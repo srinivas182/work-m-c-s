@@ -21,13 +21,15 @@ export function Avatar({ name, src, size = 'md', className }: AvatarProps) {
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
+      role="img"
+      aria-label={name}
       className={cn(
         'ring-surface relative inline-flex shrink-0 overflow-hidden rounded-full ring-2',
         sizes[size],
         className,
       )}
     >
-      {src && <AvatarPrimitive.Image src={src} alt={name} className="size-full object-cover" />}
+      {src && <AvatarPrimitive.Image src={src} alt="" className="size-full object-cover" />}
       <AvatarPrimitive.Fallback
         className="bg-brand-4 text-brand-11 grid size-full place-items-center font-semibold"
         aria-label={name}

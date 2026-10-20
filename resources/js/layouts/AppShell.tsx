@@ -59,8 +59,15 @@ function groupBySection(items: NavigationItem[]) {
 
 function Logo({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2.5 rounded-lg" aria-label="WURK home">
-      <span className="from-brand-8 to-brand-10 font-display text-primary-fg grid size-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br text-sm font-bold shadow-sm">
+    <Link
+      href="/"
+      className="flex items-center gap-2.5 rounded-lg"
+      aria-label={compact ? 'WURK home' : undefined}
+    >
+      <span
+        aria-hidden
+        className="from-brand-8 to-brand-10 font-display text-primary-fg grid size-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br text-sm font-bold shadow-sm"
+      >
         W
       </span>
       {!compact && <span className="font-display text-lg font-bold tracking-tight">WURK</span>}

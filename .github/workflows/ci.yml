@@ -241,6 +241,9 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Playwright
         run: pnpm test:e2e
+      - name: Summarise failures
+        if: failure()
+        run: node e2e/report-failures.mjs
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v7

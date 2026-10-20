@@ -37,7 +37,7 @@ export default function Welcome({ modules }: Props) {
 
           {modules.length > 0 && (
             <section className="mt-16">
-              <h2 className="text-sm font-medium tracking-wide text-white/50 uppercase">
+              <h2 className="text-sm font-medium tracking-wide text-white/60 uppercase">
                 Installed modules
               </h2>
               <ul className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -48,10 +48,10 @@ export default function Welcome({ modules }: Props) {
                   >
                     <div className="flex items-baseline justify-between gap-4">
                       <span className="font-medium">{module.name}</span>
-                      <span className="text-xs text-white/40 tabular-nums">v{module.version}</span>
+                      <span className="text-xs text-white/65 tabular-nums">v{module.version}</span>
                     </div>
                     {module.description && (
-                      <p className="mt-2 text-sm text-white/55">{module.description}</p>
+                      <p className="mt-2 text-sm text-white/65">{module.description}</p>
                     )}
                   </li>
                 ))}
