@@ -1,0 +1,26 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Wurk\{{ name }};
+
+use Wurk\Platform\Modules\ModuleServiceProvider;
+
+final class {{ name }}ServiceProvider extends ModuleServiceProvider
+{
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function permissions(): array
+    {
+        return [
+            '{{ key }}.view',
+            '{{ key }}.manage',
+        ];
+    }
+}

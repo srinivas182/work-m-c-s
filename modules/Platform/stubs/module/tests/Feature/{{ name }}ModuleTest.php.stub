@@ -1,0 +1,11 @@
+<?php
+
+declare(strict_types=1);
+
+use Inertia\Testing\AssertableInertia as Assert;
+
+it('renders the {{ name }} starter page', function () {
+    $this->get('/{{ key }}')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('{{ name }}::Index'));
+});

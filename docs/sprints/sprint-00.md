@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 0 of 15 (pre-beta) |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved — in progress (0.1) |
 | **Depends on** | PRD v1.0 (approved), ADR-0001 … 0008 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -29,12 +29,12 @@ Tenancy and WURK ID (Sprint 1), any business feature, the Node render service an
 | Item | Choice | Note |
 |---|---|---|
 | PHP | 8.4 (CI, Docker); local pre-checks on 8.3 | Code must stay 8.3-compatible until the local box gets 8.4 |
-| Laravel | Latest stable major at kickoff | Recorded in `composer.json` and CHANGELOG |
+| Laravel | 13.x (13.38 at kickoff) | Recorded in `composer.json` and CHANGELOG |
 | Octane runtime | FrankenPHP | Single binary, HTTP/2–3, simpler images than Swoole |
 | Node | 22 LTS | `.nvmrc` |
 | Package manager | pnpm | Faster, disk-efficient, strict |
-| React | 19 + TypeScript (strict) | |
-| Inertia.js | v2 (React adapter) | |
+| React | 19 + TypeScript 6 (strict) | TypeScript 7 not yet supported by typescript-eslint |
+| Inertia.js | v3 (React adapter, Laravel adapter 3.x) | Current major at kickoff |
 | Styling | Tailwind CSS v4 + shadcn/ui (Radix) | CSS-first tokens |
 | Icons | Lucide | Consistent, light line icons |
 | Fonts | Inter (UI), plus a display face for headings, self-hosted | No third-party font requests |
@@ -247,17 +247,21 @@ Remote state in S3 with DynamoDB locking. CI runs `terraform fmt -check` and `te
 | **0.1 Skeleton** | Laravel + React/TS + Inertia + Tailwind v4; module system (registry, base provider, manifest, `wurk:modules`, `wurk:make-module`); Platform + Health modules; architecture tests; Pint/PHPStan/ESLint/Prettier configs; Docker Compose; `scripts/dev`, `scripts/check` | Fresh clone → `./scripts/dev up` → app loads; `/health/ready` green; `wurk:make-module Demo` scaffolds a working module whose page renders; architecture tests fail on a deliberate cross-module violation |
 | **0.2 CI** | Workflows per §7; caching; branch protection on `develop` and `main` | Draft PR runs quick checks only; ready PR runs full suite in < 10 min; docs-only PR runs nothing; merge blocked when CI red |
 | **0.3 Design system** | Tokens, light/dark, palette engine with tests, core components, AppShell, `/_design` showcase, Playwright smoke + axe checks | Palette engine passes all edge-case tests; every showcase pairing passes WCAG AA in both themes; showcase reviewed and approved visually (desktop + mobile) |
-| **0.4 Infra** | Production Dockerfile; Terraform modules + staging/production environments; `infra/README.md` with cost estimates | Image builds and passes healthcheck in CI; `terraform validate` passes; plan documented, ready to apply on account creation |
+| **0.4 Production image** | Cloud-agnostic production Dockerfile with healthcheck, built and verified in CI | Image builds and passes `/health/ready` in CI |
 
 Sprint 0 is complete when all four PRs are merged into `develop` with green CI and `develop` is merged to `main`.
 
 ---
 
+### 8.5 Cloud decision (update 2026-10-20)
+
+The client has not yet chosen between AWS (Cape Town) and Azure (South Africa North). Cloud-specific infrastructure as code is **deferred** until that decision and is no longer part of Sprint 0. Everything delivered in Sprint 0 is cloud-agnostic (Docker images, Compose, CI). The Terraform layout in §8.4 will be re-specified for the chosen provider.
+
 ## 10. Dependencies outside the code (start now)
 
 | Item | Owner | Why now |
 |---|---|---|
-| AWS account (af-south-1 enabled — it is an opt-in region) | WURK | Needed to apply Terraform and stand up staging |
+| Cloud provider decision (AWS Cape Town or Azure South Africa North), then account | WURK | Needed to write and apply infrastructure code and stand up staging |
 | Cloudflare account (for SaaS add-on later) | WURK | Domains and edge caching from Sprint 5 |
 | wurk.co.za DNS access | WURK | Staging subdomains |
 | DebiCheck provider application | WURK | Long onboarding lead time; needed by Sprint 3 |

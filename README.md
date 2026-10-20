@@ -12,7 +12,7 @@
 
 WURK earns from subscriptions (self-managed or managed packages), add-on credits and managed services. A network of **agents** sells WURK packages and earns commission through a sponsor hierarchy.
 
-> **Status:** Phase 1 — Product Requirements. No application code yet. Code begins in Sprint 0 after PRD approval.
+> **Status:** Sprint 0 — Foundations (in progress).
 
 ## Documentation
 
@@ -26,6 +26,36 @@ WURK earns from subscriptions (self-managed or managed packages), add-on credits
 | [Architecture Decision Records](docs/adr/) | Each key decision with context, alternatives and consequences |
 | [Contributing](CONTRIBUTING.md) | Branching, commits, PRs, Definition of Done |
 
+## Local development
+
+Requirements: Docker Desktop (or Docker Engine + Compose), PHP 8.3+, Composer, Node 22 and pnpm for running checks on the host.
+
+```bash
+./scripts/dev up        # build and start the stack, install deps, migrate
+./scripts/check         # quick checks: style, static analysis, types, lint
+./scripts/check --full  # plus all tests and a production build — run before marking a PR ready
+```
+
+| Service | URL |
+|---|---|
+| App (FrankenPHP + Octane, auto-reload) | http://localhost:8000 |
+| Health | http://localhost:8000/health/ready |
+| Vite dev server | http://localhost:5173 |
+| Mailpit | http://localhost:8025 |
+| MySQL / Redis / Meilisearch | localhost:3306 / 6379 / 7700 |
+
+### Modules
+
+Every feature is a module under `modules/` (see [ADR-0001](docs/adr/0001-modular-monolith.md) and the [Sprint 0 spec](docs/sprints/sprint-00.md#5-module-contract)).
+
+```bash
+php artisan wurk:modules                 # list installed modules in boot order
+php artisan wurk:make-module Bookings    # scaffold a new module
+composer dump-autoload
+```
+
+Modules may use another module only through its `Contracts\` and `Events\` namespaces. Architecture tests enforce this.
+
 ## Core principles
 
 1. **One core platform.** All tenants run the same codebase. Customisation happens through configuration, themes, blocks and isolated extensions — never by forking.
@@ -33,4 +63,4 @@ WURK earns from subscriptions (self-managed or managed packages), add-on credits
 3. **Money never flows through WURK** except WURK's own subscription and credit revenue. Businesses use their own merchant accounts.
 4. **Design is a feature.** Every screen must meet a big-brand visual standard and load fast on mobile data.
 5. **Self-service first.** A non-technical owner must be able to run their business on WURK without calling support.
-6. **Hosted in South Africa** (POPIA).
+6. **Hosted in South Africa** (POPIA). Cloud provider (AWS or Azure) to be decided by the client.
