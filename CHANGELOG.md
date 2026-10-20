@@ -29,6 +29,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Playwright end-to-end smoke and axe accessibility checks (desktop and mobile, light and dark) in CI, with failure annotations on the PR.
 - `Table` requires a `label` and its scroll area is keyboard-focusable; `Field` supports composite controls (e.g. Select) via a render function.
 
+### Added — Sprint 0.4 (production image)
+- Cloud-agnostic production Docker image: multi-stage build, FrankenPHP + Octane, non-root user, tuned OPcache/JIT, liveness `HEALTHCHECK`, logs to stderr.
+- One image, four roles via the entrypoint: `serve`, `worker`, `scheduler`, `migrate`.
+- CI builds, lints (hadolint) and smoke-tests the image: health endpoints, home page, showcase not exposed, non-root, no `X-Powered-By`, Docker health `healthy`.
+- `docs/deployment/docker.md`.
+
 ### Fixed
 - Branch protection now applies to administrators (an admin merge could bypass the required `CI` check).
 
