@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 0 of 15 (pre-beta) |
-| **Status** | Approved — in progress (0.1) |
+| **Status** | In progress — 0.1 ✅ (#1), 0.2 ✅ (#2); next 0.3 design system |
 | **Depends on** | PRD v1.0 (approved), ADR-0001 … 0008 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -291,3 +291,12 @@ Each sub-sprint is a single PR. Reverting the merge commit on `develop` fully re
 3. Tailwind CSS v4.
 4. Inter + one display typeface (designers may propose alternatives in Figma).
 5. `/_design` showcase available on staging for client review (not production).
+
+---
+
+## 14. Progress log
+
+| Sub-sprint | PR | Result |
+|---|---|---|
+| 0.1 Skeleton | #1 | Merged. 28 backend + 6 frontend tests; PHPStan level 8 clean |
+| 0.2 CI | #2 | Merged. Draft run (quick checks) 0.7 min; full run 1.7 min. Branch protection on `develop` and `main` with `CI` as the single required check |
