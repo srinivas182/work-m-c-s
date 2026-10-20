@@ -1,0 +1,299 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import './tokens.css';
+
+@source '../../modules/*/resources/js';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * WURK design tokens. See docs/architecture/design-standards.md.
+ *
+ * Colour scales (--wurk-*) are generated into tokens.css by the palette engine and
+ * can be overridden per tenant at runtime. Components use the semantic names below,
+ * never raw hex values.
+ */
+@theme inline {
+  --color-brand-1: var(--wurk-brand-1);
+  --color-brand-2: var(--wurk-brand-2);
+  --color-brand-3: var(--wurk-brand-3);
+  --color-brand-4: var(--wurk-brand-4);
+  --color-brand-5: var(--wurk-brand-5);
+  --color-brand-6: var(--wurk-brand-6);
+  --color-brand-7: var(--wurk-brand-7);
+  --color-brand-8: var(--wurk-brand-8);
+  --color-brand-9: var(--wurk-brand-9);
+  --color-brand-10: var(--wurk-brand-10);
+  --color-brand-11: var(--wurk-brand-11);
+  --color-brand-12: var(--wurk-brand-12);
+  --color-brand-contrast: var(--wurk-brand-contrast);
+  --color-neutral-1: var(--wurk-neutral-1);
+  --color-neutral-2: var(--wurk-neutral-2);
+  --color-neutral-3: var(--wurk-neutral-3);
+  --color-neutral-4: var(--wurk-neutral-4);
+  --color-neutral-5: var(--wurk-neutral-5);
+  --color-neutral-6: var(--wurk-neutral-6);
+  --color-neutral-7: var(--wurk-neutral-7);
+  --color-neutral-8: var(--wurk-neutral-8);
+  --color-neutral-9: var(--wurk-neutral-9);
+  --color-neutral-10: var(--wurk-neutral-10);
+  --color-neutral-11: var(--wurk-neutral-11);
+  --color-neutral-12: var(--wurk-neutral-12);
+  --color-neutral-contrast: var(--wurk-neutral-contrast);
+  --color-success-1: var(--wurk-success-1);
+  --color-success-2: var(--wurk-success-2);
+  --color-success-3: var(--wurk-success-3);
+  --color-success-4: var(--wurk-success-4);
+  --color-success-5: var(--wurk-success-5);
+  --color-success-6: var(--wurk-success-6);
+  --color-success-7: var(--wurk-success-7);
+  --color-success-8: var(--wurk-success-8);
+  --color-success-9: var(--wurk-success-9);
+  --color-success-10: var(--wurk-success-10);
+  --color-success-11: var(--wurk-success-11);
+  --color-success-12: var(--wurk-success-12);
+  --color-success-contrast: var(--wurk-success-contrast);
+  --color-warning-1: var(--wurk-warning-1);
+  --color-warning-2: var(--wurk-warning-2);
+  --color-warning-3: var(--wurk-warning-3);
+  --color-warning-4: var(--wurk-warning-4);
+  --color-warning-5: var(--wurk-warning-5);
+  --color-warning-6: var(--wurk-warning-6);
+  --color-warning-7: var(--wurk-warning-7);
+  --color-warning-8: var(--wurk-warning-8);
+  --color-warning-9: var(--wurk-warning-9);
+  --color-warning-10: var(--wurk-warning-10);
+  --color-warning-11: var(--wurk-warning-11);
+  --color-warning-12: var(--wurk-warning-12);
+  --color-warning-contrast: var(--wurk-warning-contrast);
+  --color-danger-1: var(--wurk-danger-1);
+  --color-danger-2: var(--wurk-danger-2);
+  --color-danger-3: var(--wurk-danger-3);
+  --color-danger-4: var(--wurk-danger-4);
+  --color-danger-5: var(--wurk-danger-5);
+  --color-danger-6: var(--wurk-danger-6);
+  --color-danger-7: var(--wurk-danger-7);
+  --color-danger-8: var(--wurk-danger-8);
+  --color-danger-9: var(--wurk-danger-9);
+  --color-danger-10: var(--wurk-danger-10);
+  --color-danger-11: var(--wurk-danger-11);
+  --color-danger-12: var(--wurk-danger-12);
+  --color-danger-contrast: var(--wurk-danger-contrast);
+  --color-info-1: var(--wurk-info-1);
+  --color-info-2: var(--wurk-info-2);
+  --color-info-3: var(--wurk-info-3);
+  --color-info-4: var(--wurk-info-4);
+  --color-info-5: var(--wurk-info-5);
+  --color-info-6: var(--wurk-info-6);
+  --color-info-7: var(--wurk-info-7);
+  --color-info-8: var(--wurk-info-8);
+  --color-info-9: var(--wurk-info-9);
+  --color-info-10: var(--wurk-info-10);
+  --color-info-11: var(--wurk-info-11);
+  --color-info-12: var(--wurk-info-12);
+  --color-info-contrast: var(--wurk-info-contrast);
+
+  /* Semantic colours */
+  --color-canvas: var(--wurk-canvas);
+  --color-surface: var(--wurk-surface);
+  --color-surface-raised: var(--wurk-surface-raised);
+  --color-sunken: var(--wurk-sunken);
+  --color-fg: var(--wurk-neutral-12);
+  --color-fg-muted: var(--wurk-neutral-11);
+  --color-fg-subtle: var(--wurk-neutral-9);
+  --color-border: var(--wurk-neutral-6);
+  --color-border-strong: var(--wurk-neutral-7);
+  --color-ring: var(--wurk-brand-8);
+  --color-primary: var(--wurk-brand-9);
+  --color-primary-hover: var(--wurk-brand-10);
+  --color-primary-fg: var(--wurk-brand-contrast);
+  --color-accent: var(--wurk-brand-3);
+  --color-accent-hover: var(--wurk-brand-4);
+  --color-accent-fg: var(--wurk-brand-11);
+  --color-overlay: var(--wurk-overlay);
+}
+
+@theme {
+  /* Typography */
+  --font-sans:
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-display:
+    'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
+  --text-display-sm: 2.25rem;
+  --text-display-sm--line-height: 1.15;
+  --text-display-sm--letter-spacing: -0.02em;
+  --text-display: 3rem;
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.025em;
+  --text-display-lg: 3.75rem;
+  --text-display-lg--line-height: 1.05;
+  --text-display-lg--letter-spacing: -0.03em;
+
+  /* Radius */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+
+  /* Elevation — soft, layered shadows */
+  --shadow-xs: 0 1px 2px 0 rgb(16 12 40 / 0.05);
+  --shadow-sm: 0 1px 2px 0 rgb(16 12 40 / 0.06), 0 1px 3px 0 rgb(16 12 40 / 0.08);
+  --shadow-md: 0 2px 4px -1px rgb(16 12 40 / 0.06), 0 4px 12px -2px rgb(16 12 40 / 0.08);
+  --shadow-lg: 0 4px 8px -2px rgb(16 12 40 / 0.06), 0 12px 32px -4px rgb(16 12 40 / 0.12);
+  --shadow-xl: 0 8px 16px -4px rgb(16 12 40 / 0.08), 0 24px 56px -8px rgb(16 12 40 / 0.18);
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --animate-fade-in: fade-in 160ms var(--ease-out-expo);
+  --animate-fade-out: fade-out 120ms ease-in;
+  --animate-pop-in: pop-in 200ms var(--ease-out-expo);
+  --animate-pop-out: pop-out 120ms ease-in;
+  --animate-slide-in-right: slide-in-right 320ms var(--ease-out-expo);
+  --animate-slide-out-right: slide-out-right 200ms ease-in;
+  --animate-slide-in-left: slide-in-left 320ms var(--ease-out-expo);
+  --animate-slide-out-left: slide-out-left 200ms ease-in;
+  --animate-slide-in-bottom: slide-in-bottom 320ms var(--ease-out-expo);
+  --animate-slide-out-bottom: slide-out-bottom 200ms ease-in;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.97);
+    }
+  }
+  @keyframes pop-out {
+    to {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes slide-out-right {
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes slide-out-left {
+    to {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes slide-in-bottom {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes slide-out-bottom {
+    to {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+}
+
+@layer base {
+  :root,
+  [data-theme='light'] {
+    --wurk-canvas: var(--wurk-neutral-2);
+    --wurk-surface: #ffffff;
+    --wurk-surface-raised: #ffffff;
+    --wurk-sunken: var(--wurk-neutral-3);
+    --wurk-overlay: rgb(12 10 20 / 0.45);
+  }
+
+  [data-theme='dark'] {
+    --wurk-canvas: var(--wurk-neutral-1);
+    --wurk-surface: var(--wurk-neutral-2);
+    --wurk-surface-raised: var(--wurk-neutral-3);
+    --wurk-sunken: var(--wurk-neutral-1);
+    --wurk-overlay: rgb(0 0 0 / 0.6);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      --wurk-canvas: var(--wurk-neutral-1);
+      --wurk-surface: var(--wurk-neutral-2);
+      --wurk-surface-raised: var(--wurk-neutral-3);
+      --wurk-sunken: var(--wurk-neutral-1);
+      --wurk-overlay: rgb(0 0 0 / 0.6);
+    }
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-canvas text-fg font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--wurk-brand-5);
+    color: var(--wurk-brand-12);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Local development helper.  Usage: ./scripts/dev <command>
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+compose() { docker compose "$@"; }
+
+case "${1:-help}" in
+  up)
+    [ -f .env ] || cp .env.example .env
+    compose up -d --build
+    compose exec app composer install
+    grep -q '^APP_KEY=base64' .env || compose exec app php artisan key:generate
+    compose exec app php artisan migrate
+    echo
+    echo "WURK is running:"
+    echo "  App       http://localhost:8000"
+    echo "  Health    http://localhost:8000/health/ready"
+    echo "  Mailpit   http://localhost:8025"
+    ;;
+  down)    compose down ;;
+  restart) compose restart app ;;
+  logs)    compose logs -f "${2:-app}" ;;
+  shell)   compose exec app bash ;;
+  artisan) shift; compose exec app php artisan "$@" ;;
+  test)    shift; compose exec app php vendor/bin/pest "$@" ;;
+  fresh)   compose exec app php artisan migrate:fresh --seed ;;
+  *)
+    echo "Usage: ./scripts/dev {up|down|restart|logs [service]|shell|artisan <cmd>|test [args]|fresh}"
+    ;;
+esac

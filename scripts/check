@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Run before every push. Mirrors CI.
+#   ./scripts/check          quick checks (style + static analysis + types + lint)
+#   ./scripts/check --full   quick checks + all tests + production build
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+step() { printf '\n\033[1;35m▸ %s\033[0m\n' "$1"; }
+
+step "Pint (code style)";           vendor/bin/pint --test
+step "PHPStan (static analysis)";   vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+step "TypeScript";                  pnpm -s typecheck
+step "ESLint";                      pnpm -s lint
+step "Prettier";                    pnpm -s format:check
+
+if [ "${1:-}" = "--full" ]; then
+  step "Pest (backend tests)";      vendor/bin/pest --compact
+  step "Vitest (frontend tests)";   CI=true pnpm -s test
+  step "Production build";          pnpm -s build
+fi
+
+printf '\n\033[1;32m✓ All checks passed\033[0m\n'

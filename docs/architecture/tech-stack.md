@@ -40,7 +40,7 @@ Final versions are pinned at Sprint 0 kickoff. Laravel no longer ships LTS relea
 
 | Layer | Choice |
 |---|---|
-| Cloud | AWS Cape Town (af-south-1) primary; Azure South Africa North is a valid alternative. Service availability verified in Phase 2 |
+| Cloud | **Pending client decision:** AWS Cape Town (af-south-1) or Azure South Africa North. Everything up to infrastructure code is cloud-agnostic |
 | Compute | Docker on Amazon ECS (Fargate), auto-scaling; EKS only if needed |
 | IaC | Terraform |
 | CDN, SSL, custom domains | Cloudflare for SaaS |

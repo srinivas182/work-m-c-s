@@ -1,0 +1,343 @@
+# WURK CI — see docs/sprints/sprint-00.md §7.
+#
+#   Draft PR                 -> quick checks only (style, static analysis, types, lint)
+#   PR ready for review      -> quick checks + tests + production build
+#   Docs-only change         -> nothing runs except the summary job (passes immediately)
+#   Push to main / develop   -> nothing (already verified on the PR)
+#
+# The "CI" summary job always runs and is the single required status check, so
+# skipped jobs never block a merge and failed/cancelled jobs always do.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  PHP_VERSION: '8.4'
+  PHP_EXTENSIONS: mbstring, intl, pdo_sqlite, sqlite3, bcmath, zip, pcntl, redis
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            shared: &shared
+              - '.github/workflows/**'
+            backend:
+              - *shared
+              - 'app/**'
+              - 'bootstrap/**'
+              - 'config/**'
+              - 'database/**'
+              - 'routes/**'
+              - 'tests/**'
+              - 'resources/views/**'
+              - 'modules/**/*.php'
+              - 'modules/**/module.json'
+              - 'modules/**/*.stub'
+              - 'composer.json'
+              - 'composer.lock'
+              - 'phpunit.xml'
+              - 'phpstan.neon'
+              - 'pint.json'
+            frontend:
+              - *shared
+              - 'resources/js/**'
+              - 'resources/css/**'
+              - 'modules/**/*.ts'
+              - 'modules/**/*.tsx'
+              - 'modules/**/*.css'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'vite.config.ts'
+              - 'vitest.config.ts'
+              - 'tsconfig.json'
+              - 'eslint.config.js'
+              - '.prettierrc.json'
+              - 'e2e/**'
+              - 'playwright.config.ts'
+            docker:
+              - *shared
+              - 'docker/**'
+              - 'compose.yaml'
+              - '.dockerignore'
+              - 'composer.lock'
+              - 'pnpm-lock.yaml'
+
+  backend-quick:
+    name: Backend · style & static analysis
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+      - name: Composer cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Pint
+        run: vendor/bin/pint --test
+      - name: PHPStan cache
+        uses: actions/cache@v6
+        with:
+          path: .phpstan-cache
+          key: phpstan-${{ github.event.pull_request.number }}-${{ github.sha }}
+          restore-keys: |
+            phpstan-${{ github.event.pull_request.number }}-
+            phpstan-
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G --error-format=github
+
+  frontend-quick:
+    name: Frontend · types, lint & format
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: TypeScript
+        run: pnpm typecheck
+      - name: ESLint
+        run: pnpm lint
+      - name: Prettier
+        run: pnpm format:check
+
+  backend-tests:
+    name: Backend · tests
+    needs: [changes, backend-quick]
+    if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+      - name: Composer cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Pest
+        run: vendor/bin/pest --parallel --compact
+
+  frontend-tests:
+    name: Frontend · tests & build
+    needs: [changes, frontend-quick]
+    if: needs.changes.outputs.frontend == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Vitest
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
+
+  e2e:
+    name: E2E · smoke & accessibility
+    needs: [changes, backend-quick, frontend-quick]
+    if: >-
+      always() && !cancelled() && !contains(needs.*.result, 'failure')
+      && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true')
+      && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+      - name: Composer cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Prepare app
+        run: |
+          # `artisan serve` does not pass job env vars to the server, so configure .env.
+          cp .env.example .env
+          sed -i \
+            -e 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' \
+            -e '/^DB_\(HOST\|PORT\|DATABASE\|USERNAME\|PASSWORD\)=/d' \
+            -e 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' \
+            -e 's/^CACHE_STORE=.*/CACHE_STORE=file/' \
+            -e 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' \
+            .env
+          echo "WURK_DESIGN_SHOWCASE=true" >> .env
+          php artisan key:generate
+          touch database/database.sqlite
+          php artisan migrate --force
+          pnpm build
+      - name: Playwright browser cache
+        id: pw-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Playwright
+        run: pnpm test:e2e
+      - name: Summarise failures
+        if: failure()
+        run: node e2e/report-failures.mjs
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
+
+  docker-dev:
+    name: Docker · dev image builds
+    needs: changes
+    if: needs.changes.outputs.docker == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate compose file
+        run: docker compose config --quiet
+      - name: Build dev image
+        run: docker build docker/dev
+
+  docker-prod:
+    name: Docker · production image
+    needs: changes
+    if: needs.changes.outputs.docker == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Lint Dockerfile
+        run: |
+          docker run --rm -i hadolint/hadolint:v2.15.1 hadolint --ignore DL3008 --format json - \
+            < docker/production/Dockerfile > hadolint.json || true
+          jq -r '.[] | "::error file=docker/production/Dockerfile,line=\(.line)::\(.code) \(.message)"' hadolint.json
+          [ "$(jq length hadolint.json)" = "0" ]
+      - uses: docker/setup-buildx-action@v4
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/production/Dockerfile
+          tags: wurk:ci
+          load: true
+          cache-from: type=gha,scope=wurk-prod
+          cache-to: type=gha,scope=wurk-prod,mode=max
+      - name: Start container
+        run: |
+          docker run -d --name wurk -p 8000:8000 \
+            -e APP_KEY="base64:$(openssl rand -base64 32)" \
+            -e APP_URL=http://localhost:8000 \
+            -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: \
+            -e CACHE_STORE=array -e SESSION_DRIVER=array -e QUEUE_CONNECTION=sync \
+            wurk:ci
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8000/health/live > /dev/null && break
+            sleep 2
+          done
+      - name: Verify container
+        run: |
+          set -e
+          check() { code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8000$1"); echo "$1 -> $code"; [ "$code" = "$2" ]; }
+          check /health/live 200
+          check /health/ready 200
+          check / 200
+          check /_design 404
+          uid=$(docker exec wurk id -u); echo "uid=$uid"; [ "$uid" != "0" ]
+          if curl -sI http://localhost:8000/ | grep -qi '^x-powered-by'; then echo "X-Powered-By header leaked"; exit 1; fi
+          for i in $(seq 1 20); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' wurk); echo "health=$status"
+            [ "$status" = "healthy" ] && break
+            sleep 3
+          done
+          [ "$status" = "healthy" ]
+          docker image ls wurk:ci --format 'Image size: {{.Size}}'
+      - name: Container logs
+        if: failure()
+        run: docker logs wurk || true
+
+  ci:
+    name: CI
+    if: always()
+    needs: [changes, backend-quick, frontend-quick, backend-tests, frontend-tests, e2e, docker-dev, docker-prod]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Summarise results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          if echo "$RESULTS" | jq -e 'to_entries | any(.value.result == "failure" or .value.result == "cancelled")' > /dev/null; then
+            echo "::error::One or more CI jobs failed or were cancelled."
+            exit 1
+          fi
+          echo "All required jobs passed or were not needed for this change."
