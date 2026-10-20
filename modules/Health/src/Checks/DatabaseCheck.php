@@ -23,7 +23,7 @@ final readonly class DatabaseCheck implements HealthCheck
         try {
             $this->db->connection()->select('select 1');
 
-            return    CheckResult::ok() ;
+            return CheckResult::ok();
         } catch (Throwable) {
             // Never leak connection details from a public endpoint.
             return CheckResult::failed('Database unreachable');
