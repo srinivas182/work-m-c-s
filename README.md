@@ -25,6 +25,7 @@ WURK earns from subscriptions (self-managed or managed packages), add-on credits
 | [Design standards](docs/architecture/design-standards.md) | Visual quality bar, design system, performance budgets |
 | [Architecture Decision Records](docs/adr/) | Each key decision with context, alternatives and consequences |
 | [Contributing](CONTRIBUTING.md) | Branching, commits, PRs, Definition of Done |
+| [Docker deployment](docs/deployment/docker.md) | Production image: build, run roles, environment, health checks |
 
 ## Local development
 

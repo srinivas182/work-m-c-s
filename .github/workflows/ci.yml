@@ -82,6 +82,8 @@ jobs:
               - 'docker/**'
               - 'compose.yaml'
               - '.dockerignore'
+              - 'composer.lock'
+              - 'pnpm-lock.yaml'
 
   backend-quick:
     name: Backend · style & static analysis
@@ -265,10 +267,63 @@ jobs:
       - name: Build dev image
         run: docker build docker/dev
 
+  docker-prod:
+    name: Docker · production image
+    needs: changes
+    if: needs.changes.outputs.docker == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Lint Dockerfile
+        run: docker run --rm -i hadolint/hadolint:v2.15.1 hadolint --ignore DL3008 - < docker/production/Dockerfile
+      - uses: docker/setup-buildx-action@v4
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/production/Dockerfile
+          tags: wurk:ci
+          load: true
+          cache-from: type=gha,scope=wurk-prod
+          cache-to: type=gha,scope=wurk-prod,mode=max
+      - name: Start container
+        run: |
+          docker run -d --name wurk -p 8000:8000 \
+            -e APP_KEY="base64:$(openssl rand -base64 32)" \
+            -e APP_URL=http://localhost:8000 \
+            -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: \
+            -e CACHE_STORE=array -e SESSION_DRIVER=array -e QUEUE_CONNECTION=sync \
+            wurk:ci
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8000/health/live > /dev/null && break
+            sleep 2
+          done
+      - name: Verify container
+        run: |
+          set -e
+          check() { code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8000$1"); echo "$1 -> $code"; [ "$code" = "$2" ]; }
+          check /health/live 200
+          check /health/ready 200
+          check / 200
+          check /_design 404
+          uid=$(docker exec wurk id -u); echo "uid=$uid"; [ "$uid" != "0" ]
+          if curl -sI http://localhost:8000/ | grep -qi '^x-powered-by'; then echo "X-Powered-By header leaked"; exit 1; fi
+          for i in $(seq 1 20); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' wurk); echo "health=$status"
+            [ "$status" = "healthy" ] && break
+            sleep 3
+          done
+          [ "$status" = "healthy" ]
+          docker image ls wurk:ci --format 'Image size: {{.Size}}'
+      - name: Container logs
+        if: failure()
+        run: docker logs wurk || true
+
   ci:
     name: CI
     if: always()
-    needs: [changes, backend-quick, frontend-quick, backend-tests, frontend-tests, e2e, docker-dev]
+    needs: [changes, backend-quick, frontend-quick, backend-tests, frontend-tests, e2e, docker-dev, docker-prod]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

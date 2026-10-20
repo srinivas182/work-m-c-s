@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 0 of 15 (pre-beta) |
-| **Status** | In progress — 0.1 ✅ (#1), 0.2 ✅ (#2), 0.3 ✅ (#8); next 0.4 production image |
+| **Status** | 0.1 ✅ (#1), 0.2 ✅ (#2), 0.3 ✅ (#8), 0.4 in review |
 | **Depends on** | PRD v1.0 (approved), ADR-0001 … 0008 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -210,7 +210,7 @@ Services: `app` (FrankenPHP + Octane, hot reload via `--watch`), `vite`, `mysql`
 
 ### 8.2 Production image
 
-Multi-stage Dockerfile: Composer deps (no dev) → pnpm build → FrankenPHP runtime image, non-root user, OPcache tuned, healthcheck on `/health/ready`.
+Multi-stage Dockerfile: Composer deps (no dev) → pnpm build → FrankenPHP runtime image, non-root user, OPcache tuned. The image `HEALTHCHECK` uses `/health/live` (liveness); orchestrators use `/health/ready` for readiness, so a database blip does not restart healthy containers.
 
 ### 8.3 Health module
 
