@@ -48,9 +48,7 @@ test('brand colour re-themes the page', async ({ page }) => {
 test('a hard-to-read brand colour is corrected and stays accessible', async ({ page }) => {
   await page.goto('/_design');
   await page.getByTestId('brand-hex').fill('#ffff00');
-  await expect(
-    page.getByText(/so dark text passes AA|for 3:1|for 4\.5:1|for 7:1/).first(),
-  ).toBeVisible();
+  await expect(page.getByText(/to reach (3|4\.5|7):1|text reaches 4\.5:1/).first()).toBeVisible();
   await expectNoSeriousA11yIssues(page);
 });
 

@@ -204,7 +204,7 @@ function BrandLab() {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
       <Card>
         <CardHeader>
           <CardTitle>Brand colour</CardTitle>
@@ -213,7 +213,7 @@ function BrandLab() {
             be hard to read.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-5">
+        <CardContent className="grid grid-cols-1 gap-5">
           <div className="flex items-center gap-3">
             <input
               type="color"
@@ -281,7 +281,7 @@ function BrandLab() {
         </CardContent>
       </Card>
 
-      <div className="grid min-w-0 gap-6">
+      <div className="grid min-w-0 grid-cols-1 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Generated scales ({resolved} mode)</CardTitle>
@@ -290,7 +290,7 @@ function BrandLab() {
               11–12 text
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-5">
+          <CardContent className="grid grid-cols-1 gap-5">
             <div>
               <p className="mb-2 text-sm font-medium">Brand</p>
               <div className="grid grid-cols-6 gap-2 sm:grid-cols-12" data-testid="brand-scale">
@@ -310,7 +310,7 @@ function BrandLab() {
           </CardContent>
         </Card>
 
-        <Table>
+        <Table label="Contrast report">
           <TableHeader>
             <TableRow>
               <TableHead>Sample</TableHead>
@@ -369,7 +369,7 @@ function Buttons() {
   const [loading, setLoading] = useState(false);
   return (
     <Card>
-      <CardContent className="grid gap-6">
+      <CardContent className="grid grid-cols-1 gap-6">
         <div className="flex flex-wrap items-center gap-3">
           <Button>Primary</Button>
           <Button variant="secondary">Secondary</Button>
@@ -417,7 +417,7 @@ function Forms() {
           Fields wire up labels, hints and errors for screen readers automatically.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-5 sm:grid-cols-2">
+      <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field
           label="Customer name"
           required
@@ -429,16 +429,18 @@ function Forms() {
           <Input type="tel" placeholder="+27 82 000 0000" />
         </Field>
         <Field label="Service">
-          <Select defaultValue="cut">
-            <SelectTrigger>
-              <SelectValue placeholder="Choose a service" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="cut">Cut &amp; blow-dry · 45 min</SelectItem>
-              <SelectItem value="colour">Full colour · 2 h</SelectItem>
-              <SelectItem value="braids">Braids · 3 h</SelectItem>
-            </SelectContent>
-          </Select>
+          {(control) => (
+            <Select defaultValue="cut">
+              <SelectTrigger {...control}>
+                <SelectValue placeholder="Choose a service" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cut">Cut &amp; blow-dry · 45 min</SelectItem>
+                <SelectItem value="colour">Full colour · 2 h</SelectItem>
+                <SelectItem value="braids">Braids · 3 h</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </Field>
         <Field label="Branch">
           <Input defaultValue="Sandton City" />
@@ -446,7 +448,7 @@ function Forms() {
         <Field label="Notes" className="sm:col-span-2">
           <Textarea placeholder="Anything the stylist should know?" />
         </Field>
-        <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:col-span-2 sm:grid-cols-3">
           <div className="flex items-center gap-3">
             <Checkbox id="deposit" defaultChecked />
             <Label htmlFor="deposit">Require deposit</Label>
@@ -518,8 +520,8 @@ const ORDERS = [
 
 function DataDisplay() {
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Sales this month"
           value="R 84 210"
@@ -543,7 +545,7 @@ function DataDisplay() {
         />
         <StatCard label="Wallet liability" value="R 6 480" icon={Wallet} hint="owed to referrers" />
       </div>
-      <Table>
+      <Table label="Recent orders">
         <TableHeader>
           <TableRow>
             <TableHead>Order</TableHead>
@@ -602,7 +604,7 @@ function DataDisplay() {
 
 function Feedback() {
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <EmptyState
         icon={Inbox}
         title="No bookings yet"
@@ -622,11 +624,11 @@ function Feedback() {
           <CardTitle>Loading state</CardTitle>
           <CardDescription>Skeletons keep the layout steady while data loads.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4">
+        <CardContent className="grid grid-cols-1 gap-4">
           {[0, 1, 2].map((i) => (
             <div key={i} className="flex items-center gap-4">
               <Skeleton className="size-10 rounded-full" />
-              <div className="grid flex-1 gap-2">
+              <div className="grid flex-1 grid-cols-1 gap-2">
                 <Skeleton className="h-3.5 w-2/5" />
                 <Skeleton className="h-3 w-3/5" />
               </div>
@@ -681,7 +683,7 @@ function Overlays() {
             <Button variant="secondary">Open side panel</Button>
           </SheetTrigger>
           <SheetContent title="Order WK-1042">
-            <div className="grid gap-4 p-6 text-sm">
+            <div className="grid grid-cols-1 gap-4 p-6 text-sm">
               <p className="text-fg-muted">Detail drawers keep context while showing more.</p>
               <div className="flex items-center gap-3">
                 <ShoppingBag className="text-accent-fg size-5" aria-hidden />
@@ -707,7 +709,7 @@ function Overlays() {
 function Typography() {
   return (
     <Card>
-      <CardContent className="grid gap-4">
+      <CardContent className="grid grid-cols-1 gap-4">
         <p className="font-display text-display-lg font-bold">Grow with WURK</p>
         <p className="font-display text-display font-bold">Display · Plus Jakarta Sans</p>
         <h3 className="text-2xl font-semibold tracking-tight">Heading · 24px semibold</h3>
@@ -725,7 +727,7 @@ export default function DesignSystem() {
   return (
     <AppShell title="Design system" user={{ name: 'Thandi Mokoena', email: 'thandi@salon.co.za' }}>
       <Head title="Design system" />
-      <div className="grid gap-14">
+      <div className="grid grid-cols-1 gap-14">
         <PageHeader
           eyebrow="Sprint 0.3"
           title="WURK design system"

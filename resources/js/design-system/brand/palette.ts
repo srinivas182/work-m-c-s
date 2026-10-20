@@ -67,6 +67,8 @@ const WHITE = '#ffffff';
 const INK = '#0c0a14';
 
 const round = (n: number) => Math.round(n * 1000) / 1000;
+const capitalise = (mode: Mode) => (mode === 'light' ? 'Light' : 'Dark');
+const changeVerb = (delta: number) => (delta < 0 ? 'darkened' : 'lightened');
 
 function buildScale(base: Oklch, mode: Mode, options: Required<PaletteOptions>): Oklch[] {
   const targets = mode === 'light' ? LIGHT_L : DARK_L;
@@ -99,7 +101,7 @@ function nudge(color: Oklch, direction: -1 | 1, pass: (hex: string) => boolean):
   return current;
 }
 
-function guard(scale: Oklch[], mode: Mode, label: string, notes: string[]): ModePalette {
+function guard(scale: Oklch[], mode: Mode, notes: string[]): ModePalette {
   const hex = () => scale.map(oklchToHex);
   const backgrounds = () => [0, 1, 2].map((i) => hex()[i] as string);
   const minContrast = (fg: string) => Math.min(...backgrounds().map((bg) => contrast(fg, bg)));
@@ -110,7 +112,7 @@ function guard(scale: Oklch[], mode: Mode, label: string, notes: string[]): Mode
     const after = nudge(before, towardsContrast, (c) => minContrast(c) >= threshold);
     if (after.l !== before.l) {
       notes.push(
-        `${label} ${mode} step ${index + 1} (${role}) lightness ${round(before.l)} → ${round(after.l)} for ${threshold}:1`,
+        `${capitalise(mode)} mode: ${role} (step ${index + 1}) ${changeVerb(after.l - before.l)} ${round(before.l)} → ${round(after.l)} to reach ${threshold}:1`,
       );
       scale[index] = after;
     }
@@ -129,7 +131,7 @@ function guard(scale: Oklch[], mode: Mode, label: string, notes: string[]): Mode
     const before = scale[8] as Oklch;
     scale[8] = nudge(before, direction, (c) => contrast(onSolid, c) >= AA_TEXT);
     notes.push(
-      `${label} ${mode} solid fill lightness ${round(before.l)} → ${round((scale[8] as Oklch).l)} so ${onSolid === WHITE ? 'white' : 'dark'} text passes AA`,
+      `${capitalise(mode)} mode: solid fill ${changeVerb((scale[8] as Oklch).l - before.l)} ${round(before.l)} → ${round((scale[8] as Oklch).l)} so ${onSolid === WHITE ? 'white' : 'dark'} text reaches 4.5:1`,
     );
     const s = scale[8] as Oklch;
     scale[9] = { ...s, l: s.l + (onSolid === WHITE ? -0.05 : 0.05) };
@@ -157,8 +159,8 @@ export function generatePalette(source: string, options: PaletteOptions = {}): P
 
   return {
     source,
-    light: guard(buildScale(base, 'light', resolved), 'light', 'Colour', adjustments),
-    dark: guard(buildScale(base, 'dark', resolved), 'dark', 'Colour', adjustments),
+    light: guard(buildScale(base, 'light', resolved), 'light', adjustments),
+    dark: guard(buildScale(base, 'dark', resolved), 'dark', adjustments),
     adjustments,
   };
 }

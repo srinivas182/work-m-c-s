@@ -26,7 +26,8 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Components: Button, Input, Textarea, Field (label/hint/error wiring), Select, Checkbox, Switch, Radio group, Card, Badge, Avatar, Tooltip, Dropdown menu, Dialog (bottom sheet on mobile), Sheet, Tabs, Toast, Table, Skeleton, EmptyState, StatCard, PageHeader.
 - Back-office AppShell: collapsible sidebar, top bar (search ⌘K, notifications, theme, account), mobile bottom navigation and menu sheet, skip link; navigation built from module `menu()` declarations.
 - `/_design` showcase (not in production) with live brand colour lab and contrast report.
-- Playwright end-to-end smoke and axe accessibility checks (desktop and mobile, light and dark) in CI.
+- Playwright end-to-end smoke and axe accessibility checks (desktop and mobile, light and dark) in CI, with failure annotations on the PR.
+- `Table` requires a `label` and its scroll area is keyboard-focusable; `Field` supports composite controls (e.g. Select) via a render function.
 
 ### Fixed
 - Branch protection now applies to administrators (an admin merge could bypass the required `CI` check).

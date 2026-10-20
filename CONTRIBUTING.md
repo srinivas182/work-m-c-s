@@ -37,6 +37,10 @@ Scopes match module names: `platform`, `tenancy`, `billing`, `site-builder`, `sh
 
 Workflow: open PRs as **draft**, iterate, run `./scripts/check --full` locally, then mark **ready for review** for the single full run. The `CI` job is the only required check.
 
+### Browser checks locally
+
+`pnpm build`, start the app (`php artisan serve --port=8123`), then `pnpm test:e2e`. If Playwright cannot download its browser, point it at any Chromium with `PW_CHROMIUM_PATH=/path/to/chromium pnpm test:e2e`.
+
 ## Definition of Done (per sprint item)
 
 1. Code reviewed and merged with green CI

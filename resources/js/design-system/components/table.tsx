@@ -1,10 +1,27 @@
 import type { ComponentProps } from 'react';
 import { cn } from '../lib/cn';
 
-export function Table({ className, ...props }: ComponentProps<'table'>) {
+interface TableProps extends ComponentProps<'table'> {
+  /**
+   * Accessible name for the table. It also labels the scroll container, which is
+   * keyboard-focusable so wide tables can be scrolled without a mouse.
+   */
+  label: string;
+}
+
+export function Table({ className, label, ...props }: TableProps) {
   return (
-    <div className="border-border bg-surface relative w-full overflow-x-auto rounded-2xl border">
-      <table className={cn('w-full caption-bottom text-sm', className)} {...props} />
+    <div
+      role="region"
+      aria-label={label}
+      tabIndex={0}
+      className="border-border bg-surface focus-visible:outline-ring relative w-full overflow-x-auto rounded-2xl border focus-visible:outline-2 focus-visible:outline-offset-2"
+    >
+      <table
+        aria-label={label}
+        className={cn('w-full caption-bottom text-sm', className)}
+        {...props}
+      />
     </div>
   );
 }
@@ -39,5 +56,5 @@ export function TableHead({ className, ...props }: ComponentProps<'th'>) {
 }
 
 export function TableCell({ className, ...props }: ComponentProps<'td'>) {
-  return <td className={cn('px-4 py-3.5 align-middle', className)} {...props} />;
+  return <td className={cn('px-4 py-3.5 align-middle whitespace-nowrap', className)} {...props} />;
 }

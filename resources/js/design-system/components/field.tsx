@@ -1,5 +1,12 @@
 import { Label as LabelPrimitive } from 'radix-ui';
-import { useId, type ComponentProps, type ReactElement, cloneElement } from 'react';
+import {
+  cloneElement,
+  isValidElement,
+  useId,
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import { cn } from '../lib/cn';
 
 export function Label({ className, ...props }: ComponentProps<typeof LabelPrimitive.Root>) {
@@ -15,14 +22,26 @@ export function Label({ className, ...props }: ComponentProps<typeof LabelPrimit
   );
 }
 
+/** Props a Field hands to its control so label, hint and error are announced. */
+export interface FieldControlProps {
+  id: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: true;
+  'aria-required'?: true;
+}
+
 interface FieldProps {
   label: string;
   hint?: string;
   error?: string;
   required?: boolean;
   className?: string;
-  /** A single form control; it receives id and ARIA wiring automatically. */
-  children: ReactElement<Record<string, unknown>>;
+  /**
+   * Either a single control element (receives the props automatically), or a
+   * function for composite controls such as Select: `{(control) => <Select>
+   * <SelectTrigger {...control} /> … </Select>}`.
+   */
+  children: ReactElement<Record<string, unknown>> | ((control: FieldControlProps) => ReactNode);
 }
 
 /** Label + control + hint/error, with accessible associations handled for you. */
@@ -30,10 +49,15 @@ export function Field({ label, hint, error, required, className, children }: Fie
   const id = useId();
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
-  const describedBy = [errorId, hintId].filter(Boolean).join(' ') || undefined;
+  const control: FieldControlProps = {
+    id,
+    'aria-describedby': [errorId, hintId].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': error ? true : undefined,
+    'aria-required': required ? true : undefined,
+  };
 
   return (
-    <div data-slot="field" className={cn('grid gap-2', className)}>
+    <div data-slot="field" className={cn('grid content-start gap-2', className)}>
       <Label htmlFor={id}>
         {label}
         {required && (
@@ -42,12 +66,11 @@ export function Field({ label, hint, error, required, className, children }: Fie
           </span>
         )}
       </Label>
-      {cloneElement(children, {
-        id,
-        'aria-describedby': describedBy,
-        'aria-invalid': error ? true : undefined,
-        'aria-required': required || undefined,
-      })}
+      {typeof children === 'function'
+        ? children(control)
+        : isValidElement(children)
+          ? cloneElement(children, { ...control })
+          : children}
       {error ? (
         <p id={errorId} className="text-danger-11 text-sm">
           {error}
