@@ -1,0 +1,214 @@
+# WURK CI — see docs/sprints/sprint-00.md §7.
+#
+#   Draft PR                 -> quick checks only (style, static analysis, types, lint)
+#   PR ready for review      -> quick checks + tests + production build
+#   Docs-only change         -> nothing runs except the summary job (passes immediately)
+#   Push to main / develop   -> nothing (already verified on the PR)
+#
+# The "CI" summary job always runs and is the single required status check, so
+# skipped jobs never block a merge and failed/cancelled jobs always do.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  PHP_VERSION: '8.4'
+  PHP_EXTENSIONS: mbstring, intl, pdo_sqlite, sqlite3, bcmath, zip, pcntl, redis
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            shared: &shared
+              - '.github/workflows/**'
+            backend:
+              - *shared
+              - 'app/**'
+              - 'bootstrap/**'
+              - 'config/**'
+              - 'database/**'
+              - 'routes/**'
+              - 'tests/**'
+              - 'resources/views/**'
+              - 'modules/**/*.php'
+              - 'modules/**/module.json'
+              - 'modules/**/*.stub'
+              - 'composer.json'
+              - 'composer.lock'
+              - 'phpunit.xml'
+              - 'phpstan.neon'
+              - 'pint.json'
+            frontend:
+              - *shared
+              - 'resources/js/**'
+              - 'resources/css/**'
+              - 'modules/**/*.ts'
+              - 'modules/**/*.tsx'
+              - 'modules/**/*.css'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'vite.config.ts'
+              - 'tsconfig.json'
+              - 'eslint.config.js'
+              - '.prettierrc.json'
+            docker:
+              - *shared
+              - 'docker/**'
+              - 'compose.yaml'
+              - '.dockerignore'
+
+  backend-quick:
+    name: Backend · style & static analysis
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+      - name: Composer cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Pint
+        run: vendor/bin/pint --test
+      - name: PHPStan cache
+        uses: actions/cache@v6
+        with:
+          path: .phpstan-cache
+          key: phpstan-${{ github.event.pull_request.number }}-${{ github.sha }}
+          restore-keys: |
+            phpstan-${{ github.event.pull_request.number }}-
+            phpstan-
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G --error-format=github
+
+  frontend-quick:
+    name: Frontend · types, lint & format
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: TypeScript
+        run: pnpm typecheck
+      - name: ESLint
+        run: pnpm lint
+      - name: Prettier
+        run: pnpm format:check
+
+  backend-tests:
+    name: Backend · tests
+    needs: [changes, backend-quick]
+    if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+      - name: Composer cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Pest
+        run: vendor/bin/pest --parallel --compact
+
+  frontend-tests:
+    name: Frontend · tests & build
+    needs: [changes, frontend-quick]
+    if: needs.changes.outputs.frontend == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Vitest
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
+
+  docker-dev:
+    name: Docker · dev image builds
+    needs: changes
+    if: needs.changes.outputs.docker == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate compose file
+        run: docker compose config --quiet
+      - name: Build dev image
+        run: docker build docker/dev
+
+  ci:
+    name: CI
+    if: always()
+    needs: [changes, backend-quick, frontend-quick, backend-tests, frontend-tests, docker-dev]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Summarise results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          if echo "$RESULTS" | jq -e 'to_entries | any(.value.result == "failure" or .value.result == "cancelled")' > /dev/null; then
+            echo "::error::One or more CI jobs failed or were cancelled."
+            exit 1
+          fi
+          echo "All required jobs passed or were not needed for this change."
