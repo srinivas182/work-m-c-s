@@ -2,7 +2,7 @@ import { fileURLToPath, URL } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [
@@ -22,9 +22,5 @@ export default defineConfig({
   server: {
     host: process.env.VITE_HOST ?? 'localhost',
     hmr: { host: 'localhost' },
-  },
-  test: {
-    environment: 'jsdom',
-    include: ['resources/js/**/*.test.{ts,tsx}', 'modules/*/resources/js/**/*.test.{ts,tsx}'],
   },
 });

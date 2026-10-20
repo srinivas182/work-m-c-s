@@ -15,7 +15,7 @@ step "Prettier";                    pnpm -s format:check
 
 if [ "${1:-}" = "--full" ]; then
   step "Pest (backend tests)";      vendor/bin/pest --compact
-  step "Vitest (frontend tests)";   pnpm -s test
+  step "Vitest (frontend tests)";   CI=true pnpm -s test
   step "Production build";          pnpm -s build
 fi
 

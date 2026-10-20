@@ -14,5 +14,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Pest, Larastan (level 8), Pint, ESLint, Prettier, Vitest.
 - Docker Compose dev stack (FrankenPHP + Octane, Vite, MySQL 8.4, Redis, Meilisearch, Mailpit); `scripts/dev` and `scripts/check`.
 
+### Added — Sprint 0.2 (CI)
+- GitHub Actions CI: change detection, quick checks on draft PRs, full tests and build when ready for review, Docker dev-image build when Docker files change, a single always-running `CI` summary job used as the required status check.
+- Concurrency cancellation of superseded runs; Composer, pnpm and PHPStan caches.
+- Branch protection on `develop` and `main` (PR required, `CI` must pass).
+- Feature tests no longer depend on a compiled Vite build.
+
 ### Changed
 - Removed the framework default `/up` route in favour of the Health module.

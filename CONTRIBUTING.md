@@ -26,6 +26,17 @@ Scopes match module names: `platform`, `tenancy`, `billing`, `site-builder`, `sh
 - At least one approving review; architecture-affecting changes need the tech lead.
 - **CI must be green before merge.** No exceptions.
 
+## CI
+
+| When | What runs |
+|---|---|
+| Draft PR | Quick checks: Pint, PHPStan, TypeScript, ESLint, Prettier |
+| PR ready for review | Quick checks + Pest + Vitest + production build (+ Docker build if Docker files changed) |
+| Docs-only change | Nothing (the `CI` check passes immediately) |
+| Push to `main` / `develop` | Nothing — already verified on the PR |
+
+Workflow: open PRs as **draft**, iterate, run `./scripts/check --full` locally, then mark **ready for review** for the single full run. The `CI` job is the only required check.
+
 ## Definition of Done (per sprint item)
 
 1. Code reviewed and merged with green CI
