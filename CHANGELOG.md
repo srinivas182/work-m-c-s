@@ -20,5 +20,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Branch protection on `develop` and `main` (PR required, `CI` must pass).
 - Feature tests no longer depend on a compiled Vite build.
 
+### Added — Sprint 0.3 (design system)
+- Brand palette engine (OKLCH): one brand colour → 12-step light and dark scales plus brand-tinted neutrals, with a WCAG 2.2 contrast guard (muted text ≥ 4.5:1, body text ≥ 7:1, focus ring ≥ 3:1, text on solid fills ≥ 4.5:1). Tested on 16 edge-case colours and 300 random colours.
+- Generated design tokens (`resources/css/tokens.css`, `pnpm tokens`), semantic colour roles, type scale (Inter + Plus Jakarta Sans, self-hosted), radius, elevation, motion; light, dark and system themes without a flash on load; reduced-motion support.
+- Components: Button, Input, Textarea, Field (label/hint/error wiring), Select, Checkbox, Switch, Radio group, Card, Badge, Avatar, Tooltip, Dropdown menu, Dialog (bottom sheet on mobile), Sheet, Tabs, Toast, Table, Skeleton, EmptyState, StatCard, PageHeader.
+- Back-office AppShell: collapsible sidebar, top bar (search ⌘K, notifications, theme, account), mobile bottom navigation and menu sheet, skip link; navigation built from module `menu()` declarations.
+- `/_design` showcase (not in production) with live brand colour lab and contrast report.
+- Playwright end-to-end smoke and axe accessibility checks (desktop and mobile, light and dark) in CI.
+
+### Fixed
+- Branch protection now applies to administrators (an admin merge could bypass the required `CI` check).
+
 ### Changed
 - Removed the framework default `/up` route in favour of the Health module.

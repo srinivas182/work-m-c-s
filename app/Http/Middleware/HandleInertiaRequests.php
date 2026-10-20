@@ -6,6 +6,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Wurk\Platform\Navigation\NavigationBuilder;
 
 final class HandleInertiaRequests extends Middleware
 {
@@ -29,6 +30,7 @@ final class HandleInertiaRequests extends Middleware
                 'name' => config('app.name'),
                 'environment' => app()->environment(),
             ],
+            'navigation' => fn () => app(NavigationBuilder::class)->build($request),
         ];
     }
 }

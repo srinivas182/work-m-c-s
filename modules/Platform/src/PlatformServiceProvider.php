@@ -17,6 +17,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+
         $this->app->singleton(
             ModuleRegistry::class,
             fn (): ModuleRegistry => new ModuleRegistry($this->app->basePath('modules')),
@@ -31,6 +32,16 @@ final class PlatformServiceProvider extends ModuleServiceProvider
 
             $this->app->register($manifest->providerClass());
         }
+    }
+
+    /**
+     * @return list<array{label: string, route: string, icon?: string, section?: string, permission?: string, order?: int}>
+     */
+    public function menu(): array
+    {
+        return [
+            ['label' => 'Design system', 'route' => 'platform.design', 'icon' => 'palette', 'section' => 'Platform', 'order' => 900],
+        ];
     }
 
     protected function bootModule(): void
