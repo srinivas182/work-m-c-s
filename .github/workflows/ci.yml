@@ -276,7 +276,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Lint Dockerfile
-        run: docker run --rm -i hadolint/hadolint:v2.15.1 hadolint --ignore DL3008 - < docker/production/Dockerfile
+        run: |
+          docker run --rm -i hadolint/hadolint:v2.15.1 hadolint --ignore DL3008 --format json - \
+            < docker/production/Dockerfile > hadolint.json || true
+          jq -r '.[] | "::error file=docker/production/Dockerfile,line=\(.line)::\(.code) \(.message)"' hadolint.json
+          [ "$(jq length hadolint.json)" = "0" ]
       - uses: docker/setup-buildx-action@v4
       - name: Build image
         uses: docker/build-push-action@v7

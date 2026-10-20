@@ -79,7 +79,7 @@ EXPOSE 8000
 
 # Container liveness. Orchestrators should use GET /health/ready for readiness.
 HEALTHCHECK --interval=15s --timeout=3s --start-period=20s --retries=3 \
-  CMD php -r "exit(@file_get_contents('http://127.0.0.1:8000/health/live') === false ? 1 : 0);"
+  CMD ["php", "-r", "exit(@file_get_contents('http://127.0.0.1:8000/health/live') === false ? 1 : 0);"]
 
 ENTRYPOINT ["docker/production/entrypoint.sh"]
 CMD ["serve"]
