@@ -71,6 +71,7 @@ jobs:
               - 'package.json'
               - 'pnpm-lock.yaml'
               - 'vite.config.ts'
+              - 'vitest.config.ts'
               - 'tsconfig.json'
               - 'eslint.config.js'
               - '.prettierrc.json'
