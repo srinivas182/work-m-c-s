@@ -23,3 +23,11 @@ Thumbs.db
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+.env.backup
+.env.production
+/.phpunit.cache
+/storage/pail
+/public/fonts-manifest.dev.json
+/auth.json
+_ide_helper.php
+.phpstan-cache/

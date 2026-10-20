@@ -1,0 +1,9 @@
+{
+    "name": "{{ name }}",
+    "key": "{{ key }}",
+    "version": "0.1.0",
+    "description": "",
+    "core": {{ core }},
+    "entitlement": {{ entitlement }},
+    "depends_on": ["platform"]
+}

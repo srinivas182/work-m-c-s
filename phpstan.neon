@@ -1,0 +1,15 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 8
+    phpVersion: 80300
+    paths:
+        - app
+        - modules
+        - bootstrap/app.php
+    excludePaths:
+        - modules/*/stubs/*
+        - modules/*/tests/*
+    tmpDir: .phpstan-cache
+    treatPhpDocTypesAsCertain: false

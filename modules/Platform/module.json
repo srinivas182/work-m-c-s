@@ -1,0 +1,9 @@
+{
+    "name": "Platform",
+    "key": "platform",
+    "version": "0.1.0",
+    "description": "Platform kernel: module registry, module contract and shared foundations.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": []
+}

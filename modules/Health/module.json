@@ -1,0 +1,9 @@
+{
+    "name": "Health",
+    "key": "health",
+    "version": "0.1.0",
+    "description": "Liveness and readiness endpoints used by load balancers, uptime monitoring and the update engine.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": ["platform"]
+}
