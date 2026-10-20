@@ -65,9 +65,10 @@ abstract class ModuleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Back-office navigation items.
+     * Back-office navigation items. "icon" is a name from the frontend icon registry
+     * (resources/js/design-system/icons.ts); "section" groups items in the sidebar.
      *
-     * @return list<array{label: string, route: string, icon?: string, permission?: string, order?: int}>
+     * @return list<array{label: string, route: string, icon?: string, section?: string, permission?: string, order?: int}>
      */
     public function menu(): array
     {

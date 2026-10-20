@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 0 of 15 (pre-beta) |
-| **Status** | In progress — 0.1 ✅ (#1), 0.2 ✅ (#2); next 0.3 design system |
+| **Status** | In progress — 0.1 ✅ (#1), 0.2 ✅ (#2), 0.3 ✅ (#8); next 0.4 production image |
 | **Depends on** | PRD v1.0 (approved), ADR-0001 … 0008 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -300,3 +300,5 @@ Each sub-sprint is a single PR. Reverting the merge commit on `develop` fully re
 |---|---|---|
 | 0.1 Skeleton | #1 | Merged. 28 backend + 6 frontend tests; PHPStan level 8 clean |
 | 0.2 CI | #2 | Merged. Draft run (quick checks) 0.7 min; full run 1.7 min. Branch protection on `develop` and `main` with `CI` as the single required check |
+| 0.2 follow-up | #5, #6 | Protection test showed admins could bypass the required check; admin enforcement enabled, test commit reverted via green PR |
+| 0.3 Design system | #8 | Merged. 36 frontend + 31 backend tests; 14 browser checks (desktop + mobile, light + dark) with axe: no serious or critical issues. Browser checks caught and fixed: logo and avatar accessible names, faint welcome text, mobile page overflow (bottom nav untappable), unlabelled Select, keyboard-inaccessible table scroll |

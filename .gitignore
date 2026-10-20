@@ -31,3 +31,6 @@ Thumbs.db
 /auth.json
 _ide_helper.php
 .phpstan-cache/
+/playwright-report/
+/test-results/
+/blob-report/
