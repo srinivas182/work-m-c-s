@@ -12,7 +12,7 @@
 
 WURK earns from subscriptions (self-managed or managed packages), add-on credits and managed services. A network of **agents** sells WURK packages and earns commission through a sponsor hierarchy.
 
-> **Status:** Sprint 0 — Foundations (in progress).
+> **Status:** Sprint 0 (Foundations) complete — v0.1.0. Next: Sprint 1 (tenancy core, WURK ID, roles and permissions, audit logging).
 
 ## Documentation
 
