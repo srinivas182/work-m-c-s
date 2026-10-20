@@ -67,11 +67,11 @@ test('navigation adapts to the viewport', async ({ page, isMobile }) => {
   await page.goto('/_design');
   if (isMobile) {
     const quickNav = page.getByRole('navigation', { name: 'Quick' });
-    await expect(quickNav).toBeVisible();
-    await quickNav.getByRole('button', { name: 'More' }).click();
-    await expect(
-      page.getByRole('dialog').getByRole('link', { name: 'Design system' }),
-    ).toBeVisible();
+    await expect(quickNav, 'bottom navigation is visible on mobile').toBeVisible({ timeout: 5000 });
+    await quickNav.getByRole('button', { name: 'More' }).click({ timeout: 5000 });
+    const sheet = page.getByRole('dialog', { name: 'Menu' });
+    await expect(sheet, 'menu sheet opens').toBeVisible({ timeout: 5000 });
+    await expect(sheet.getByRole('link', { name: 'Design system' })).toBeVisible({ timeout: 5000 });
   } else {
     await expect(
       page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Design system' }),

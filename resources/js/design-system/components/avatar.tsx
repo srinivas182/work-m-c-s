@@ -17,6 +17,10 @@ export function initials(name: string): string {
   return (first + last).toUpperCase() || '?';
 }
 
+/**
+ * The full name is the accessible name. Initials are drawn with CSS so they never
+ * compete with it (WCAG 2.5.3 label in name) when an avatar sits inside a labelled button.
+ */
 export function Avatar({ name, src, size = 'md', className }: AvatarProps) {
   return (
     <AvatarPrimitive.Root
@@ -31,11 +35,10 @@ export function Avatar({ name, src, size = 'md', className }: AvatarProps) {
     >
       {src && <AvatarPrimitive.Image src={src} alt="" className="size-full object-cover" />}
       <AvatarPrimitive.Fallback
-        className="bg-brand-4 text-brand-11 grid size-full place-items-center font-semibold"
-        aria-label={name}
-      >
-        {initials(name)}
-      </AvatarPrimitive.Fallback>
+        aria-hidden
+        data-initials={initials(name)}
+        className="bg-brand-4 text-brand-11 grid size-full place-items-center font-semibold before:content-[attr(data-initials)]"
+      />
     </AvatarPrimitive.Root>
   );
 }
