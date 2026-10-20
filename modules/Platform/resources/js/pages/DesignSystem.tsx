@@ -255,7 +255,7 @@ function BrandLab() {
                   {hex === preset.hex && (
                     <Check
                       className="size-4"
-                      style={{ color: theme.brand.light.onSolid }}
+                      style={{ color: readableOn(preset.hex) }}
                       aria-hidden
                     />
                   )}
