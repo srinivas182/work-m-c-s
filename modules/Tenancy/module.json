@@ -1,0 +1,11 @@
+{
+    "name": "Tenancy",
+    "key": "tenancy",
+    "version": "0.1.0",
+    "description": "Tenants, shards, domains, request/job tenant context and the isolation guard.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform"
+    ]
+}

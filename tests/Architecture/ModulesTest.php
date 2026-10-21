@@ -1,6 +1,9 @@
 <?php
 
 declare(strict_types=1);
+use Illuminate\Database\Eloquent\Model;
+use Wurk\Tenancy\Contracts\BelongsToTenant;
+use Wurk\Tenancy\Contracts\CentralModel;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,3 +67,33 @@ arch('controllers are final and suffixed')
     ->expect(array_map(fn (string $m) => "Wurk\\{$m}\\Http\\Controllers", $modules))
     ->toBeFinal()
     ->toHaveSuffix('Controller');
+
+/*
+|--------------------------------------------------------------------------
+| Tenant isolation (Sprint 1 spec §6.3)
+|--------------------------------------------------------------------------
+| Every model must make an explicit choice: tenant data (BelongsToTenant)
+| or central data (CentralModel). Nothing is allowed to be ambiguous.
+*/
+
+it('classifies every model as tenant data or central data', function () use ($modulesRoot) {
+    $unclassified = [];
+
+    foreach (glob($modulesRoot.'/*/src/Models/*.php') ?: [] as $file) {
+        $module = basename(dirname($file, 3));
+        $class = "Wurk\\{$module}\\Models\\".basename($file, '.php');
+
+        if (! class_exists($class) || ! is_subclass_of($class, Model::class)) {
+            continue;
+        }
+
+        $tenant = in_array(BelongsToTenant::class, class_uses_recursive($class), true);
+        $central = is_subclass_of($class, CentralModel::class);
+
+        if ($tenant === $central) {
+            $unclassified[] = $class.($tenant ? ' (both)' : ' (neither)');
+        }
+    }
+
+    expect($unclassified)->toBe([]);
+});

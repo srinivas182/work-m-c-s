@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /*
@@ -12,4 +13,6 @@ use Tests\TestCase;
 | full Laravel application. Unit tests run without it.
 */
 
-pest()->extend(TestCase::class)->in('Feature', '../modules/*/tests/Feature');
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->in('Feature', '../modules/*/tests/Feature');

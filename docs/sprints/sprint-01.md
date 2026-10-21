@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 1 of 18 · 2 – 13 November 2026 |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 21 Oct 2026 — in progress (1.1) |
 | **Depends on** | Sprint 0 (v0.1.0), PRD §3 and §15.5, ADR-0002 (hybrid tenancy), ADR-0005 (WURK ID) |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -271,3 +271,11 @@ Each sub-sprint is one PR; reverting its merge commit removes it. Sprint 1 intro
 5. **Sessions:** admin 30-minute idle / 8-hour absolute; back office 2-hour idle with 30-day "remember me".
 6. **Permissions library:** spatie/laravel-permission with teams (team = business).
 7. **CI:** add a MySQL 8 test job (~1 extra minute per full run).
+
+---
+
+## 15. Progress log
+
+| Sub-sprint | PR | Result |
+|---|---|---|
+| 1.1 Tenancy core | see PR | 30 tenancy tests (66 total) passing on SQLite and on MySQL 8 with two real shards; isolation, interleaved requests, queued jobs, Octane reset, cache/storage scoping and shard rollout all covered |
