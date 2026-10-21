@@ -4,19 +4,32 @@ declare(strict_types=1);
 
 namespace Wurk\Identity;
 
+use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Event;
 use Wurk\Identity\Console\CreateIdentityCommand;
+use Wurk\Identity\Contracts\Invitations;
+use Wurk\Identity\Contracts\PeopleDirectory;
+use Wurk\Identity\Http\Middleware\EnsurePlatformStaff;
+use Wurk\Identity\Invites\InvitationService;
+use Wurk\Identity\Listeners\InviteBusinessOwner;
+use Wurk\Identity\People\EloquentPeopleDirectory;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Tenancy\Events\OwnerInvitationRequested;
 
 final class IdentityServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->singleton(Invitations::class, InvitationService::class);
+        $this->app->singleton(PeopleDirectory::class, EloquentPeopleDirectory::class);
     }
 
     protected function bootModule(): void
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'identity');
+        Event::listen(OwnerInvitationRequested::class, InviteBusinessOwner::class);
+        // Published for other modules' admin routes: active WURK staff with an authenticator.
+        $this->app->make(Router::class)->aliasMiddleware('staff', EnsurePlatformStaff::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([CreateIdentityCommand::class]);

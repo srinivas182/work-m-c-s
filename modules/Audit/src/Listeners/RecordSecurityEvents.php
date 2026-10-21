@@ -45,7 +45,7 @@ final readonly class RecordSecurityEvents
         $events->listen(MembershipGranted::class, fn (MembershipGranted $e) => $platform('identity.membership_granted', 'identity', $e->identityId, ['tenant_id' => $e->tenantId, 'kind' => $e->kind, 'role' => $e->role]));
 
         $events->listen(TenantProvisioned::class, fn (TenantProvisioned $e) => $platform('tenant.created', 'tenant', $e->tenantId, ['handle' => $e->handle, 'name' => $e->name]));
-        $events->listen(TenantStatusChanged::class, fn (TenantStatusChanged $e) => $platform('tenant.status_changed', 'tenant', $e->tenantId, ['handle' => $e->handle, 'from' => $e->from, 'to' => $e->to]));
+        $events->listen(TenantStatusChanged::class, fn (TenantStatusChanged $e) => $platform('tenant.status_changed', 'tenant', $e->tenantId, array_filter(['handle' => $e->handle, 'from' => $e->from, 'to' => $e->to, 'reason' => $e->reason])));
 
         $events->listen(AccessChanged::class, fn (AccessChanged $e) => $this->audit->record($e->action, $e->subjectType, $e->subjectId, $e->details, ['platform' => $e->platform]));
     }

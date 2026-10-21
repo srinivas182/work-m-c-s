@@ -55,6 +55,16 @@ final class TenancyServiceProvider extends ModuleServiceProvider
         ];
     }
 
+    /**
+     * @return list<array{label: string, route: string, icon?: string, section?: string, permission?: string, order?: int}>
+     */
+    public function menu(): array
+    {
+        return [
+            ['label' => 'Businesses', 'route' => 'admin.businesses.index', 'icon' => 'building', 'section' => 'Platform', 'permission' => 'tenants.view', 'order' => 20],
+        ];
+    }
+
     protected function bootModule(): void
     {
         Gate::policy(Tenant::class, TenantPolicy::class);

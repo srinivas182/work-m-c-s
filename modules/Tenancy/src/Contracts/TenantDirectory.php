@@ -11,6 +11,9 @@ interface TenantDirectory
 
     public function findByHandle(string $handle): ?CurrentTenant;
 
+    /** @return array{active: int, suspended: int, provisioning: int, shards: int, capacity: int, used: int} */
+    public function summary(): array;
+
     /**
      * Connection names of every registered shard (for maintenance commands that
      * work across all tenants on a shard at once).

@@ -33,3 +33,9 @@ php artisan shards:register e2e-shard --driver=sqlite --database="${root}/databa
 php artisan tenants:create "Glow Salon" --handle=glow-salon
 php artisan identities:create owner@glow.co.za --first=Thandi --last=Mokoena \
   --password="sunny days in durban" --tenant=glow-salon
+# WURK staff for admin browser tests, one per Playwright project (authenticator
+# codes are single-use, so two projects must not share an account).
+for project in desktop mobile; do
+  php artisan identities:create "ops-${project}@wurk.co.za" --first=Lerato --last=Ops \
+    --password="sunny days in durban" --staff --mfa-secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP
+done

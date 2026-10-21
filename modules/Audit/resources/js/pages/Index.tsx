@@ -21,6 +21,7 @@ import {
   TableRow,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { auditLabel } from '@/lib/audit-labels';
 
 interface AuditRow {
   id: string;
@@ -38,32 +39,6 @@ interface Props {
   filters: { action?: string; actor?: string; from?: string; to?: string };
   events: { data: AuditRow[]; total: number; next: string | null; prev: string | null };
 }
-
-/** Plain-language names for audit actions; unknown actions fall back to the raw key. */
-const LABELS: Record<string, string> = {
-  'identity.signed_in': 'Signed in',
-  'identity.sign_in_failed': 'Sign-in failed',
-  'identity.code_requested': 'Sign-in code requested',
-  'identity.mfa_enabled': 'Authenticator turned on',
-  'identity.mfa_disabled': 'Authenticator turned off',
-  'identity.password_changed': 'Password changed',
-  'identity.sessions_revoked': 'Signed out other devices',
-  'identity.signed_out': 'Signed out',
-  'identity.staff_granted': 'WURK staff access granted',
-  'identity.membership_granted': 'Added to a business',
-  'tenant.created': 'Business created',
-  'tenant.status_changed': 'Business status changed',
-  'role.assigned': 'Role given',
-  'role.revoked': 'Role removed',
-  'role.created': 'Custom role created',
-  'role.updated': 'Custom role changed',
-  'role.deleted': 'Custom role deleted',
-  'member.branches_changed': 'Branch access changed',
-  'platform_role.granted': 'Staff role given',
-  'platform_role.revoked': 'Staff role removed',
-  'platform_role.created': 'Staff role created',
-  'platform_role.deleted': 'Staff role deleted',
-};
 
 const GROUPS = [
   { value: 'all', label: 'All activity' },
@@ -230,7 +205,7 @@ export default function Index({ scope, filters, events }: Props) {
                     </TableCell>
                     <TableCell className="font-medium">{e.actor}</TableCell>
                     <TableCell>
-                      <Badge tone={tone(e.action)}>{LABELS[e.action] ?? e.action}</Badge>
+                      <Badge tone={tone(e.action)}>{auditLabel(e.action)}</Badge>
                     </TableCell>
                     <TableCell className="whitespace-normal">
                       <Details details={e.details} />

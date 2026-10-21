@@ -1,8 +1,10 @@
 import {
   BarChart3,
+  Building2,
   Calendar,
   Circle,
   Globe,
+  KeyRound,
   HeartPulse,
   LayoutDashboard,
   Megaphone,
@@ -11,6 +13,7 @@ import {
   Settings,
   ShieldCheck,
   ShoppingBag,
+  UserCog,
   Users,
   Wallet,
   type LucideIcon,
@@ -22,6 +25,9 @@ import {
  */
 export const icons: Record<string, LucideIcon> = {
   'bar-chart': BarChart3,
+  building: Building2,
+  'user-cog': UserCog,
+  'key-round': KeyRound,
   calendar: Calendar,
   circle: Circle,
   globe: Globe,

@@ -40,7 +40,14 @@ final readonly class NavigationBuilder
             }
 
             foreach ($provider->menu() as $entry) {
-                if (! $this->router->has($entry['route'])) {
+                $route = $this->router->getRoutes()->getByName($entry['route']);
+                if ($route === null) {
+                    continue;
+                }
+
+                // Items belong to the back office they live on (admin vs business host).
+                $domain = $route->getDomain();
+                if ($domain !== null && strtolower($domain) !== strtolower($request->getHost())) {
                     continue;
                 }
 
