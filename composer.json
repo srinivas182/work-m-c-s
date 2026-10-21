@@ -6,10 +6,12 @@
     "license": "proprietary",
     "require": {
         "php": "^8.3",
+        "bacon/bacon-qr-code": "^3.1",
         "inertiajs/inertia-laravel": "^3.5",
         "laravel/framework": "^13.17",
         "laravel/octane": "^2.22",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "league/flysystem-path-prefixing": "^3.31"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -28,14 +30,22 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
             "Wurk\\Platform\\": "modules/Platform/src/",
-            "Wurk\\Health\\": "modules/Health/src/"
+            "Wurk\\Health\\": "modules/Health/src/",
+            "Wurk\\Tenancy\\": "modules/Tenancy/src/",
+            "Wurk\\Identity\\": "modules/Identity/src/",
+            "Wurk\\Access\\": "modules/Access/src/",
+            "Wurk\\Audit\\": "modules/Audit/src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/",
             "Wurk\\Platform\\Tests\\": "modules/Platform/tests/",
-            "Wurk\\Health\\Tests\\": "modules/Health/tests/"
+            "Wurk\\Health\\Tests\\": "modules/Health/tests/",
+            "Wurk\\Tenancy\\Tests\\": "modules/Tenancy/tests/",
+            "Wurk\\Identity\\Tests\\": "modules/Identity/tests/",
+            "Wurk\\Access\\Tests\\": "modules/Access/tests/",
+            "Wurk\\Audit\\Tests\\": "modules/Audit/tests/"
         }
     },
     "scripts": {

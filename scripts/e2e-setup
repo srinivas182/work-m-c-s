@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Prepares an isolated environment for browser tests (.env.e2e + SQLite files),
+# with one business and its owner. Never touches .env.
+#   ./scripts/e2e-setup && pnpm build && APP_ENV=e2e pnpm test:e2e
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+root="$(pwd)"
+cp .env.example .env.e2e
+sed -i \
+  -e 's/^APP_ENV=.*/APP_ENV=e2e/' \
+  -e 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' \
+  -e '/^DB_\(HOST\|PORT\|DATABASE\|USERNAME\|PASSWORD\)=/d' \
+  -e 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' \
+  -e 's/^CACHE_STORE=.*/CACHE_STORE=file/' \
+  -e 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' \
+  -e 's/^MAIL_MAILER=.*/MAIL_MAILER=log/' \
+  .env.e2e
+cat >> .env.e2e <<ENV
+DB_DATABASE=${root}/database/e2e.sqlite
+WURK_DESIGN_SHOWCASE=true
+WURK_ROOT_DOMAIN=wurk.test
+WURK_APP_DOMAIN=127.0.0.1
+WURK_ADMIN_DOMAIN=localhost
+ENV
+
+export APP_ENV=e2e
+rm -f database/e2e.sqlite database/e2e-shard.sqlite
+touch database/e2e.sqlite
+php artisan key:generate --force --no-interaction
+php artisan migrate --force --no-interaction
+php artisan shards:register e2e-shard --driver=sqlite --database="${root}/database/e2e-shard.sqlite"
+php artisan tenants:create "Glow Salon" --handle=glow-salon
+php artisan identities:create owner@glow.co.za --first=Thandi --last=Mokoena \
+  --password="sunny days in durban" --tenant=glow-salon

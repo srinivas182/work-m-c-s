@@ -4,6 +4,48 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-10-21 — Sprint 1: Platform core
+
+### Added — Sprint 1.4 (audit logging)
+- Audit module: append-only, tamper-evident trail — one SHA-256 hash chain for the platform (central database) and one per business (on its shard). Each event links to the previous one; gapless sequence numbers per chain.
+- Security events recorded automatically and synchronously: sign-in success and failure, code requests, MFA on/off, password changes, sessions revoked, sign-out, staff and membership grants, business created and status changes, every role and branch-access change.
+- `AuditLog::record()` for any module and an `Auditable` model trait (create/update/delete with before/after values); secrets redacted at any depth.
+- Request ids on every response (`X-Request-Id`), shared with logs, jobs and audit events.
+- `audit:verify` checks every chain and reports edits, gaps and removed events.
+- Audit log viewer for WURK staff (platform chain) and owners (their business), with filters and CSV export; hidden from people without permission.
+
+### Fixed
+- Concurrent audit writers on MySQL could deadlock and lose events; proven fixed with 8 parallel writers (400/400 events, chain intact, three runs).
+
+### Added — Sprint 1.3 (access control)
+- Access module (ADR-0009): permissions declared by each module with a platform or business scope; system roles defined in code (super-admin, finance, support, managed-services; owner, branch-manager, staff); custom roles from declared permissions only.
+- Checks through Laravel's Gate: declared permissions answered by Access, everything else falls through to policies. Business permissions apply only inside the current business; super admins get no business permissions inside a business.
+- Team records, role assignments and branch assignments on the shard; `BelongsToBranch` limits branch-restricted members to their branches.
+- Guards: a business always keeps an owner; WURK always keeps a super admin; custom roles cannot mix scopes or be deleted while assigned.
+- Policies for businesses and branches; navigation items hidden without the required permission.
+- `permissions:sync` (validates system roles, prunes undeclared permissions from custom roles on the central database and every shard); `identities:create --role` and `--staff-role`.
+- Exhaustive permission-matrix test (every role × permission × place).
+
+### Added — Sprint 1.2 (WURK ID)
+- Identity module: one WURK ID per person (email and/or mobile), business memberships, platform staff.
+- Sign-in with one-time codes (6 digits, 5 minutes, 5 attempts, 30-second resend, hourly limits per address and IP; stored only as keyed hashes; neutral responses) or password (min 10 characters, ~98 000 common passwords rejected, lockout after 5 failures).
+- Authenticator-app MFA (RFC 6238, replay-protected) with ten single-use recovery codes; mandatory for WURK staff, optional for everyone else. Nobody is signed in until every required factor passes.
+- Sessions: admin 30-minute idle / 8-hour maximum; back office 2-hour idle with optional 30-day remember-me; device list and "sign out other devices"; password change signs out other devices.
+- Screens: sign in, code entry, password, MFA challenge and set-up, recovery codes, forgot password, choose business, account & security; business home and admin placeholders.
+- `identities:create` to bootstrap staff and team members; `scripts/e2e-setup` for isolated browser-test environments.
+- Security events dispatched for the Audit module (Sprint 1.4).
+
+### Fixed
+- Business handles can no longer capture platform paths on the back-office host (Laravel matches domain routes first); an architecture test keeps every platform path reserved.
+
+### Added — Sprint 1.1 (tenancy core)
+- Tenancy module: shards, tenants and domains in the central database; branches in shard databases.
+- Tenant context: shard connection per shard, tenant in log and queued-job context, scoped cache keys and storage, URL defaults; reset at Octane request boundaries and after every queued job.
+- Isolation guard: `BelongsToTenant` filters every query to the current tenant, fills `tenant_id`, and throws on use without context or on another tenant's rows. `CentralModel` marks central data; an architecture test requires every model to be one or the other.
+- Resolution by back-office path (`app.{root}/{handle}`) and by host (subdomains and custom domains), cached by id and invalidated on change; `Route::tenant()` and `Route::tenantSite()` route macros.
+- Commands: `shards:register`, `shards:migrate` (shard-by-shard, stops on first failure), `tenants:create`, `tenants:run`.
+- CI job running the full suite on MySQL 8 with two real shard databases; local dev stack creates and registers two shards.
+
 ## [0.1.0] — 2026-10-21 — Sprint 0: Foundations
 
 ### Added — Sprint 0.1 (skeleton)

@@ -1,0 +1,13 @@
+{
+    "name": "Access",
+    "key": "access",
+    "version": "0.1.0",
+    "description": "Roles and permissions scoped to platform, business and branch; permissions declared by modules.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "identity"
+    ]
+}

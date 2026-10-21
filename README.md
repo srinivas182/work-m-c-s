@@ -12,7 +12,7 @@
 
 WURK earns from subscriptions (self-managed or managed packages), add-on credits and managed services. A network of **agents** sells WURK packages and earns commission through a sponsor hierarchy.
 
-> **Status:** Sprint 0 (Foundations) complete — v0.1.0. Next: Sprint 1 (tenancy core, WURK ID, roles and permissions, audit logging).
+> **Status:** Sprint 1 (Platform core: tenancy, WURK ID, access control, audit) complete — v0.2.0. Next: Sprint 2 (super admin).
 
 ## Documentation
 
@@ -44,6 +44,25 @@ Requirements: Docker Desktop (or Docker Engine + Compose), PHP 8.3+, Composer, N
 | Vite dev server | http://localhost:5173 |
 | Mailpit | http://localhost:8025 |
 | MySQL / Redis / Meilisearch | localhost:3306 / 6379 / 7700 |
+
+### People and sign-in
+
+```bash
+./scripts/dev artisan identities:create you@wurk.co.za --staff               # first WURK staff account
+./scripts/dev artisan identities:create owner@glow.co.za --tenant=glow-salon  # a business team member
+```
+
+Sign in at `admin.wurk.test/sign-in` (staff, authenticator app required) or `app.wurk.test/sign-in`. Locally, emailed codes land in Mailpit and SMS codes in the application log until Sprint 2 connects real providers.
+
+### Businesses and shards
+
+```bash
+./scripts/dev artisan tenants:create "Glow Salon"        # provision a business on the least-loaded shard
+./scripts/dev artisan shards:migrate                     # roll tenant migrations out shard by shard
+./scripts/dev artisan tenants:run "cache:clear" --tenant=glow-salon
+```
+
+Local hosts: `admin.wurk.test` (WURK staff), `app.wurk.test/{business}` (back office), `{business}.wurk.test` (public sites). Point them at 127.0.0.1 in your hosts file.
 
 ### Modules
 

@@ -12,8 +12,14 @@ case "${1:-help}" in
     compose exec app composer install
     grep -q '^APP_KEY=base64' .env || compose exec app php artisan key:generate
     compose exec app php artisan migrate
+    for i in 1 2; do
+      compose exec app php artisan shards:register "local-shard-$i" --if-missing \
+        --host=mysql --database="wurk_shard_$i" --username=wurk --password=wurk
+    done
+    compose exec app php artisan shards:migrate
     echo
     echo "WURK is running:"
+    echo "  Try:      ./scripts/dev artisan tenants:create \"Glow Salon\""
     echo "  App       http://localhost:8000"
     echo "  Health    http://localhost:8000/health/ready"
     echo "  Mailpit   http://localhost:8025"

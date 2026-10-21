@@ -16,3 +16,4 @@ export * from './components/tooltip';
 export { cn } from './lib/cn';
 export * from './theme/theme';
 export { useTheme } from './theme/use-theme';
+export * from './components/otp-input';
