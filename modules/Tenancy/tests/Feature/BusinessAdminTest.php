@@ -21,7 +21,7 @@ beforeEach(function () {
 
 function newBusiness(array $overrides = []): array
 {
-    return ['name' => 'Bright Smiles Dental', 'handle' => 'bright-smiles', 'country' => 'ZA', 'owner_first_name' => 'Sipho', 'owner_last_name' => 'Dlamini', 'owner_email' => 'sipho@brightsmiles.co.za', ...$overrides];
+    return ['name' => 'Bright Smiles Dental', 'handle' => 'bright-smiles', 'country' => 'ZA', 'owner_first_name' => 'Sipho', 'owner_last_name' => 'Dlamini', 'owner_contact' => 'sipho@brightsmiles.co.za', ...$overrides];
 }
 
 it('lists and filters businesses for staff who may see them', function () {

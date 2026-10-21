@@ -55,7 +55,7 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await page.getByLabel(/^Business name/).fill(`E2E ${testInfo.project.name} Studio`);
   await page.getByLabel(/^Web address/).fill(handle);
   await page.getByLabel(/^First name/).fill('Sipho');
-  await page.getByLabel(/^Email/).fill(`${handle}@example.com`);
+  await page.getByLabel(/^Email or mobile number/).fill(`${handle}@example.com`);
   await page.getByRole('button', { name: 'Create business and invite owner' }).click();
   await expect(
     page.getByRole('heading', { level: 1, name: `E2E ${testInfo.project.name} Studio` }),
@@ -89,6 +89,15 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
 
   await page.goto(`${admin}/features`);
   await expect(page.getByRole('heading', { level: 1, name: 'Feature rollouts' })).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/providers`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Providers' })).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/countries`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Countries' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'South Africa · ZA' })).toBeVisible();
   await expectAccessible(page);
 
   await page.goto(`${admin}/roles`);

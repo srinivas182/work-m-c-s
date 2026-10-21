@@ -32,13 +32,13 @@ final class InvitationController
     public function show(Request $request, string $token, TenantDirectory $directory): Response
     {
         $invitation = $this->find($token);
-        $existing = $invitation === null ? null : Identity::query()->where('email', $invitation->email)->first();
+        $existing = $invitation === null ? null : self::identityFor($invitation);
 
         return Inertia::render('Identity::Invitation', [
             'valid' => $invitation !== null,
             'joining' => $invitation === null ? null : ($invitation->tenant_id ? $directory->find($invitation->tenant_id)?->displayName() : 'WURK'),
             'role' => $invitation?->role,
-            'email' => $invitation?->email,
+            'email' => $invitation?->destination(),
             'needsName' => $invitation !== null && $existing === null,
             'firstName' => $invitation?->first_name,
             'lastName' => $invitation?->last_name,
@@ -50,7 +50,7 @@ final class InvitationController
         $invitation = $this->find($token);
         abort_if($invitation === null, 410, 'This invitation has expired or was already used.');
 
-        $existing = Identity::query()->where('email', $invitation->email)->first();
+        $existing = self::identityFor($invitation);
         $data = $request->validate($existing === null ? [
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['nullable', 'string', 'max:80'],
@@ -69,8 +69,11 @@ final class InvitationController
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'] ?? '',
                 'email' => $invitation->email,
+                'phone' => $invitation->phone,
             ]);
-            $identity->forceFill(['email_verified_at' => $identity->email_verified_at ?? now()])->save();
+            // The link reached this address, which proves the person controls it.
+            $verified = $invitation->email !== null ? 'email_verified_at' : 'phone_verified_at';
+            $identity->forceFill([$verified => $identity->{$verified} ?? now()])->save();
             $invitation->forceFill(['accepted_at' => now()])->save();
 
             if ($invitation->kind === Invitation::KIND_STAFF) {
@@ -92,6 +95,13 @@ final class InvitationController
         }
 
         return $this->flow->afterFirstFactor($request, $identity, false, 'invitation');
+    }
+
+    private static function identityFor(Invitation $invitation): ?Identity
+    {
+        return $invitation->email !== null
+            ? Identity::query()->where('email', $invitation->email)->first()
+            : Identity::query()->where('phone', $invitation->phone)->first();
     }
 
     private function find(string $token): ?Invitation

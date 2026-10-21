@@ -39,7 +39,7 @@ return [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
             'help', 'login', 'logout', 'mail', 'my', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
-            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', 'settings',
+            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', 'settings', 'webhooks',
         ],
 
         // Default capacity of a shared shard (tenants per database).

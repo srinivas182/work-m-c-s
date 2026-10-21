@@ -1,0 +1,13 @@
+{
+    "name": "Regions",
+    "key": "regions",
+    "version": "0.1.0",
+    "description": "Countries: currency, VAT, phone prefix, time zone; which countries WURK operates in.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "audit"
+    ]
+}

@@ -72,16 +72,16 @@ final class BusinessesController
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'handle' => ['required', 'string', 'max:40'],
-            'country' => ['required', 'in:ZA'],
+            'country' => ['required', 'exists:countries,code,enabled,1'],
             'owner_first_name' => ['required', 'string', 'max:80'],
             'owner_last_name' => ['nullable', 'string', 'max:80'],
-            'owner_email' => ['required', 'email', 'max:255'],
+            'owner_contact' => ['required', 'string', 'max:255'],
         ]);
 
         $tenant = $create($data['name'], $data['handle'], $data['country']);
-        event(new OwnerInvitationRequested($tenant->id, $tenant->name, $data['owner_email'], $data['owner_first_name'], $data['owner_last_name'] ?? '', (string) $request->user()?->getAuthIdentifier()));
+        event(new OwnerInvitationRequested($tenant->id, $tenant->name, $data['owner_contact'], $data['owner_first_name'], $data['owner_last_name'] ?? '', (string) $request->user()?->getAuthIdentifier()));
 
-        return redirect()->route('admin.businesses.show', $tenant)->with('status', "{$tenant->name} is ready. We emailed {$data['owner_email']} an invitation.");
+        return redirect()->route('admin.businesses.show', $tenant)->with('status', "{$tenant->name} is ready. We sent {$data['owner_contact']} an invitation.");
     }
 
     public function show(Tenant $tenant): Response
