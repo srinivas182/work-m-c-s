@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 2 of 18 · 16 – 27 November 2026 |
-| **Status** | Approved 21 Oct 2026 — in progress (2.1) |
+| **Status** | Approved 21 Oct 2026 — 2.1 ✅ (#21), 2.2 in review |
 | **Depends on** | v0.2.0 (tenancy, WURK ID, access control, audit), PRD §4, §12, §14 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -136,4 +136,5 @@ All amounts are integers (cents, credit units); all changes to packages, rates, 
 
 | Sub-sprint | PR | Result |
 |---|---|---|
-| 2.1 Businesses & staff | see PR | 229 tests on SQLite and MySQL 8; 28 browser checks incl. staff sign-in with a real authenticator code. Mobile-number invitations deferred to 2.3 (needs SMS) |
+| 2.1 Businesses & staff | #21 | 229 tests on SQLite and MySQL 8; 28 browser checks incl. staff sign-in with a real authenticator code. Mobile-number invitations deferred to 2.3 (needs SMS) |
+| 2.2 Packages & entitlements | see PR | 273 tests on SQLite and MySQL 8; 28 browser checks (admin now creates a package and visits feature rollouts). Found and fixed: `wurk:make-module` left the app unbootable until a manual autoload refresh; empty package description crashed |

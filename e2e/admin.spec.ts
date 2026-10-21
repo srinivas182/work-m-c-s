@@ -71,6 +71,26 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('heading', { level: 1, name: 'WURK staff' })).toBeVisible();
   await expectAccessible(page);
 
+  await page.goto(`${admin}/packages/new`);
+  await expect(page.getByRole('heading', { level: 1, name: 'New package' })).toBeVisible();
+  await expectAccessible(page);
+  await page.getByLabel(/^Name/).fill(`E2E ${testInfo.project.name}`);
+  await page.getByLabel(/^Key/).fill(`e2e-${testInfo.project.name}-${Date.now().toString(36)}`);
+  await page.getByLabel(/^Monthly price/).fill('299');
+  await page.getByLabel(/^Yearly price/).fill('2990');
+  await page.getByLabel('Appointments').check();
+  await page.getByRole('button', { name: 'Create package' }).click();
+  await expect(page.getByText('Version 1')).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/packages`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Packages' })).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/features`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Feature rollouts' })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/roles`);
   await expect(page.getByRole('heading', { level: 1, name: 'Staff roles' })).toBeVisible();
   await expectAccessible(page);

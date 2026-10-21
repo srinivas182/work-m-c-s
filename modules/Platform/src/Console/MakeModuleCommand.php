@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use JsonException;
+use Symfony\Component\Process\Process;
 use Wurk\Platform\Modules\ModuleRegistry;
 
 final class MakeModuleCommand extends Command
@@ -80,8 +81,13 @@ final class MakeModuleCommand extends Command
         $this->registerAutoload($files, $name);
 
         $this->components->info("Module {$name} created at modules/{$name}.");
+
+        // The app cannot boot with a module whose provider is not autoloadable yet,
+        // so refresh the autoloader straight away.
+        $process = new Process(['composer', 'dump-autoload', '--quiet'], base_path());
+        $process->run();
         $this->components->bulletList([
-            'Run `composer dump-autoload` to load the new namespace.',
+            $process->isSuccessful() ? 'Autoloader refreshed.' : 'Run `composer dump-autoload` now — the app will not boot until you do.',
             "Visit /{$key} to see its starter page.",
         ]);
 
