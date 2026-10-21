@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 1 of 18 · 2 – 13 November 2026 |
-| **Status** | Approved 21 Oct 2026 — in progress (1.1) |
+| **Status** | Approved 21 Oct 2026 — 1.1 ✅ (#13), 1.2 in review |
 | **Depends on** | Sprint 0 (v0.1.0), PRD §3 and §15.5, ADR-0002 (hybrid tenancy), ADR-0005 (WURK ID) |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -278,4 +278,5 @@ Each sub-sprint is one PR; reverting its merge commit removes it. Sprint 1 intro
 
 | Sub-sprint | PR | Result |
 |---|---|---|
-| 1.1 Tenancy core | see PR | 30 tenancy tests (66 total) passing on SQLite and on MySQL 8 with two real shards; isolation, interleaved requests, queued jobs, Octane reset, cache/storage scoping and shard rollout all covered |
+| 1.1 Tenancy core | #13 | 30 tenancy tests (66 total) passing on SQLite and on MySQL 8 with two real shards; isolation, interleaved requests, queued jobs, Octane reset, cache/storage scoping and shard rollout all covered |
+| 1.2 WURK ID | see PR | 134 tests on SQLite and MySQL 8; 24 browser checks (desktop + mobile, light + dark). Found and fixed: domain-route precedence capturing /sign-in, guard touched at boot (broke fresh installs, lost under Octane), device tracking tied to a changing session id, TOTP on the system clock |

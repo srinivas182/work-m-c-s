@@ -4,6 +4,18 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 1.2 (WURK ID)
+- Identity module: one WURK ID per person (email and/or mobile), business memberships, platform staff.
+- Sign-in with one-time codes (6 digits, 5 minutes, 5 attempts, 30-second resend, hourly limits per address and IP; stored only as keyed hashes; neutral responses) or password (min 10 characters, ~98 000 common passwords rejected, lockout after 5 failures).
+- Authenticator-app MFA (RFC 6238, replay-protected) with ten single-use recovery codes; mandatory for WURK staff, optional for everyone else. Nobody is signed in until every required factor passes.
+- Sessions: admin 30-minute idle / 8-hour maximum; back office 2-hour idle with optional 30-day remember-me; device list and "sign out other devices"; password change signs out other devices.
+- Screens: sign in, code entry, password, MFA challenge and set-up, recovery codes, forgot password, choose business, account & security; business home and admin placeholders.
+- `identities:create` to bootstrap staff and team members; `scripts/e2e-setup` for isolated browser-test environments.
+- Security events dispatched for the Audit module (Sprint 1.4).
+
+### Fixed
+- Business handles can no longer capture platform paths on the back-office host (Laravel matches domain routes first); an architecture test keeps every platform path reserved.
+
 ### Added — Sprint 1.1 (tenancy core)
 - Tenancy module: shards, tenants and domains in the central database; branches in shard databases.
 - Tenant context: shard connection per shard, tenant in log and queued-job context, scoped cache keys and storage, URL defaults; reset at Octane request boundaries and after every queued job.

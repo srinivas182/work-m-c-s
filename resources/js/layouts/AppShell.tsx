@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import {
   Bell,
   ChevronsLeft,
@@ -28,6 +28,7 @@ import {
   Sheet,
   SheetContent,
   Toaster,
+  toast,
   Tooltip,
   TooltipProvider,
   useTheme,
@@ -221,11 +222,13 @@ function UserMenu({ user }: { user: ShellUser }) {
           <span className="block truncate font-normal">{user.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User /> Profile
+        <DropdownMenuItem asChild>
+          <Link href="/account/security">
+            <User /> Account &amp; security
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem destructive>
+        <DropdownMenuItem destructive onSelect={() => router.post('/sign-out')}>
           <LogOut /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -275,8 +278,13 @@ function BottomNav({ items, onMore }: { items: NavigationItem[]; onMore: () => v
   );
 }
 
-export default function AppShell({ title, user, children }: AppShellProps) {
-  const { navigation } = usePage<SharedProps>().props;
+export default function AppShell({ title, user: userProp, children }: AppShellProps) {
+  const { navigation, auth, flash } = usePage<SharedProps>().props;
+  const user = userProp ?? auth.user ?? undefined;
+
+  useEffect(() => {
+    if (flash.status) toast.success(flash.status);
+  }, [flash.status]);
   const { resolved } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {

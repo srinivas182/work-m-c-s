@@ -21,10 +21,12 @@ use Wurk\Tenancy\Console\RegisterShardCommand;
 use Wurk\Tenancy\Console\RunForTenantsCommand;
 use Wurk\Tenancy\Context\TenantContextManager;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Tenancy\Http\Middleware\InitializeTenancyByDomain;
 use Wurk\Tenancy\Http\Middleware\InitializeTenancyByPath;
 use Wurk\Tenancy\Listeners\ForgetTenantContext;
 use Wurk\Tenancy\Models\Tenant;
+use Wurk\Tenancy\Resolution\EloquentTenantDirectory;
 use Wurk\Tenancy\Support\HandleRules;
 
 final class TenancyServiceProvider extends ModuleServiceProvider
@@ -32,6 +34,7 @@ final class TenancyServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         $this->app->singleton(TenantContext::class, TenantContextManager::class);
+        $this->app->singleton(TenantDirectory::class, EloquentTenantDirectory::class);
     }
 
     protected function bootModule(): void
@@ -51,16 +54,18 @@ final class TenancyServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * Route::tenant(fn () => …)       app.{root}/{tenant}/…  (business back office)
+     * Route::tenant(fn () => …)       app.{root}/{tenant}/…  (business back office; signed-in
+     *                                   users only, checked before the business is looked up so
+     *                                   unauthenticated visitors cannot probe which handles exist)
      * Route::tenantSite(fn () => …)   {handle}.{root} or custom domain (public site)
      */
     private function registerRouteMacros(): void
     {
-        Route::macro('tenant', function (Closure $routes): RouteRegistrar {
+        Route::macro('tenant', function (Closure $routes, bool $requiresAuth = true): RouteRegistrar {
             $registrar = Route::domain((string) config('wurk.domains.app'))
                 ->prefix('{tenant}')
-                ->where(['tenant' => HandleRules::PATTERN])
-                ->middleware(['web', InitializeTenancyByPath::class]);
+                ->where(['tenant' => HandleRules::routePattern()])
+                ->middleware($requiresAuth ? ['web', 'auth', InitializeTenancyByPath::class] : ['web', InitializeTenancyByPath::class]);
             $registrar->group($routes);
 
             return $registrar;
