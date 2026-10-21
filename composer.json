@@ -32,7 +32,8 @@
             "Wurk\\Platform\\": "modules/Platform/src/",
             "Wurk\\Health\\": "modules/Health/src/",
             "Wurk\\Tenancy\\": "modules/Tenancy/src/",
-            "Wurk\\Identity\\": "modules/Identity/src/"
+            "Wurk\\Identity\\": "modules/Identity/src/",
+            "Wurk\\Access\\": "modules/Access/src/"
         }
     },
     "autoload-dev": {
@@ -41,7 +42,8 @@
             "Wurk\\Platform\\Tests\\": "modules/Platform/tests/",
             "Wurk\\Health\\Tests\\": "modules/Health/tests/",
             "Wurk\\Tenancy\\Tests\\": "modules/Tenancy/tests/",
-            "Wurk\\Identity\\Tests\\": "modules/Identity/tests/"
+            "Wurk\\Identity\\Tests\\": "modules/Identity/tests/",
+            "Wurk\\Access\\Tests\\": "modules/Access/tests/"
         }
     },
     "scripts": {

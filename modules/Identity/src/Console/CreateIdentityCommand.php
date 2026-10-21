@@ -6,6 +6,8 @@ namespace Wurk\Identity\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
+use Wurk\Identity\Events\MembershipGranted;
+use Wurk\Identity\Events\StaffGranted;
 use Wurk\Identity\Models\Identity;
 use Wurk\Identity\Models\Membership;
 use Wurk\Identity\Models\PlatformStaff;
@@ -26,7 +28,9 @@ final class CreateIdentityCommand extends Command
         {--phone= : Mobile number}
         {--password= : Optional password (otherwise sign in with a code)}
         {--staff : Grant WURK staff access (admin back office)}
-        {--tenant=* : Add as a team member of these business handles}';
+        {--staff-role=super-admin : Platform role for --staff}
+        {--tenant=* : Add as a team member of these business handles}
+        {--role=owner : Business role for --tenant (owner, branch-manager, staff)}';
 
     protected $description = 'Create a WURK ID (person) and optionally grant staff access or business membership';
 
@@ -54,6 +58,7 @@ final class CreateIdentityCommand extends Command
 
         if ($this->option('staff')) {
             PlatformStaff::query()->updateOrCreate(['identity_id' => $identity->id], ['status' => 'active']);
+            event(new StaffGranted($identity->id, (string) $this->option('staff-role')));
         }
 
         foreach ((array) $this->option('tenant') as $handle) {
@@ -67,6 +72,7 @@ final class CreateIdentityCommand extends Command
                 ['identity_id' => $identity->id, 'tenant_id' => $tenant->tenantId(), 'kind' => Membership::KIND_STAFF],
                 ['status' => 'active'],
             );
+            event(new MembershipGranted($identity->id, $tenant->tenantId(), Membership::KIND_STAFF, $identity->fullName(), (string) $this->option('role')));
         }
 
         $this->components->info("WURK ID ready for {$email}.");

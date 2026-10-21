@@ -24,10 +24,14 @@ final class IdentityServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * @return list<string>
+     * @return list<string|array<string, string>>
      */
     public function permissions(): array
     {
-        return [];
+        return [
+            ['key' => 'staff.manage', 'label' => 'Manage WURK staff accounts', 'scope' => 'platform'],
+            ['key' => 'team.view', 'label' => 'See the team'],
+            ['key' => 'team.manage', 'label' => 'Invite and manage team members'],
+        ];
     }
 }

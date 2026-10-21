@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Platform\Navigation;
 
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
@@ -15,7 +16,7 @@ use Wurk\Platform\Modules\ModuleServiceProvider;
  *
  * Items whose route does not exist are skipped, so a module can declare an item
  * for a route that is only registered in some environments or packages.
- * Permission filtering is added with authorisation in Sprint 1.
+ * Items with a permission are shown only to people who hold it (via the Gate).
  */
 final readonly class NavigationBuilder
 {
@@ -23,6 +24,7 @@ final readonly class NavigationBuilder
         private Application $app,
         private Router $router,
         private UrlGenerator $url,
+        private Gate $gate,
     ) {}
 
     /**
@@ -39,6 +41,10 @@ final readonly class NavigationBuilder
 
             foreach ($provider->menu() as $entry) {
                 if (! $this->router->has($entry['route'])) {
+                    continue;
+                }
+
+                if (isset($entry['permission']) && ! $this->gate->forUser($request->user())->allows($entry['permission'])) {
                     continue;
                 }
 

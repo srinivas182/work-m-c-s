@@ -11,6 +11,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Laravel\Octane\Events\RequestReceived;
 use Laravel\Octane\Events\RequestTerminated;
@@ -25,7 +26,10 @@ use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Tenancy\Http\Middleware\InitializeTenancyByDomain;
 use Wurk\Tenancy\Http\Middleware\InitializeTenancyByPath;
 use Wurk\Tenancy\Listeners\ForgetTenantContext;
+use Wurk\Tenancy\Models\Branch;
 use Wurk\Tenancy\Models\Tenant;
+use Wurk\Tenancy\Policies\BranchPolicy;
+use Wurk\Tenancy\Policies\TenantPolicy;
 use Wurk\Tenancy\Resolution\EloquentTenantDirectory;
 use Wurk\Tenancy\Support\HandleRules;
 
@@ -37,8 +41,25 @@ final class TenancyServiceProvider extends ModuleServiceProvider
         $this->app->singleton(TenantDirectory::class, EloquentTenantDirectory::class);
     }
 
+    /**
+     * @return list<string|array<string, string>>
+     */
+    public function permissions(): array
+    {
+        return [
+            ['key' => 'tenants.view', 'label' => 'See businesses', 'scope' => 'platform'],
+            ['key' => 'tenants.manage', 'label' => 'Create, suspend and change businesses', 'scope' => 'platform'],
+            ['key' => 'shards.manage', 'label' => 'Manage tenant databases', 'scope' => 'platform'],
+            ['key' => 'branches.view', 'label' => 'See branches'],
+            ['key' => 'branches.manage', 'label' => 'Add and change branches'],
+        ];
+    }
+
     protected function bootModule(): void
     {
+        Gate::policy(Tenant::class, TenantPolicy::class);
+        Gate::policy(Branch::class, BranchPolicy::class);
+
         $this->registerRouteMacros();
         $this->resetContextBetweenUnitsOfWork();
         $this->restoreContextInQueuedJobs();

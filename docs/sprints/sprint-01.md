@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 1 of 18 · 2 – 13 November 2026 |
-| **Status** | Approved 21 Oct 2026 — 1.1 ✅ (#13), 1.2 in review |
+| **Status** | Approved 21 Oct 2026 — 1.1 ✅ (#13), 1.2 ✅ (#14), 1.3 in review |
 | **Depends on** | Sprint 0 (v0.1.0), PRD §3 and §15.5, ADR-0002 (hybrid tenancy), ADR-0005 (WURK ID) |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -269,7 +269,7 @@ Each sub-sprint is one PR; reverting its merge commit removes it. Sprint 1 intro
 3. **Passwords:** minimum 10 characters, common-password list, no forced symbols (current NIST guidance).
 4. **MFA:** mandatory for WURK staff from Sprint 1; optional for owners, with an "enforce for my team" setting in Sprint 2.
 5. **Sessions:** admin 30-minute idle / 8-hour absolute; back office 2-hour idle with 30-day "remember me".
-6. **Permissions library:** spatie/laravel-permission with teams (team = business).
+6. **Permissions library:** spatie/laravel-permission with teams (team = business). *Superseded during 1.3 by ADR-0009: the package cannot span the central and shard databases.*
 7. **CI:** add a MySQL 8 test job (~1 extra minute per full run).
 
 ---
@@ -279,4 +279,5 @@ Each sub-sprint is one PR; reverting its merge commit removes it. Sprint 1 intro
 | Sub-sprint | PR | Result |
 |---|---|---|
 | 1.1 Tenancy core | #13 | 30 tenancy tests (66 total) passing on SQLite and on MySQL 8 with two real shards; isolation, interleaved requests, queued jobs, Octane reset, cache/storage scoping and shard rollout all covered |
-| 1.2 WURK ID | see PR | 134 tests on SQLite and MySQL 8; 24 browser checks (desktop + mobile, light + dark). Found and fixed: domain-route precedence capturing /sign-in, guard touched at boot (broke fresh installs, lost under Octane), device tracking tied to a changing session id, TOTP on the system clock |
+| 1.2 WURK ID | #14 | 134 tests on SQLite and MySQL 8; 24 browser checks (desktop + mobile, light + dark). Found and fixed: domain-route precedence capturing /sign-in, guard touched at boot (broke fresh installs, lost under Octane), device tracking tied to a changing session id, TOTP on the system clock |
+| 1.3 Access control | see PR | 170 tests on SQLite and MySQL 8, incl. an exhaustive permission matrix; 24 browser checks. Library decision changed: spatie/laravel-permission cannot span the central and shard databases, replaced by a purpose-built layer (ADR-0009) |

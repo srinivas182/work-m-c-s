@@ -55,9 +55,12 @@ abstract class ModuleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Permission names this module defines, e.g. ['bookings.view', 'bookings.manage'].
+     * Permissions this module defines. A string is a business permission; use an
+     * array for a label or platform scope:
+     *   'bookings.manage'
+     *   ['key' => 'tenants.manage', 'label' => 'Manage businesses', 'scope' => 'platform']
      *
-     * @return list<string>
+     * @return list<string|array<string, string>>
      */
     public function permissions(): array
     {
