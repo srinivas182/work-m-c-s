@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Wurk\Tenancy\Contracts\CentralModel;
 use Wurk\Tenancy\Contracts\CurrentTenant;
+use Wurk\Tenancy\Events\TenantStatusChanged;
 use Wurk\Tenancy\Resolution\TenantResolver;
 
 /**
@@ -57,6 +58,12 @@ final class Tenant extends Model implements CentralModel, CurrentTenant
 
         self::saved($flush);
         self::deleted($flush);
+
+        self::updated(function (Tenant $tenant): void {
+            if ($tenant->wasChanged('status')) {
+                event(new TenantStatusChanged($tenant->id, $tenant->handle, (string) $tenant->getOriginal('status'), $tenant->status));
+            }
+        });
     }
 
     /** @return BelongsTo<Shard, $this> */

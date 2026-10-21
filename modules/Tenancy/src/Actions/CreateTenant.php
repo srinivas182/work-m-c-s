@@ -9,6 +9,7 @@ use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Tenancy\Events\TenantProvisioned;
 use Wurk\Tenancy\Models\Branch;
 use Wurk\Tenancy\Models\Shard;
 use Wurk\Tenancy\Models\Tenant;
@@ -90,7 +91,8 @@ final readonly class CreateTenant
             throw $e;
         }
 
-        $tenant->forceFill(['status' => Tenant::STATUS_ACTIVE])->save();
+        $tenant->forceFill(['status' => Tenant::STATUS_ACTIVE])->saveQuietly();
+        event(new TenantProvisioned($tenant->id, $tenant->handle, $tenant->name, $tenant->shard_id));
 
         return $tenant;
     }

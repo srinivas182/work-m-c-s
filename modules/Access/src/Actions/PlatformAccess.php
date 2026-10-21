@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Access\Actions;
 
 use Wurk\Access\AccessManager;
+use Wurk\Access\Events\AccessChanged;
 use Wurk\Access\Exceptions\AccessRuleViolation;
 use Wurk\Access\Models\PlatformRole;
 use Wurk\Access\Models\PlatformRoleAssignment;
@@ -25,7 +26,10 @@ final readonly class PlatformAccess
             throw new AccessRuleViolation("[{$roleKey}] is not a WURK staff role.");
         }
 
-        PlatformRoleAssignment::query()->firstOrCreate(['identity_id' => $identityId, 'role_key' => $roleKey]);
+        $assignment = PlatformRoleAssignment::query()->firstOrCreate(['identity_id' => $identityId, 'role_key' => $roleKey]);
+        if ($assignment->wasRecentlyCreated) {
+            event(new AccessChanged('platform_role.granted', 'identity', $identityId, ['role' => $roleKey], platform: true));
+        }
         $this->access->flush();
     }
 
@@ -38,6 +42,7 @@ final readonly class PlatformAccess
         }
 
         PlatformRoleAssignment::query()->where('identity_id', $identityId)->where('role_key', $roleKey)->delete();
+        event(new AccessChanged('platform_role.revoked', 'identity', $identityId, ['role' => $roleKey], platform: true));
         $this->access->flush();
     }
 }

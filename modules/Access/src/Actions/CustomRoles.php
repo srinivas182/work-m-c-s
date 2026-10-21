@@ -6,6 +6,7 @@ namespace Wurk\Access\Actions;
 
 use Illuminate\Validation\ValidationException;
 use Wurk\Access\AccessManager;
+use Wurk\Access\Events\AccessChanged;
 use Wurk\Access\Exceptions\AccessRuleViolation;
 use Wurk\Access\Models\MemberRole;
 use Wurk\Access\Models\PlatformRole;
@@ -25,13 +26,18 @@ final readonly class CustomRoles
     /** @param  list<string>  $permissions */
     public function createBusinessRole(string $name, array $permissions): Role
     {
-        return Role::query()->create(['name' => $name, 'permissions' => $this->validated($permissions, Permission::BUSINESS)]);
+        $role = Role::query()->create(['name' => $name, 'permissions' => $this->validated($permissions, Permission::BUSINESS)]);
+        event(new AccessChanged('role.created', 'role', $role->id, ['name' => $name, 'permissions' => $role->permissions]));
+
+        return $role;
     }
 
     /** @param  list<string>  $permissions */
     public function updateBusinessRole(Role $role, string $name, array $permissions): Role
     {
+        $before = ['name' => $role->name, 'permissions' => $role->permissions];
         $role->update(['name' => $name, 'permissions' => $this->validated($permissions, Permission::BUSINESS)]);
+        event(new AccessChanged('role.updated', 'role', $role->id, ['before' => $before, 'after' => ['name' => $role->name, 'permissions' => $role->permissions]]));
         $this->access->flush();
 
         return $role;
@@ -43,12 +49,16 @@ final readonly class CustomRoles
             throw new AccessRuleViolation('This role is still assigned to team members. Reassign them first.');
         }
         $role->delete();
+        event(new AccessChanged('role.deleted', 'role', $role->id, ['name' => $role->name]));
     }
 
     /** @param  list<string>  $permissions */
     public function createPlatformRole(string $name, array $permissions): PlatformRole
     {
-        return PlatformRole::query()->create(['name' => $name, 'permissions' => $this->validated($permissions, Permission::PLATFORM)]);
+        $role = PlatformRole::query()->create(['name' => $name, 'permissions' => $this->validated($permissions, Permission::PLATFORM)]);
+        event(new AccessChanged('platform_role.created', 'platform_role', $role->id, ['name' => $name, 'permissions' => $role->permissions], platform: true));
+
+        return $role;
     }
 
     public function deletePlatformRole(PlatformRole $role): void
@@ -57,6 +67,7 @@ final readonly class CustomRoles
             throw new AccessRuleViolation('This role is still assigned to WURK staff. Reassign them first.');
         }
         $role->delete();
+        event(new AccessChanged('platform_role.deleted', 'platform_role', $role->id, ['name' => $role->name], platform: true));
     }
 
     /**

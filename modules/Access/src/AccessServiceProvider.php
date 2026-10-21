@@ -8,10 +8,12 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Octane\Events\RequestReceived;
 use Wurk\Access\Console\SyncPermissionsCommand;
+use Wurk\Access\Http\Middleware\RequirePermission;
 use Wurk\Access\Listeners\GrantAccessOnMembership;
 use Wurk\Access\Permissions\PermissionRegistry;
 use Wurk\Identity\Events\MembershipGranted;
@@ -61,6 +63,8 @@ final class AccessServiceProvider extends ModuleServiceProvider
             $events[] = RequestReceived::class;
         }
         Event::listen($events, $flush);
+
+        $this->app->make(Router::class)->aliasMiddleware('permission', RequirePermission::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([SyncPermissionsCommand::class]);
