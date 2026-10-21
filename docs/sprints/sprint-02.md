@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 2 of 18 · 16 – 27 November 2026 |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 21 Oct 2026 — in progress (2.1) |
 | **Depends on** | v0.2.0 (tenancy, WURK ID, access control, audit), PRD §4, §12, §14 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -129,3 +129,11 @@ All amounts are integers (cents, credit units); all changes to packages, rates, 
 | Meta Business verification started; WhatsApp Business number | 2.3 (sending); templates submitted in 2.3 |
 | Brevo (or SMTP) account | 2.3 |
 | First package line-up and prices (names, monthly/yearly price, modules, limits) | 2.2 (we can seed placeholders) |
+
+---
+
+## 8. Progress log
+
+| Sub-sprint | PR | Result |
+|---|---|---|
+| 2.1 Businesses & staff | see PR | 229 tests on SQLite and MySQL 8; 28 browser checks incl. staff sign-in with a real authenticator code. Mobile-number invitations deferred to 2.3 (needs SMS) |

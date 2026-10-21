@@ -25,6 +25,7 @@ final class AuditLogController
         $filters = $request->validate([
             'action' => ['nullable', 'string', 'max:80'],
             'actor' => ['nullable', 'string', 'max:80'],
+            'subject' => ['nullable', 'string', 'max:64'],
             'from' => ['nullable', 'date'],
             'to' => ['nullable', 'date'],
             'format' => ['nullable', 'in:csv'],
@@ -34,6 +35,7 @@ final class AuditLogController
         $query = $context->has() ? AuditEvent::query() : PlatformAuditEvent::query()->where('scope', 'platform');
         $query->when($filters['action'] ?? null, fn ($q, $a) => $q->where('action', 'like', $a.'%'))
             ->when($filters['actor'] ?? null, fn ($q, $a) => $q->where('actor_name', 'like', '%'.$a.'%'))
+            ->when($filters['subject'] ?? null, fn ($q, $s) => $q->where('subject_id', $s))
             ->when($filters['from'] ?? null, fn ($q, $d) => $q->where('occurred_at', '>=', $d.' 00:00:00'))
             ->when($filters['to'] ?? null, fn ($q, $d) => $q->where('occurred_at', '<=', $d.' 23:59:59.999999'))
             ->orderByDesc('seq');

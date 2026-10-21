@@ -4,6 +4,20 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 2.1 (super admin back office)
+- Admin module: WURK staff dashboard (businesses, staff, shard capacity, recent platform activity).
+- Businesses: list with search and filters, detail with web addresses and audit link, manual creation with owner invitation, suspend / reactivate with a recorded reason.
+- WURK staff: invite by email, change roles (always one super admin), deactivate / reactivate (signs out everywhere and removes every platform permission at once); custom staff roles from platform permissions.
+- Invitations: signed, single-use, 7-day links stored as hashes; accepting proves control of the email and counts as the first sign-in factor (staff still set up an authenticator); a newer invitation replaces an older one.
+- Navigation shows each back office only its own items (by route host).
+- Browser test signs WURK staff in with a real authenticator code and runs the admin (create business, staff, roles), accessibility-scanned.
+
+### Fixed
+- Toast close button meets the WCAG 2.2 minimum touch target (now 28×28 px); found by the mobile accessibility scan in CI.
+
+### Changed
+- Docker images pin FrankenPHP 1.13.0 (Debian Trixie); the dev image builds with buildx and caching.
+
 ## [0.2.0] — 2026-10-21 — Sprint 1: Platform core
 
 ### Added — Sprint 1.4 (audit logging)

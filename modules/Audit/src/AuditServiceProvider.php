@@ -6,8 +6,10 @@ namespace Wurk\Audit;
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
+use Wurk\Audit\Chain\EloquentAuditFeed;
 use Wurk\Audit\Chain\Recorder;
 use Wurk\Audit\Console\VerifyAuditCommand;
+use Wurk\Audit\Contracts\AuditFeed;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Audit\Http\Middleware\AssignRequestId;
 use Wurk\Audit\Listeners\RecordSecurityEvents;
@@ -18,6 +20,7 @@ final class AuditServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         $this->app->singleton(AuditLog::class, Recorder::class);
+        $this->app->singleton(AuditFeed::class, EloquentAuditFeed::class);
     }
 
     /**
@@ -37,7 +40,7 @@ final class AuditServiceProvider extends ModuleServiceProvider
     public function menu(): array
     {
         return [
-            ['label' => 'Audit log', 'route' => 'admin.audit', 'icon' => 'shield-check', 'section' => 'Security', 'permission' => 'platform-audit.view', 'order' => 800],
+            ['label' => 'Audit log', 'route' => 'admin.audit', 'icon' => 'shield-check', 'section' => 'Platform', 'permission' => 'platform-audit.view', 'order' => 80],
             ['label' => 'Audit log', 'route' => 'tenant.audit', 'icon' => 'shield-check', 'section' => 'Settings', 'permission' => 'audit.view', 'order' => 800],
         ];
     }

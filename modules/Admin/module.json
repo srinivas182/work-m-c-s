@@ -1,0 +1,15 @@
+{
+    "name": "Admin",
+    "key": "admin",
+    "version": "0.1.0",
+    "description": "WURK staff back office shell: dashboard composed from other modules\u2019 contracts.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "identity",
+        "access",
+        "audit"
+    ]
+}

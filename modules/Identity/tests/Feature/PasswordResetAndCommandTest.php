@@ -7,6 +7,7 @@ use Tests\Support\FakeOtpChannel;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Identity\Models\Identity;
+use Wurk\Identity\Models\IdentityMfa;
 use Wurk\Identity\Models\Membership;
 
 uses(InteractsWithIdentity::class, InteractsWithShards::class);
@@ -43,4 +44,10 @@ it('creates staff and team members from the command line', function () {
 
     expect(Identity::query()->where('email', 'ops@wurk.co.za')->firstOrFail()->isPlatformStaff())->toBeTrue()
         ->and(Membership::query()->count())->toBe(1);
+});
+
+it('refuses a pre-set authenticator secret in production', function () {
+    app()->detectEnvironment(fn () => 'production');
+    $this->artisan('identities:create', ['email' => 'x@wurk.co.za', '--mfa-secret' => 'JBSWY3DPEHPK3PXP'])->assertFailed();
+    expect(IdentityMfa::query()->count())->toBe(0);
 });

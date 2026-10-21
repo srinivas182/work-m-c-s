@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Wurk\Identity\Events\MembershipGranted;
 use Wurk\Identity\Events\StaffGranted;
 use Wurk\Identity\Models\Identity;
+use Wurk\Identity\Models\IdentityMfa;
 use Wurk\Identity\Models\Membership;
 use Wurk\Identity\Models\PlatformStaff;
 use Wurk\Identity\Support\Destination;
@@ -30,7 +31,8 @@ final class CreateIdentityCommand extends Command
         {--staff : Grant WURK staff access (admin back office)}
         {--staff-role=super-admin : Platform role for --staff}
         {--tenant=* : Add as a team member of these business handles}
-        {--role=owner : Business role for --tenant (owner, branch-manager, staff)}';
+        {--role=owner : Business role for --tenant (owner, branch-manager, staff)}
+        {--mfa-secret= : Testing only: pre-confirmed authenticator secret (refused in production)}';
 
     protected $description = 'Create a WURK ID (person) and optionally grant staff access or business membership';
 
@@ -55,6 +57,16 @@ final class CreateIdentityCommand extends Command
             'phone' => $phone,
             'password' => $password,
         ]);
+
+        $secret = $this->option('mfa-secret');
+        if (is_string($secret) && $secret !== '') {
+            if (app()->environment('production')) {
+                $this->components->error('--mfa-secret is for automated tests and is refused in production.');
+
+                return self::FAILURE;
+            }
+            IdentityMfa::query()->updateOrCreate(['identity_id' => $identity->id], ['secret' => $secret, 'type' => 'totp', 'confirmed_at' => now(), 'recovery_codes' => []]);
+        }
 
         if ($this->option('staff')) {
             PlatformStaff::query()->updateOrCreate(['identity_id' => $identity->id], ['status' => 'active']);

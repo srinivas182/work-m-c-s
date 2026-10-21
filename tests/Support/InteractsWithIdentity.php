@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Support;
 
+use Wurk\Access\Actions\PlatformAccess;
 use Wurk\Identity\Mfa\Totp;
 use Wurk\Identity\Models\Identity;
 use Wurk\Identity\Models\IdentityMfa;
@@ -38,6 +39,17 @@ trait InteractsWithIdentity
         if ($mfaSecret !== null) {
             $this->enableMfa($identity, $mfaSecret);
         }
+
+        return $identity;
+    }
+
+    /** Active WURK staff with an authenticator and the given platform role. */
+    protected function staffWithRole(string $role, string $email = 'ops@wurk.co.za'): Identity
+    {
+        $identity = $this->person(['email' => $email, 'phone' => null]);
+        PlatformStaff::query()->create(['identity_id' => $identity->id, 'status' => 'active']);
+        $this->enableMfa($identity, Totp::generateSecret());
+        app(PlatformAccess::class)->grant($identity->id, $role);
 
         return $identity;
     }
