@@ -6,11 +6,18 @@
 #   Run:      see docs/deployment/docker.md
 
 ARG PHP_VERSION=8.4
+# Build tooling is pinned like any other dependency (at least two weeks old when
+# chosen), so an upstream release can never change or break our images silently.
+ARG EXTENSION_INSTALLER_VERSION=2.12.0
 
 # ---------------------------------------------------------------------------
 # base: PHP runtime with the extensions WURK needs
 # ---------------------------------------------------------------------------
+FROM mlocati/php-extension-installer:${EXTENSION_INSTALLER_VERSION} AS extension-installer
+
 FROM dunglas/frankenphp:1-php${PHP_VERSION} AS base
+
+COPY --from=extension-installer /usr/bin/install-php-extensions /usr/local/bin/install-php-extensions
 
 RUN install-php-extensions pdo_mysql redis pcntl intl zip bcmath opcache
 
