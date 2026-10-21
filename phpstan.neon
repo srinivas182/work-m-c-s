@@ -13,3 +13,8 @@ parameters:
         - modules/*/tests/*
     tmpDir: .phpstan-cache
     treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        # Traits under Contracts/ are published for other modules to use; until a
+        # module uses one, PHPStan reports it as unused.
+        - identifier: trait.unused
+          path: modules/*/src/Contracts/*

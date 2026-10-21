@@ -10,5 +10,6 @@
 | [0006](0006-schema-auto-features-opt-in.md) | Schema changes automatic; features opt-in | Accepted |
 | [0007](0007-merchant-money-never-via-wurk.md) | Business money never flows through WURK | Accepted |
 | [0008](0008-wurk-credits.md) | Single WURK Credits balance | Accepted |
+| [0009](0009-purpose-built-access-control.md) | Purpose-built access control instead of spatie/laravel-permission | Accepted |
 
 New ADRs use [the template](0000-template.md).

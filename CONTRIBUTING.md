@@ -52,6 +52,14 @@ Workflow: open PRs as **draft**, iterate, run `./scripts/check --full` locally, 
 
 ## Golden rules
 
+### Data and access
+- Every model is either tenant data (`use BelongsToTenant`) or central data (`implements CentralModel`) — an architecture test enforces the choice. Branch-level data also uses `BelongsToBranch`.
+- Declare permissions in your module provider's `permissions()`; check them with `$user->can('bookings.manage')` or policies. Never check role names in code.
+- When queueing work inside `TenantContext::run()`, dispatch inside the closure as a statement (`function () { dispatch(new Job); }`), not as its return value: a returned `PendingDispatch` is sent after the context ends.
+- Static first path segments on the back-office host must be added to `wurk.tenancy.reserved_handles` (a test enforces this).
+
+### General
+
 - Controllers stay thin. Business logic lives in module Services / Actions.
 - Modules talk to each other through events and published contracts, never by reaching into another module's internals.
 - Every write action that matters is permission-checked and audit-logged.
