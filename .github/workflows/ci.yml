@@ -168,6 +168,55 @@ jobs:
       - name: Pest
         run: vendor/bin/pest --parallel --compact
 
+  backend-tests-mysql:
+    name: Backend · tests on MySQL 8 (real shards)
+    needs: [changes, backend-quick]
+    if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wurk_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: wurk_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      TEST_SHARD_DRIVER: mysql
+      TEST_SHARD_DATABASES: wurk_shard_1,wurk_shard_2
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}, pdo_mysql
+          coverage: none
+          tools: composer:v2
+      - name: Composer cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Create shard databases
+        run: mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE wurk_shard_1; CREATE DATABASE wurk_shard_2;"
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Pest (MySQL, sequential — shards are shared databases)
+        run: vendor/bin/pest --compact
+
   frontend-tests:
     name: Frontend · tests & build
     needs: [changes, frontend-quick]
@@ -327,7 +376,7 @@ jobs:
   ci:
     name: CI
     if: always()
-    needs: [changes, backend-quick, frontend-quick, backend-tests, frontend-tests, e2e, docker-dev, docker-prod]
+    needs: [changes, backend-quick, frontend-quick, backend-tests, backend-tests-mysql, frontend-tests, e2e, docker-dev, docker-prod]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

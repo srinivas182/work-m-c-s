@@ -45,6 +45,16 @@ Requirements: Docker Desktop (or Docker Engine + Compose), PHP 8.3+, Composer, N
 | Mailpit | http://localhost:8025 |
 | MySQL / Redis / Meilisearch | localhost:3306 / 6379 / 7700 |
 
+### Businesses and shards
+
+```bash
+./scripts/dev artisan tenants:create "Glow Salon"        # provision a business on the least-loaded shard
+./scripts/dev artisan shards:migrate                     # roll tenant migrations out shard by shard
+./scripts/dev artisan tenants:run "cache:clear" --tenant=glow-salon
+```
+
+Local hosts: `admin.wurk.test` (WURK staff), `app.wurk.test/{business}` (back office), `{business}.wurk.test` (public sites). Point them at 127.0.0.1 in your hosts file.
+
 ### Modules
 
 Every feature is a module under `modules/` (see [ADR-0001](docs/adr/0001-modular-monolith.md) and the [Sprint 0 spec](docs/sprints/sprint-00.md#5-module-contract)).
