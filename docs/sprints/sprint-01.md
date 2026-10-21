@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 1 of 18 · 2 – 13 November 2026 |
-| **Status** | Approved 21 Oct 2026 — 1.1 ✅ (#13), 1.2 ✅ (#14), 1.3 ✅ (#15), 1.4 in review |
+| **Status** | ✅ Complete — demo accepted 21 Oct 2026, released as v0.2.0 |
 | **Depends on** | Sprint 0 (v0.1.0), PRD §3 and §15.5, ADR-0002 (hybrid tenancy), ADR-0005 (WURK ID) |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -281,4 +281,4 @@ Each sub-sprint is one PR; reverting its merge commit removes it. Sprint 1 intro
 | 1.1 Tenancy core | #13 | 30 tenancy tests (66 total) passing on SQLite and on MySQL 8 with two real shards; isolation, interleaved requests, queued jobs, Octane reset, cache/storage scoping and shard rollout all covered |
 | 1.2 WURK ID | #14 | 134 tests on SQLite and MySQL 8; 24 browser checks (desktop + mobile, light + dark). Found and fixed: domain-route precedence capturing /sign-in, guard touched at boot (broke fresh installs, lost under Octane), device tracking tied to a changing session id, TOTP on the system clock |
 | 1.3 Access control | #15 | 170 tests on SQLite and MySQL 8, incl. an exhaustive permission matrix; 24 browser checks. Library decision changed: spatie/laravel-permission cannot span the central and shard databases, replaced by a purpose-built layer (ADR-0009) |
-| 1.4 Audit logging | see PR | 197 tests on SQLite and MySQL 8; 26 browser checks. Concurrency check (not in CI): 8 parallel processes × 50 events on one chain, 3 rounds — 400/400 recorded, gapless, `audit:verify` intact. First run found a MySQL deadlock that lost events; fixed by creating the chain head before locking it plus automatic retry |
+| 1.4 Audit logging | #16 | 197 tests on SQLite and MySQL 8; 26 browser checks. Concurrency check (not in CI): 8 parallel processes × 50 events on one chain, 3 rounds — 400/400 recorded, gapless, `audit:verify` intact. First run found a MySQL deadlock that lost events; fixed by creating the chain head before locking it plus automatic retry |
