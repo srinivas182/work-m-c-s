@@ -7,6 +7,7 @@ namespace Wurk\Plans\Actions;
 use Illuminate\Validation\ValidationException;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Plans\Events\SubscriptionChanged;
 use Wurk\Plans\Models\EntitlementOverride;
 use Wurk\Plans\Models\Package;
 use Wurk\Plans\Models\TenantSubscription;
@@ -34,6 +35,7 @@ final readonly class Subscriptions
         ]);
 
         $this->entitlements->flush();
+        event(new SubscriptionChanged($tenantId, $package->key, $before === null, $version->monthly_credits));
         $this->audit->record('subscription.changed', 'tenant', $tenantId, [
             'from' => $before?->package_version_id, 'package' => $package->key, 'version' => $version->version,
         ], ['platform' => true]);

@@ -12,6 +12,9 @@ interface PeopleDirectory
 
     public function staffCount(): int;
 
+    /** Whether the person has a confirmed authenticator app. */
+    public function hasMfa(string $identityId): bool;
+
     /** Active WURK staff (deactivated staff keep their roles on record but lose all access). */
     public function isActiveStaff(string $identityId): bool;
 

@@ -1,0 +1,15 @@
+{
+    "name": "Credits",
+    "key": "credits",
+    "version": "0.1.0",
+    "description": "WURK Credits: one balance per business for SMS, WhatsApp, email and AI (ADR-0008); rate card per country.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "plans",
+        "regions",
+        "audit"
+    ]
+}

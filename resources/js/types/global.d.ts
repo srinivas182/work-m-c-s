@@ -15,7 +15,7 @@ export interface SharedProps extends Record<string, unknown> {
   };
   navigation: NavigationItem[];
   auth: { user: { name: string; email: string } | null };
-  flash: { status: string | null };
+  flash: { status: string | null; warning?: string | null };
 }
 
 declare module '@inertiajs/core' {

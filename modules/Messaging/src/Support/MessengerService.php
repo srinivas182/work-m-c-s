@@ -6,6 +6,9 @@ namespace Wurk\Messaging\Support;
 
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Wurk\Credits\Contracts\CreditWallet;
+use Wurk\Credits\Contracts\InsufficientCredits;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\SendResult;
 use Wurk\Messaging\Contracts\SmsDriver;
@@ -15,9 +18,19 @@ use Wurk\Tenancy\Contracts\TenantContext;
 
 final readonly class MessengerService implements Messenger
 {
-    public function __construct(private ProviderSettings $providers, private Container $container, private TenantContext $context) {}
+    public function __construct(
+        private ProviderSettings $providers,
+        private Container $container,
+        private TenantContext $context,
+        private CreditWallet $wallet,
+    ) {}
 
     public function sms(string $to, string $text, string $purpose): SendResult
+    {
+        return $this->charged('sms', $purpose, fn () => $this->sendSms($to, $text, $purpose));
+    }
+
+    private function sendSms(string $to, string $text, string $purpose): SendResult
     {
         $provider = $this->providers->active('sms');
 
@@ -35,6 +48,12 @@ final readonly class MessengerService implements Messenger
 
     public function whatsappTemplate(string $to, string $template, array $parameters, string $purpose, string $language = 'en'): SendResult
     {
+        return $this->charged('whatsapp', $purpose, fn () => $this->sendWhatsApp($to, $template, $parameters, $purpose, $language));
+    }
+
+    /** @param  list<string>  $parameters */
+    private function sendWhatsApp(string $to, string $template, array $parameters, string $purpose, string $language): SendResult
+    {
         $provider = $this->providers->active('whatsapp');
 
         if ($provider === null) {
@@ -46,6 +65,34 @@ final readonly class MessengerService implements Messenger
         );
 
         return $this->record('whatsapp', $provider->driver, $to, $purpose, $result);
+    }
+
+    /**
+     * Messages sent for a business are paid from its WURK Credits (ADR-0008):
+     * charged before sending, refunded automatically if the send fails.
+     * Platform messages (sign-in codes, invitations) are WURK's own cost.
+     *
+     * @param  callable(): SendResult  $send
+     */
+    private function charged(string $channel, string $purpose, callable $send): SendResult
+    {
+        if (! $this->context->has()) {
+            return $send();
+        }
+
+        $key = 'msg:'.Str::ulid();
+        try {
+            $this->wallet->charge($channel, $key, ucfirst(str_replace('_', ' ', $purpose)).' ('.$channel.')');
+        } catch (InsufficientCredits $e) {
+            return SendResult::failed($e->getMessage());
+        }
+
+        $result = $send();
+        if (! $result->ok) {
+            $this->wallet->refund($key, 'Refund: message not sent');
+        }
+
+        return $result;
     }
 
     public function channelActive(string $channel): bool

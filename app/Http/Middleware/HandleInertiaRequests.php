@@ -38,7 +38,7 @@ final class HandleInertiaRequests extends Middleware
                     'email' => $user->email ?? $user->phone ?? '',
                 ] : null,
             ],
-            'flash' => fn () => ['status' => $request->session()->get('status')],
+            'flash' => fn () => ['status' => $request->session()->get('status'), 'warning' => $request->session()->get('warning')],
         ];
     }
 }

@@ -4,6 +4,19 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 2.4 (WURK Credits, security settings)
+- Credits module (ADR-0008): one balance per business, kept in thousandths of a credit. Append-only ledger (allowance, purchase, adjustment, debit, refund, expiry) with a cached balance kept in step under a row lock; every write is idempotent by key.
+- Monthly allowance spent first; unused allowance expires at the next one; purchased credits never expire. First allowance on a business's first package, then daily `credits:grant-allowances` on each billing anniversary (31st → last day of shorter months).
+- Effective-dated rate card per country and channel (starting ZA: SMS 3, WhatsApp 5, email 0.1, AI 2); past charges keep their price.
+- Business messages are charged before sending and refunded automatically on failure; sending is refused cleanly without credits; platform messages (sign-in codes, invitations) are free.
+- Low-balance alert raised once and re-armed by a top-up (recorded; owner notifications arrive with the notification engine).
+- Admin: credit rates, a business's balance and ledger, audited manual adjustments. Owners: Settings → WURK Credits (balance, usage, prices, alert level).
+- Security module: admin IP allow-list (off by default; refuses a list that would lock out the person saving it; `WURK_ADMIN_IP_ALLOWLIST=false` emergency switch), cash-payment approval and receipt recipients (used from Sprint 3), and owners can require an authenticator for their whole team.
+- Extension points: the `tenant.back-office` middleware group; `CurrentTenant::countryCode()`.
+
+### Fixed
+- Two rates set in the same second could apply in either order; the most recently set rate now always wins.
+
 ### Added — Sprint 2.3 (countries, providers, messaging)
 - Regions module: countries with currency, VAT, phone prefix and time zone; South Africa open for sign-up, neighbours prepared but off (their VAT rates must be confirmed before enabling). Business creation only allows open countries.
 - Messaging module: one interface over five SMS providers (SMSPortal, Clickatell, BulkSMS, Brevo, Twilio), the WhatsApp Cloud API (Meta) and SMTP email (Brevo relay or any provider).
