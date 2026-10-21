@@ -14,6 +14,8 @@ export function Toaster({ theme }: { theme: ResolvedTheme }) {
             '!rounded-xl !border !border-border !bg-surface-raised !text-fg !shadow-lg !font-sans',
           description: '!text-fg-muted',
           actionButton: '!bg-primary !text-primary-fg',
+          // WCAG 2.2 target size: at least 24×24 px, easy to hit on a phone.
+          closeButton: '!size-7 !border-border !bg-surface-raised !text-fg-muted',
         },
       }}
     />

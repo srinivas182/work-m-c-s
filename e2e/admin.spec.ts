@@ -18,6 +18,7 @@ async function expectAccessible(page: Page) {
 
 // The admin host is "localhost" in the e2e environment; the business back office is 127.0.0.1.
 test('WURK staff sign in with an authenticator and run the admin', async ({ page }, testInfo) => {
+  test.setTimeout(90_000);
   const admin = `http://localhost:${process.env.E2E_PORT ?? 8123}`;
 
   await page.goto(`${admin}/sign-in/password`);
@@ -31,11 +32,18 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await page.getByRole('button', { name: 'Sign in' }).click();
 
   await expect(page.getByRole('heading', { name: 'Two-step verification' })).toBeVisible();
-  await page
-    .getByRole('group', { name: 'One-time code' })
-    .getByRole('textbox')
-    .first()
-    .fill(totp(SECRET));
+  // Authenticator codes are single-use. If this code was already used (e.g. on a
+  // test retry within the same 30 seconds), wait for the next one.
+  const codeBox = page.getByRole('group', { name: 'One-time code' }).getByRole('textbox').first();
+  await codeBox.fill(totp(SECRET));
+  const signedIn = await page.waitForURL(/\/dashboard$/, { timeout: 5000 }).then(
+    () => true,
+    () => false,
+  );
+  if (!signedIn) {
+    await page.waitForTimeout(30_000 - (Date.now() % 30_000) + 1000);
+    await codeBox.fill(totp(SECRET));
+  }
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible();
   await expectAccessible(page);

@@ -12,6 +12,9 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Navigation shows each back office only its own items (by route host).
 - Browser test signs WURK staff in with a real authenticator code and runs the admin (create business, staff, roles), accessibility-scanned.
 
+### Fixed
+- Toast close button meets the WCAG 2.2 minimum touch target (now 28×28 px); found by the mobile accessibility scan in CI.
+
 ### Changed
 - Docker images pin FrankenPHP 1.13.0 (Debian Trixie); the dev image builds with buildx and caching.
 
