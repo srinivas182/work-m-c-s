@@ -22,7 +22,7 @@ beforeEach(function () {
             'branches' => Branch::query()->count(),
             'url' => route('probe.self'),
         ])->name('probe.self');
-    });
+    }, requiresAuth: false);
     Route::tenantSite(function () {
         Route::get('/site-probe', fn (TenantContext $context) => ['tenant' => $context->current()->handle()]);
     });

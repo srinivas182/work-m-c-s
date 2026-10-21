@@ -45,6 +45,15 @@ Requirements: Docker Desktop (or Docker Engine + Compose), PHP 8.3+, Composer, N
 | Mailpit | http://localhost:8025 |
 | MySQL / Redis / Meilisearch | localhost:3306 / 6379 / 7700 |
 
+### People and sign-in
+
+```bash
+./scripts/dev artisan identities:create you@wurk.co.za --staff               # first WURK staff account
+./scripts/dev artisan identities:create owner@glow.co.za --tenant=glow-salon  # a business team member
+```
+
+Sign in at `admin.wurk.test/sign-in` (staff, authenticator app required) or `app.wurk.test/sign-in`. Locally, emailed codes land in Mailpit and SMS codes in the application log until Sprint 2 connects real providers.
+
 ### Businesses and shards
 
 ```bash

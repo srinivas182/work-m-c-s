@@ -266,21 +266,9 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Prepare app
+      - name: Prepare app (isolated .env.e2e with a business and its owner)
         run: |
-          # `artisan serve` does not pass job env vars to the server, so configure .env.
-          cp .env.example .env
-          sed -i \
-            -e 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' \
-            -e '/^DB_\(HOST\|PORT\|DATABASE\|USERNAME\|PASSWORD\)=/d' \
-            -e 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' \
-            -e 's/^CACHE_STORE=.*/CACHE_STORE=file/' \
-            -e 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' \
-            .env
-          echo "WURK_DESIGN_SHOWCASE=true" >> .env
-          php artisan key:generate
-          touch database/database.sqlite
-          php artisan migrate --force
+          ./scripts/e2e-setup
           pnpm build
       - name: Playwright browser cache
         id: pw-cache
@@ -291,6 +279,8 @@ jobs:
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
       - name: Playwright
+        env:
+          APP_ENV: e2e
         run: pnpm test:e2e
       - name: Summarise failures
         if: failure()

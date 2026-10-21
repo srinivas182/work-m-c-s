@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+use Wurk\Identity\Otp\LogOtpChannel;
+use Wurk\Identity\Otp\MailOtpChannel;
 
 $root = env('WURK_ROOT_DOMAIN', 'wurk.test');
 
@@ -36,7 +38,8 @@ return [
         'reserved_handles' => [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
             'help', 'login', 'logout', 'mail', 'my', 'partners', 'register', 'signup', 'static',
-            'status', 'support', 'www', 'wurk',
+            'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
+            'forgot-password', 'mfa', 'health', 'build', 'storage',
         ],
 
         // Default capacity of a shared shard (tenants per database).
@@ -44,6 +47,33 @@ return [
 
         // Seconds tenant lookups by handle/host are cached.
         'resolution_cache_ttl' => 600,
+    ],
+
+    'identity' => [
+        'otp' => [
+            'length' => 6,
+            'ttl_seconds' => 300,
+            'max_attempts' => 5,
+            'resend_after_seconds' => 30,
+            'per_destination_per_hour' => 5,
+            'per_ip_per_hour' => 20,
+            // Channel per destination type. SMS/WhatsApp drivers replace 'phone' in Sprint 2.
+            'channels' => [
+                'email' => MailOtpChannel::class,
+                'phone' => LogOtpChannel::class,
+            ],
+        ],
+        'password' => [
+            'min_length' => 10,
+            'max_attempts' => 5,
+            'lockout_seconds' => 900,
+        ],
+        // Minutes. "remember" allows a 30-day remember-me cookie on that surface.
+        'sessions' => [
+            'admin' => ['idle' => 30, 'absolute' => 480, 'remember' => false],
+            'app' => ['idle' => 120, 'absolute' => 43200, 'remember' => true],
+        ],
+        'default_country_code' => '27',
     ],
 
 ];

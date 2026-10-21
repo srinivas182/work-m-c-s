@@ -6,6 +6,7 @@
     "license": "proprietary",
     "require": {
         "php": "^8.3",
+        "bacon/bacon-qr-code": "^3.1",
         "inertiajs/inertia-laravel": "^3.5",
         "laravel/framework": "^13.17",
         "laravel/octane": "^2.22",
@@ -30,7 +31,8 @@
             "Database\\Seeders\\": "database/seeders/",
             "Wurk\\Platform\\": "modules/Platform/src/",
             "Wurk\\Health\\": "modules/Health/src/",
-            "Wurk\\Tenancy\\": "modules/Tenancy/src/"
+            "Wurk\\Tenancy\\": "modules/Tenancy/src/",
+            "Wurk\\Identity\\": "modules/Identity/src/"
         }
     },
     "autoload-dev": {
@@ -38,7 +40,8 @@
             "Tests\\": "tests/",
             "Wurk\\Platform\\Tests\\": "modules/Platform/tests/",
             "Wurk\\Health\\Tests\\": "modules/Health/tests/",
-            "Wurk\\Tenancy\\Tests\\": "modules/Tenancy/tests/"
+            "Wurk\\Tenancy\\Tests\\": "modules/Tenancy/tests/",
+            "Wurk\\Identity\\Tests\\": "modules/Identity/tests/"
         }
     },
     "scripts": {

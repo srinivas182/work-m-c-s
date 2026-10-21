@@ -6,6 +6,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Wurk\Identity\Models\Identity;
 use Wurk\Platform\Navigation\NavigationBuilder;
 
 final class HandleInertiaRequests extends Middleware
@@ -31,6 +32,13 @@ final class HandleInertiaRequests extends Middleware
                 'environment' => app()->environment(),
             ],
             'navigation' => fn () => app(NavigationBuilder::class)->build($request),
+            'auth' => fn () => [
+                'user' => ($user = $request->user()) instanceof Identity ? [
+                    'name' => $user->fullName(),
+                    'email' => $user->email ?? $user->phone ?? '',
+                ] : null,
+            ],
+            'flash' => fn () => ['status' => $request->session()->get('status')],
         ];
     }
 }
