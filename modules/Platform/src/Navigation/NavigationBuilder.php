@@ -55,6 +55,11 @@ final readonly class NavigationBuilder
                     continue;
                 }
 
+                // Business modules appear only when the business's package includes them.
+                if (isset($entry['entitlement']) && ! $this->gate->forUser($request->user())->allows('use-module', $entry['entitlement'])) {
+                    continue;
+                }
+
                 $items[] = new NavigationItem(
                     label: $entry['label'],
                     href: $this->url->route($entry['route'], [], false),

@@ -30,6 +30,10 @@ final class PlatformServiceProvider extends ModuleServiceProvider
                 continue;
             }
 
+            if (! class_exists($manifest->providerClass())) {
+                throw new \RuntimeException("Module [{$manifest->name}] has no autoloadable provider {$manifest->providerClass()}. Run `composer dump-autoload`.");
+            }
+
             $this->app->register($manifest->providerClass());
         }
     }

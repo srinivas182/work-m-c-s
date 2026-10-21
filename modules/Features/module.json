@@ -1,0 +1,14 @@
+{
+    "name": "Features",
+    "key": "features",
+    "version": "0.1.0",
+    "description": "Feature flags: rollouts, per-business opt-in and kill switch (Laravel Pennant).",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit"
+    ]
+}

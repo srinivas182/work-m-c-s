@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, ExternalLink, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Package, ShieldCheck } from 'lucide-react';
 import type { FormEvent } from 'react';
 import {
   Badge,
@@ -148,11 +148,18 @@ export default function Business({ business, canManage, auditUrl }: Props) {
             </CardContent>
           </Card>
         </div>
-        <Button variant="secondary" className="w-fit" asChild>
-          <a href={auditUrl}>
-            <ShieldCheck /> View this business in the audit log
-          </a>
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="secondary" asChild>
+            <Link href={`/businesses/${business.id}/plan`}>
+              <Package /> Plan and modules
+            </Link>
+          </Button>
+          <Button variant="secondary" asChild>
+            <a href={auditUrl}>
+              <ShieldCheck /> View this business in the audit log
+            </a>
+          </Button>
+        </div>
       </div>
     </AppShell>
   );

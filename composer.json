@@ -10,6 +10,7 @@
         "inertiajs/inertia-laravel": "^3.5",
         "laravel/framework": "^13.17",
         "laravel/octane": "^2.22",
+        "laravel/pennant": "^1.26",
         "laravel/tinker": "^3.0",
         "league/flysystem-path-prefixing": "^3.31"
     },
@@ -35,7 +36,9 @@
             "Wurk\\Identity\\": "modules/Identity/src/",
             "Wurk\\Access\\": "modules/Access/src/",
             "Wurk\\Audit\\": "modules/Audit/src/",
-            "Wurk\\Admin\\": "modules/Admin/src/"
+            "Wurk\\Admin\\": "modules/Admin/src/",
+            "Wurk\\Plans\\": "modules/Plans/src/",
+            "Wurk\\Features\\": "modules/Features/src/"
         }
     },
     "autoload-dev": {
@@ -47,7 +50,9 @@
             "Wurk\\Identity\\Tests\\": "modules/Identity/tests/",
             "Wurk\\Access\\Tests\\": "modules/Access/tests/",
             "Wurk\\Audit\\Tests\\": "modules/Audit/tests/",
-            "Wurk\\Admin\\Tests\\": "modules/Admin/tests/"
+            "Wurk\\Admin\\Tests\\": "modules/Admin/tests/",
+            "Wurk\\Plans\\Tests\\": "modules/Plans/tests/",
+            "Wurk\\Features\\Tests\\": "modules/Features/tests/"
         }
     },
     "scripts": {

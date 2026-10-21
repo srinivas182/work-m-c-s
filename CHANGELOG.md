@@ -4,6 +4,18 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 2.2 (packages, entitlements, feature flags)
+- Plans module: packages with monthly/yearly prices (cents, VAT added at checkout), trials, storage/staff/branch limits, custom domain, monthly credits, referral guardrails, managed fee and included modules.
+- Versioning: presentation edits change in place; any commercial change creates a new immutable version. Existing businesses keep their version (grandfathering); new subscriptions get the latest. Archive instead of delete.
+- Module catalogue: modules can be sold before they are built and switch on when a module ships with the same entitlement key.
+- Entitlements: package modules plus per-business grant/revoke exceptions with a reason; `entitled:{module}` route middleware shows a friendly "not in your package" page; menus hide modules a business does not have (`use-module` Gate ability).
+- Business plan page for WURK staff: change package (first package starts its trial) and module exceptions; every change audited.
+- Features module (Laravel Pennant): modules declare flags; WURK staff choose off (kill switch), opt-in (standard for everyone after 90 days), percentage rollout (stable per business) or on; owners opt in from Settings → New features. Rule changes purge cached values; opt-ins are kept separately.
+
+### Fixed
+- `wurk:make-module` refreshes the autoloader itself (the app could not boot until `composer dump-autoload` was run); a missing module provider now fails with a clear message.
+- Creating a package with an empty description failed (found by the browser test).
+
 ### Added — Sprint 2.1 (super admin back office)
 - Admin module: WURK staff dashboard (businesses, staff, shard capacity, recent platform activity).
 - Businesses: list with search and filters, detail with web addresses and audit link, manual creation with owner invitation, suspend / reactivate with a recorded reason.
