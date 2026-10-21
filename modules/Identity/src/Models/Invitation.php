@@ -14,7 +14,8 @@ use Wurk\Tenancy\Contracts\CentralModel;
  *
  * @property string $id
  * @property string $kind staff|member
- * @property string $email
+ * @property string|null $email
+ * @property string|null $phone
  * @property string|null $first_name
  * @property string|null $last_name
  * @property string|null $tenant_id
@@ -33,7 +34,7 @@ final class Invitation extends Model implements CentralModel
 
     public const KIND_MEMBER = 'member';
 
-    protected $fillable = ['kind', 'email', 'first_name', 'last_name', 'tenant_id', 'role', 'invited_by', 'token_hash', 'expires_at', 'accepted_at', 'revoked_at'];
+    protected $fillable = ['kind', 'email', 'phone', 'first_name', 'last_name', 'tenant_id', 'role', 'invited_by', 'token_hash', 'expires_at', 'accepted_at', 'revoked_at'];
 
     protected function casts(): array
     {
@@ -43,6 +44,12 @@ final class Invitation extends Model implements CentralModel
     public function isOpen(): bool
     {
         return $this->accepted_at === null && $this->revoked_at === null && $this->expires_at->isFuture();
+    }
+
+    /** Where the invitation was sent (email address or E.164 mobile number). */
+    public function destination(): string
+    {
+        return (string) ($this->email ?? $this->phone);
     }
 
     public static function hashToken(string $token): string

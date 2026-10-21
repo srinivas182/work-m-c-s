@@ -29,7 +29,7 @@ export default function CreateBusiness({ rootDomain }: { rootDomain: string }) {
     country: 'ZA',
     owner_first_name: '',
     owner_last_name: '',
-    owner_email: '',
+    owner_contact: '',
   });
   const [touchedHandle, setTouchedHandle] = useState(false);
   const [check, setCheck] = useState<{ available: boolean; problem: string | null } | null>(null);
@@ -128,7 +128,8 @@ export default function CreateBusiness({ rootDomain }: { rootDomain: string }) {
             <CardHeader>
               <CardTitle>Owner</CardTitle>
               <CardDescription>
-                We’ll email them an invitation. They sign in and land straight in their business.
+                We’ll send them an invitation by email or SMS. They sign in and land straight in
+                their business.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -145,15 +146,15 @@ export default function CreateBusiness({ rootDomain }: { rootDomain: string }) {
                 />
               </Field>
               <Field
-                label="Email"
-                error={form.errors.owner_email}
+                label="Email or mobile number"
+                error={form.errors.owner_contact}
+                hint="Mobile numbers get the invitation by SMS"
                 required
                 className="sm:col-span-2"
               >
                 <Input
-                  type="email"
-                  value={form.data.owner_email}
-                  onChange={(e) => form.setData('owner_email', e.target.value)}
+                  value={form.data.owner_contact}
+                  onChange={(e) => form.setData('owner_contact', e.target.value)}
                 />
               </Field>
             </CardContent>

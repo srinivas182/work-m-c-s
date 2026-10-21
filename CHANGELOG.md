@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 2.3 (countries, providers, messaging)
+- Regions module: countries with currency, VAT, phone prefix and time zone; South Africa open for sign-up, neighbours prepared but off (their VAT rates must be confirmed before enabling). Business creation only allows open countries.
+- Messaging module: one interface over five SMS providers (SMSPortal, Clickatell, BulkSMS, Brevo, Twilio), the WhatsApp Cloud API (Meta) and SMTP email (Brevo relay or any provider).
+- Provider settings in the admin: credentials encrypted at rest, write-only (never returned to the browser; blank keeps the saved value; never written to the audit log), "send test" per channel, recent platform messages.
+- Sign-in codes to mobile numbers by WhatsApp first (approved authentication template with copy-code button), falling back to SMS.
+- Delivery records for every message (recipient stored as a hash plus masked number); signed delivery receipts from Twilio and Meta update status; forged calls are rejected.
+- Invitations by mobile number (business owners and team): SMS with the link; accepting verifies the number.
+- Payment gateway credentials (PayFast, Paystack, Yoco, Ozow, Peach) stored encrypted, used from Sprint 3.
+- docs/messaging/whatsapp-templates.md: templates to submit to Meta and webhook set-up.
+
 ### Added — Sprint 2.2 (packages, entitlements, feature flags)
 - Plans module: packages with monthly/yearly prices (cents, VAT added at checkout), trials, storage/staff/branch limits, custom domain, monthly credits, referral guardrails, managed fee and included modules.
 - Versioning: presentation edits change in place; any commercial change creates a new immutable version. Existing businesses keep their version (grandfathering); new subscriptions get the latest. Archive instead of delete.

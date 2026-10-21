@@ -38,7 +38,9 @@
             "Wurk\\Audit\\": "modules/Audit/src/",
             "Wurk\\Admin\\": "modules/Admin/src/",
             "Wurk\\Plans\\": "modules/Plans/src/",
-            "Wurk\\Features\\": "modules/Features/src/"
+            "Wurk\\Features\\": "modules/Features/src/",
+            "Wurk\\Regions\\": "modules/Regions/src/",
+            "Wurk\\Messaging\\": "modules/Messaging/src/"
         }
     },
     "autoload-dev": {
@@ -52,7 +54,9 @@
             "Wurk\\Audit\\Tests\\": "modules/Audit/tests/",
             "Wurk\\Admin\\Tests\\": "modules/Admin/tests/",
             "Wurk\\Plans\\Tests\\": "modules/Plans/tests/",
-            "Wurk\\Features\\Tests\\": "modules/Features/tests/"
+            "Wurk\\Features\\Tests\\": "modules/Features/tests/",
+            "Wurk\\Regions\\Tests\\": "modules/Regions/tests/",
+            "Wurk\\Messaging\\Tests\\": "modules/Messaging/tests/"
         }
     },
     "scripts": {

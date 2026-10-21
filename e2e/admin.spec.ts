@@ -5,6 +5,13 @@ import { totp } from './totp';
 const SECRET = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
 
 async function expectAccessible(page: Page) {
+  // Scan what people actually read: wait for toasts to finish their fade-in
+  // (axe measures contrast at the current opacity, so a half-faded toast fails).
+  await page.waitForFunction(() =>
+    Array.from(document.querySelectorAll('[data-sonner-toast]')).every(
+      (t) => getComputedStyle(t).opacity === '1',
+    ),
+  );
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
@@ -55,7 +62,7 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await page.getByLabel(/^Business name/).fill(`E2E ${testInfo.project.name} Studio`);
   await page.getByLabel(/^Web address/).fill(handle);
   await page.getByLabel(/^First name/).fill('Sipho');
-  await page.getByLabel(/^Email/).fill(`${handle}@example.com`);
+  await page.getByLabel(/^Email or mobile number/).fill(`${handle}@example.com`);
   await page.getByRole('button', { name: 'Create business and invite owner' }).click();
   await expect(
     page.getByRole('heading', { level: 1, name: `E2E ${testInfo.project.name} Studio` }),
@@ -89,6 +96,15 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
 
   await page.goto(`${admin}/features`);
   await expect(page.getByRole('heading', { level: 1, name: 'Feature rollouts' })).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/providers`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Providers' })).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/countries`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Countries' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'South Africa · ZA' })).toBeVisible();
   await expectAccessible(page);
 
   await page.goto(`${admin}/roles`);
