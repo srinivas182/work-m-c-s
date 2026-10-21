@@ -55,6 +55,10 @@ Defaults already set in the image: `APP_ENV=production`, `APP_DEBUG=false`, `LOG
 - Secrets only through environment variables / the cloud secrets manager.
 - TLS terminates at the load balancer / CDN (Cloudflare for SaaS, ADR-0004).
 
+## Audit trail: database privileges
+
+The audit trail is append-only in the application; enforce it in the database too. The application's database user should have only `SELECT, INSERT` on `audit_events` and `SELECT, INSERT, UPDATE` on `audit_chain_heads`, on the central database and on every shard. Run `php artisan audit:verify` on a schedule (for example nightly) and alert on a non-zero exit code.
+
 ## CI verification
 
 Every PR that touches Docker files or dependency lock files builds the image, lints the Dockerfile (hadolint), starts a container and checks: liveness and readiness return 200, the home page renders, the design showcase is **not** exposed (404), the process is not root, no `X-Powered-By` header, and Docker reports the container `healthy`.

@@ -6,6 +6,7 @@ namespace Wurk\Access\Actions;
 
 use Illuminate\Support\Facades\DB;
 use Wurk\Access\AccessManager;
+use Wurk\Access\Events\AccessChanged;
 use Wurk\Access\Exceptions\AccessRuleViolation;
 use Wurk\Access\Models\BranchMember;
 use Wurk\Access\Models\Member;
@@ -39,7 +40,10 @@ final readonly class Team
     public function assign(Member $member, string $roleKey): void
     {
         $this->assertBusinessRole($roleKey);
-        MemberRole::query()->firstOrCreate(['member_id' => $member->id, 'role_key' => $roleKey]);
+        $role = MemberRole::query()->firstOrCreate(['member_id' => $member->id, 'role_key' => $roleKey]);
+        if ($role->wasRecentlyCreated) {
+            event(new AccessChanged('role.assigned', 'member', $member->id, ['identity_id' => $member->identity_id, 'role' => $roleKey]));
+        }
 
         if (SystemRoles::DEFINITIONS[$roleKey]['branch_restricted'] ?? false) {
             $member->forceFill(['all_branches' => false])->save();
@@ -60,6 +64,7 @@ final readonly class Team
 
             MemberRole::query()->where('member_id', $member->id)->where('role_key', $roleKey)->delete();
         });
+        event(new AccessChanged('role.revoked', 'member', $member->id, ['identity_id' => $member->identity_id, 'role' => $roleKey]));
 
         $this->access->flush();
     }
@@ -82,6 +87,7 @@ final readonly class Team
             $member->forceFill(['all_branches' => false])->save();
         }
 
+        event(new AccessChanged('member.branches_changed', 'member', $member->id, ['branches' => $branchIds ?? 'all']));
         $this->access->flush();
     }
 

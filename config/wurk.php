@@ -76,4 +76,12 @@ return [
         'default_country_code' => '27',
     ],
 
+    'audit' => [
+        // Keys whose values are never written to the audit trail (any depth, case-insensitive).
+        'redact' => [
+            'password', 'password_confirmation', 'current_password', 'secret', 'token', 'remember_token',
+            'recovery_codes', 'code', 'code_hash', 'connection', 'api_key', 'card_number', 'cvv',
+        ],
+    ],
+
 ];

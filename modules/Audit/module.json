@@ -1,0 +1,14 @@
+{
+    "name": "Audit",
+    "key": "audit",
+    "version": "0.1.0",
+    "description": "Tamper-evident audit trail: one hash chain for the platform and one per business.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "identity",
+        "access"
+    ]
+}
