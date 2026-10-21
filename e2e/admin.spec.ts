@@ -5,6 +5,13 @@ import { totp } from './totp';
 const SECRET = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
 
 async function expectAccessible(page: Page) {
+  // Scan what people actually read: wait for toasts to finish their fade-in
+  // (axe measures contrast at the current opacity, so a half-faded toast fails).
+  await page.waitForFunction(() =>
+    Array.from(document.querySelectorAll('[data-sonner-toast]')).every(
+      (t) => getComputedStyle(t).opacity === '1',
+    ),
+  );
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
