@@ -12,8 +12,14 @@ ARG PHP_VERSION=8.4
 # ---------------------------------------------------------------------------
 FROM dunglas/frankenphp:1-php${PHP_VERSION} AS base
 
-RUN install-php-extensions pdo_mysql redis pcntl intl zip bcmath opcache \
- && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+RUN install-php-extensions pdo_mysql redis pcntl intl zip bcmath opcache
+
+# Use PHP's recommended production settings when the base image ships them;
+# our own overrides (zz-wurk.ini) apply either way.
+RUN if [ -f "$PHP_INI_DIR/php.ini-production" ]; then \
+      cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"; \
+    fi \
+ && php --ini
 
 COPY docker/production/php.ini "$PHP_INI_DIR/conf.d/zz-wurk.ini"
 
