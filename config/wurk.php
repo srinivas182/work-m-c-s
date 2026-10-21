@@ -102,4 +102,9 @@ return [
         'ai-assistant' => ['name' => 'AI assistant', 'sprint' => 14],
     ],
 
+    'security' => [
+        // Emergency switch: WURK_ADMIN_IP_ALLOWLIST=false ignores the admin IP allow-list.
+        'admin_ip_allowlist' => (bool) env('WURK_ADMIN_IP_ALLOWLIST', true),
+    ],
+
 ];

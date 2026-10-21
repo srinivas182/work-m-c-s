@@ -40,7 +40,9 @@
             "Wurk\\Plans\\": "modules/Plans/src/",
             "Wurk\\Features\\": "modules/Features/src/",
             "Wurk\\Regions\\": "modules/Regions/src/",
-            "Wurk\\Messaging\\": "modules/Messaging/src/"
+            "Wurk\\Messaging\\": "modules/Messaging/src/",
+            "Wurk\\Credits\\": "modules/Credits/src/",
+            "Wurk\\Security\\": "modules/Security/src/"
         }
     },
     "autoload-dev": {
@@ -56,7 +58,9 @@
             "Wurk\\Plans\\Tests\\": "modules/Plans/tests/",
             "Wurk\\Features\\Tests\\": "modules/Features/tests/",
             "Wurk\\Regions\\Tests\\": "modules/Regions/tests/",
-            "Wurk\\Messaging\\Tests\\": "modules/Messaging/tests/"
+            "Wurk\\Messaging\\Tests\\": "modules/Messaging/tests/",
+            "Wurk\\Credits\\Tests\\": "modules/Credits/tests/",
+            "Wurk\\Security\\Tests\\": "modules/Security/tests/"
         }
     },
     "scripts": {

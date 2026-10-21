@@ -29,6 +29,12 @@ final class EntitlementService implements Entitlements
         return $this->load($tenantId)['limits'];
     }
 
+    public function subscribedSince(): array
+    {
+        return TenantSubscription::query()->get(['tenant_id', 'started_at'])
+            ->mapWithKeys(fn (TenantSubscription $s) => [$s->tenant_id => $s->started_at->toIso8601String()])->all();
+    }
+
     public function flush(): void
     {
         $this->memo = [];

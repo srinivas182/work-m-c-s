@@ -107,6 +107,14 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('cell', { name: 'South Africa · ZA' })).toBeVisible();
   await expectAccessible(page);
 
+  await page.goto(`${admin}/credits/rates`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Credit rates' })).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/security`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Security' })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/roles`);
   await expect(page.getByRole('heading', { level: 1, name: 'Staff roles' })).toBeVisible();
   await expectAccessible(page);

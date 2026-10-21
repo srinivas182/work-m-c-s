@@ -101,6 +101,11 @@ final class Tenant extends Model implements CentralModel, CurrentTenant
         return $this->shard_id;
     }
 
+    public function countryCode(): string
+    {
+        return strtoupper((string) $this->country);
+    }
+
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;

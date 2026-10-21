@@ -32,6 +32,11 @@ final class EloquentPeopleDirectory implements PeopleDirectory
         return PlatformStaff::query()->where('status', 'active')->count();
     }
 
+    public function hasMfa(string $identityId): bool
+    {
+        return Identity::query()->find($identityId)?->hasMfa() ?? false;
+    }
+
     public function isActiveStaff(string $identityId): bool
     {
         return PlatformStaff::query()->whereKey($identityId)->where('status', 'active')->exists();

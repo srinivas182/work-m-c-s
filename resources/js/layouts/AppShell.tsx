@@ -284,7 +284,8 @@ export default function AppShell({ title, user: userProp, children }: AppShellPr
 
   useEffect(() => {
     if (flash.status) toast.success(flash.status);
-  }, [flash.status]);
+    if (flash.warning) toast.warning(flash.warning);
+  }, [flash.status, flash.warning]);
   const { resolved } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {

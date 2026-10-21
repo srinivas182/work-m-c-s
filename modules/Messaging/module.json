@@ -6,10 +6,11 @@
     "core": true,
     "entitlement": null,
     "depends_on": [
-        "platform",
-        "tenancy",
-        "identity",
         "audit",
-        "regions"
+        "credits",
+        "identity",
+        "platform",
+        "regions",
+        "tenancy"
     ]
 }

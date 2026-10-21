@@ -17,5 +17,8 @@ interface Entitlements
      */
     public function limits(string $tenantId): ?array;
 
+    /** @return array<string, string> tenant id => subscription start (ISO 8601), for anniversary jobs */
+    public function subscribedSince(): array;
+
     public function flush(): void;
 }
