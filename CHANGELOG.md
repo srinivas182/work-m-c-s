@@ -4,6 +4,8 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-10-22 — Sprint 3: Signup & billing
+
 ### Added — Sprint 3.4 (invoices, proration, dunning)
 - SARS tax invoices for every payment: gapless `WURK-INV-` numbers (allocated under a row lock in the issuing transaction), issuer and customer details snapshotted at issue, all required fields, PDF (dompdf, no network access while rendering), emailed with the PDF attached; owners download only their own. Invoices are immutable — corrections are credit notes.
 - Credit notes (`WURK-CN-`, own PDF, emailed): full or partial, never more than is left; card payments refunded through Paystack automatically, cash and debit orders flagged for an EFT refund that finance marks paid.
