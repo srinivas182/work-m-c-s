@@ -8,11 +8,14 @@ export default defineConfig({
   plugins: [
     laravel({
       input: ['resources/css/app.css', 'resources/js/app.tsx'],
+      ssr: 'resources/js/ssr.tsx',
       refresh: ['modules/*/routes/**', 'modules/*/resources/**', 'resources/views/**'],
     }),
     react(),
     tailwindcss(),
   ],
+  // The SSR bundle carries its dependencies, so production needs only the Node binary.
+  ssr: { noExternal: true },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./resources/js', import.meta.url)),

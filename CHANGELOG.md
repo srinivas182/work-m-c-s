@@ -4,6 +4,19 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 3.1 (marketing site, signup wizard)
+- Marketing module: wurk.co.za home, pricing (live from public packages, monthly/yearly, prices excl. and incl. VAT), questions, contact (stored, emailed to `WURK_CONTACT_EMAIL`, honeypot and rate limit) and legal pages (awaiting WURK's final text).
+- Server-side rendering for wurk.co.za only (Inertia SSR): full HTML for search engines; if the renderer is down, pages render in the browser. Self-contained SSR bundle; the production image ships a pinned Node runtime and an `ssr` role; CI renders a page from the built image.
+- Onboarding module: signup wizard — details → verify (one-time code) → package → web address (live availability) → finish → signed in to the new business on its free trial with the first month's credits. Resumes on another device after re-verifying; one free trial per verified email or mobile; temporary mailboxes refused; finishing twice never creates two businesses; signups expire after 7 days; rate limits.
+- Contracts: `Identity\Contracts\Verification` and `Accounts`, `Tenancy\Contracts\TenantProvisioner`, `Plans\Contracts\Catalog`; subscriptions record the billing period.
+- One-time codes go to new addresses only for the signup purpose; every other purpose still only reaches existing WURK IDs.
+- `packages:seed-placeholders` (development and testing only; refused in production).
+- Mobile Lighthouse (production-like compression): home 98 / 100 / 100, pricing 98 / 100 / 100 for performance / accessibility / SEO.
+
+### Fixed
+- Prices could format differently on the server and in browsers (`R343,85` vs `R343.85`); rand amounts now format identically everywhere.
+- The marketing site downloaded the whole design-system bundle; it now loads only the components it uses (page weight 729 KB → about 220 KB).
+
 ## [0.3.0] — 2026-10-22 — Sprint 2: Super admin
 
 ### Added — Sprint 2.4 (WURK Credits, security settings)

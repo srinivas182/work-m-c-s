@@ -42,7 +42,9 @@
             "Wurk\\Regions\\": "modules/Regions/src/",
             "Wurk\\Messaging\\": "modules/Messaging/src/",
             "Wurk\\Credits\\": "modules/Credits/src/",
-            "Wurk\\Security\\": "modules/Security/src/"
+            "Wurk\\Security\\": "modules/Security/src/",
+            "Wurk\\Onboarding\\": "modules/Onboarding/src/",
+            "Wurk\\Marketing\\": "modules/Marketing/src/"
         }
     },
     "autoload-dev": {
@@ -60,7 +62,9 @@
             "Wurk\\Regions\\Tests\\": "modules/Regions/tests/",
             "Wurk\\Messaging\\Tests\\": "modules/Messaging/tests/",
             "Wurk\\Credits\\Tests\\": "modules/Credits/tests/",
-            "Wurk\\Security\\Tests\\": "modules/Security/tests/"
+            "Wurk\\Security\\Tests\\": "modules/Security/tests/",
+            "Wurk\\Onboarding\\Tests\\": "modules/Onboarding/tests/",
+            "Wurk\\Marketing\\Tests\\": "modules/Marketing/tests/"
         }
     },
     "scripts": {

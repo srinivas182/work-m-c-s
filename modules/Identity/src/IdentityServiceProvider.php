@@ -7,12 +7,16 @@ namespace Wurk\Identity;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Wurk\Identity\Console\CreateIdentityCommand;
+use Wurk\Identity\Contracts\Accounts;
 use Wurk\Identity\Contracts\Invitations;
 use Wurk\Identity\Contracts\PeopleDirectory;
 use Wurk\Identity\Contracts\TextMessenger;
+use Wurk\Identity\Contracts\Verification;
 use Wurk\Identity\Http\Middleware\EnsurePlatformStaff;
 use Wurk\Identity\Invites\InvitationService;
 use Wurk\Identity\Listeners\InviteBusinessOwner;
+use Wurk\Identity\Onboarding\AccountService;
+use Wurk\Identity\Onboarding\VerificationService;
 use Wurk\Identity\Otp\LogTextMessenger;
 use Wurk\Identity\People\EloquentPeopleDirectory;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -25,6 +29,8 @@ final class IdentityServiceProvider extends ModuleServiceProvider
         $this->app->singleton(Invitations::class, InvitationService::class);
         $this->app->singleton(PeopleDirectory::class, EloquentPeopleDirectory::class);
         $this->app->singletonIf(TextMessenger::class, LogTextMessenger::class);
+        $this->app->singleton(Verification::class, VerificationService::class);
+        $this->app->singleton(Accounts::class, AccountService::class);
     }
 
     protected function bootModule(): void
