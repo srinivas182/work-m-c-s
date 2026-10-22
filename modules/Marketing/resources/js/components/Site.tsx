@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { Button } from '@/design-system';
+// Direct imports keep the public site's JavaScript small (no full design-system bundle).
+import { Button } from '@/design-system/components/button';
 export { rand } from '@/lib/money';
 
 export interface SiteProps {

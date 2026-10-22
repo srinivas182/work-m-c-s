@@ -1,4 +1,5 @@
-import { Button } from '@/design-system';
+// Direct imports keep the public site's JavaScript small (no full design-system bundle).
+import { Button } from '@/design-system/components/button';
 import { PriceCards, type SalePackage } from '../components/PriceCards';
 import { Site, type SiteProps } from '../components/Site';
 
@@ -26,7 +27,7 @@ const STORIES = [
 /** The product in use: a salon's booking page and the WhatsApp confirmation that follows. */
 function PhoneDemo() {
   return (
-    <div aria-hidden className="relative mx-auto w-full max-w-[19rem] select-none">
+    <div aria-hidden className="relative mx-auto w-full max-w-[19rem] pb-20 select-none">
       <div className="rounded-[2.4rem] bg-[#1B1640] p-2.5 shadow-[0_30px_60px_-20px_rgba(27,22,64,0.45)]">
         <div className="overflow-hidden rounded-[1.9rem] bg-white">
           <div className="bg-[#2A1E6B] px-5 pt-7 pb-5 text-white">
@@ -54,7 +55,7 @@ function PhoneDemo() {
         </div>
       </div>
       {/* The one moment of motion: the confirmation arriving. */}
-      <div className="absolute -bottom-8 -left-6 w-[15.5rem] rounded-2xl rounded-bl-md bg-[#DCF8C6] px-4 py-3 text-[13px] leading-snug text-[#123B12] shadow-[0_12px_28px_-10px_rgba(27,22,64,0.35)] motion-safe:animate-[arrive_600ms_cubic-bezier(.2,.8,.2,1)_900ms_both] sm:-left-12">
+      <div className="absolute -right-2 bottom-0 w-[15.5rem] rounded-2xl rounded-bl-md bg-[#DCF8C6] px-4 py-3 text-[13px] leading-snug text-[#123B12] shadow-[0_12px_28px_-10px_rgba(27,22,64,0.35)] motion-safe:animate-[arrive_600ms_cubic-bezier(.2,.8,.2,1)_900ms_both] sm:-right-14">
         <p className="font-semibold">Glow Salon</p>
         <p>You’re booked with Lerato on Saturday at 09:30. Reply 1 to change your time.</p>
         <p className="mt-1 text-right text-[11px] text-[#123B12]/70">09:31 ✓✓</p>

@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/design-system';
+// Direct imports keep the public site's JavaScript small (no full design-system bundle).
+import { Button } from '@/design-system/components/button';
 import { rand, vatInclusive } from './Site';
 
 export interface SalePackage {
@@ -25,11 +26,15 @@ export function PriceCards({
   packages,
   moduleNames,
   signupUrl,
+  headingLevel = 'h3',
 }: {
   packages: SalePackage[];
   moduleNames: Record<string, string>;
   signupUrl: string;
+  /** h2 when the cards sit directly under the page title, h3 under a section heading. */
+  headingLevel?: 'h2' | 'h3';
 }) {
+  const Heading = headingLevel;
   const [period, setPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
   if (packages.length === 0) {
@@ -70,9 +75,9 @@ export function PriceCards({
               aria-labelledby={`pkg-${p.key}`}
               className="flex flex-col rounded-[22px] bg-white p-7 ring-1 ring-[#1B1640]/10"
             >
-              <h3 id={`pkg-${p.key}`} className="font-display text-xl font-bold">
+              <Heading id={`pkg-${p.key}`} className="font-display text-xl font-bold">
                 {p.name}
-              </h3>
+              </Heading>
               {p.description && (
                 <p className="mt-1.5 text-[15px] text-[#1B1640]/70">{p.description}</p>
               )}
@@ -87,12 +92,15 @@ export function PriceCards({
               </p>
               <p className="text-sm text-[#1B1640]/65">{rand(vatInclusive(cents))} incl. VAT</p>
               <ul className="mt-6 grid gap-2.5 text-[15px]">
-                {p.modules.map((m) => (
-                  <li key={m} className="flex gap-2.5">
-                    <Check className="text-primary mt-0.5 size-4 shrink-0" aria-hidden />
-                    {moduleNames[m] ?? m}
-                  </li>
-                ))}
+                {/* Catalogue order (website first), not the stored alphabetical order. */}
+                {Object.keys(moduleNames)
+                  .filter((m) => p.modules.includes(m))
+                  .map((m) => (
+                    <li key={m} className="flex gap-2.5">
+                      <Check className="text-primary mt-0.5 size-4 shrink-0" aria-hidden />
+                      {moduleNames[m] ?? m}
+                    </li>
+                  ))}
                 <li className="flex gap-2.5">
                   <Check className="text-primary mt-0.5 size-4 shrink-0" aria-hidden />
                   {p.staff_limit} team {p.staff_limit === 1 ? 'member' : 'members'}

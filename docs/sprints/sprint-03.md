@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 3 of 18 · 30 November – 11 December 2026 |
-| **Status** | Approved 22 Oct 2026 — in progress (3.1) |
+| **Status** | Approved 22 Oct 2026 — 3.1 in review |
 | **Depends on** | v0.3.0 (packages, entitlements, providers, WURK Credits, security settings); PRD §4.5, §5.1–5.2, §7.14, §11 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -111,3 +111,11 @@ All money in cents (ZAR); VAT computed per line and rounded per invoice with the
 | Marketing copy, imagery, FAQ, and legal pages (terms of service, privacy policy / POPIA notice) | 3.1 (placeholders until then) |
 | Credit pack sizes and prices; final package line-up | 3.2 |
 | Bank account details for EFT refunds and cash deposits | 3.3 |
+
+---
+
+## 8. Progress log
+
+| Sub-sprint | PR | Result |
+|---|---|---|
+| 3.1 Marketing site & signup | see PR | 456 tests on SQLite and MySQL 8; 32 browser checks incl. a full signup from the pricing page into the back office (desktop and mobile). Lighthouse mobile ≥ 98 performance, 100 accessibility, 100 SEO through compression (best practices only lacks HTTPS locally). Category, template and AI steps join the wizard with Sprints 4–5 and 14. Without a trial (already used), finishing waits for card payment in 3.2 |

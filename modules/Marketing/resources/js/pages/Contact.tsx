@@ -1,6 +1,9 @@
 import { useForm, usePage } from '@inertiajs/react';
 import type { FormEvent } from 'react';
-import { Button, Field, Input, Textarea } from '@/design-system';
+// Direct imports keep the public site's JavaScript small (no full design-system bundle).
+import { Button } from '@/design-system/components/button';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
 import { Site, type SiteProps } from '../components/Site';
 
 export default function Contact(props: SiteProps) {

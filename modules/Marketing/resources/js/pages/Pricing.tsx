@@ -14,11 +14,12 @@ export default function Pricing(props: SiteProps & { packages: SalePackage[] }) 
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-[#1B1640]/75">
           Prices exclude VAT; the VAT-inclusive amount is shown under each. Upgrade any time and pay
-          only the difference for the rest of the month. Each package includes WURK Credits for SMS
-          and WhatsApp messages every month.
+          only the difference for the rest of your billing period. Each package includes WURK
+          Credits for SMS and WhatsApp messages every month.
         </p>
         <div className="mt-12">
           <PriceCards
+            headingLevel="h2"
             packages={props.packages}
             moduleNames={props.moduleNames}
             signupUrl={props.signupUrl}
