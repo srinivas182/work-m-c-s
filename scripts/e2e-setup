@@ -39,3 +39,6 @@ for project in desktop mobile; do
   php artisan identities:create "ops-${project}@wurk.co.za" --first=Lerato --last=Ops \
     --password="sunny days in durban" --staff --mfa-secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP
 done
+
+# Example packages for the pricing page and signup.
+php artisan packages:seed-placeholders

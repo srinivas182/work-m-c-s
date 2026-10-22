@@ -1,0 +1,16 @@
+{
+    "name": "Onboarding",
+    "key": "onboarding",
+    "version": "0.1.0",
+    "description": "Self-service signup wizard: verify, choose a package and web address, start a trial or pay, land in the back office.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "identity",
+        "plans",
+        "regions",
+        "audit"
+    ]
+}

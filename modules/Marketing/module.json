@@ -1,0 +1,12 @@
+{
+    "name": "Marketing",
+    "key": "marketing",
+    "version": "0.1.0",
+    "description": "The wurk.co.za marketing site (server-rendered): home, pricing from packages, FAQ, contact, legal pages.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "plans"
+    ]
+}

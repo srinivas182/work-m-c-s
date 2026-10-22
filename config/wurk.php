@@ -39,7 +39,7 @@ return [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
             'help', 'login', 'logout', 'mail', 'my', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
-            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', 'settings', 'webhooks',
+            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', 'settings', 'webhooks', 'signup',
         ],
 
         // Default capacity of a shared shard (tenants per database).
@@ -106,5 +106,11 @@ return [
         // Emergency switch: WURK_ADMIN_IP_ALLOWLIST=false ignores the admin IP allow-list.
         'admin_ip_allowlist' => (bool) env('WURK_ADMIN_IP_ALLOWLIST', true),
     ],
+
+    // Where website enquiries from wurk.co.za/contact are sent.
+    'contact_email' => env('WURK_CONTACT_EMAIL'),
+
+    // Server-side render wurk.co.za (needs the "ssr" process; falls back to browser rendering).
+    'marketing_ssr' => (bool) env('WURK_MARKETING_SSR', true),
 
 ];

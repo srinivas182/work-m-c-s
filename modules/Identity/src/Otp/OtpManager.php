@@ -22,6 +22,9 @@ use Wurk\Identity\Support\Destination;
  */
 final readonly class OtpManager
 {
+    /** Purposes whose codes go to any address, not only to existing WURK IDs. */
+    public const OPEN_PURPOSES = ['signup'];
+
     public const PURPOSE_LOGIN = 'login';
 
     public const PURPOSE_RESET = 'reset';
@@ -67,15 +70,42 @@ final readonly class OtpManager
         ]);
 
         // Only send to people who exist and are active; the response is identical either way.
-        if ($identity !== null && $identity->isActive()) {
+        // Signup is the one purpose that must reach new addresses (it proves a new contact).
+        if (($identity !== null && $identity->isActive()) || in_array($purpose, self::OPEN_PURPOSES, true)) {
             $this->channelFor($destination)->send($destination->value, $code, $purpose);
         }
 
         $this->events->dispatch(new OtpRequested($identity, $destination->type, $purpose));
     }
 
+    /**
+     * True when the code is right for this destination and purpose (consumes it).
+     * For open purposes such as signup, where the person may not exist yet.
+     */
+    public function confirm(Destination $destination, string $code, string $purpose): bool
+    {
+        return $this->consume($destination, $code, $purpose) !== null;
+    }
+
     /** Returns the verified identity, or null if the code is wrong, expired or exhausted. */
     public function verify(Destination $destination, string $code, string $purpose): ?Identity
+    {
+        $challenge = $this->consume($destination, $code, $purpose);
+        if ($challenge === null) {
+            return null;
+        }
+
+        $identity = $challenge->identity_id !== null ? Identity::query()->find($challenge->identity_id) : null;
+
+        if ($identity !== null) {
+            $column = $destination->type === 'email' ? 'email_verified_at' : 'phone_verified_at';
+            $identity->forceFill([$column => $identity->{$column} ?? now()])->save();
+        }
+
+        return $identity?->isActive() ? $identity : null;
+    }
+
+    private function consume(Destination $destination, string $code, string $purpose): ?OtpChallenge
     {
         $hash = $destination->hash();
         $challenge = OtpChallenge::query()
@@ -100,14 +130,8 @@ final readonly class OtpManager
         }
 
         $challenge->forceFill(['consumed_at' => now()])->save();
-        $identity = $challenge->identity_id !== null ? Identity::query()->find($challenge->identity_id) : null;
 
-        if ($identity !== null) {
-            $column = $destination->type === 'email' ? 'email_verified_at' : 'phone_verified_at';
-            $identity->forceFill([$column => $identity->{$column} ?? now()])->save();
-        }
-
-        return $identity?->isActive() ? $identity : null;
+        return $challenge;
     }
 
     private function hashCode(string $code, string $destinationHash): string

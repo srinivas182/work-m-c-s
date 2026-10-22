@@ -4,6 +4,8 @@
 #   worker     run a queue worker
 #   scheduler  run the task scheduler
 #   migrate    run database migrations (use as a one-off release step)
+#   ssr        server-side renderer for wurk.co.za (point web containers at it
+#              with INERTIA_SSR_URL=http://<ssr-host>:13714)
 #   <anything> run that command, e.g. `php artisan tinker`
 set -eu
 
@@ -29,6 +31,9 @@ case "${1:-serve}" in
   scheduler)
     warm_caches
     exec php artisan schedule:work
+    ;;
+  ssr)
+    SSR_HOST="${SSR_HOST:-0.0.0.0}" exec node bootstrap/ssr/ssr.js
     ;;
   migrate)
     exec php artisan migrate --force --no-interaction

@@ -8,9 +8,12 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
+use Wurk\Plans\Console\SeedPlaceholderPackagesCommand;
+use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Http\Middleware\EnsureEntitled;
 use Wurk\Plans\Models\Package;
+use Wurk\Plans\Support\EloquentCatalog;
 use Wurk\Plans\Support\EntitlementService;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -20,6 +23,7 @@ final class PlansServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         $this->app->singleton(Entitlements::class, EntitlementService::class);
+        $this->app->singleton(Catalog::class, EloquentCatalog::class);
     }
 
     /**
@@ -45,6 +49,10 @@ final class PlansServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([SeedPlaceholderPackagesCommand::class]);
+        }
+
         Route::model('package', Package::class);
         $this->app->make(Router::class)->aliasMiddleware('entitled', EnsureEntitled::class);
 

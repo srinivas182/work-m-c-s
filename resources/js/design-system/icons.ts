@@ -1,4 +1,7 @@
 import {
+  TriangleAlert,
+  Receipt,
+  CreditCard,
   BarChart3,
   Building2,
   Calendar,
@@ -30,6 +33,9 @@ import {
 export const icons: Record<string, LucideIcon> = {
   'bar-chart': BarChart3,
   building: Building2,
+  'triangle-alert': TriangleAlert,
+  receipt: Receipt,
+  'credit-card': CreditCard,
   coins: Coins,
   'lock-keyhole': LockKeyhole,
   'user-cog': UserCog,

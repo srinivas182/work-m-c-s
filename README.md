@@ -12,7 +12,7 @@
 
 WURK earns from subscriptions (self-managed or managed packages), add-on credits and managed services. A network of **agents** sells WURK packages and earns commission through a sponsor hierarchy.
 
-> **Status:** Sprint 2 (Super admin: businesses, staff, packages, entitlements, feature flags, providers, messaging, WURK Credits, security) complete — v0.3.0. Next: Sprint 3 (billing and self-service signup).
+> **Status:** Sprint 3 (Signup & billing: marketing site, signup wizard, card/DebiCheck/cash payments, tax invoices, proration, dunning) complete — v0.4.0. Next: Sprint 4.
 
 ## Documentation
 

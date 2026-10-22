@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && vite build --ssr",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write \"resources/**/*.{ts,tsx,css}\" \"modules/**/*.{ts,tsx}\" \"e2e/**/*.ts\"",

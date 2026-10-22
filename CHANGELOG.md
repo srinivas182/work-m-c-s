@@ -4,6 +4,55 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-10-22 — Sprint 3: Signup & billing
+
+### Added — Sprint 3.4 (invoices, proration, dunning)
+- SARS tax invoices for every payment: gapless `WURK-INV-` numbers (allocated under a row lock in the issuing transaction), issuer and customer details snapshotted at issue, all required fields, PDF (dompdf, no network access while rendering), emailed with the PDF attached; owners download only their own. Invoices are immutable — corrections are credit notes.
+- Credit notes (`WURK-CN-`, own PDF, emailed): full or partial, never more than is left; card payments refunded through Paystack automatically, cash and debit orders flagged for an EFT refund that finance marks paid.
+- Invoice issuer details (legal name, address, VAT number, registration) as settings with placeholder defaults, clearly flagged on the settings page and on invoices until replaced.
+- Proration (PRD §11.3): upgrades charged now for the rest of the period (monthly → yearly starts a new year, crediting the unused month); downgrades and yearly → monthly scheduled for renewal and charged at the new price then.
+- Dunning (PRD §11.1, schedule editable): owner told on failure (email; SMS when a billing mobile is set), banner on days 1–7, retries on days 3/5/7 (once per day), Billing-only from day 8, suspended on day 15, restored at once on payment. Suspension is a billing state — the owner can still reach Billing — and `ServiceStatus` tells the Sprint 5 site renderer to show "temporarily unavailable".
+- Admin: invoice and dunning settings, a business's invoices and payments (credit notes, EFT refunds, retry now), failed-payments queue. Permissions `invoices.view` and `invoices.manage`.
+- Generic page banner in the back office (`banner` prop), set per request.
+- Guard tests: no `Inertia::share()` in modules; every menu icon is registered.
+
+### Fixed
+- A request-specific banner was set with `Inertia::share()`, which outlives the request in Octane workers and could have shown one business's notice to another; it is now attached to the request.
+- Billing, Failed payments and Invoice settings showed blank menu icons (unregistered icon).
+
+### Added — Sprint 3.3 (cash, DebiCheck)
+- Cash at a WURK office (PRD §4.5): staff record cash for a subscription or credit pack; a 6-digit code goes to the approvers in Security settings — never to the person who recorded it, and recording is refused when nobody else can approve. Codes are hashed, valid 15 minutes, 5 attempts. Once confirmed the payment settles like any other; receipts go to finance and the business. Recorded, approved and cancelled cash is audited. New platform permission `payments.record-cash` (finance and super admin).
+- DebiCheck debit orders behind a `DebitOrderProvider` contract with a stand-in provider until WURK chooses one (Sprint 3 decision 2); the stand-in refuses to run in production. Owners set up a mandate (SA ID number checksum, 6-digit branch codes with universal codes prefilled, account details encrypted and masked); approval, rejection and collection outcomes arrive as signed events, each handled once. Renewals collect by debit order when one is active; outcomes settle days later without moving the billing date.
+- Any failed subscription payment (card now, debit order later) makes an active subscription past due.
+
+### Fixed
+- Wrong cash approval codes never counted: the attempt was rolled back with the error, allowing unlimited guesses. Attempts now commit before the error is reported.
+- A new payment's status was empty in memory (database default not loaded), so a submitted debit-order collection was marked past due; payments now set "pending" explicitly.
+- Rate limits shared one counter per user across routes (e.g. wrong codes used up "send a new code"); every throttled route now has its own counter.
+
+### Added — Sprint 3.2 (card payments, credit top-ups)
+- Billing module with a `PaymentGateway` contract and Paystack as the first driver (checkout, server-side verify, saved-card charges, refunds, HMAC-SHA512 webhooks).
+- A payment is marked paid only on server-side confirmation from Paystack (signed webhook or our own verify call), and only if the confirmed amount and currency match; every confirmation path goes through one idempotent, row-locked settle step. Webhook events are handled once.
+- VAT added per the business's country (15% in ZA) and stored on each payment for invoicing (3.4).
+- Subscriptions: first payment, paying during a trial (the paid period starts when the trial ends), and hourly renewals on the saved card; failed renewals mark the subscription past due (dunning in 3.4). Subscriptions now record their current period.
+- Saved cards: Paystack's reusable token only (encrypted), deduplicated by card signature; "add a card" makes a R1 check refunded straight away.
+- Credit packs (set by WURK staff) bought by card or one tap on the saved card; credits granted only after confirmation.
+- Owner Settings → Billing: package, price incl. VAT, renewal or trial date, billing details (SA VAT number check), card, credit packs, payment history. A business that hasn't paid, or whose trial has ended, can only reach Billing.
+- Signup: when the free trial was already used, the business is created waiting for payment and the owner goes straight to Billing.
+
+### Added — Sprint 3.1 (marketing site, signup wizard)
+- Marketing module: wurk.co.za home, pricing (live from public packages, monthly/yearly, prices excl. and incl. VAT), questions, contact (stored, emailed to `WURK_CONTACT_EMAIL`, honeypot and rate limit) and legal pages (awaiting WURK's final text).
+- Server-side rendering for wurk.co.za only (Inertia SSR): full HTML for search engines; if the renderer is down, pages render in the browser. Self-contained SSR bundle; the production image ships a pinned Node runtime and an `ssr` role; CI renders a page from the built image.
+- Onboarding module: signup wizard — details → verify (one-time code) → package → web address (live availability) → finish → signed in to the new business on its free trial with the first month's credits. Resumes on another device after re-verifying; one free trial per verified email or mobile; temporary mailboxes refused; finishing twice never creates two businesses; signups expire after 7 days; rate limits.
+- Contracts: `Identity\Contracts\Verification` and `Accounts`, `Tenancy\Contracts\TenantProvisioner`, `Plans\Contracts\Catalog`; subscriptions record the billing period.
+- One-time codes go to new addresses only for the signup purpose; every other purpose still only reaches existing WURK IDs.
+- `packages:seed-placeholders` (development and testing only; refused in production).
+- Mobile Lighthouse (production-like compression): home 98 / 100 / 100, pricing 98 / 100 / 100 for performance / accessibility / SEO.
+
+### Fixed
+- Prices could format differently on the server and in browsers (`R343,85` vs `R343.85`); rand amounts now format identically everywhere.
+- The marketing site downloaded the whole design-system bundle; it now loads only the components it uses (page weight 729 KB → about 220 KB).
+
 ## [0.3.0] — 2026-10-22 — Sprint 2: Super admin
 
 ### Added — Sprint 2.4 (WURK Credits, security settings)

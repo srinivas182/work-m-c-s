@@ -34,7 +34,7 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name('identity.invitation');
-Route::post('/invitations/{token}', [InvitationController::class, 'accept'])->middleware('throttle:10,1')->name('identity.invitation.accept');
+Route::post('/invitations/{token}', [InvitationController::class, 'accept'])->middleware('throttle:10,1,identity.invitation.accept')->name('identity.invitation.accept');
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/sign-out', [AccountController::class, 'signOut'])->name('identity.sign-out');

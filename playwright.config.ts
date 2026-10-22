@@ -18,9 +18,11 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${port}`,
     trace: 'retain-on-failure',
     // Optional local override when the Playwright browser download is unavailable.
-    launchOptions: process.env.PW_CHROMIUM_PATH
-      ? { executablePath: process.env.PW_CHROMIUM_PATH, args: ['--no-sandbox'] }
-      : {},
+    // wurk.test (the marketing site's host in e2e) resolves to the local server.
+    launchOptions: {
+      args: ['--host-resolver-rules=MAP wurk.test 127.0.0.1', ...(process.env.PW_CHROMIUM_PATH ? ['--no-sandbox'] : [])],
+      ...(process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {}),
+    },
     screenshot: 'only-on-failure',
   },
   projects: [

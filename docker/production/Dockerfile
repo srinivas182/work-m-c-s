@@ -10,6 +10,8 @@ ARG PHP_VERSION=8.4
 # chosen), so an upstream release can never change or break our images silently.
 ARG EXTENSION_INSTALLER_VERSION=2.12.0
 ARG FRANKENPHP_VERSION=1.13.0
+# Node runs the server-side renderer for wurk.co.za (pinned like other tooling).
+ARG NODE_VERSION=22.23.3
 
 # ---------------------------------------------------------------------------
 # base: PHP runtime with the extensions WURK needs
@@ -46,7 +48,7 @@ RUN composer install --no-dev --no-interaction --no-progress --prefer-dist \
 # ---------------------------------------------------------------------------
 # assets: production frontend build
 # ---------------------------------------------------------------------------
-FROM node:22-alpine AS assets
+FROM node:${NODE_VERSION}-alpine AS assets
 
 WORKDIR /app
 RUN corepack enable
@@ -58,6 +60,9 @@ RUN pnpm build
 # ---------------------------------------------------------------------------
 # runtime
 # ---------------------------------------------------------------------------
+# The Node binary only (glibc build; the SSR bundle carries its own dependencies).
+FROM node:${NODE_VERSION}-bookworm-slim AS node-runtime
+
 FROM base AS runtime
 
 ARG APP_USER=wurk
@@ -78,6 +83,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY --chown=${APP_USER}:${APP_USER} . .
 COPY --chown=${APP_USER}:${APP_USER} --from=vendor /app/vendor ./vendor
 COPY --chown=${APP_USER}:${APP_USER} --from=assets /app/public/build ./public/build
+COPY --chown=${APP_USER}:${APP_USER} --from=assets /app/bootstrap/ssr ./bootstrap/ssr
+COPY --from=node-runtime /usr/local/bin/node /usr/local/bin/node
 
 # Optimised autoloader + package discovery, then drop build-only tooling.
 RUN composer dump-autoload --no-dev --classmap-authoritative --no-interaction \

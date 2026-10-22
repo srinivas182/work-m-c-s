@@ -70,6 +70,10 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByText(`${handle}.wurk.test`).first()).toBeVisible();
   await expectAccessible(page);
 
+  await page.getByRole('link', { name: 'Cash payment' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Cash payments' })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/businesses`);
   await expect(page.getByRole('link', { name: 'Glow Salon' })).toBeVisible();
   await expectAccessible(page);
@@ -113,6 +117,15 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
 
   await page.goto(`${admin}/security`);
   await expect(page.getByRole('heading', { level: 1, name: 'Security' })).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/billing/settings`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Invoice settings' })).toBeVisible();
+  await expect(page.getByText('These are placeholder company details.')).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/billing/failed`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Failed payments' })).toBeVisible();
   await expectAccessible(page);
 
   await page.goto(`${admin}/roles`);
