@@ -10,6 +10,8 @@ use Wurk\Tenancy\Contracts\CentralModel;
 /**
  * @property string $tenant_id
  * @property string $billing_email
+ * @property string|null $billing_phone
+ * @property string|null $address
  * @property string|null $billing_name
  * @property string|null $vat_number
  * @property string|null $default_method_id

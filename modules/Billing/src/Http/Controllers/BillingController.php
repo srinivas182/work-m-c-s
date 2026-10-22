@@ -12,10 +12,13 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 use Wurk\Billing\Gateways\DebitOrderProvider;
 use Wurk\Billing\Gateways\FakeDebitOrderProvider;
 use Wurk\Billing\Models\BillingAccount;
+use Wurk\Billing\Models\CreditNote;
 use Wurk\Billing\Models\CreditPack;
+use Wurk\Billing\Models\Invoice;
 use Wurk\Billing\Models\Mandate;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\BillingStatus;
+use Wurk\Billing\Support\Dunning;
 use Wurk\Billing\Support\Payments;
 use Wurk\Billing\Support\SaBanking;
 use Wurk\Messaging\Contracts\ProviderCredentials;
@@ -54,6 +57,11 @@ final class BillingController
             'payments' => Payment::query()->where('tenant_id', $tenantId)->latest()->limit(20)->get()
                 ->map(fn (Payment $p) => ['id' => $p->id, 'at' => $p->created_at?->toIso8601String(), 'purpose' => $p->purpose, 'total_cents' => $p->total_cents, 'status' => $p->status, 'failure' => $p->failure])->all(),
             'gatewayReady' => $providers->active('payments.paystack') !== null,
+            'stage' => app(Dunning::class)->stage($tenantId),
+            'packagesOnSale' => array_map(fn (array $p) => ['id' => $p['id'], 'name' => $p['name'], 'monthly_total_cents' => $withVat($p['monthly_cents']), 'yearly_total_cents' => $withVat($p['yearly_cents'])], $this->catalog->onSale()),
+            'invoices' => Invoice::query()->where('tenant_id', $tenantId)->latest('issued_at')->limit(24)->get()
+                ->map(fn (Invoice $i) => ['id' => $i->id, 'number' => $i->number, 'issued_at' => $i->issued_at->toIso8601String(), 'total_cents' => $i->total_cents, 'credited_cents' => $i->credited_cents])->all(),
+            'creditNotes' => CreditNote::query()->where('tenant_id', $tenantId)->latest('issued_at')->get(['id', 'number', 'total_cents', 'issued_at'])->toArray(),
             'debitOrders' => [
                 'available' => $debitOrders->available(),
                 'simulated' => $debitOrders instanceof FakeDebitOrderProvider && $debitOrders->available(),

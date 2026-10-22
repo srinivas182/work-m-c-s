@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Billing\Events\PaymentFailed;
+use Wurk\Billing\Events\PaymentSucceeded;
 use Wurk\Billing\Gateways\GatewayResult;
 use Wurk\Billing\Gateways\PaymentGateway;
 use Wurk\Billing\Models\BillingAccount;
@@ -147,6 +148,16 @@ final readonly class Payments
             }
         }
 
+        if ($payment->purpose === 'upgrade') {
+            $d = $payment->details;
+            $restart = ($d['restart_period'] ?? false) === true;
+            $this->catalog->changePackage(
+                $payment->tenant_id, (string) $d['package_id'], (string) $d['period'],
+                $restart ? CarbonImmutable::now() : null,
+                $restart ? CarbonImmutable::now()->addYear() : null,
+            );
+        }
+
         if ($payment->purpose === 'credits') {
             $credits = (int) ($payment->details['credits'] ?? 0);
             $this->context->run($tenant, fn () => $this->wallet->grant('purchase', $credits * 1000, 'purchase:'.$payment->id, "Bought {$credits} credits"));
@@ -156,6 +167,7 @@ final readonly class Payments
             $payment->update(['status' => 'refunded']); // only saved the card; give the money back
         }
 
+        event(new PaymentSucceeded($payment->id));
         $this->audit->record('payment.succeeded', 'payment', $payment->id, [
             'tenant_id' => $payment->tenant_id, 'purpose' => $payment->purpose, 'total' => $payment->total_cents / 100, 'currency' => $payment->currency,
         ], ['platform' => true]);
