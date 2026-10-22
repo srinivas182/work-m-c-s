@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Coins, ExternalLink, Package, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Banknote, Coins, ExternalLink, Package, ShieldCheck } from 'lucide-react';
 import type { FormEvent } from 'react';
 import {
   Badge,
@@ -157,6 +157,11 @@ export default function Business({ business, canManage, auditUrl }: Props) {
           <Button variant="secondary" asChild>
             <Link href={`/businesses/${business.id}/credits`}>
               <Coins /> WURK Credits
+            </Link>
+          </Button>
+          <Button variant="secondary" asChild>
+            <Link href={`/businesses/${business.id}/cash`}>
+              <Banknote /> Cash payment
             </Link>
           </Button>
           <Button variant="secondary" asChild>

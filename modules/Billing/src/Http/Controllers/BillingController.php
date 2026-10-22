@@ -9,11 +9,15 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
+use Wurk\Billing\Gateways\DebitOrderProvider;
+use Wurk\Billing\Gateways\FakeDebitOrderProvider;
 use Wurk\Billing\Models\BillingAccount;
 use Wurk\Billing\Models\CreditPack;
+use Wurk\Billing\Models\Mandate;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\BillingStatus;
 use Wurk\Billing\Support\Payments;
+use Wurk\Billing\Support\SaBanking;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Regions\Contracts\Countries;
@@ -24,7 +28,7 @@ final class BillingController
 {
     public function __construct(private readonly TenantContext $context, private readonly Payments $payments, private readonly Catalog $catalog) {}
 
-    public function show(Request $request, Countries $countries, ProviderCredentials $providers, BillingStatus $status): Response
+    public function show(Request $request, Countries $countries, ProviderCredentials $providers, BillingStatus $status, DebitOrderProvider $debitOrders): Response
     {
         $tenantId = $this->context->id();
         $sub = $this->catalog->subscriptionOf($tenantId);
@@ -50,6 +54,16 @@ final class BillingController
             'payments' => Payment::query()->where('tenant_id', $tenantId)->latest()->limit(20)->get()
                 ->map(fn (Payment $p) => ['id' => $p->id, 'at' => $p->created_at?->toIso8601String(), 'purpose' => $p->purpose, 'total_cents' => $p->total_cents, 'status' => $p->status, 'failure' => $p->failure])->all(),
             'gatewayReady' => $providers->active('payments.paystack') !== null,
+            'debitOrders' => [
+                'available' => $debitOrders->available(),
+                'simulated' => $debitOrders instanceof FakeDebitOrderProvider && $debitOrders->available(),
+                'banks' => SaBanking::BANKS,
+                'accountTypes' => SaBanking::ACCOUNT_TYPES,
+                'method' => $account->collection_method ?? 'card',
+                'mandate' => ($m = Mandate::query()->where('tenant_id', $tenantId)->latest()->first()) === null ? null : [
+                    'status' => $m->status, 'bank' => $m->bank, 'account' => $m->account_masked, 'day' => $m->collection_day, 'failure' => $m->failure,
+                ],
+            ],
         ]);
     }
 

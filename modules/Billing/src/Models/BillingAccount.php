@@ -13,6 +13,8 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property string|null $billing_name
  * @property string|null $vat_number
  * @property string|null $default_method_id
+ * @property string $collection_method
+ * @property string|null $default_mandate_id
  */
 final class BillingAccount extends Model implements CentralModel
 {

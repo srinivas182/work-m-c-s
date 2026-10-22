@@ -6,6 +6,7 @@ namespace Wurk\Billing\Console;
 
 use Illuminate\Console\Command;
 use Wurk\Billing\Models\Payment;
+use Wurk\Billing\Support\Mandates;
 use Wurk\Billing\Support\Payments;
 use Wurk\Plans\Contracts\Catalog;
 
@@ -22,7 +23,7 @@ final class RenewSubscriptionsCommand extends Command
 
     protected $description = 'Charge saved cards for subscriptions that are due';
 
-    public function handle(Catalog $catalog, Payments $payments): int
+    public function handle(Catalog $catalog, Payments $payments, Mandates $mandates): int
     {
         $renewed = $failed = 0;
 
@@ -38,9 +39,14 @@ final class RenewSubscriptionsCommand extends Command
                 continue;
             }
 
-            $payment = $payments->chargeSaved($tenantId, 'subscription', $sub['period_cents'], ['package' => $sub['package_key'], 'period' => $sub['period'], 'renewal_of' => $sub['current_period_end']]);
+            $details = ['package' => $sub['package_key'], 'period' => $sub['period'], 'renewal_of' => $sub['current_period_end']];
+            $mandate = $mandates->active($tenantId);
+            // Debit orders settle days later: a pending collection is "submitted", not failed.
+            $payment = $mandate !== null
+                ? $mandates->collect($mandate, $tenantId, $sub['period_cents'], $details)
+                : $payments->chargeSaved($tenantId, 'subscription', $sub['period_cents'], $details);
 
-            if ($payment->status === 'succeeded') {
+            if (in_array($payment->status, ['succeeded', 'pending'], true)) {
                 $renewed++;
             } else {
                 $catalog->markPastDue($tenantId);

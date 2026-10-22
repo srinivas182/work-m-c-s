@@ -7,6 +7,7 @@ namespace Wurk\Security;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\Router;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Security\Contracts\PlatformSettings;
 use Wurk\Security\Http\Middleware\AdminIpAllowList;
 use Wurk\Security\Http\Middleware\RequireTeamMfa;
 use Wurk\Security\Support\Settings;
@@ -16,6 +17,7 @@ final class SecurityServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         $this->app->singleton(Settings::class);
+        $this->app->alias(Settings::class, PlatformSettings::class);
     }
 
     /**

@@ -2,16 +2,18 @@
     "name": "Billing",
     "key": "billing",
     "version": "0.1.0",
-    "description": "Collecting WURK subscriptions and credit purchases: card payments (Paystack), saved cards, renewals.",
+    "description": "Collecting WURK subscriptions and credit purchases: cards (Paystack), DebiCheck debit orders, cash at a WURK office.",
     "core": true,
     "entitlement": null,
     "depends_on": [
-        "platform",
-        "tenancy",
-        "plans",
+        "audit",
         "credits",
-        "regions",
+        "identity",
         "messaging",
-        "audit"
+        "plans",
+        "platform",
+        "regions",
+        "security",
+        "tenancy"
     ]
 }

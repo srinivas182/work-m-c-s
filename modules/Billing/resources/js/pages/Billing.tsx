@@ -13,6 +13,11 @@ import {
   Field,
   Input,
   PageHeader,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Table,
   TableBody,
   TableCell,
@@ -51,6 +56,20 @@ interface Props {
     failure: string | null;
   }[];
   gatewayReady: boolean;
+  debitOrders: {
+    available: boolean;
+    simulated: boolean;
+    banks: Record<string, string>;
+    accountTypes: string[];
+    method: 'card' | 'debit_order';
+    mandate: {
+      status: string;
+      bank: string;
+      account: string;
+      day: number;
+      failure: string | null;
+    } | null;
+  };
 }
 
 const date = (iso: string | null) =>
@@ -128,6 +147,212 @@ function Details({ account }: Pick<Props, 'account'>) {
   );
 }
 
+function DebitOrder({ debitOrders }: Pick<Props, 'debitOrders'>) {
+  const firstBank = Object.keys(debitOrders.banks)[0] ?? '';
+  const form = useForm({
+    holder_name: '',
+    id_number: '',
+    bank: firstBank,
+    branch_code: debitOrders.banks[firstBank] ?? '',
+    account_number: '',
+    account_type: 'cheque',
+    collection_day: 1,
+  });
+  const m = debitOrders.mandate;
+  const post = (url: string, data: Record<string, unknown> = {}) =>
+    router.post(url, data as never, { preserveScroll: true });
+
+  if (!debitOrders.available) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Debit order</CardTitle>
+          <CardDescription>
+            DebiCheck debit orders open soon. Pay by card until then.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Debit order</CardTitle>
+        <CardDescription>
+          Pay each renewal by DebiCheck debit order. You approve it once with your bank.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-5">
+        {m && (
+          <div role="status" className="bg-sunken rounded-xl p-4 text-sm">
+            {m.status === 'active' && (
+              <p>
+                <strong className="font-semibold">Active:</strong> {m.bank} {m.account}, collected
+                around day {m.day} of the month
+                {debitOrders.method === 'debit_order'
+                  ? '.'
+                  : ' (renewals currently go to your card).'}
+              </p>
+            )}
+            {m.status === 'pending_authentication' && (
+              <p>
+                Waiting for you to approve the debit order with {m.bank} — check your banking app or
+                SMS.
+              </p>
+            )}
+            {m.status === 'rejected' && (
+              <p>
+                The bank didn’t approve the debit order{m.failure ? `: ${m.failure}` : ''}. You can
+                try again below.
+              </p>
+            )}
+          </div>
+        )}
+        {debitOrders.method === 'debit_order' && (
+          <Button
+            variant="secondary"
+            className="w-fit"
+            onClick={() => post('billing/debit-order/use-card')}
+          >
+            Charge renewals to my card instead
+          </Button>
+        )}
+        {(!m || m.status === 'rejected') && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.post('billing/debit-order', { preserveScroll: true });
+            }}
+            className="grid gap-5 sm:grid-cols-2"
+            noValidate
+          >
+            <Field label="Account holder" error={form.errors.holder_name} required>
+              <Input
+                value={form.data.holder_name}
+                onChange={(e) => form.setData('holder_name', e.target.value)}
+                autoComplete="name"
+              />
+            </Field>
+            <Field label="Account holder’s ID number" error={form.errors.id_number} required>
+              <Input
+                value={form.data.id_number}
+                onChange={(e) => form.setData('id_number', e.target.value)}
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </Field>
+            <Field label="Bank" error={form.errors.bank}>
+              {(control) => (
+                <Select
+                  value={form.data.bank}
+                  onValueChange={(v) =>
+                    form.setData((d) => ({
+                      ...d,
+                      bank: v,
+                      branch_code: debitOrders.banks[v] ?? d.branch_code,
+                    }))
+                  }
+                >
+                  <SelectTrigger {...control}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(debitOrders.banks).map((b) => (
+                      <SelectItem key={b} value={b}>
+                        {b}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </Field>
+            <Field
+              label="Branch code"
+              hint="Universal code filled in for you"
+              error={form.errors.branch_code}
+              required
+            >
+              <Input
+                value={form.data.branch_code}
+                onChange={(e) => form.setData('branch_code', e.target.value)}
+                inputMode="numeric"
+              />
+            </Field>
+            <Field label="Account number" error={form.errors.account_number} required>
+              <Input
+                value={form.data.account_number}
+                onChange={(e) => form.setData('account_number', e.target.value)}
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </Field>
+            <Field label="Account type" error={form.errors.account_type}>
+              {(control) => (
+                <Select
+                  value={form.data.account_type}
+                  onValueChange={(v) => form.setData('account_type', v)}
+                >
+                  <SelectTrigger {...control}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {debitOrders.accountTypes.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t[0]?.toUpperCase() + t.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </Field>
+            <Field
+              label="Collection day of the month"
+              hint="1 to 28"
+              error={form.errors.collection_day}
+            >
+              <Input
+                type="number"
+                min={1}
+                max={28}
+                value={form.data.collection_day}
+                onChange={(e) => form.setData('collection_day', Number(e.target.value))}
+              />
+            </Field>
+            <div className="flex items-end">
+              <Button type="submit" loading={form.processing}>
+                Set up debit order
+              </Button>
+            </div>
+          </form>
+        )}
+        {debitOrders.simulated && m && (
+          <div className="border-border grid gap-2 rounded-xl border border-dashed p-4">
+            <p className="text-sm font-medium">Development only — act as the bank</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'mandate.approved',
+                'mandate.rejected',
+                'collection.succeeded',
+                'collection.failed',
+              ].map((t) => (
+                <Button
+                  key={t}
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => post('billing/debit-order/simulate', { type: t })}
+                >
+                  {t}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Billing({
   subscription,
   needsPayment,
@@ -137,6 +362,7 @@ export default function Billing({
   packs,
   payments,
   gatewayReady,
+  debitOrders,
 }: Props) {
   const canPay = gatewayReady && account.saved;
   const post = (url: string, data: Record<string, unknown> = {}) =>
@@ -249,6 +475,8 @@ export default function Billing({
             Adding a card makes a R1 check that is refunded straight away.
           </CardContent>
         </Card>
+
+        <DebitOrder debitOrders={debitOrders} />
 
         {packs.length > 0 && (
           <Card>
