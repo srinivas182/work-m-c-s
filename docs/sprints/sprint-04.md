@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 4 of 18 · 14 – 25 December 2026 |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 22 Oct 2026 — in progress (4.1) |
 | **Depends on** | v0.4.0 (packages and entitlements, design system and palette engine); PRD §5.4 FR-WB-01, FR-WB-02, FR-WB-03; ADR-0003 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 | **Capacity note** | 16 December (Day of Reconciliation) and 25 December (Christmas Day) are public holidays in South Africa: 8 working days instead of 10 (see §6, decision 7) |
