@@ -23,6 +23,11 @@ final readonly class Settings implements PlatformSettings
         return $this->platform($key, $default);
     }
 
+    public function set(string $key, mixed $value, ?string $by): void
+    {
+        $this->setPlatform($key, $value, $by);
+    }
+
     public function platform(string $key, mixed $default = null): mixed
     {
         $value = Cache::remember("platform-setting:{$key}", 300, fn () => DB::table('platform_settings')->where('key', $key)->value('value'));

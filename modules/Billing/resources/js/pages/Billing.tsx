@@ -1,6 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { CreditCard, Receipt } from 'lucide-react';
-import type { FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import {
   Badge,
   Button,
@@ -30,6 +30,8 @@ import { rand } from '@/lib/money';
 
 interface Props {
   subscription: {
+    package_id: string;
+    pending: { package: string; period: string } | null;
     package: string;
     status: string;
     period: string;
@@ -56,6 +58,21 @@ interface Props {
     failure: string | null;
   }[];
   gatewayReady: boolean;
+  stage: 'none' | 'grace' | 'restricted' | 'suspended';
+  packagesOnSale: {
+    id: string;
+    name: string;
+    monthly_total_cents: number;
+    yearly_total_cents: number;
+  }[];
+  invoices: {
+    id: string;
+    number: string;
+    issued_at: string;
+    total_cents: number;
+    credited_cents: number;
+  }[];
+  creditNotes: { id: string; number: string; total_cents: number; issued_at: string }[];
   debitOrders: {
     available: boolean;
     simulated: boolean;
@@ -147,6 +164,178 @@ function Details({ account }: Pick<Props, 'account'>) {
   );
 }
 
+function ChangePackage({
+  subscription,
+  packagesOnSale,
+}: {
+  subscription: NonNullable<Props['subscription']>;
+  packagesOnSale: Props['packagesOnSale'];
+}) {
+  const [choice, setChoice] = useState({
+    package_id: subscription.package_id,
+    period: subscription.period,
+  });
+  const [quote, setQuote] = useState<{ kind: string; charge_cents: number } | null>(null);
+  const form = useForm({});
+  const unchanged =
+    choice.package_id === subscription.package_id && choice.period === subscription.period;
+
+  useEffect(() => {
+    if (unchanged) return;
+    const ctrl = new AbortController();
+    fetch(
+      `billing/change/quote?package_id=${encodeURIComponent(choice.package_id)}&period=${choice.period}`,
+      { headers: { Accept: 'application/json' }, signal: ctrl.signal },
+    )
+      .then((r) => (r.ok ? r.json() : null))
+      .then((q) => setQuote(q))
+      .catch(() => undefined);
+    return () => ctrl.abort();
+  }, [choice, unchanged]);
+  const shown = unchanged ? null : quote;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Change package</CardTitle>
+        <CardDescription>
+          Upgrades start now and you pay only for the rest of this period. Downgrades start at your
+          next renewal.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        {subscription.pending && (
+          <div className="bg-sunken flex flex-wrap items-center justify-between gap-3 rounded-xl p-4 text-sm">
+            <span>
+              {subscription.pending.package}, {subscription.pending.period}, starts at your next
+              renewal.
+            </span>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => router.post('billing/change/cancel', {}, { preserveScroll: true })}
+            >
+              Keep my current package
+            </Button>
+          </div>
+        )}
+        <div className="grid gap-4 sm:grid-cols-[1.5fr_1fr_auto] sm:items-end">
+          <Field label="Package">
+            {(control) => (
+              <Select
+                value={choice.package_id}
+                onValueChange={(v) => setChoice((c) => ({ ...c, package_id: v }))}
+              >
+                <SelectTrigger {...control}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {packagesOnSale.map((p) => (
+                    <SelectItem
+                      key={p.id}
+                      value={p.id}
+                    >{`${p.name} — ${rand(p.monthly_total_cents)}/month`}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </Field>
+          <Field label="Billing">
+            {(control) => (
+              <Select
+                value={choice.period}
+                onValueChange={(v) => setChoice((c) => ({ ...c, period: v }))}
+              >
+                <SelectTrigger {...control}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </Field>
+          <Button
+            disabled={unchanged || form.processing}
+            loading={form.processing}
+            onClick={() => {
+              form.transform(() => choice);
+              form.post('billing/change', { preserveScroll: true });
+            }}
+          >
+            {shown?.kind === 'upgrade' && shown.charge_cents > 0
+              ? `Upgrade and pay ${rand(shown.charge_cents)} + VAT`
+              : shown?.kind === 'scheduled'
+                ? 'Change at renewal'
+                : 'Change package'}
+          </Button>
+        </div>
+        {(form.errors as Record<string, string>).package && (
+          <p role="alert" className="text-danger-11 text-sm">
+            {(form.errors as Record<string, string>).package}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function Documents({ invoices, creditNotes }: Pick<Props, 'invoices' | 'creditNotes'>) {
+  if (invoices.length === 0) return null;
+  return (
+    <Table label="Tax invoices">
+      <TableHeader>
+        <TableRow>
+          <TableHead>Invoice</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead className="text-right">Amount</TableHead>
+          <TableHead>
+            <span className="sr-only">Download</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {invoices.map((i) => (
+          <TableRow key={i.id}>
+            <TableCell className="font-medium">
+              {i.number}
+              {i.credited_cents > 0 && (
+                <Badge className="ml-2">Credited {rand(i.credited_cents)}</Badge>
+              )}
+            </TableCell>
+            <TableCell className="text-fg-muted">{date(i.issued_at)}</TableCell>
+            <TableCell className="text-right tabular-nums">{rand(i.total_cents)}</TableCell>
+            <TableCell className="text-right">
+              <a
+                className="text-accent-fg font-medium underline-offset-4 hover:underline"
+                href={`billing/invoices/${i.id}`}
+              >
+                PDF<span className="sr-only"> of {i.number}</span>
+              </a>
+            </TableCell>
+          </TableRow>
+        ))}
+        {creditNotes.map((n) => (
+          <TableRow key={n.id}>
+            <TableCell className="font-medium">{n.number}</TableCell>
+            <TableCell className="text-fg-muted">{date(n.issued_at)}</TableCell>
+            <TableCell className="text-right tabular-nums">−{rand(n.total_cents)}</TableCell>
+            <TableCell className="text-right">
+              <a
+                className="text-accent-fg font-medium underline-offset-4 hover:underline"
+                href={`billing/credit-notes/${n.id}`}
+              >
+                PDF<span className="sr-only"> of {n.number}</span>
+              </a>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
 function DebitOrder({ debitOrders }: Pick<Props, 'debitOrders'>) {
   const firstBank = Object.keys(debitOrders.banks)[0] ?? '';
   const form = useForm({
@@ -159,6 +348,9 @@ function DebitOrder({ debitOrders }: Pick<Props, 'debitOrders'>) {
     collection_day: 1,
   });
   const m = debitOrders.mandate;
+  // Most owners pay by card: keep the seven-field form closed until asked for (open again after errors).
+  const [open, setOpen] = useState(false);
+  const showForm = open || Object.keys(form.errors).length > 0;
   const post = (url: string, data: Record<string, unknown> = {}) =>
     router.post(url, data as never, { preserveScroll: true });
 
@@ -218,7 +410,12 @@ function DebitOrder({ debitOrders }: Pick<Props, 'debitOrders'>) {
             Charge renewals to my card instead
           </Button>
         )}
-        {(!m || m.status === 'rejected') && (
+        {(!m || m.status === 'rejected') && !showForm && (
+          <Button variant="secondary" className="w-fit" onClick={() => setOpen(true)}>
+            Set up a debit order
+          </Button>
+        )}
+        {(!m || m.status === 'rejected') && showForm && (
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -363,6 +560,10 @@ export default function Billing({
   payments,
   gatewayReady,
   debitOrders,
+  stage,
+  packagesOnSale,
+  invoices,
+  creditNotes,
 }: Props) {
   const canPay = gatewayReady && account.saved;
   const post = (url: string, data: Record<string, unknown> = {}) =>
@@ -380,9 +581,13 @@ export default function Billing({
         {needsPayment && (
           <div role="alert" className="border-warning-6 bg-warning-3 rounded-2xl border p-5">
             <p className="font-semibold">
-              {subscription?.status === 'trial'
-                ? 'Your free trial has ended.'
-                : 'Your business is ready — pay for your first period to start using it.'}
+              {stage === 'suspended'
+                ? 'Your business is suspended because the subscription hasn’t been paid. Pay now and everything comes back at once — nothing has been deleted.'
+                : stage === 'restricted'
+                  ? 'Your last payment didn’t go through, so only Billing is open. Pay now to restore everything.'
+                  : subscription?.status === 'trial'
+                    ? 'Your free trial has ended.'
+                    : 'Your business is ready — pay for your first period to start using it.'}
             </p>
             <p className="text-fg-muted mt-1 text-sm">
               {account.saved
@@ -451,6 +656,10 @@ export default function Billing({
           </Card>
         )}
 
+        {subscription && packagesOnSale.length > 0 && (
+          <ChangePackage subscription={subscription} packagesOnSale={packagesOnSale} />
+        )}
+
         <Details account={account} />
 
         <Card>
@@ -509,6 +718,8 @@ export default function Billing({
             </CardContent>
           </Card>
         )}
+
+        <Documents invoices={invoices} creditNotes={creditNotes} />
 
         {payments.length === 0 ? (
           <EmptyState

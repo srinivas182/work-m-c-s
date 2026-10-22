@@ -28,6 +28,10 @@ final class RenewSubscriptionsCommand extends Command
         $renewed = $failed = 0;
 
         foreach ($catalog->dueForRenewal(now()->addHour()) as $tenantId) {
+            // Downgrades and yearly → monthly scheduled earlier take effect now, before charging.
+            if ($catalog->applyScheduledChange($tenantId)) {
+                $this->components->twoColumnDetail($tenantId, 'scheduled package change applied');
+            }
             $sub = $catalog->subscriptionOf($tenantId);
             if ($sub === null) {
                 continue;

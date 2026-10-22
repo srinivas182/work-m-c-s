@@ -85,5 +85,8 @@ test('a new owner signs up from the pricing page and lands in their back office'
   await expect(page.getByText('R343.85 a month incl. VAT')).toBeVisible();
   await expect(page.getByText('Free trial')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Debit order' })).toBeVisible();
+  await page.getByRole('button', { name: 'Set up a debit order' }).click();
+  await expect(page.getByLabel(/^Account holder’s ID number/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Change package' })).toBeVisible();
   await expectAccessible(page);
 });

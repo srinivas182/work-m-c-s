@@ -42,7 +42,13 @@ final readonly class EloquentCatalog implements Catalog
             return null;
         }
 
+        $pending = $s->pending_package_id === null && $s->pending_period === null ? null : [
+            'package' => (string) (Package::query()->whereKey((string) ($s->pending_package_id ?? $s->package_id))->value('name') ?? ''),
+            'period' => $s->pending_period ?? $s->billing_period,
+        ];
+
         return [
+            'package_id' => $s->package_id,
             'package' => $s->package->name,
             'package_key' => $s->package->key,
             'version' => $s->version->version,
@@ -51,14 +57,70 @@ final readonly class EloquentCatalog implements Catalog
             'period_cents' => $s->billing_period === 'yearly' ? $s->version->yearly_price_cents : $s->version->monthly_price_cents,
             'monthly_credits' => $s->version->monthly_credits,
             'trial_ends_at' => $s->trial_ends_at?->toIso8601String(),
+            'current_period_start' => $s->current_period_start?->toIso8601String(),
             'current_period_end' => $s->current_period_end?->toIso8601String(),
+            'past_due_since' => $s->past_due_since?->toIso8601String(),
+            'pending' => $pending,
         ];
+    }
+
+    public function suspendForNonPayment(string $tenantId): void
+    {
+        TenantSubscription::query()->whereKey($tenantId)->where('status', 'past_due')->update(['status' => 'suspended']);
+        $this->audit->record('subscription.suspended', 'tenant', $tenantId, ['reason' => 'non-payment'], ['platform' => true]);
+    }
+
+    public function inDunning(): array
+    {
+        return TenantSubscription::query()->whereIn('status', ['past_due', 'suspended'])->whereNotNull('past_due_since')->get()
+            ->mapWithKeys(fn (TenantSubscription $s) => [$s->tenant_id => ['status' => $s->status, 'since' => $s->past_due_since?->toIso8601String() ?? '']])->all();
+    }
+
+    public function priceOf(string $packageId, string $period): ?array
+    {
+        $p = Package::query()->with('currentVersion')->whereKey($packageId)->where('status', 'active')->first();
+        $v = $p?->currentVersion;
+        if ($p === null || $v === null || ! in_array($period, ['monthly', 'yearly'], true)) {
+            return null;
+        }
+
+        return ['package_id' => $p->id, 'key' => $p->key, 'name' => $p->name, 'period_cents' => $period === 'yearly' ? $v->yearly_price_cents : $v->monthly_price_cents, 'monthly_credits' => $v->monthly_credits];
+    }
+
+    public function changePackage(string $tenantId, string $packageId, string $period, ?\DateTimeInterface $periodStart = null, ?\DateTimeInterface $periodEnd = null): void
+    {
+        $package = Package::query()->with('currentVersion')->whereKey($packageId)->where('status', 'active')->firstOrFail();
+        $before = TenantSubscription::query()->findOrFail($tenantId);
+        TenantSubscription::query()->whereKey($tenantId)->update(array_filter([
+            'package_id' => $package->id, 'package_version_id' => $package->current_version_id, 'billing_period' => $period,
+            'current_period_start' => $periodStart, 'current_period_end' => $periodEnd,
+            'pending_package_id' => null, 'pending_period' => null,
+        ], fn ($v, $k) => $v !== null || in_array($k, ['pending_package_id', 'pending_period'], true), ARRAY_FILTER_USE_BOTH));
+        $this->entitlements->flush();
+        $this->audit->record('subscription.package_changed', 'tenant', $tenantId, ['from' => $before->package_id, 'to' => $package->key, 'period' => $period], ['platform' => true]);
+    }
+
+    public function scheduleChange(string $tenantId, ?string $packageId, ?string $period): void
+    {
+        TenantSubscription::query()->whereKey($tenantId)->update(['pending_package_id' => $packageId, 'pending_period' => $period]);
+        $this->audit->record($packageId === null && $period === null ? 'subscription.change_cancelled' : 'subscription.change_scheduled', 'tenant', $tenantId, ['package_id' => $packageId, 'period' => $period], ['platform' => true]);
+    }
+
+    public function applyScheduledChange(string $tenantId): bool
+    {
+        $s = TenantSubscription::query()->find($tenantId);
+        if ($s === null || ($s->pending_package_id === null && $s->pending_period === null)) {
+            return false;
+        }
+        $this->changePackage($tenantId, $s->pending_package_id ?? $s->package_id, $s->pending_period ?? $s->billing_period);
+
+        return true;
     }
 
     public function markPaid(string $tenantId, \DateTimeInterface $periodStart, \DateTimeInterface $periodEnd): void
     {
         TenantSubscription::query()->whereKey($tenantId)->update([
-            'status' => 'active', 'current_period_start' => $periodStart, 'current_period_end' => $periodEnd,
+            'status' => 'active', 'current_period_start' => $periodStart, 'current_period_end' => $periodEnd, 'past_due_since' => null,
         ]);
         $this->entitlements->flush();
         $this->audit->record('subscription.paid', 'tenant', $tenantId, ['until' => $periodEnd->format(DATE_ATOM)], ['platform' => true]);
@@ -66,7 +128,7 @@ final readonly class EloquentCatalog implements Catalog
 
     public function markPastDue(string $tenantId): void
     {
-        TenantSubscription::query()->whereKey($tenantId)->where('status', 'active')->update(['status' => 'past_due']);
+        TenantSubscription::query()->whereKey($tenantId)->where('status', 'active')->update(['status' => 'past_due', 'past_due_since' => now()]);
         $this->audit->record('subscription.past_due', 'tenant', $tenantId, [], ['platform' => true]);
     }
 
