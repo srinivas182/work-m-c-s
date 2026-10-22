@@ -62,3 +62,15 @@ The audit trail is append-only in the application; enforce it in the database to
 ## CI verification
 
 Every PR that touches Docker files or dependency lock files builds the image, lints the Dockerfile (hadolint), starts a container and checks: liveness and readiness return 200, the home page renders, the design showcase is **not** exposed (404), the process is not root, no `X-Powered-By` header, and Docker reports the container `healthy`.
+
+## Server-side rendering (wurk.co.za)
+
+The marketing site is rendered on the server so search engines get full HTML. Run the same image in its `ssr` role as a separate container (or sidecar) and point the web containers at it:
+
+```sh
+docker run -d --name wurk-ssr wurk:latest ssr          # listens on 0.0.0.0:13714
+# web containers:
+INERTIA_SSR_URL=http://wurk-ssr:13714
+```
+
+Only requests for the root domain use it; the back offices render in the browser. If the SSR container is down, pages still work and render in the browser, losing only the search-engine benefit until it's back. Keep it internal (no public port).

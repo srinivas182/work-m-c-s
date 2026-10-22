@@ -14,6 +14,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  // The SSR bundle carries its dependencies, so production needs only the Node binary.
+  ssr: { noExternal: true },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./resources/js', import.meta.url)),

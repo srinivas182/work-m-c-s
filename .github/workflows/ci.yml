@@ -364,10 +364,21 @@ jobs:
             sleep 3
           done
           [ "$status" = "healthy" ]
+          # Server-side renderer for wurk.co.za: the same image in its "ssr" role.
+          docker run -d --name wurk-ssr -p 13714:13714 wurk:ci ssr
+          for i in $(seq 1 15); do
+            out=$(curl -s -X POST http://localhost:13714/render -H 'Content-Type: application/json' \
+              -d '{"component":"Marketing::Faq","props":{"signupUrl":"x","signInUrl":"y","moduleNames":{},"errors":{}},"url":"/faq","version":"1"}' || true)
+            echo "$out" | grep -q 'Questions · WURK' && { echo "SSR renders pages"; break; }
+            sleep 1
+          done
+          echo "$out" | grep -q 'Questions · WURK'
           docker image ls wurk:ci --format 'Image size: {{.Size}}'
       - name: Container logs
         if: failure()
-        run: docker logs wurk || true
+        run: |
+          docker logs wurk || true
+          docker logs wurk-ssr || true
 
   ci:
     name: CI
