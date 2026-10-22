@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 3 of 18 · 30 November – 11 December 2026 |
-| **Status** | Approved 22 Oct 2026 — 3.1 ✅ (#28), 3.2 ✅ (#29), 3.3 in review |
+| **Status** | Approved 22 Oct 2026 — 3.1 ✅ (#28), 3.2 ✅ (#29), 3.3 ✅ (#30), 3.4 in review |
 | **Depends on** | v0.3.0 (packages, entitlements, providers, WURK Credits, security settings); PRD §4.5, §5.1–5.2, §7.14, §11 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -120,4 +120,5 @@ All money in cents (ZAR); VAT computed per line and rounded per invoice with the
 |---|---|---|
 | 3.1 Marketing site & signup | #28 | 456 tests on SQLite and MySQL 8; 32 browser checks incl. a full signup from the pricing page into the back office (desktop and mobile). Lighthouse mobile ≥ 98 performance, 100 accessibility, 100 SEO through compression (best practices only lacks HTTPS locally). Category, template and AI steps join the wizard with Sprints 4–5 and 14. Without a trial (already used), finishing waits for card payment in 3.2 |
 | 3.2 Card payments & credit top-ups | #29 | 497 tests on SQLite and MySQL 8; 32 browser checks. Paystack calls checked against its docs: only `charge.success` is sent as a webhook, so declines are taken from the charge response or verify API. Real charges still need Paystack test keys |
-| 3.3 Cash & DebiCheck | see PR | 509 tests on SQLite and MySQL 8; 32 browser checks. DebiCheck runs against a stand-in provider (refused in production) until WURK chooses a provider; the live driver follows in Sprint 4. Three real bugs found by tests: unlimited cash-code guesses, debit collections marked past due, shared rate-limit counters |
+| 3.3 Cash & DebiCheck | #30 | 509 tests on SQLite and MySQL 8; 32 browser checks. DebiCheck runs against a stand-in provider (refused in production) until WURK chooses a provider; the live driver follows in Sprint 4. Three real bugs found by tests: unlimited cash-code guesses, debit collections marked past due, shared rate-limit counters |
+| 3.4 Invoices, proration & dunning | see PR | 522 tests on SQLite and MySQL 8; 32 browser checks; invoice PDF and billing/cash screens reviewed visually. Issuer details are placeholders until WURK enters real ones. Dunning notices by email/SMS; WhatsApp needs an approved template; instant EFT not yet in the pay link |
