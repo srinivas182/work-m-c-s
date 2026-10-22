@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 3.3 (cash, DebiCheck)
+- Cash at a WURK office (PRD §4.5): staff record cash for a subscription or credit pack; a 6-digit code goes to the approvers in Security settings — never to the person who recorded it, and recording is refused when nobody else can approve. Codes are hashed, valid 15 minutes, 5 attempts. Once confirmed the payment settles like any other; receipts go to finance and the business. Recorded, approved and cancelled cash is audited. New platform permission `payments.record-cash` (finance and super admin).
+- DebiCheck debit orders behind a `DebitOrderProvider` contract with a stand-in provider until WURK chooses one (Sprint 3 decision 2); the stand-in refuses to run in production. Owners set up a mandate (SA ID number checksum, 6-digit branch codes with universal codes prefilled, account details encrypted and masked); approval, rejection and collection outcomes arrive as signed events, each handled once. Renewals collect by debit order when one is active; outcomes settle days later without moving the billing date.
+- Any failed subscription payment (card now, debit order later) makes an active subscription past due.
+
+### Fixed
+- Wrong cash approval codes never counted: the attempt was rolled back with the error, allowing unlimited guesses. Attempts now commit before the error is reported.
+- A new payment's status was empty in memory (database default not loaded), so a submitted debit-order collection was marked past due; payments now set "pending" explicitly.
+- Rate limits shared one counter per user across routes (e.g. wrong codes used up "send a new code"); every throttled route now has its own counter.
+
 ### Added — Sprint 3.2 (card payments, credit top-ups)
 - Billing module with a `PaymentGateway` contract and Paystack as the first driver (checkout, server-side verify, saved-card charges, refunds, HMAC-SHA512 webhooks).
 - A payment is marked paid only on server-side confirmation from Paystack (signed webhook or our own verify call), and only if the confirmed amount and currency match; every confirmation path goes through one idempotent, row-locked settle step. Webhook events are handled once.
