@@ -12,6 +12,14 @@ interface PeopleDirectory
 
     public function staffCount(): int;
 
+    /**
+     * How to reach people (for approval codes and notices).
+     *
+     * @param  list<string>  $ids
+     * @return array<string, array{name: string, email: string|null, phone: string|null}>
+     */
+    public function contacts(array $ids): array;
+
     /** Whether the person has a confirmed authenticator app. */
     public function hasMfa(string $identityId): bool;
 

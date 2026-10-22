@@ -11,7 +11,7 @@ Route::domain((string) config('wurk.domains.admin'))
     ->group(function (): void {
         Route::get('/providers', [ProvidersController::class, 'index'])->name('admin.providers');
         Route::put('/providers/{channel}', [ProvidersController::class, 'update'])->name('admin.providers.update');
-        Route::post('/providers/{channel}/test', [ProvidersController::class, 'test'])->middleware('throttle:10,1')->name('admin.providers.test');
+        Route::post('/providers/{channel}/test', [ProvidersController::class, 'test'])->middleware('throttle:10,1,admin.providers.test')->name('admin.providers.test');
     });
 
 // Delivery receipts from providers (signature-verified; no session or CSRF).

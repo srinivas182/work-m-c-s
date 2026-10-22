@@ -6,6 +6,7 @@ namespace Wurk\Security\Support;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Wurk\Security\Contracts\PlatformSettings;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -13,9 +14,14 @@ use Wurk\Tenancy\Contracts\TenantContext;
  * Platform settings are cached because the admin IP check reads them on every
  * admin request; writes clear the cache.
  */
-final readonly class Settings
+final readonly class Settings implements PlatformSettings
 {
     public function __construct(private TenantContext $context) {}
+
+    public function get(string $key, mixed $default = null): mixed
+    {
+        return $this->platform($key, $default);
+    }
 
     public function platform(string $key, mixed $default = null): mixed
     {

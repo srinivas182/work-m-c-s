@@ -125,10 +125,17 @@ final readonly class Payments
 
         if ($payment->purpose === 'subscription') {
             $sub = $this->catalog->subscriptionOf($payment->tenant_id);
-            $start = CarbonImmutable::now();
-            foreach ([$sub['trial_ends_at'] ?? null, $sub['current_period_end'] ?? null] as $later) {
-                if ($later !== null && CarbonImmutable::parse($later)->gt($start)) {
-                    $start = CarbonImmutable::parse($later); // paying early never loses trial or paid days
+            $renewalOf = $payment->details['renewal_of'] ?? null;
+            if (is_string($renewalOf) && $renewalOf !== '') {
+                // A renewal continues exactly where the renewed period ended, even when a
+                // debit order settles days later, so the billing date never drifts.
+                $start = CarbonImmutable::parse($renewalOf);
+            } else {
+                $start = CarbonImmutable::now();
+                foreach ([$sub['trial_ends_at'] ?? null, $sub['current_period_end'] ?? null] as $later) {
+                    if ($later !== null && CarbonImmutable::parse($later)->gt($start)) {
+                        $start = CarbonImmutable::parse($later); // paying early never loses trial or paid days
+                    }
                 }
             }
             $end = ($sub['period'] ?? 'monthly') === 'yearly' ? $start->addYear() : $start->addMonth();
@@ -155,7 +162,7 @@ final readonly class Payments
     }
 
     /** @param  array<string, mixed>  $details */
-    private function create(string $tenantId, string $purpose, int $exclCents, array $details): Payment
+    public function create(string $tenantId, string $purpose, int $exclCents, array $details, ?string $gateway = null): Payment
     {
         $tenant = $this->tenants->find($tenantId) ?? throw new \InvalidArgumentException('Unknown business.');
         $country = $this->countries->find($tenant->countryCode());
@@ -163,8 +170,10 @@ final readonly class Payments
         $vat = intdiv($exclCents * $vatBp + 5000, 10000); // round half up to the cent
 
         return Payment::query()->create([
+            // Set explicitly: a new model doesn't see the database default, and callers read ->status.
+            'status' => 'pending',
             'tenant_id' => $tenantId, 'purpose' => $purpose, 'reference' => 'WURK-'.Str::upper((string) Str::ulid()),
-            'gateway' => $this->gateway->name(), 'currency' => (string) ($country['currency'] ?? 'ZAR'),
+            'gateway' => $gateway ?? $this->gateway->name(), 'currency' => (string) ($country['currency'] ?? 'ZAR'),
             'amount_excl_cents' => $exclCents, 'vat_cents' => $vat, 'total_cents' => $exclCents + $vat, 'vat_bp' => $vatBp, 'details' => $details,
         ]);
     }

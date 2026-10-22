@@ -32,6 +32,13 @@ final class EloquentPeopleDirectory implements PeopleDirectory
         return PlatformStaff::query()->where('status', 'active')->count();
     }
 
+    public function contacts(array $ids): array
+    {
+        return Identity::query()->whereIn('id', $ids)->get()->mapWithKeys(fn (Identity $i) => [
+            $i->id => ['name' => $i->fullName(), 'email' => $i->email, 'phone' => $i->phone],
+        ])->all();
+    }
+
     public function hasMfa(string $identityId): bool
     {
         return Identity::query()->find($identityId)?->hasMfa() ?? false;
