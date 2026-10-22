@@ -6,7 +6,6 @@ namespace Wurk\Billing\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 use Wurk\Billing\Support\BillingStatus;
 use Wurk\Billing\Support\Dunning;
@@ -26,7 +25,9 @@ final readonly class RequirePayment
 
         // Dunning grace (days 1–7): full service, with a banner on every page.
         if ($this->context->has() && $this->dunning->stage($this->context->id()) === 'grace') {
-            Inertia::share('banner', [
+            // On the request, never Inertia::share(): shared state outlives the request in
+            // long-running Octane workers and would leak this banner to other businesses.
+            $request->attributes->set('wurk.banner', [
                 'tone' => 'danger',
                 'message' => 'We couldn’t take your last payment. Pay now to keep everything running.',
                 'action' => ['label' => 'Pay now', 'href' => route('tenant.billing')],

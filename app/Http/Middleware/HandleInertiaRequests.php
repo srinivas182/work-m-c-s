@@ -53,6 +53,8 @@ final class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
             'flash' => fn () => ['status' => $request->session()->get('status'), 'warning' => $request->session()->get('warning')],
+            // A page-wide notice a module attached to this request (e.g. Billing's payment reminder).
+            'banner' => fn () => $request->attributes->get('wurk.banner'),
         ];
     }
 }

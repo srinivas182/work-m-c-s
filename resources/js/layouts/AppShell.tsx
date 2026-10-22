@@ -279,7 +279,7 @@ function BottomNav({ items, onMore }: { items: NavigationItem[]; onMore: () => v
 }
 
 export default function AppShell({ title, user: userProp, children }: AppShellProps) {
-  const { navigation, auth, flash } = usePage<SharedProps>().props;
+  const { navigation, auth, flash, banner } = usePage<SharedProps>().props;
   const user = userProp ?? auth.user ?? undefined;
 
   useEffect(() => {
@@ -376,6 +376,22 @@ export default function AppShell({ title, user: userProp, children }: AppShellPr
             </div>
           </header>
 
+          {banner && (
+            <div
+              role="alert"
+              className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm sm:px-6 lg:px-10 ${banner.tone === 'danger' ? 'bg-danger-3 text-danger-12' : banner.tone === 'warning' ? 'bg-warning-3 text-warning-12' : 'bg-accent-3 text-fg'}`}
+            >
+              <span className="font-medium">{banner.message}</span>
+              {banner.action && (
+                <Link
+                  href={banner.action.href}
+                  className="bg-surface text-fg hover:bg-surface-raised rounded-lg px-3 py-1.5 font-semibold shadow-xs"
+                >
+                  {banner.action.label}
+                </Link>
+              )}
+            </div>
+          )}
           <main id="main" className="flex-1 px-4 pt-6 pb-28 sm:px-6 md:pb-10 lg:px-10 lg:pt-10">
             <div className="mx-auto w-full max-w-7xl">{children}</div>
           </main>
