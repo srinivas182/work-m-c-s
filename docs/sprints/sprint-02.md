@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 2 of 18 · 16 – 27 November 2026 |
-| **Status** | Approved 21 Oct 2026 — 2.1 ✅ (#21), 2.2 ✅ (#22), 2.3 ✅ (#23), 2.4 in review |
+| **Status** | ✅ Complete — demo accepted 22 Oct 2026, released as v0.3.0 |
 | **Depends on** | v0.2.0 (tenancy, WURK ID, access control, audit), PRD §4, §12, §14 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 
@@ -139,4 +139,4 @@ All amounts are integers (cents, credit units); all changes to packages, rates, 
 | 2.1 Businesses & staff | #21 | 229 tests on SQLite and MySQL 8; 28 browser checks incl. staff sign-in with a real authenticator code. Mobile-number invitations deferred to 2.3 (needs SMS) |
 | 2.2 Packages & entitlements | #22 | 273 tests on SQLite and MySQL 8; 28 browser checks (admin now creates a package and visits feature rollouts). Found and fixed: `wurk:make-module` left the app unbootable until a manual autoload refresh; empty package description crashed |
 | 2.3 Countries, providers & messaging | #23 | 330 tests; 28 browser checks. Driver requests checked against provider docs: Brevo's SMS endpoint changed in May 2025 (`/transactionalSMS/send`), so the driver uses the current one. Real sends still need sandbox keys. Payment gateways: credentials stored; live connection checks move to Sprint 3 with each integration. Delivery receipts: Twilio and Meta (signed); other SMS providers record "sent" until their callbacks are added |
-| 2.4 Credits & security | see PR | 391 tests on SQLite and MySQL 8, incl. a 300-operation property test (ledger always equals balance, never negative); 28 browser checks. Found and fixed: rates set in the same second applied in arbitrary order. Low-balance alerts are recorded; delivering them to owners waits for the notification engine |
+| 2.4 Credits & security | #24 | 391 tests on SQLite and MySQL 8, incl. a 300-operation property test (ledger always equals balance, never negative); 28 browser checks. Found and fixed: rates set in the same second applied in arbitrary order. Low-balance alerts are recorded; delivering them to owners waits for the notification engine |
