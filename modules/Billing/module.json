@@ -1,0 +1,17 @@
+{
+    "name": "Billing",
+    "key": "billing",
+    "version": "0.1.0",
+    "description": "Collecting WURK subscriptions and credit purchases: card payments (Paystack), saved cards, renewals.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "plans",
+        "credits",
+        "regions",
+        "messaging",
+        "audit"
+    ]
+}

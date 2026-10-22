@@ -44,7 +44,8 @@
             "Wurk\\Credits\\": "modules/Credits/src/",
             "Wurk\\Security\\": "modules/Security/src/",
             "Wurk\\Onboarding\\": "modules/Onboarding/src/",
-            "Wurk\\Marketing\\": "modules/Marketing/src/"
+            "Wurk\\Marketing\\": "modules/Marketing/src/",
+            "Wurk\\Billing\\": "modules/Billing/src/"
         }
     },
     "autoload-dev": {
@@ -64,7 +65,8 @@
             "Wurk\\Credits\\Tests\\": "modules/Credits/tests/",
             "Wurk\\Security\\Tests\\": "modules/Security/tests/",
             "Wurk\\Onboarding\\Tests\\": "modules/Onboarding/tests/",
-            "Wurk\\Marketing\\Tests\\": "modules/Marketing/tests/"
+            "Wurk\\Marketing\\Tests\\": "modules/Marketing/tests/",
+            "Wurk\\Billing\\Tests\\": "modules/Billing/tests/"
         }
     },
     "scripts": {

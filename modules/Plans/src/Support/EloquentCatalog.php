@@ -35,6 +35,47 @@ final readonly class EloquentCatalog implements Catalog
             })->all());
     }
 
+    public function subscriptionOf(string $tenantId): ?array
+    {
+        $s = TenantSubscription::query()->with(['package', 'version'])->find($tenantId);
+        if ($s === null || $s->version === null || $s->package === null) {
+            return null;
+        }
+
+        return [
+            'package' => $s->package->name,
+            'package_key' => $s->package->key,
+            'version' => $s->version->version,
+            'status' => $s->status,
+            'period' => $s->billing_period,
+            'period_cents' => $s->billing_period === 'yearly' ? $s->version->yearly_price_cents : $s->version->monthly_price_cents,
+            'monthly_credits' => $s->version->monthly_credits,
+            'trial_ends_at' => $s->trial_ends_at?->toIso8601String(),
+            'current_period_end' => $s->current_period_end?->toIso8601String(),
+        ];
+    }
+
+    public function markPaid(string $tenantId, \DateTimeInterface $periodStart, \DateTimeInterface $periodEnd): void
+    {
+        TenantSubscription::query()->whereKey($tenantId)->update([
+            'status' => 'active', 'current_period_start' => $periodStart, 'current_period_end' => $periodEnd,
+        ]);
+        $this->entitlements->flush();
+        $this->audit->record('subscription.paid', 'tenant', $tenantId, ['until' => $periodEnd->format(DATE_ATOM)], ['platform' => true]);
+    }
+
+    public function markPastDue(string $tenantId): void
+    {
+        TenantSubscription::query()->whereKey($tenantId)->where('status', 'active')->update(['status' => 'past_due']);
+        $this->audit->record('subscription.past_due', 'tenant', $tenantId, [], ['platform' => true]);
+    }
+
+    public function dueForRenewal(\DateTimeInterface $before): array
+    {
+        return array_values(array_map('strval', TenantSubscription::query()->where('status', 'active')
+            ->whereNotNull('current_period_end')->where('current_period_end', '<=', $before)->pluck('tenant_id')->all()));
+    }
+
     public function subscribe(string $tenantId, string $packageId, string $period, bool $allowTrial): array
     {
         $package = Package::query()->with('currentVersion')->whereKey($packageId)
