@@ -348,6 +348,9 @@ function DebitOrder({ debitOrders }: Pick<Props, 'debitOrders'>) {
     collection_day: 1,
   });
   const m = debitOrders.mandate;
+  // Most owners pay by card: keep the seven-field form closed until asked for (open again after errors).
+  const [open, setOpen] = useState(false);
+  const showForm = open || Object.keys(form.errors).length > 0;
   const post = (url: string, data: Record<string, unknown> = {}) =>
     router.post(url, data as never, { preserveScroll: true });
 
@@ -407,7 +410,12 @@ function DebitOrder({ debitOrders }: Pick<Props, 'debitOrders'>) {
             Charge renewals to my card instead
           </Button>
         )}
-        {(!m || m.status === 'rejected') && (
+        {(!m || m.status === 'rejected') && !showForm && (
+          <Button variant="secondary" className="w-fit" onClick={() => setOpen(true)}>
+            Set up a debit order
+          </Button>
+        )}
+        {(!m || m.status === 'rejected') && showForm && (
           <form
             onSubmit={(e) => {
               e.preventDefault();

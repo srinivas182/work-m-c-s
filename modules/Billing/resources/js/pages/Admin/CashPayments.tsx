@@ -114,7 +114,11 @@ export default function CashPayments({ business, subscription, packs, canRecord,
           <CardContent>
             {!canRecord ? (
               <p role="alert" className="text-danger-11 text-sm">
-                Add an approver other than yourself in Settings → Security before recording cash.
+                Add an approver other than yourself in{' '}
+                <Link href="/security" className="font-semibold underline underline-offset-4">
+                  Settings → Security
+                </Link>{' '}
+                before recording cash.
               </p>
             ) : (
               <form

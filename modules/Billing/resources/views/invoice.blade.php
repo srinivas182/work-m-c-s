@@ -13,7 +13,7 @@
   table.lines { width: 100%; border-collapse: collapse; margin-top: 24px; }
   table.lines th { text-align: left; font-size: 9.5px; color: #5b5776; border-bottom: 1px solid #d9d6e8; padding: 6px 4px; }
   table.lines td { border-bottom: 1px solid #eeecf5; padding: 8px 4px; }
-  .num { text-align: right; white-space: nowrap; }
+  .num, table.lines th.num { text-align: right; white-space: nowrap; }
   .totals { width: 46%; margin-left: 54%; margin-top: 14px; border-collapse: collapse; }
   .totals td { padding: 4px; }
   .grand td { font-weight: bold; font-size: 12px; border-top: 1.5px solid #1B1640; padding-top: 7px; }

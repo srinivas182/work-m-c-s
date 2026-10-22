@@ -57,8 +57,8 @@ final class BillingServiceProvider extends ModuleServiceProvider
     {
         return [
             ['label' => 'Billing', 'route' => 'tenant.billing', 'icon' => 'credit-card', 'section' => 'Settings', 'permission' => 'billing.manage', 'order' => 770],
-            ['label' => 'Failed payments', 'route' => 'admin.billing.failed', 'icon' => 'credit-card', 'section' => 'Platform', 'permission' => 'invoices.view', 'order' => 35],
-            ['label' => 'Invoice settings', 'route' => 'admin.billing.settings', 'icon' => 'credit-card', 'section' => 'Settings', 'permission' => 'invoices.manage', 'order' => 936],
+            ['label' => 'Failed payments', 'route' => 'admin.billing.failed', 'icon' => 'triangle-alert', 'section' => 'Platform', 'permission' => 'invoices.view', 'order' => 35],
+            ['label' => 'Invoice settings', 'route' => 'admin.billing.settings', 'icon' => 'receipt', 'section' => 'Settings', 'permission' => 'invoices.manage', 'order' => 936],
             ['label' => 'Credit packs', 'route' => 'admin.credits.packs', 'icon' => 'coins', 'section' => 'Settings', 'permission' => 'credits.manage', 'order' => 935],
         ];
     }

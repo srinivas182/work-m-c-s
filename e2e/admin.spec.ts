@@ -119,6 +119,15 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('heading', { level: 1, name: 'Security' })).toBeVisible();
   await expectAccessible(page);
 
+  await page.goto(`${admin}/billing/settings`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Invoice settings' })).toBeVisible();
+  await expect(page.getByText('These are placeholder company details.')).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/billing/failed`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Failed payments' })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/roles`);
   await expect(page.getByRole('heading', { level: 1, name: 'Staff roles' })).toBeVisible();
   await expectAccessible(page);
