@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 3.2 (card payments, credit top-ups)
+- Billing module with a `PaymentGateway` contract and Paystack as the first driver (checkout, server-side verify, saved-card charges, refunds, HMAC-SHA512 webhooks).
+- A payment is marked paid only on server-side confirmation from Paystack (signed webhook or our own verify call), and only if the confirmed amount and currency match; every confirmation path goes through one idempotent, row-locked settle step. Webhook events are handled once.
+- VAT added per the business's country (15% in ZA) and stored on each payment for invoicing (3.4).
+- Subscriptions: first payment, paying during a trial (the paid period starts when the trial ends), and hourly renewals on the saved card; failed renewals mark the subscription past due (dunning in 3.4). Subscriptions now record their current period.
+- Saved cards: Paystack's reusable token only (encrypted), deduplicated by card signature; "add a card" makes a R1 check refunded straight away.
+- Credit packs (set by WURK staff) bought by card or one tap on the saved card; credits granted only after confirmation.
+- Owner Settings → Billing: package, price incl. VAT, renewal or trial date, billing details (SA VAT number check), card, credit packs, payment history. A business that hasn't paid, or whose trial has ended, can only reach Billing.
+- Signup: when the free trial was already used, the business is created waiting for payment and the owner goes straight to Billing.
+
 ### Added — Sprint 3.1 (marketing site, signup wizard)
 - Marketing module: wurk.co.za home, pricing (live from public packages, monthly/yearly, prices excl. and incl. VAT), questions, contact (stored, emailed to `WURK_CONTACT_EMAIL`, honeypot and rate limit) and legal pages (awaiting WURK's final text).
 - Server-side rendering for wurk.co.za only (Inertia SSR): full HTML for search engines; if the renderer is down, pages render in the browser. Self-contained SSR bundle; the production image ships a pinned Node runtime and an `ssr` role; CI renders a page from the built image.

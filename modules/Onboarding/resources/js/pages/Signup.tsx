@@ -467,7 +467,7 @@ function Finish({
       <p className="text-[15px] text-[#1B1640]/75">
         {trial
           ? `Your ${pkg?.trial_days}-day free trial starts now. No card needed — we’ll remind you before it ends.`
-          : 'You’ve already had a free trial with this email or number. Paying by card opens here very soon; your details are saved.'}
+          : 'You’ve already had a free trial with this email or number, so you’ll pay for your first period next — by card.'}
       </p>
       {errors.finish && (
         <p role="alert" className="text-danger-11 text-sm">
@@ -488,7 +488,6 @@ function Finish({
           size="lg"
           className="flex-1"
           loading={form.processing}
-          disabled={!trial}
           onClick={() => form.post('/signup/complete')}
         >
           Create my business

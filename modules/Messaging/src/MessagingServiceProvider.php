@@ -6,8 +6,10 @@ namespace Wurk\Messaging;
 
 use Wurk\Identity\Contracts\TextMessenger;
 use Wurk\Messaging\Contracts\Messenger;
+use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Messaging\Otp\PhoneOtpChannel;
 use Wurk\Messaging\Otp\SmsTextMessenger;
+use Wurk\Messaging\Support\EloquentProviderCredentials;
 use Wurk\Messaging\Support\MailConfigurator;
 use Wurk\Messaging\Support\MessengerService;
 use Wurk\Messaging\Support\ProviderSettings;
@@ -20,6 +22,7 @@ final class MessagingServiceProvider extends ModuleServiceProvider
         $this->app->singleton(ProviderSettings::class);
         $this->app->singleton(Messenger::class, MessengerService::class);
         $this->app->singleton(TextMessenger::class, SmsTextMessenger::class);
+        $this->app->singleton(ProviderCredentials::class, EloquentProviderCredentials::class);
     }
 
     /**

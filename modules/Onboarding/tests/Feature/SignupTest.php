@@ -81,15 +81,19 @@ it('refuses temporary mailboxes and taken or reserved web addresses', function (
     $this->getJson($this->app('/signup/check-handle?handle=taken-name'))->assertJson(['available' => false]);
 });
 
-it('gives each email or number one free trial', function () {
+it('gives each email or number one free trial; a second business starts unpaid and goes to billing', function () {
     signUpTo($this);
     $this->post($this->app('/signup/complete'));
     $this->post($this->app('/sign-out'));
     $this->travel(2)->minutes(); // codes to the same address are spaced out
 
     signUpTo($this, handle: 'glow-salon-two');
-    $this->post($this->app('/signup/complete'))->assertSessionHasErrors('finish');
-    expect(Tenant::query()->where('handle', 'glow-salon-two')->exists())->toBeFalse();
+    $this->post($this->app('/signup/complete'))->assertRedirect('/glow-salon-two/settings/billing');
+
+    $second = Tenant::query()->where('handle', 'glow-salon-two')->firstOrFail();
+    expect(TenantSubscription::query()->find($second->id)->status)->toBe('pending_payment')
+        ->and(DB::table('trial_claims')->count())->toBe(1);
+    $this->get($this->app('/glow-salon-two'))->assertRedirect(route('tenant.billing', ['tenant' => 'glow-salon-two']));
 });
 
 it('never creates two businesses when finish is pressed twice', function () {

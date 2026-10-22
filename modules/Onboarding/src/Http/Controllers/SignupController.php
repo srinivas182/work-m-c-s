@@ -173,12 +173,11 @@ final class SignupController
         $signup = $this->require($request, 'finish');
         $d = $signup->data;
 
-        if ($this->trialClaimed($signup->fingerprint)) {
-            // Card and debit-order payment join the wizard in Sprint 3.2.
-            throw ValidationException::withMessages(['finish' => 'You’ve already had a free trial with this email or number. Paying by card opens here very soon — we’ve saved your details.']);
-        }
+        // One free trial per verified email or number; otherwise the business starts unpaid
+        // and the owner pays for the first period straight away (Billing).
+        $trial = ! $this->trialClaimed($signup->fingerprint);
 
-        $result = DB::transaction(function () use ($signup, $d, $accounts): array {
+        $result = DB::transaction(function () use ($signup, $d, $accounts, $trial): array {
             $locked = Signup::query()->whereKey($signup->id)->lockForUpdate()->firstOrFail();
             if ($locked->completed_at !== null) {
                 return ['handle' => (string) $locked->data['handle'], 'identity' => (string) $locked->data['identity_id']];
@@ -187,9 +186,11 @@ final class SignupController
             $tenant = $this->tenants->provision((string) $d['business_name'], (string) $d['handle'], (string) $d['country']);
             $identityId = $accounts->forVerifiedContact((string) $d['contact'], (string) $d['first_name'], (string) $d['last_name']);
             $accounts->makeOwner($identityId, $tenant->tenantId(), trim($d['first_name'].' '.$d['last_name']));
-            $subscription = $this->catalog->subscribe($tenant->tenantId(), (string) $d['package_id'], (string) $d['period'], allowTrial: true);
+            $subscription = $this->catalog->subscribe($tenant->tenantId(), (string) $d['package_id'], (string) $d['period'], allowTrial: $trial);
 
-            DB::table('trial_claims')->insert(['fingerprint' => $locked->fingerprint, 'tenant_id' => $tenant->tenantId(), 'claimed_at' => now()]);
+            if ($subscription['status'] === 'trial') {
+                DB::table('trial_claims')->insert(['fingerprint' => $locked->fingerprint, 'tenant_id' => $tenant->tenantId(), 'claimed_at' => now()]);
+            }
             $locked->update(['completed_at' => now(), 'tenant_id' => $tenant->tenantId(), 'data' => [...$locked->data, 'identity_id' => $identityId]]);
             $this->audit->record('signup.completed', 'tenant', $tenant->tenantId(), ['package_id' => $d['package_id'], 'period' => $d['period'], 'status' => $subscription['status']], ['platform' => true, 'actor_id' => $identityId]);
 
@@ -198,7 +199,9 @@ final class SignupController
 
         $request->session()->forget(self::SESSION);
 
-        return $accounts->signIn($request, $result['identity'], '/'.$result['handle'].'?welcome=1');
+        $onTrial = $trial && ($this->catalog->subscriptionOf((string) $signup->fresh()?->tenant_id)['status'] ?? '') === 'trial';
+
+        return $accounts->signIn($request, $result['identity'], $onTrial ? '/'.$result['handle'].'?welcome=1' : '/'.$result['handle'].'/settings/billing');
     }
 
     private function current(Request $request): ?Signup

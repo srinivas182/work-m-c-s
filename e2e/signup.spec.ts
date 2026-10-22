@@ -78,4 +78,11 @@ test('a new owner signs up from the pricing page and lands in their back office'
 
   await expect(page).toHaveURL(new RegExp(`/${handle}\\?welcome=1$`));
   await expect(page.getByRole('heading', { level: 1, name: `E2E Studio ${digits}` })).toBeVisible();
+
+  // Billing: their trial, the price incl. VAT, and where to add a card.
+  await page.goto(`/${handle}/settings/billing`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Billing' })).toBeVisible();
+  await expect(page.getByText('R343.85 a month incl. VAT')).toBeVisible();
+  await expect(page.getByText('Free trial')).toBeVisible();
+  await expectAccessible(page);
 });
