@@ -4,6 +4,8 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-22 — Sprint 2: Super admin
+
 ### Added — Sprint 2.4 (WURK Credits, security settings)
 - Credits module (ADR-0008): one balance per business, kept in thousandths of a credit. Append-only ledger (allowance, purchase, adjustment, debit, refund, expiry) with a cached balance kept in step under a row lock; every write is idempotent by key.
 - Monthly allowance spent first; unused allowance expires at the next one; purchased credits never expire. First allowance on a business's first package, then daily `credits:grant-allowances` on each billing anniversary (31st → last day of shorter months).
