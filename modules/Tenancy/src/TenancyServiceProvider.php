@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Log\Context\Repository as LogContext;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Routing\Router;
 use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
@@ -55,6 +56,16 @@ final class TenancyServiceProvider extends ModuleServiceProvider
         ];
     }
 
+    /**
+     * @return list<array{label: string, route: string, icon?: string, section?: string, permission?: string, order?: int}>
+     */
+    public function menu(): array
+    {
+        return [
+            ['label' => 'Businesses', 'route' => 'admin.businesses.index', 'icon' => 'building', 'section' => 'Platform', 'permission' => 'tenants.view', 'order' => 20],
+        ];
+    }
+
     protected function bootModule(): void
     {
         Gate::policy(Tenant::class, TenantPolicy::class);
@@ -82,11 +93,15 @@ final class TenancyServiceProvider extends ModuleServiceProvider
      */
     private function registerRouteMacros(): void
     {
+        $this->app->make(Router::class)->middlewareGroup('tenant.back-office', []);
+
         Route::macro('tenant', function (Closure $routes, bool $requiresAuth = true): RouteRegistrar {
             $registrar = Route::domain((string) config('wurk.domains.app'))
                 ->prefix('{tenant}')
                 ->where(['tenant' => HandleRules::routePattern()])
-                ->middleware($requiresAuth ? ['web', 'auth', InitializeTenancyByPath::class] : ['web', InitializeTenancyByPath::class]);
+                // "tenant.back-office" is an extension point: other modules push middleware
+                // into it (e.g. Security's "this business requires MFA").
+                ->middleware($requiresAuth ? ['web', 'auth', InitializeTenancyByPath::class, 'tenant.back-office'] : ['web', InitializeTenancyByPath::class]);
             $registrar->group($routes);
 
             return $registrar;

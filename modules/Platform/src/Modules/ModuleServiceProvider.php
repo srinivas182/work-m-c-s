@@ -71,7 +71,7 @@ abstract class ModuleServiceProvider extends ServiceProvider
      * Back-office navigation items. "icon" is a name from the frontend icon registry
      * (resources/js/design-system/icons.ts); "section" groups items in the sidebar.
      *
-     * @return list<array{label: string, route: string, icon?: string, section?: string, permission?: string, order?: int}>
+     * @return list<array{label: string, route: string, icon?: string, section?: string, permission?: string, entitlement?: string, order?: int}>
      */
     public function menu(): array
     {
@@ -104,6 +104,18 @@ abstract class ModuleServiceProvider extends ServiceProvider
      * @return list<array<string, mixed>>
      */
     public function messageTemplates(): array
+    {
+        return [];
+    }
+
+    /**
+     * Feature flags this module declares, managed by WURK staff in the admin
+     * (off, opt-in for businesses, percentage rollout, or on for everyone):
+     *   'new-calendar' => ['label' => 'New booking calendar', 'description' => '…']
+     *
+     * @return array<string, array{label: string, description?: string}>
+     */
+    public function features(): array
     {
         return [];
     }

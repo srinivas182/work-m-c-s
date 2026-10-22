@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Identity\Http\Controllers\AccountController;
-use Wurk\Identity\Http\Controllers\AdminHomeController;
 use Wurk\Identity\Http\Controllers\BusinessesController;
+use Wurk\Identity\Http\Controllers\InvitationController;
 use Wurk\Identity\Http\Controllers\MfaController;
 use Wurk\Identity\Http\Controllers\PasswordResetController;
 use Wurk\Identity\Http\Controllers\SignInController;
 use Wurk\Identity\Http\Controllers\WorkspaceController;
-use Wurk\Identity\Http\Middleware\EnsurePlatformStaff;
 use Wurk\Identity\Http\Middleware\EnsureTenantMember;
 
 Route::middleware('guest')->group(function (): void {
@@ -34,6 +33,9 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/forgot-password/new', [PasswordResetController::class, 'reset'])->name('identity.forgot.reset');
 });
 
+Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name('identity.invitation');
+Route::post('/invitations/{token}', [InvitationController::class, 'accept'])->middleware('throttle:10,1')->name('identity.invitation.accept');
+
 Route::middleware('auth')->group(function (): void {
     Route::post('/sign-out', [AccountController::class, 'signOut'])->name('identity.sign-out');
     Route::get('/account/security', [AccountController::class, 'show'])->name('identity.account');
@@ -45,12 +47,6 @@ Route::middleware('auth')->group(function (): void {
     Route::delete('/account/sessions', [AccountController::class, 'revokeOtherSessions'])->name('identity.account.sessions.revoke');
     Route::get('/businesses', BusinessesController::class)->name('identity.businesses');
 });
-
-Route::domain((string) config('wurk.domains.admin'))
-    ->middleware(['auth', EnsurePlatformStaff::class])
-    ->group(function (): void {
-        Route::get('/dashboard', AdminHomeController::class)->name('admin.home');
-    });
 
 Route::tenant(function (): void {
     Route::get('/', WorkspaceController::class)->middleware(EnsureTenantMember::class)->name('tenant.home');

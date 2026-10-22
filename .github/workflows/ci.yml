@@ -303,8 +303,14 @@ jobs:
       - uses: actions/checkout@v7
       - name: Validate compose file
         run: docker compose config --quiet
-      - name: Build dev image
-        run: docker build docker/dev
+      - uses: docker/setup-buildx-action@v4
+      - name: Build dev image (retries once on transient network failures)
+        uses: docker/build-push-action@v7
+        with:
+          context: docker/dev
+          load: false
+          cache-from: type=gha,scope=wurk-dev
+          cache-to: type=gha,scope=wurk-dev,mode=max
 
   docker-prod:
     name: Docker · production image

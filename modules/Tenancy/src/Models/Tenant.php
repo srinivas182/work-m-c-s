@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Wurk\Tenancy\Contracts\CentralModel;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Events\TenantStatusChanged;
@@ -24,6 +25,8 @@ use Wurk\Tenancy\Resolution\TenantResolver;
  * @property string $shard_id
  * @property string $country
  * @property string $timezone
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class Tenant extends Model implements CentralModel, CurrentTenant
 {
@@ -96,6 +99,11 @@ final class Tenant extends Model implements CentralModel, CurrentTenant
     public function shardId(): string
     {
         return $this->shard_id;
+    }
+
+    public function countryCode(): string
+    {
+        return strtoupper((string) $this->country);
     }
 
     public function isActive(): bool

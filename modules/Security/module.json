@@ -1,0 +1,15 @@
+{
+    "name": "Security",
+    "key": "security",
+    "version": "0.1.0",
+    "description": "Platform and business security settings: admin IP allow-list, cash-payment recipients, team MFA.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "identity",
+        "access",
+        "audit"
+    ]
+}

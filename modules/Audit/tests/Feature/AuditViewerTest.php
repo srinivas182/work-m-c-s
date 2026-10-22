@@ -9,6 +9,7 @@ use Wurk\Access\Actions\PlatformAccess;
 use Wurk\Access\Actions\Team;
 use Wurk\Access\Roles\SystemRoles;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Identity\Mfa\Totp;
 use Wurk\Identity\Models\Membership;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -52,7 +53,7 @@ it('hides the business audit log from staff without permission and from outsider
 });
 
 it('shows WURK support staff the platform audit log, and nobody else', function () {
-    $staff = $this->staff();
+    $staff = $this->staff(Totp::generateSecret());
     app(PlatformAccess::class)->grant($staff->id, 'support');
 
     $this->actingAs($staff)->get($this->admin('/audit'))

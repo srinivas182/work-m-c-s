@@ -19,4 +19,7 @@ interface CurrentTenant
     public function shardId(): string;
 
     public function isActive(): bool;
+
+    /** ISO country code (e.g. "ZA"): currency, VAT and messaging rates follow it. */
+    public function countryCode(): string;
 }

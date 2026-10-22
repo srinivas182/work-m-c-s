@@ -22,6 +22,20 @@ final class EloquentTenantDirectory implements TenantDirectory
         return Tenant::query()->where('handle', strtolower($handle))->first();
     }
 
+    public function summary(): array
+    {
+        $counts = Tenant::query()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
+
+        return [
+            'active' => (int) ($counts['active'] ?? 0),
+            'suspended' => (int) ($counts['suspended'] ?? 0),
+            'provisioning' => (int) ($counts['provisioning'] ?? 0),
+            'shards' => Shard::query()->count(),
+            'capacity' => (int) Shard::query()->where('status', Shard::STATUS_ACTIVE)->sum('capacity'),
+            'used' => (int) Shard::query()->sum('tenant_count'),
+        ];
+    }
+
     public function shardConnections(): array
     {
         $connections = app(ShardConnections::class);

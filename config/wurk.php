@@ -39,7 +39,7 @@ return [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
             'help', 'login', 'logout', 'mail', 'my', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
-            'forgot-password', 'mfa', 'health', 'build', 'storage',
+            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', 'settings', 'webhooks',
         ],
 
         // Default capacity of a shared shard (tenants per database).
@@ -82,6 +82,29 @@ return [
             'password', 'password_confirmation', 'current_password', 'secret', 'token', 'remember_token',
             'recovery_codes', 'code', 'code_hash', 'connection', 'api_key', 'card_number', 'cvv',
         ],
+    ],
+
+    /*
+    | Module catalogue for packages. Keys match each module's manifest
+    | "entitlement" key; modules not built yet can already be sold, and
+    | switch on automatically when they ship with the same key.
+    */
+    'modules' => [
+        'website' => ['name' => 'Website & page builder', 'sprint' => 4],
+        'bookings' => ['name' => 'Appointments', 'sprint' => 7],
+        'shop' => ['name' => 'Online shop', 'sprint' => 8],
+        'multi-branch' => ['name' => 'Multiple branches', 'sprint' => 9],
+        'crm' => ['name' => 'CRM & leads', 'sprint' => 10],
+        'chatbot' => ['name' => 'Website chatbot', 'sprint' => 10],
+        'referrals' => ['name' => 'Customer referral programme', 'sprint' => 11],
+        'marketing' => ['name' => 'Campaigns & offers', 'sprint' => 13],
+        'reports' => ['name' => 'Reports', 'sprint' => 13],
+        'ai-assistant' => ['name' => 'AI assistant', 'sprint' => 14],
+    ],
+
+    'security' => [
+        // Emergency switch: WURK_ADMIN_IP_ALLOWLIST=false ignores the admin IP allow-list.
+        'admin_ip_allowlist' => (bool) env('WURK_ADMIN_IP_ALLOWLIST', true),
     ],
 
 ];

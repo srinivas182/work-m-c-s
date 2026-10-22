@@ -11,10 +11,12 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Laravel\Octane\Events\RequestReceived;
 use Wurk\Access\Console\SyncPermissionsCommand;
 use Wurk\Access\Http\Middleware\RequirePermission;
 use Wurk\Access\Listeners\GrantAccessOnMembership;
+use Wurk\Access\Models\PlatformRole;
 use Wurk\Access\Permissions\PermissionRegistry;
 use Wurk\Identity\Events\MembershipGranted;
 use Wurk\Identity\Events\StaffGranted;
@@ -38,6 +40,17 @@ final class AccessServiceProvider extends ModuleServiceProvider
         return [
             ['key' => 'platform-roles.manage', 'label' => 'Manage WURK staff roles', 'scope' => 'platform'],
             ['key' => 'roles.manage', 'label' => 'Create and change team roles'],
+        ];
+    }
+
+    /**
+     * @return list<array{label: string, route: string, icon?: string, section?: string, permission?: string, order?: int}>
+     */
+    public function menu(): array
+    {
+        return [
+            ['label' => 'WURK staff', 'route' => 'admin.staff.index', 'icon' => 'user-cog', 'section' => 'Platform', 'permission' => 'staff.manage', 'order' => 60],
+            ['label' => 'Staff roles', 'route' => 'admin.roles.index', 'icon' => 'key-round', 'section' => 'Platform', 'permission' => 'platform-roles.manage', 'order' => 70],
         ];
     }
 
@@ -65,6 +78,7 @@ final class AccessServiceProvider extends ModuleServiceProvider
         Event::listen($events, $flush);
 
         $this->app->make(Router::class)->aliasMiddleware('permission', RequirePermission::class);
+        Route::model('role', PlatformRole::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([SyncPermissionsCommand::class]);

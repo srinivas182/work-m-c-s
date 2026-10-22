@@ -1,0 +1,16 @@
+{
+    "name": "Messaging",
+    "key": "messaging",
+    "version": "0.1.0",
+    "description": "SMS, WhatsApp and email providers behind one interface, with delivery records.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "audit",
+        "credits",
+        "identity",
+        "platform",
+        "regions",
+        "tenancy"
+    ]
+}

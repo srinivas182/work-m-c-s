@@ -11,6 +11,7 @@ use Wurk\Access\Models\Role;
 use Wurk\Access\Permissions\Permission;
 use Wurk\Access\Permissions\PermissionRegistry;
 use Wurk\Access\Roles\SystemRoles;
+use Wurk\Identity\Contracts\PeopleDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -26,7 +27,11 @@ final class AccessManager
     /** @var array<string, list<string>> */
     private array $memo = [];
 
-    public function __construct(private readonly PermissionRegistry $registry, private readonly TenantContext $context) {}
+    public function __construct(
+        private readonly PermissionRegistry $registry,
+        private readonly TenantContext $context,
+        private readonly PeopleDirectory $people,
+    ) {}
 
     public function allows(string $identityId, string $permission): bool
     {
@@ -46,6 +51,10 @@ final class AccessManager
     /** @return list<string> */
     public function platformPermissions(string $identityId): array
     {
+        if (! $this->people->isActiveStaff($identityId)) {
+            return $this->memo["p:{$identityId}"] = [];
+        }
+
         return $this->memo["p:{$identityId}"] ??= $this->expand(
             array_values(array_map('strval', PlatformRoleAssignment::query()->where('identity_id', $identityId)->pluck('role_key')->all())),
             Permission::PLATFORM,

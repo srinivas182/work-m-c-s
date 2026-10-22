@@ -1,0 +1,14 @@
+{
+    "name": "Plans",
+    "key": "plans",
+    "version": "0.1.0",
+    "description": "Packages (versioned), subscriptions and module entitlements per business.",
+    "core": true,
+    "entitlement": null,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit"
+    ]
+}
