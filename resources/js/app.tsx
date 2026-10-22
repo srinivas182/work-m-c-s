@@ -1,5 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
 import { resolvePage } from '@/lib/resolve-page';
 
@@ -14,7 +14,12 @@ void createInertiaApp({
   title: (title) => (title ? `${title} · WURK` : 'WURK'),
   resolve: async (name) => (await resolvePage(name, pages)).default,
   setup({ el, App, props }) {
-    createRoot(el).render(<App {...props} />);
+    // Pages rendered on the server (the marketing site) are hydrated, not re-rendered.
+    if (el.dataset.serverRendered === 'true') {
+      hydrateRoot(el, <App {...props} />);
+    } else {
+      createRoot(el).render(<App {...props} />);
+    }
   },
   progress: { color: '#6d4aff' },
 });

@@ -14,6 +14,7 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property string $package_id
  * @property string $package_version_id
  * @property string $status
+ * @property string $billing_period
  * @property Carbon $started_at
  * @property Carbon|null $trial_ends_at
  * @property-read PackageVersion|null $version
@@ -27,7 +28,7 @@ final class TenantSubscription extends Model implements CentralModel
 
     protected $keyType = 'string';
 
-    protected $fillable = ['tenant_id', 'package_id', 'package_version_id', 'status', 'started_at', 'trial_ends_at'];
+    protected $fillable = ['tenant_id', 'package_id', 'package_version_id', 'status', 'billing_period', 'started_at', 'trial_ends_at'];
 
     protected function casts(): array
     {

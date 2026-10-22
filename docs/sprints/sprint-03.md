@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 3 of 18 · 30 November – 11 December 2026 |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 22 Oct 2026 — in progress (3.1) |
 | **Depends on** | v0.3.0 (packages, entitlements, providers, WURK Credits, security settings); PRD §4.5, §5.1–5.2, §7.14, §11 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 

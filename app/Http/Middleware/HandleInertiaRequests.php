@@ -6,6 +6,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Symfony\Component\HttpFoundation\Response;
 use Wurk\Identity\Models\Identity;
 use Wurk\Platform\Navigation\NavigationBuilder;
 
@@ -23,6 +24,19 @@ final class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
+    /**
+     * Server-side rendering only for the public marketing site (wurk.co.za), where
+     * search engines need full HTML. If the SSR process is down, Inertia falls
+     * back to rendering in the browser.
+     */
+    public function handle(Request $request, \Closure $next): Response
+    {
+        config(['inertia.ssr.enabled' => (bool) config('inertia.ssr.enabled')
+            || (strcasecmp($request->getHost(), (string) config('wurk.domains.root')) === 0 && (bool) config('wurk.marketing_ssr', true))]);
+
+        return parent::handle($request, $next);
+    }
+
     public function share(Request $request): array
     {
         return [

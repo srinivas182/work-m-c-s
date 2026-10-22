@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Octane\Events\RequestReceived;
 use Laravel\Octane\Events\RequestTerminated;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Tenancy\Actions\TenantProvisioning;
 use Wurk\Tenancy\Console\CreateTenantCommand;
 use Wurk\Tenancy\Console\MigrateShardsCommand;
 use Wurk\Tenancy\Console\RegisterShardCommand;
@@ -24,6 +25,7 @@ use Wurk\Tenancy\Console\RunForTenantsCommand;
 use Wurk\Tenancy\Context\TenantContextManager;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
+use Wurk\Tenancy\Contracts\TenantProvisioner;
 use Wurk\Tenancy\Http\Middleware\InitializeTenancyByDomain;
 use Wurk\Tenancy\Http\Middleware\InitializeTenancyByPath;
 use Wurk\Tenancy\Listeners\ForgetTenantContext;
@@ -38,6 +40,7 @@ final class TenancyServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(TenantProvisioner::class, TenantProvisioning::class);
         $this->app->singleton(TenantContext::class, TenantContextManager::class);
         $this->app->singleton(TenantDirectory::class, EloquentTenantDirectory::class);
     }
