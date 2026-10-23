@@ -8,8 +8,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\Page;
+use Wurk\Website\Models\Site;
 use Wurk\Website\Support\Pages;
+use Wurk\Website\Support\Templates;
+use Wurk\Website\Support\TemplateSwitcher;
 
 /** Owners: the list of website pages. */
 final class PagesController
@@ -29,6 +33,7 @@ final class PagesController
                 ->map(fn (Page $p) => ['id' => $p->id, 'title' => $p->title, 'deleted_at' => $p->deleted_at?->toIso8601String()])->all(),
             'canPublish' => (bool) $request->user()?->can('website.publish'),
             'base' => route('tenant.website.pages', [], false),
+            'design' => $this->design(),
         ]);
     }
 
@@ -78,5 +83,26 @@ final class PagesController
         $restored = $this->pages->restoreDeleted($page);
 
         return back()->with('status', "“{$restored->title}” restored.");
+    }
+
+    /** Change design: switch within the category, keeping content. */
+    public function switchDesign(Request $request, TemplateSwitcher $switcher): RedirectResponse
+    {
+        $key = (string) $request->validate(['template' => ['required', 'string']])['template'];
+        $switcher->switch($key, (string) $request->user()?->getAuthIdentifier());
+
+        return back()->with('status', 'Design changed. Your content came across — preview it, then publish when you’re happy.');
+    }
+
+    /** @return array{current: string|null, options: list<array{key: string, name: string, description: string|null}>}|null */
+    private function design(): ?array
+    {
+        $site = Site::query()->find(app(TenantContext::class)->id());
+        if ($site?->category_key === null) {
+            return null;
+        }
+        $category = collect(app(Templates::class)->catalogue())->firstWhere('key', $site->category_key);
+
+        return ['current' => $site->template_key, 'options' => $category['templates'] ?? []];
     }
 }

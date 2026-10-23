@@ -27,6 +27,7 @@ Route::tenant(function (): void {
         Route::post('/pages/{page}/home', [PagesController::class, 'home'])->name('pages.home');
         Route::delete('/pages/{page}', [PagesController::class, 'destroy'])->name('pages.destroy');
         Route::post('/pages/{page}/restore', [PagesController::class, 'restore'])->name('pages.restore');
+        Route::post('/design', [PagesController::class, 'switchDesign'])->middleware('throttle:10,1,website-design')->name('design');
 
         Route::get('/pages/{page}/edit', EditorController::class)->name('editor');
         Route::get('/pages/{page}/draft', [DraftController::class, 'show'])->name('draft');
