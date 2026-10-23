@@ -49,11 +49,14 @@ export function SiteRenderer({
   branding,
   site,
   children,
+  fill = false,
 }: {
   document: ContentDocument;
   branding: Branding;
   site: SiteContext;
   children?: ReactNode;
+  /** Fill the screen with the site's background (whole-page views), not just its content. */
+  fill?: boolean;
 }) {
   const head = document.blocks.filter((b) => HEAD.has(b.type));
   const foot = document.blocks.filter((b) => FOOT.has(b.type));
@@ -61,7 +64,7 @@ export function SiteRenderer({
 
   return (
     <div
-      className="wurk-site"
+      className={fill ? 'wurk-site min-h-svh' : 'wurk-site'}
       style={{
         ...siteTheme(branding),
         background: 'var(--s-bg)',

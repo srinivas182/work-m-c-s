@@ -170,9 +170,14 @@ export default function Pages({ pages, deleted, base }: Props) {
           title="Website pages"
           description="Add pages, choose your home page and put them in order. The visual editor and live site preview arrive next."
           actions={
-            <Button onClick={() => setAdding(true)}>
-              <FilePlus2 /> Add page
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="secondary" asChild>
+                <a href={`${base.replace(/\/pages$/, '')}/preview`}>Preview site</a>
+              </Button>
+              <Button onClick={() => setAdding(true)}>
+                <FilePlus2 /> Add page
+              </Button>
+            </div>
           }
         />
         <Card>

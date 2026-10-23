@@ -1,5 +1,4 @@
-import '@fontsource-variable/playfair-display';
-import '@fontsource-variable/source-sans-3';
+import '../site/fonts';
 import { Head } from '@inertiajs/react';
 import { SiteRenderer } from '../site/SiteRenderer';
 import type { Branding, ContentDocument, MenuItem } from '../site/types';
