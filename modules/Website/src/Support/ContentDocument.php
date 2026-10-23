@@ -50,7 +50,7 @@ final class ContentDocument
             }
             $id = $block['id'] ?? null;
             $type = $block['type'] ?? null;
-            if (! is_string($id) || preg_match('/^[A-Za-z0-9_-]{1,40}$/', $id) !== 1 || isset($ids[$id])) {
+            if (! is_string($id) || preg_match('/^[A-Za-z0-9_-]{1,100}$/', $id) !== 1 || isset($ids[$id])) {
                 $fail("Section {$n} has a missing or duplicate id.");
             }
             if (! is_string($type) || preg_match('/^[A-Z][A-Za-z0-9]{1,40}$/', $type) !== 1) {

@@ -9,7 +9,7 @@ export const Footer: BlockDefinition<FooterProps> = {
   version: 1,
   label: 'Footer',
   description: 'Your name, a line about you, and your footer menu.',
-  fields: { text: { kind: 'text', label: 'A line about your business', max: 200 } },
+  fields: { text: { kind: 'text', inline: true, label: 'A line about your business', max: 200 } },
   defaults: { text: '' },
   render: (p, site) => {
     const items = site.menus?.footer ?? [];

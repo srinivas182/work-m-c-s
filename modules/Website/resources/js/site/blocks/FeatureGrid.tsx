@@ -37,8 +37,8 @@ export const FeatureGrid: BlockDefinition<FeatureGridProps> = {
   label: 'Why choose us',
   description: 'Three to six reasons customers pick you, each with an icon.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 60 },
-    intro: { kind: 'text', label: 'Introduction', multiline: true, max: 200 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },
+    intro: { kind: 'text', inline: true, label: 'Introduction', multiline: true, max: 200 },
     items: {
       kind: 'list',
       label: 'Reasons',
@@ -49,8 +49,8 @@ export const FeatureGrid: BlockDefinition<FeatureGridProps> = {
           label: 'Icon',
           options: (Object.keys(ICONS) as IconName[]).map((k) => ({ value: k, label: k })),
         },
-        title: { kind: 'text', label: 'Title', max: 40 },
-        text: { kind: 'text', label: 'Text', multiline: true, max: 160 },
+        title: { kind: 'text', inline: true, label: 'Title', max: 40 },
+        text: { kind: 'text', inline: true, label: 'Text', multiline: true, max: 160 },
       },
     },
   },

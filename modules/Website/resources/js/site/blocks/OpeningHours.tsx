@@ -24,7 +24,7 @@ export const OpeningHours: BlockDefinition<OpeningHoursProps> = {
   label: 'Opening hours',
   description: 'When you’re open, day by day, with a note for public holidays.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 60 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },
     hours: {
       kind: 'list',
       label: 'Hours (Monday to Sunday)',
@@ -34,7 +34,7 @@ export const OpeningHours: BlockDefinition<OpeningHoursProps> = {
         closes: { kind: 'text', label: 'Closes (e.g. 17:00)', max: 5 },
       },
     },
-    note: { kind: 'text', label: 'Note (e.g. public holidays)', max: 160 },
+    note: { kind: 'text', inline: true, label: 'Note (e.g. public holidays)', max: 160 },
   },
   defaults: {
     heading: 'Opening hours',

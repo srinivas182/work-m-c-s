@@ -13,14 +13,14 @@ export const Faq: BlockDefinition<FaqProps> = {
   label: 'Questions and answers',
   description: 'Answer the questions customers ask most.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 60 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },
     items: {
       kind: 'list',
       label: 'Questions',
       max: 20,
       item: {
         question: { kind: 'text', label: 'Question', max: 140 },
-        answer: { kind: 'text', label: 'Answer', multiline: true, max: 800 },
+        answer: { kind: 'text', inline: true, label: 'Answer', multiline: true, max: 800 },
       },
     },
   },

@@ -127,6 +127,9 @@ it('publishes immutable versions and restores any of them exactly', function () 
 
 it('accepts only well-formed content documents', function () {
     expect(ContentDocument::validate(doc('ok'))['blocks'][0]['type'])->toBe('Text');
+    // Puck's ids are "<Type>-<uuid>", longer than 40 characters.
+    $puckId = 'ServicesPrices-0b7f0a7e-8a1f-4d8e-9a3b-2f1c4e5d6a7b';
+    expect(ContentDocument::validate(['schema' => 1, 'blocks' => [['id' => $puckId, 'type' => 'ServicesPrices', 'version' => 1, 'props' => []]]])['blocks'][0]['id'])->toBe($puckId);
     foreach ([
         ['schema' => 2, 'blocks' => []],
         ['schema' => 1, 'blocks' => [['id' => 'a', 'type' => 'Text', 'version' => 1, 'props' => []], ['id' => 'a', 'type' => 'Text', 'version' => 1, 'props' => []]]],

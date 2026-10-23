@@ -14,8 +14,8 @@ export const Gallery: BlockDefinition<GalleryProps> = {
   label: 'Gallery',
   description: 'Show your work — up to 12 photos in a balanced mosaic.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 60 },
-    intro: { kind: 'text', label: 'Introduction', max: 200 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },
+    intro: { kind: 'text', inline: true, label: 'Introduction', max: 200 },
     images: {
       kind: 'list',
       label: 'Photos',

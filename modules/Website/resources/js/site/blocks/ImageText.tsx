@@ -17,7 +17,7 @@ export const ImageText: BlockDefinition<ImageTextProps> = {
   label: 'Photo and text',
   description: 'A photo beside a short story — your space, your team, your work.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 80 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 80 },
     text: { kind: 'text', label: 'Text', multiline: true, max: 1200 },
     image: { kind: 'image', label: 'Photo' },
     imageAlt: { kind: 'text', label: 'Describe the photo (for screen readers)', max: 140 },
@@ -29,7 +29,7 @@ export const ImageText: BlockDefinition<ImageTextProps> = {
         { value: 'right', label: 'Right' },
       ],
     },
-    buttonLabel: { kind: 'text', label: 'Button (optional)', max: 30 },
+    buttonLabel: { kind: 'text', inline: true, label: 'Button (optional)', max: 30 },
     buttonHref: { kind: 'link', label: 'Button link' },
   },
   defaults: {

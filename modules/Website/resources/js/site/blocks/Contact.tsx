@@ -27,8 +27,8 @@ export const Contact: BlockDefinition<ContactProps> = {
   label: 'Contact details',
   description: 'Address with a map link, tap-to-call, WhatsApp and email.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 60 },
-    intro: { kind: 'text', label: 'Introduction', max: 200 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },
+    intro: { kind: 'text', inline: true, label: 'Introduction', max: 200 },
     address: { kind: 'text', label: 'Address', multiline: true, max: 200 },
     phone: { kind: 'text', label: 'Phone', max: 20 },
     whatsapp: { kind: 'text', label: 'WhatsApp number', max: 20 },

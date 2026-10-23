@@ -40,8 +40,24 @@ export interface SiteContext {
 
 /** Editor field description, independent of the editor library (mapped to Puck in 4.3). */
 export type Field =
-  | { kind: 'text'; label: string; multiline?: boolean; max?: number }
-  | { kind: 'select'; label: string; options: { value: string; label: string }[] }
+  | {
+      kind: 'text';
+      label: string;
+      multiline?: boolean;
+      max?: number;
+      /**
+       * Editable directly on the page. Only for text a block renders purely as content:
+       * in the editor the value becomes an editable element, so it must never be used
+       * as a string (attributes, links, comparisons, splitting into paragraphs).
+       */
+      inline?: boolean;
+    }
+  /** Option values are the real prop values (true/false, numbers) — never 'true'/'false' strings, which are both truthy. */
+  | {
+      kind: 'select';
+      label: string;
+      options: { value: string | number | boolean; label: string }[];
+    }
   | { kind: 'image'; label: string }
   | { kind: 'link'; label: string }
   | { kind: 'money'; label: string }
