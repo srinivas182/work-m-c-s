@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Wurk\Website\Http\Controllers\AssetsController;
 use Wurk\Website\Http\Controllers\BlockBoardController;
 use Wurk\Website\Http\Controllers\BrandingController;
 use Wurk\Website\Http\Controllers\DraftController;
@@ -24,6 +25,8 @@ Route::tenant(function (): void {
         Route::put('/pages/{page}/draft', [DraftController::class, 'save'])->middleware('throttle:120,1,website-draft')->name('draft.save');
         Route::get('/pages/{page}/versions', [DraftController::class, 'versions'])->name('versions');
 
+        Route::get('/photos', [AssetsController::class, 'index'])->name('photos');
+        Route::post('/photos', [AssetsController::class, 'store'])->middleware('throttle:60,1,website-photos')->name('photos.store');
         Route::get('/branding', [BrandingController::class, 'show'])->name('branding');
         Route::put('/branding', [BrandingController::class, 'update'])->name('branding.update');
 

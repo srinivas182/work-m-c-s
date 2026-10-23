@@ -7,6 +7,7 @@ namespace Wurk\Website;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\Pages;
+use Wurk\Website\Support\SiteAssets;
 
 final class WebsiteServiceProvider extends ModuleServiceProvider
 {
@@ -15,6 +16,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->mergeConfigFrom($this->modulePath('config/website.php'), 'website');
         $this->app->singleton(Branding::class);
         $this->app->scoped(Pages::class);
+        $this->app->scoped(SiteAssets::class);
     }
 
     /**

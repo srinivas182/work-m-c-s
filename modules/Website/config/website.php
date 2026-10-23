@@ -21,5 +21,15 @@ return [
     'reserved_slugs' => ['api', 'assets', 'build', 'cart', 'checkout', 'feed', 'llms.txt', 'login', 'robots.txt', 'search', 'sitemap', 'sitemap.xml', 'static', 'wurk'],
 
     'max_document_bytes' => 512 * 1024,
+
+    // Photo uploads (Sprint 4.3). Phone photos are often 4–8 MB; everything is
+    // resized, so the limit is generous while the stored result stays small.
+    'uploads' => [
+        'max_kb' => 10 * 1024,
+        'max_side' => 8000,
+        'max_pixels' => 40_000_000,
+        'widths' => [640, 1600],
+        'webp_quality' => 80,
+    ],
     'max_blocks' => 80,
 ];
