@@ -17,7 +17,9 @@ final class TemplatePreviewController
         $published = $templates->published($template) ?? abort(404);
         $definition = $published['definition'];
         $pageKey = (string) $request->query('page', '');
-        $pages = collect($definition['pages']);
+        /** @var list<array{key: string, title: string, is_home: bool, content: array<string, mixed>}> $list */
+        $list = (array) $definition['pages'];
+        $pages = collect($list);
         $page = ($pageKey === '' ? $pages->firstWhere('is_home', true) : $pages->firstWhere('key', $pageKey)) ?? abort(404);
         $base = route('website.template-preview', ['template' => $template], false);
         $href = fn (array $item) => $item['type'] === 'page' ? $base.'?page='.$item['page'] : $item['href'];

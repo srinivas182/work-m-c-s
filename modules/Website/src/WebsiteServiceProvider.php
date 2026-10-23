@@ -13,6 +13,7 @@ use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteAssets;
 use Wurk\Website\Support\SiteBuilder;
 use Wurk\Website\Support\Templates;
+use Wurk\Website\Support\TemplateSwitcher;
 
 final class WebsiteServiceProvider extends ModuleServiceProvider
 {
@@ -24,6 +25,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->app->scoped(SiteAssets::class);
         $this->app->singleton(Templates::class);
         $this->app->scoped(SiteBuilder::class);
+        $this->app->scoped(TemplateSwitcher::class);
         $this->app->scoped(SiteTemplates::class, EloquentSiteTemplates::class);
     }
 
