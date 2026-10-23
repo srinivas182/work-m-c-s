@@ -121,6 +121,15 @@ export default function Editor({
   }, [businessName, branding, menus, urls.photos]);
 
   const initialData = useMemo(() => toPuck(content), [content]);
+  // Puck doesn't record the page as loaded in its history, so the first edit after
+  // opening the editor could never be undone. Seed the history with it.
+  const initialHistory = useMemo(
+    () => ({
+      histories: [{ state: { data: initialData } }] as [{ state: { data: Data } }],
+      index: 0,
+    }),
+    [initialData],
+  );
 
   /** Saves the latest data. Never overwrites someone else's save (the server answers 409). */
   const save = useCallback(async (): Promise<boolean> => {
@@ -239,6 +248,7 @@ export default function Editor({
       <Puck
         config={config}
         data={initialData}
+        initialHistory={initialHistory}
         onChange={onChange}
         // Puck's own labels, in our voice (its defaults are lowercase).
         dictionary={{ 'header-undo': 'Undo', 'header-redo': 'Redo' }}
@@ -275,12 +285,18 @@ export default function Editor({
                 Load their version
               </Button>
             )}
-            <Button size="sm" variant="ghost" onClick={() => void openVersions()}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="hidden md:inline-flex"
+              onClick={() => void openVersions()}
+            >
               <History /> Versions
             </Button>
             {canPublish && (
               <Button
                 size="sm"
+                className="hidden md:inline-flex"
                 disabled={status === 'conflict'}
                 onClick={() => setPublishing(true)}
               >
@@ -291,15 +307,26 @@ export default function Editor({
         )}
       />
 
-      {/* Phones: Puck folds the header actions into a menu, so the save status stays visible here. */}
-      <span
-        role="status"
-        aria-live="polite"
-        className={`fixed top-3 left-3 z-[60] inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium shadow-sm ring-1 ring-black/5 md:hidden ${s.tone}`}
-      >
-        {s.icon}
-        {s.text}
-      </span>
+      {/* Phones: Puck folds its header into a menu that its canvas then covers, so the
+          save status, Versions and Publish live in this bar instead — within thumb reach. */}
+      <div className="fixed bottom-[5.25rem] left-1/2 z-[60] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-white/95 p-1.5 pl-3 shadow-md ring-1 ring-black/5 md:hidden">
+        <span
+          role="status"
+          aria-live="polite"
+          className={`inline-flex items-center gap-1.5 text-xs font-medium whitespace-nowrap ${s.tone}`}
+        >
+          {s.icon}
+          {s.text}
+        </span>
+        <Button size="sm" variant="ghost" aria-label="Versions" onClick={() => void openVersions()}>
+          <History />
+        </Button>
+        {canPublish && (
+          <Button size="sm" disabled={status === 'conflict'} onClick={() => setPublishing(true)}>
+            {isPublished ? 'Publish changes' : 'Publish'}
+          </Button>
+        )}
+      </div>
 
       {message && (
         <div

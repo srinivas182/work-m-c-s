@@ -37,7 +37,7 @@ export async function signUpBusiness(
   const handle = `${prefix}-${testInfo.project.name}-${digits}`;
 
   await page.goto('/signup?package=starter');
-  await page.getByLabel(/^Business name/).fill(`Glow Salon ${digits}`);
+  await page.getByLabel(/^Business name/).fill(`E2E Studio ${digits}`); // never a seeded name (e.g. "Glow Salon")
   await page.getByLabel(/^First name/).fill('Thandi');
   await page.getByLabel(/^Last name/).fill('Mokoena');
   await page.getByLabel(/^Email or mobile number/).fill(`082${digits}`);

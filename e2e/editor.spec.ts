@@ -1,5 +1,18 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { expectAccessible, signUpBusiness } from './support';
+
+/** Header actions (Undo, Versions, Publish) sit behind Puck's menu toggle on phones. */
+async function headerAction(page: Page, name: string | RegExp) {
+  const button = page.getByRole('button', { name, exact: typeof name === 'string' });
+  if (!(await button.isVisible())) {
+    // Phones: with the Blocks drawer open Puck hides its header; close the drawer first.
+    const toggle = page.getByRole('button', { name: 'Toggle menu bar' });
+    if (!(await toggle.isVisible()))
+      await page.getByRole('button', { name: 'Blocks', exact: true }).click();
+    await toggle.click();
+  }
+  await button.click();
+}
 
 test('an owner edits a page on the page itself, it autosaves, and they publish it', async ({
   page,
@@ -36,7 +49,7 @@ test('an owner edits a page on the page itself, it autosaves, and they publish i
     page.frameLocator('iframe').first().locator('h2 [contenteditable]').first(),
   ).toHaveText('Prices for December');
 
-  // Undo is one click away (and is saved too).
+  // Undo is one click away — even for the first edit after opening the editor — and is saved too.
   await heading.hover();
   await heading.click();
   await heading.press('End');
@@ -44,15 +57,7 @@ test('an owner edits a page on the page itself, it autosaves, and they publish i
   await expect(page.getByRole('status').first()).toHaveText('All changes saved', {
     timeout: 10_000,
   });
-  // Known issue (Puck 0.23, docs/sprints/sprint-04.md): Undo pressed while the text is
-  // still in editing mode does nothing. Clicking elsewhere first ends editing; then it works.
-  await page
-    .getByRole('heading', { name: 'Prices' })
-    .first()
-    .click()
-    .catch(() => {});
-  await page.frameLocator('iframe').first().locator('footer').first().click();
-  await page.getByRole('button', { name: 'Undo' }).click();
+  await headerAction(page, 'Undo');
   await expect(
     page.frameLocator('iframe').first().locator('h2 [contenteditable]').first(),
   ).toHaveText('Prices for December');
@@ -61,12 +66,12 @@ test('an owner edits a page on the page itself, it autosaves, and they publish i
   });
 
   // Publish with a note; the version list shows it live.
-  await page.getByRole('button', { name: 'Publish' }).click();
+  await headerAction(page, 'Publish');
   await page.getByLabel(/What changed/).fill('December prices');
   await expectAccessible(page);
   await page.getByRole('button', { name: 'Publish now' }).click();
   await expect(page.getByText('Published — version 1 is live.')).toBeVisible();
-  await page.getByRole('button', { name: 'Versions' }).click();
+  await headerAction(page, 'Versions');
   await expect(page.getByRole('dialog').getByText('Version 1')).toBeVisible();
   await expect(page.getByRole('dialog').getByText('December prices')).toBeVisible();
 });
