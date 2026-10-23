@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Wurk\Website\Http\Controllers\Admin\TemplatesController;
 use Wurk\Website\Http\Controllers\AssetsController;
 use Wurk\Website\Http\Controllers\BlockBoardController;
 use Wurk\Website\Http\Controllers\BrandingController;
@@ -11,8 +12,12 @@ use Wurk\Website\Http\Controllers\EditorController;
 use Wurk\Website\Http\Controllers\MenusController;
 use Wurk\Website\Http\Controllers\PagesController;
 use Wurk\Website\Http\Controllers\PreviewController;
+use Wurk\Website\Http\Controllers\TemplatePreviewController;
 
 Route::get('/_blocks', BlockBoardController::class)->name('website.block-board');
+
+Route::domain((string) config('wurk.domains.app'))->middleware('throttle:120,1,template-preview')
+    ->get('/templates/{template}/preview', TemplatePreviewController::class)->name('website.template-preview');
 
 Route::tenant(function (): void {
     Route::middleware(['entitled:website', 'permission:website.edit'])->prefix('website')->name('tenant.website.')->group(function (): void {
@@ -23,6 +28,7 @@ Route::tenant(function (): void {
         Route::post('/pages/{page}/home', [PagesController::class, 'home'])->name('pages.home');
         Route::delete('/pages/{page}', [PagesController::class, 'destroy'])->name('pages.destroy');
         Route::post('/pages/{page}/restore', [PagesController::class, 'restore'])->name('pages.restore');
+        Route::post('/design', [PagesController::class, 'switchDesign'])->middleware('throttle:10,1,website-design')->name('design');
 
         Route::get('/pages/{page}/edit', EditorController::class)->name('editor');
         Route::get('/pages/{page}/draft', [DraftController::class, 'show'])->name('draft');
@@ -43,4 +49,21 @@ Route::tenant(function (): void {
             Route::post('/pages/{page}/versions/{version}/restore', [DraftController::class, 'restore'])->name('versions.restore');
         });
     });
+});
+
+Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])->prefix('templates')->name('admin.templates')->group(function (): void {
+    Route::get('/', [TemplatesController::class, 'index']);
+    Route::post('/', [TemplatesController::class, 'store'])->name('.store');
+    Route::put('/categories/{category}', [TemplatesController::class, 'updateCategory'])->name('.category');
+    Route::get('/{template}', [TemplatesController::class, 'show'])->name('.show');
+    Route::put('/{template}', [TemplatesController::class, 'update'])->name('.update');
+    Route::post('/{template}/publish', [TemplatesController::class, 'publish'])->name('.publish');
+    Route::post('/{template}/retire', [TemplatesController::class, 'retire'])->name('.retire');
+    Route::get('/{template}/preview', [TemplatesController::class, 'preview'])->name('.preview');
+    Route::get('/{template}/versions', [TemplatesController::class, 'versions'])->name('.versions');
+    Route::post('/{template}/versions/{version}/restore', [TemplatesController::class, 'restoreVersion'])->name('.versions.restore');
+    Route::get('/{template}/photos', [TemplatesController::class, 'photos'])->name('.photos');
+    Route::post('/{template}/photos', [TemplatesController::class, 'uploadPhoto'])->middleware('throttle:60,1,template-photos')->name('.photos.store');
+    Route::get('/{template}/pages/{page}/edit', [TemplatesController::class, 'editPage'])->name('.pages.edit');
+    Route::put('/{template}/pages/{page}/draft', [TemplatesController::class, 'saveDraft'])->middleware('throttle:120,1,template-draft')->name('.pages.draft');
 });

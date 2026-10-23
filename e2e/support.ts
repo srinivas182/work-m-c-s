@@ -31,6 +31,10 @@ export async function signUpBusiness(
   page: Page,
   testInfo: TestInfo,
   prefix: string,
+  choice: { category: string; design: string } = {
+    category: 'Salon & beauty',
+    design: 'Warm salon (sample)',
+  },
 ): Promise<string> {
   const digits = String(Date.now()).slice(-7);
   const e164 = `+2782${digits}`;
@@ -49,6 +53,20 @@ export async function signUpBusiness(
     .first()
     .fill(latestCode(e164));
   await expect(page.getByRole('heading', { level: 1, name: 'Choose a package' })).toBeVisible();
+  await page.getByRole('button', { name: 'Continue' }).click();
+
+  // Category and design (shown once designs are published — the e2e setup publishes samples).
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'What kind of business is it?' }),
+  ).toBeVisible();
+  await page.getByRole('radio', { name: new RegExp(choice.category) }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Choose your website design' }),
+  ).toBeVisible();
+  await page
+    .getByRole('radio', { name: new RegExp(choice.design.replace(/[()]/g, '\\$&')) })
+    .click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByLabel(/^Your web address/).fill(handle);
   await expect(page.getByLabel('Available')).toBeVisible();

@@ -1,5 +1,21 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Check, X } from 'lucide-react';
+import {
+  Check,
+  X,
+  Scissors,
+  Stethoscope,
+  Flower2,
+  ShoppingBag,
+  Dumbbell,
+  Briefcase,
+  Wrench,
+  Utensils,
+  Hammer,
+  GraduationCap,
+  Camera,
+  Truck,
+  type LucideIcon,
+} from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { rand } from '@/lib/money';
 import {
@@ -24,8 +40,16 @@ interface Pkg {
   trial_days: number;
 }
 
+interface Category {
+  key: string;
+  name: string;
+  description: string | null;
+  icon: string;
+  templates: { key: string; name: string; description: string | null }[];
+}
+
 interface Props {
-  step: 'details' | 'verify' | 'package' | 'address' | 'finish';
+  step: 'details' | 'verify' | 'package' | 'category' | 'template' | 'address' | 'finish';
   steps: string[];
   data: {
     business_name: string;
@@ -36,7 +60,10 @@ interface Props {
     package_id: string;
     period: 'monthly' | 'yearly';
     handle: string;
+    category: string;
+    template: string;
   };
+  catalogue: Category[];
   maskedContact: string | null;
   packages: Pkg[];
   countries: { code: string; name: string; vat: number }[];
@@ -48,6 +75,8 @@ const LABELS: Record<string, string> = {
   details: 'Your details',
   verify: 'Verify',
   package: 'Package',
+  category: 'Category',
+  template: 'Design',
   address: 'Web address',
   finish: 'Finish',
 };
@@ -361,6 +390,146 @@ function PackageStep({ data, packages }: Pick<Props, 'data' | 'packages'>) {
   );
 }
 
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  scissors: Scissors,
+  stethoscope: Stethoscope,
+  flower: Flower2,
+  'shopping-bag': ShoppingBag,
+  dumbbell: Dumbbell,
+  briefcase: Briefcase,
+  wrench: Wrench,
+  utensils: Utensils,
+  hammer: Hammer,
+  'graduation-cap': GraduationCap,
+  camera: Camera,
+  truck: Truck,
+};
+
+function CategoryStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
+  const form = useForm({ category: data.category || '' });
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.post('/signup/category', { preserveScroll: true });
+      }}
+      className="grid gap-5"
+    >
+      <p className="text-[#5b5776]">
+        This chooses designs made for your kind of business. It can’t be changed later.
+      </p>
+      <div role="radiogroup" aria-label="Business category" className="grid gap-3 sm:grid-cols-2">
+        {catalogue.map((c) => {
+          const Icon = CATEGORY_ICONS[c.icon] ?? Briefcase;
+          const selected = form.data.category === c.key;
+          return (
+            <button
+              key={c.key}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => form.setData('category', c.key)}
+              className={`flex items-start gap-3 rounded-2xl border p-4 text-left transition ${selected ? 'border-[#5b3df5] bg-[#F4F1FF] ring-2 ring-[#5b3df5]/25' : 'border-[#E4E1F0] hover:border-[#B9B2E0]'}`}
+            >
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-[#5b3df5] shadow-xs">
+                <Icon className="size-5" aria-hidden />
+              </span>
+              <span>
+                <span className="block font-semibold">{c.name}</span>
+                {c.description && <span className="text-sm text-[#5b5776]">{c.description}</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {form.errors.category && (
+        <p role="alert" className="text-danger-11 text-sm">
+          {form.errors.category}
+        </p>
+      )}
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        loading={form.processing}
+        disabled={!form.data.category}
+      >
+        Continue
+      </Button>
+    </form>
+  );
+}
+
+function TemplateStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
+  const category = catalogue.find((c) => c.key === data.category);
+  const form = useForm({ template: data.template || category?.templates[0]?.key || '' });
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.post('/signup/template', { preserveScroll: true });
+      }}
+      className="grid gap-5"
+    >
+      <p className="text-[#5b5776]">
+        Designs for <strong className="text-[#1B1640]">{category?.name ?? 'your business'}</strong>.
+        You can switch to the other design later and keep everything you add.{' '}
+        <button
+          type="button"
+          className="font-semibold text-[#5b3df5] underline-offset-4 hover:underline"
+          onClick={() => router.post('/signup/back/category', {}, { preserveScroll: true })}
+        >
+          Change category
+        </button>
+      </p>
+      <div role="radiogroup" aria-label="Website design" className="grid gap-3">
+        {(category?.templates ?? []).map((t) => {
+          const selected = form.data.template === t.key;
+          return (
+            <div
+              key={t.key}
+              className={`flex items-center justify-between gap-3 rounded-2xl border p-4 transition ${selected ? 'border-[#5b3df5] bg-[#F4F1FF] ring-2 ring-[#5b3df5]/25' : 'border-[#E4E1F0]'}`}
+            >
+              <button
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => form.setData('template', t.key)}
+                className="flex-1 text-left"
+              >
+                <span className="block font-semibold">{t.name}</span>
+                {t.description && <span className="text-sm text-[#5b5776]">{t.description}</span>}
+              </button>
+              <a
+                href={`/templates/${t.key}/preview`}
+                target="_blank"
+                rel="noopener"
+                className="shrink-0 rounded-lg px-3 py-2 text-sm font-semibold text-[#5b3df5] hover:bg-white"
+              >
+                Preview<span className="sr-only"> {t.name} (opens in a new tab)</span>
+              </a>
+            </div>
+          );
+        })}
+      </div>
+      {form.errors.template && (
+        <p role="alert" className="text-danger-11 text-sm">
+          {form.errors.template}
+        </p>
+      )}
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        loading={form.processing}
+        disabled={!form.data.template}
+      >
+        Continue
+      </Button>
+    </form>
+  );
+}
+
 function Address({ data, rootDomain }: Pick<Props, 'data' | 'rootDomain'>) {
   const form = useForm({ handle: data.handle || slug(data.business_name) });
   const [check, setCheck] = useState<{
@@ -515,6 +684,8 @@ export default function Signup(props: Props) {
     details: 'Tell us about your business',
     verify: 'Check it’s you',
     package: 'Choose a package',
+    category: 'What kind of business is it?',
+    template: 'Choose your website design',
     address: 'Pick your web address',
     finish: 'Ready to go',
   };
@@ -526,6 +697,8 @@ export default function Signup(props: Props) {
         <Verify maskedContact={props.maskedContact} onEdit={() => setEditing(true)} />
       )}
       {step === 'package' && <PackageStep data={props.data} packages={props.packages} />}
+      {step === 'category' && <CategoryStep data={props.data} catalogue={props.catalogue} />}
+      {step === 'template' && <TemplateStep data={props.data} catalogue={props.catalogue} />}
       {step === 'address' && <Address data={props.data} rootDomain={props.rootDomain} />}
       {step === 'finish' && (
         <Finish

@@ -9,6 +9,9 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
 
 /**
  * @property string $tenant_id
+ * @property string|null $category_key
+ * @property string|null $template_key
+ * @property int|null $template_version
  * @property array<string, mixed> $branding
  * @property array<string, mixed> $menus
  * @property array<string, mixed> $settings

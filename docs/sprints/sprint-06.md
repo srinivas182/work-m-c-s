@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 6 · 18 – 29 January 2027 (runs before Sprint 5 — see §8) |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 23 Oct 2026 — 6.1 in review |
 | **Depends on** | v0.5.0 (blocks, editor, photo uploads, menus, branding, preview); PRD §5.3 onboarding, §5.4 FR-WB-04 templates, FR-WB-06 media; sprint plan revision 3 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -178,3 +178,11 @@ Each template: home, about, services, contact and legal pages (privacy, terms, c
 
 - 24 templates (2 per category): Car mechanics adds *Panel beater & auto electrician*; Events & creative adds *Venue & event planner*; Transport & logistics splits into *Shuttles & tours* and *Couriers & removals*.
 - Sprint order: 6 → 7 → 5 → 8 …; custom domains, SSL and Cloudflare join the cloud work in Sprint 17.
+
+---
+
+## 9. Progress log
+
+| Sub-sprint | PR | Result |
+|---|---|---|
+| 6.1 Template system | see PR | 595 backend tests on SQLite and MySQL 8; 127 frontend; 44 browser checks (signup with category and design, switching design, previews, admin screens scanned). Unfinished admin work from another session was found on the branch, reviewed, fixed (photo listing, partial renames, empty quota line, labels) and tested |
