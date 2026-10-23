@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\Page;
+use Wurk\Website\Support\Menus;
 use Wurk\Website\Support\Pages;
 
 /** The visual editor for one page (Sprint 4.3). */
@@ -28,7 +29,7 @@ final class EditorController
             'canPublish' => (bool) $request->user()?->can('website.publish'),
             'businessName' => $context->current()->displayName(),
             'branding' => $site->branding,
-            'menus' => ['header' => $site->menus['header'] ?? [], 'footer' => $site->menus['footer'] ?? []],
+            'menus' => app(Menus::class)->resolve($site),
             'urls' => [
                 'pages' => route('tenant.website.pages', [], false),
                 'draft' => $base.'/draft',

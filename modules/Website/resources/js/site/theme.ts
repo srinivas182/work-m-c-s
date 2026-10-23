@@ -10,13 +10,34 @@ const MODERN: FontPairing = {
 };
 
 export const FONT_PAIRINGS: Record<string, FontPairing> = {
-  modern: {
-    display: "'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif",
-    body: "'Inter Variable', Inter, system-ui, sans-serif",
-  },
+  modern: MODERN,
   classic: {
     display: "'Playfair Display Variable', 'Playfair Display', Georgia, serif",
     body: "'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif",
+  },
+  friendly: {
+    display: "'Nunito Variable', Nunito, system-ui, sans-serif",
+    body: "'Nunito Sans Variable', 'Nunito Sans', system-ui, sans-serif",
+  },
+  elegant: {
+    display: "'Cormorant Garamond Variable', 'Cormorant Garamond', Georgia, serif",
+    body: 'Lato, system-ui, sans-serif',
+  },
+  bold: {
+    display: "'Archivo Variable', Archivo, system-ui, sans-serif",
+    body: "'Archivo Variable', Archivo, system-ui, sans-serif",
+  },
+  clean: {
+    display: "'DM Sans Variable', 'DM Sans', system-ui, sans-serif",
+    body: "'DM Sans Variable', 'DM Sans', system-ui, sans-serif",
+  },
+  editorial: {
+    display: "'Fraunces Variable', Fraunces, Georgia, serif",
+    body: "'Work Sans Variable', 'Work Sans', system-ui, sans-serif",
+  },
+  technical: {
+    display: "'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif",
+    body: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif",
   },
 };
 

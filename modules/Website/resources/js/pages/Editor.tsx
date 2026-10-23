@@ -1,5 +1,4 @@
-import '@fontsource-variable/playfair-display';
-import '@fontsource-variable/source-sans-3';
+import '../site/fonts';
 // Puck's default stylesheet imports Inter from rsms.me (a third-party request from
 // every owner's browser). This variant has no external imports; Inter is self-hosted.
 import '@puckeditor/core/no-external.css';
