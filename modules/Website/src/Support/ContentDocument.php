@@ -26,15 +26,16 @@ final class ContentDocument
      * What a new page starts with, so nobody faces a blank canvas. Props are empty:
      * each block fills in its own defaults when rendered (and upgrades from version 1).
      *
-     * @param  list<string>  $types
+     * @param  list<string|array{0: string, 1: array<string, mixed>}>  $blocks  a type, or [type, props to set]
      * @return array{schema: int, blocks: list<array{id: string, type: string, version: int, props: array<string, mixed>}>}
      */
-    public static function starter(array $types): array
+    public static function starter(array $blocks): array
     {
-        return ['schema' => self::SCHEMA, 'blocks' => array_map(
-            fn (string $type) => ['id' => strtolower($type).'-'.substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'version' => 1, 'props' => []],
-            $types,
-        )];
+        return ['schema' => self::SCHEMA, 'blocks' => array_map(function (string|array $block): array {
+            [$type, $props] = is_array($block) ? $block : [$block, []];
+
+            return ['id' => strtolower($type).'-'.bin2hex(random_bytes(5)), 'type' => $type, 'version' => 1, 'props' => $props];
+        }, $blocks)];
     }
 
     /**

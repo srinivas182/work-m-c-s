@@ -44,7 +44,7 @@ final readonly class Pages
 
         return Page::query()->create([
             'title' => $title, 'slug' => $slug, 'position' => (int) Page::query()->max('position') + 1,
-            'draft' => json_encode(ContentDocument::starter(['Header', 'Text', 'Footer'])), 'updated_by' => $by,
+            'draft' => json_encode(ContentDocument::starter(['Header', ['Text', ['heading' => $title]], 'Footer'])), 'updated_by' => $by,
         ]);
     }
 

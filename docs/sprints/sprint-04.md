@@ -121,3 +121,7 @@ Header/navigation · Hero (3 variants) · Services and prices · Feature grid ·
 |---|---|---|
 | 4.1 Site model & branding | #35 | 562 tests on SQLite and MySQL 8; 32 browser checks (a new owner adds a page). Puck package checked before starting: `@measured/puck` is deprecated, `@puckeditor/core` 0.23.0 will be pinned in 4.3 |
 | 4.2 Block library, part 1 | #36 | Design direction approved 23 Oct; client asked for photo-led heroes — Hero has five layouts incl. a guarded slideshow, and basic image resizing moves into 4.3. 14 blocks; 45 frontend tests, 562 backend, 36 browser checks. Deviation: pixel-snapshot tests replaced by server-render tests plus accessibility scans at both widths — pixel baselines differ between machines (font rendering) and would make CI flaky; CI-generated baselines can follow with the Sprint 5 engine |
+
+### Open issue — Undo straight after inline typing (4.3)
+
+Puck 0.23's inline text keeps its own "being edited" state. When Undo is pressed while a text is still in that state, the undo does not take effect on screen or in the saved page (they stay consistent — nothing is lost or mismatched). Clicking anywhere else first ends editing, and Undo then works every time (verified in a browser probe). Four workarounds in our editor (releasing focus, deferring the click, dispatching focus-out) did not change it, so none was kept. Next step: a minimal reproduction against Puck alone, then a fix or an upstream report.

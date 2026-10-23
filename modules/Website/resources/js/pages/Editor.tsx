@@ -240,6 +240,8 @@ export default function Editor({
         config={config}
         data={initialData}
         onChange={onChange}
+        // Puck's own labels, in our voice (its defaults are lowercase).
+        dictionary={{ 'header-undo': 'Undo', 'header-redo': 'Redo' }}
         headerTitle={page.title}
         headerPath={page.is_home ? '/' : `/${page.slug}`}
         viewports={[
@@ -258,7 +260,7 @@ export default function Editor({
             <span
               role="status"
               aria-live="polite"
-              className={`inline-flex items-center gap-1.5 px-2 text-sm font-medium ${s.tone}`}
+              className={`hidden items-center gap-1.5 px-2 text-sm font-medium md:inline-flex ${s.tone}`}
             >
               {s.icon}
               {s.text}
@@ -288,6 +290,16 @@ export default function Editor({
           </div>
         )}
       />
+
+      {/* Phones: Puck folds the header actions into a menu, so the save status stays visible here. */}
+      <span
+        role="status"
+        aria-live="polite"
+        className={`fixed top-3 left-3 z-[60] inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium shadow-sm ring-1 ring-black/5 md:hidden ${s.tone}`}
+      >
+        {s.icon}
+        {s.text}
+      </span>
 
       {message && (
         <div
