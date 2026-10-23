@@ -6,6 +6,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use Wurk\Identity\Auth\SignInFlow;
 use Wurk\Identity\Http\Middleware\SessionGuardian;
@@ -28,4 +29,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+        // App screens: a friendly message on the same page instead of a raw "429" box.
+        // API and JSON callers still get a proper 429 response.
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            if ($request->hasHeader('X-Inertia') && ! $request->expectsJson()) {
+                return back()->with('warning', 'That was a lot of attempts in a short time. Please wait a minute and try again.');
+            }
+
+            return null;
+        });
     })->create();

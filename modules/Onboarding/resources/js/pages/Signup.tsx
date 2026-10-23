@@ -71,7 +71,10 @@ function Shell({
   title: string;
 }) {
   const index = steps.indexOf(step);
-  const { errors } = usePage<{ errors: Record<string, string> }>().props;
+  const { errors, flash } = usePage<{
+    errors: Record<string, string>;
+    flash?: { warning?: string | null };
+  }>().props;
   return (
     <div className="min-h-dvh bg-[#F7F7FB] text-[#1B1640]">
       <Head title={`Sign up — ${title}`} />
@@ -105,6 +108,14 @@ function Shell({
             className="mt-4 rounded-xl bg-[#FDECEC] px-4 py-3 text-[15px] text-[#8A1C1C]"
           >
             {errors.signup}
+          </p>
+        )}
+        {flash?.warning && (
+          <p
+            role="alert"
+            className="mt-4 rounded-xl bg-[#FDECEC] px-4 py-3 text-[15px] text-[#8A1C1C]"
+          >
+            {flash?.warning}
           </p>
         )}
         <div className="mt-7 rounded-[22px] bg-white p-6 ring-1 ring-[#1B1640]/10 sm:p-8">

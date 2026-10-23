@@ -2,8 +2,12 @@
 
 declare(strict_types=1);
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\FakeOtpChannel;
 use Tests\Support\InteractsWithIdentity;
@@ -125,4 +129,31 @@ it('expires signups after 7 days', function () {
     $code = FakeOtpChannel::$codes['thandi@glow.co.za'];
     $this->travel(8)->days();
     $this->post($this->app('/signup/verify'), ['code' => $code])->assertSessionHasErrors('signup');
+});
+
+it('limits signups per person, with only a high backstop per shared IP address', function () {
+    // South African mobile networks put many customers behind one IP address.
+    $request = Request::create('/signup', 'GET', server: ['REMOTE_ADDR' => '41.0.0.7']);
+    $request->setLaravelSession($session = app('session')->driver());
+    $session->setId(str_repeat('a', 40));
+
+    $limits = collect(RateLimiter::limiter('signup')($request))->map(fn ($l) => [$l->key, $l->maxAttempts, $l->decaySeconds])->all();
+    expect($limits)->toBe([['signup:session:'.str_repeat('a', 40), 30, 60], ['signup:ip:41.0.0.7', 300, 60]]);
+
+    $start = collect(RateLimiter::limiter('signup-start')($request))->map(fn ($l) => [$l->key, $l->maxAttempts, $l->decaySeconds])->all();
+    expect($start)->toBe([['signup-start:session:'.str_repeat('a', 40), 5, 3600], ['signup-start:ip:41.0.0.7', 60, 3600]]);
+});
+
+it('explains a rate limit on the same screen instead of showing a raw 429', function () {
+    $handler = app(ExceptionHandler::class);
+    $screen = Request::create('/signup/address', 'POST', server: ['HTTP_X_INERTIA' => 'true', 'HTTP_REFERER' => $this->app('/signup')]);
+    $screen->setLaravelSession(app('session')->driver());
+    app()->instance('request', $screen);
+
+    $response = $handler->render($screen, new ThrottleRequestsException);
+    expect($response->getStatusCode())->toBe(302)
+        ->and($response->getSession()?->get('warning') ?? session('warning'))->toContain('wait a minute');
+
+    $json = Request::create('/signup/check-handle', 'GET', server: ['HTTP_ACCEPT' => 'application/json']);
+    expect($handler->render($json, new ThrottleRequestsException)->getStatusCode())->toBe(429);
 });

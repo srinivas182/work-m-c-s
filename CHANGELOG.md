@@ -4,6 +4,22 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 4.4 (menus, branding, site preview)
+- All 8 curated font pairings work (6 font families added, self-hosted, OFL); a test keeps the server's list and the site theme in step.
+- Menus: one header menu for desktop and phones, with one level of accessible dropdown sub-items, plus footer links. Items point to pages by id (renaming a page's address never breaks a menu; deleted pages drop out). Only https://, mailto:, tel: and #section links are accepted — never javascript: or data:.
+- Branding screen: logo and browser icon (only this business's own uploads accepted), main and optional second colour with the generated palette, font pairing cards written in their own fonts, corner styles, and a live preview that updates before saving.
+- Site preview inside the back office: the whole site with its real blocks, latest changes or exactly what's published, page switcher, menu links that stay within the preview.
+
+### Changed
+- Signup rate limits are counted per browser session with a high per-IP backstop (30/min per session + 300/min per IP; starting a signup 5/hour per session + 60/hour per IP). South African mobile networks share IP addresses, so IP-only limits let strangers throttle each other.
+- A rate-limited app screen now shows a plain message on the same screen instead of a raw "429" box (API and JSON still receive 429).
+
+### Fixed
+- The Branding service is a singleton; it now looks up the current business on every call (a captured context could outlive the request under Octane).
+- The photo picker's hidden upload input had no label (accessibility scan).
+- An unset second colour showed a misleading swatch; it is now an "Add a second colour" button.
+- On short pages the back office's background showed below the preview's footer.
+
 ### Added — Sprint 4.3 (visual editor, photo uploads)
 - Visual editor (Puck `@puckeditor/core` 0.23.0, pinned, behind our own adapter — pages stay in WURK's format): all blocks, click-to-edit text on the page (38 fields, each checked safe), drag-and-drop, undo/redo, phone/tablet/desktop previews, autosave with a clear conflict message (never a silent overwrite), offline/"couldn't save" retry, leave-page warning, publish with a note, version history with restore. On phones Puck's header folds away and its canvas covers that menu, so save status, Versions and Publish sit in a bar within thumb reach.
 - New pages never start blank: Home starts with header, hero and footer; other pages with header, a text section headed with the page title, and footer.
