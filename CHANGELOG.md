@@ -4,6 +4,19 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 4.2 (block library, part 1)
+- 14 server-renderable website blocks, used unchanged by the editor, the preview and the Sprint 5 public engine: Header and menu, Hero, Why choose us, Services and prices, Photo and text, Gallery, Testimonials, Team, Opening hours, Contact details, Questions and answers, Text, Call to action, Footer.
+- Hero (version 2) with five layouts: Full photo, Text and photo, Photo collage, Slideshow and Text only. The slideshow never advances on its own unless the owner chooses it — then slowly, pausing on hover/focus, with a pause button, and never for visitors who prefer reduced motion; only the first photo loads immediately. Without photos, every layout falls back to a strong text-only hero on the live site.
+- Block contract: versioned props with upgrade steps (Hero v1 → v2 converts the single photo to a photo list); unknown blocks, or blocks saved by a newer release, are skipped instead of breaking the page.
+- Site theming from each business's branding through the Sprint 0 palette engine, scoped to the site; site base styles so back-office fonts never leak into a website; self-hosted font pairings (Playfair Display and Source Sans 3 added, OFL licence).
+- Page structure built by the renderer: header before `<main>`, footer after, skip link.
+- No third-party requests from public sites: the map is a link to Google Maps, not an embed (POPIA); phone and WhatsApp links use South African international format.
+- Design board at `/_blocks` (not in production) with two contrasting sample businesses; accessibility-scanned on desktop and phone.
+
+### Fixed
+- Block upgrades merged old props into the new shape, so removed fields survived; each step now replaces them and defaults apply afterwards.
+- A block with nothing to show left an empty wrapper on the page.
+
 ### Added — Sprint 4.1 (site model, branding)
 - Website module (entitlement `website`): one site per business on its shard, created with a home page the first time it's needed.
 - Pages: titles, addresses (unique per site, engine paths reserved), order, exactly one home page, SEO title and description, soft delete with 30-day restore (a reused address gets `-2`).
