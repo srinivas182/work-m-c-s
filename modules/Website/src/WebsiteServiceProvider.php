@@ -49,6 +49,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         return [
             ['label' => 'Pages', 'route' => 'tenant.website.pages', 'icon' => 'globe', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 100],
             ['label' => 'Branding', 'route' => 'tenant.website.branding', 'icon' => 'palette', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
+            ['label' => 'Templates', 'route' => 'admin.templates', 'icon' => 'layout-template', 'section' => 'Platform', 'permission' => 'templates.manage', 'order' => 60],
             ['label' => 'Menus', 'route' => 'tenant.website.menus', 'icon' => 'menu', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 101],
         ];
     }

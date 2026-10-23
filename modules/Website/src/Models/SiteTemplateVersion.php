@@ -6,6 +6,7 @@ namespace Wurk\Website\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Wurk\Tenancy\Contracts\CentralModel;
 
 /**
@@ -14,6 +15,7 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property int $number
  * @property string $definition
  * @property string|null $note
+ * @property Carbon|null $created_at
  */
 final class SiteTemplateVersion extends Model implements CentralModel
 {

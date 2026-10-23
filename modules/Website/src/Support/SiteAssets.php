@@ -29,6 +29,32 @@ final readonly class SiteAssets
 
     public function store(UploadedFile $file, ?string $by): SiteAsset
     {
+        $id = (string) Str::ulid();
+        ['width' => $width, 'height' => $height, 'bytes' => $bytes, 'variants' => $variants] = $this->process($file, 'sites/'.$this->context->id(), $id);
+        $disk = Storage::disk((string) config('wurk.site_assets_disk'));
+
+        $this->assertQuota($bytes, $variants, $disk);
+
+        $asset = SiteAsset::query()->create([
+            'id' => $id, 'name' => mb_substr($file->getClientOriginalName(), 0, 160) ?: 'photo',
+            'width' => $width, 'height' => $height,
+            'bytes' => $bytes, 'variants' => $variants, 'uploaded_by' => $by,
+        ]);
+        $this->audit->record('website.photo_uploaded', 'site_asset', $asset->id, ['name' => $asset->name, 'bytes' => $bytes]);
+
+        return $asset;
+    }
+
+    /**
+     * The safe upload pipeline, shared by business photos and template photos: checked by
+     * content, dimensions checked before decoding, phone orientation applied, re-encoded
+     * to WebP sizes (no metadata survives). Stores the files under $directory and returns
+     * what was written; the original upload is never kept.
+     *
+     * @return array{width: int, height: int, bytes: int, variants: array<int, string>}
+     */
+    public function process(UploadedFile $file, string $directory, string $id): array
+    {
         $config = (array) config('website.uploads');
         $fail = fn (string $message) => throw ValidationException::withMessages(['photo' => $message]);
 
@@ -61,7 +87,6 @@ final readonly class SiteAssets
         [$width, $height] = [imagesx($image), imagesy($image)];
 
         $disk = Storage::disk((string) config('wurk.site_assets_disk'));
-        $id = (string) Str::ulid();
         $variants = [];
         $bytes = 0;
         try {
@@ -73,7 +98,7 @@ final readonly class SiteAssets
                 ob_start();
                 imagewebp($scaled, null, (int) $config['webp_quality']);
                 $data = (string) ob_get_clean();
-                $path = 'sites/'.$this->context->id().'/'.strtolower($id).'-'.$w.'.webp';
+                $path = $directory.'/'.strtolower($id).'-'.$w.'.webp';
                 $disk->put($path, $data, ['visibility' => 'public']);
                 $variants[$w] = $path;
                 $bytes += strlen($data);
@@ -85,16 +110,7 @@ final readonly class SiteAssets
             imagedestroy($image);
         }
 
-        $this->assertQuota($bytes, $variants, $disk);
-
-        $asset = SiteAsset::query()->create([
-            'id' => $id, 'name' => mb_substr($file->getClientOriginalName(), 0, 160) ?: 'photo',
-            'width' => $width, 'height' => $height,
-            'bytes' => $bytes, 'variants' => $variants, 'uploaded_by' => $by,
-        ]);
-        $this->audit->record('website.photo_uploaded', 'site_asset', $asset->id, ['name' => $asset->name, 'bytes' => $bytes]);
-
-        return $asset;
+        return ['width' => $width, 'height' => $height, 'bytes' => $bytes, 'variants' => $variants];
     }
 
     /**
@@ -116,6 +132,28 @@ final readonly class SiteAssets
             'width' => $largest,
             // Same aspect ratio as the photo, so the browser reserves the right space (no layout jump).
             'height' => (int) round($asset->height * $largest / max(1, $asset->width)),
+            'alt' => $alt,
+        ];
+    }
+
+    /**
+     * Photo value from stored variant paths (template photos have no database row).
+     *
+     * @param  array<int, string>  $variants
+     * @return array{src: string, srcset: string, width: int, height: int, alt: string}
+     */
+    public static function photoFromVariants(array $variants, int $width, int $height, string $alt = ''): array
+    {
+        $disk = Storage::disk((string) config('wurk.site_assets_disk'));
+        $widths = array_map('intval', array_keys($variants));
+        sort($widths);
+        $largest = (int) end($widths);
+
+        return [
+            'src' => $disk->url($variants[$largest]),
+            'srcset' => implode(', ', array_map(fn (int $w) => $disk->url($variants[$w]).' '.$w.'w', $widths)),
+            'width' => $largest,
+            'height' => (int) round($height * $largest / max(1, $width)),
             'alt' => $alt,
         ];
     }

@@ -182,9 +182,11 @@ export function PhotoPicker({
 
       {library && (
         <div className="grid gap-2 rounded-lg border border-[#d9d6e8] p-2">
-          <p className="text-[#5b5776]">
-            {library.used_mb} MB of {library.limit_mb} MB used
-          </p>
+          {library.limit_mb > 0 && (
+            <p className="text-[#5b5776]">
+              {library.used_mb} MB of {library.limit_mb} MB used
+            </p>
+          )}
           {library.photos.length === 0 ? (
             <p>No photos yet — upload one.</p>
           ) : (
