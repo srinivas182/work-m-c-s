@@ -84,7 +84,9 @@ export const Contact: BlockDefinition<ContactProps> = {
     return (
       <Section id="contact">
         <Heading intro={p.intro}>{p.heading}</Heading>
-        <ul className="mt-10 grid gap-4 sm:grid-cols-2">
+        <ul
+          className={`mt-10 grid gap-4 sm:grid-cols-2 ${rows.length === 3 ? 'lg:grid-cols-3' : ''}`}
+        >
           {rows.map((r) => (
             <li
               key={r.label}

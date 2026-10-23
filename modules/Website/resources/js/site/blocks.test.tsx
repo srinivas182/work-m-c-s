@@ -116,6 +116,17 @@ describe('block library', () => {
     expect(internationalDigits('+27 82 123 4567')).toBe('27821234567');
   });
 
+  it('puts the header and footer outside <main>, with a skip link', () => {
+    const html = render([
+      { id: 'f', type: 'Footer', version: 1, props: {} },
+      { id: 't', type: 'Text', version: 1, props: { text: 'Body' } },
+      { id: 'h', type: 'Header', version: 1, props: {} },
+    ]);
+    expect(html.indexOf('<header')).toBeLessThan(html.indexOf('<main'));
+    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<footer'));
+    expect(html).toContain('Skip to content');
+  });
+
   it('scopes each site’s theme to its own root', () => {
     const html = render([]);
     expect(html).toMatch(/class="wurk-site" style="--s-bg:/);

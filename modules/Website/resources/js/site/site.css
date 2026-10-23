@@ -1,0 +1,18 @@
+/*
+ * Base styles for business websites. The back office styles headings globally;
+ * inside a site only the site's own fonts may apply, so headings and body text
+ * are reset to the site's chosen pairing here.
+ */
+.wurk-site {
+  font-family: var(--s-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.wurk-site :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--s-font-display);
+  letter-spacing: normal;
+}
+
+.wurk-site :is(h3, h4, h5, h6) {
+  font-weight: 600;
+}

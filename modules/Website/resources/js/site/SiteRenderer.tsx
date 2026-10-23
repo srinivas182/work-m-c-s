@@ -1,3 +1,4 @@
+import './site.css';
 import type { ReactNode } from 'react';
 import { BLOCKS } from './registry';
 import { siteTheme } from './theme';
@@ -22,6 +23,27 @@ export function upgradeBlock(block: StoredBlock): Record<string, unknown> | null
  * Renders a page the same way in the editor, the preview and (Sprint 5) the
  * public site. Unknown or invalid blocks are skipped rather than breaking the page.
  */
+const HEAD = new Set(['Header']);
+const FOOT = new Set(['Footer']);
+
+function renderBlock(block: StoredBlock, site: SiteContext) {
+  const def = BLOCKS[block.type];
+  const props = upgradeBlock(block);
+  const out = def && props ? def.render(props as never, site) : null;
+  // A block with nothing to show (e.g. an empty gallery on a live site) leaves no trace.
+  return out === null || out === undefined ? null : (
+    <div key={block.id} data-block={block.type}>
+      {out}
+    </div>
+  );
+}
+
+/**
+ * Renders a page the same way in the editor, the preview and (Sprint 5) the
+ * public site, with correct landmarks: header blocks before <main>, footer
+ * blocks after it, and a skip link. Unknown or invalid blocks are skipped
+ * rather than breaking the page.
+ */
 export function SiteRenderer({
   document,
   branding,
@@ -33,6 +55,10 @@ export function SiteRenderer({
   site: SiteContext;
   children?: ReactNode;
 }) {
+  const head = document.blocks.filter((b) => HEAD.has(b.type));
+  const foot = document.blocks.filter((b) => FOOT.has(b.type));
+  const body = document.blocks.filter((b) => !HEAD.has(b.type) && !FOOT.has(b.type));
+
   return (
     <div
       className="wurk-site"
@@ -43,18 +69,20 @@ export function SiteRenderer({
         fontFamily: 'var(--s-font-body)',
       }}
     >
-      {document.blocks.map((block) => {
-        const def = BLOCKS[block.type];
-        const props = upgradeBlock(block);
-        const out = def && props ? def.render(props as never, site) : null;
-        // A block with nothing to show (e.g. an empty gallery on a live site) leaves no trace.
-        return out === null || out === undefined ? null : (
-          <div key={block.id} data-block={block.type}>
-            {out}
-          </div>
-        );
-      })}
-      {children}
+      {!site.editing && (
+        <a
+          href="#content"
+          className="sr-only z-50 rounded-[var(--s-radius)] bg-[var(--s-brand)] px-4 py-3 font-semibold text-[var(--s-on-brand)] focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        >
+          Skip to content
+        </a>
+      )}
+      {head.map((b) => renderBlock(b, site))}
+      <main id="content">
+        {body.map((b) => renderBlock(b, site))}
+        {children}
+      </main>
+      {foot.map((b) => renderBlock(b, site))}
     </div>
   );
 }

@@ -94,7 +94,7 @@ export const Testimonials: BlockDefinition<TestimonialsProps> = {
               </figcaption>
             </figure>
             {rest.length > 0 && (
-              <div className="grid gap-6">
+              <div className="grid content-start gap-6">
                 {rest.slice(0, 4).map((t, i) => (
                   <figure
                     key={i}
