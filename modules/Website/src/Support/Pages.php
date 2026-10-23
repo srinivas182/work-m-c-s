@@ -31,7 +31,7 @@ final readonly class Pages
 
         return DB::connection($this->context->connectionName())->transaction(function (): Site {
             $site = Site::query()->create(['tenant_id' => $this->context->id(), 'branding' => $this->branding->defaults(), 'menus' => ['header' => [], 'footer' => [], 'mobile' => []], 'settings' => []]);
-            Page::query()->create(['title' => 'Home', 'slug' => 'home', 'position' => 0, 'is_home' => true, 'draft' => json_encode(ContentDocument::empty())]);
+            Page::query()->create(['title' => 'Home', 'slug' => 'home', 'position' => 0, 'is_home' => true, 'draft' => json_encode(ContentDocument::starter(['Header', 'Hero', 'Footer']))]);
 
             return $site;
         });
@@ -44,7 +44,7 @@ final readonly class Pages
 
         return Page::query()->create([
             'title' => $title, 'slug' => $slug, 'position' => (int) Page::query()->max('position') + 1,
-            'draft' => json_encode(ContentDocument::empty()), 'updated_by' => $by,
+            'draft' => json_encode(ContentDocument::starter(['Header', ['Text', ['heading' => $title]], 'Footer'])), 'updated_by' => $by,
         ]);
     }
 

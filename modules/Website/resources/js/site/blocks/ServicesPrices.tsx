@@ -23,28 +23,28 @@ export const ServicesPrices: BlockDefinition<ServicesPricesProps> = {
   label: 'Services and prices',
   description: 'A clear price list, set out like a printed menu.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 60 },
-    intro: { kind: 'text', label: 'Introduction', multiline: true, max: 240 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },
+    intro: { kind: 'text', inline: true, label: 'Introduction', multiline: true, max: 240 },
     items: {
       kind: 'list',
       label: 'Services',
       max: 40,
       item: {
-        name: { kind: 'text', label: 'Service', max: 60 },
-        description: { kind: 'text', label: 'Description', max: 140 },
+        name: { kind: 'text', inline: true, label: 'Service', max: 60 },
+        description: { kind: 'text', inline: true, label: 'Description', max: 140 },
         duration: { kind: 'text', label: 'Duration', max: 20 },
         price: { kind: 'money', label: 'Price' },
         from: {
           kind: 'select',
           label: 'Price is',
           options: [
-            { value: 'false', label: 'Fixed' },
-            { value: 'true', label: 'From' },
+            { value: false, label: 'Fixed' },
+            { value: true, label: 'From' },
           ],
         },
       },
     },
-    note: { kind: 'text', label: 'Note under the list', max: 160 },
+    note: { kind: 'text', inline: true, label: 'Note under the list', max: 160 },
   },
   defaults: {
     heading: 'Services and prices',

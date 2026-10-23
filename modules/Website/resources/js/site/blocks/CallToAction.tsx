@@ -13,9 +13,9 @@ export const CallToAction: BlockDefinition<CallToActionProps> = {
   label: 'Call to action',
   description: 'A bold band that asks visitors to book, call or visit.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 80 },
-    text: { kind: 'text', label: 'Text', max: 200 },
-    buttonLabel: { kind: 'text', label: 'Button', max: 30 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 80 },
+    text: { kind: 'text', inline: true, label: 'Text', max: 200 },
+    buttonLabel: { kind: 'text', inline: true, label: 'Button', max: 30 },
     buttonHref: { kind: 'link', label: 'Button link' },
   },
   defaults: {

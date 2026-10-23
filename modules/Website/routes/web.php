@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Wurk\Website\Http\Controllers\AssetsController;
 use Wurk\Website\Http\Controllers\BlockBoardController;
 use Wurk\Website\Http\Controllers\BrandingController;
 use Wurk\Website\Http\Controllers\DraftController;
+use Wurk\Website\Http\Controllers\EditorController;
 use Wurk\Website\Http\Controllers\PagesController;
 
 Route::get('/_blocks', BlockBoardController::class)->name('website.block-board');
@@ -20,10 +22,13 @@ Route::tenant(function (): void {
         Route::delete('/pages/{page}', [PagesController::class, 'destroy'])->name('pages.destroy');
         Route::post('/pages/{page}/restore', [PagesController::class, 'restore'])->name('pages.restore');
 
+        Route::get('/pages/{page}/edit', EditorController::class)->name('editor');
         Route::get('/pages/{page}/draft', [DraftController::class, 'show'])->name('draft');
         Route::put('/pages/{page}/draft', [DraftController::class, 'save'])->middleware('throttle:120,1,website-draft')->name('draft.save');
         Route::get('/pages/{page}/versions', [DraftController::class, 'versions'])->name('versions');
 
+        Route::get('/photos', [AssetsController::class, 'index'])->name('photos');
+        Route::post('/photos', [AssetsController::class, 'store'])->middleware('throttle:60,1,website-photos')->name('photos.store');
         Route::get('/branding', [BrandingController::class, 'show'])->name('branding');
         Route::put('/branding', [BrandingController::class, 'update'])->name('branding.update');
 

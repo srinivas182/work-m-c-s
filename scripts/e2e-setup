@@ -29,6 +29,8 @@ rm -f database/e2e.sqlite database/e2e-shard.sqlite
 touch database/e2e.sqlite
 php artisan key:generate --force --no-interaction
 php artisan migrate --force --no-interaction
+# Start from a clean slate: rate limits (e.g. signups per IP) live in the cache.
+php artisan cache:clear --no-interaction > /dev/null
 php artisan shards:register e2e-shard --driver=sqlite --database="${root}/database/e2e-shard.sqlite"
 php artisan tenants:create "Glow Salon" --handle=glow-salon
 php artisan identities:create owner@glow.co.za --first=Thandi --last=Mokoena \

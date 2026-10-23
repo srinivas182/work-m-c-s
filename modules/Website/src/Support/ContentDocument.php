@@ -23,6 +23,22 @@ final class ContentDocument
     }
 
     /**
+     * What a new page starts with, so nobody faces a blank canvas. Props are empty:
+     * each block fills in its own defaults when rendered (and upgrades from version 1).
+     *
+     * @param  list<string|array{0: string, 1: array<string, mixed>}>  $blocks  a type, or [type, props to set]
+     * @return array{schema: int, blocks: list<array{id: string, type: string, version: int, props: array<string, mixed>}>}
+     */
+    public static function starter(array $blocks): array
+    {
+        return ['schema' => self::SCHEMA, 'blocks' => array_map(function (string|array $block): array {
+            [$type, $props] = is_array($block) ? $block : [$block, []];
+
+            return ['id' => strtolower($type).'-'.bin2hex(random_bytes(5)), 'type' => $type, 'version' => 1, 'props' => $props];
+        }, $blocks)];
+    }
+
+    /**
      * @return array{schema: int, blocks: list<array{id: string, type: string, version: int, props: array<string, mixed>}>}
      *
      * @throws ValidationException
@@ -50,7 +66,7 @@ final class ContentDocument
             }
             $id = $block['id'] ?? null;
             $type = $block['type'] ?? null;
-            if (! is_string($id) || preg_match('/^[A-Za-z0-9_-]{1,40}$/', $id) !== 1 || isset($ids[$id])) {
+            if (! is_string($id) || preg_match('/^[A-Za-z0-9_-]{1,100}$/', $id) !== 1 || isset($ids[$id])) {
                 $fail("Section {$n} has a missing or duplicate id.");
             }
             if (! is_string($type) || preg_match('/^[A-Z][A-Za-z0-9]{1,40}$/', $type) !== 1) {

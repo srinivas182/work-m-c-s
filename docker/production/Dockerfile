@@ -22,7 +22,7 @@ FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-php${PHP_VERSION}-trixie AS base
 
 COPY --from=extension-installer /usr/bin/install-php-extensions /usr/local/bin/install-php-extensions
 
-RUN install-php-extensions pdo_mysql redis pcntl intl zip bcmath opcache
+RUN install-php-extensions pdo_mysql redis pcntl intl zip bcmath opcache gd exif
 
 # Use PHP's recommended production settings when the base image ships them;
 # our own overrides (zz-wurk.ini) apply either way.

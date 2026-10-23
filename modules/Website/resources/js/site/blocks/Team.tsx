@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '../types';
-import { EmptyHint, Heading, Section } from './shared';
+import { EmptyHint, Heading, Section, photoSrcSet } from './shared';
 
 export interface TeamProps extends Record<string, unknown> {
   heading: string;
@@ -13,16 +13,16 @@ export const Team: BlockDefinition<TeamProps> = {
   label: 'Team',
   description: 'The people customers will meet.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 60 },
-    intro: { kind: 'text', label: 'Introduction', max: 200 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },
+    intro: { kind: 'text', inline: true, label: 'Introduction', max: 200 },
     people: {
       kind: 'list',
       label: 'People',
       max: 12,
       item: {
         name: { kind: 'text', label: 'Name', max: 60 },
-        role: { kind: 'text', label: 'Role', max: 60 },
-        bio: { kind: 'text', label: 'Short bio', multiline: true, max: 240 },
+        role: { kind: 'text', inline: true, label: 'Role', max: 60 },
+        bio: { kind: 'text', inline: true, label: 'Short bio', multiline: true, max: 240 },
         photo: { kind: 'image', label: 'Photo' },
       },
     },
@@ -42,6 +42,8 @@ export const Team: BlockDefinition<TeamProps> = {
               {m.photo ? (
                 <img
                   src={m.photo}
+                  srcSet={photoSrcSet(m.photo)}
+                  sizes="(min-width: 768px) 25vw, 50vw"
                   alt=""
                   loading="lazy"
                   className="aspect-[4/5] w-full rounded-[var(--s-radius)] object-cover"

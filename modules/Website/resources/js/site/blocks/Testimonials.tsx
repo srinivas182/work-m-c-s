@@ -39,21 +39,21 @@ export const Testimonials: BlockDefinition<TestimonialsProps> = {
   label: 'Testimonials',
   description: 'What customers say — one featured, others alongside.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 60 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },
     items: {
       kind: 'list',
       label: 'Testimonials',
       max: 6,
       item: {
-        quote: { kind: 'text', label: 'What they said', multiline: true, max: 320 },
-        name: { kind: 'text', label: 'Name', max: 60 },
-        detail: { kind: 'text', label: 'Detail (e.g. “Client since 2021”)', max: 60 },
+        quote: { kind: 'text', inline: true, label: 'What they said', multiline: true, max: 320 },
+        name: { kind: 'text', inline: true, label: 'Name', max: 60 },
+        detail: { kind: 'text', inline: true, label: 'Detail (e.g. “Client since 2021”)', max: 60 },
         rating: {
           kind: 'select',
           label: 'Rating',
           options: [
-            { value: '0', label: 'None' },
-            ...[5, 4, 3, 2, 1].map((n) => ({ value: String(n), label: `${n} stars` })),
+            { value: 0, label: 'None' },
+            ...[5, 4, 3, 2, 1].map((n) => ({ value: n, label: `${n} stars` })),
           ],
         },
       },

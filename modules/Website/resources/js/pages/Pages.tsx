@@ -1,10 +1,11 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
   ArrowDown,
   ArrowUp,
   FilePlus2,
   Home,
   MoreHorizontal,
+  PencilLine,
   RotateCcw,
   Trash2,
 } from 'lucide-react';
@@ -190,6 +191,11 @@ export default function Pages({ pages, deleted, base }: Props) {
                     <p className="text-fg-muted truncate text-sm">/{p.is_home ? '' : p.slug}</p>
                   </div>
                   <div className="flex items-center gap-1">
+                    <Button size="sm" variant="secondary" asChild>
+                      <Link href={`${base}/${p.id}/edit`} aria-label={`Edit ${p.title}`}>
+                        <PencilLine /> Edit
+                      </Link>
+                    </Button>
                     <Badge tone={p.published ? 'success' : 'neutral'} dot>
                       {p.published ? 'Published' : 'Draft'}
                     </Badge>

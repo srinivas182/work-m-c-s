@@ -4,6 +4,20 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 4.3 (visual editor, photo uploads)
+- Visual editor (Puck `@puckeditor/core` 0.23.0, pinned, behind our own adapter — pages stay in WURK's format): all blocks, click-to-edit text on the page (38 fields, each checked safe), drag-and-drop, undo/redo, phone/tablet/desktop previews, autosave with a clear conflict message (never a silent overwrite), offline/"couldn't save" retry, leave-page warning, publish with a note, version history with restore. On phones Puck's header folds away and its canvas covers that menu, so save status, Versions and Publish sit in a bar within thumb reach.
+- New pages never start blank: Home starts with header, hero and footer; other pages with header, a text section headed with the page title, and footer.
+- Photo uploads (GD, added to both Docker images and CI): content-checked JPEG/PNG/WebP up to 10 MB, dimensions checked before decoding, phone orientation applied, re-encoded to WebP at 640px and 1600px with all metadata (GPS, camera) removed; the original is never stored; counts towards the package storage quota. Photo picker (upload or choose an uploaded photo). Every block photo serves the 640px file to phones (`srcset`/`sizes`).
+- Guard tests: inline-editable fields render safely with and without photos; select options carry real values; no stylesheet may load from another host.
+
+### Fixed
+- On/off options were stored as the text "true"/"false" (both truthy): choosing "No" would have auto-played the slideshow, pinned the header and shown every price as "from".
+- Puck's block ids were longer than the server allowed, so every save would have failed.
+- Puck's default stylesheet loaded Inter from rsms.me (a third-party request from every owner's browser); the no-external stylesheet is used with our self-hosted font.
+- The first edit after opening the editor could not be undone (Puck doesn't record the page as loaded); history is now seeded.
+- The Text block's empty heading had no height and couldn't be clicked.
+- Browser-test setup now clears rate limits, and test businesses no longer share a seeded business's name.
+
 ### Fixed
 - Website header: logo and button now line up with the content of every section (the header kept its side padding inside the content column).
 

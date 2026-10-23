@@ -1,3 +1,4 @@
+import { photoSrcSet } from './shared';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
@@ -83,6 +84,8 @@ export function HeroSlideshow({
           >
             <img
               src={p.src}
+              srcSet={photoSrcSet(p.src)}
+              sizes="(min-width: 768px) 45vw, 100vw"
               alt={p.alt}
               loading={i === 0 ? 'eager' : 'lazy'}
               fetchPriority={i === 0 ? 'high' : 'low'}

@@ -14,14 +14,14 @@ export const Header: BlockDefinition<HeaderProps> = {
   label: 'Header and menu',
   description: 'Your name or logo, your menu, and a booking button.',
   fields: {
-    buttonLabel: { kind: 'text', label: 'Button', max: 24 },
+    buttonLabel: { kind: 'text', inline: true, label: 'Button', max: 24 },
     buttonHref: { kind: 'link', label: 'Button link' },
     sticky: {
       kind: 'select',
       label: 'Stays at the top when scrolling',
       options: [
-        { value: 'true', label: 'Yes' },
-        { value: 'false', label: 'No' },
+        { value: true, label: 'Yes' },
+        { value: false, label: 'No' },
       ],
     },
   },

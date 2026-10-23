@@ -13,7 +13,7 @@ export const Text: BlockDefinition<TextProps> = {
   label: 'Text',
   description: 'A heading and a few paragraphs — your story, policies, anything.',
   fields: {
-    heading: { kind: 'text', label: 'Heading', max: 80 },
+    heading: { kind: 'text', inline: true, label: 'Heading', max: 80 },
     text: { kind: 'text', label: 'Text', multiline: true, max: 4000 },
   },
   defaults: { heading: '', text: 'Write a few sentences here.' },

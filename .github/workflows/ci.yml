@@ -25,7 +25,7 @@ permissions:
 
 env:
   PHP_VERSION: '8.4'
-  PHP_EXTENSIONS: mbstring, intl, pdo_sqlite, sqlite3, bcmath, zip, pcntl, redis
+  PHP_EXTENSIONS: mbstring, intl, pdo_sqlite, sqlite3, bcmath, zip, pcntl, redis, gd, exif
 
 jobs:
   changes:
