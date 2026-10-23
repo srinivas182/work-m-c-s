@@ -3,15 +3,19 @@ import { BLOCKS } from './registry';
 import { siteTheme } from './theme';
 import type { Branding, ContentDocument, SiteContext, StoredBlock } from './types';
 
-/** Upgrades props saved by older block versions, step by step. */
+/**
+ * Upgrades props saved by older block versions, step by step. Each step's
+ * result replaces the previous props (so fields a version removed really go),
+ * and defaults fill any gaps only after all steps have run.
+ */
 export function upgradeBlock(block: StoredBlock): Record<string, unknown> | null {
   const def = BLOCKS[block.type];
   if (!def || block.version > def.version) return null; // unknown, or saved by a newer release
-  let props = { ...def.defaults, ...block.props };
+  let props: Record<string, unknown> = { ...block.props };
   for (let from = block.version; from < def.version; from++) {
-    props = { ...props, ...(def.upgrade?.(props, from) ?? {}) };
+    props = def.upgrade ? def.upgrade(props, from) : props;
   }
-  return props;
+  return { ...def.defaults, ...props };
 }
 
 /**
@@ -42,11 +46,13 @@ export function SiteRenderer({
       {document.blocks.map((block) => {
         const def = BLOCKS[block.type];
         const props = upgradeBlock(block);
-        return def && props ? (
+        const out = def && props ? def.render(props as never, site) : null;
+        // A block with nothing to show (e.g. an empty gallery on a live site) leaves no trace.
+        return out === null || out === undefined ? null : (
           <div key={block.id} data-block={block.type}>
-            {def.render(props as never, site)}
+            {out}
           </div>
-        ) : null;
+        );
       })}
       {children}
     </div>

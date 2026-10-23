@@ -23,8 +23,17 @@ export interface Branding {
 }
 
 /** What every block may know about the site it is rendered on. */
+export interface MenuItem {
+  label: string;
+  href: string;
+  children?: MenuItem[];
+}
+
 export interface SiteContext {
   businessName: string;
+  /** Edited in 4.4; blocks read them from here. */
+  menus?: { header: MenuItem[]; footer: MenuItem[] };
+  logo?: string | null;
   /** True inside the editor: links don't navigate, empty fields show prompts. */
   editing: boolean;
 }
