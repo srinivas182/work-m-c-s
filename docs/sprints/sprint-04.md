@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 4 of 18 · 14 – 25 December 2026 |
-| **Status** | Approved 22 Oct 2026 — 4.1 ✅ (#35), 4.2 in review |
+| **Status** | ✅ Complete — released as v0.5.0 (#40) |
 | **Depends on** | v0.4.0 (packages and entitlements, design system and palette engine); PRD §5.4 FR-WB-01, FR-WB-02, FR-WB-03; ADR-0003 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each must pass CI and be merged before the next starts |
 | **Capacity note** | 16 December (Day of Reconciliation) and 25 December (Christmas Day) are public holidays in South Africa: 8 working days instead of 10 (see §6, decision 7) |
@@ -122,7 +122,7 @@ Header/navigation · Hero (3 variants) · Services and prices · Feature grid ·
 | 4.1 Site model & branding | #35 | 562 tests on SQLite and MySQL 8; 32 browser checks (a new owner adds a page). Puck package checked before starting: `@measured/puck` is deprecated, `@puckeditor/core` 0.23.0 will be pinned in 4.3 |
 | 4.2 Block library, part 1 | #36 | Design direction approved 23 Oct; client asked for photo-led heroes — Hero has five layouts incl. a guarded slideshow, and basic image resizing moves into 4.3. 14 blocks; 45 frontend tests, 562 backend, 36 browser checks. Deviation: pixel-snapshot tests replaced by server-render tests plus accessibility scans at both widths — pixel baselines differ between machines (font rendering) and would make CI flaky; CI-generated baselines can follow with the Sprint 5 engine |
 | 4.3 Visual editor & photo uploads | #38 | 568 backend tests on SQLite and MySQL 8; 127 frontend; 38 browser checks incl. the full editing journey on desktop and phone. Deviations: uploads up to 10 MB (phone photos); photo resizing brought forward from Sprint 6 at the client's request; on phones Publish/Versions live in a bottom bar (Puck's canvas covers its folded header menu) |
-| 4.4 Menus, branding & preview | see PR | 578 backend tests on SQLite and MySQL 8; 127 frontend; 40 browser checks (menus, branding and preview on desktop and phone). Decisions: one header menu for desktop and phones; signup limits per session (shared mobile IPs). Found via the browser suite: IP-only signup limits throttled concurrent sign-ups |
+| 4.4 Menus, branding & preview | #39 | 578 backend tests on SQLite and MySQL 8; 127 frontend; 40 browser checks (menus, branding and preview on desktop and phone). Decisions: one header menu for desktop and phones; signup limits per session (shared mobile IPs). Found via the browser suite: IP-only signup limits throttled concurrent sign-ups |
 
 ### Resolved — first edit could not be undone (4.3)
 
