@@ -100,7 +100,7 @@ export default function Template({
 
   const menuEditor = (where: 'header' | 'footer') => (
     <div className="grid gap-2">
-      <p className="text-sm font-medium capitalize">{where} menu</p>
+      <p className="text-sm font-medium">{where === 'header' ? 'Header menu' : 'Footer menu'}</p>
       {form.data.menus[where].map((item, i) => (
         <div key={i} className="grid gap-2 sm:grid-cols-[1fr_8rem_1fr_auto]">
           <Input
@@ -245,7 +245,7 @@ export default function Template({
                   : 'warning'
             }
           >
-            {template.status}
+            {template.status.charAt(0).toUpperCase() + template.status.slice(1)}
           </Badge>
           {template.version !== null && (
             <span className="text-fg-muted">Businesses get version {template.version}</span>
@@ -450,7 +450,7 @@ export default function Template({
                   <SelectContent>
                     {['square', 'soft', 'round'].map((c) => (
                       <SelectItem key={c} value={c}>
-                        {c}
+                        {c.charAt(0).toUpperCase() + c.slice(1)}
                       </SelectItem>
                     ))}
                   </SelectContent>
