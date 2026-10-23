@@ -65,4 +65,17 @@ final class Branding
 
         return is_string($value) && str_starts_with($value, $prefix) && ! str_contains($value, '..');
     }
+
+    /**
+     * Colours, fonts and corners only — what a template carries (never a logo or icon).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array{primary: string, secondary: string|null, font_pairing: string, corners: string}
+     */
+    public function validateColoursAndType(array $input): array
+    {
+        $clean = $this->validate([...$input, 'logo' => null, 'favicon' => null]);
+
+        return ['primary' => $clean['primary'], 'secondary' => $clean['secondary'], 'font_pairing' => $clean['font_pairing'], 'corners' => $clean['corners']];
+    }
 }

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 6 · 18 – 29 January 2027 (runs before Sprint 5 — see §8) |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 23 Oct 2026 — in progress (6.1) |
 | **Depends on** | v0.5.0 (blocks, editor, photo uploads, menus, branding, preview); PRD §5.3 onboarding, §5.4 FR-WB-04 templates, FR-WB-06 media; sprint plan revision 3 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 

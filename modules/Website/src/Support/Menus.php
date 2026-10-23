@@ -17,6 +17,9 @@ final class Menus
 {
     public const LIMITS = ['header' => 8, 'footer' => 12, 'children' => 8];
 
+    /** Web, email, phone and on-page links only — never javascript: or data: URLs. Shared with templates. */
+    public const SAFE_LINK = '#^(https://[^\s]+|mailto:[^\s]+|tel:\+?[0-9 ]{6,20}|\#[A-Za-z][\w-]*)$#';
+
     /**
      * @param  array<string, mixed>  $input
      * @return array{header: list<array<string, mixed>>, footer: list<array<string, mixed>>}
@@ -95,8 +98,7 @@ final class Menus
                 $entry['page_id'] = $item['page_id'];
             } elseif ($type === 'link') {
                 $href = trim((string) ($item['href'] ?? ''));
-                // Only web, email, phone and on-page links: never javascript: or data: URLs.
-                if (preg_match('#^(https://[^\s]+|mailto:[^\s]+|tel:\+?[0-9 ]{6,20}|\#[A-Za-z][\w-]*)$#', $href) !== 1) {
+                if (preg_match(self::SAFE_LINK, $href) !== 1) {
                     $fail("“{$label}” needs a link starting with https://, mailto:, tel: or #.");
                 }
                 $entry['href'] = $href;
