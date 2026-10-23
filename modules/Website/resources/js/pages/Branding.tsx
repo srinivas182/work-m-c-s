@@ -202,12 +202,23 @@ export default function Branding({
                   onChange={(v) => v && set('primary', v)}
                 />
                 <Swatches colour={data.primary} />
-                <ColourField
-                  label="Second colour (optional)"
-                  optional
-                  value={data.secondary}
-                  onChange={(v) => set('secondary', v)}
-                />
+                {data.secondary ? (
+                  <ColourField
+                    label="Second colour"
+                    optional
+                    value={data.secondary}
+                    onChange={(v) => set('secondary', v)}
+                  />
+                ) : (
+                  // A colour input can't be empty, so an unset second colour is a button, not a misleading swatch.
+                  <Button
+                    variant="secondary"
+                    className="w-fit"
+                    onClick={() => set('secondary', '#F59E0B')}
+                  >
+                    Add a second colour
+                  </Button>
+                )}
                 {data.secondary && <Swatches colour={data.secondary} />}
                 {(errors.primary || errors.secondary) && (
                   <p role="alert" className="text-danger-11 text-sm">

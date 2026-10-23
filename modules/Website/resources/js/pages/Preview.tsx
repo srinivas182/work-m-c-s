@@ -73,6 +73,7 @@ export default function Preview({
       </div>
       {content ? (
         <SiteRenderer
+          fill
           document={content}
           branding={branding}
           site={{ businessName, editing: false, logo: branding.logo, menus }}

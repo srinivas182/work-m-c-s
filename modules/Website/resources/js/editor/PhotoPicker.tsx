@@ -142,6 +142,9 @@ export function PhotoPicker({
             type="file"
             accept="image/jpeg,image/png,image/webp"
             className="sr-only"
+            // Uploads start from the visible button; the input itself is named and kept out of the tab order.
+            aria-label="Choose a photo to upload"
+            tabIndex={-1}
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) void upload(file);
