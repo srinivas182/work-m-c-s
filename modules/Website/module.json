@@ -1,0 +1,15 @@
+{
+    "name": "Website",
+    "key": "website",
+    "version": "0.1.0",
+    "description": "Business websites: pages, versions, branding, menus and the visual editor.",
+    "core": false,
+    "entitlement": "website",
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit",
+        "plans"
+    ]
+}

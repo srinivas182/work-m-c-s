@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 4.1 (site model, branding)
+- Website module (entitlement `website`): one site per business on its shard, created with a home page the first time it's needed.
+- Pages: titles, addresses (unique per site, engine paths reserved), order, exactly one home page, SEO title and description, soft delete with 30-day restore (a reused address gets `-2`).
+- Content stored in WURK's own versioned format (`schema` + blocks with id, type, version and props), validated on every save (size, section count, ids, types) — never raw editor data, so editor upgrades can't break saved pages.
+- Drafts with a revision number: a second editor saving a stale copy gets a conflict (HTTP 409) instead of silently overwriting.
+- Publishing creates an immutable numbered version; any version can be restored as the draft (publishing it is a separate step); unpublish.
+- Branding inputs (primary/secondary colour, curated self-hosted font pairing, corner style) validated and stored; the accessible palette is computed from them by the Sprint 0 engine wherever the site renders.
+- Pages screen for owners; JSON endpoints for the editor (4.3) and branding (4.4). Permissions `website.edit` and `website.publish`; every publish, restore, delete and branding change is on the business's audit chain.
+
 ## [0.4.0] — 2026-10-22 — Sprint 3: Signup & billing
 
 ### Added — Sprint 3.4 (invoices, proration, dunning)
