@@ -42,9 +42,10 @@ export const Header: BlockDefinition<HeaderProps> = {
     );
     return (
       <header
-        className={`z-30 border-b border-[var(--s-border)] bg-[var(--s-bg)]/90 backdrop-blur ${p.sticky ? 'sticky top-0' : ''}`}
+        className={`z-30 border-b border-[var(--s-border)] bg-[var(--s-bg)]/90 px-5 backdrop-blur sm:px-8 ${p.sticky ? 'sticky top-0' : ''}`}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-4 sm:px-8">
+        {/* Padding outside the column, like every section, so the logo and button line up with the content below. */}
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 py-4">
           <a href={href('/')} className="shrink-0">
             {brand}
           </a>
