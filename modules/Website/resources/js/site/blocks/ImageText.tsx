@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '../types';
-import { paragraphs, PhotoPrompt, Section } from './shared';
+import { paragraphs, PhotoPrompt, Section, photoSrcSet } from './shared';
 
 export interface ImageTextProps extends Record<string, unknown> {
   heading: string;
@@ -45,6 +45,8 @@ export const ImageText: BlockDefinition<ImageTextProps> = {
     const photo = p.image ? (
       <img
         src={p.image}
+        srcSet={photoSrcSet(p.image)}
+        sizes="(min-width: 768px) 50vw, 100vw"
         alt={p.imageAlt}
         loading="lazy"
         className="aspect-[4/3] w-full rounded-[var(--s-radius)] object-cover"

@@ -75,3 +75,15 @@ export const paragraphs = (text: string) =>
     .split(/\n\s*\n/)
     .map((t) => t.trim())
     .filter(Boolean);
+
+/**
+ * Uploaded photos are stored as "<id>-<width>.webp", with a 640px version whenever
+ * the largest is wider than that (Sprint 4.3). Derive srcset from the URL so phones
+ * download the small file; other URLs are left as they are.
+ */
+export function photoSrcSet(src: string): string | undefined {
+  const match = src.match(/^(.*)-(\d+)\.webp$/);
+  const width = match ? Number(match[2]) : 0;
+  if (!match || width <= 640) return undefined;
+  return `${match[1]}-640.webp 640w, ${src} ${width}w`;
+}

@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '../types';
-import { EmptyHint, Heading, Section } from './shared';
+import { EmptyHint, Heading, Section, photoSrcSet } from './shared';
 
 export interface TeamProps extends Record<string, unknown> {
   heading: string;
@@ -42,6 +42,8 @@ export const Team: BlockDefinition<TeamProps> = {
               {m.photo ? (
                 <img
                   src={m.photo}
+                  srcSet={photoSrcSet(m.photo)}
+                  sizes="(min-width: 768px) 25vw, 50vw"
                   alt=""
                   loading="lazy"
                   className="aspect-[4/5] w-full rounded-[var(--s-radius)] object-cover"

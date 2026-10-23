@@ -23,6 +23,21 @@ final class ContentDocument
     }
 
     /**
+     * What a new page starts with, so nobody faces a blank canvas. Props are empty:
+     * each block fills in its own defaults when rendered (and upgrades from version 1).
+     *
+     * @param  list<string>  $types
+     * @return array{schema: int, blocks: list<array{id: string, type: string, version: int, props: array<string, mixed>}>}
+     */
+    public static function starter(array $types): array
+    {
+        return ['schema' => self::SCHEMA, 'blocks' => array_map(
+            fn (string $type) => ['id' => strtolower($type).'-'.substr(bin2hex(random_bytes(6)), 0, 10), 'type' => $type, 'version' => 1, 'props' => []],
+            $types,
+        )];
+    }
+
+    /**
      * @return array{schema: int, blocks: list<array{id: string, type: string, version: int, props: array<string, mixed>}>}
      *
      * @throws ValidationException

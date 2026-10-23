@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '../types';
-import { Heading, PhotoPrompt, Section } from './shared';
+import { Heading, PhotoPrompt, Section, photoSrcSet } from './shared';
 
 export interface GalleryProps extends Record<string, unknown> {
   heading: string;
@@ -49,6 +49,8 @@ export const Gallery: BlockDefinition<GalleryProps> = {
               <li key={i} className={i === 0 ? 'col-span-2 row-span-2' : ''}>
                 <img
                   src={ph.src}
+                  srcSet={photoSrcSet(ph.src)}
+                  sizes="(min-width: 768px) 33vw, 50vw"
                   alt={ph.alt}
                   loading="lazy"
                   className="size-full rounded-[var(--s-radius)] object-cover"

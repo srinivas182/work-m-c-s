@@ -1,3 +1,4 @@
+import { photoSrcSet } from './shared';
 import { ImagePlus } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { BlockDefinition, SiteContext } from '../types';
@@ -201,6 +202,8 @@ export const Hero: BlockDefinition<HeroProps> = {
           {photo ? (
             <img
               src={photo.src}
+              srcSet={photoSrcSet(photo.src)}
+              sizes="100vw"
               alt={photo.alt}
               fetchPriority="high"
               className="absolute inset-0 -z-20 size-full object-cover"
@@ -229,6 +232,8 @@ export const Hero: BlockDefinition<HeroProps> = {
         ph ? (
           <img
             src={ph.src}
+            srcSet={photoSrcSet(ph.src)}
+            sizes="(min-width: 768px) 30vw, 60vw"
             alt={ph.alt}
             loading="lazy"
             className={`size-full rounded-[var(--s-radius)] object-cover ${cls}`}
@@ -244,6 +249,8 @@ export const Hero: BlockDefinition<HeroProps> = {
               {a ? (
                 <img
                   src={a.src}
+                  srcSet={photoSrcSet(a.src)}
+                  sizes="(min-width: 768px) 30vw, 60vw"
                   alt={a.alt}
                   fetchPriority="high"
                   className="size-full rounded-[var(--s-radius)] object-cover"
@@ -284,6 +291,8 @@ export const Hero: BlockDefinition<HeroProps> = {
         {photo ? (
           <img
             src={photo.src}
+            srcSet={photoSrcSet(photo.src)}
+            sizes="(min-width: 768px) 45vw, 100vw"
             alt={photo.alt}
             fetchPriority="high"
             className="aspect-[4/5] w-full rounded-[var(--s-radius)] object-cover sm:aspect-[5/6]"
