@@ -1,4 +1,4 @@
-import { Menu } from 'lucide-react';
+import { ChevronDown, Menu } from 'lucide-react';
 import type { BlockDefinition } from '../types';
 
 export interface HeaderProps extends Record<string, unknown> {
@@ -54,15 +54,47 @@ export const Header: BlockDefinition<HeaderProps> = {
               aria-label="Main"
               className="hidden items-center gap-7 text-[15px] font-medium md:flex"
             >
-              {items.map((i) => (
-                <a
-                  key={i.href + i.label}
-                  href={href(i.href)}
-                  className="text-[var(--s-fg-muted)] hover:text-[var(--s-fg)]"
-                >
-                  {i.label}
-                </a>
-              ))}
+              {items.map((i) =>
+                i.children && i.children.length > 0 ? (
+                  // Sub-items: a native disclosure — works without JavaScript and with a keyboard.
+                  <details key={i.href + i.label} className="group/sub relative">
+                    <summary className="flex cursor-pointer list-none items-center gap-1 text-[var(--s-fg-muted)] hover:text-[var(--s-fg)] [&::-webkit-details-marker]:hidden">
+                      {i.label}
+                      <ChevronDown
+                        className="size-4 transition-transform group-open/sub:rotate-180"
+                        aria-hidden
+                      />
+                    </summary>
+                    <div className="absolute left-0 mt-3 grid w-56 gap-1 rounded-[var(--s-radius)] border border-[var(--s-border)] bg-[var(--s-bg)] p-2 shadow-lg">
+                      {!i.href.startsWith('#') && (
+                        <a
+                          href={href(i.href)}
+                          className="rounded-lg px-3 py-2.5 font-semibold hover:bg-[var(--s-surface)]"
+                        >
+                          {i.label}
+                        </a>
+                      )}
+                      {i.children.map((c) => (
+                        <a
+                          key={c.href + c.label}
+                          href={href(c.href)}
+                          className="rounded-lg px-3 py-2.5 hover:bg-[var(--s-surface)]"
+                        >
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
+                  </details>
+                ) : (
+                  <a
+                    key={i.href + i.label}
+                    href={href(i.href)}
+                    className="text-[var(--s-fg-muted)] hover:text-[var(--s-fg)]"
+                  >
+                    {i.label}
+                  </a>
+                ),
+              )}
             </nav>
           )}
           <div className="flex items-center gap-2">
@@ -87,13 +119,23 @@ export const Header: BlockDefinition<HeaderProps> = {
                   className="absolute right-0 mt-2 grid w-56 gap-1 rounded-[var(--s-radius)] border border-[var(--s-border)] bg-[var(--s-bg)] p-2 shadow-lg"
                 >
                   {items.map((i) => (
-                    <a
-                      key={i.href + i.label}
-                      href={href(i.href)}
-                      className="rounded-lg px-3 py-2.5 font-medium hover:bg-[var(--s-surface)]"
-                    >
-                      {i.label}
-                    </a>
+                    <div key={i.href + i.label} className="grid gap-1">
+                      <a
+                        href={href(i.href)}
+                        className="rounded-lg px-3 py-2.5 font-medium hover:bg-[var(--s-surface)]"
+                      >
+                        {i.label}
+                      </a>
+                      {i.children?.map((c) => (
+                        <a
+                          key={c.href + c.label}
+                          href={href(c.href)}
+                          className="ml-3 rounded-lg border-l border-[var(--s-border)] px-3 py-2 text-[var(--s-fg-muted)] hover:bg-[var(--s-surface)]"
+                        >
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
                   ))}
                 </nav>
               </details>

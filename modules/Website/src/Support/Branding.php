@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Wurk\Website\Support;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
  * Branding inputs (FR-WB-03). Only what the owner chose is stored; the accessible
@@ -23,7 +25,7 @@ final class Branding
 
     /**
      * @param  array<string, mixed>  $input
-     * @return array{primary: string, secondary: string|null, font_pairing: string, corners: string}
+     * @return array{primary: string, secondary: string|null, font_pairing: string, corners: string, logo: string|null, favicon: string|null}
      *
      * @throws ValidationException
      */
@@ -36,6 +38,9 @@ final class Branding
             'secondary' => ['nullable', $hex],
             'font_pairing' => ['required', Rule::in(array_keys((array) config('website.font_pairings')))],
             'corners' => ['required', Rule::in((array) config('website.corner_styles'))],
+            // Only photos this business uploaded — never an image hosted elsewhere.
+            'logo' => ['nullable', 'string', 'max:500', fn ($attr, $value, $fail) => $this->ownAsset($value) || $fail('Upload the logo here.')],
+            'favicon' => ['nullable', 'string', 'max:500', fn ($attr, $value, $fail) => $this->ownAsset($value) || $fail('Upload the icon here.')],
         ], ['primary.regex' => 'Choose a colour like #6D4AFF.', 'secondary.regex' => 'Choose a colour like #6D4AFF.'])->validate();
 
         return [
@@ -43,6 +48,21 @@ final class Branding
             'secondary' => isset($data['secondary']) ? strtoupper((string) $data['secondary']) : null,
             'font_pairing' => $data['font_pairing'],
             'corners' => $data['corners'],
+            'logo' => isset($data['logo']) && $data['logo'] !== '' ? (string) $data['logo'] : null,
+            'favicon' => isset($data['favicon']) && $data['favicon'] !== '' ? (string) $data['favicon'] : null,
         ];
+    }
+
+    private function ownAsset(mixed $value): bool
+    {
+        if ($value === null || $value === '') {
+            return true;
+        }
+        // Resolved per call: this class is a singleton, and under Octane a captured
+        // context would outlive the request (and belong to another business).
+        $context = app(TenantContext::class);
+        $prefix = Storage::disk((string) config('wurk.site_assets_disk'))->url('sites/'.$context->id().'/');
+
+        return is_string($value) && str_starts_with($value, $prefix) && ! str_contains($value, '..');
     }
 }

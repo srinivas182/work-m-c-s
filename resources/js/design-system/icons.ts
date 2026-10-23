@@ -1,4 +1,5 @@
 import {
+  Menu,
   TriangleAlert,
   Receipt,
   CreditCard,
@@ -44,6 +45,7 @@ export const icons: Record<string, LucideIcon> = {
   circle: Circle,
   flag: Flag,
   globe: Globe,
+  menu: Menu,
   'heart-pulse': HeartPulse,
   'layout-dashboard': LayoutDashboard,
   megaphone: Megaphone,
