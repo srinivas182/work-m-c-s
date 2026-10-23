@@ -2,7 +2,7 @@
 
 **Assumptions:** 2-week sprints; team of ~10 — 1 architect/tech lead, 4 Laravel developers, 3 React developers, 2 designers (senior visual + UI/UX), 1 DevOps, 2 QA, plus a project manager. Designers work one sprint ahead.
 
-**Revision 3 — 23 October 2026:** 24 templates (two per category); Sprints 6 and 7 run before Sprint 5; custom domains join the cloud work in Sprint 17; Sprint 7 grows to three weeks.
+**Revision 3 — 23 October 2026:** 24 templates (two per category); Sprints 6 and 7 run before Sprint 5; custom domains join the cloud work in Sprint 17; Sprint 7 grows to four weeks (WURK AI image generation, media library and owner usage page added).
 
 **Revision 2 — 23 October 2026.** Agreed with the client: 12 categories and 21 premium templates; category sections (food menu, rooms & rates, quote form, service areas, portfolio, before & after, class timetable, packages & specials, accreditations, promotion banner); online consultations (Google Meet / Zoom) for every category; patient documents for health practices; hotel template starts with enquiries or an embedded booking engine; the cloud provider is chosen near the end. **Goal for every template: a non-technical owner launches a premium site themselves in one hour or less.** Three sprints are added (two for new scope, one because cloud infrastructure moves from Sprint 0 to just before hardening).
 
@@ -15,7 +15,7 @@
 | 4 | | Website builder | 14 premium blocks; Puck editor; photo uploads; menus; branding; site preview | ✅ v0.5.0 |
 | 5 | after 7 | Website engine | Public site rendering on name.wurk.co.za; caching & purge; automatic SEO & AEO; "temporarily unavailable" page for suspended businesses; WhatsApp chat button (custom domains & SSL move to Sprint 17) | |
 | 6 | next | Templates I & AI onboarding | Category & template steps in signup; AI site generation from a few questions; 10 category sections; templates for Salon & beauty, Health, Spa & wellness, Retail, Fitness (10); legal pages generated per category; template switching with content kept; media library with quotas | |
-| 7 | 3 weeks | **Templates II & one-hour launch** *(new)* | Templates for Professional services, Car mechanics, Hospitality, Trades & home services, Education & training, Events & creative, Transport & logistics (14); licensed photo library per category; guided launch checklist with progress; in-editor tips; performance and accessibility budgets for every template; **timed launch test with 5+ non-technical owners** | |
+| 7 | 4 weeks | **Templates II & one-hour launch** *(new)* | Templates for Professional services, Car mechanics, Hospitality, Trades & home services, Education & training, Events & creative, Transport & logistics (14); licensed photo library per category; guided launch checklist with progress; in-editor tips; AI image generation (decorative only); media library; "My plan & usage" page; performance and accessibility budgets for every template; **timed launch test with 5+ non-technical owners** | |
 | 8 | 15 – 26 Feb | Appointments | Staff/branch availability; booking widget; deposits; cancellation/no-show rules; reminders; restaurant table reservations | |
 | 9 | 01 – 12 Mar | **Online consultations & patient documents** *(new)* | In-person / online / either per service; Google Meet & Zoom connections with a unique link per appointment; pay online before the slot; join window and reminders; online group classes; patient documents (secure, encrypted, audited) — **gated by legal review** | |
 | 10 | 15 – 26 Mar | Online shop | Catalogue, variants, stock, cart, checkout; PayFast, Yoco, Ozow, Paystack, Peach; orders & refunds | |
@@ -23,7 +23,7 @@
 | 12 | 12 – 23 Apr | CRM & messaging | Leads & pipelines; forms & custom fields (incl. quote requests); rule-based chatbot; event template engine (email/SMS/WhatsApp) | |
 | 13 | 26 Apr – 07 May | Referral engine | Self + 7 levels; pending/available; wallet rules; attribution; customer payouts; My WURK | |
 | 14 | 10 – 21 May | Agents | Sponsor hierarchy; package commissions & clawback; EFT payouts; agent dashboard; demo sites | |
-| 15 | 24 May – 04 Jun | Reports & campaigns | Tenant reports; SaaS metrics; analytics; campaigns & offers; weekly WhatsApp summary | |
+| 15 | 24 May – 04 Jun | Reports & campaigns | Tenant reports; SaaS metrics; **profit per package, pricing simulator, provider reconciliation, margin alerts**; analytics; campaigns & offers with credit estimates; monthly usage summary; auto top-up | |
 | 16 | 07 – 18 Jun | Self-service & support | AI assistant; help centre & short videos per category; consent-based impersonation; tickets; tenant health; backup/restore & export | |
 | 17 | 21 Jun – 02 Jul | **Cloud, domains & production infrastructure** *(moved)* | Chosen cloud (AWS or Azure, South African region); custom domains & SSL (Cloudflare for SaaS); wurk.co.za DNS; infrastructure as code; staging & production; monitoring & alerts; backups | |
 | 18 | 05 – 16 Jul | Hardening | Penetration test; load testing at scale; shard rollout rehearsal; DR drill; accessibility; design polish; UAT | |
