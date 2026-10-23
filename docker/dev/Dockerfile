@@ -6,7 +6,7 @@ FROM dunglas/frankenphp:1.13.0-php8.4-trixie
 
 COPY --from=extension-installer /usr/bin/install-php-extensions /usr/local/bin/install-php-extensions
 
-RUN install-php-extensions pdo_mysql redis pcntl intl zip bcmath opcache \
+RUN install-php-extensions pdo_mysql redis pcntl intl zip bcmath opcache gd exif \
  && apt-get update \
  && apt-get install -y --no-install-recommends git unzip nodejs \
  && rm -rf /var/lib/apt/lists/*

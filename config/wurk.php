@@ -39,7 +39,7 @@ return [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
             'help', 'login', 'logout', 'mail', 'my', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
-            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', 'settings', 'webhooks', 'signup',
+            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'settings', 'webhooks', 'signup',
         ],
 
         // Default capacity of a shared shard (tenants per database).
@@ -113,4 +113,6 @@ return [
     // Server-side render wurk.co.za (needs the "ssr" process; falls back to browser rendering).
     'marketing_ssr' => (bool) env('WURK_MARKETING_SSR', true),
 
+    // Where website photos are stored (S3-compatible in production; Sprint 4.3).
+    'site_assets_disk' => env('WURK_SITE_ASSETS_DISK', 'public'),
 ];

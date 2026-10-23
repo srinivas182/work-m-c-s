@@ -4,6 +4,61 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 4.4 (menus, branding, site preview)
+- All 8 curated font pairings work (6 font families added, self-hosted, OFL); a test keeps the server's list and the site theme in step.
+- Menus: one header menu for desktop and phones, with one level of accessible dropdown sub-items, plus footer links. Items point to pages by id (renaming a page's address never breaks a menu; deleted pages drop out). Only https://, mailto:, tel: and #section links are accepted — never javascript: or data:.
+- Branding screen: logo and browser icon (only this business's own uploads accepted), main and optional second colour with the generated palette, font pairing cards written in their own fonts, corner styles, and a live preview that updates before saving.
+- Site preview inside the back office: the whole site with its real blocks, latest changes or exactly what's published, page switcher, menu links that stay within the preview.
+
+### Changed
+- Signup rate limits are counted per browser session with a high per-IP backstop (30/min per session + 300/min per IP; starting a signup 5/hour per session + 60/hour per IP). South African mobile networks share IP addresses, so IP-only limits let strangers throttle each other.
+- A rate-limited app screen now shows a plain message on the same screen instead of a raw "429" box (API and JSON still receive 429).
+
+### Fixed
+- The Branding service is a singleton; it now looks up the current business on every call (a captured context could outlive the request under Octane).
+- The photo picker's hidden upload input had no label (accessibility scan).
+- An unset second colour showed a misleading swatch; it is now an "Add a second colour" button.
+- On short pages the back office's background showed below the preview's footer.
+
+### Added — Sprint 4.3 (visual editor, photo uploads)
+- Visual editor (Puck `@puckeditor/core` 0.23.0, pinned, behind our own adapter — pages stay in WURK's format): all blocks, click-to-edit text on the page (38 fields, each checked safe), drag-and-drop, undo/redo, phone/tablet/desktop previews, autosave with a clear conflict message (never a silent overwrite), offline/"couldn't save" retry, leave-page warning, publish with a note, version history with restore. On phones Puck's header folds away and its canvas covers that menu, so save status, Versions and Publish sit in a bar within thumb reach.
+- New pages never start blank: Home starts with header, hero and footer; other pages with header, a text section headed with the page title, and footer.
+- Photo uploads (GD, added to both Docker images and CI): content-checked JPEG/PNG/WebP up to 10 MB, dimensions checked before decoding, phone orientation applied, re-encoded to WebP at 640px and 1600px with all metadata (GPS, camera) removed; the original is never stored; counts towards the package storage quota. Photo picker (upload or choose an uploaded photo). Every block photo serves the 640px file to phones (`srcset`/`sizes`).
+- Guard tests: inline-editable fields render safely with and without photos; select options carry real values; no stylesheet may load from another host.
+
+### Fixed
+- On/off options were stored as the text "true"/"false" (both truthy): choosing "No" would have auto-played the slideshow, pinned the header and shown every price as "from".
+- Puck's block ids were longer than the server allowed, so every save would have failed.
+- Puck's default stylesheet loaded Inter from rsms.me (a third-party request from every owner's browser); the no-external stylesheet is used with our self-hosted font.
+- The first edit after opening the editor could not be undone (Puck doesn't record the page as loaded); history is now seeded.
+- The Text block's empty heading had no height and couldn't be clicked.
+- Browser-test setup now clears rate limits, and test businesses no longer share a seeded business's name.
+
+### Fixed
+- Website header: logo and button now line up with the content of every section (the header kept its side padding inside the content column).
+
+### Added — Sprint 4.2 (block library, part 1)
+- 14 server-renderable website blocks, used unchanged by the editor, the preview and the Sprint 5 public engine: Header and menu, Hero, Why choose us, Services and prices, Photo and text, Gallery, Testimonials, Team, Opening hours, Contact details, Questions and answers, Text, Call to action, Footer.
+- Hero (version 2) with five layouts: Full photo, Text and photo, Photo collage, Slideshow and Text only. The slideshow never advances on its own unless the owner chooses it — then slowly, pausing on hover/focus, with a pause button, and never for visitors who prefer reduced motion; only the first photo loads immediately. Without photos, every layout falls back to a strong text-only hero on the live site.
+- Block contract: versioned props with upgrade steps (Hero v1 → v2 converts the single photo to a photo list); unknown blocks, or blocks saved by a newer release, are skipped instead of breaking the page.
+- Site theming from each business's branding through the Sprint 0 palette engine, scoped to the site; site base styles so back-office fonts never leak into a website; self-hosted font pairings (Playfair Display and Source Sans 3 added, OFL licence).
+- Page structure built by the renderer: header before `<main>`, footer after, skip link.
+- No third-party requests from public sites: the map is a link to Google Maps, not an embed (POPIA); phone and WhatsApp links use South African international format.
+- Design board at `/_blocks` (not in production) with two contrasting sample businesses; accessibility-scanned on desktop and phone.
+
+### Fixed
+- Block upgrades merged old props into the new shape, so removed fields survived; each step now replaces them and defaults apply afterwards.
+- A block with nothing to show left an empty wrapper on the page.
+
+### Added — Sprint 4.1 (site model, branding)
+- Website module (entitlement `website`): one site per business on its shard, created with a home page the first time it's needed.
+- Pages: titles, addresses (unique per site, engine paths reserved), order, exactly one home page, SEO title and description, soft delete with 30-day restore (a reused address gets `-2`).
+- Content stored in WURK's own versioned format (`schema` + blocks with id, type, version and props), validated on every save (size, section count, ids, types) — never raw editor data, so editor upgrades can't break saved pages.
+- Drafts with a revision number: a second editor saving a stale copy gets a conflict (HTTP 409) instead of silently overwriting.
+- Publishing creates an immutable numbered version; any version can be restored as the draft (publishing it is a separate step); unpublish.
+- Branding inputs (primary/secondary colour, curated self-hosted font pairing, corner style) validated and stored; the accessible palette is computed from them by the Sprint 0 engine wherever the site renders.
+- Pages screen for owners; JSON endpoints for the editor (4.3) and branding (4.4). Permissions `website.edit` and `website.publish`; every publish, restore, delete and branding change is on the business's audit chain.
+
 ## [0.4.0] — 2026-10-22 — Sprint 3: Signup & billing
 
 ### Added — Sprint 3.4 (invoices, proration, dunning)

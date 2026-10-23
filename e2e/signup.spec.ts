@@ -79,6 +79,16 @@ test('a new owner signs up from the pricing page and lands in their back office'
   await expect(page).toHaveURL(new RegExp(`/${handle}\\?welcome=1$`));
   await expect(page.getByRole('heading', { level: 1, name: `E2E Studio ${digits}` })).toBeVisible();
 
+  // Website: pages list, add a page through the dialog.
+  await page.goto(`/${handle}/website/pages`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Website pages' })).toBeVisible();
+  await expectAccessible(page);
+  await page.getByRole('button', { name: 'Add page' }).click();
+  await page.getByLabel(/^Page title/).fill('Our services');
+  await page.getByRole('dialog').getByRole('button', { name: 'Add page' }).click();
+  await expect(page.getByRole('list', { name: 'Pages' }).getByText('Our services')).toBeVisible();
+  await expect(page.getByText('/our-services')).toBeVisible();
+
   // Billing: their trial, the price incl. VAT, and where to add a card.
   await page.goto(`/${handle}/settings/billing`);
   await expect(page.getByRole('heading', { level: 1, name: 'Billing' })).toBeVisible();
