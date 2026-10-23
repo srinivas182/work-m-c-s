@@ -3,9 +3,12 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Wurk\Website\Http\Controllers\BlockBoardController;
 use Wurk\Website\Http\Controllers\BrandingController;
 use Wurk\Website\Http\Controllers\DraftController;
 use Wurk\Website\Http\Controllers\PagesController;
+
+Route::get('/_blocks', BlockBoardController::class)->name('website.block-board');
 
 Route::tenant(function (): void {
     Route::middleware(['entitled:website', 'permission:website.edit'])->prefix('website')->name('tenant.website.')->group(function (): void {
