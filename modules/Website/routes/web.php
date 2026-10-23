@@ -11,8 +11,12 @@ use Wurk\Website\Http\Controllers\EditorController;
 use Wurk\Website\Http\Controllers\MenusController;
 use Wurk\Website\Http\Controllers\PagesController;
 use Wurk\Website\Http\Controllers\PreviewController;
+use Wurk\Website\Http\Controllers\TemplatePreviewController;
 
 Route::get('/_blocks', BlockBoardController::class)->name('website.block-board');
+
+Route::domain((string) config('wurk.domains.app'))->middleware('throttle:120,1,template-preview')
+    ->get('/templates/{template}/preview', TemplatePreviewController::class)->name('website.template-preview');
 
 Route::tenant(function (): void {
     Route::middleware(['entitled:website', 'permission:website.edit'])->prefix('website')->name('tenant.website.')->group(function (): void {

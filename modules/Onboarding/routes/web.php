@@ -14,6 +14,8 @@ Route::domain((string) config('wurk.domains.app'))
         Route::post('/verify', [SignupController::class, 'verify'])->name('verify');
         Route::post('/resend', [SignupController::class, 'resend'])->name('resend');
         Route::post('/package', [SignupController::class, 'package'])->name('package');
+        Route::post('/category', [SignupController::class, 'category'])->name('category');
+        Route::post('/template', [SignupController::class, 'template'])->name('template');
         Route::get('/check-handle', [SignupController::class, 'checkHandle'])->name('check-handle');
         Route::post('/address', [SignupController::class, 'address'])->name('address');
         Route::post('/back/{step}', [SignupController::class, 'back'])->name('back');

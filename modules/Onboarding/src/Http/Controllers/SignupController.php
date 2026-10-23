@@ -17,7 +17,9 @@ use Wurk\Identity\Contracts\Verification;
 use Wurk\Onboarding\Models\Signup;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Regions\Contracts\Countries;
+use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantProvisioner;
+use Wurk\Website\Contracts\SiteTemplates;
 
 /**
  * Self-service signup (PRD §5.2, Sprint 3 scope): details → verify → package →
@@ -47,7 +49,8 @@ final class SignupController
 
         return Inertia::render('Onboarding::Signup', [
             'step' => $signup->step ?? 'details',
-            'steps' => Signup::STEPS,
+            'steps' => $this->offersTemplates() ? Signup::STEPS_WITH_TEMPLATES : Signup::STEPS,
+            'catalogue' => $this->offersTemplates() ? $this->templates()?->catalogue() : [],
             'data' => [
                 'business_name' => $data['business_name'] ?? '',
                 'first_name' => $data['first_name'] ?? '',
@@ -57,6 +60,8 @@ final class SignupController
                 'package_id' => $data['package_id'] ?? $this->packageFromQuery($request, $packages),
                 'period' => $data['period'] ?? ($request->query('period') === 'yearly' ? 'yearly' : 'monthly'),
                 'handle' => $data['handle'] ?? '',
+                'category' => $data['category'] ?? '',
+                'template' => $data['template'] ?? '',
             ],
             'maskedContact' => $data['masked'] ?? null,
             'packages' => $packages,
@@ -120,7 +125,7 @@ final class SignupController
         }
 
         // Resume: a package or address chosen earlier is kept.
-        $next = isset($signup->data['handle']) ? 'finish' : (isset($signup->data['package_id']) ? 'address' : 'package');
+        $next = isset($signup->data['package_id']) ? $this->nextAfterPackage($signup->data) : 'package';
         $signup->update(['verified_at' => now(), 'step' => $next]);
 
         return back();
@@ -128,12 +133,39 @@ final class SignupController
 
     public function package(Request $request): RedirectResponse
     {
-        $signup = $this->require($request, 'package', 'address', 'finish');
+        $signup = $this->require($request, 'package', 'category', 'template', 'address', 'finish');
         $data = $request->validate([
             'package_id' => ['required', 'string', 'in:'.implode(',', array_column($this->catalog->onSale(), 'id'))],
             'period' => ['required', 'in:monthly,yearly'],
         ]);
-        $signup->update(['step' => isset($signup->data['handle']) ? 'finish' : 'address', 'data' => [...$signup->data, ...$data]]);
+        $merged = [...$signup->data, ...$data];
+        $signup->update(['step' => $this->nextAfterPackage($merged), 'data' => $merged]);
+
+        return back();
+    }
+
+    public function category(Request $request): RedirectResponse
+    {
+        $signup = $this->require($request, 'category', 'template', 'address', 'finish');
+        $key = (string) $request->validate(['category' => ['required', 'string']])['category'];
+        if (! in_array($key, array_column($this->templates()?->catalogue() ?? [], 'key'), true)) {
+            throw ValidationException::withMessages(['category' => 'Choose one of the categories shown.']);
+        }
+        $changed = ($signup->data['category'] ?? null) !== $key;
+        $data = [...$signup->data, 'category' => $key, ...($changed ? ['template' => null] : [])];
+        $signup->update(['step' => 'template', 'data' => $data]);
+
+        return back();
+    }
+
+    public function template(Request $request): RedirectResponse
+    {
+        $signup = $this->require($request, 'template', 'address', 'finish');
+        $key = (string) $request->validate(['template' => ['required', 'string']])['template'];
+        if (! ($this->templates()?->offers((string) ($signup->data['category'] ?? ''), $key) ?? false)) {
+            throw ValidationException::withMessages(['template' => 'Choose one of the designs shown.']);
+        }
+        $signup->update(['step' => isset($signup->data['handle']) ? 'finish' : 'address', 'data' => [...$signup->data, 'template' => $key]]);
 
         return back();
     }
@@ -160,8 +192,9 @@ final class SignupController
 
     public function back(Request $request, string $step): RedirectResponse
     {
-        $signup = $this->require($request, 'package', 'address', 'finish');
-        if (in_array($step, ['package', 'address'], true)) {
+        $signup = $this->require($request, 'package', 'category', 'template', 'address', 'finish');
+        $allowed = $this->offersTemplates() ? ['package', 'category', 'template', 'address'] : ['package', 'address'];
+        if (in_array($step, $allowed, true)) {
             $signup->update(['step' => $step]);
         }
 
@@ -194,10 +227,20 @@ final class SignupController
             $locked->update(['completed_at' => now(), 'tenant_id' => $tenant->tenantId(), 'data' => [...$locked->data, 'identity_id' => $identityId]]);
             $this->audit->record('signup.completed', 'tenant', $tenant->tenantId(), ['package_id' => $d['package_id'], 'period' => $d['period'], 'status' => $subscription['status']], ['platform' => true, 'actor_id' => $identityId]);
 
-            return ['handle' => $tenant->handle(), 'identity' => $identityId];
+            return ['handle' => $tenant->handle(), 'identity' => $identityId, 'tenant' => $tenant];
         });
 
         $request->session()->forget(self::SESSION);
+
+        // The chosen template becomes the website. Outside the signup transaction, and never
+        // fatal: if it fails the business still exists and gets the starter layout instead.
+        if (! empty($d['template']) && isset($result['tenant']) && ($templates = $this->templates()) !== null) {
+            try {
+                app(TenantContext::class)->run($result['tenant'], fn () => $templates->apply((string) $d['template']));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         $onTrial = $trial && ($this->catalog->subscriptionOf((string) $signup->fresh()?->tenant_id)['status'] ?? '') === 'trial';
 
@@ -209,6 +252,30 @@ final class SignupController
         $id = $request->session()->get(self::SESSION);
 
         return is_string($id) ? Signup::query()->find($id) : null;
+    }
+
+    /**
+     * After the package: category and template (when templates are on offer), then the address.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function nextAfterPackage(array $data): string
+    {
+        if ($this->offersTemplates() && empty($data['template'])) {
+            return empty($data['category']) ? 'category' : 'template';
+        }
+
+        return isset($data['handle']) ? 'finish' : 'address';
+    }
+
+    private function templates(): ?SiteTemplates
+    {
+        return app()->bound(SiteTemplates::class) ? app(SiteTemplates::class) : null;
+    }
+
+    private function offersTemplates(): bool
+    {
+        return ($this->templates()?->catalogue() ?? []) !== [];
     }
 
     private function require(Request $request, string ...$steps): Signup

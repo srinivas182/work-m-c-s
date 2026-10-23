@@ -20,6 +20,11 @@ use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Models\TenantSubscription;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Models\Tenant;
+use Wurk\Website\Models\Page;
+use Wurk\Website\Models\Site;
+use Wurk\Website\Models\SiteCategory;
+use Wurk\Website\Models\SiteTemplate;
+use Wurk\Website\Support\Templates;
 
 uses(InteractsWithIdentity::class, InteractsWithShards::class);
 
@@ -156,4 +161,71 @@ it('explains a rate limit on the same screen instead of showing a raw 429', func
 
     $json = Request::create('/signup/check-handle', 'GET', server: ['HTTP_ACCEPT' => 'application/json']);
     expect($handler->render($json, new ThrottleRequestsException)->getStatusCode())->toBe(429);
+});
+
+/** Publishes one salon template so signup offers the category and design steps. */
+function publishSalonTemplate(): void
+{
+    test()->artisan('website:seed-categories');
+    $templates = app(Templates::class);
+    $template = $templates->create(SiteCategory::query()->where('key', 'salon-beauty')->firstOrFail(), 'salon-hair', 'Hair & braids salon', 'Bold and warm', null, null);
+    $text = fn (string $heading) => ['schema' => 1, 'blocks' => [['id' => 'b1', 'type' => 'Text', 'version' => 1, 'props' => ['heading' => $heading]]]];
+    $templates->saveDraft($template, [
+        'pages' => [
+            ['key' => 'home', 'title' => 'Home', 'slug' => 'home', 'is_home' => true, 'content' => $text('Braids that last')],
+            ['key' => 'prices', 'title' => 'Prices', 'slug' => 'prices', 'is_home' => false, 'content' => $text('Our prices')],
+        ],
+        'menus' => ['header' => [['label' => 'Prices', 'type' => 'page', 'page' => 'prices']], 'footer' => []],
+        'branding' => ['primary' => '#9D174D', 'font_pairing' => 'classic', 'corners' => 'soft'],
+    ], 1);
+    $templates->publish($template->fresh(), null, null);
+}
+
+it('lets a new owner choose a category and design, and builds their website from it', function () {
+    publishSalonTemplate();
+    $app = fn (string $p) => $this->app($p);
+    $this->post($app('/signup/details'), ['business_name' => 'Glow Salon', 'first_name' => 'Thandi', 'last_name' => 'Mokoena', 'contact' => 'thandi@glow.co.za', 'country' => 'ZA']);
+    $this->post($app('/signup/verify'), ['code' => FakeOtpChannel::$codes[array_key_last(FakeOtpChannel::$codes)]]);
+    $this->post($app('/signup/package'), ['package_id' => $this->package->id, 'period' => 'monthly']);
+
+    $this->get($app('/signup'))->assertInertia(fn (Assert $p) => $p->where('step', 'category')->where('steps', Signup::STEPS_WITH_TEMPLATES)->where('catalogue.0.key', 'salon-beauty'));
+    $this->post($app('/signup/category'), ['category' => 'health'])->assertSessionHasErrors('category'); // not offered: no template yet
+    $this->post($app('/signup/category'), ['category' => 'salon-beauty'])->assertSessionHasNoErrors();
+    $this->post($app('/signup/template'), ['template' => 'someone-elses'])->assertSessionHasErrors('template');
+    $this->post($app('/signup/template'), ['template' => 'salon-hair'])->assertSessionHasNoErrors();
+    $this->get($app('/signup'))->assertInertia(fn (Assert $p) => $p->where('step', 'address'));
+    $this->post($app('/signup/address'), ['handle' => 'glow-salon']);
+    $this->post($app('/signup/complete'))->assertRedirect('/glow-salon?welcome=1');
+
+    $tenant = Tenant::query()->where('handle', 'glow-salon')->firstOrFail();
+    app(TenantContext::class)->run($tenant, function () {
+        expect(Site::query()->firstOrFail()->only(['category_key', 'template_key']))->toBe(['category_key' => 'salon-beauty', 'template_key' => 'salon-hair'])
+            ->and(Page::query()->orderBy('position')->pluck('slug')->all())->toBe(['home', 'prices']);
+    });
+});
+
+it('never blocks signup when the chosen template disappears before finishing', function () {
+    publishSalonTemplate();
+    $app = fn (string $p) => $this->app($p);
+    $this->post($app('/signup/details'), ['business_name' => 'Glow Salon', 'first_name' => 'Thandi', 'last_name' => 'Mokoena', 'contact' => 'thandi@glow.co.za', 'country' => 'ZA']);
+    $this->post($app('/signup/verify'), ['code' => FakeOtpChannel::$codes[array_key_last(FakeOtpChannel::$codes)]]);
+    $this->post($app('/signup/package'), ['package_id' => $this->package->id, 'period' => 'monthly']);
+    $this->post($app('/signup/category'), ['category' => 'salon-beauty']);
+    $this->post($app('/signup/template'), ['template' => 'salon-hair']);
+    $this->post($app('/signup/address'), ['handle' => 'glow-salon']);
+
+    app(Templates::class)->retire(SiteTemplate::query()->where('key', 'salon-hair')->firstOrFail(), null);
+    $this->post($app('/signup/complete'))->assertRedirect('/glow-salon?welcome=1'); // the business exists; the starter layout is used
+
+    expect(Tenant::query()->where('handle', 'glow-salon')->exists())->toBeTrue();
+});
+
+it('previews published templates publicly, never drafts', function () {
+    publishSalonTemplate();
+    $this->get($this->app('/templates/salon-hair/preview'))->assertOk()
+        ->assertInertia(fn (Assert $p) => $p->component('Website::TemplatePreview')->where('page.key', 'home')->where('menus.header.0.href', '/templates/salon-hair/preview?page=prices'));
+    $this->get($this->app('/templates/salon-hair/preview?page=prices'))->assertInertia(fn (Assert $p) => $p->where('content.blocks.0.props.heading', 'Our prices'));
+
+    $draft = app(Templates::class)->create(SiteCategory::query()->where('key', 'health')->firstOrFail(), 'dental', 'Dental practice', null, null, null);
+    $this->get($this->app('/templates/dental/preview'))->assertNotFound();
 });

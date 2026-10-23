@@ -6,7 +6,9 @@ namespace Wurk\Website;
 
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\SeedCategoriesCommand;
+use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Support\Branding;
+use Wurk\Website\Support\EloquentSiteTemplates;
 use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteAssets;
 use Wurk\Website\Support\SiteBuilder;
@@ -22,6 +24,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->app->scoped(SiteAssets::class);
         $this->app->singleton(Templates::class);
         $this->app->scoped(SiteBuilder::class);
+        $this->app->scoped(SiteTemplates::class, EloquentSiteTemplates::class);
     }
 
     /**
