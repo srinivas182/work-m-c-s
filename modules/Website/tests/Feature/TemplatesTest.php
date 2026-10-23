@@ -117,3 +117,13 @@ it('builds a business’s site from a template: pages, menus linked to real page
             ->and(fn () => app(SiteBuilder::class)->apply('salon-hair'))->toThrow(ValidationException::class);
     });
 });
+
+it('publishes sample designs for development, and never in production', function () {
+    $this->artisan('website:seed-sample-templates')->assertSuccessful();
+    $this->artisan('website:seed-sample-templates')->assertSuccessful(); // safe to re-run
+    expect(array_column(app(Templates::class)->catalogue(), 'key'))->toBe(['salon-beauty', 'health'])
+        ->and(count(app(Templates::class)->catalogue()[0]['templates']))->toBe(2);
+
+    app()->detectEnvironment(fn () => 'production');
+    $this->artisan('website:seed-sample-templates')->assertFailed();
+});

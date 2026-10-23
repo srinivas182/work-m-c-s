@@ -64,6 +64,28 @@ test('a new owner signs up from the pricing page and lands in their back office'
   await page.getByRole('radio', { name: /Starter/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
 
+  // Category and design (sample designs are published by the e2e setup).
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'What kind of business is it?' }),
+  ).toBeVisible();
+
+  await expectAccessible(page);
+
+  await page.getByRole('radio', { name: /Salon & beauty/ }).click();
+
+  await page.getByRole('button', { name: 'Continue' }).click();
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Choose your website design' }),
+  ).toBeVisible();
+
+  await expectAccessible(page);
+
+  await page.getByRole('radio', { name: /Warm salon \(sample\)/ }).click();
+
+  await page.getByRole('button', { name: 'Continue' }).click();
+
   await expect(
     page.getByRole('heading', { level: 1, name: 'Pick your web address' }),
   ).toBeVisible();

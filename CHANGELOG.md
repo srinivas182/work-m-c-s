@@ -4,6 +4,17 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 6.1 (template system)
+- Website categories (the 12 agreed, `website:seed-categories`) and templates managed by WURK staff: create blank or as a copy, edit pages in the same visual editor owners use, template photos (same safe pipeline, kept apart from businesses' photos), preview drafts, publish immutable versions with a note, restore a version, retire. Permission `templates.manage`.
+- Signup: "What kind of business is it?" and "Choose your website design" steps with live previews (published designs only); categories appear once they have a design. Completing signup builds the site from the design (pages, menus linked to real pages, branding). Applying a design can never block signup — on failure the business gets the starter layout.
+- Owners switch to the other design in their category from the Pages screen, keeping every text, photo, price, menu item and page (only style settings and fonts change; colours and logo stay). The site is snapshotted first; the live site changes only when they publish.
+- `website:seed-sample-templates` for development and browser tests (refused in production).
+
+### Fixed (review of unfinished work found on the branch)
+- The template photo list read every image from storage to get its size; sizes are now recorded at upload.
+- A refused template save could still rename the template.
+- Staff saw "0 MB of 0 MB used" in the template photo picker.
+
 ### Added — Sprint 4.4 (menus, branding, site preview)
 - All 8 curated font pairings work (6 font families added, self-hosted, OFL); a test keeps the server's list and the site theme in step.
 - Menus: one header menu for desktop and phones, with one level of accessible dropdown sub-items, plus footer links. Items point to pages by id (renaming a page's address never breaks a menu; deleted pages drop out). Only https://, mailto:, tel: and #section links are accepted — never javascript: or data:.

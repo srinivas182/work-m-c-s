@@ -128,6 +128,13 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('heading', { level: 1, name: 'Failed payments' })).toBeVisible();
   await expectAccessible(page);
 
+  await page.goto(`${admin}/templates`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Website templates' })).toBeVisible();
+  await expectAccessible(page);
+  await page.getByRole('link', { name: /Warm salon \(sample\)/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Warm salon (sample)' })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/roles`);
   await expect(page.getByRole('heading', { level: 1, name: 'Staff roles' })).toBeVisible();
   await expectAccessible(page);

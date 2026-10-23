@@ -6,6 +6,7 @@ namespace Wurk\Website;
 
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\SeedCategoriesCommand;
+use Wurk\Website\Console\SeedSampleTemplatesCommand;
 use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\EloquentSiteTemplates;
@@ -57,7 +58,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([SeedCategoriesCommand::class]);
+            $this->commands([SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class]);
         }
     }
 }

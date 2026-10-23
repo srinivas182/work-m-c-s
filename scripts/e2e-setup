@@ -33,6 +33,8 @@ php artisan migrate --force --no-interaction
 php artisan cache:clear --no-interaction > /dev/null
 php artisan shards:register e2e-shard --driver=sqlite --database="${root}/database/e2e-shard.sqlite"
 php artisan tenants:create "Glow Salon" --handle=glow-salon
+# Categories and sample designs, so signup shows the category and design steps.
+php artisan website:seed-sample-templates --no-interaction > /dev/null
 php artisan identities:create owner@glow.co.za --first=Thandi --last=Mokoena \
   --password="sunny days in durban" --tenant=glow-salon
 # WURK staff for admin browser tests, one per Playwright project (authenticator

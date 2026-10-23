@@ -23,14 +23,14 @@ test('an owner edits a page on the page itself, it autosaves, and they publish i
   // A new page starts with a header, its title as a heading, and a footer — never blank.
   await page.goto(`/${handle}/website/pages`);
   await page.getByRole('button', { name: 'Add page' }).click();
-  await page.getByLabel(/^Page title/).fill('Prices');
+  await page.getByLabel(/^Page title/).fill('Specials');
   await page.getByRole('dialog').getByRole('button', { name: 'Add page' }).click();
-  await page.getByRole('link', { name: 'Edit Prices' }).click();
+  await page.getByRole('link', { name: 'Edit Specials' }).click();
   await expect(page).toHaveURL(/\/edit$/);
 
   const canvas = page.frameLocator('iframe').first();
   const heading = canvas.locator('h2 [contenteditable]').first();
-  await expect(heading).toHaveText('Prices');
+  await expect(heading).toHaveText('Specials');
   await expect(page.getByRole('status').first()).toHaveText('All changes saved');
 
   // Click-to-edit on the page, then autosave.
@@ -47,7 +47,7 @@ test('an owner edits a page on the page itself, it autosaves, and they publish i
   await page.reload();
   await expect(
     page.frameLocator('iframe').first().locator('h2 [contenteditable]').first(),
-  ).toHaveText('Prices for December');
+  ).toHaveText('Specials for December');
 
   // Undo is one click away — even for the first edit after opening the editor — and is saved too.
   await heading.hover();
@@ -60,7 +60,7 @@ test('an owner edits a page on the page itself, it autosaves, and they publish i
   await headerAction(page, 'Undo');
   await expect(
     page.frameLocator('iframe').first().locator('h2 [contenteditable]').first(),
-  ).toHaveText('Prices for December');
+  ).toHaveText('Specials for December');
   await expect(page.getByRole('status').first()).toHaveText('All changes saved', {
     timeout: 10_000,
   });
