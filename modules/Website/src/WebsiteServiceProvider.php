@@ -54,6 +54,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         return [
             ['label' => 'Pages', 'route' => 'tenant.website.pages', 'icon' => 'globe', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 100],
             ['label' => 'Branding', 'route' => 'tenant.website.branding', 'icon' => 'palette', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
+            ['label' => 'Time to launch', 'route' => 'admin.launch-times', 'icon' => 'clock', 'section' => 'Platform', 'permission' => 'tenants.view', 'order' => 61],
             ['label' => 'Templates', 'route' => 'admin.templates', 'icon' => 'layout-template', 'section' => 'Platform', 'permission' => 'templates.manage', 'order' => 60],
             ['label' => 'Write with AI', 'route' => 'tenant.website.ai', 'icon' => 'sparkles', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
             ['label' => 'Media', 'route' => 'tenant.website.media', 'icon' => 'image', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 104],

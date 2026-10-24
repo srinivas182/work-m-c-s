@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 7.6 (preparation)
+- **Time to launch**, measured automatically: the first time a business publishes its home page, WURK records the minutes since the business was created (and its template). **Platform → Time to launch** shows each business, the median and the share launched within an hour — for the timed launch test now, and as an ongoing product metric.
+- **Timed launch test kit** (docs/research/launch-test.md): who to recruit, POPIA consent for screen recording, the session script, an observation sheet and what happens after.
+
 ### Added — Sprint 7.5 (launch checklist and quality)
 - **Launch checklist** at the top of Website → Pages: logo, contact details, prices, your own photos, opening hours, legal pages, publish — each judged from the site’s real state (or confirmed by the owner where it can’t be), each linking straight to where it’s done.
 - **Editing tips** in the editor: three short tips that step through, dismiss, and stay dismissed; on phones they sit above the bottom controls and close when the owner taps elsewhere.

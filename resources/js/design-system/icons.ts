@@ -1,4 +1,5 @@
 import {
+  Clock,
   Image,
   Sparkles,
   Inbox,
@@ -49,6 +50,7 @@ export const icons: Record<string, LucideIcon> = {
   circle: Circle,
   flag: Flag,
   globe: Globe,
+  clock: Clock,
   image: Image,
   sparkles: Sparkles,
   inbox: Inbox,

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 7 · four weeks (sprint plan revision 3) |
-| **Status** | Approved 24 Oct 2026 — 7.1 ✅ (#49), 7.2 ✅ (#50), 7.3 ✅ (#51), 7.4 ✅ (#52), 7.5 in review |
+| **Status** | Approved 24 Oct 2026 — 7.1 ✅ (#49), 7.2 ✅ (#50), 7.3 ✅ (#51), 7.4 ✅ (#52), 7.5 ✅ (#53), 7.6 preparation in review — sessions need participants from WURK |
 | **Depends on** | v0.6.0 (template system, category sections, WURK AI, first 10 templates) |
 | **Delivery** | 6 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -66,6 +66,8 @@ Same standard as Sprint 6 (approved): two distinct designs per category; honest 
 
 ### 7.6 Timed launch test
 
+**Kit:** docs/research/launch-test.md (recruiting, POPIA consent, script, observation sheet, what happens after). **Timing:** recorded automatically — Platform → Time to launch.
+
 At least five non-technical owners each launch a site from signup without help, timed and observed (remote screen-share is fine). **Pass:** median under 60 minutes and everyone succeeds without help. Every place someone hesitates is fixed in this sub-sprint and re-tested.
 
 ## 3. Out of scope
@@ -105,4 +107,5 @@ At least five non-technical owners each launch a site from signup without help, 
 | 7.2 Templates II, part 2 | #50 | All 24 templates. 658 backend tests on SQLite and MySQL 8; 341 frontend; 386 browser checks incl. 338 template page checks (every page of all 24, desktop and phone). Found: safety claims and an invented class size in education copy |
 | 7.3 AI images & media library | #51 | 668 backend tests on SQLite and MySQL 8; 343 frontend; media page in the browser suite. Google image provider deferred until a key allows verifying its API; image prices are placeholders. Found: photo usage detection missed every use (escaped slashes in stored JSON) — a photo in use could have been deleted |
 | 7.4 My plan & usage | #52 | 675 backend tests on SQLite and MySQL 8; 343 frontend; 52 browser checks (template page checks unchanged). Found: usage counted refunds as spent; team-member limit never enforced; a circular module dependency of my own making, fixed |
-| 7.5 Launch checklist & quality | see PR | 678 backend tests on SQLite and MySQL 8; 343 frontend; 57 browser checks (template page checks in CI). Measured performance for the first time (65–71 mobile on previews): ≥ 90 gate moved to Sprint 5 public pages. Found: four editor accessibility issues in Puck’s chrome; tips covering the page on phones; two money formats; an unproven claim |
+| 7.5 Launch checklist & quality | #53 | 678 backend tests on SQLite and MySQL 8; 343 frontend; 57 browser checks (template page checks in CI). Measured performance for the first time (65–71 mobile on previews): ≥ 90 gate moved to Sprint 5 public pages. Found: four editor accessibility issues in Puck’s chrome; tips covering the page on phones; two money formats; an unproven claim |
+| 7.6 Timed launch test — preparation | see PR | Launch timing recorded automatically; admin view; test kit written. 680 backend tests on SQLite and MySQL 8; 343 frontend. **Sessions pending: need 5+ non-technical owners from WURK** |
