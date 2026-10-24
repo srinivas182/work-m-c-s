@@ -79,3 +79,13 @@ it('charges once per confirmation and refunds automatically when the work fails'
         expect($wallet->balance()['balance_milli'])->toBe(4000); // refunded
     });
 });
+
+it('explains a spending limit in the quote instead of offering an action that would be refused', function () {
+    $this->ctx->run($this->glow, function () {
+        $wallet = app(CreditWallet::class);
+        $wallet->grant('purchase', 10000, 'buy:1', 'Purchase');
+        $wallet->setLimits(500, [], null); // half a credit a month
+        expect(app(AiActions::class)->quote('rewrite'))->toMatchArray(['allowed' => false, 'reason' => 'limit'])
+            ->and(fn () => app(AiActions::class)->perform('rewrite', 'k', fn () => 'x'))->toThrow(AiActionRefused::class, 'monthly spending limit');
+    });
+});

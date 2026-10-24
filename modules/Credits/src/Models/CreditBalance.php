@@ -15,6 +15,8 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property int $balance_milli
  * @property int $allowance_milli
  * @property int $low_balance_milli
+ * @property int|null $monthly_limit_milli
+ * @property array<string, int>|null $staff_limits
  * @property Carbon|null $low_alerted_at
  */
 final class CreditBalance extends Model
@@ -33,6 +35,6 @@ final class CreditBalance extends Model
 
     protected function casts(): array
     {
-        return ['balance_milli' => 'integer', 'allowance_milli' => 'integer', 'low_balance_milli' => 'integer', 'low_alerted_at' => 'datetime'];
+        return ['staff_limits' => 'array', 'balance_milli' => 'integer', 'allowance_milli' => 'integer', 'low_balance_milli' => 'integer', 'low_alerted_at' => 'datetime'];
     }
 }

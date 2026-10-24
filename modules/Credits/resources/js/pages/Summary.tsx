@@ -17,6 +17,14 @@ import {
 } from '@/design-system';
 
 export interface CreditSummary {
+  randPerCredit?: number | null;
+  nextPayment?: { date: string; total_cents: number } | null;
+  allowanceExpires?: string | null;
+  included?: number;
+  spentThisMonth?: number;
+  meters?: { label: string; used: number; included: number | null; unit: string }[];
+  limits?: { monthly: number | null };
+  canManage?: boolean;
   balance: number;
   allowance: number;
   lowBalance: number;

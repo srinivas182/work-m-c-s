@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 7 · four weeks (sprint plan revision 3) |
-| **Status** | Approved 24 Oct 2026 — 7.1 ✅ (#49), 7.2 ✅ (#50), 7.3 in review |
+| **Status** | Approved 24 Oct 2026 — 7.1 ✅ (#49), 7.2 ✅ (#50), 7.3 ✅ (#51), 7.4 in review |
 | **Depends on** | v0.6.0 (template system, category sections, WURK AI, first 10 templates) |
 | **Delivery** | 6 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -103,4 +103,5 @@ At least five non-technical owners each launch a site from signup without help, 
 |---|---|---|
 | 7.1 Templates II, part 1 | #49 | 658 backend tests on SQLite and MySQL 8; 301 frontend; 80 browser checks incl. every page of all 16 templates. Found: empty sections showed orphan headings on the live site (also in Sprint 6 templates) — now hidden; three invented policies in copy |
 | 7.2 Templates II, part 2 | #50 | All 24 templates. 658 backend tests on SQLite and MySQL 8; 341 frontend; 386 browser checks incl. 338 template page checks (every page of all 24, desktop and phone). Found: safety claims and an invented class size in education copy |
-| 7.3 AI images & media library | see PR | 668 backend tests on SQLite and MySQL 8; 343 frontend; media page in the browser suite. Google image provider deferred until a key allows verifying its API; image prices are placeholders. Found: photo usage detection missed every use (escaped slashes in stored JSON) — a photo in use could have been deleted |
+| 7.3 AI images & media library | #51 | 668 backend tests on SQLite and MySQL 8; 343 frontend; media page in the browser suite. Google image provider deferred until a key allows verifying its API; image prices are placeholders. Found: photo usage detection missed every use (escaped slashes in stored JSON) — a photo in use could have been deleted |
+| 7.4 My plan & usage | see PR | 675 backend tests on SQLite and MySQL 8; 343 frontend; 52 browser checks (template page checks unchanged). Found: usage counted refunds as spent; team-member limit never enforced; a circular module dependency of my own making, fixed |
