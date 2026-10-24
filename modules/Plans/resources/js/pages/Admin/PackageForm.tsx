@@ -74,8 +74,8 @@ function CostTip({
         {monthlyPrice > 0 && (
           <>
             {' '}
-            · up to {Math.round(((credits * dearest.zar) / monthlyPrice) * 100)}% of the R
-            {monthlyPrice.toLocaleString('en-ZA')} monthly price
+            · up to {Math.round(((credits * dearest.zar) / monthlyPrice) * 100)}% of the{' '}
+            {rand(monthlyPrice)} monthly price
           </>
         )}
       </p>
