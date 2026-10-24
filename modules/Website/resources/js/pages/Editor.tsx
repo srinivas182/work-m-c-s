@@ -69,13 +69,13 @@ const STATUS: Record<Status, { icon: ReactNode; text: string; tone: string }> = 
 };
 
 /**
- * Puck's list fields render an icon-only "add" button with no accessible name (screen readers
- * hear just "button"). Puck doesn't let us label it, so name any such button as it appears.
- * Remove if Puck adds labels upstream.
+ * Puck's editor chrome misses some accessible names (an icon-only list "add" button, the preview
+ * frame, the zoom control, the loading indicator) and doesn't let us set them, so name them as
+ * they appear. Remove each fix if Puck adds it upstream.
  */
 function useNameListAddButtons() {
   useEffect(() => {
-    const name = () =>
+    const name = () => {
       document
         .querySelectorAll<HTMLButtonElement>(
           'button[class*="ArrayField-addButton"]:not([aria-label])',
@@ -86,6 +86,21 @@ function useNameListAddButtons() {
             b.title = 'Add an item';
           }
         });
+      // Puck's preview frame, zoom control and loading indicator: give each a valid accessible name.
+      document
+        .querySelectorAll<HTMLIFrameElement>('iframe#preview-frame:not([title])')
+        .forEach((f) => {
+          f.title = 'Page preview';
+        });
+      document
+        .querySelectorAll<HTMLSelectElement>(
+          'select[class*="ViewportControls-zoomSelect"]:not([aria-label])',
+        )
+        .forEach((z) => z.setAttribute('aria-label', 'Zoom'));
+      document
+        .querySelectorAll<HTMLElement>('[class*="_Loader_"][aria-label]:not([role])')
+        .forEach((l) => l.setAttribute('role', 'status'));
+    };
     name();
     const observer = new MutationObserver(name);
     observer.observe(document.body, { childList: true, subtree: true });
