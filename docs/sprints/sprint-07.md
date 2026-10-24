@@ -62,6 +62,7 @@ Same standard as Sprint 6 (approved): two distinct designs per category; honest 
 | In-editor tips | Short, dismissible hints at the moments owners get stuck |
 | Performance budget | Mobile performance ≥ 90 for every template, measured automatically in CI (Lighthouse) — not yet measured |
 | Carried over from Sprint 6 | One money format across the app (the package pages use a second formatter); links named only "Edit" on the packages page given distinct names |
+| Found in 7.3 | The editor's "add item" buttons in list fields (from the Puck library) are icon-only with no accessible name — name them (e.g. "Add a photo") |
 
 ### 7.6 Timed launch test
 
