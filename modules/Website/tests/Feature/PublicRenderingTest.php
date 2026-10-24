@@ -61,3 +61,17 @@ it('keeps the publishing request’s business context after a render runs inline
             ->and(PageRender::query()->whereNotNull('path')->count())->toBe(1);
     });
 });
+
+it('re-renders every published page when branding or menus change', function () {
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Hi</h1>']))]);
+    $this->ctx->run($this->glow, function () {
+        $pages = app(Pages::class);
+        foreach (['home', 'services'] as $slug) {
+            $pages->publish(Page::query()->where('slug', $slug)->firstOrFail(), null, null);
+        }
+        Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>New look</h1>']))]);
+        expect($pages->rerenderPublished())->toBe(2);
+    });
+    Process::assertRanTimes(fn ($p) => true, 4); // two publishes, then two re-renders
+    $this->get($this->site)->assertSee('<h1>New look</h1>', false);
+});

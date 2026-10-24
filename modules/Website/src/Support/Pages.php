@@ -204,4 +204,18 @@ final readonly class Pages
             'minutes' => $created === null ? null : (int) max(0, round((now()->getTimestamp() - $created->getTimestamp()) / 60)),
         ]);
     }
+
+    /**
+     * Branding and menus are baked into published HTML: re-render every published page
+     * (queued). Returns how many were queued.
+     */
+    public function rerenderPublished(): int
+    {
+        $versions = Page::query()->whereNotNull('published_version_id')->pluck('published_version_id');
+        foreach ($versions as $versionId) {
+            RenderPublishedPage::dispatch($this->context->id(), (string) $versionId)->afterCommit();
+        }
+
+        return $versions->count();
+    }
 }
