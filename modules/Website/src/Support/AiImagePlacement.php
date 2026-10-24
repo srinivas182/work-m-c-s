@@ -27,12 +27,7 @@ final class AiImagePlacement
             if (in_array($block['type'], self::ALLOWED, true)) {
                 continue;
             }
-            $ids = [];
-            array_walk_recursive($block['props'], function ($v) use (&$ids): void {
-                if (is_string($v) && preg_match('#/sites/[0-9A-Za-z]+/([0-9a-z]{26})-\d+\.webp#', $v, $m) === 1) {
-                    $ids[] = $m[1];
-                }
-            });
+            $ids = SiteAssets::idsIn($block['props']);
             if ($ids === []) {
                 continue;
             }

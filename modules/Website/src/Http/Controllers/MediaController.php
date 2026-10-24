@@ -73,11 +73,10 @@ final class MediaController
     private function usage(): array
     {
         $found = [];
-        $scan = function (string $text, string $place) use (&$found): void {
-            if (preg_match_all('#/sites/[0-9A-Za-z]+/([0-9a-z]{26})-\d+\.webp#', $text, $m) > 0) {
-                foreach (array_unique($m[1]) as $id) {
-                    $found[$id][$place] = true;
-                }
+        // Read stored JSON as data (it escapes "/" as "\/"), then check each text value.
+        $scan = function (mixed $data, string $place) use (&$found): void {
+            foreach (SiteAssets::idsIn($data) as $id) {
+                $found[$id][$place] = true;
             }
         };
         foreach (Page::query()->get(['id', 'title', 'draft']) as $page) {
@@ -86,8 +85,8 @@ final class MediaController
         }
         $site = Site::query()->first();
         if ($site !== null) {
-            $scan((string) json_encode([$site->branding['logo'] ?? null]), 'Logo');
-            $scan((string) json_encode([$site->branding['favicon'] ?? null]), 'Browser icon');
+            $scan([$site->branding['logo'] ?? null], 'Logo');
+            $scan([$site->branding['favicon'] ?? null], 'Browser icon');
         }
 
         return array_map(fn (array $places) => array_keys($places), $found);

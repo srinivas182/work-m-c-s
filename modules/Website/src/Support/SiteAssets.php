@@ -236,4 +236,26 @@ final readonly class SiteAssets
             throw ValidationException::withMessages(['photo' => "Your package includes {$limitMb} MB of storage and it’s full. Remove photos you don’t use, or upgrade for more space."]);
         }
     }
+
+    /**
+     * Ids of this business's photos referenced anywhere in some content (decoded arrays
+     * or stored JSON text — read as data, since stored JSON escapes "/").
+     *
+     * @return list<string> lower-case ids
+     */
+    public static function idsIn(mixed $data): array
+    {
+        $values = is_string($data) ? json_decode($data, true) : $data;
+        if (! is_array($values)) {
+            return [];
+        }
+        $ids = [];
+        array_walk_recursive($values, function ($v) use (&$ids): void {
+            if (is_string($v) && preg_match('#/sites/[0-9A-Za-z]+/([0-9a-z]{26})-\d+\.webp#', $v, $m) === 1) {
+                $ids[$m[1]] = true;
+            }
+        });
+
+        return array_keys($ids);
+    }
 }
