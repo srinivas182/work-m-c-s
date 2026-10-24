@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 7.1 (templates II, part 1)
+- Six templates: Professional services (Advisory practice; Agency / consultancy), Car mechanics (Workshop & service centre; Panel beater & auto electrician), Hospitality (Hotel / guesthouse with rooms & rates; Restaurant with a food menu). 16 templates in total.
+
+### Fixed
+- Sections with nothing in them yet showed an orphan heading on the live site (portfolio, team, accreditations, timetable and other lists, including in Sprint 6 templates). They're now hidden on the live site and show a prompt in the editor; the main heading goes to the first section actually shown.
+- The template guard now also catches pages that would be blank before the owner adds content.
+- Three invented policies removed from template copy (free quotes, a kitchen closing time, a reply-time promise).
+
 ### Added — Sprint 6.4 (first 10 templates)
 - Ten templates in the repository (modules/Website/templates): Salon & beauty (Hair & braids salon; Nails, lashes & barbers), Health (Dental practice; Doctor’s practice), Spa & wellness (Day spa; Wellness practitioner), Retail (Boutique; General store), Fitness (Gym & class studio; Personal trainer) — each pair visually distinct.
 - `website:install-templates`: creates templates and publishes a new version only when a file changes (fingerprint); safe on every deploy.
