@@ -43,12 +43,14 @@ final readonly class PageRenderer
         if (! $result->successful()) {
             throw new RuntimeException('Rendering failed: '.mb_substr(trim($result->errorOutput()), 0, 200));
         }
-        $body = (string) (json_decode($result->output(), true)['html'] ?? '');
+        $out = (array) json_decode($result->output(), true);
+        $body = (string) ($out['html'] ?? '');
+        $fonts = array_values(array_filter((array) ($out['fonts'] ?? []), 'is_string'));
 
         $html = view('website::public.page', [
             'title' => $page->seo_title ?: ($page->is_home ? $this->context->current()->displayName() : $page->title.' · '.$this->context->current()->displayName()),
             'description' => $page->seo_description,
-            'preloads' => [],
+            'preloads' => app(FontPreloads::class)->for($fonts),
             'body' => $body,
         ])->render();
 
