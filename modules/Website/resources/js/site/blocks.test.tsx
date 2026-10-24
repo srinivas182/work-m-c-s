@@ -31,8 +31,8 @@ const render = (blocks: ContentDocument['blocks'], editing = false) =>
   );
 
 describe('block library', () => {
-  it('has 14 blocks whose types and versions the server accepts', () => {
-    expect(Object.keys(BLOCKS)).toHaveLength(14);
+  it('has 24 blocks whose types and versions the server accepts', () => {
+    expect(Object.keys(BLOCKS)).toHaveLength(24);
     for (const [type, def] of Object.entries(BLOCKS)) {
       expect(type).toMatch(/^[A-Z][A-Za-z0-9]{1,40}$/);
       expect(def.type).toBe(type);
