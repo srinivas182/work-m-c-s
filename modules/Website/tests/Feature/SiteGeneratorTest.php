@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
+use Wurk\Access\Actions\Team;
 use Wurk\Ai\Contracts\AiUnavailable;
 use Wurk\Ai\Drivers\SimulatedDriver;
 use Wurk\Credits\Contracts\CreditWallet;
@@ -15,7 +17,7 @@ use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageVersion;
 use Wurk\Website\Support\Pages;
 
-uses(InteractsWithShards::class);
+uses(InteractsWithIdentity::class, InteractsWithShards::class);
 
 beforeEach(function () {
     SimulatedDriver::$failNext = 0;
@@ -87,4 +89,17 @@ it('is free the first time, 20 credits after, and refunds an unusable answer', f
         app(SiteGenerator::class)->generate($this->brief, 'c3', null);
         expect($wallet->balance()['balance_milli'])->toBe(5000);
     });
+});
+
+it('quotes and writes through the owner’s screen, showing refusals as a friendly message', function () {
+    $owner = $this->person();
+    $this->member($owner, $this->glow);
+    $this->ctx->run($this->glow, fn () => app(Team::class)->add($owner->id, 'Owner', 'owner'));
+    $base = $this->app('/glow-salon/website/ai');
+
+    $this->actingAs($owner)->getJson("{$base}/quote?action=generate_site")->assertOk()->assertJson(['free' => true, 'credits' => 0, 'allowed' => true]);
+    $this->actingAs($owner)->post("{$base}/generate", [...$this->brief, 'confirmation' => 'c1'])->assertRedirect()->assertSessionHas('status');
+
+    // Second generation costs 20 credits; with none, a friendly refusal — not a server error.
+    $this->actingAs($owner)->post("{$base}/generate", [...$this->brief, 'confirmation' => 'c2'])->assertSessionHasErrors(['ai' => 'You need 20 credits and have 0.']);
 });

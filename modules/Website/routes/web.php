@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Website\Http\Controllers\Admin\TemplatesController;
+use Wurk\Website\Http\Controllers\AiWriterController;
 use Wurk\Website\Http\Controllers\AssetsController;
 use Wurk\Website\Http\Controllers\BlockBoardController;
 use Wurk\Website\Http\Controllers\BrandingController;
@@ -40,6 +41,9 @@ Route::tenant(function (): void {
         Route::get('/photos', [AssetsController::class, 'index'])->name('photos');
         Route::post('/photos', [AssetsController::class, 'store'])->middleware('throttle:60,1,website-photos')->name('photos.store');
         Route::get('/preview', PreviewController::class)->name('preview');
+        Route::get('/ai', [AiWriterController::class, 'show'])->name('ai');
+        Route::get('/ai/quote', [AiWriterController::class, 'quote'])->name('ai.quote');
+        Route::post('/ai/generate', [AiWriterController::class, 'generate'])->middleware('throttle:6,1,ai-generate')->name('ai.generate');
         Route::get('/enquiries', [EnquiriesController::class, 'index'])->name('enquiries');
         Route::put('/enquiries/settings', [EnquiriesController::class, 'settings'])->name('enquiries.settings');
         Route::put('/enquiries/{enquiry}', [EnquiriesController::class, 'status'])->name('enquiries.status');
