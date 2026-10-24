@@ -9,6 +9,7 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - The early-learning centre's sample photos show rooms and play spaces, never children (photos of children need parental consent under POPIA); registrations are left for the owner, never claimed.
 
 ### Changed
+- Browser tests: the sign-in code limit per IP (20/hour in production, unchanged) is raised only in the browser-test environment; the full suite sends more codes from one IP than that, which made CI fail.
 - The template accessibility scan runs one test per page (338 page checks across desktop and phone): clearer failures and no timeouts.
 
 ### Fixed

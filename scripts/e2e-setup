@@ -22,6 +22,8 @@ WURK_DESIGN_SHOWCASE=true
 WURK_ROOT_DOMAIN=wurk.test
 WURK_APP_DOMAIN=127.0.0.1
 WURK_ADMIN_DOMAIN=localhost
+# The whole browser suite signs in and signs up from one IP: room above the production limit of 20 codes/hour.
+WURK_OTP_PER_IP_PER_HOUR=500
 ENV
 
 export APP_ENV=e2e

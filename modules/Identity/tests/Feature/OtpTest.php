@@ -95,3 +95,7 @@ it('supersedes the previous code when a new one is sent', function () {
     }
     expect($this->otp->verify($this->email, $second, 'login'))->not->toBeNull();
 });
+
+it('keeps the production limit of 20 sign-in codes per IP per hour unless an environment raises it', function () {
+    expect(config('wurk.identity.otp.per_ip_per_hour'))->toBe(20);
+});
