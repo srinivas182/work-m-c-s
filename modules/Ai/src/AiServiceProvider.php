@@ -21,4 +21,16 @@ final class AiServiceProvider extends ModuleServiceProvider
         $this->app->scoped(AiActions::class);
         $this->app->singleton(CreditCostEstimates::class, CostEstimates::class);
     }
+
+    /** @return list<array{key: string, label: string, scope?: string}> */
+    public function permissions(): array
+    {
+        return [['key' => 'ai.manage', 'label' => 'Manage WURK AI (providers’ models, prices, margin, caps)', 'scope' => 'platform']];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function menu(): array
+    {
+        return [['label' => 'WURK AI', 'route' => 'admin.ai', 'icon' => 'sparkles', 'section' => 'Settings', 'permission' => 'ai.manage', 'order' => 35]];
+    }
 }
