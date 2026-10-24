@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 7 · four weeks (sprint plan revision 3) |
-| **Status** | Approved 24 Oct 2026 — 7.1 in review |
+| **Status** | Approved 24 Oct 2026 — 7.1 ✅ (#49), 7.2 in review |
 | **Depends on** | v0.6.0 (template system, category sections, WURK AI, first 10 templates) |
 | **Delivery** | 6 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -100,4 +100,5 @@ At least five non-technical owners each launch a site from signup without help, 
 
 | Sub-sprint | PR | Result |
 |---|---|---|
-| 7.1 Templates II, part 1 | see PR | 658 backend tests on SQLite and MySQL 8; 301 frontend; 80 browser checks incl. every page of all 16 templates. Found: empty sections showed orphan headings on the live site (also in Sprint 6 templates) — now hidden; three invented policies in copy |
+| 7.1 Templates II, part 1 | #49 | 658 backend tests on SQLite and MySQL 8; 301 frontend; 80 browser checks incl. every page of all 16 templates. Found: empty sections showed orphan headings on the live site (also in Sprint 6 templates) — now hidden; three invented policies in copy |
+| 7.2 Templates II, part 2 | see PR | All 24 templates. 658 backend tests on SQLite and MySQL 8; 341 frontend; 386 browser checks incl. 338 template page checks (every page of all 24, desktop and phone). Found: safety claims and an invented class size in education copy |

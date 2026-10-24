@@ -56,7 +56,8 @@ return [
             'max_attempts' => 5,
             'resend_after_seconds' => 30,
             'per_destination_per_hour' => 5,
-            'per_ip_per_hour' => 20,
+            // Production default 20; browser tests send many codes from one IP and raise it (scripts/e2e-setup).
+            'per_ip_per_hour' => (int) env('WURK_OTP_PER_IP_PER_HOUR', 20),
             // Channel per destination type. SMS/WhatsApp drivers replace 'phone' in Sprint 2.
             'channels' => [
                 'email' => MailOtpChannel::class,
