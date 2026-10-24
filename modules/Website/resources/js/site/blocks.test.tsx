@@ -186,3 +186,39 @@ describe('gallery grid', () => {
     }
   });
 });
+
+describe('colour contrast guards', () => {
+  const sources = import.meta.glob('./blocks/*.tsx', {
+    eager: true,
+    query: '?raw',
+    import: 'default',
+  }) as Record<string, string>;
+  // Fading text undoes the palette engine's contrast guarantee. Allowed: decorative marks,
+  // disabled controls (WCAG-exempt) and editor-only states.
+  const ALLOWED = [
+    'Testimonials.tsx:opacity-25',
+    'QuoteForm.tsx:disabled:opacity-60',
+    'Packages.tsx:opacity-60',
+  ];
+
+  it('never fades text (including on hover) outside the allowed cases', () => {
+    const found = Object.entries(sources).flatMap(([file, src]) =>
+      (src.match(/(?:[a-z]+:)?opacity-\d+/g) ?? []).map(
+        (o) => `${file.replace('./blocks/', '')}:${o}`,
+      ),
+    );
+    expect(found.filter((f) => !ALLOWED.includes(f))).toEqual([]);
+  });
+
+  it('uses the guaranteed pair on brand backgrounds: brand on on-brand, never brand-text', () => {
+    const bad = Object.entries(sources).flatMap(([file, src]) =>
+      (src.match(/className="[^"]*"/g) ?? [])
+        .filter(
+          (c) =>
+            /bg-\[var\(--s-(?:on-)?brand\)\]/.test(c) && c.includes('text-[var(--s-brand-text)]'),
+        )
+        .map((c) => `${file}: ${c.slice(0, 80)}`),
+    );
+    expect(bad).toEqual([]);
+  });
+});

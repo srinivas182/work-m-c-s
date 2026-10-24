@@ -32,12 +32,12 @@ export const CallToAction: BlockDefinition<CallToActionProps> = {
           <SectionTitle className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] text-balance sm:text-4xl">
             {p.heading}
           </SectionTitle>
-          {p.text && <p className="mt-3 text-lg opacity-90">{p.text}</p>}
+          {p.text && <p className="mt-3 text-lg">{p.text}</p>}
         </div>
         {p.buttonLabel && (
           <a
             href={site.editing ? undefined : p.buttonHref}
-            className="inline-flex min-h-12 shrink-0 items-center rounded-[var(--s-radius)] bg-[var(--s-on-brand)] px-7 font-semibold text-[var(--s-brand-text)]"
+            className="inline-flex min-h-12 shrink-0 items-center rounded-[var(--s-radius)] bg-[var(--s-on-brand)] px-7 font-semibold text-[var(--s-brand)]"
           >
             {p.buttonLabel}
           </a>
