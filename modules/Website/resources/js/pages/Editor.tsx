@@ -68,6 +68,31 @@ const STATUS: Record<Status, { icon: ReactNode; text: string; tone: string }> = 
   },
 };
 
+/**
+ * Puck's list fields render an icon-only "add" button with no accessible name (screen readers
+ * hear just "button"). Puck doesn't let us label it, so name any such button as it appears.
+ * Remove if Puck adds labels upstream.
+ */
+function useNameListAddButtons() {
+  useEffect(() => {
+    const name = () =>
+      document
+        .querySelectorAll<HTMLButtonElement>(
+          'button[class*="ArrayField-addButton"]:not([aria-label])',
+        )
+        .forEach((b) => {
+          if (!b.textContent?.trim()) {
+            b.setAttribute('aria-label', 'Add an item');
+            b.title = 'Add an item';
+          }
+        });
+    name();
+    const observer = new MutationObserver(name);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+}
+
 export default function Editor({
   page,
   revision,
@@ -79,6 +104,7 @@ export default function Editor({
   menus,
   urls,
 }: Props) {
+  useNameListAddButtons();
   const [status, setStatus] = useState<Status>('saved');
   const [message, setMessage] = useState<string | null>(null);
   const [isPublished, setPublished] = useState(published);
