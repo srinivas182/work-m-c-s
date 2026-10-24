@@ -44,7 +44,7 @@ final class CreditsServiceProvider extends ModuleServiceProvider
     {
         return [
             ['label' => 'Credit rates', 'route' => 'admin.credits.rates', 'icon' => 'coins', 'section' => 'Settings', 'permission' => 'credits.manage', 'order' => 930],
-            ['label' => 'WURK Credits', 'route' => 'tenant.credits', 'icon' => 'coins', 'section' => 'Settings', 'permission' => 'credits.view-own', 'order' => 780],
+            ['label' => 'Plan & usage', 'route' => 'tenant.credits', 'icon' => 'coins', 'section' => 'Settings', 'permission' => 'credits.view-own', 'order' => 780],
         ];
     }
 
