@@ -70,7 +70,7 @@ function StepPicker({
     <div className="grid gap-2 sm:grid-cols-2">
       <Field label={`${label}: provider`}>
         <Select value={step.provider} onValueChange={(v) => onChange({ ...step, provider: v })}>
-          <SelectTrigger>
+          <SelectTrigger aria-label={`${label}: provider`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

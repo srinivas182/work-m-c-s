@@ -82,7 +82,7 @@ export default function AiWriter({ business, base }: Props) {
             </Field>
             <Field label="Tone">
               <Select value={form.data.tone} onValueChange={(v) => form.setData('tone', v)}>
-                <SelectTrigger>
+                <SelectTrigger aria-label="Tone">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

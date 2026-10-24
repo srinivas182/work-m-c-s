@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Tests\Support\InteractsWithShards;
 use Wurk\Ai\Contracts\AiActionRefused;
+use Wurk\Ai\Contracts\AiActions;
 use Wurk\Ai\Models\AiRequest;
-use Wurk\Ai\Support\AiActions;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
@@ -50,6 +50,7 @@ it('refuses packages without WURK AI and balances that are too low — without r
     $ran = false;
     $this->ctx->run($other, function () use (&$ran) {
         expect(app(AiActions::class)->quote('rewrite'))->toMatchArray(['allowed' => false, 'reason' => 'not_included']);
+        expect(app(AiActions::class)->quote('generate_site'))->toMatchArray(['allowed' => true, 'free' => true]); // first website: free on every package
         expect(fn () => app(AiActions::class)->perform('rewrite', 'k1', function () use (&$ran) {
             $ran = true;
         }))->toThrow(AiActionRefused::class, 'isn’t included');

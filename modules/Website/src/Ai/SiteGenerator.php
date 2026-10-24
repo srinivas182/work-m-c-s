@@ -6,8 +6,8 @@ namespace Wurk\Website\Ai;
 
 use Illuminate\Support\Facades\DB;
 use Wurk\Ai\Contracts\Ai;
+use Wurk\Ai\Contracts\AiActions;
 use Wurk\Ai\Contracts\AiUnavailable;
-use Wurk\Ai\Support\AiActions;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Support\ContentDocument;

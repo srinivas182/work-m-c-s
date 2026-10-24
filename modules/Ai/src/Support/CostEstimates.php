@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Ai\Support;
 
+use Wurk\Ai\Contracts\AiActions;
 use Wurk\Ai\Models\AiRequest;
 use Wurk\Credits\Contracts\RateCard;
 use Wurk\Messaging\Contracts\ProviderCredentials;
@@ -18,6 +19,9 @@ final readonly class CostEstimates implements CreditCostEstimates
 {
     /** Typical tokens per action before real usage exists. */
     private const ESTIMATE_TOKENS = ['generate_site' => [6000, 6000], 'rewrite' => [1500, 300]];
+
+    /** How each reads in the cost tip ("Cheapest: all spent on AI rewrites"). */
+    private const LABELS = ['generate_site' => 'AI website writing', 'rewrite' => 'AI rewrites'];
 
     public function __construct(private AiSettings $settings, private RateCard $rates, private ProviderCredentials $providers) {}
 
@@ -40,7 +44,7 @@ final readonly class CostEstimates implements CreditCostEstimates
                 [$in, $outTokens] = self::ESTIMATE_TOKENS[$action];
                 $avgMicro = $this->settings->costMicro($step['provider'], $step['model'], $in, $outTokens);
             }
-            $out['ai.'.$action] = ['label' => 'AI: '.$meta['label'], 'zar_per_credit' => $credits > 0 ? ((float) $avgMicro / 1_000_000) * $zarPerUsd / $credits : null];
+            $out['ai.'.$action] = ['label' => self::LABELS[$action], 'zar_per_credit' => $credits > 0 ? ((float) $avgMicro / 1_000_000) * $zarPerUsd / $credits : null];
         }
 
         return $out;

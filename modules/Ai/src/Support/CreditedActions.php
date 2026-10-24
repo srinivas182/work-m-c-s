@@ -6,6 +6,7 @@ namespace Wurk\Ai\Support;
 
 use Throwable;
 use Wurk\Ai\Contracts\AiActionRefused;
+use Wurk\Ai\Contracts\AiActions;
 use Wurk\Ai\Models\AiRequest;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Plans\Contracts\Entitlements;
@@ -17,13 +18,8 @@ use Wurk\Tenancy\Contracts\TenantContext;
  * charges exactly the quoted price once (idempotent key), runs the work and refunds
  * automatically if it fails. The first website generation is free.
  */
-final readonly class AiActions
+final readonly class CreditedActions implements AiActions
 {
-    public const ACTIONS = [
-        'generate_site' => ['label' => 'Write my website', 'task' => 'site_generation'],
-        'rewrite' => ['label' => 'Rewrite this section', 'task' => 'rewrite'],
-    ];
-
     public function __construct(private TenantContext $context, private CreditWallet $wallet, private Entitlements $entitlements) {}
 
     /** @return array{action: string, label: string, credits: float, free: bool, balance: float, after: float, allowed: bool, reason: string|null, can_buy: bool} */
@@ -35,10 +31,12 @@ final readonly class AiActions
         $costMilli = $free ? 0 : $this->wallet->rateFor('ai.'.$action);
         $balanceMilli = (int) $this->wallet->balance()['balance_milli'];
         $included = $this->entitlements->entitled($tenant, 'ai-assistant');
-        $reason = ! $included ? 'not_included' : ($balanceMilli < $costMilli ? 'insufficient' : null);
+        // The first website is free on every package (PRD: AI site generation at onboarding);
+        // everything after that needs a package that includes WURK AI.
+        $reason = ! $included && ! $free ? 'not_included' : ($balanceMilli < $costMilli ? 'insufficient' : null);
 
         return [
-            'action' => $action, 'label' => self::ACTIONS[$action]['label'] ?? $action,
+            'action' => $action, 'label' => AiActions::ACTIONS[$action]['label'] ?? $action,
             'credits' => $costMilli / 1000, 'free' => $free, 'balance' => $balanceMilli / 1000, 'after' => ($balanceMilli - $costMilli) / 1000,
             'allowed' => $reason === null, 'reason' => $reason,
             'can_buy' => (bool) ($this->entitlements->limits($tenant)['credit_packs_allowed'] ?? true),
@@ -61,13 +59,13 @@ final readonly class AiActions
         }
         $chargeKey = 'ai:'.$action.':'.$key;
         if (! $quote['free']) {
-            $this->wallet->charge('ai.'.$action, $chargeKey, (string) self::ACTIONS[$action]['label']);
+            $this->wallet->charge('ai.'.$action, $chargeKey, (string) AiActions::ACTIONS[$action]['label']);
         }
         try {
             return $work();
         } catch (Throwable $e) {
             if (! $quote['free']) {
-                $this->wallet->refund($chargeKey, 'Refund: '.self::ACTIONS[$action]['label'].' didn’t complete');
+                $this->wallet->refund($chargeKey, 'Refund: '.AiActions::ACTIONS[$action]['label'].' didn’t complete');
             }
             throw $e;
         }

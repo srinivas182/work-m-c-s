@@ -97,6 +97,7 @@ it('quotes and writes through the owner’s screen, showing refusals as a friend
     $this->ctx->run($this->glow, fn () => app(Team::class)->add($owner->id, 'Owner', 'owner'));
     $base = $this->app('/glow-salon/website/ai');
 
+    $this->actingAs($owner)->get($base)->assertOk()->assertInertia(fn ($p) => $p->component('Website::AiWriter')->where('business', 'Glow-salon'));
     $this->actingAs($owner)->getJson("{$base}/quote?action=generate_site")->assertOk()->assertJson(['free' => true, 'credits' => 0, 'allowed' => true]);
     $this->actingAs($owner)->post("{$base}/generate", [...$this->brief, 'confirmation' => 'c1'])->assertRedirect()->assertSessionHas('status');
 

@@ -33,8 +33,8 @@ interface CreditCosts {
   assumptions: { fx_zar_per_usd: number; fx_buffer_pct: number; target_margin_pct: number };
 }
 
-const rands = (n: number) =>
-  `R${n.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+/** The package pages' own money format (from rands), so the tip matches the prices beside it. */
+const rands = (n: number) => rand(Math.round(n * 100) / 100);
 
 /** What the credits cost WURK if fully used — a range across channels — and a safe price per extra credit. */
 function CostTip({
@@ -70,7 +70,7 @@ function CostTip({
         {rands(credits * cheapest.zar)}–{rands(credits * dearest.zar)} / month
       </p>
       <p className="text-fg-muted">
-        Cheapest: all {cheapest.label} · Most expensive: all {dearest.label}
+        Cheapest: all spent on {cheapest.label} · Most expensive: all on {dearest.label}
         {monthlyPrice > 0 && (
           <>
             {' '}

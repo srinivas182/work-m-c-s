@@ -11,20 +11,20 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Ai\Contracts\AiActionRefused;
+use Wurk\Ai\Contracts\AiActions;
 use Wurk\Ai\Contracts\AiUnavailable;
-use Wurk\Ai\Support\AiActions;
-use Wurk\Tenancy\Contracts\CurrentTenant;
+use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Ai\SiteGenerator;
 use Wurk\Website\Support\Pages;
 
 /** Owners: Website → Write with AI. Every run is confirmed with its price first. */
 final class AiWriterController
 {
-    public function show(Pages $pages, CurrentTenant $tenant): Response
+    public function show(Pages $pages, TenantContext $context): Response
     {
         $pages->ensureSite();
 
-        return Inertia::render('Website::AiWriter', ['business' => $tenant->displayName(), 'base' => route('tenant.website.ai', [], false)]);
+        return Inertia::render('Website::AiWriter', ['business' => $context->current()->displayName(), 'base' => route('tenant.website.ai', [], false)]);
     }
 
     public function quote(Request $request, AiActions $actions): JsonResponse
