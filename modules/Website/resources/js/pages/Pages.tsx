@@ -249,7 +249,7 @@ function LaunchChecklist({
       <CardHeader>
         <CardTitle>Launch your website</CardTitle>
         <CardDescription>
-          {done} of {steps.length} done. Most owners finish in under an hour.
+          {done} of {steps.length} done. Each step takes a few minutes.
         </CardDescription>
         <div
           role="progressbar"
@@ -285,7 +285,7 @@ function LaunchChecklist({
                 <Button
                   size="sm"
                   variant="secondary"
-                  aria-label={`Mark “${s.label}” as done`}
+                  aria-label={`Mark as done: ${s.label}`}
                   onClick={() =>
                     router.post(
                       `${base.replace(/\/pages$/, '')}/checklist/${s.key}`,
@@ -322,7 +322,7 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
       <div className="grid max-w-4xl gap-8">
         <PageHeader
           title="Website pages"
-          description="Add pages, choose your home page and put them in order. The visual editor and live site preview arrive next."
+          description="Add pages, choose your home page and put them in order."
           actions={
             <div className="flex gap-2">
               <Button variant="secondary" asChild>
