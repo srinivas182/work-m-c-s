@@ -4,6 +4,21 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 6.4 (first 10 templates)
+- Ten templates in the repository (modules/Website/templates): Salon & beauty (Hair & braids salon; Nails, lashes & barbers), Health (Dental practice; Doctor’s practice), Spa & wellness (Day spa; Wellness practitioner), Retail (Boutique; General store), Fitness (Gym & class studio; Personal trainer) — each pair visually distinct.
+- `website:install-templates`: creates templates and publishes a new version only when a file changes (fingerprint); safe on every deploy.
+- Privacy, terms and cookies pages for every template, written for POPIA, kept in one place; the business’s name is filled in when its site is built. General templates, not legal advice.
+- Honest sample content: no sample reviews, team members, prices, offers or invented policies — those sections prompt the owner. Health templates ask visitors not to send medical details in messages; the doctor’s practice shows the emergency numbers.
+- Template guard: every prop is a real field, every option valid, every photo present, every page has exactly one main heading. Every template page is accessibility-scanned on desktop and phone.
+
+### Fixed
+- Switching between designs failed when both had a section with the same id.
+- “Write my website” never filled Text sections’ main content (wrong field name); a test now checks every AI slot against the real block fields.
+- Links inside sections weren’t validated; only site paths, #anchors, https://, mailto: and tel: are accepted, at any depth.
+- Galleries left gaps for 3, 4 and other photo counts.
+- Low contrast with bright brand colours: faded call-to-action text and an inverted button using the wrong colour; guard tests prevent both returning.
+- “Use this design” buttons now name their design for screen readers.
+
 ### Added — Sprint 6.3 (WURK AI, credits and transparency)
 - **WURK AI** module: Anthropic, Google and OpenAI providers on the existing Providers screen (encrypted, write-only keys) plus a simulated provider that never answers in production. Model per task (pinned versions; "latest" aliases refused), fallback order, every attempt logged with its real cost, daily limit per business and monthly spend cap per provider.
 - **Owners:** "Write with AI" — describe the business, add services and prices, choose a tone; a confirmation shows the exact credits and balance before and after; charged once (double-clicks included), refunded automatically on failure. The first website is free on every package; later AI actions need a package that includes WURK AI. Not enough credits → Buy credits and/or Upgrade.

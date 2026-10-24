@@ -1,0 +1,353 @@
+{
+  "category": "fitness",
+  "key": "fitness-gym-studio",
+  "name": "Gym & class studio",
+  "position": 1,
+  "description": "High-energy and modern, for gyms and class studios.",
+  "definition": {
+    "branding": {
+      "primary": "#DC2626",
+      "secondary": "#111827",
+      "font_pairing": "technical",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Classes",
+          "type": "page",
+          "page": "classes"
+        },
+        {
+          "label": "Memberships",
+          "type": "page",
+          "page": "memberships"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Join now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Stronger every week",
+                "text": "Classes, equipment and coaching for every fitness level.",
+                "primaryLabel": "See the timetable",
+                "primaryHref": "/classes",
+                "secondaryLabel": "Memberships",
+                "secondaryHref": "/memberships",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/fitness-gym-studio/hero.jpg",
+                    "alt": "People training together in a class"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why train with us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "users",
+                    "title": "Classes for all levels",
+                    "text": "From your first class to your best ever."
+                  },
+                  {
+                    "icon": "calendar",
+                    "title": "Train when it suits you",
+                    "text": "Early mornings, lunchtimes and evenings."
+                  },
+                  {
+                    "icon": "heart",
+                    "title": "Coaches who care",
+                    "text": "Help with technique, every session."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "timetable",
+              "type": "ClassTimetable",
+              "version": 1,
+              "props": {
+                "heading": "Class timetable",
+                "intro": "",
+                "classes": [],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Memberships",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Inside the gym",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/fitness-gym-studio/floor.jpg",
+                    "alt": "The training floor"
+                  },
+                  {
+                    "src": "/images/templates/fitness-gym-studio/class.jpg",
+                    "alt": "A class in progress"
+                  },
+                  {
+                    "src": "/images/templates/fitness-gym-studio/hero.jpg",
+                    "alt": "People training together in a class"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "Member stories",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Try a class",
+                "text": "Come and see what it’s like.",
+                "buttonLabel": "Get in touch",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "classes",
+        "title": "Classes",
+        "slug": "classes",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Join now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "timetable",
+              "type": "ClassTimetable",
+              "version": 1,
+              "props": {
+                "heading": "Class timetable",
+                "intro": "",
+                "classes": [],
+                "note": ""
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "First time?",
+                "items": [
+                  {
+                    "question": "What should I bring?",
+                    "answer": "Comfortable clothes, trainers, a towel and water."
+                  },
+                  {
+                    "question": "Do I need to be fit already?",
+                    "answer": "No — every class can be adjusted to your level."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "memberships",
+        "title": "Memberships",
+        "slug": "memberships",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Join now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Memberships",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Questions about joining?",
+                "text": "Message us and we’ll help you choose.",
+                "buttonLabel": "Ask us",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Join now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Find us",
+                "intro": "Message us to book a first class.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

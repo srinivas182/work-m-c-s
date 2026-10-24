@@ -20,6 +20,7 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property string $draft
  * @property int $draft_revision
  * @property int|null $published_version
+ * @property string|null $source_hash
  * @property-read SiteCategory|null $category
  */
 final class SiteTemplate extends Model implements CentralModel

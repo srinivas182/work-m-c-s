@@ -10,6 +10,7 @@ use Wurk\Website\Models\Page;
 use Wurk\Website\Models\Site;
 use Wurk\Website\Models\SiteCategory;
 use Wurk\Website\Models\SiteTemplateVersion;
+use Wurk\Website\Support\ContentDocument;
 use Wurk\Website\Support\Menus;
 use Wurk\Website\Support\SiteBuilder;
 use Wurk\Website\Support\TemplateDefinition;
@@ -126,4 +127,25 @@ it('publishes sample designs for development, and never in production', function
 
     app()->detectEnvironment(fn () => 'production');
     $this->artisan('website:seed-sample-templates')->assertFailed();
+});
+
+it('only accepts safe links in sections, at any depth', function () {
+    $doc = fn (array $props) => ['schema' => 1, 'blocks' => [['id' => 'b', 'type' => 'CallToAction', 'version' => 1, 'props' => $props]]];
+    foreach (['/contact', '#book', 'https://example.com', 'mailto:hi@example.com', 'tel:+27 82 555 0101', ''] as $ok) {
+        expect(ContentDocument::validate($doc(['buttonHref' => $ok]))['blocks'][0]['props']['buttonHref'])->toBe($ok);
+    }
+    foreach (['javascript:alert(1)', 'data:text/html,x', '//evil.example', 'http://insecure.example', 'ftp://x'] as $bad) {
+        expect(fn () => ContentDocument::validate($doc(['buttonHref' => $bad])))->toThrow(ValidationException::class);
+    }
+    // Nested: a package's button inside a list.
+    expect(fn () => ContentDocument::validate($doc(['items' => [['buttonHref' => 'javascript:x']]])))->toThrow(ValidationException::class);
+});
+
+it('names every link field …Href, so the link check covers it', function () {
+    foreach (glob(base_path('modules/Website/resources/js/site/blocks/*.tsx')) as $file) {
+        preg_match_all("/(\\w+): \\{ kind: 'link'/", (string) file_get_contents($file), $m);
+        foreach ($m[1] as $field) {
+            expect($field)->toEndWith('Href', basename($file)." field {$field}");
+        }
+    }
 });

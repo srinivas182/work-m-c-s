@@ -1,0 +1,401 @@
+{
+  "category": "spa-wellness",
+  "key": "spa-day-spa",
+  "name": "Day spa",
+  "position": 1,
+  "description": "Elegant and serene, for day spas and beauty therapy.",
+  "definition": {
+    "branding": {
+      "primary": "#3F6212",
+      "secondary": "#B45309",
+      "font_pairing": "elegant",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Treatments",
+          "type": "page",
+          "page": "treatments"
+        },
+        {
+          "label": "Gallery",
+          "type": "page",
+          "page": "gallery"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a treatment",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Slow down. Breathe. Be looked after.",
+                "text": "Massages, facials and body treatments in a calm, quiet space.",
+                "primaryLabel": "Book a treatment",
+                "primaryHref": "/contact",
+                "secondaryLabel": "Treatments",
+                "secondaryHref": "/treatments",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/spa-day-spa/hero.jpg",
+                    "alt": "A quiet treatment room with soft light"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "treatments",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Signature treatments",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Full-body massage",
+                    "description": "Swedish or deep tissue",
+                    "duration": "60 or 90 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Facial",
+                    "description": "Cleanse, exfoliate and hydrate",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Body scrub and wrap",
+                    "description": "",
+                    "duration": "75 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Spa packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Our spa",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/spa-day-spa/treat-1.jpg",
+                    "alt": "Massage oils and warm towels"
+                  },
+                  {
+                    "src": "/images/templates/spa-day-spa/treat-2.jpg",
+                    "alt": "A facial treatment"
+                  },
+                  {
+                    "src": "/images/templates/spa-day-spa/treat-3.jpg",
+                    "alt": "The relaxation lounge"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "Guest reviews",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Treat yourself",
+                "text": "Book a treatment, or a gift for someone special.",
+                "buttonLabel": "Book a treatment",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "treatments",
+        "title": "Treatments",
+        "slug": "treatments",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a treatment",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "treatments",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Treatments",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Full-body massage",
+                    "description": "Swedish or deep tissue",
+                    "duration": "60 or 90 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Back, neck and shoulders",
+                    "description": "",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Facial",
+                    "description": "Cleanse, exfoliate and hydrate",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Body scrub and wrap",
+                    "description": "",
+                    "duration": "75 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Manicure and pedicure",
+                    "description": "",
+                    "duration": "90 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Spa packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "gallery",
+        "title": "Gallery",
+        "slug": "gallery",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a treatment",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Inside the spa",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/spa-day-spa/room.jpg",
+                    "alt": "A treatment room"
+                  },
+                  {
+                    "src": "/images/templates/spa-day-spa/treat-1.jpg",
+                    "alt": "Massage oils and warm towels"
+                  },
+                  {
+                    "src": "/images/templates/spa-day-spa/treat-2.jpg",
+                    "alt": "A facial treatment"
+                  },
+                  {
+                    "src": "/images/templates/spa-day-spa/treat-3.jpg",
+                    "alt": "The relaxation lounge"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a treatment",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Visit us",
+                "intro": "Message us to book or ask about gift vouchers.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": ""
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Before your visit",
+                "items": [
+                  {
+                    "question": "What should I bring?",
+                    "answer": "Just yourself — we provide gowns, towels and slippers."
+                  },
+                  {
+                    "question": "How early should I arrive?",
+                    "answer": "About ten minutes early so you can settle in."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

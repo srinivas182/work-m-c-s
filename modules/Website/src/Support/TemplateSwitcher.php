@@ -37,7 +37,7 @@ final readonly class TemplateSwitcher
         if ($site->template_key === $templateKey) {
             return $site;
         }
-        $definition = $published['definition'];
+        $definition = LegalPages::fill($published['definition'], ['business' => $this->context->current()->displayName()]);
 
         DB::connection($this->context->connectionName())->transaction(function () use ($site, $definition, $published, $by): void {
             SiteSnapshot::query()->create([
@@ -106,6 +106,19 @@ final readonly class TemplateSwitcher
             $footerAt = array_search('Footer', array_column($blocks, 'type'), true);
             array_splice($blocks, $footerAt === false ? count($blocks) : (int) $footerAt, 0, $leftover);
         }
+
+        // The kept sections and the new design's sections can share ids (e.g. both have a
+        // "story"): give any repeat a unique id so the page stays valid.
+        $seen = [];
+        foreach ($blocks as &$block) {
+            $id = (string) $block['id'];
+            for ($n = 2; isset($seen[$id]); $n++) {
+                $id = $block['id'].'-'.$n;
+            }
+            $block['id'] = $id;
+            $seen[$id] = true;
+        }
+        unset($block);
 
         return ['schema' => ContentDocument::SCHEMA, 'blocks' => $blocks];
     }

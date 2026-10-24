@@ -23,7 +23,7 @@ final readonly class SiteBuilder
         if (Site::query()->find($this->context->id()) !== null) {
             throw ValidationException::withMessages(['template' => 'This business already has a website; switch template instead.']);
         }
-        $definition = $published['definition'];
+        $definition = LegalPages::fill($published['definition'], ['business' => $this->context->current()->displayName()]);
 
         $site = DB::connection($this->context->connectionName())->transaction(function () use ($published, $definition): Site {
             $site = Site::query()->create([

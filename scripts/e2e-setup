@@ -35,6 +35,7 @@ php artisan shards:register e2e-shard --driver=sqlite --database="${root}/databa
 php artisan tenants:create "Glow Salon" --handle=glow-salon
 # Categories and sample designs, so signup shows the category and design steps.
 php artisan website:seed-sample-templates --no-interaction > /dev/null
+php artisan website:install-templates --no-interaction > /dev/null
 php artisan identities:create owner@glow.co.za --first=Thandi --last=Mokoena \
   --password="sunny days in durban" --tenant=glow-salon
 # WURK staff for admin browser tests, one per Playwright project (authenticator

@@ -1,0 +1,325 @@
+{
+  "category": "retail",
+  "key": "retail-general-store",
+  "name": "General store",
+  "position": 2,
+  "description": "Friendly and practical, for neighbourhood and general stores.",
+  "definition": {
+    "branding": {
+      "primary": "#EA580C",
+      "secondary": "#15803D",
+      "font_pairing": "bold",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "What we stock",
+          "type": "page",
+          "page": "stock"
+        },
+        {
+          "label": "About",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Contact us",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "centered",
+                "heading": "Everything you need, close to home",
+                "text": "Your friendly neighbourhood store.",
+                "primaryLabel": "What we stock",
+                "primaryHref": "/stock",
+                "secondaryLabel": "Find us",
+                "secondaryHref": "/contact",
+                "facts": [],
+                "images": [],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why shop with us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "pin",
+                    "title": "Close to home",
+                    "text": "Pop in on your way."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "A friendly face",
+                    "text": "We know our regulars by name."
+                  },
+                  {
+                    "icon": "check",
+                    "title": "What you need",
+                    "text": "Everyday essentials and more."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "shelves",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Well stocked",
+                "text": "Tell customers what you sell and anything you’re known for.",
+                "image": "/images/templates/retail-general-store/shelves.jpg",
+                "imageAlt": "Stocked shelves in the store",
+                "imageSide": "right",
+                "buttonLabel": "See what we stock",
+                "buttonHref": "/stock"
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What people say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Can’t find something?",
+                "text": "Message us and we’ll tell you if we have it.",
+                "buttonLabel": "Ask us",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "stock",
+        "title": "What we stock",
+        "slug": "stock",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Contact us",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "stock",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "What we stock",
+                "intro": "Ask us about anything you don’t see here.",
+                "items": [
+                  {
+                    "name": "Groceries",
+                    "description": "Everyday essentials",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Household",
+                    "description": "Cleaning and home goods",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Airtime and electricity",
+                    "description": "",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "This week’s specials",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Contact us",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "About us",
+                "text": "Tell customers about your store and the community you serve.",
+                "image": "/images/templates/retail-general-store/counter.jpg",
+                "imageAlt": "The store counter",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Contact us",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Find us",
+                "intro": "Message us to check stock.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
