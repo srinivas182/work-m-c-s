@@ -1,4 +1,5 @@
 import {
+  Inbox,
   LayoutTemplate,
   Menu,
   TriangleAlert,
@@ -46,6 +47,7 @@ export const icons: Record<string, LucideIcon> = {
   circle: Circle,
   flag: Flag,
   globe: Globe,
+  inbox: Inbox,
   menu: Menu,
   'layout-template': LayoutTemplate,
   'heart-pulse': HeartPulse,
