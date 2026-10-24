@@ -33,7 +33,9 @@ final readonly class CreditedActions implements AiActions
         $included = $this->entitlements->entitled($tenant, 'ai-assistant');
         // The first website is free on every package (PRD: AI site generation at onboarding);
         // everything after that needs a package that includes WURK AI.
-        $reason = ! $included && ! $free ? 'not_included' : ($balanceMilli < $costMilli ? 'insufficient' : null);
+        $spendable = $free ? null : $this->wallet->spendable($this->actor());
+        $reason = ! $included && ! $free ? 'not_included'
+            : ($balanceMilli < $costMilli ? 'insufficient' : ($spendable !== null && $spendable < $costMilli ? 'limit' : null));
 
         return [
             'action' => $action, 'label' => AiActions::ACTIONS[$action]['label'] ?? $action,
@@ -53,13 +55,15 @@ final readonly class CreditedActions implements AiActions
     {
         $quote = $this->quote($action);
         if (! $quote['allowed']) {
-            throw new AiActionRefused((string) $quote['reason'], $quote['reason'] === 'not_included'
-                ? 'WURK AI isn’t included in your package.'
-                : "You need {$quote['credits']} credits and have {$quote['balance']}.");
+            throw new AiActionRefused((string) $quote['reason'], match ($quote['reason']) {
+                'not_included' => 'WURK AI isn’t included in your package.',
+                'limit' => 'You’ve reached your monthly spending limit.',
+                default => "You need {$quote['credits']} credits and have {$quote['balance']}.",
+            });
         }
         $chargeKey = 'ai:'.$action.':'.$key;
         if (! $quote['free']) {
-            $this->wallet->charge('ai.'.$action, $chargeKey, (string) AiActions::ACTIONS[$action]['label']);
+            $this->wallet->charge('ai.'.$action, $chargeKey, (string) AiActions::ACTIONS[$action]['label'], $this->actor());
         }
         try {
             return $work();
@@ -69,5 +73,13 @@ final readonly class CreditedActions implements AiActions
             }
             throw $e;
         }
+    }
+
+    /** Who is spending (for per-staff limits); null outside a signed-in request. */
+    private function actor(): ?string
+    {
+        $id = auth()->id();
+
+        return $id === null ? null : (string) $id;
     }
 }
