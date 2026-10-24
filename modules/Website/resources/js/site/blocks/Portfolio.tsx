@@ -38,6 +38,7 @@ export const Portfolio: BlockDefinition<PortfolioProps> = {
       },
     },
   },
+  isEmpty: (p) => p.projects.length === 0,
   defaults: { heading: 'Our work', intro: '', projects: [] },
   render: (p, site) => (
     <Section>

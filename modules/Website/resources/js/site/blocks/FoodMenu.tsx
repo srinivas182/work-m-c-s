@@ -58,6 +58,7 @@ export const FoodMenu: BlockDefinition<FoodMenuProps> = {
     },
     note: { kind: 'text', inline: true, label: 'Note (e.g. allergies, service charge)', max: 200 },
   },
+  isEmpty: (p) => !p.sections.some((s) => s.dishes.length > 0),
   defaults: { heading: 'Menu', intro: '', sections: [], note: '' },
   render: (p, site) => (
     <Section narrow>

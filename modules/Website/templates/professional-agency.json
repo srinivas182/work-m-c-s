@@ -185,11 +185,20 @@
               }
             },
             {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Our work",
+                "text": "A selection of projects for clients we’re proud to work with. Get in touch to talk about yours."
+              }
+            },
+            {
               "id": "portfolio",
               "type": "Portfolio",
               "version": 1,
               "props": {
-                "heading": "Our work",
+                "heading": "Projects",
                 "intro": "",
                 "projects": []
               }

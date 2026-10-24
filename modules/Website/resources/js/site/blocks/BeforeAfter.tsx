@@ -101,6 +101,7 @@ export const BeforeAfter: BlockDefinition<BeforeAfterProps> = {
       },
     },
   },
+  isEmpty: (p) => !p.items.some((i) => i.before && i.after),
   defaults: { heading: 'Before & after', intro: '', layout: 'slider', items: [] },
   render: (p, site) => {
     // Live site: only complete pairs. Editor: every result, with prompts for missing
