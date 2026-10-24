@@ -60,6 +60,7 @@ export const Testimonials: BlockDefinition<TestimonialsProps> = {
       },
     },
   },
+  isEmpty: (p) => p.items.length === 0,
   defaults: { heading: 'What our customers say', items: [] },
   render: (p, site) => {
     const [featured, ...rest] = p.items;

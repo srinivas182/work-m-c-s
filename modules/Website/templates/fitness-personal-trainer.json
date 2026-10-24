@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/fitness-personal-trainer/portrait.jpg",
+                    "src": "/images/templates/fitness-personal-trainer/portrait-1600.webp",
                     "alt": "A personal trainer in the gym"
                   }
                 ],
@@ -295,7 +295,7 @@
               "props": {
                 "heading": "About me",
                 "text": "Tell clients about your background, your qualifications and how you train people.",
-                "image": "/images/templates/fitness-personal-trainer/session.jpg",
+                "image": "/images/templates/fitness-personal-trainer/session-1600.webp",
                 "imageAlt": "A training session",
                 "imageSide": "right",
                 "buttonLabel": "",

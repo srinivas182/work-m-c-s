@@ -75,5 +75,7 @@ export interface BlockDefinition<P extends Record<string, unknown>> {
   defaults: P;
   /** Brings props saved by an older version up to the current one. */
   upgrade?: (props: Record<string, unknown>, from: number) => Record<string, unknown>;
+  /** True when the section has nothing to show yet: hidden on the live site, a prompt in the editor. */
+  isEmpty?: (props: P) => boolean;
   render: (props: P, site: SiteContext) => ReactNode;
 }

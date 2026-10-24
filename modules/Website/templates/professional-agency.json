@@ -1,0 +1,363 @@
+{
+  "category": "professional-services",
+  "key": "professional-agency",
+  "name": "Agency / consultancy",
+  "position": 2,
+  "description": "Bold and modern, for agencies, studios and consultants.",
+  "definition": {
+    "branding": {
+      "primary": "#7C3AED",
+      "secondary": "#0F172A",
+      "font_pairing": "technical",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Work",
+          "type": "page",
+          "page": "work"
+        },
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Start a project",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "centered",
+                "heading": "We help good businesses grow",
+                "text": "Strategy, design and digital work that brings in customers.",
+                "primaryLabel": "Start a project",
+                "primaryHref": "/contact",
+                "secondaryLabel": "See our work",
+                "secondaryHref": "/work",
+                "facts": [],
+                "images": [],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "portfolio",
+              "type": "Portfolio",
+              "version": 1,
+              "props": {
+                "heading": "Selected work",
+                "intro": "",
+                "projects": []
+              }
+            },
+            {
+              "id": "how",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "How we work",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "check",
+                    "title": "Clear plans",
+                    "text": "Agreed goals, scope and timelines before we begin."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "A small, senior team",
+                    "text": "The people you meet are the people who do the work."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Work that performs",
+                    "text": "Measured against the results you care about."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "studio",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Who we are",
+                "text": "Tell visitors about your team, your approach and the kind of clients you love working with.",
+                "image": "/images/templates/professional-agency/studio-1600.webp",
+                "imageAlt": "The team at work in the studio",
+                "imageSide": "left",
+                "buttonLabel": "About us",
+                "buttonHref": "/services"
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "Client feedback",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Have a project in mind?",
+                "text": "Tell us about it.",
+                "buttonLabel": "Start a project",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "work",
+        "title": "Work",
+        "slug": "work",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Start a project",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Our work",
+                "text": "A selection of projects for clients we’re proud to work with. Get in touch to talk about yours."
+              }
+            },
+            {
+              "id": "portfolio",
+              "type": "Portfolio",
+              "version": 1,
+              "props": {
+                "heading": "Projects",
+                "intro": "",
+                "projects": []
+              }
+            },
+            {
+              "id": "accred",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Clients and partners",
+                "intro": "Add the logos of clients and partners you’re allowed to show.",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Start a project",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Strategy",
+                    "description": "Positioning, planning and research",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Design",
+                    "description": "Brand identity and design",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Digital",
+                    "description": "Websites, campaigns and content",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Start a project",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Start a project",
+                "intro": "Tell us what you’re planning and we’ll be in touch.",
+                "services": [
+                  {
+                    "name": "Strategy"
+                  },
+                  {
+                    "name": "Design"
+                  },
+                  {
+                    "name": "Digital"
+                  }
+                ],
+                "detailsLabel": "Tell us about your project",
+                "submitLabel": "Send request"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Other ways to reach us",
+                "intro": "",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,382 @@
+{
+  "category": "hospitality",
+  "key": "hospitality-hotel",
+  "name": "Hotel / guesthouse",
+  "position": 1,
+  "description": "Warm and inviting, for guesthouses, B&Bs and small hotels.",
+  "definition": {
+    "branding": {
+      "primary": "#78350F",
+      "secondary": "#15803D",
+      "font_pairing": "elegant",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Rooms",
+          "type": "page",
+          "page": "rooms"
+        },
+        {
+          "label": "Gallery",
+          "type": "page",
+          "page": "gallery"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check availability",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "A warm welcome and a good night’s rest",
+                "text": "Comfortable rooms, a quiet setting and hosts who care.",
+                "primaryLabel": "Check availability",
+                "primaryHref": "/contact",
+                "secondaryLabel": "See the rooms",
+                "secondaryHref": "/rooms",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/hospitality-hotel/hero-1600.webp",
+                    "alt": "The guesthouse at dusk"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "rooms",
+              "type": "RoomsRates",
+              "version": 1,
+              "props": {
+                "heading": "Rooms",
+                "intro": "",
+                "rooms": [
+                  {
+                    "name": "Standard room",
+                    "photo": "/images/templates/hospitality-hotel/room-1-1600.webp",
+                    "photoAlt": "A double bedroom",
+                    "sleeps": "2 adults",
+                    "price": 0,
+                    "description": "",
+                    "features": ""
+                  },
+                  {
+                    "name": "Family room",
+                    "photo": "/images/templates/hospitality-hotel/room-2-1600.webp",
+                    "photoAlt": "A family room with two beds",
+                    "sleeps": "2 adults, 2 children",
+                    "price": 0,
+                    "description": "",
+                    "features": ""
+                  }
+                ],
+                "buttonLabel": "Check availability",
+                "buttonHref": "/contact",
+                "note": ""
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why guests stay with us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "heart",
+                    "title": "Personal welcome",
+                    "text": "Hosts who know their guests by name."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Thoughtful touches",
+                    "text": "Comfortable beds and the little extras that matter."
+                  },
+                  {
+                    "icon": "pin",
+                    "title": "A great base",
+                    "text": "Easy reach of the area’s best places."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Around the house",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/hospitality-hotel/lounge-1600.webp",
+                    "alt": "The guest lounge"
+                  },
+                  {
+                    "src": "/images/templates/hospitality-hotel/garden-1600.webp",
+                    "alt": "The garden"
+                  },
+                  {
+                    "src": "/images/templates/hospitality-hotel/room-1-1600.webp",
+                    "alt": "A double bedroom"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "Guest reviews",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Planning a stay?",
+                "text": "Ask about dates and we’ll confirm availability.",
+                "buttonLabel": "Check availability",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "rooms",
+        "title": "Rooms",
+        "slug": "rooms",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check availability",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "rooms",
+              "type": "RoomsRates",
+              "version": 1,
+              "props": {
+                "heading": "Rooms",
+                "intro": "",
+                "rooms": [
+                  {
+                    "name": "Standard room",
+                    "photo": "/images/templates/hospitality-hotel/room-1-1600.webp",
+                    "photoAlt": "A double bedroom",
+                    "sleeps": "2 adults",
+                    "price": 0,
+                    "description": "",
+                    "features": ""
+                  },
+                  {
+                    "name": "Family room",
+                    "photo": "/images/templates/hospitality-hotel/room-2-1600.webp",
+                    "photoAlt": "A family room with two beds",
+                    "sleeps": "2 adults, 2 children",
+                    "price": 0,
+                    "description": "",
+                    "features": ""
+                  }
+                ],
+                "buttonLabel": "Check availability",
+                "buttonHref": "/contact",
+                "note": ""
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Good to know",
+                "items": [
+                  {
+                    "question": "What time is check-in and check-out?",
+                    "answer": "Let guests know your check-in and check-out times here."
+                  },
+                  {
+                    "question": "Is breakfast included?",
+                    "answer": "Tell guests what’s included in the rate."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "gallery",
+        "title": "Gallery",
+        "slug": "gallery",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check availability",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Gallery",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/hospitality-hotel/hero-1600.webp",
+                    "alt": "The guesthouse at dusk"
+                  },
+                  {
+                    "src": "/images/templates/hospitality-hotel/lounge-1600.webp",
+                    "alt": "The guest lounge"
+                  },
+                  {
+                    "src": "/images/templates/hospitality-hotel/garden-1600.webp",
+                    "alt": "The garden"
+                  },
+                  {
+                    "src": "/images/templates/hospitality-hotel/room-2-1600.webp",
+                    "alt": "A family room"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check availability",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Send us your dates and how many guests — we’ll confirm availability.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

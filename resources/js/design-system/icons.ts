@@ -1,4 +1,6 @@
 import {
+  Clock,
+  Image,
   Sparkles,
   Inbox,
   LayoutTemplate,
@@ -48,6 +50,8 @@ export const icons: Record<string, LucideIcon> = {
   circle: Circle,
   flag: Flag,
   globe: Globe,
+  clock: Clock,
+  image: Image,
   sparkles: Sparkles,
   inbox: Inbox,
   menu: Menu,

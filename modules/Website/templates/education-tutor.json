@@ -1,0 +1,389 @@
+{
+  "category": "education-training",
+  "key": "education-tutor",
+  "name": "Tutor & online classes",
+  "position": 1,
+  "description": "Encouraging and clear, for tutors, coaches and online classes.",
+  "definition": {
+    "branding": {
+      "primary": "#4338CA",
+      "secondary": "#F59E0B",
+      "font_pairing": "friendly",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Lessons",
+          "type": "page",
+          "page": "lessons"
+        },
+        {
+          "label": "About",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a lesson",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Confidence, one lesson at a time",
+                "text": "One-to-one and small-group lessons, in person or online.",
+                "primaryLabel": "Book a lesson",
+                "primaryHref": "/contact",
+                "secondaryLabel": "Lessons",
+                "secondaryHref": "/lessons",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/education-tutor/portrait-1600.webp",
+                    "alt": "A tutor helping a learner with their work"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "how",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "How lessons work",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "users",
+                    "title": "Built around the learner",
+                    "text": "We start where they are and go at their pace."
+                  },
+                  {
+                    "icon": "calendar",
+                    "title": "Flexible times",
+                    "text": "After school, weekends and online."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Progress you can see",
+                    "text": "Regular feedback for learners and parents."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "lessons",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Lessons",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "One-to-one lesson",
+                    "description": "",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Small-group class",
+                    "description": "Learn with a few others",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Online lesson",
+                    "description": "From anywhere",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "timetable",
+              "type": "ClassTimetable",
+              "version": 1,
+              "props": {
+                "heading": "Class timetable",
+                "intro": "",
+                "classes": [],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Lesson packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "From learners and parents",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Ready to get started?",
+                "text": "Get in touch to book a first lesson.",
+                "buttonLabel": "Book a lesson",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "lessons",
+        "title": "Lessons",
+        "slug": "lessons",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a lesson",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "lessons",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Lessons",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "One-to-one lesson",
+                    "description": "",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Small-group class",
+                    "description": "Learn with a few others",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Online lesson",
+                    "description": "From anywhere",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Exam preparation",
+                    "description": "",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "timetable",
+              "type": "ClassTimetable",
+              "version": 1,
+              "props": {
+                "heading": "Class timetable",
+                "intro": "",
+                "classes": [],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Lesson packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a lesson",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "About me",
+                "text": "Tell families about your qualifications, the subjects you teach and how you help learners grow.",
+                "image": "/images/templates/education-tutor/study-1600.webp",
+                "imageAlt": "A quiet study space",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "accred",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Qualifications",
+                "intro": "Add your qualifications and registrations.",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a lesson",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Get in touch",
+                "intro": "Message us to book a lesson or ask a question.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

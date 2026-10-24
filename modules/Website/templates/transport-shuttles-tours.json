@@ -1,0 +1,396 @@
+{
+  "category": "transport-logistics",
+  "key": "transport-shuttles-tours",
+  "name": "Shuttles & tours",
+  "position": 1,
+  "description": "Fresh and welcoming, for shuttles, airport transfers and tours.",
+  "definition": {
+    "branding": {
+      "primary": "#0F766E",
+      "secondary": "#F59E0B",
+      "font_pairing": "modern",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "Tours",
+          "type": "page",
+          "page": "tours"
+        },
+        {
+          "label": "Book",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a trip",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Getting you there, comfortably",
+                "text": "Airport transfers, shuttles and tours with friendly, professional drivers.",
+                "primaryLabel": "Book a trip",
+                "primaryHref": "/contact",
+                "secondaryLabel": "Our services",
+                "secondaryHref": "/services",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/transport-shuttles-tours/hero-1600.webp",
+                    "alt": "A shuttle on a scenic road"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Airport transfers",
+                    "description": "To and from the airport",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Shuttles",
+                    "description": "Point-to-point trips",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Day tours",
+                    "description": "Guided tours of the area",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why travel with us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "clock",
+                    "title": "On time",
+                    "text": "We plan around your flight or schedule."
+                  },
+                  {
+                    "icon": "shield",
+                    "title": "Safe and comfortable",
+                    "text": "Well-kept vehicles and careful drivers."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Groups welcome",
+                    "text": "From one passenger to a full group."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we cover",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "From our passengers",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Where are you going?",
+                "text": "Tell us your trip and we’ll quote.",
+                "buttonLabel": "Book a trip",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a trip",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "We’ll confirm the price when you book.",
+                "items": [
+                  {
+                    "name": "Airport transfers",
+                    "description": "To and from the airport",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Shuttles",
+                    "description": "Point-to-point trips",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Corporate transport",
+                    "description": "",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Event transport",
+                    "description": "Weddings and functions",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we cover",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "tours",
+        "title": "Tours",
+        "slug": "tours",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a trip",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "tours",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Tours",
+                "text": "Describe the tours you offer — where you go, how long they take and what guests see.",
+                "image": "/images/templates/transport-shuttles-tours/vehicle-1600.webp",
+                "imageAlt": "The tour vehicle",
+                "imageSide": "right",
+                "buttonLabel": "Book a tour",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Tour packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Book",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a trip",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Book a trip",
+                "intro": "Tell us where and when.",
+                "services": [
+                  {
+                    "name": "Airport transfer"
+                  },
+                  {
+                    "name": "Shuttle"
+                  },
+                  {
+                    "name": "Day tour"
+                  },
+                  {
+                    "name": "Something else"
+                  }
+                ],
+                "detailsLabel": "Pick-up, drop-off, date, time and number of passengers",
+                "submitLabel": "Send request"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Other ways to reach us",
+                "intro": "",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

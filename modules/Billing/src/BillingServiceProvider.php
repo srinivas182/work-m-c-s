@@ -24,12 +24,15 @@ use Wurk\Billing\Listeners\DunningNotices;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\DunningServiceStatus;
 use Wurk\Billing\Support\Invoices;
+use Wurk\Billing\Support\PackCreditPricing;
+use Wurk\Plans\Contracts\CreditPricing;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
 final class BillingServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(CreditPricing::class, PackCreditPricing::class);
         // First gateway (Sprint 3 decision 1); others implement the same contract.
         $this->app->singleton(PaymentGateway::class, PaystackGateway::class);
         // Until WURK chooses a DebiCheck provider (Sprint 3 decision 2); refuses to run in production.

@@ -21,7 +21,7 @@ final readonly class CostEstimates implements CreditCostEstimates
     private const ESTIMATE_TOKENS = ['generate_site' => [6000, 6000], 'rewrite' => [1500, 300]];
 
     /** How each reads in the cost tip ("Cheapest: all spent on AI rewrites"). */
-    private const LABELS = ['generate_site' => 'AI website writing', 'rewrite' => 'AI rewrites'];
+    private const LABELS = ['generate_site' => 'AI website writing', 'rewrite' => 'AI rewrites', 'image' => 'AI images'];
 
     public function __construct(private AiSettings $settings, private RateCard $rates, private ProviderCredentials $providers) {}
 
@@ -39,7 +39,10 @@ final readonly class CostEstimates implements CreditCostEstimates
         foreach (AiActions::ACTIONS as $action => $meta) {
             $credits = ($this->rates->rate($country, 'ai.'.$action) ?? 0) / 1000;
             $avgMicro = AiRequest::query()->where('task', $meta['task'])->where('status', 'succeeded')->where('created_at', '>=', now()->subDays(30))->avg('cost_usd_micro');
-            if ($avgMicro === null) {
+            if ($avgMicro === null && $action === 'image') {
+                $step = $this->settings->imageChain()[0];
+                $avgMicro = $this->settings->imageCostMicro($step['provider'], $step['model']);
+            } elseif ($avgMicro === null) {
                 $step = $this->settings->chain($meta['task'])[0];
                 [$in, $outTokens] = self::ESTIMATE_TOKENS[$action];
                 $avgMicro = $this->settings->costMicro($step['provider'], $step['model'], $in, $outTokens);

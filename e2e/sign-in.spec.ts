@@ -24,7 +24,7 @@ for (const theme of ['light', 'dark'] as const) {
     // A distinct address per run: the 30-second resend limit applies per address.
     await page
       .getByLabel('Email or mobile number')
-      .fill(`${theme}-${testInfo.project.name}@example.com`);
+      .fill(`${theme}-${testInfo.project.name}-${testInfo.retry}@example.com`); // a retry gets its own address (30-second resend rule)
     await page.getByRole('button', { name: 'Send me a code' }).click();
     await expect(page.getByRole('heading', { name: 'Enter your code' })).toBeVisible();
     await expect(page.getByRole('group', { name: 'One-time code' })).toBeVisible();

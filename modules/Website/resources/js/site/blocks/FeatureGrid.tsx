@@ -54,6 +54,7 @@ export const FeatureGrid: BlockDefinition<FeatureGridProps> = {
       },
     },
   },
+  isEmpty: (p) => p.items.length === 0,
   defaults: { heading: 'Why customers choose us', intro: '', items: [] },
   render: (p, site) => (
     <Section>

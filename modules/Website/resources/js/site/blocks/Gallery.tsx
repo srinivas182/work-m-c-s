@@ -61,6 +61,7 @@ export const Gallery: BlockDefinition<GalleryProps> = {
       },
     },
   },
+  isEmpty: (p) => p.images.filter((i) => i.src).length === 0,
   defaults: { heading: 'Our work', intro: '', images: [] },
   render: (p, site) => {
     const photos = p.images.filter((i) => i.src);

@@ -95,3 +95,11 @@ it('supersedes the previous code when a new one is sent', function () {
     }
     expect($this->otp->verify($this->email, $second, 'login'))->not->toBeNull();
 });
+
+it('keeps the production limit of 20 sign-in codes per IP per hour unless an environment raises it', function () {
+    expect(config('wurk.identity.otp.per_ip_per_hour'))->toBe(20);
+});
+
+it('sends every page with a title in its first HTML, before any JavaScript runs', function () {
+    $this->get($this->app('/sign-in'))->assertOk()->assertSee('<title inertia>', false);
+});

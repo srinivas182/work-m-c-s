@@ -19,7 +19,7 @@ final class AssetsController
     public function index(TenantContext $context, Entitlements $entitlements): JsonResponse
     {
         return new JsonResponse([
-            'photos' => SiteAsset::query()->latest()->limit(200)->get()->map(fn (SiteAsset $a) => [...$this->assets->photo($a), 'name' => $a->name])->all(),
+            'photos' => SiteAsset::query()->latest()->limit(200)->get()->map(fn (SiteAsset $a) => [...$this->assets->photo($a, (string) $a->description), 'id' => $a->id, 'name' => $a->name, 'ai' => $a->ai_generated])->all(),
             'used_mb' => round($this->assets->usedBytes() / 1048576, 1),
             'limit_mb' => (int) ($entitlements->limits($context->id())['storage_mb'] ?? 0),
         ]);

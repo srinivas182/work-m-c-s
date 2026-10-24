@@ -1,0 +1,408 @@
+{
+  "category": "professional-services",
+  "key": "professional-advisory",
+  "name": "Advisory practice",
+  "position": 1,
+  "description": "Trusted and established, for accountants, attorneys and advisers.",
+  "definition": {
+    "branding": {
+      "primary": "#14532D",
+      "secondary": "#B45309",
+      "font_pairing": "classic",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "About",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a consultation",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Clear advice. Careful work.",
+                "text": "Accounting, tax and advisory services for small businesses and individuals.",
+                "primaryLabel": "Book a consultation",
+                "primaryHref": "/contact",
+                "secondaryLabel": "Our services",
+                "secondaryHref": "/services",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/professional-advisory/office-1600.webp",
+                    "alt": "An adviser meeting a client in the office"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "How we work",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "shield",
+                    "title": "Careful and thorough",
+                    "text": "Work you can rely on, done properly the first time."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Personal service",
+                    "text": "You deal with the same people who know your affairs."
+                  },
+                  {
+                    "icon": "calendar",
+                    "title": "On top of deadlines",
+                    "text": "We keep track of what’s due, so you don’t have to."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Bookkeeping",
+                    "description": "Monthly books and reconciliations",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Tax returns",
+                    "description": "Individuals and companies",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Advisory",
+                    "description": "Planning and business advice",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "accred",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registrations",
+                "intro": "Add your professional registrations and memberships.",
+                "items": []
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What clients say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Let’s talk",
+                "text": "Book a consultation to discuss what you need.",
+                "buttonLabel": "Book a consultation",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a consultation",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "We’ll confirm fees before we start.",
+                "items": [
+                  {
+                    "name": "Bookkeeping",
+                    "description": "Monthly books and reconciliations",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Tax returns",
+                    "description": "Individuals and companies",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Payroll",
+                    "description": "",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Company secretarial",
+                    "description": "",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Advisory",
+                    "description": "Planning and business advice",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Request a quote",
+                "intro": "Tell us what you need and we’ll come back to you with a quote.",
+                "services": [
+                  {
+                    "name": "Bookkeeping"
+                  },
+                  {
+                    "name": "Tax returns"
+                  },
+                  {
+                    "name": "Payroll"
+                  },
+                  {
+                    "name": "Advisory"
+                  }
+                ],
+                "detailsLabel": "Tell us about your business or situation",
+                "submitLabel": "Send request"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a consultation",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "About the practice",
+                "text": "Introduce your practice: your experience, the clients you serve and how you work.",
+                "image": "/images/templates/professional-advisory/meeting-1600.webp",
+                "imageAlt": "A client meeting",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Our people",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "accred",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registrations",
+                "intro": "Add your professional registrations and memberships.",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a consultation",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Call or email us to book a consultation.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

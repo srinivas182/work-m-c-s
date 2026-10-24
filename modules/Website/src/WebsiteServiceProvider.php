@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Website;
 
+use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\InstallTemplatesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
@@ -14,6 +15,7 @@ use Wurk\Website\Support\EloquentSiteTemplates;
 use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteAssets;
 use Wurk\Website\Support\SiteBuilder;
+use Wurk\Website\Support\StorageMeter;
 use Wurk\Website\Support\Templates;
 use Wurk\Website\Support\TemplateSwitcher;
 
@@ -21,6 +23,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->tag([StorageMeter::class], UsageMeter::TAG);
         $this->mergeConfigFrom($this->modulePath('config/website.php'), 'website');
         $this->app->singleton(Branding::class);
         $this->app->scoped(Pages::class);
@@ -51,8 +54,10 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         return [
             ['label' => 'Pages', 'route' => 'tenant.website.pages', 'icon' => 'globe', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 100],
             ['label' => 'Branding', 'route' => 'tenant.website.branding', 'icon' => 'palette', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
+            ['label' => 'Time to launch', 'route' => 'admin.launch-times', 'icon' => 'clock', 'section' => 'Platform', 'permission' => 'tenants.view', 'order' => 61],
             ['label' => 'Templates', 'route' => 'admin.templates', 'icon' => 'layout-template', 'section' => 'Platform', 'permission' => 'templates.manage', 'order' => 60],
             ['label' => 'Write with AI', 'route' => 'tenant.website.ai', 'icon' => 'sparkles', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
+            ['label' => 'Media', 'route' => 'tenant.website.media', 'icon' => 'image', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 104],
             ['label' => 'Enquiries', 'route' => 'tenant.website.enquiries', 'icon' => 'inbox', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 103],
             ['label' => 'Menus', 'route' => 'tenant.website.menus', 'icon' => 'menu', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 101],
         ];

@@ -160,7 +160,7 @@
               "props": {
                 "heading": "A practice you can trust",
                 "text": "Describe your practice and your approach to care.",
-                "image": "/images/templates/health-doctor/consult.jpg",
+                "image": "/images/templates/health-doctor/consult-1600.webp",
                 "imageAlt": "A doctor in a consultation",
                 "imageSide": "left",
                 "buttonLabel": "About us",
@@ -309,7 +309,7 @@
               "props": {
                 "heading": "About the practice",
                 "text": "Introduce your doctors and your practice.",
-                "image": "/images/templates/health-doctor/practice.jpg",
+                "image": "/images/templates/health-doctor/practice-1600.webp",
                 "imageAlt": "Reception at the practice",
                 "imageSide": "right",
                 "buttonLabel": "",

@@ -4,6 +4,66 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 7.6 (preparation)
+- **Time to launch**, measured automatically: the first time a business publishes its home page, WURK records the minutes since the business was created (and its template). **Platform → Time to launch** shows each business, the median and the share launched within an hour — for the timed launch test now, and as an ongoing product metric.
+- **Timed launch test kit** (docs/research/launch-test.md): who to recruit, POPIA consent for screen recording, the session script, an observation sheet and what happens after.
+
+### Added — Sprint 7.5 (launch checklist and quality)
+- **Launch checklist** at the top of Website → Pages: logo, contact details, prices, your own photos, opening hours, legal pages, publish — each judged from the site’s real state (or confirmed by the owner where it can’t be), each linking straight to where it’s done.
+- **Editing tips** in the editor: three short tips that step through, dismiss, and stay dismissed; on phones they sit above the bottom controls and close when the owner taps elsewhere.
+- Template guard: every template photo must be a 1600 px WebP with its 640 px phone size.
+
+### Changed
+- Template photos are responsive WebP sizes (phone size about a fifth of the JPEGs).
+- **Performance gate moved to Sprint 5** after measuring: template previews score 65–71 on mobile because the preview is built in the browser; the ≥ 90 gate (and layout shift < 0.1) will be enforced on real public pages served as ready-made HTML.
+- One money format across WURK (the package pages and WURK AI admin used locale formatting, e.g. “R0,28”).
+
+### Fixed
+- Editor accessibility (Puck’s chrome): unnamed list “add” buttons, untitled preview frame, unlabelled zoom control, invalid label on the loading indicator — found by the first scan of the editor with its fields panel open.
+- Package “Edit/View” links named per package; checklist buttons name their visible words first (label in name).
+- An unproven “under an hour” claim and stale copy (“the editor and preview arrive next”) on the Pages screen.
+
+### Added — Sprint 7.4 (Plan & usage)
+- **Settings → Plan & usage** (was “WURK Credits”): renewal date and amount (incl. VAT); monthly credits, storage and team members as accessible progress bars; the balance in rands (cheapest pack, incl. VAT); when monthly credits expire vs bought credits that never expire; usage by type; the price list; statement download (CSV).
+- **Spending limits**: a monthly limit for the business (set by those who manage billing) and per staff member, enforced when credits are charged, inside the balance lock. A limit is a kind of “insufficient credits”, so messaging and WURK AI handle it automatically; AI quotes explain a limit instead of offering an action that would be refused.
+- **Usage meters** (Plans contract): storage (Website) and team members, so future modules can add their own.
+- **Team-member limit enforced** wherever team members are added (it was defined and sold but never enforced; no owner invite screen exists yet, so it couldn’t be exceeded in practice).
+
+### Fixed
+- Usage “this month” counted refunded charges as spent; it’s now net of refunds.
+- A circular dependency between Plans and Access (introduced while building the staff meter) — Access now defines small contracts that Plans implements; credit pricing lives in Plans so Credits never depends on Billing.
+- Outdated copy on the credits page (“Buying credits arrives with billing”).
+
+### Added — Sprint 7.3 (AI images and media library)
+- **AI images**: “Generate an image” in the photo picker, with the same confirmation (8 credits; balance before and after), charged once and refunded on failure. Stored through the same safe pipeline as uploads and marked as AI. Image providers in WURK AI settings: OpenAI and a simulated provider (Google once a key lets us verify its API); price per image.
+- **Decorative only, enforced on save**: AI images are allowed in the Hero and Image & text sections and refused elsewhere (galleries, Before & after, Team, Portfolio, Rooms, Reviews, Accreditations, logo) with a plain message. The editor only offers and shows AI images where allowed; a test keeps the editor's and server's lists identical. Every image request asks for no real, identifiable people, logos or brands.
+- **Media library** (Website → Media): every photo with an AI badge, size, where it's used, an editable description offered wherever it's placed, delete (refused while in use), and storage against the package quota.
+
+### Fixed
+- Photo usage detection read stored page JSON as text, where “/” is escaped — every photo looked unused, so a photo still on a page could have been deleted. It now reads the content as data, through one shared helper.
+
+### Added — Sprint 7.2 (templates II, part 2)
+- Eight templates: Trades & home services (Solar & electrical; Home services), Education & training (Tutor & online classes; Early-learning centre), Events & creative (Photographer & events portfolio; Venue & event planner), Transport & logistics (Shuttles & tours; Couriers & removals). **All 24 templates across the 12 categories are done.**
+- The early-learning centre's sample photos show rooms and play spaces, never children (photos of children need parental consent under POPIA); registrations are left for the owner, never claimed.
+
+### Changed
+- Browser tests: the sign-in code limit per IP (20/hour in production, unchanged) is raised only in the browser-test environment; the full suite sends more codes from one IP than that, which made CI fail.
+- The template accessibility scan runs one test per page (338 page checks across desktop and phone): clearer failures and no timeouts.
+
+### Fixed
+- Every page's HTML now has a title from the first byte (it was added only by JavaScript): untitled pages for screen readers, browser tabs and link previews until scripts ran — and a CI accessibility scan that raced it.
+- Copy reviewed against the honesty rules: an invented class size, and safety claims for the early-learning centre (in its features and its headline), removed.
+
+### Added — Sprint 7.1 (templates II, part 1)
+- Six templates: Professional services (Advisory practice; Agency / consultancy), Car mechanics (Workshop & service centre; Panel beater & auto electrician), Hospitality (Hotel / guesthouse with rooms & rates; Restaurant with a food menu). 16 templates in total.
+
+### Fixed
+- Sections with nothing in them yet showed an orphan heading on the live site (portfolio, team, accreditations, timetable and other lists, including in Sprint 6 templates). They're now hidden on the live site and show a prompt in the editor; the main heading goes to the first section actually shown.
+- The template guard now also catches pages that would be blank before the owner adds content.
+- Three invented policies removed from template copy (free quotes, a kitchen closing time, a reply-time promise).
+- CI: changes to website templates (and their photos) now run the backend and frontend tests that read them; previously a template-only change would have skipped them.
+- Marketing site: the Monthly/Yearly price switch changes colour instantly; its fade could be caught mid-way by the accessibility scan (a CI timing race).
+
 ### Added — Sprint 6.4 (first 10 templates)
 - Ten templates in the repository (modules/Website/templates): Salon & beauty (Hair & braids salon; Nails, lashes & barbers), Health (Dental practice; Doctor’s practice), Spa & wellness (Day spa; Wellness practitioner), Retail (Boutique; General store), Fitness (Gym & class studio; Personal trainer) — each pair visually distinct.
 - `website:install-templates`: creates templates and publishes a new version only when a file changes (fingerprint); safe on every deploy.

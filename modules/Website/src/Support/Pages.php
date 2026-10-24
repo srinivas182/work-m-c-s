@@ -13,6 +13,7 @@ use Wurk\Website\Exceptions\DraftConflict;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageVersion;
 use Wurk\Website\Models\Site;
+use Wurk\Website\Models\SiteLaunch;
 
 /** Pages of the current business's website: drafts, publishing, versions. */
 final readonly class Pages
@@ -115,6 +116,7 @@ final readonly class Pages
     public function saveDraft(Page $page, mixed $document, int $expectedRevision, ?string $by): int
     {
         $clean = ContentDocument::validate($document);
+        AiImagePlacement::check($clean);
 
         return DB::connection($this->context->connectionName())->transaction(function () use ($page, $clean, $expectedRevision, $by): int {
             $locked = Page::query()->whereKey($page->id)->lockForUpdate()->firstOrFail();
@@ -137,6 +139,8 @@ final readonly class Pages
                 'title' => $locked->title, 'content' => $locked->draft, 'note' => $note, 'published_by' => $by,
             ]);
             $locked->update(['published_version_id' => $version->id]);
+
+            $this->recordLaunch($page);
 
             return $version;
         });
@@ -180,5 +184,21 @@ final readonly class Pages
         }
 
         return $slug;
+    }
+
+    /** The first time a business publishes its home page, record how long it took (time to launch). */
+    private function recordLaunch(Page $page): void
+    {
+        if (! $page->is_home || SiteLaunch::query()->whereKey($this->context->id())->exists()) {
+            return;
+        }
+        $created = $this->context->current()->createdAt();
+        SiteLaunch::query()->create([
+            'tenant_id' => $this->context->id(),
+            'template_key' => Site::query()->find($this->context->id())?->template_key,
+            'business_created_at' => $created,
+            'launched_at' => now(),
+            'minutes' => $created === null ? null : (int) max(0, round((now()->getTimestamp() - $created->getTimestamp()) / 60)),
+        ]);
     }
 }

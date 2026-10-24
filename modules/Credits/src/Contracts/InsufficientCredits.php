@@ -6,7 +6,7 @@ namespace Wurk\Credits\Contracts;
 
 use RuntimeException;
 
-final class InsufficientCredits extends RuntimeException
+class InsufficientCredits extends RuntimeException
 {
     public function __construct(public readonly int $neededMilli, public readonly int $availableMilli)
     {

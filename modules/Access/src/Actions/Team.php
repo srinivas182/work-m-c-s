@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Wurk\Access\Actions;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Wurk\Access\AccessManager;
+use Wurk\Access\Contracts\SeatPolicy;
 use Wurk\Access\Events\AccessChanged;
 use Wurk\Access\Exceptions\AccessRuleViolation;
 use Wurk\Access\Models\BranchMember;
@@ -14,6 +16,7 @@ use Wurk\Access\Models\MemberRole;
 use Wurk\Access\Models\Role;
 use Wurk\Access\Permissions\Permission;
 use Wurk\Access\Roles\SystemRoles;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
  * Team membership, roles and branch assignments inside the current business.
@@ -21,11 +24,16 @@ use Wurk\Access\Roles\SystemRoles;
  */
 final readonly class Team
 {
-    public function __construct(private AccessManager $access) {}
+    public function __construct(private AccessManager $access, private SeatPolicy $seats, private TenantContext $context) {}
 
     public function add(string $identityId, string $displayName, string $roleKey = SystemRoles::STAFF): Member
     {
         $this->assertBusinessRole($roleKey);
+
+        if (! Member::query()->where('identity_id', $identityId)->exists()
+            && ($refusal = $this->seats->refusal($this->context->id(), Member::query()->count())) !== null) {
+            throw ValidationException::withMessages(['member' => $refusal]);
+        }
 
         $member = Member::query()->firstOrCreate(['identity_id' => $identityId], [
             'display_name' => $displayName,

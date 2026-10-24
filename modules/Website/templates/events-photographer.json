@@ -1,0 +1,369 @@
+{
+  "category": "events-creative",
+  "key": "events-photographer",
+  "name": "Photographer & events portfolio",
+  "position": 1,
+  "description": "Editorial and image-led, for photographers, videographers and creatives.",
+  "definition": {
+    "branding": {
+      "primary": "#18181B",
+      "secondary": "#A16207",
+      "font_pairing": "editorial",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Portfolio",
+          "type": "page",
+          "page": "portfolio"
+        },
+        {
+          "label": "Packages",
+          "type": "page",
+          "page": "packages"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my dates",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Moments worth keeping",
+                "text": "Weddings, events and portraits, photographed with care.",
+                "primaryLabel": "Check my dates",
+                "primaryHref": "/contact",
+                "secondaryLabel": "See my work",
+                "secondaryHref": "/portfolio",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/events-photographer/hero-1600.webp",
+                    "alt": "A couple photographed at golden hour"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Recent work",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/events-photographer/shot-1-1600.webp",
+                    "alt": "A bride getting ready"
+                  },
+                  {
+                    "src": "/images/templates/events-photographer/shot-2-1600.webp",
+                    "alt": "Guests celebrating at a reception"
+                  },
+                  {
+                    "src": "/images/templates/events-photographer/shot-3-1600.webp",
+                    "alt": "A portrait in natural light"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "about",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Hello, I’m your photographer",
+                "text": "Introduce yourself: your style, how you work on the day and what clients receive afterwards.",
+                "image": "/images/templates/events-photographer/shot-3-1600.webp",
+                "imageAlt": "A portrait in natural light",
+                "imageSide": "left",
+                "buttonLabel": "My packages",
+                "buttonHref": "/packages"
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "Kind words",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Planning something special?",
+                "text": "Tell me your date and I’ll check availability.",
+                "buttonLabel": "Check my dates",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "portfolio",
+        "title": "Portfolio",
+        "slug": "portfolio",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my dates",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Portfolio",
+                "text": "A selection of weddings, events and portraits."
+              }
+            },
+            {
+              "id": "portfolio",
+              "type": "Portfolio",
+              "version": 1,
+              "props": {
+                "heading": "Stories",
+                "intro": "",
+                "projects": []
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Gallery",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/events-photographer/hero-1600.webp",
+                    "alt": "A couple photographed at golden hour"
+                  },
+                  {
+                    "src": "/images/templates/events-photographer/shot-1-1600.webp",
+                    "alt": "A bride getting ready"
+                  },
+                  {
+                    "src": "/images/templates/events-photographer/shot-2-1600.webp",
+                    "alt": "Guests celebrating at a reception"
+                  },
+                  {
+                    "src": "/images/templates/events-photographer/shot-3-1600.webp",
+                    "alt": "A portrait in natural light"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "packages",
+        "title": "Packages",
+        "slug": "packages",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my dates",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Packages",
+                "text": "Every booking is different — ask for a quote tailored to your day."
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "How do I book?",
+                    "answer": "Get in touch with your date and I’ll confirm availability."
+                  },
+                  {
+                    "question": "When will we receive our photos?",
+                    "answer": "Tell clients how long you take to deliver photos."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my dates",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Check my dates",
+                "intro": "Tell me about your event.",
+                "services": [
+                  {
+                    "name": "Wedding"
+                  },
+                  {
+                    "name": "Event"
+                  },
+                  {
+                    "name": "Portrait"
+                  },
+                  {
+                    "name": "Something else"
+                  }
+                ],
+                "detailsLabel": "Date, place and what you have in mind",
+                "submitLabel": "Send request"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Other ways to reach me",
+                "intro": "",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

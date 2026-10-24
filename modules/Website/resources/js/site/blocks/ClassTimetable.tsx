@@ -76,6 +76,7 @@ export const ClassTimetable: BlockDefinition<ClassTimetableProps> = {
     },
     note: { kind: 'text', inline: true, label: 'Note (e.g. public holiday times)', max: 160 },
   },
+  isEmpty: (p) => p.classes.length === 0,
   defaults: { heading: 'Class timetable', intro: '', classes: [], note: '' },
   render: (p, site) => {
     const byDay = DAYS.map((day) => ({

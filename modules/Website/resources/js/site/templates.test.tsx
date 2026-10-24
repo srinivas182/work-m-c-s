@@ -58,6 +58,19 @@ function check(
       !existsSync(resolve('public', value.replace(/^\//, '')))
     )
       problems.push(`${where}.${key}: photo ${value} is missing`);
+    // Phones get the small size: every template photo is the 1600 WebP with its 640 version beside it.
+    if (field.kind === 'image' && typeof value === 'string' && value !== '') {
+      if (!/-1600\.webp$/.test(value))
+        problems.push(
+          `${where}.${key}: ${value} must be a -1600.webp (with a -640.webp beside it)`,
+        );
+      else if (
+        !existsSync(
+          resolve('public', value.replace(/^\//, '').replace(/-1600\.webp$/, '-640.webp')),
+        )
+      )
+        problems.push(`${where}.${key}: phone size of ${value} is missing`);
+    }
   }
   // Photos inside image lists ({ src, alt }) are checked as items above when the item field is an image.
   return problems;

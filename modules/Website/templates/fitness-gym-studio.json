@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/fitness-gym-studio/hero.jpg",
+                    "src": "/images/templates/fitness-gym-studio/hero-1600.webp",
                     "alt": "People training together in a class"
                   }
                 ],
@@ -146,15 +146,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/fitness-gym-studio/floor.jpg",
+                    "src": "/images/templates/fitness-gym-studio/floor-1600.webp",
                     "alt": "The training floor"
                   },
                   {
-                    "src": "/images/templates/fitness-gym-studio/class.jpg",
+                    "src": "/images/templates/fitness-gym-studio/class-1600.webp",
                     "alt": "A class in progress"
                   },
                   {
-                    "src": "/images/templates/fitness-gym-studio/hero.jpg",
+                    "src": "/images/templates/fitness-gym-studio/hero-1600.webp",
                     "alt": "People training together in a class"
                   }
                 ]

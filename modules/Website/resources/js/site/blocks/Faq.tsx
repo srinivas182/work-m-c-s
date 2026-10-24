@@ -24,6 +24,7 @@ export const Faq: BlockDefinition<FaqProps> = {
       },
     },
   },
+  isEmpty: (p) => p.items.length === 0,
   defaults: { heading: 'Questions', items: [] },
   render: (p, site) => (
     <Section narrow>

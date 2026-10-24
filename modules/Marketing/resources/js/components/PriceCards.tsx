@@ -60,7 +60,7 @@ export function PriceCards({
             role="radio"
             aria-checked={period === p}
             onClick={() => setPeriod(p)}
-            className={`min-h-11 rounded-full px-5 text-sm font-semibold transition-colors ${period === p ? 'bg-[#1B1640] text-white' : 'text-[#1B1640]/75 hover:text-[#1B1640]'}`}
+            className={`min-h-11 rounded-full px-5 text-sm font-semibold ${period === p ? 'bg-[#1B1640] text-white' : 'text-[#1B1640]/75 hover:text-[#1B1640]'}`}
           >
             {p === 'monthly' ? 'Monthly' : 'Yearly'}
           </button>

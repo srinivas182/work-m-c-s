@@ -12,6 +12,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { rand as money } from '@/lib/money';
 
 export interface Terms {
   monthly_price: number;
@@ -44,8 +45,8 @@ export interface PackageData {
   subscribers?: number;
 }
 
-export const rand = (n: number) =>
-  `R\u202f${n.toLocaleString('en-ZA', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+/** Rands (not cents), in the one format used across WURK (shared helper; locale formatting differs between runtimes). */
+export const rand = (n: number) => money(Math.round(n * 100));
 
 interface Props {
   packages: PackageData[];
@@ -132,7 +133,12 @@ export default function Packages({ packages, modules, canManage }: Props) {
                   <div className="border-border flex items-center justify-between border-t pt-4 text-sm">
                     <span className="text-fg-muted">{p.subscribers ?? 0} businesses</span>
                     <Button variant="secondary" size="sm" asChild>
-                      <Link href={`/packages/${p.id}`}>{canManage ? 'Edit' : 'View'}</Link>
+                      <Link
+                        href={`/packages/${p.id}`}
+                        aria-label={`${canManage ? 'Edit' : 'View'} ${p.name}`}
+                      >
+                        {canManage ? 'Edit' : 'View'}
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>

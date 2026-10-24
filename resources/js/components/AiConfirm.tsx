@@ -10,7 +10,7 @@ export interface AiQuote {
   balance: number;
   after: number;
   allowed: boolean;
-  reason: 'not_included' | 'insufficient' | null;
+  reason: 'not_included' | 'insufficient' | 'limit' | null;
   can_buy: boolean;
 }
 
@@ -75,6 +75,11 @@ export function AiConfirm({
               {quote.after < 0 ? '—' : `${fmt(quote.after)} credits`}
             </dd>
           </dl>
+        )}
+        {quote?.reason === 'limit' && (
+          <p role="alert" className="text-sm">
+            You’ve reached your monthly spending limit. The owner can change it under Plan & usage.
+          </p>
         )}
         {quote?.reason === 'insufficient' && (
           <p role="alert" className="text-sm">
