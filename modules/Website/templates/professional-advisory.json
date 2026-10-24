@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/professional-advisory/office.jpg",
+                    "src": "/images/templates/professional-advisory/office-1600.webp",
                     "alt": "An adviser meeting a client in the office"
                   }
                 ],
@@ -316,7 +316,7 @@
               "props": {
                 "heading": "About the practice",
                 "text": "Introduce your practice: your experience, the clients you serve and how you work.",
-                "image": "/images/templates/professional-advisory/meeting.jpg",
+                "image": "/images/templates/professional-advisory/meeting-1600.webp",
                 "imageAlt": "A client meeting",
                 "imageSide": "right",
                 "buttonLabel": "",

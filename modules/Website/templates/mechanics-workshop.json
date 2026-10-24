@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/mechanics-workshop/hero.jpg",
+                    "src": "/images/templates/mechanics-workshop/hero-1600.webp",
                     "alt": "A mechanic working on a car in the workshop"
                   }
                 ],
@@ -335,7 +335,7 @@
               "props": {
                 "heading": "About the workshop",
                 "text": "Tell drivers about your workshop, your experience and the cars you specialise in.",
-                "image": "/images/templates/mechanics-workshop/bay.jpg",
+                "image": "/images/templates/mechanics-workshop/bay-1600.webp",
                 "imageAlt": "A service bay in the workshop",
                 "imageSide": "right",
                 "buttonLabel": "",

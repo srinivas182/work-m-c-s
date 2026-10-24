@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/trades-solar-electrical/hero.jpg",
+                    "src": "/images/templates/trades-solar-electrical/hero-1600.webp",
                     "alt": "An installer fitting solar panels on a roof"
                   }
                 ],
@@ -336,15 +336,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/trades-solar-electrical/roof.jpg",
+                    "src": "/images/templates/trades-solar-electrical/roof-1600.webp",
                     "alt": "Solar panels on a roof"
                   },
                   {
-                    "src": "/images/templates/trades-solar-electrical/board.jpg",
+                    "src": "/images/templates/trades-solar-electrical/board-1600.webp",
                     "alt": "A neatly wired DB board"
                   },
                   {
-                    "src": "/images/templates/trades-solar-electrical/hero.jpg",
+                    "src": "/images/templates/trades-solar-electrical/hero-1600.webp",
                     "alt": "An installer fitting solar panels on a roof"
                   }
                 ]

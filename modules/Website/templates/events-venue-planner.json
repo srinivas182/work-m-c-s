@@ -83,15 +83,15 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/events-venue-planner/hall.jpg",
+                    "src": "/images/templates/events-venue-planner/hall-1600.webp",
                     "alt": "The venue set for a wedding reception"
                   },
                   {
-                    "src": "/images/templates/events-venue-planner/table.jpg",
+                    "src": "/images/templates/events-venue-planner/table-1600.webp",
                     "alt": "A dressed dinner table"
                   },
                   {
-                    "src": "/images/templates/events-venue-planner/garden.jpg",
+                    "src": "/images/templates/events-venue-planner/garden-1600.webp",
                     "alt": "The garden at dusk"
                   }
                 ],
@@ -143,15 +143,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/events-venue-planner/table.jpg",
+                    "src": "/images/templates/events-venue-planner/table-1600.webp",
                     "alt": "A dressed dinner table"
                   },
                   {
-                    "src": "/images/templates/events-venue-planner/detail.jpg",
+                    "src": "/images/templates/events-venue-planner/detail-1600.webp",
                     "alt": "Flowers and table details"
                   },
                   {
-                    "src": "/images/templates/events-venue-planner/garden.jpg",
+                    "src": "/images/templates/events-venue-planner/garden-1600.webp",
                     "alt": "The garden at dusk"
                   }
                 ]
@@ -294,19 +294,19 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/events-venue-planner/hall.jpg",
+                    "src": "/images/templates/events-venue-planner/hall-1600.webp",
                     "alt": "The venue set for a wedding reception"
                   },
                   {
-                    "src": "/images/templates/events-venue-planner/table.jpg",
+                    "src": "/images/templates/events-venue-planner/table-1600.webp",
                     "alt": "A dressed dinner table"
                   },
                   {
-                    "src": "/images/templates/events-venue-planner/garden.jpg",
+                    "src": "/images/templates/events-venue-planner/garden-1600.webp",
                     "alt": "The garden at dusk"
                   },
                   {
-                    "src": "/images/templates/events-venue-planner/detail.jpg",
+                    "src": "/images/templates/events-venue-planner/detail-1600.webp",
                     "alt": "Flowers and table details"
                   }
                 ]

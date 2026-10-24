@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/transport-couriers-removals/hero.jpg",
+                    "src": "/images/templates/transport-couriers-removals/hero-1600.webp",
                     "alt": "Movers carrying boxes into a truck"
                   }
                 ],
@@ -305,7 +305,7 @@
               "props": {
                 "heading": "About us",
                 "text": "Tell customers about your team, your vehicles and the areas you serve.",
-                "image": "/images/templates/transport-couriers-removals/van.jpg",
+                "image": "/images/templates/transport-couriers-removals/van-1600.webp",
                 "imageAlt": "A delivery van",
                 "imageSide": "right",
                 "buttonLabel": "",

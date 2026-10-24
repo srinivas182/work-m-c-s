@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/transport-shuttles-tours/hero.jpg",
+                    "src": "/images/templates/transport-shuttles-tours/hero-1600.webp",
                     "alt": "A shuttle on a scenic road"
                   }
                 ],
@@ -298,7 +298,7 @@
               "props": {
                 "heading": "Tours",
                 "text": "Describe the tours you offer — where you go, how long they take and what guests see.",
-                "image": "/images/templates/transport-shuttles-tours/vehicle.jpg",
+                "image": "/images/templates/transport-shuttles-tours/vehicle-1600.webp",
                 "imageAlt": "The tour vehicle",
                 "imageSide": "right",
                 "buttonLabel": "Book a tour",

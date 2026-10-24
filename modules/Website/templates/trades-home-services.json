@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/trades-home-services/hero.jpg",
+                    "src": "/images/templates/trades-home-services/hero-1600.webp",
                     "alt": "A tradesperson working in a kitchen"
                   }
                 ],
@@ -336,11 +336,11 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/trades-home-services/work.jpg",
+                    "src": "/images/templates/trades-home-services/work-1600.webp",
                     "alt": "A freshly painted room"
                   },
                   {
-                    "src": "/images/templates/trades-home-services/hero.jpg",
+                    "src": "/images/templates/trades-home-services/hero-1600.webp",
                     "alt": "A tradesperson working in a kitchen"
                   }
                 ]

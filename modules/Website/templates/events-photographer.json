@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/events-photographer/hero.jpg",
+                    "src": "/images/templates/events-photographer/hero-1600.webp",
                     "alt": "A couple photographed at golden hour"
                   }
                 ],
@@ -99,15 +99,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/events-photographer/shot-1.jpg",
+                    "src": "/images/templates/events-photographer/shot-1-1600.webp",
                     "alt": "A bride getting ready"
                   },
                   {
-                    "src": "/images/templates/events-photographer/shot-2.jpg",
+                    "src": "/images/templates/events-photographer/shot-2-1600.webp",
                     "alt": "Guests celebrating at a reception"
                   },
                   {
-                    "src": "/images/templates/events-photographer/shot-3.jpg",
+                    "src": "/images/templates/events-photographer/shot-3-1600.webp",
                     "alt": "A portrait in natural light"
                   }
                 ]
@@ -120,7 +120,7 @@
               "props": {
                 "heading": "Hello, I’m your photographer",
                 "text": "Introduce yourself: your style, how you work on the day and what clients receive afterwards.",
-                "image": "/images/templates/events-photographer/shot-3.jpg",
+                "image": "/images/templates/events-photographer/shot-3-1600.webp",
                 "imageAlt": "A portrait in natural light",
                 "imageSide": "left",
                 "buttonLabel": "My packages",
@@ -204,19 +204,19 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/events-photographer/hero.jpg",
+                    "src": "/images/templates/events-photographer/hero-1600.webp",
                     "alt": "A couple photographed at golden hour"
                   },
                   {
-                    "src": "/images/templates/events-photographer/shot-1.jpg",
+                    "src": "/images/templates/events-photographer/shot-1-1600.webp",
                     "alt": "A bride getting ready"
                   },
                   {
-                    "src": "/images/templates/events-photographer/shot-2.jpg",
+                    "src": "/images/templates/events-photographer/shot-2-1600.webp",
                     "alt": "Guests celebrating at a reception"
                   },
                   {
-                    "src": "/images/templates/events-photographer/shot-3.jpg",
+                    "src": "/images/templates/events-photographer/shot-3-1600.webp",
                     "alt": "A portrait in natural light"
                   }
                 ]
