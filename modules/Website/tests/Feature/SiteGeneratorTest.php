@@ -104,3 +104,12 @@ it('quotes and writes through the owner’s screen, showing refusals as a friend
     // Second generation costs 20 credits; with none, a friendly refusal — not a server error.
     $this->actingAs($owner)->post("{$base}/generate", [...$this->brief, 'confirmation' => 'c2'])->assertSessionHasErrors(['ai' => 'You need 20 credits and have 0.']);
 });
+
+it('only fills fields the blocks really have (PHP slots checked against the block definitions)', function () {
+    foreach (SiteGenerator::SLOTS as $type => $fields) {
+        $source = (string) file_get_contents(base_path("modules/Website/resources/js/site/blocks/{$type}.tsx"));
+        foreach (array_keys($fields) as $field) {
+            expect(preg_match('/^\s{4}'.preg_quote($field, '/').': \{/m', $source))->toBe(1, "{$type} has no field “{$field}”");
+        }
+    }
+});

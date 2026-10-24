@@ -94,3 +94,12 @@ it('only switches within the business’s category', function () {
             ->and(SiteSnapshot::query()->count())->toBe(0);
     });
 });
+
+it('keeps ids unique when a kept section and a new one share an id', function () {
+    $old = ['schema' => 1, 'blocks' => [['id' => 'story', 'type' => 'ImageText', 'version' => 1, 'props' => ['heading' => 'Ours']]]];
+    $new = ['schema' => 1, 'blocks' => [['id' => 'story', 'type' => 'Text', 'version' => 1, 'props' => []], ['id' => 'footer', 'type' => 'Footer', 'version' => 1, 'props' => []]]];
+    $merged = TemplateSwitcher::carryOver($old, $new);
+
+    expect(array_column($merged['blocks'], 'id'))->toBe(['story', 'story-2', 'footer'])
+        ->and($merged['blocks'][1]['props']['heading'])->toBe('Ours'); // the owner's section is kept, above the footer
+});

@@ -23,7 +23,7 @@ final readonly class SiteGenerator
     /** Block type → text fields the AI may write, with their limits. */
     public const SLOTS = [
         'Hero' => ['heading' => 70, 'text' => 200],
-        'Text' => ['heading' => 60, 'body' => 1500],
+        'Text' => ['heading' => 60, 'text' => 1500],
         'ImageText' => ['heading' => 60, 'text' => 600],
         'FeatureGrid' => ['heading' => 60, 'intro' => 200],
         'CallToAction' => ['heading' => 70, 'text' => 160],

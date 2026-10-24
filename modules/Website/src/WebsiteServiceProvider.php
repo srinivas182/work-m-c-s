@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Website;
 
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Website\Console\InstallTemplatesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
 use Wurk\Website\Console\SeedSampleTemplatesCommand;
 use Wurk\Website\Contracts\SiteTemplates;
@@ -61,7 +62,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'website');
         if ($this->app->runningInConsole()) {
-            $this->commands([SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class]);
+            $this->commands([SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class]);
         }
     }
 }

@@ -1,0 +1,497 @@
+{
+  "category": "salon-beauty",
+  "key": "salon-hair-braids",
+  "name": "Hair & braids salon",
+  "position": 1,
+  "description": "Warm and photo-led, made for braids, natural hair and colour.",
+  "definition": {
+    "branding": {
+      "primary": "#9D174D",
+      "secondary": "#D97706",
+      "font_pairing": "classic",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "About",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Gallery",
+          "type": "page",
+          "page": "gallery"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Braids, colour and care that last",
+                "text": "Knotless braids, natural hair care and colour, done by stylists who take their time with you.",
+                "primaryLabel": "Book an appointment",
+                "primaryHref": "/contact",
+                "secondaryLabel": "See our services",
+                "secondaryHref": "/services",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/salon-hair-braids/hero.jpg",
+                    "alt": "Stylist braiding a client’s hair in the salon"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why clients come back",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "heart",
+                    "title": "Gentle on your hair",
+                    "text": "Techniques and products chosen to protect your edges and scalp."
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Time for you",
+                    "text": "Appointments planned so nobody rushes your style."
+                  },
+                  {
+                    "icon": "sparkles",
+                    "title": "Finished with care",
+                    "text": "Every look is checked and styled before you leave."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Popular services",
+                "intro": "Ask us about anything you don’t see here.",
+                "items": [
+                  {
+                    "name": "Knotless braids",
+                    "description": "Medium or small, shoulder to waist length",
+                    "duration": "4–6 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Silk press",
+                    "description": "Wash, treatment and silk press",
+                    "duration": "2 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Colour",
+                    "description": "Full colour or highlights",
+                    "duration": "2–3 hrs",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Recent work",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/salon-hair-braids/work-1.jpg",
+                    "alt": "Long knotless braids"
+                  },
+                  {
+                    "src": "/images/templates/salon-hair-braids/work-2.jpg",
+                    "alt": "Natural curls after a wash and set"
+                  },
+                  {
+                    "src": "/images/templates/salon-hair-braids/work-3.jpg",
+                    "alt": "Rich copper colour"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What clients say",
+                "items": []
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Good to know",
+                "items": [
+                  {
+                    "question": "Do I need to book?",
+                    "answer": "We recommend booking so we can give you our full attention. Walk-ins are welcome when we have a gap."
+                  },
+                  {
+                    "question": "How should I prepare for my appointment?",
+                    "answer": "Arrive with clean, dry hair unless we have agreed otherwise. Tell us about any allergies or sensitivities when you book."
+                  },
+                  {
+                    "question": "What if I need to cancel?",
+                    "answer": "Please let us know as early as you can so we can offer your time to someone else."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Ready for your next look?",
+                "text": "Choose a time that suits you.",
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "Prices depend on length and thickness; we confirm yours before we start.",
+                "items": [
+                  {
+                    "name": "Knotless braids",
+                    "description": "Medium or small",
+                    "duration": "4–6 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Cornrows",
+                    "description": "Straight back or styled",
+                    "duration": "1–2 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Silk press",
+                    "description": "Wash, treatment and silk press",
+                    "duration": "2 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Wash and treatment",
+                    "description": "Deep conditioning for natural hair",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Colour",
+                    "description": "Full colour or highlights",
+                    "duration": "2–3 hrs",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Packages & specials",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Not sure what to choose?",
+                "text": "Send us a photo of the look you love and we’ll advise.",
+                "buttonLabel": "Ask us",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Our story",
+                "text": "Tell visitors how your salon started, what you care about and what makes a visit to you special.",
+                "image": "/images/templates/salon-hair-braids/story.jpg",
+                "imageAlt": "Inside the salon",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Meet the team",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "gallery",
+        "title": "Gallery",
+        "slug": "gallery",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Before & after",
+                "intro": "Real results from our chairs.",
+                "layout": "slider",
+                "items": []
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Our work",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/salon-hair-braids/work-1.jpg",
+                    "alt": "Long knotless braids"
+                  },
+                  {
+                    "src": "/images/templates/salon-hair-braids/work-2.jpg",
+                    "alt": "Natural curls after a wash and set"
+                  },
+                  {
+                    "src": "/images/templates/salon-hair-braids/work-3.jpg",
+                    "alt": "Rich copper colour"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Visit or contact us",
+                "intro": "Send us a message on WhatsApp — it’s the quickest way to book.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Please confirm public holiday hours with us."
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

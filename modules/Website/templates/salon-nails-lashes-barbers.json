@@ -1,0 +1,434 @@
+{
+  "category": "salon-beauty",
+  "key": "salon-nails-lashes-barbers",
+  "name": "Nails, lashes & barbers",
+  "position": 2,
+  "description": "Bold and modern, for nail bars, lash studios and barbershops.",
+  "definition": {
+    "branding": {
+      "primary": "#18181B",
+      "secondary": "#DB2777",
+      "font_pairing": "bold",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "About",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "collage",
+                "heading": "Sharp cuts. Flawless nails. Lashes that turn heads.",
+                "text": "Walk out looking your best — book online in a minute.",
+                "primaryLabel": "Book now",
+                "primaryHref": "/contact",
+                "secondaryLabel": "Services",
+                "secondaryHref": "/services",
+                "facts": [
+                  {
+                    "text": "Walk-ins welcome"
+                  },
+                  {
+                    "text": "Card and cash"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-1.jpg",
+                    "alt": "Gel nails in a bold pink"
+                  },
+                  {
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-2.jpg",
+                    "alt": "Lash extensions close up"
+                  },
+                  {
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-3.jpg",
+                    "alt": "Fresh fade at the barber chair"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Menu",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Gel overlay",
+                    "description": "Hands, with a colour of your choice",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Classic lash set",
+                    "description": "Natural, everyday volume",
+                    "duration": "1.5 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Fade and beard",
+                    "description": "Skin fade with beard shape-up",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "studio",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Your new favourite spot",
+                "text": "Describe your studio: the vibe, the music, the coffee — why people love spending an hour with you.",
+                "image": "/images/templates/salon-nails-lashes-barbers/studio.jpg",
+                "imageAlt": "Inside the studio",
+                "imageSide": "left",
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Fresh from the studio",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/salon-nails-lashes-barbers/work-1.jpg",
+                    "alt": "Detailed nail art"
+                  },
+                  {
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-2.jpg",
+                    "alt": "Lash extensions close up"
+                  },
+                  {
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-3.jpg",
+                    "alt": "Fresh fade at the barber chair"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "Reviews",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Your chair is waiting",
+                "text": "Book a time that works for you.",
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Full menu",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Gel overlay",
+                    "description": "Hands",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Acrylic set",
+                    "description": "Full set with shape of your choice",
+                    "duration": "1.5 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Pedicure",
+                    "description": "Soak, scrub, shape and polish",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Classic lash set",
+                    "description": "Natural volume",
+                    "duration": "1.5 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Lash fill",
+                    "description": "Within three weeks",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Fade and beard",
+                    "description": "Skin fade with beard shape-up",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Specials",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Before & after",
+                "intro": "",
+                "layout": "side-by-side",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "About us",
+                "text": "Tell visitors who you are, how you started and what your clients can expect every time they visit."
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "The crew",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Find us",
+                "intro": "Book on WhatsApp or pop in.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": ""
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Do I need to book?",
+                    "answer": "We recommend booking so we can give you our full attention. Walk-ins are welcome when we have a gap."
+                  },
+                  {
+                    "question": "How should I prepare for my appointment?",
+                    "answer": "Arrive with clean, dry hair unless we have agreed otherwise. Tell us about any allergies or sensitivities when you book."
+                  },
+                  {
+                    "question": "What if I need to cancel?",
+                    "answer": "Please let us know as early as you can so we can offer your time to someone else."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
