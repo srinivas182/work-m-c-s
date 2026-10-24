@@ -12,6 +12,7 @@ use Wurk\Website\Http\Controllers\BrandingController;
 use Wurk\Website\Http\Controllers\DraftController;
 use Wurk\Website\Http\Controllers\EditorController;
 use Wurk\Website\Http\Controllers\EnquiriesController;
+use Wurk\Website\Http\Controllers\MediaController;
 use Wurk\Website\Http\Controllers\MenusController;
 use Wurk\Website\Http\Controllers\PagesController;
 use Wurk\Website\Http\Controllers\PreviewController;
@@ -39,6 +40,9 @@ Route::tenant(function (): void {
         Route::put('/pages/{page}/draft', [DraftController::class, 'save'])->middleware('throttle:120,1,website-draft')->name('draft.save');
         Route::get('/pages/{page}/versions', [DraftController::class, 'versions'])->name('versions');
 
+        Route::get('/media', [MediaController::class, 'index'])->name('media');
+        Route::put('/media/{asset}', [MediaController::class, 'update'])->name('media.update');
+        Route::delete('/media/{asset}', [MediaController::class, 'destroy'])->name('media.destroy');
         Route::get('/photos', [AssetsController::class, 'index'])->name('photos');
         Route::post('/photos', [AssetsController::class, 'store'])->middleware('throttle:60,1,website-photos')->name('photos.store');
         Route::get('/preview', PreviewController::class)->name('preview');

@@ -16,6 +16,7 @@ use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\SiteAsset;
+use Wurk\Website\Support\AiImagePlacement;
 use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteAssets;
 
@@ -81,4 +82,10 @@ it('allows AI images for decoration only, refusing them in sections that show re
             ->and(fn () => $save([['id' => 'b', 'type' => 'BeforeAfter', 'version' => 1, 'props' => ['items' => [['before' => $realUrl, 'after' => $aiUrl]]]]]))
             ->toThrow(ValidationException::class, 'Before & after');
     });
+});
+
+it('offers AI images in the same sections on both sides (editor and server)', function () {
+    $ts = (string) file_get_contents(base_path('modules/Website/resources/js/editor/adapter.tsx'));
+    preg_match('/AI_IMAGE_SECTIONS = \\[([^\\]]*)\\]/', $ts, $m);
+    expect(array_map(fn ($s) => trim($s, " '"), explode(',', $m[1])))->toBe(AiImagePlacement::ALLOWED);
 });
