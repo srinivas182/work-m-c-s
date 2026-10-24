@@ -64,6 +64,7 @@ export const RoomsRates: BlockDefinition<RoomsRatesProps> = {
       max: 200,
     },
   },
+  isEmpty: (p) => p.rooms.length === 0,
   defaults: {
     heading: 'Rooms & rates',
     intro: '',

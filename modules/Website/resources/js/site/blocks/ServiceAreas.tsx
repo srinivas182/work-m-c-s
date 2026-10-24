@@ -36,6 +36,7 @@ export const ServiceAreas: BlockDefinition<ServiceAreasProps> = {
       max: 80,
     },
   },
+  isEmpty: (p) => p.areas.length === 0,
   defaults: { heading: 'Areas we cover', intro: '', areas: [], note: '', mapQuery: '' },
   render: (p, site) => (
     <Section narrow>

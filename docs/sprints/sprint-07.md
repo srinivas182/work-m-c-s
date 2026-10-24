@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 7 · four weeks (sprint plan revision 3) |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 24 Oct 2026 — 7.1 in review |
 | **Depends on** | v0.6.0 (template system, category sections, WURK AI, first 10 templates) |
 | **Delivery** | 6 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -93,3 +93,11 @@ At least five non-technical owners each launch a site from signup without help, 
 | **5+ non-technical owners** for the timed test | 7.6 | The one-hour goal is proven only with real people |
 | AI API keys (text and image) | 7.3 | Simulated providers until then |
 | Margin, buffer and exchange rate | 7.4 | Credits shown in rands |
+
+---
+
+## 6. Progress log
+
+| Sub-sprint | PR | Result |
+|---|---|---|
+| 7.1 Templates II, part 1 | see PR | 658 backend tests on SQLite and MySQL 8; 301 frontend; 80 browser checks incl. every page of all 16 templates. Found: empty sections showed orphan headings on the live site (also in Sprint 6 templates) — now hidden; three invented policies in copy |

@@ -1,0 +1,439 @@
+{
+  "category": "car-mechanics",
+  "key": "mechanics-workshop",
+  "name": "Workshop & service centre",
+  "position": 1,
+  "description": "Strong and dependable, for workshops and service centres.",
+  "definition": {
+    "branding": {
+      "primary": "#1F2937",
+      "secondary": "#F59E0B",
+      "font_pairing": "bold",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "About",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Honest servicing and repairs",
+                "text": "Services, repairs and diagnostics — explained clearly and quoted upfront.",
+                "primaryLabel": "Get a quote",
+                "primaryHref": "/services",
+                "secondaryLabel": "Contact us",
+                "secondaryHref": "/contact",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/mechanics-workshop/hero.jpg",
+                    "alt": "A mechanic working on a car in the workshop"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why drivers trust us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "check",
+                    "title": "Quoted upfront",
+                    "text": "We explain the work and the cost before we start."
+                  },
+                  {
+                    "icon": "shield",
+                    "title": "Done properly",
+                    "text": "Quality parts and careful work."
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Back on the road",
+                    "text": "We keep you updated so you can plan your day."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Minor service",
+                    "description": "Oil, filters and checks",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Major service",
+                    "description": "Full service to manufacturer schedule",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Brakes",
+                    "description": "Pads, discs and fluid",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Diagnostics",
+                    "description": "Fault finding and warning lights",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we cover",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What drivers say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Need a service or repair?",
+                "text": "Ask for a quote — tell us your car and what it needs.",
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/services"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "Quotes are confirmed before any work.",
+                "items": [
+                  {
+                    "name": "Minor service",
+                    "description": "Oil, filters and checks",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Major service",
+                    "description": "Full service to manufacturer schedule",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Brakes",
+                    "description": "Pads, discs and fluid",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Clutch and gearbox",
+                    "description": "",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Suspension",
+                    "description": "",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Diagnostics",
+                    "description": "Fault finding and warning lights",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Get a quote",
+                "intro": "Tell us about your car and what it needs.",
+                "services": [
+                  {
+                    "name": "Service"
+                  },
+                  {
+                    "name": "Brakes"
+                  },
+                  {
+                    "name": "Clutch and gearbox"
+                  },
+                  {
+                    "name": "Diagnostics"
+                  },
+                  {
+                    "name": "Something else"
+                  }
+                ],
+                "detailsLabel": "Make, model, year and what’s wrong",
+                "submitLabel": "Send request"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "About the workshop",
+                "text": "Tell drivers about your workshop, your experience and the cars you specialise in.",
+                "image": "/images/templates/mechanics-workshop/bay.jpg",
+                "imageAlt": "A service bay in the workshop",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "accred",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Brands and approvals",
+                "intro": "Add the brands you’re approved for and any industry memberships.",
+                "items": []
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "The team",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Find the workshop",
+                "intro": "Call or WhatsApp us to book your car in.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": ""
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we cover",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

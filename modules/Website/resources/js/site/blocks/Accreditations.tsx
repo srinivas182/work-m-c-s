@@ -27,6 +27,7 @@ export const Accreditations: BlockDefinition<AccreditationsProps> = {
       },
     },
   },
+  isEmpty: (p) => p.items.length === 0,
   defaults: { heading: 'Registered and accredited', intro: '', items: [] },
   render: (p, site) => (
     <Section tone="surface">

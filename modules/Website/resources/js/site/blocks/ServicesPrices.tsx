@@ -47,6 +47,7 @@ export const ServicesPrices: BlockDefinition<ServicesPricesProps> = {
     },
     note: { kind: 'text', inline: true, label: 'Note under the list', max: 160 },
   },
+  isEmpty: (p) => p.items.length === 0,
   defaults: {
     heading: 'Services and prices',
     intro: '',

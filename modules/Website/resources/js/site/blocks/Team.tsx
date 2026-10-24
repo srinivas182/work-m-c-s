@@ -27,6 +27,7 @@ export const Team: BlockDefinition<TeamProps> = {
       },
     },
   },
+  isEmpty: (p) => p.people.length === 0,
   defaults: { heading: 'Meet the team', intro: '', people: [] },
   render: (p, site) => (
     <Section>

@@ -64,6 +64,7 @@ export const Packages: BlockDefinition<PackagesProps> = {
       },
     },
   },
+  isEmpty: (p) => !p.items.some((i) => isCurrent('', i.validUntil)),
   defaults: { heading: 'Packages & specials', intro: '', items: [] },
   render: (p, site) => {
     const shown = site.editing ? p.items : p.items.filter((i) => isCurrent('', i.validUntil));

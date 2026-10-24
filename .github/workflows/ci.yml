@@ -56,6 +56,7 @@ jobs:
               - 'modules/**/*.php'
               - 'modules/**/module.json'
               - 'modules/**/*.stub'
+              - 'modules/**/templates/**' # website templates: installed and switched by backend tests
               - 'composer.json'
               - 'composer.lock'
               - 'phpunit.xml'
@@ -68,6 +69,8 @@ jobs:
               - 'modules/**/*.ts'
               - 'modules/**/*.tsx'
               - 'modules/**/*.css'
+              - 'modules/**/templates/**' # the template guard renders every template page
+              - 'public/images/templates/**' # the guard checks every template photo exists
               - 'package.json'
               - 'pnpm-lock.yaml'
               - 'vite.config.ts'

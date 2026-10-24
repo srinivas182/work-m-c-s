@@ -222,3 +222,36 @@ describe('colour contrast guards', () => {
     expect(bad).toEqual([]);
   });
 });
+
+describe('empty sections', () => {
+  const doc = {
+    schema: 1,
+    blocks: [
+      {
+        id: 'r',
+        type: 'Testimonials',
+        version: BLOCKS.Testimonials!.version,
+        props: { heading: 'Reviews', items: [] },
+      },
+      {
+        id: 't',
+        type: 'Text',
+        version: BLOCKS.Text!.version,
+        props: { heading: 'About us', text: 'Hello' },
+      },
+    ],
+  };
+  const html = (editing: boolean) =>
+    renderToString(
+      <SiteRenderer document={doc as never} branding={branding} site={{ ...site, editing }} />,
+    );
+
+  it('are hidden on the live site, with the main heading going to the first section shown', () => {
+    expect(html(false)).not.toContain('Reviews');
+    expect(html(false)).toMatch(/<h1[^>]*>About us<\/h1>/);
+  });
+
+  it('show a prompt in the editor', () => {
+    expect(html(true)).toContain('Add a testimonial from a real customer.');
+  });
+});

@@ -64,7 +64,14 @@ export function SiteRenderer({
     .filter((b) => HEAD.has(b.type))
     .sort((a, b) => Number(b.type === 'PromotionBanner') - Number(a.type === 'PromotionBanner'));
   const foot = document.blocks.filter((b) => FOOT.has(b.type));
-  const body = document.blocks.filter((b) => !HEAD.has(b.type) && !FOOT.has(b.type));
+  // On the live site, a section with nothing in it yet is not shown (the editor shows a prompt instead).
+  const shown = (b: StoredBlock) => {
+    if (site.editing) return true;
+    const props = upgradeBlock(b);
+    const def = BLOCKS[b.type] as { isEmpty?: (p: Record<string, unknown>) => boolean } | undefined;
+    return props === null || !def?.isEmpty?.(props);
+  };
+  const body = document.blocks.filter((b) => !HEAD.has(b.type) && !FOOT.has(b.type) && shown(b));
   // Exactly one main heading: the Hero's, or else the first section's (a banner doesn't count).
   const mainHeadingAt = body.some((b) => b.type === 'Hero')
     ? -1
