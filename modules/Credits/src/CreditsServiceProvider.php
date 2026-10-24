@@ -9,8 +9,10 @@ use Illuminate\Support\Facades\Event;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Credits\Console\GrantAllowancesCommand;
 use Wurk\Credits\Contracts\CreditWallet;
+use Wurk\Credits\Contracts\RateCard;
 use Wurk\Credits\Events\LowCreditBalance;
 use Wurk\Credits\Listeners\GrantFirstAllowance;
+use Wurk\Credits\Support\EloquentRateCard;
 use Wurk\Credits\Support\Wallet;
 use Wurk\Plans\Events\SubscriptionChanged;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -19,6 +21,7 @@ final class CreditsServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(RateCard::class, EloquentRateCard::class);
         $this->app->singleton(CreditWallet::class, Wallet::class);
     }
 

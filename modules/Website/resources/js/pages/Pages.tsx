@@ -46,6 +46,10 @@ interface Props {
   canPublish: boolean;
   /** Absolute path of the pages endpoints, e.g. /glow-salon/website/pages */
   base: string;
+  design: {
+    current: string | null;
+    options: { key: string; name: string; description: string | null }[];
+  } | null;
 }
 
 function AddPage({ base, onClose }: { base: string; onClose: () => void }) {
@@ -151,7 +155,63 @@ function PageSettings({
   );
 }
 
-export default function Pages({ pages, deleted, base }: Props) {
+function DesignCard({ base, design }: { base: string; design: NonNullable<Props['design']> }) {
+  const others = design.options.filter((o) => o.key !== design.current);
+  const current = design.options.find((o) => o.key === design.current);
+  if (others.length === 0) return null;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Design</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-3">
+        <p className="text-fg-muted text-sm">
+          {current ? (
+            <>
+              You’re using <strong className="text-fg">{current.name}</strong>.{' '}
+            </>
+          ) : null}
+          Switching keeps all your text, photos, prices and menus. Your live website only changes
+          when you publish.
+        </p>
+        {others.map((o) => (
+          <div
+            key={o.key}
+            className="border-border flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3"
+          >
+            <span>
+              <span className="block font-medium">{o.name}</span>
+              {o.description && <span className="text-fg-muted text-sm">{o.description}</span>}
+            </span>
+            <span className="flex gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <a href={`/templates/${o.key}/preview`} target="_blank" rel="noopener">
+                  Preview<span className="sr-only"> {o.name} (opens in a new tab)</span>
+                </a>
+              </Button>
+              <Button
+                aria-label={`Use this design: ${o.name}`}
+                size="sm"
+                variant="secondary"
+                onClick={() =>
+                  router.post(
+                    `${base.replace(/\/pages$/, '')}/design`,
+                    { template: o.key },
+                    { preserveScroll: true },
+                  )
+                }
+              >
+                Use this design
+              </Button>
+            </span>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Pages({ pages, deleted, base, design }: Props) {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<PageRow | null>(null);
   const move = (index: number, delta: number) => {
@@ -261,6 +321,7 @@ export default function Pages({ pages, deleted, base }: Props) {
             </ul>
           </CardContent>
         </Card>
+        {design && <DesignCard base={base} design={design} />}
         {deleted.length > 0 && (
           <Card>
             <CardHeader>

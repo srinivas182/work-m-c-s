@@ -12,7 +12,7 @@ const week = (o: string, c: string, sat: [string, string], sun: [string, string]
 ];
 
 const SAMPLES: Record<
-  'salon' | 'dental',
+  'salon' | 'dental' | 'sections',
   {
     name: string;
     branding: Branding;
@@ -416,9 +416,294 @@ const SAMPLES: Record<
       ],
     },
   },
+  sections: {
+    name: 'Sections sample',
+    branding: {
+      primary: '#166534',
+      secondary: '#F59E0B',
+      font_pairing: 'technical',
+      corners: 'square',
+      logo: null,
+      favicon: null,
+    },
+    menus: { header: [{ label: 'Quote', href: '#quote' }], footer: [] },
+    document: {
+      schema: 1,
+      blocks: [
+        {
+          id: 'promo',
+          type: 'PromotionBanner',
+          version: 1,
+          props: {
+            text: 'Load-shedding special: free site assessment in December',
+            linkLabel: 'Book yours',
+            linkHref: '#quote',
+            tone: 'accent',
+            starts: '',
+            ends: '',
+          },
+        },
+        {
+          id: 'header',
+          type: 'Header',
+          version: 1,
+          props: { buttonLabel: 'Get a quote', buttonHref: '#quote' },
+        },
+        {
+          id: 'ba',
+          type: 'BeforeAfter',
+          version: 1,
+          props: {
+            heading: 'Before & after',
+            intro: 'Real installations by our team.',
+            layout: 'slider',
+            items: [
+              {
+                before: img('dental-1'),
+                beforeAlt: 'Roof before installation',
+                after: img('dental-2'),
+                afterAlt: 'Roof with solar panels installed',
+                caption: '5 kW system, Umhlanga',
+              },
+              {
+                before: img('salon-1'),
+                beforeAlt: 'Old distribution board',
+                after: img('salon-2'),
+                afterAlt: 'New distribution board',
+                caption: 'DB board upgrade, Durban North',
+              },
+            ],
+          },
+        },
+        {
+          id: 'pk',
+          type: 'Packages',
+          version: 1,
+          props: {
+            heading: 'Backup power packages',
+            intro: 'Fixed prices, installed and certified.',
+            items: [
+              {
+                name: 'Essentials',
+                price: 2490000,
+                from: true,
+                inclusions: '3 kW inverter\n5 kWh battery\nCertificate of compliance',
+                validUntil: '',
+                highlight: false,
+                buttonLabel: 'Choose Essentials',
+                buttonHref: '#quote',
+              },
+              {
+                name: 'Whole home',
+                price: 6990000,
+                from: true,
+                inclusions: '8 kW inverter\n10 kWh battery\n6 solar panels\nApp monitoring',
+                validUntil: '',
+                highlight: true,
+                buttonLabel: 'Choose Whole home',
+                buttonHref: '#quote',
+              },
+            ],
+          },
+        },
+        {
+          id: 'tt',
+          type: 'ClassTimetable',
+          version: 1,
+          props: {
+            heading: 'Class timetable',
+            intro: 'Gym sample — all classes 45 minutes.',
+            classes: [
+              {
+                day: 'Monday',
+                start: '06:00',
+                end: '06:45',
+                name: 'HIIT',
+                instructor: 'Thabo',
+                level: 'All levels',
+              },
+              {
+                day: 'Monday',
+                start: '18:00',
+                end: '18:45',
+                name: 'Spin',
+                instructor: 'Aisha',
+                level: 'Intermediate',
+              },
+              {
+                day: 'Wednesday',
+                start: '06:00',
+                end: '06:45',
+                name: 'Strength',
+                instructor: 'Thabo',
+                level: 'Beginner',
+              },
+              {
+                day: 'Saturday',
+                start: '08:00',
+                end: '09:00',
+                name: 'Yoga',
+                instructor: 'Naledi',
+                level: 'All levels',
+              },
+            ],
+            note: 'Public holidays: Saturday times.',
+          },
+        },
+        {
+          id: 'fm',
+          type: 'FoodMenu',
+          version: 1,
+          props: {
+            heading: 'Menu',
+            intro: 'Restaurant sample.',
+            sections: [
+              {
+                name: 'Mains',
+                dishes: [
+                  {
+                    name: 'Bunny chow',
+                    description: 'Quarter loaf, mutton curry',
+                    price: 12500,
+                    tags: [{ tag: 'Halaal' }, { tag: 'Spicy' }],
+                  },
+                  {
+                    name: 'Bobotie',
+                    description: 'With yellow rice and chutney',
+                    price: 14500,
+                    tags: [],
+                  },
+                  {
+                    name: 'Chakalaka bowl',
+                    description: 'Pap, chakalaka, grilled veg',
+                    price: 9800,
+                    tags: [{ tag: 'Vegan' }],
+                  },
+                ],
+              },
+            ],
+            note: 'Please tell us about any allergies.',
+          },
+        },
+        {
+          id: 'rr',
+          type: 'RoomsRates',
+          version: 1,
+          props: {
+            heading: 'Rooms & rates',
+            intro: 'Guesthouse sample.',
+            rooms: [
+              {
+                name: 'Garden room',
+                photo: img('salon-3'),
+                photoAlt: 'Bedroom opening onto the garden',
+                sleeps: '2 adults',
+                price: 115000,
+                description: 'Quiet room with a private patio.',
+                features: 'Breakfast included\nFree Wi-Fi\nBackup power',
+              },
+              {
+                name: 'Family suite',
+                photo: img('dental-3'),
+                photoAlt: 'Family suite with two beds',
+                sleeps: '2 adults, 2 children',
+                price: 189000,
+                description: 'Two bedrooms and a lounge.',
+                features: 'Breakfast included\nKitchenette',
+              },
+            ],
+            buttonLabel: 'Check availability',
+            buttonHref: '#quote',
+            note: 'Check-in from 14:00.',
+          },
+        },
+        {
+          id: 'pf',
+          type: 'Portfolio',
+          version: 1,
+          props: {
+            heading: 'Recent projects',
+            intro: '',
+            projects: [
+              {
+                title: 'Off-grid farmhouse',
+                photo: img('team-1'),
+                photoAlt: 'Farmhouse with a solar array',
+                category: 'Solar',
+                story: 'A farm outside Pietermaritzburg wanted to stop relying on the grid.',
+                outcome: 'No outages since installation.',
+              },
+              {
+                title: 'Clinic backup',
+                photo: img('team-2'),
+                photoAlt: 'Inverters installed in a clinic',
+                category: 'Backup power',
+                story: 'A medical practice needed its fridges and lights to stay on.',
+                outcome: 'Runs for 9 hours on battery.',
+              },
+            ],
+          },
+        },
+        {
+          id: 'ac',
+          type: 'Accreditations',
+          version: 1,
+          props: {
+            heading: 'Registered and accredited',
+            intro: '',
+            items: [
+              { name: 'ECB registered', logo: '', detail: 'Electrical contractor' },
+              { name: 'PV GreenCard', logo: '', detail: 'Certified installer' },
+              { name: 'SAPVIA member', logo: '', detail: '' },
+            ],
+          },
+        },
+        {
+          id: 'sa',
+          type: 'ServiceAreas',
+          version: 1,
+          props: {
+            heading: 'Areas we cover',
+            intro: 'Same-week installations in:',
+            areas: [
+              { name: 'Durban North' },
+              { name: 'Umhlanga' },
+              { name: 'Ballito' },
+              { name: 'Westville' },
+              { name: 'Pinetown' },
+            ],
+            note: 'Further afield? Ask about our call-out fee.',
+            mapQuery: 'Durban North',
+          },
+        },
+        {
+          id: 'qf',
+          type: 'QuoteForm',
+          version: 1,
+          props: {
+            heading: 'Request a quote',
+            intro: 'Tell us what you need and we’ll get back to you, usually within a day.',
+            services: [
+              { name: 'Solar installation' },
+              { name: 'Backup power' },
+              { name: 'Electrical repair' },
+            ],
+            detailsLabel: 'Tell us about the job',
+            submitLabel: 'Send request',
+          },
+        },
+        {
+          id: 'footer',
+          type: 'Footer',
+          version: 1,
+          props: { text: 'Sample content for the design board.' },
+        },
+      ],
+    },
+  },
 };
 
-export default function BlockBoard({ business }: { business: 'salon' | 'dental' }) {
+export default function BlockBoard({ business }: { business: 'salon' | 'dental' | 'sections' }) {
   const sample = SAMPLES[business];
   return (
     <>

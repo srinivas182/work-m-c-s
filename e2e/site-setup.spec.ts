@@ -8,17 +8,17 @@ test('an owner sets up menus and branding, then previews the site', async ({ pag
   // A second page to link to.
   await page.goto(`/${handle}/website/pages`);
   await page.getByRole('button', { name: 'Add page' }).click();
-  await page.getByLabel(/^Page title/).fill('Prices');
+  await page.getByLabel(/^Page title/).fill('Specials');
   await page.getByRole('dialog').getByRole('button', { name: 'Add page' }).click();
-  await expect(page.getByText('/prices')).toBeVisible();
+  await expect(page.getByText('/specials')).toBeVisible();
 
-  // Menus: link the header to the Prices page.
+  // Menus: link the header to the Specials page.
   await page.goto(`/${handle}/website/menus`);
   await expect(page.getByRole('heading', { level: 1, name: 'Menus' })).toBeVisible();
   await page.getByRole('button', { name: 'Add a link' }).first().click();
-  await page.getByRole('textbox', { name: 'Menu label' }).first().fill('Our prices');
-  await page.getByRole('combobox', { name: 'Page' }).first().click();
-  await page.getByRole('option', { name: 'Prices' }).click();
+  await page.getByRole('textbox', { name: 'Menu label' }).last().fill('Our prices');
+  await page.getByRole('combobox', { name: 'Page' }).last().click();
+  await page.getByRole('option', { name: 'Specials' }).click();
   await expectAccessible(page);
   await page.getByRole('button', { name: 'Save menus' }).click();
   await expect(page.getByText('Menus saved.')).toBeVisible();
@@ -41,6 +41,7 @@ test('an owner sets up menus and branding, then previews the site', async ({ pag
     testInfo.project.name === 'mobile' ? page.locator('summary[aria-label="Menu"]') : null;
   if (nav) await nav.click();
   await page.getByRole('link', { name: 'Our prices' }).first().click();
-  await expect(page).toHaveURL(/\/website\/preview\?page=prices$/);
-  await expect(page.getByRole('heading', { level: 2, name: 'Prices' })).toBeVisible();
+  await expect(page).toHaveURL(/\/website\/preview\?page=specials$/);
+  // No Hero on this page: its first section's heading is the page's main heading.
+  await expect(page.getByRole('heading', { level: 1, name: 'Specials' })).toBeVisible();
 });

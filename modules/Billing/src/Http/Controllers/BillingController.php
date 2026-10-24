@@ -6,6 +6,7 @@ namespace Wurk\Billing\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
@@ -23,13 +24,20 @@ use Wurk\Billing\Support\Payments;
 use Wurk\Billing\Support\SaBanking;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Plans\Contracts\Catalog;
+use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Regions\Contracts\Countries;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Business owners: Settings → Billing (PRD §7.14). */
 final class BillingController
 {
-    public function __construct(private readonly TenantContext $context, private readonly Payments $payments, private readonly Catalog $catalog) {}
+    public function __construct(private readonly TenantContext $context, private readonly Payments $payments, private readonly Catalog $catalog, private readonly Entitlements $entitlements) {}
+
+    /** A package can switch off credit packs (upgrading is then the way to get more credits). */
+    private function packsAllowed(): bool
+    {
+        return (bool) ($this->entitlements->limits($this->context->id())['credit_packs_allowed'] ?? true);
+    }
 
     public function show(Request $request, Countries $countries, ProviderCredentials $providers, BillingStatus $status, DebitOrderProvider $debitOrders): Response
     {
@@ -52,7 +60,8 @@ final class BillingController
                 'saved' => $account !== null,
             ],
             'card' => $method === null ? null : ['brand' => $method->brand, 'last4' => $method->last4, 'expires' => $method->expires],
-            'packs' => CreditPack::query()->where('active', true)->orderBy('display_order')->orderBy('credits')->get()
+            'creditPacksAllowed' => $this->packsAllowed(),
+            'packs' => ! $this->packsAllowed() ? [] : CreditPack::query()->where('active', true)->orderBy('display_order')->orderBy('credits')->get()
                 ->map(fn (CreditPack $p) => ['id' => $p->id, 'name' => $p->name, 'credits' => $p->credits, 'total_cents' => $withVat($p->price_cents)])->all(),
             'payments' => Payment::query()->where('tenant_id', $tenantId)->latest()->limit(20)->get()
                 ->map(fn (Payment $p) => ['id' => $p->id, 'at' => $p->created_at?->toIso8601String(), 'purpose' => $p->purpose, 'total_cents' => $p->total_cents, 'status' => $p->status, 'failure' => $p->failure])->all(),
@@ -97,6 +106,9 @@ final class BillingController
 
     public function buyCredits(Request $request): HttpResponse
     {
+        if (! $this->packsAllowed()) {
+            throw ValidationException::withMessages(['pack_id' => 'Your package doesn’t include buying credit packs. Upgrade for more monthly credits.']);
+        }
         $data = $request->validate(['pack_id' => ['required', 'exists:credit_packs,id'], 'saved_card' => ['boolean']]);
         $pack = CreditPack::query()->whereKey($data['pack_id'])->where('active', true)->firstOrFail();
         $details = ['pack' => $pack->name, 'credits' => $pack->credits];

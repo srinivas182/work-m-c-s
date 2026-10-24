@@ -4,6 +4,56 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 6.4 (first 10 templates)
+- Ten templates in the repository (modules/Website/templates): Salon & beauty (Hair & braids salon; Nails, lashes & barbers), Health (Dental practice; Doctor’s practice), Spa & wellness (Day spa; Wellness practitioner), Retail (Boutique; General store), Fitness (Gym & class studio; Personal trainer) — each pair visually distinct.
+- `website:install-templates`: creates templates and publishes a new version only when a file changes (fingerprint); safe on every deploy.
+- Privacy, terms and cookies pages for every template, written for POPIA, kept in one place; the business’s name is filled in when its site is built. General templates, not legal advice.
+- Honest sample content: no sample reviews, team members, prices, offers or invented policies — those sections prompt the owner. Health templates ask visitors not to send medical details in messages; the doctor’s practice shows the emergency numbers.
+- Template guard: every prop is a real field, every option valid, every photo present, every page has exactly one main heading. Every template page is accessibility-scanned on desktop and phone.
+
+### Fixed
+- Switching between designs failed when both had a section with the same id.
+- “Write my website” never filled Text sections’ main content (wrong field name); a test now checks every AI slot against the real block fields.
+- Links inside sections weren’t validated; only site paths, #anchors, https://, mailto: and tel: are accepted, at any depth.
+- Galleries left gaps for 3, 4 and other photo counts.
+- Low contrast with bright brand colours: faded call-to-action text and an inverted button using the wrong colour; guard tests prevent both returning.
+- “Use this design” buttons now name their design for screen readers.
+
+### Added — Sprint 6.3 (WURK AI, credits and transparency)
+- **WURK AI** module: Anthropic, Google and OpenAI providers on the existing Providers screen (encrypted, write-only keys) plus a simulated provider that never answers in production. Model per task (pinned versions; "latest" aliases refused), fallback order, every attempt logged with its real cost, daily limit per business and monthly spend cap per provider.
+- **Owners:** "Write with AI" — describe the business, add services and prices, choose a tone; a confirmation shows the exact credits and balance before and after; charged once (double-clicks included), refunded automatically on failure. The first website is free on every package; later AI actions need a package that includes WURK AI. Not enough credits → Buy credits and/or Upgrade.
+- **Honesty by design:** the AI fills only whitelisted text slots; testimonials, team, prices, opening hours, qualifications and registrations are never sent or written; prices come only from the owner. Results are drafts for review.
+- **Admin → WURK AI:** this month's real cost per provider (requests, failures, fallbacks, $ and R) and per business; models and fallbacks; "try a model" with a sample and its cost; prices, exchange rate, buffer and margin; caps; model retirement dates with a "retiring soon" warning.
+- **Package cost tip:** as monthly credits are entered — cost if fully used (range across channels), share of the package price, minimum safe price per extra credit at the target margin, and which costs aren't set yet. New "Your cost per message" setting on every SMS, WhatsApp and email provider.
+- **Can buy credit packs** per package (versioned; absent means allowed). When off, purchases are refused at the server and the billing page suggests upgrading.
+- Per-action credit prices on the rate card: "AI: write a website" (20) and "AI: rewrite a section" (1) for South Africa.
+
+### Fixed
+- "Write with AI" page crashed (business resolved the wrong way) — caught by the browser test; the page now has its own test.
+- Unlabelled dropdowns on the admin AI and AI writer screens (accessibility scan).
+- A test that passed for the wrong reason (CSRF 419 instead of the production guard) now proves the guard itself.
+
+### Added — Sprint 6.2 (category sections)
+- Ten sections: Before & after (keyboard-accessible slider or side by side), Packages & specials (expired specials hide themselves), Class timetable (week grid on desktop, days with classes on phones), Food menu (dietary tags), Rooms & rates (links out to a booking engine — never embedded), Portfolio, Accreditations, Service areas (map link, no embedded map), Promotion banner (between dates, dismissible, above the header), Quote form.
+- Quote form submissions: stored per business and emailed if the owner sets an address; consent required; hidden-field spam trap, per-visitor limit and a daily cap per business; visitors' IP addresses stored only as a hash. New Website → Enquiries screen (new first, one-tap Call / WhatsApp / Email, mark read, archive, notification email).
+- The design board shows all 24 sections, accessibility-scanned on desktop and phone.
+
+### Fixed
+- Pages without a Hero had no main heading (accessibility and SEO): the first section's heading becomes the page's only h1; four blocks that wrote their own h2 now follow the rule.
+- The Before & after caption couldn't be edited until both photos were uploaded.
+- The inline-editing safety test skipped fields in lists inside lists (e.g. a menu's dishes); nested lists are now filled and tested.
+
+### Added — Sprint 6.1 (template system)
+- Website categories (the 12 agreed, `website:seed-categories`) and templates managed by WURK staff: create blank or as a copy, edit pages in the same visual editor owners use, template photos (same safe pipeline, kept apart from businesses' photos), preview drafts, publish immutable versions with a note, restore a version, retire. Permission `templates.manage`.
+- Signup: "What kind of business is it?" and "Choose your website design" steps with live previews (published designs only); categories appear once they have a design. Completing signup builds the site from the design (pages, menus linked to real pages, branding). Applying a design can never block signup — on failure the business gets the starter layout.
+- Owners switch to the other design in their category from the Pages screen, keeping every text, photo, price, menu item and page (only style settings and fonts change; colours and logo stay). The site is snapshotted first; the live site changes only when they publish.
+- `website:seed-sample-templates` for development and browser tests (refused in production).
+
+### Fixed (review of unfinished work found on the branch)
+- The template photo list read every image from storage to get its size; sizes are now recorded at upload.
+- A refused template save could still rename the template.
+- Staff saw "0 MB of 0 MB used" in the template photo picker.
+
 ### Added — Sprint 4.4 (menus, branding, site preview)
 - All 8 curated font pairings work (6 font families added, self-hosted, OFL); a test keeps the server's list and the site theme in step.
 - Menus: one header menu for desktop and phones, with one level of accessible dropdown sub-items, plus footer links. Items point to pages by id (renaming a page's address never breaks a menu; deleted pages drop out). Only https://, mailto:, tel: and #section links are accepted — never javascript: or data:.

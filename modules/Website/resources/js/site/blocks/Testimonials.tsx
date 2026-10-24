@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react';
 import type { BlockDefinition } from '../types';
+import { SectionTitle } from './shared';
 
 export interface Testimonial {
   quote: string;
@@ -72,9 +73,9 @@ export const Testimonials: BlockDefinition<TestimonialsProps> = {
     return (
       <section className="px-5 py-16 sm:px-8 sm:py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] sm:text-4xl">
+          <SectionTitle className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] sm:text-4xl">
             {p.heading}
-          </h2>
+          </SectionTitle>
           {/* A lone quote keeps a readable line length instead of spanning the page. */}
           <div
             className={`mt-10 grid gap-6 ${rest.length > 0 ? 'lg:grid-cols-[1.4fr_1fr]' : 'max-w-3xl'}`}

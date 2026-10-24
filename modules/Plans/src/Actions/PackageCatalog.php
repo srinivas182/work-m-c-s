@@ -98,6 +98,8 @@ final readonly class PackageCatalog
             $value = $data[$field] ?? null;
             $terms[$field] = match ($field) {
                 'multi_branch', 'custom_domain' => (bool) $value,
+                // Absent means allowed: a missing value must never quietly block credit purchases.
+                'credit_packs_allowed' => array_key_exists($field, $data) ? (bool) $value : true,
                 'modules' => $modules,
                 'managed_fee_cents' => $value === null || $value === '' ? null : (int) $value,
                 default => (int) $value,

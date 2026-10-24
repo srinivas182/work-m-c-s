@@ -1,0 +1,368 @@
+{
+  "category": "fitness",
+  "key": "fitness-personal-trainer",
+  "name": "Personal trainer",
+  "position": 2,
+  "description": "Bold and personal, for trainers and coaches — in person and online.",
+  "definition": {
+    "branding": {
+      "primary": "#0F766E",
+      "secondary": "#F59E0B",
+      "font_pairing": "bold",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Training",
+          "type": "page",
+          "page": "training"
+        },
+        {
+          "label": "About",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Your goals. Your plan. Real results.",
+                "text": "One-to-one training in person or online, built around you.",
+                "primaryLabel": "Book a session",
+                "primaryHref": "/contact",
+                "secondaryLabel": "How it works",
+                "secondaryHref": "/training",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/fitness-personal-trainer/portrait.jpg",
+                    "alt": "A personal trainer in the gym"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "how",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "How it works",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "check",
+                    "title": "A plan for you",
+                    "text": "We start with your goals and build from there."
+                  },
+                  {
+                    "icon": "calendar",
+                    "title": "Sessions that fit",
+                    "text": "In person, outdoors or online."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Progress you can see",
+                    "text": "We track what matters to you."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "training",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Training",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "First session",
+                    "description": "Goals, assessment and a plan",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "One-to-one session",
+                    "description": "",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Online coaching",
+                    "description": "Plans and check-ins",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Client results",
+                "intro": "",
+                "layout": "side-by-side",
+                "items": []
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "Client stories",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Ready to start?",
+                "text": "Book your first session.",
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "training",
+        "title": "Training",
+        "slug": "training",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "training",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Training",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "First session",
+                    "description": "Goals, assessment and a plan",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "One-to-one session",
+                    "description": "",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Partner session",
+                    "description": "Train with a friend",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Online coaching",
+                    "description": "Plans and check-ins",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Session packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "About me",
+                "text": "Tell clients about your background, your qualifications and how you train people.",
+                "image": "/images/templates/fitness-personal-trainer/session.jpg",
+                "imageAlt": "A training session",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "accred",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Qualifications",
+                "intro": "Add your qualifications and registrations.",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Get in touch",
+                "intro": "Message me to book your first session.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

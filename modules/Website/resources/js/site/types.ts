@@ -33,6 +33,8 @@ export interface SiteContext {
   businessName: string;
   /** Edited in 4.4; blocks read them from here. */
   menus?: { header: MenuItem[]; footer: MenuItem[] };
+  /** Where forms post (set by the public site engine); absent in the editor and previews. */
+  formAction?: string;
   logo?: string | null;
   /** True inside the editor: links don't navigate, empty fields show prompts. */
   editing: boolean;

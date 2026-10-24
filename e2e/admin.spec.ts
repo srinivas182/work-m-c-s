@@ -128,6 +128,26 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('heading', { level: 1, name: 'Failed payments' })).toBeVisible();
   await expectAccessible(page);
 
+  await page.goto(`${admin}/templates`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Website templates' })).toBeVisible();
+  await expectAccessible(page);
+  await page.getByRole('link', { name: /Warm salon \(sample\)/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Warm salon (sample)' })).toBeVisible();
+  await expectAccessible(page);
+
+  await page.goto(`${admin}/settings/ai`);
+  await expect(page.getByRole('heading', { level: 1, name: 'WURK AI' })).toBeVisible();
+  await expectAccessible(page);
+  await page.goto(`${admin}/packages`);
+  // The Edit link inside the Starter card (other parts of the page have Edit links too).
+  await page
+    .getByRole('heading', { level: 3, name: 'Starter' })
+    .locator('xpath=ancestor::*[.//a[normalize-space(.)="Edit"]][1]')
+    .getByRole('link', { name: 'Edit' })
+    .click();
+  await expect(page.getByRole('note', { name: 'Estimated cost of these credits' })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/roles`);
   await expect(page.getByRole('heading', { level: 1, name: 'Staff roles' })).toBeVisible();
   await expectAccessible(page);

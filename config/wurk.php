@@ -39,7 +39,7 @@ return [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
             'help', 'login', 'logout', 'mail', 'my', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
-            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'settings', 'webhooks', 'signup',
+            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'templates', 'forms', 'settings', 'webhooks', 'signup',
         ],
 
         // Default capacity of a shared shard (tenants per database).
@@ -99,7 +99,7 @@ return [
         'referrals' => ['name' => 'Customer referral programme', 'sprint' => 11],
         'marketing' => ['name' => 'Campaigns & offers', 'sprint' => 13],
         'reports' => ['name' => 'Reports', 'sprint' => 13],
-        'ai-assistant' => ['name' => 'AI assistant', 'sprint' => 14],
+        'ai-assistant' => ['name' => 'WURK AI', 'sprint' => 6],
     ],
 
     'security' => [

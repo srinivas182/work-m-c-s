@@ -25,6 +25,9 @@ final class Signup extends Model implements CentralModel
 
     public const STEPS = ['details', 'verify', 'package', 'address', 'finish'];
 
+    /** With templates on offer, the business chooses its category and template after the package. */
+    public const STEPS_WITH_TEMPLATES = ['details', 'verify', 'package', 'category', 'template', 'address', 'finish'];
+
     protected $fillable = ['fingerprint', 'step', 'data', 'verified_at', 'tenant_id', 'completed_at', 'ip'];
 
     protected function casts(): array

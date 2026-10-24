@@ -1,0 +1,362 @@
+{
+  "category": "spa-wellness",
+  "key": "spa-wellness-practitioner",
+  "name": "Wellness practitioner",
+  "position": 2,
+  "description": "Warm and personal, for therapists, coaches and practitioners.",
+  "definition": {
+    "branding": {
+      "primary": "#C2410C",
+      "secondary": "#0F766E",
+      "font_pairing": "friendly",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Sessions",
+          "type": "page",
+          "page": "sessions"
+        },
+        {
+          "label": "About",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Support that fits your life",
+                "text": "One-to-one sessions in person or online, at a pace that suits you.",
+                "primaryLabel": "Book a session",
+                "primaryHref": "/contact",
+                "secondaryLabel": "How I work",
+                "secondaryHref": "/about",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/spa-wellness-practitioner/portrait.jpg",
+                    "alt": "The practitioner in her practice room"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "how",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "How I can help",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "heart",
+                    "title": "A safe space",
+                    "text": "Somewhere to talk openly, without judgement."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Tailored to you",
+                    "text": "Sessions shaped around what you need."
+                  },
+                  {
+                    "icon": "calendar",
+                    "title": "Flexible times",
+                    "text": "Daytime, evening and online sessions."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sessions",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Sessions",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "First session",
+                    "description": "Getting to know you and what you need",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Follow-up session",
+                    "description": "",
+                    "duration": "50 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Session packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "Kind words",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Ready to start?",
+                "text": "Get in touch to book your first session.",
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "sessions",
+        "title": "Sessions",
+        "slug": "sessions",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "sessions",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Sessions",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "First session",
+                    "description": "Getting to know you and what you need",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Follow-up session",
+                    "description": "",
+                    "duration": "50 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Online session",
+                    "description": "From anywhere",
+                    "duration": "50 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Session packages",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "accred",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Qualifications and registrations",
+                "intro": "Add your qualifications and professional registrations.",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "About me",
+                "text": "Tell visitors about your background, your training and how you work with people.",
+                "image": "/images/templates/spa-wellness-practitioner/space.jpg",
+                "imageAlt": "The practice room",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Get in touch",
+                "intro": "Send me a message to book or ask a question. Please keep personal details for our session.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -14,6 +14,9 @@ use Illuminate\Validation\ValidationException;
  */
 final class ContentDocument
 {
+    /** Site paths (/contact), on-page anchors (#book), https://, mailto: and tel: only. */
+    public const SAFE_LINK = '#^(/(?!/)[^\s]*|\#[A-Za-z][\w-]*|https://[^\s]+|mailto:[^\s]+|tel:\+?[0-9 ]{6,20})$#';
+
     public const SCHEMA = 1;
 
     /** @return array{schema: int, blocks: list<array{id: string, type: string, version: int, props: array<string, mixed>}>} */
@@ -79,6 +82,12 @@ final class ContentDocument
             if (! is_array($props) || ($props !== [] && array_is_list($props))) {
                 $fail("Section {$n} has invalid settings.");
             }
+            // Every link field (named …Href, at any depth) must be a safe link — never javascript: or data:.
+            array_walk_recursive($props, function ($value, $key) use ($fail, $n): void {
+                if (is_string($key) && str_ends_with($key, 'Href') && is_string($value) && $value !== '' && preg_match(self::SAFE_LINK, $value) !== 1) {
+                    $fail("Section {$n} has a link we can’t use. Use a page (/contact), a section (#book), https://, mailto: or tel:.");
+                }
+            });
             $ids[$id] = true;
             $blocks[] = ['id' => $id, 'type' => $type, 'version' => $block['version'], 'props' => $props];
         }

@@ -1,0 +1,343 @@
+{
+  "category": "retail",
+  "key": "retail-boutique",
+  "name": "Boutique",
+  "position": 1,
+  "description": "Editorial and stylish, for fashion and lifestyle boutiques.",
+  "definition": {
+    "branding": {
+      "primary": "#111827",
+      "secondary": "#BE185D",
+      "font_pairing": "editorial",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Collections",
+          "type": "page",
+          "page": "collections"
+        },
+        {
+          "label": "About",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Visit us",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Visit us",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "collage",
+                "heading": "New season, new favourites",
+                "text": "Clothing and accessories picked with care, for every day and every occasion.",
+                "primaryLabel": "See the collections",
+                "primaryHref": "/collections",
+                "secondaryLabel": "Visit the store",
+                "secondaryHref": "/contact",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/retail-boutique/look-1.jpg",
+                    "alt": "A model in a linen summer dress"
+                  },
+                  {
+                    "src": "/images/templates/retail-boutique/look-2.jpg",
+                    "alt": "Accessories on a display table"
+                  },
+                  {
+                    "src": "/images/templates/retail-boutique/look-3.jpg",
+                    "alt": "Rails of new-season clothing"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "This season",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/retail-boutique/look-1.jpg",
+                    "alt": "A model in a linen summer dress"
+                  },
+                  {
+                    "src": "/images/templates/retail-boutique/look-2.jpg",
+                    "alt": "Accessories on a display table"
+                  },
+                  {
+                    "src": "/images/templates/retail-boutique/look-3.jpg",
+                    "alt": "Rails of new-season clothing"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "store",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Come and see us",
+                "text": "Describe your store and what makes shopping with you special.",
+                "image": "/images/templates/retail-boutique/store.jpg",
+                "imageAlt": "Inside the boutique",
+                "imageSide": "left",
+                "buttonLabel": "Find us",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "From our customers",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Something caught your eye?",
+                "text": "Message us to check sizes and stock.",
+                "buttonLabel": "Ask about an item",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "collections",
+        "title": "Collections",
+        "slug": "collections",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Visit us",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Collections",
+                "text": "Show what you stock — add photos of your favourite pieces and tell customers what’s new."
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "New in",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/retail-boutique/look-1.jpg",
+                    "alt": "A model in a linen summer dress"
+                  },
+                  {
+                    "src": "/images/templates/retail-boutique/look-2.jpg",
+                    "alt": "Accessories on a display table"
+                  },
+                  {
+                    "src": "/images/templates/retail-boutique/look-3.jpg",
+                    "alt": "Rails of new-season clothing"
+                  },
+                  {
+                    "src": "/images/templates/retail-boutique/store.jpg",
+                    "alt": "Inside the boutique"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Specials",
+                "intro": "",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Visit us",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Our story",
+                "text": "Tell customers how your boutique started and what you love about what you sell."
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "The team",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Visit us",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Visit us",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Visit the store",
+                "intro": "Message us to check stock or reserve an item.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -20,6 +20,20 @@ final class Drivers
     /** @return array<string, array<string, array{name: string, class?: class-string, fields: array<string, array{label: string, secret: bool}>, settings: array<string, string>}>> */
     public static function catalogue(): array
     {
+        // Every message provider records what a message costs WURK, for the package cost tip.
+        $catalogue = self::providers();
+        foreach (['sms', 'whatsapp', 'email'] as $channel) {
+            foreach ($catalogue[$channel] as $key => $driver) {
+                $catalogue[$channel][$key]['settings']['cost_zar'] = 'Your cost per message in rands (for pricing estimates)';
+            }
+        }
+
+        return $catalogue;
+    }
+
+    /** @return array<string, array<string, array{name: string, class?: class-string, fields: array<string, array{label: string, secret: bool}>, settings: array<string, string>}>> */
+    private static function providers(): array
+    {
         $smsSettings = ['sender' => 'Sender ID or number'];
 
         return [
@@ -45,6 +59,10 @@ final class Drivers
             'payments.paystack' => ['paystack' => ['name' => 'Paystack', 'fields' => ['public_key' => ['label' => 'Public key', 'secret' => false], 'secret_key' => ['label' => 'Secret key', 'secret' => true]], 'settings' => []]],
             'payments.yoco' => ['yoco' => ['name' => 'Yoco', 'fields' => ['secret_key' => ['label' => 'Secret key', 'secret' => true]], 'settings' => []]],
             'payments.ozow' => ['ozow' => ['name' => 'Ozow', 'fields' => ['site_code' => ['label' => 'Site code', 'secret' => false], 'private_key' => ['label' => 'Private key', 'secret' => true], 'api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => ['sandbox' => 'Sandbox (1 = yes)']]],
+            // WURK AI providers (Ai module): one secret key each; the model per task is chosen in AI settings.
+            'ai.anthropic' => ['anthropic' => ['name' => 'Anthropic (Claude)', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
+            'ai.google' => ['google' => ['name' => 'Google (Gemini)', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
+            'ai.openai' => ['openai' => ['name' => 'OpenAI', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
             'payments.peach' => ['peach' => ['name' => 'Peach Payments', 'fields' => ['entity_id' => ['label' => 'Entity ID', 'secret' => false], 'access_token' => ['label' => 'Access token', 'secret' => true]], 'settings' => ['sandbox' => 'Sandbox (1 = yes)']]],
         ];
     }

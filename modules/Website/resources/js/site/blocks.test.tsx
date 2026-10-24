@@ -1,6 +1,7 @@
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { internationalDigits } from './blocks/Contact';
+import { gallerySpan } from './blocks/Gallery';
 import { BLOCKS } from './registry';
 import { SiteRenderer, upgradeBlock } from './SiteRenderer';
 import type { Branding, ContentDocument } from './types';
@@ -31,8 +32,8 @@ const render = (blocks: ContentDocument['blocks'], editing = false) =>
   );
 
 describe('block library', () => {
-  it('has 14 blocks whose types and versions the server accepts', () => {
-    expect(Object.keys(BLOCKS)).toHaveLength(14);
+  it('has 24 blocks whose types and versions the server accepts', () => {
+    expect(Object.keys(BLOCKS)).toHaveLength(24);
     for (const [type, def] of Object.entries(BLOCKS)) {
       expect(type).toMatch(/^[A-Z][A-Za-z0-9]{1,40}$/);
       expect(def.type).toBe(type);
@@ -130,5 +131,94 @@ describe('block library', () => {
   it('scopes each site’s theme to its own root', () => {
     const html = render([]);
     expect(html).toMatch(/class="wurk-site" style="--s-bg:/);
+  });
+});
+
+describe('main heading', () => {
+  const page = (types: string[]) =>
+    renderToString(
+      <SiteRenderer
+        document={{
+          schema: 1,
+          blocks: types.map((type, i) => ({
+            id: `b${i}`,
+            type,
+            version: BLOCKS[type]!.version,
+            props: { heading: `${type} heading` },
+          })),
+        }}
+        branding={branding}
+        site={site}
+      />,
+    );
+  const count = (html: string) => (html.match(/<h1[\s>]/g) ?? []).length;
+
+  it('gives every page exactly one main heading', () => {
+    expect(count(page(['Header', 'Hero', 'Text', 'Footer']))).toBe(1); // the Hero's
+    const noHero = page(['Header', 'PromotionBanner', 'ServicesPrices', 'Text', 'Footer']);
+    expect(count(noHero)).toBe(1); // the first section's, not the banner's
+    expect(noHero).toMatch(/<h1[^>]*>ServicesPrices heading<\/h1>/);
+  });
+});
+
+describe('gallery grid', () => {
+  /** Cells used, given the spans at a column count; must fill whole rows. */
+  const cells = (n: number, cols: 2 | 4) =>
+    Array.from({ length: n }, (_, i) => {
+      const cls = gallerySpan(i, n).split(' ');
+      const col =
+        cols === 4
+          ? Number(
+              cls.find((c) => c.startsWith('sm:col-span-'))?.slice(12) ??
+                (cls.includes('col-span-2') && i === 0 ? 2 : 1),
+            )
+          : cls.includes('col-span-2')
+            ? 2
+            : 1;
+      const row = i === 0 || (cols === 4 && cls.includes('sm:row-span-2')) ? 2 : 1;
+      return col * row;
+    }).reduce((a, b) => a + b, 0);
+
+  it('never leaves a gap, on phones or desktop, for 2 to 9 photos', () => {
+    for (let n = 2; n <= 9; n++) {
+      expect(cells(n, 2) % 2, `${n} photos on a phone`).toBe(0);
+      expect(cells(n, 4) % 4, `${n} photos on desktop`).toBe(0);
+    }
+  });
+});
+
+describe('colour contrast guards', () => {
+  const sources = import.meta.glob('./blocks/*.tsx', {
+    eager: true,
+    query: '?raw',
+    import: 'default',
+  }) as Record<string, string>;
+  // Fading text undoes the palette engine's contrast guarantee. Allowed: decorative marks,
+  // disabled controls (WCAG-exempt) and editor-only states.
+  const ALLOWED = [
+    'Testimonials.tsx:opacity-25',
+    'QuoteForm.tsx:disabled:opacity-60',
+    'Packages.tsx:opacity-60',
+  ];
+
+  it('never fades text (including on hover) outside the allowed cases', () => {
+    const found = Object.entries(sources).flatMap(([file, src]) =>
+      (src.match(/(?:[a-z]+:)?opacity-\d+/g) ?? []).map(
+        (o) => `${file.replace('./blocks/', '')}:${o}`,
+      ),
+    );
+    expect(found.filter((f) => !ALLOWED.includes(f))).toEqual([]);
+  });
+
+  it('uses the guaranteed pair on brand backgrounds: brand on on-brand, never brand-text', () => {
+    const bad = Object.entries(sources).flatMap(([file, src]) =>
+      (src.match(/className="[^"]*"/g) ?? [])
+        .filter(
+          (c) =>
+            /bg-\[var\(--s-(?:on-)?brand\)\]/.test(c) && c.includes('text-[var(--s-brand-text)]'),
+        )
+        .map((c) => `${file}: ${c.slice(0, 80)}`),
+    );
+    expect(bad).toEqual([]);
   });
 });

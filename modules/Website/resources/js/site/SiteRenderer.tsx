@@ -1,5 +1,6 @@
 import './site.css';
 import type { ReactNode } from 'react';
+import { MainHeading } from './blocks/shared';
 import { BLOCKS } from './registry';
 import { siteTheme } from './theme';
 import type { Branding, ContentDocument, SiteContext, StoredBlock } from './types';
@@ -23,7 +24,8 @@ export function upgradeBlock(block: StoredBlock): Record<string, unknown> | null
  * Renders a page the same way in the editor, the preview and (Sprint 5) the
  * public site. Unknown or invalid blocks are skipped rather than breaking the page.
  */
-const HEAD = new Set(['Header']);
+// Announcement banners sit above the header, at the very top of the page.
+const HEAD = new Set(['PromotionBanner', 'Header']);
 const FOOT = new Set(['Footer']);
 
 function renderBlock(block: StoredBlock, site: SiteContext) {
@@ -58,9 +60,15 @@ export function SiteRenderer({
   /** Fill the screen with the site's background (whole-page views), not just its content. */
   fill?: boolean;
 }) {
-  const head = document.blocks.filter((b) => HEAD.has(b.type));
+  const head = document.blocks
+    .filter((b) => HEAD.has(b.type))
+    .sort((a, b) => Number(b.type === 'PromotionBanner') - Number(a.type === 'PromotionBanner'));
   const foot = document.blocks.filter((b) => FOOT.has(b.type));
   const body = document.blocks.filter((b) => !HEAD.has(b.type) && !FOOT.has(b.type));
+  // Exactly one main heading: the Hero's, or else the first section's (a banner doesn't count).
+  const mainHeadingAt = body.some((b) => b.type === 'Hero')
+    ? -1
+    : body.findIndex((b) => b.type !== 'PromotionBanner');
 
   return (
     <div
@@ -82,7 +90,15 @@ export function SiteRenderer({
       )}
       {head.map((b) => renderBlock(b, site))}
       <main id="content">
-        {body.map((b) => renderBlock(b, site))}
+        {body.map((b, i) =>
+          i === mainHeadingAt ? (
+            <MainHeading.Provider key={b.id} value>
+              {renderBlock(b, site)}
+            </MainHeading.Provider>
+          ) : (
+            renderBlock(b, site)
+          ),
+        )}
         {children}
       </main>
       {foot.map((b) => renderBlock(b, site))}

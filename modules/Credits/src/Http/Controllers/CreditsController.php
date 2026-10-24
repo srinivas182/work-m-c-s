@@ -23,7 +23,7 @@ use Wurk\Tenancy\Contracts\TenantDirectory;
 
 final class CreditsController
 {
-    public const CHANNELS = ['sms' => 'SMS', 'whatsapp' => 'WhatsApp message', 'email' => 'Email', 'ai' => 'AI action'];
+    public const CHANNELS = ['sms' => 'SMS', 'whatsapp' => 'WhatsApp message', 'email' => 'Email', 'ai' => 'AI action', 'ai.generate_site' => 'AI: write a website', 'ai.rewrite' => 'AI: rewrite a section'];
 
     public function __construct(private readonly CreditWallet $wallet, private readonly TenantContext $context) {}
 
