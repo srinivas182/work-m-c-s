@@ -27,7 +27,7 @@ final readonly class SiteAssets
 
     public function __construct(private TenantContext $context, private Entitlements $entitlements, private AuditLog $audit) {}
 
-    public function store(UploadedFile $file, ?string $by): SiteAsset
+    public function store(UploadedFile $file, ?string $by, bool $aiGenerated = false, ?string $description = null): SiteAsset
     {
         $id = (string) Str::ulid();
         ['width' => $width, 'height' => $height, 'bytes' => $bytes, 'variants' => $variants] = $this->process($file, 'sites/'.$this->context->id(), $id);
@@ -37,12 +37,30 @@ final readonly class SiteAssets
 
         $asset = SiteAsset::query()->create([
             'id' => $id, 'name' => mb_substr($file->getClientOriginalName(), 0, 160) ?: 'photo',
+            'description' => $description === null ? null : mb_substr($description, 0, 200),
             'width' => $width, 'height' => $height,
-            'bytes' => $bytes, 'variants' => $variants, 'uploaded_by' => $by,
+            'bytes' => $bytes, 'variants' => $variants, 'ai_generated' => $aiGenerated, 'uploaded_by' => $by,
         ]);
-        $this->audit->record('website.photo_uploaded', 'site_asset', $asset->id, ['name' => $asset->name, 'bytes' => $bytes]);
+        $this->audit->record($aiGenerated ? 'website.ai_image_created' : 'website.photo_uploaded', 'site_asset', $asset->id, ['name' => $asset->name, 'bytes' => $bytes]);
 
         return $asset;
+    }
+
+    /**
+     * An image made by WURK AI: through the same safe pipeline as an upload (checked,
+     * re-encoded to WebP sizes, quota enforced), marked AI-generated.
+     */
+    public function storeGenerated(string $bytes, string $name, string $description, ?string $by): SiteAsset
+    {
+        $path = tempnam(sys_get_temp_dir(), 'wurk-ai-');
+        try {
+            file_put_contents((string) $path, $bytes);
+            $file = new UploadedFile((string) $path, $name.'.png', null, null, true);
+
+            return $this->store($file, $by, aiGenerated: true, description: $description);
+        } finally {
+            @unlink((string) $path);
+        }
     }
 
     /**

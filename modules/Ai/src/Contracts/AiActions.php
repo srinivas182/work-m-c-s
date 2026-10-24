@@ -13,6 +13,7 @@ interface AiActions
     public const ACTIONS = [
         'generate_site' => ['label' => 'Write my website', 'task' => 'site_generation'],
         'rewrite' => ['label' => 'Rewrite this section', 'task' => 'rewrite'],
+        'image' => ['label' => 'Generate an image', 'task' => 'image'],
     ];
 
     /** @return array{action: string, label: string, credits: float, free: bool, balance: float, after: float, allowed: bool, reason: string|null, can_buy: bool} */

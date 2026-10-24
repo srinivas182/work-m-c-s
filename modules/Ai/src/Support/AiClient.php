@@ -10,8 +10,10 @@ use Wurk\Ai\Drivers\AiDriver;
 use Wurk\Ai\Drivers\AnthropicDriver;
 use Wurk\Ai\Drivers\GoogleDriver;
 use Wurk\Ai\Drivers\OpenAiDriver;
+use Wurk\Ai\Drivers\OpenAiImageDriver;
 use Wurk\Ai\Drivers\ProviderFailed;
 use Wurk\Ai\Drivers\SimulatedDriver;
+use Wurk\Ai\Drivers\SimulatedImageDriver;
 use Wurk\Ai\Models\AiRequest;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 
@@ -90,5 +92,37 @@ final readonly class AiClient implements Ai
             'status' => $status, 'error' => $error === null ? null : mb_substr($error, 0, 255), 'fallback' => $fallback,
             'duration_ms' => (int) round((microtime(true) - $started) * 1000), 'created_at' => now(),
         ]);
+    }
+
+    public function image(string $prompt, ?string $tenantId = null): string
+    {
+        $this->checkCaps($tenantId);
+        $chain = array_values(array_filter($this->settings->imageChain(), fn (array $step) => $this->key($step['provider']) !== null));
+        if ($chain === [] && ! app()->environment('production')) {
+            $chain = [['provider' => 'simulated', 'model' => 'simulated']];
+        }
+        // Never real, identifiable people; decorative scenes only.
+        $prompt = mb_substr($prompt, 0, 400).'. A decorative, photographic-style image for a small business website. Do not depict any real, identifiable person, logo or brand.';
+
+        foreach ($chain as $i => $step) {
+            $started = microtime(true);
+            try {
+                $driver = match ($step['provider']) {
+                    'openai' => new OpenAiImageDriver, default => new SimulatedImageDriver
+                };
+                $bytes = $driver->generate($step['model'], $prompt, (string) $this->key($step['provider']));
+                AiRequest::query()->create([
+                    'tenant_id' => $tenantId, 'task' => 'image', 'provider' => $step['provider'], 'model' => $step['model'],
+                    'cost_usd_micro' => $this->settings->imageCostMicro($step['provider'], $step['model']), 'status' => 'succeeded',
+                    'fallback' => $i > 0, 'duration_ms' => (int) round((microtime(true) - $started) * 1000), 'created_at' => now(),
+                ]);
+
+                return $bytes;
+            } catch (ProviderFailed $e) {
+                $this->log($tenantId, 'image', $step, 0, 0, 'failed', $e->getMessage(), $i > 0, $started);
+            }
+        }
+
+        throw new AiUnavailable('WURK AI couldn’t make an image right now. Please try again in a few minutes.');
     }
 }

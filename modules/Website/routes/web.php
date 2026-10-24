@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Website\Http\Controllers\Admin\TemplatesController;
+use Wurk\Website\Http\Controllers\AiImageController;
 use Wurk\Website\Http\Controllers\AiWriterController;
 use Wurk\Website\Http\Controllers\AssetsController;
 use Wurk\Website\Http\Controllers\BlockBoardController;
@@ -44,6 +45,7 @@ Route::tenant(function (): void {
         Route::get('/ai', [AiWriterController::class, 'show'])->name('ai');
         Route::get('/ai/quote', [AiWriterController::class, 'quote'])->name('ai.quote');
         Route::post('/ai/generate', [AiWriterController::class, 'generate'])->middleware('throttle:6,1,ai-generate')->name('ai.generate');
+        Route::post('/ai/image', AiImageController::class)->middleware('throttle:10,1,ai-image')->name('ai.image');
         Route::get('/enquiries', [EnquiriesController::class, 'index'])->name('enquiries');
         Route::put('/enquiries/settings', [EnquiriesController::class, 'settings'])->name('enquiries.settings');
         Route::put('/enquiries/{enquiry}', [EnquiriesController::class, 'status'])->name('enquiries.status');

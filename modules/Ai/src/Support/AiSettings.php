@@ -17,6 +17,9 @@ final readonly class AiSettings
 
     public const TASKS = ['site_generation' => 'Write a website', 'rewrite' => 'Rewrite a section'];
 
+    /** Image providers (Google is added once WURK's key lets us verify its API). */
+    public const IMAGE_PROVIDERS = ['openai' => 'OpenAI', 'simulated' => 'Simulated (development only)'];
+
     public const DEFAULTS = [
         'tasks' => [
             'site_generation' => ['provider' => 'anthropic', 'model' => 'claude-sonnet-5-5'],
@@ -35,6 +38,10 @@ final readonly class AiSettings
         'fx_buffer_pct' => 5,       // placeholder until confirmed
         'target_margin_pct' => 40,  // placeholder until confirmed
         'caps' => ['provider_monthly_usd' => [], 'tenant_daily_requests' => 50],
+        // Images: model and fallback, priced per image (US dollars) — placeholders until WURK's plan is known.
+        'image' => ['provider' => 'openai', 'model' => 'gpt-image-1'],
+        'image_fallback' => [],
+        'image_prices' => ['openai:gpt-image-1' => 0.04, 'simulated:simulated' => 0.0],
     ];
 
     public function __construct(private PlatformSettings $settings) {}
@@ -74,5 +81,25 @@ final readonly class AiSettings
         [$pin, $pout] = $this->all()['prices']["{$provider}:{$model}"] ?? [0.0, 0.0];
 
         return (int) round($in * (float) $pin + $out * (float) $pout); // per-million price × tokens = micro-dollars
+    }
+
+    /** @return list<array{provider: string, model: string}> */
+    public function imageChain(): array
+    {
+        $all = $this->all();
+        $chain = [(array) $all['image']];
+        foreach ((array) $all['image_fallback'] as $f) {
+            if ($f !== $chain[0]) {
+                $chain[] = (array) $f;
+            }
+        }
+
+        /** @var list<array{provider: string, model: string}> $chain */
+        return $chain;
+    }
+
+    public function imageCostMicro(string $provider, string $model): int
+    {
+        return (int) round((float) ($this->all()['image_prices']["{$provider}:{$model}"] ?? 0) * 1_000_000);
     }
 }
