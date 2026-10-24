@@ -1,0 +1,417 @@
+{
+  "category": "car-mechanics",
+  "key": "mechanics-panel-auto-electrical",
+  "name": "Panel beater & auto electrician",
+  "position": 2,
+  "description": "Clean and technical, for panel beaters and auto electricians.",
+  "definition": {
+    "branding": {
+      "primary": "#1D4ED8",
+      "secondary": "#EA580C",
+      "font_pairing": "technical",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "Our work",
+          "type": "page",
+          "page": "work"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Looking like new, running like new",
+                "text": "Panel beating, spray painting and auto electrical repairs.",
+                "primaryLabel": "Get a quote",
+                "primaryHref": "/contact",
+                "secondaryLabel": "Our services",
+                "secondaryHref": "/services",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/mechanics-panel-auto-electrical/hero.jpg",
+                    "alt": "A car being repaired in the workshop"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "What we do",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Panel beating",
+                    "description": "Dents, scratches and accident repairs",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Spray painting",
+                    "description": "Colour-matched paintwork",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Auto electrical",
+                    "description": "Batteries, wiring, starters and alternators",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Before & after",
+                "intro": "",
+                "layout": "slider",
+                "items": []
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why choose us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "check",
+                    "title": "Clear quotes",
+                    "text": "You know the cost before we start."
+                  },
+                  {
+                    "icon": "shield",
+                    "title": "Quality finish",
+                    "text": "Careful preparation and colour matching."
+                  },
+                  {
+                    "icon": "calendar",
+                    "title": "Kept informed",
+                    "text": "We tell you how the work is going."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What clients say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Had a knock or an electrical fault?",
+                "text": "Send us photos and we’ll quote.",
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/contact"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Panel beating",
+                    "description": "Dents, scratches and accident repairs",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Spray painting",
+                    "description": "Colour-matched paintwork",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Insurance work",
+                    "description": "We work with your insurer’s process",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Auto electrical",
+                    "description": "Batteries, wiring, starters and alternators",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Diagnostics",
+                    "description": "Warning lights and electrical faults",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ],
+                "note": ""
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we cover",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "work",
+        "title": "Our work",
+        "slug": "work",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Before & after",
+                "intro": "",
+                "layout": "side-by-side",
+                "items": []
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "In the workshop",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/mechanics-panel-auto-electrical/work.jpg",
+                    "alt": "Bodywork being prepared for paint"
+                  },
+                  {
+                    "src": "/images/templates/mechanics-panel-auto-electrical/hero.jpg",
+                    "alt": "A car being repaired in the workshop"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Get a quote",
+                "intro": "Tell us what happened — photos help.",
+                "services": [
+                  {
+                    "name": "Panel beating"
+                  },
+                  {
+                    "name": "Spray painting"
+                  },
+                  {
+                    "name": "Auto electrical"
+                  },
+                  {
+                    "name": "Something else"
+                  }
+                ],
+                "detailsLabel": "Make, model and what needs fixing",
+                "submitLabel": "Send request"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Find us",
+                "intro": "",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
