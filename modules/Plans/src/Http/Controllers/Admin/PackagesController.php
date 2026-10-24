@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Plans\Actions\PackageCatalog;
+use Wurk\Plans\Contracts\CreditCostEstimates;
 use Wurk\Plans\Models\Package;
 use Wurk\Plans\Models\PackageVersion;
 use Wurk\Plans\Models\TenantSubscription;
@@ -39,7 +40,8 @@ final class PackagesController
     {
         Gate::authorize('packages.manage');
 
-        return Inertia::render('Plans::Admin/PackageForm', ['package' => null, 'modules' => $this->modules->all(), 'versions' => []]);
+        return Inertia::render('Plans::Admin/PackageForm', [
+            'creditCosts' => $this->creditCosts(), 'package' => null, 'modules' => $this->modules->all(), 'versions' => []]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -57,6 +59,7 @@ final class PackagesController
         $package->load('currentVersion');
 
         return Inertia::render('Plans::Admin/PackageForm', [
+            'creditCosts' => $this->creditCosts(),
             'package' => self::present($package),
             'modules' => $this->modules->all(),
             'canManage' => Gate::allows('packages.manage'),
@@ -107,6 +110,7 @@ final class PackagesController
             'max_branches' => ['required', 'integer', 'between:1,1000'],
             'custom_domain' => ['boolean'],
             'monthly_credits' => ['required', 'integer', 'between:0,1000000'],
+            'credit_packs_allowed' => ['boolean'],
             'referral_max_levels' => ['required', 'integer', 'between:0,7'],
             'referral_max_commission' => ['required', 'numeric', 'between:0,80'],
             'managed_fee' => ['nullable', 'numeric', 'between:0,1000000'],
@@ -148,10 +152,21 @@ final class PackagesController
                 'monthly_price' => $v->monthly_price_cents / 100, 'yearly_price' => $v->yearly_price_cents / 100,
                 'trial_days' => $v->trial_days, 'storage_mb' => $v->storage_mb, 'staff_limit' => $v->staff_limit,
                 'multi_branch' => $v->multi_branch, 'max_branches' => $v->max_branches, 'custom_domain' => $v->custom_domain,
-                'monthly_credits' => $v->monthly_credits, 'referral_max_levels' => $v->referral_max_levels,
+                'monthly_credits' => $v->monthly_credits, 'credit_packs_allowed' => $v->credit_packs_allowed, 'referral_max_levels' => $v->referral_max_levels,
                 'referral_max_commission' => $v->referral_max_commission_bp / 100,
                 'managed_fee' => $v->managed_fee_cents === null ? null : $v->managed_fee_cents / 100, 'modules' => $v->modules,
             ],
         ];
+    }
+
+    /** @return array{perCredit: array<string, mixed>, assumptions: array<string, float>}|null */
+    private function creditCosts(): ?array
+    {
+        if (! app()->bound(CreditCostEstimates::class)) {
+            return null;
+        }
+        $estimates = app(CreditCostEstimates::class);
+
+        return ['perCredit' => $estimates->perCredit(), 'assumptions' => $estimates->assumptions()];
     }
 }

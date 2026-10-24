@@ -23,6 +23,7 @@ export interface Terms {
   max_branches: number;
   custom_domain: boolean;
   monthly_credits: number;
+  credit_packs_allowed: boolean;
   referral_max_levels: number;
   referral_max_commission: number;
   managed_fee: number | null;

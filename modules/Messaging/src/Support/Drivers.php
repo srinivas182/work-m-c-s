@@ -20,6 +20,20 @@ final class Drivers
     /** @return array<string, array<string, array{name: string, class?: class-string, fields: array<string, array{label: string, secret: bool}>, settings: array<string, string>}>> */
     public static function catalogue(): array
     {
+        // Every message provider records what a message costs WURK, for the package cost tip.
+        $catalogue = self::providers();
+        foreach (['sms', 'whatsapp', 'email'] as $channel) {
+            foreach ($catalogue[$channel] as $key => $driver) {
+                $catalogue[$channel][$key]['settings']['cost_zar'] = 'Your cost per message in rands (for pricing estimates)';
+            }
+        }
+
+        return $catalogue;
+    }
+
+    /** @return array<string, array<string, array{name: string, class?: class-string, fields: array<string, array{label: string, secret: bool}>, settings: array<string, string>}>> */
+    private static function providers(): array
+    {
         $smsSettings = ['sender' => 'Sender ID or number'];
 
         return [

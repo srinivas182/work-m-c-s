@@ -28,6 +28,71 @@ import {
 import AppShell from '@/layouts/AppShell';
 import { rand, type PackageData } from './Packages';
 
+interface CreditCosts {
+  perCredit: Record<string, { label: string; zar_per_credit: number | null }>;
+  assumptions: { fx_zar_per_usd: number; fx_buffer_pct: number; target_margin_pct: number };
+}
+
+const rands = (n: number) =>
+  `R${n.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/** What the credits cost WURK if fully used — a range across channels — and a safe price per extra credit. */
+function CostTip({
+  credits,
+  monthlyPrice,
+  costs,
+}: {
+  credits: number;
+  monthlyPrice: number;
+  costs: CreditCosts;
+}) {
+  const entries = Object.values(costs.perCredit);
+  const known = entries
+    .filter((e) => e.zar_per_credit !== null)
+    .map((e) => ({ ...e, zar: e.zar_per_credit as number }));
+  const missing = entries.filter((e) => e.zar_per_credit === null).map((e) => e.label);
+  if (credits <= 0 || known.length === 0) {
+    return missing.length > 0 ? (
+      <p className="text-fg-muted text-sm">Costs not set yet for: {missing.join(', ')}.</p>
+    ) : null;
+  }
+  const cheapest = known.reduce((a, b) => (a.zar <= b.zar ? a : b));
+  const dearest = known.reduce((a, b) => (a.zar >= b.zar ? a : b));
+  const margin = costs.assumptions.target_margin_pct / 100;
+  return (
+    <div
+      role="note"
+      aria-label="Estimated cost of these credits"
+      className="bg-surface grid gap-1.5 rounded-xl p-4 text-sm"
+    >
+      <p className="font-semibold">
+        {credits.toLocaleString('en-ZA')} credits — your cost if fully used:{' '}
+        {rands(credits * cheapest.zar)}–{rands(credits * dearest.zar)} / month
+      </p>
+      <p className="text-fg-muted">
+        Cheapest: all {cheapest.label} · Most expensive: all {dearest.label}
+        {monthlyPrice > 0 && (
+          <>
+            {' '}
+            · up to {Math.round(((credits * dearest.zar) / monthlyPrice) * 100)}% of the R
+            {monthlyPrice.toLocaleString('en-ZA')} monthly price
+          </>
+        )}
+      </p>
+      <p>
+        At your {costs.assumptions.target_margin_pct}% margin, sell extra credits for at least{' '}
+        <strong>{rands(dearest.zar / (1 - margin))}</strong> each.
+      </p>
+      <p className="text-fg-muted text-xs">
+        Allowance credits expire monthly and many businesses won’t use them all, so real cost is
+        usually lower. AI costs use R{costs.assumptions.fx_zar_per_usd} per US dollar plus a{' '}
+        {costs.assumptions.fx_buffer_pct}% buffer.
+        {missing.length > 0 && <> Not included yet (cost not set): {missing.join(', ')}.</>}
+      </p>
+    </div>
+  );
+}
+
 interface Props {
   package: PackageData | null;
   modules: Record<string, { name: string; installed: boolean }>;
@@ -39,9 +104,16 @@ interface Props {
     subscribers: number;
   }[];
   canManage?: boolean;
+  creditCosts?: CreditCosts | null;
 }
 
-export default function PackageForm({ package: pkg, modules, versions, canManage = true }: Props) {
+export default function PackageForm({
+  package: pkg,
+  modules,
+  versions,
+  canManage = true,
+  creditCosts = null,
+}: Props) {
   const t = pkg?.terms;
   const form = useForm({
     key: pkg?.key ?? '',
@@ -59,6 +131,7 @@ export default function PackageForm({ package: pkg, modules, versions, canManage
     max_branches: t?.max_branches ?? 1,
     custom_domain: t?.custom_domain ?? false,
     monthly_credits: t?.monthly_credits ?? 100,
+    credit_packs_allowed: t?.credit_packs_allowed ?? true,
     referral_max_levels: t?.referral_max_levels ?? 7,
     referral_max_commission: t?.referral_max_commission ?? 30,
     managed_fee: t?.managed_fee ?? '',
@@ -216,6 +289,23 @@ export default function PackageForm({ package: pkg, modules, versions, canManage
                   onChange={number('monthly_credits')}
                 />
               </Field>
+              {creditCosts && (
+                <div className="sm:col-span-2">
+                  <CostTip
+                    credits={Number(form.data.monthly_credits) || 0}
+                    monthlyPrice={Number(form.data.monthly_price) || 0}
+                    costs={creditCosts}
+                  />
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="packs"
+                  checked={form.data.credit_packs_allowed}
+                  onCheckedChange={(v) => form.setData('credit_packs_allowed', v)}
+                />
+                <Label htmlFor="packs">Can buy credit packs</Label>
+              </div>
               <div className="flex items-center gap-3">
                 <Switch
                   id="multi"

@@ -49,6 +49,7 @@ interface Props {
   };
   card: { brand: string | null; last4: string | null; expires: string | null } | null;
   packs: { id: string; name: string; credits: number; total_cents: number }[];
+  creditPacksAllowed: boolean;
   payments: {
     id: string;
     at: string;
@@ -557,6 +558,7 @@ export default function Billing({
   account,
   card,
   packs,
+  creditPacksAllowed,
   payments,
   gatewayReady,
   debitOrders,
@@ -686,6 +688,17 @@ export default function Billing({
         </Card>
 
         <DebitOrder debitOrders={debitOrders} />
+
+        {!creditPacksAllowed && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Need more WURK Credits?</CardTitle>
+              <CardDescription>
+                Your package doesn’t include buying credit packs. Upgrade for more monthly credits.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
 
         {packs.length > 0 && (
           <Card>
