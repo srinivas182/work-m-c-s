@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 // The block design board: every block, two very different brands, accessibility-scanned.
-for (const business of ['salon', 'dental']) {
+for (const business of ['salon', 'dental', 'sections']) {
   test(`blocks are accessible for the ${business} sample`, async ({ page }) => {
     await page.goto(`/_blocks?business=${business}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

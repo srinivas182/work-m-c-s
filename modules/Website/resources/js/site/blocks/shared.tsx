@@ -1,3 +1,4 @@
+import { createContext, useContext } from 'react';
 import { ImagePlus } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -28,12 +29,25 @@ export function Section({
   );
 }
 
+/**
+ * Section headings are level 2. On a page without a Hero, the renderer marks the
+ * first section so its heading becomes the page's main heading (exactly one h1).
+ */
+export const MainHeading = createContext(false);
+
+/** A section title keeping its block's own styling; the page's main heading when its section is marked. */
+export function SectionTitle({ className, children }: { className: string; children: ReactNode }) {
+  const Tag = useContext(MainHeading) ? 'h1' : 'h2';
+  return <Tag className={className}>{children}</Tag>;
+}
+
 export function Heading({ children, intro }: { children: ReactNode; intro?: string }) {
+  const Tag = useContext(MainHeading) ? 'h1' : 'h2';
   return (
     <>
-      <h2 className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] text-balance sm:text-4xl">
+      <Tag className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] text-balance sm:text-4xl">
         {children}
-      </h2>
+      </Tag>
       {intro && <p className="mt-4 max-w-2xl text-lg text-[var(--s-fg-muted)]">{intro}</p>}
     </>
   );

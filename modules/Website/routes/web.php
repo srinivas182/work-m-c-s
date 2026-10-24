@@ -9,9 +9,11 @@ use Wurk\Website\Http\Controllers\BlockBoardController;
 use Wurk\Website\Http\Controllers\BrandingController;
 use Wurk\Website\Http\Controllers\DraftController;
 use Wurk\Website\Http\Controllers\EditorController;
+use Wurk\Website\Http\Controllers\EnquiriesController;
 use Wurk\Website\Http\Controllers\MenusController;
 use Wurk\Website\Http\Controllers\PagesController;
 use Wurk\Website\Http\Controllers\PreviewController;
+use Wurk\Website\Http\Controllers\QuoteFormController;
 use Wurk\Website\Http\Controllers\TemplatePreviewController;
 
 Route::get('/_blocks', BlockBoardController::class)->name('website.block-board');
@@ -38,6 +40,9 @@ Route::tenant(function (): void {
         Route::get('/photos', [AssetsController::class, 'index'])->name('photos');
         Route::post('/photos', [AssetsController::class, 'store'])->middleware('throttle:60,1,website-photos')->name('photos.store');
         Route::get('/preview', PreviewController::class)->name('preview');
+        Route::get('/enquiries', [EnquiriesController::class, 'index'])->name('enquiries');
+        Route::put('/enquiries/settings', [EnquiriesController::class, 'settings'])->name('enquiries.settings');
+        Route::put('/enquiries/{enquiry}', [EnquiriesController::class, 'status'])->name('enquiries.status');
         Route::get('/menus', [MenusController::class, 'show'])->name('menus');
         Route::put('/menus', [MenusController::class, 'update'])->name('menus.update');
         Route::get('/branding', [BrandingController::class, 'show'])->name('branding');
@@ -67,3 +72,9 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
     Route::get('/{template}/pages/{page}/edit', [TemplatesController::class, 'editPage'])->name('.pages.edit');
     Route::put('/{template}/pages/{page}/draft', [TemplatesController::class, 'saveDraft'])->middleware('throttle:120,1,template-draft')->name('.pages.draft');
 });
+
+// Public quote forms: no session or CSRF (nothing signed in to protect); hidden field,
+// per-visitor limit and a daily cap per business guard against spam.
+Route::domain((string) config('wurk.domains.app'))->withoutMiddleware(['web'])
+    ->middleware('throttle:5,10,quote-form')
+    ->post('/forms/{handle}/quote', QuoteFormController::class)->name('website.forms.quote');

@@ -51,12 +51,14 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
             ['label' => 'Pages', 'route' => 'tenant.website.pages', 'icon' => 'globe', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 100],
             ['label' => 'Branding', 'route' => 'tenant.website.branding', 'icon' => 'palette', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
             ['label' => 'Templates', 'route' => 'admin.templates', 'icon' => 'layout-template', 'section' => 'Platform', 'permission' => 'templates.manage', 'order' => 60],
+            ['label' => 'Enquiries', 'route' => 'tenant.website.enquiries', 'icon' => 'inbox', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 103],
             ['label' => 'Menus', 'route' => 'tenant.website.menus', 'icon' => 'menu', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 101],
         ];
     }
 
     protected function bootModule(): void
     {
+        $this->loadViewsFrom($this->modulePath('resources/views'), 'website');
         if ($this->app->runningInConsole()) {
             $this->commands([SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class]);
         }

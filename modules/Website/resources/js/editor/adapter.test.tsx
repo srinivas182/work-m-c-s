@@ -83,26 +83,26 @@ function filled(
   // Rendered with and without photos: blocks take different paths (e.g. initials
   // when a team member has no photo), and both must be safe.
   const photo = withPhotos ? '/storage/sites/t/p-1600.webp' : '';
+  // Lists are filled recursively (e.g. a menu's sections → dishes), so nested fields render too.
+  const item = (itemFields: Record<string, Field>): Record<string, unknown> =>
+    Object.fromEntries(
+      Object.entries(itemFields).map(([k, f]) => [
+        k,
+        f.kind === 'money'
+          ? 45000
+          : f.kind === 'select'
+            ? f.options[0]?.value
+            : f.kind === 'list'
+              ? [item(f.item)]
+              : f.kind === 'image'
+                ? photo
+                : `${k} value`,
+      ]),
+    );
   const props: Record<string, unknown> = { ...defaults };
   for (const [key, field] of Object.entries(fields)) {
     if (field.kind === 'image') props[key] = photo;
-    if (field.kind === 'list') {
-      const item = Object.fromEntries(
-        Object.entries(field.item).map(([k, f]) => [
-          k,
-          f.kind === 'money'
-            ? 45000
-            : f.kind === 'select'
-              ? f.options[0]?.value
-              : f.kind === 'list'
-                ? []
-                : f.kind === 'image'
-                  ? photo
-                  : `${k} value`,
-        ]),
-      );
-      props[key] = [item];
-    }
+    if (field.kind === 'list') props[key] = [item(field.item)];
   }
   return props;
 }

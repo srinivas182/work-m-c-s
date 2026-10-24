@@ -31,8 +31,8 @@ const render = (blocks: ContentDocument['blocks'], editing = false) =>
   );
 
 describe('block library', () => {
-  it('has 14 blocks whose types and versions the server accepts', () => {
-    expect(Object.keys(BLOCKS)).toHaveLength(14);
+  it('has 24 blocks whose types and versions the server accepts', () => {
+    expect(Object.keys(BLOCKS)).toHaveLength(24);
     for (const [type, def] of Object.entries(BLOCKS)) {
       expect(type).toMatch(/^[A-Z][A-Za-z0-9]{1,40}$/);
       expect(def.type).toBe(type);
@@ -130,5 +130,32 @@ describe('block library', () => {
   it('scopes each site’s theme to its own root', () => {
     const html = render([]);
     expect(html).toMatch(/class="wurk-site" style="--s-bg:/);
+  });
+});
+
+describe('main heading', () => {
+  const page = (types: string[]) =>
+    renderToString(
+      <SiteRenderer
+        document={{
+          schema: 1,
+          blocks: types.map((type, i) => ({
+            id: `b${i}`,
+            type,
+            version: BLOCKS[type]!.version,
+            props: { heading: `${type} heading` },
+          })),
+        }}
+        branding={branding}
+        site={site}
+      />,
+    );
+  const count = (html: string) => (html.match(/<h1[\s>]/g) ?? []).length;
+
+  it('gives every page exactly one main heading', () => {
+    expect(count(page(['Header', 'Hero', 'Text', 'Footer']))).toBe(1); // the Hero's
+    const noHero = page(['Header', 'PromotionBanner', 'ServicesPrices', 'Text', 'Footer']);
+    expect(count(noHero)).toBe(1); // the first section's, not the banner's
+    expect(noHero).toMatch(/<h1[^>]*>ServicesPrices heading<\/h1>/);
   });
 });

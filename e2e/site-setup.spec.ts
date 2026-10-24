@@ -42,5 +42,6 @@ test('an owner sets up menus and branding, then previews the site', async ({ pag
   if (nav) await nav.click();
   await page.getByRole('link', { name: 'Our prices' }).first().click();
   await expect(page).toHaveURL(/\/website\/preview\?page=specials$/);
-  await expect(page.getByRole('heading', { level: 2, name: 'Specials' })).toBeVisible();
+  // No Hero on this page: its first section's heading is the page's main heading.
+  await expect(page.getByRole('heading', { level: 1, name: 'Specials' })).toBeVisible();
 });

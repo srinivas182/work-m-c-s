@@ -12,6 +12,16 @@ import { ServicesPrices } from './blocks/ServicesPrices';
 import { Team } from './blocks/Team';
 import { Testimonials } from './blocks/Testimonials';
 import { Text } from './blocks/Text';
+import { BeforeAfter } from './blocks/BeforeAfter';
+import { Packages } from './blocks/Packages';
+import { ClassTimetable } from './blocks/ClassTimetable';
+import { FoodMenu } from './blocks/FoodMenu';
+import { RoomsRates } from './blocks/RoomsRates';
+import { Portfolio } from './blocks/Portfolio';
+import { Accreditations } from './blocks/Accreditations';
+import { ServiceAreas } from './blocks/ServiceAreas';
+import { QuoteForm } from './blocks/QuoteForm';
+import { PromotionBanner } from './blocks/PromotionBanner';
 import type { BlockDefinition } from './types';
 
 type AnyBlock = BlockDefinition<Record<string, unknown>>;
@@ -31,6 +41,16 @@ export const BLOCKS: Record<string, AnyBlock> = Object.fromEntries(
     OpeningHours,
     Contact,
     Faq,
+    BeforeAfter,
+    Packages,
+    ClassTimetable,
+    FoodMenu,
+    RoomsRates,
+    Portfolio,
+    Accreditations,
+    ServiceAreas,
+    QuoteForm,
+    PromotionBanner,
     Text,
     CallToAction,
     Footer,
