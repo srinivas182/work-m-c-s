@@ -15,6 +15,6 @@ final class BlockBoardController
     {
         abort_if(app()->environment('production'), 404);
 
-        return Inertia::render('Website::BlockBoard', ['business' => $request->query('business') === 'dental' ? 'dental' : 'salon']);
+        return Inertia::render('Website::BlockBoard', ['business' => in_array($request->query('business'), ['dental', 'sections'], true) ? $request->query('business') : 'salon']);
     }
 }

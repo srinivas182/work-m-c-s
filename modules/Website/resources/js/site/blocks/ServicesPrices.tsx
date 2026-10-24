@@ -1,5 +1,6 @@
 import { rand } from '@/lib/money';
 import type { BlockDefinition } from '../types';
+import { SectionTitle } from './shared';
 
 export interface ServiceItem {
   name: string;
@@ -57,9 +58,9 @@ export const ServicesPrices: BlockDefinition<ServicesPricesProps> = {
       {/* Same left edge as the other sections; the list keeps a comfortable reading width. */}
       <div className="mx-auto max-w-6xl">
         <div className="max-w-3xl">
-          <h2 className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] sm:text-4xl">
+          <SectionTitle className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] sm:text-4xl">
             {p.heading}
-          </h2>
+          </SectionTitle>
           {p.intro && <p className="mt-4 text-lg text-[var(--s-fg-muted)]">{p.intro}</p>}
           <ul className="mt-10 grid gap-7">
             {p.items.map((item, i) => (

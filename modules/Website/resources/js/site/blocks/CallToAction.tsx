@@ -1,4 +1,5 @@
 import type { BlockDefinition } from '../types';
+import { SectionTitle } from './shared';
 
 export interface CallToActionProps extends Record<string, unknown> {
   heading: string;
@@ -28,9 +29,9 @@ export const CallToAction: BlockDefinition<CallToActionProps> = {
     <section className="px-5 py-10 sm:px-8 sm:py-14">
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 rounded-[calc(var(--s-radius)*1.5)] bg-[var(--s-brand)] px-8 py-12 text-[var(--s-on-brand)] sm:px-12 md:flex-row md:items-center">
         <div className="max-w-2xl">
-          <h2 className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] text-balance sm:text-4xl">
+          <SectionTitle className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] text-balance sm:text-4xl">
             {p.heading}
-          </h2>
+          </SectionTitle>
           {p.text && <p className="mt-3 text-lg opacity-90">{p.text}</p>}
         </div>
         {p.buttonLabel && (

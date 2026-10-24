@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '../types';
-import { paragraphs, PhotoPrompt, Section, photoSrcSet } from './shared';
+import { paragraphs, PhotoPrompt, Section, photoSrcSet, SectionTitle } from './shared';
 
 export interface ImageTextProps extends Record<string, unknown> {
   heading: string;
@@ -62,9 +62,9 @@ export const ImageText: BlockDefinition<ImageTextProps> = {
         >
           {hasPhoto && <div className={p.imageSide === 'right' ? 'md:order-2' : ''}>{photo}</div>}
           <div>
-            <h2 className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] text-balance sm:text-4xl">
+            <SectionTitle className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] text-balance sm:text-4xl">
               {p.heading}
-            </h2>
+            </SectionTitle>
             <div className="mt-5 grid gap-4 text-lg leading-relaxed text-[var(--s-fg-muted)]">
               {paragraphs(p.text).map((t, i) => (
                 <p key={i}>{t}</p>

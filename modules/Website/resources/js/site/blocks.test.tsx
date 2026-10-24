@@ -132,3 +132,30 @@ describe('block library', () => {
     expect(html).toMatch(/class="wurk-site" style="--s-bg:/);
   });
 });
+
+describe('main heading', () => {
+  const page = (types: string[]) =>
+    renderToString(
+      <SiteRenderer
+        document={{
+          schema: 1,
+          blocks: types.map((type, i) => ({
+            id: `b${i}`,
+            type,
+            version: BLOCKS[type]!.version,
+            props: { heading: `${type} heading` },
+          })),
+        }}
+        branding={branding}
+        site={site}
+      />,
+    );
+  const count = (html: string) => (html.match(/<h1[\s>]/g) ?? []).length;
+
+  it('gives every page exactly one main heading', () => {
+    expect(count(page(['Header', 'Hero', 'Text', 'Footer']))).toBe(1); // the Hero's
+    const noHero = page(['Header', 'PromotionBanner', 'ServicesPrices', 'Text', 'Footer']);
+    expect(count(noHero)).toBe(1); // the first section's, not the banner's
+    expect(noHero).toMatch(/<h1[^>]*>ServicesPrices heading<\/h1>/);
+  });
+});
