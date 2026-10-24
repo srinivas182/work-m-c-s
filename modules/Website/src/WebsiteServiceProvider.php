@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Website;
 
+use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\InstallTemplatesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
@@ -14,6 +15,7 @@ use Wurk\Website\Support\EloquentSiteTemplates;
 use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteAssets;
 use Wurk\Website\Support\SiteBuilder;
+use Wurk\Website\Support\StorageMeter;
 use Wurk\Website\Support\Templates;
 use Wurk\Website\Support\TemplateSwitcher;
 
@@ -21,6 +23,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->tag([StorageMeter::class], UsageMeter::TAG);
         $this->mergeConfigFrom($this->modulePath('config/website.php'), 'website');
         $this->app->singleton(Branding::class);
         $this->app->scoped(Pages::class);

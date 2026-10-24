@@ -18,8 +18,10 @@ use Wurk\Access\Http\Middleware\RequirePermission;
 use Wurk\Access\Listeners\GrantAccessOnMembership;
 use Wurk\Access\Models\PlatformRole;
 use Wurk\Access\Permissions\PermissionRegistry;
+use Wurk\Access\Support\StaffMeter;
 use Wurk\Identity\Events\MembershipGranted;
 use Wurk\Identity\Events\StaffGranted;
+use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Tenancy\Events\TenantEntered;
 use Wurk\Tenancy\Events\TenantLeft;
@@ -28,6 +30,7 @@ final class AccessServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->tag([StaffMeter::class], UsageMeter::TAG);
         $this->app->singleton(PermissionRegistry::class);
         $this->app->singleton(AccessManager::class);
     }
