@@ -1,0 +1,16 @@
+{
+    "name": "Ai",
+    "key": "ai",
+    "version": "0.1.0",
+    "description": "WURK AI: AI providers with fallback, model per task, usage and cost logging, credit-charged actions.",
+    "core": false,
+    "entitlement": "ai-assistant",
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "messaging",
+        "security",
+        "credits",
+        "audit"
+    ]
+}

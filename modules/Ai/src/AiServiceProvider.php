@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Wurk\Ai;
+
+use Wurk\Ai\Contracts\Ai;
+use Wurk\Ai\Support\AiClient;
+use Wurk\Ai\Support\AiSettings;
+use Wurk\Platform\Modules\ModuleServiceProvider;
+
+final class AiServiceProvider extends ModuleServiceProvider
+{
+    public function register(): void
+    {
+        $this->app->singleton(AiSettings::class);
+        $this->app->singleton(Ai::class, AiClient::class);
+    }
+}
