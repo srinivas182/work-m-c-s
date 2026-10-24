@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 7 · four weeks (sprint plan revision 3) |
-| **Status** | Approved 24 Oct 2026 — 7.1 ✅ (#49), 7.2 ✅ (#50), 7.3 ✅ (#51), 7.4 in review |
+| **Status** | Approved 24 Oct 2026 — 7.1 ✅ (#49), 7.2 ✅ (#50), 7.3 ✅ (#51), 7.4 ✅ (#52), 7.5 in review |
 | **Depends on** | v0.6.0 (template system, category sections, WURK AI, first 10 templates) |
 | **Delivery** | 6 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -60,7 +60,7 @@ Same standard as Sprint 6 (approved): two distinct designs per category; honest 
 |---|---|
 | Launch checklist | Guided steps with progress: logo and colours, services and prices, opening hours, contact details, photos, review legal pages, publish. Each step links straight to where it's done |
 | In-editor tips | Short, dismissible hints at the moments owners get stuck |
-| Performance budget | Mobile performance ≥ 90 for every template, measured automatically in CI (Lighthouse) — not yet measured |
+| Performance budget | **Revised 25 Oct 2026 after measuring.** Template previews scored 65–71 on mobile (Lighthouse): the preview is built in the browser (HTML arrives empty; ~250 KB of back-office JavaScript runs before the hero image loads → LCP 5.2 s), and the display font arrives after first paint (layout shift 0.116). Template-level fixes made now: photos as responsive WebP (phone size ~⅕ of the JPEGs). **The ≥ 90 mobile gate (and layout shift < 0.1) moves to Sprint 5**, measured on real public pages, which must be ready-made HTML with preloaded fonts, size-matched fallbacks and minimal JavaScript |
 | Carried over from Sprint 6 | One money format across the app (the package pages use a second formatter); links named only "Edit" on the packages page given distinct names |
 | Found in 7.3 | The editor's "add item" buttons in list fields (from the Puck library) are icon-only with no accessible name — name them (e.g. "Add a photo") |
 
@@ -104,4 +104,5 @@ At least five non-technical owners each launch a site from signup without help, 
 | 7.1 Templates II, part 1 | #49 | 658 backend tests on SQLite and MySQL 8; 301 frontend; 80 browser checks incl. every page of all 16 templates. Found: empty sections showed orphan headings on the live site (also in Sprint 6 templates) — now hidden; three invented policies in copy |
 | 7.2 Templates II, part 2 | #50 | All 24 templates. 658 backend tests on SQLite and MySQL 8; 341 frontend; 386 browser checks incl. 338 template page checks (every page of all 24, desktop and phone). Found: safety claims and an invented class size in education copy |
 | 7.3 AI images & media library | #51 | 668 backend tests on SQLite and MySQL 8; 343 frontend; media page in the browser suite. Google image provider deferred until a key allows verifying its API; image prices are placeholders. Found: photo usage detection missed every use (escaped slashes in stored JSON) — a photo in use could have been deleted |
-| 7.4 My plan & usage | see PR | 675 backend tests on SQLite and MySQL 8; 343 frontend; 52 browser checks (template page checks unchanged). Found: usage counted refunds as spent; team-member limit never enforced; a circular module dependency of my own making, fixed |
+| 7.4 My plan & usage | #52 | 675 backend tests on SQLite and MySQL 8; 343 frontend; 52 browser checks (template page checks unchanged). Found: usage counted refunds as spent; team-member limit never enforced; a circular module dependency of my own making, fixed |
+| 7.5 Launch checklist & quality | see PR | 678 backend tests on SQLite and MySQL 8; 343 frontend; 57 browser checks (template page checks in CI). Measured performance for the first time (65–71 mobile on previews): ≥ 90 gate moved to Sprint 5 public pages. Found: four editor accessibility issues in Puck’s chrome; tips covering the page on phones; two money formats; an unproven claim |

@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/hospitality-hotel/hero.jpg",
+                    "src": "/images/templates/hospitality-hotel/hero-1600.webp",
                     "alt": "The guesthouse at dusk"
                   }
                 ],
@@ -100,7 +100,7 @@
                 "rooms": [
                   {
                     "name": "Standard room",
-                    "photo": "/images/templates/hospitality-hotel/room-1.jpg",
+                    "photo": "/images/templates/hospitality-hotel/room-1-1600.webp",
                     "photoAlt": "A double bedroom",
                     "sleeps": "2 adults",
                     "price": 0,
@@ -109,7 +109,7 @@
                   },
                   {
                     "name": "Family room",
-                    "photo": "/images/templates/hospitality-hotel/room-2.jpg",
+                    "photo": "/images/templates/hospitality-hotel/room-2-1600.webp",
                     "photoAlt": "A family room with two beds",
                     "sleeps": "2 adults, 2 children",
                     "price": 0,
@@ -157,15 +157,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/hospitality-hotel/lounge.jpg",
+                    "src": "/images/templates/hospitality-hotel/lounge-1600.webp",
                     "alt": "The guest lounge"
                   },
                   {
-                    "src": "/images/templates/hospitality-hotel/garden.jpg",
+                    "src": "/images/templates/hospitality-hotel/garden-1600.webp",
                     "alt": "The garden"
                   },
                   {
-                    "src": "/images/templates/hospitality-hotel/room-1.jpg",
+                    "src": "/images/templates/hospitality-hotel/room-1-1600.webp",
                     "alt": "A double bedroom"
                   }
                 ]
@@ -230,7 +230,7 @@
                 "rooms": [
                   {
                     "name": "Standard room",
-                    "photo": "/images/templates/hospitality-hotel/room-1.jpg",
+                    "photo": "/images/templates/hospitality-hotel/room-1-1600.webp",
                     "photoAlt": "A double bedroom",
                     "sleeps": "2 adults",
                     "price": 0,
@@ -239,7 +239,7 @@
                   },
                   {
                     "name": "Family room",
-                    "photo": "/images/templates/hospitality-hotel/room-2.jpg",
+                    "photo": "/images/templates/hospitality-hotel/room-2-1600.webp",
                     "photoAlt": "A family room with two beds",
                     "sleeps": "2 adults, 2 children",
                     "price": 0,
@@ -308,19 +308,19 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/hospitality-hotel/hero.jpg",
+                    "src": "/images/templates/hospitality-hotel/hero-1600.webp",
                     "alt": "The guesthouse at dusk"
                   },
                   {
-                    "src": "/images/templates/hospitality-hotel/lounge.jpg",
+                    "src": "/images/templates/hospitality-hotel/lounge-1600.webp",
                     "alt": "The guest lounge"
                   },
                   {
-                    "src": "/images/templates/hospitality-hotel/garden.jpg",
+                    "src": "/images/templates/hospitality-hotel/garden-1600.webp",
                     "alt": "The garden"
                   },
                   {
-                    "src": "/images/templates/hospitality-hotel/room-2.jpg",
+                    "src": "/images/templates/hospitality-hotel/room-2-1600.webp",
                     "alt": "A family room"
                   }
                 ]

@@ -11,6 +11,7 @@ use Inertia\Response;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\Site;
+use Wurk\Website\Support\LaunchChecklist;
 use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\Templates;
 use Wurk\Website\Support\TemplateSwitcher;
@@ -34,6 +35,7 @@ final class PagesController
             'canPublish' => (bool) $request->user()?->can('website.publish'),
             'base' => route('tenant.website.pages', [], false),
             'design' => $this->design(),
+            'checklist' => app(LaunchChecklist::class)->steps(),
         ]);
     }
 
@@ -104,5 +106,14 @@ final class PagesController
         $category = collect(app(Templates::class)->catalogue())->firstWhere('key', $site->category_key);
 
         return ['current' => $site->template_key, 'options' => $category['templates'] ?? []];
+    }
+
+    /** Confirm (or un-confirm) a launch step that can't be judged from the site itself. */
+    public function confirmStep(Request $request, string $step, LaunchChecklist $checklist): RedirectResponse
+    {
+        abort_unless(in_array($step, LaunchChecklist::CONFIRMABLE, true), 404);
+        $checklist->confirm($step, (bool) $request->boolean('done', true), (string) $request->user()?->getAuthIdentifier());
+
+        return back();
     }
 }

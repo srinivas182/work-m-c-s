@@ -4,6 +4,21 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 7.5 (launch checklist and quality)
+- **Launch checklist** at the top of Website → Pages: logo, contact details, prices, your own photos, opening hours, legal pages, publish — each judged from the site’s real state (or confirmed by the owner where it can’t be), each linking straight to where it’s done.
+- **Editing tips** in the editor: three short tips that step through, dismiss, and stay dismissed; on phones they sit above the bottom controls and close when the owner taps elsewhere.
+- Template guard: every template photo must be a 1600 px WebP with its 640 px phone size.
+
+### Changed
+- Template photos are responsive WebP sizes (phone size about a fifth of the JPEGs).
+- **Performance gate moved to Sprint 5** after measuring: template previews score 65–71 on mobile because the preview is built in the browser; the ≥ 90 gate (and layout shift < 0.1) will be enforced on real public pages served as ready-made HTML.
+- One money format across WURK (the package pages and WURK AI admin used locale formatting, e.g. “R0,28”).
+
+### Fixed
+- Editor accessibility (Puck’s chrome): unnamed list “add” buttons, untitled preview frame, unlabelled zoom control, invalid label on the loading indicator — found by the first scan of the editor with its fields panel open.
+- Package “Edit/View” links named per package; checklist buttons name their visible words first (label in name).
+- An unproven “under an hour” claim and stale copy (“the editor and preview arrive next”) on the Pages screen.
+
 ### Added — Sprint 7.4 (Plan & usage)
 - **Settings → Plan & usage** (was “WURK Credits”): renewal date and amount (incl. VAT); monthly credits, storage and team members as accessible progress bars; the balance in rands (cheapest pack, incl. VAT); when monthly credits expire vs bought credits that never expire; usage by type; the price list; statement download (CSV).
 - **Spending limits**: a monthly limit for the business (set by those who manage billing) and per staff member, enforced when credits are charged, inside the balance lock. A limit is a kind of “insufficient credits”, so messaging and WURK AI handle it automatically; AI quotes explain a limit instead of offering an action that would be refused.

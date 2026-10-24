@@ -2,6 +2,8 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
   ArrowDown,
   ArrowUp,
+  CheckCircle2,
+  Circle,
   FilePlus2,
   Home,
   MoreHorizontal,
@@ -28,6 +30,7 @@ import {
   Input,
   PageHeader,
   Textarea,
+  CardDescription,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 
@@ -46,6 +49,14 @@ interface Props {
   canPublish: boolean;
   /** Absolute path of the pages endpoints, e.g. /glow-salon/website/pages */
   base: string;
+  checklist?: {
+    key: string;
+    label: string;
+    hint: string;
+    done: boolean;
+    href: string;
+    confirm: boolean;
+  }[];
   design: {
     current: string | null;
     options: { key: string; name: string; description: string | null }[];
@@ -211,7 +222,90 @@ function DesignCard({ base, design }: { base: string; design: NonNullable<Props[
   );
 }
 
-export default function Pages({ pages, deleted, base, design }: Props) {
+/** From template to a site the owner is proud of — each step from the site's real state. */
+function LaunchChecklist({
+  steps,
+  base,
+}: {
+  steps: NonNullable<Props['checklist']>;
+  base: string;
+}) {
+  const done = steps.filter((s) => s.done).length;
+  if (steps.length === 0) return null;
+  if (done === steps.length) {
+    return (
+      <p
+        role="status"
+        className="bg-success-3 text-success-11 flex items-center gap-2 rounded-xl px-4 py-3 font-medium"
+      >
+        <CheckCircle2 className="size-5" aria-hidden /> Your website is launched. Keep it fresh —
+        edit any page whenever you like.
+      </p>
+    );
+  }
+  const pct = Math.round((done / steps.length) * 100);
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Launch your website</CardTitle>
+        <CardDescription>
+          {done} of {steps.length} done. Each step takes a few minutes.
+        </CardDescription>
+        <div
+          role="progressbar"
+          aria-label="Launch progress"
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          className="bg-surface mt-2 h-2 overflow-hidden rounded-full"
+        >
+          <div className="bg-brand-9 h-full rounded-full" style={{ width: `${pct}%` }} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ol className="grid gap-3" aria-label="Launch steps">
+          {steps.map((s) => (
+            <li key={s.key} className="flex items-start gap-3">
+              {s.done ? (
+                <CheckCircle2 className="text-success-9 mt-0.5 size-5 shrink-0" aria-hidden />
+              ) : (
+                <Circle className="text-fg-muted mt-0.5 size-5 shrink-0" aria-hidden />
+              )}
+              <div className="flex-1">
+                <Link
+                  href={s.href}
+                  className={`font-medium underline-offset-4 hover:underline ${s.done ? 'text-fg-muted line-through' : ''}`}
+                >
+                  {s.label}
+                  <span className="sr-only">{s.done ? ' (done)' : ' (to do)'}</span>
+                </Link>
+                {!s.done && <p className="text-fg-muted text-sm">{s.hint}</p>}
+              </div>
+              {s.confirm && !s.done && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  aria-label={`Mark as done: ${s.label}`}
+                  onClick={() =>
+                    router.post(
+                      `${base.replace(/\/pages$/, '')}/checklist/${s.key}`,
+                      {},
+                      { preserveScroll: true },
+                    )
+                  }
+                >
+                  Mark as done
+                </Button>
+              )}
+            </li>
+          ))}
+        </ol>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Pages({ pages, deleted, base, design, checklist = [] }: Props) {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<PageRow | null>(null);
   const move = (index: number, delta: number) => {
@@ -228,18 +322,20 @@ export default function Pages({ pages, deleted, base, design }: Props) {
       <div className="grid max-w-4xl gap-8">
         <PageHeader
           title="Website pages"
-          description="Add pages, choose your home page and put them in order. The visual editor and live site preview arrive next."
+          description="Add pages, choose your home page and put them in order."
           actions={
             <div className="flex gap-2">
               <Button variant="secondary" asChild>
                 <a href={`${base.replace(/\/pages$/, '')}/preview`}>Preview site</a>
               </Button>
               <Button onClick={() => setAdding(true)}>
-                <FilePlus2 /> Add page
+                <FilePlus2 />
+                Add page
               </Button>
             </div>
           }
         />
+        <LaunchChecklist steps={checklist} base={base} />
         <Card>
           <CardContent className="p-0">
             <ul className="divide-border divide-y" aria-label="Pages">

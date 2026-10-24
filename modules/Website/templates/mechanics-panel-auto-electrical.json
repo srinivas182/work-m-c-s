@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/mechanics-panel-auto-electrical/hero.jpg",
+                    "src": "/images/templates/mechanics-panel-auto-electrical/hero-1600.webp",
                     "alt": "A car being repaired in the workshop"
                   }
                 ],
@@ -317,11 +317,11 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/mechanics-panel-auto-electrical/work.jpg",
+                    "src": "/images/templates/mechanics-panel-auto-electrical/work-1600.webp",
                     "alt": "Bodywork being prepared for paint"
                   },
                   {
-                    "src": "/images/templates/mechanics-panel-auto-electrical/hero.jpg",
+                    "src": "/images/templates/mechanics-panel-auto-electrical/hero-1600.webp",
                     "alt": "A car being repaired in the workshop"
                   }
                 ]

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { rand } from '@/lib/money';
 
 interface Step {
   provider: string;
@@ -101,8 +102,7 @@ export default function AiAdmin({ settings, providers, tasks, connected, usage }
   });
   const [trialResult, setTrialResult] = useState<string | null>(null);
   const [trying, setTrying] = useState(false);
-  const zar = (n: number) =>
-    `R${n.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const zar = (n: number) => rand(Math.round(n * 100)); // the one money format across WURK
   const modelKeys = Object.keys(form.data.prices);
   const [now] = useState(() => Date.now()); // captured once: render stays pure
   const soon = (date: string | null | undefined) =>

@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/spa-wellness-practitioner/portrait.jpg",
+                    "src": "/images/templates/spa-wellness-practitioner/portrait-1600.webp",
                     "alt": "The practitioner in her practice room"
                   }
                 ],
@@ -290,7 +290,7 @@
               "props": {
                 "heading": "About me",
                 "text": "Tell visitors about your background, your training and how you work with people.",
-                "image": "/images/templates/spa-wellness-practitioner/space.jpg",
+                "image": "/images/templates/spa-wellness-practitioner/space-1600.webp",
                 "imageAlt": "The practice room",
                 "imageSide": "right",
                 "buttonLabel": "",

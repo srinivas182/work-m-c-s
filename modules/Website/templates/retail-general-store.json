@@ -118,7 +118,7 @@
               "props": {
                 "heading": "Well stocked",
                 "text": "Tell customers what you sell and anything you’re known for.",
-                "image": "/images/templates/retail-general-store/shelves.jpg",
+                "image": "/images/templates/retail-general-store/shelves-1600.webp",
                 "imageAlt": "Stocked shelves in the store",
                 "imageSide": "right",
                 "buttonLabel": "See what we stock",
@@ -253,7 +253,7 @@
               "props": {
                 "heading": "About us",
                 "text": "Tell customers about your store and the community you serve.",
-                "image": "/images/templates/retail-general-store/counter.jpg",
+                "image": "/images/templates/retail-general-store/counter-1600.webp",
                 "imageAlt": "The store counter",
                 "imageSide": "left",
                 "buttonLabel": "",

@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/health-dental/hero.jpg",
+                    "src": "/images/templates/health-dental/hero-1600.webp",
                     "alt": "Dentist talking a patient through a check-up"
                   }
                 ],
@@ -331,7 +331,7 @@
               "props": {
                 "heading": "About the practice",
                 "text": "Introduce your practice: who you are, how long you’ve been caring for patients, and what a visit feels like.",
-                "image": "/images/templates/health-dental/room.jpg",
+                "image": "/images/templates/health-dental/room-1600.webp",
                 "imageAlt": "A treatment room in the practice",
                 "imageSide": "right",
                 "buttonLabel": "",

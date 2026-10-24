@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/education-tutor/portrait.jpg",
+                    "src": "/images/templates/education-tutor/portrait-1600.webp",
                     "alt": "A tutor helping a learner with their work"
                   }
                 ],
@@ -316,7 +316,7 @@
               "props": {
                 "heading": "About me",
                 "text": "Tell families about your qualifications, the subjects you teach and how you help learners grow.",
-                "image": "/images/templates/education-tutor/study.jpg",
+                "image": "/images/templates/education-tutor/study-1600.webp",
                 "imageAlt": "A quiet study space",
                 "imageSide": "right",
                 "buttonLabel": "",

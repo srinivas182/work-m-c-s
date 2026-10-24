@@ -88,7 +88,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/salon-hair-braids/hero.jpg",
+                    "src": "/images/templates/salon-hair-braids/hero-1600.webp",
                     "alt": "Stylist braiding a client’s hair in the salon"
                   }
                 ],
@@ -163,15 +163,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/salon-hair-braids/work-1.jpg",
+                    "src": "/images/templates/salon-hair-braids/work-1-1600.webp",
                     "alt": "Long knotless braids"
                   },
                   {
-                    "src": "/images/templates/salon-hair-braids/work-2.jpg",
+                    "src": "/images/templates/salon-hair-braids/work-2-1600.webp",
                     "alt": "Natural curls after a wash and set"
                   },
                   {
-                    "src": "/images/templates/salon-hair-braids/work-3.jpg",
+                    "src": "/images/templates/salon-hair-braids/work-3-1600.webp",
                     "alt": "Rich copper colour"
                   }
                 ]
@@ -352,7 +352,7 @@
               "props": {
                 "heading": "Our story",
                 "text": "Tell visitors how your salon started, what you care about and what makes a visit to you special.",
-                "image": "/images/templates/salon-hair-braids/story.jpg",
+                "image": "/images/templates/salon-hair-braids/story-1600.webp",
                 "imageAlt": "Inside the salon",
                 "imageSide": "right",
                 "buttonLabel": "",
@@ -418,15 +418,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/salon-hair-braids/work-1.jpg",
+                    "src": "/images/templates/salon-hair-braids/work-1-1600.webp",
                     "alt": "Long knotless braids"
                   },
                   {
-                    "src": "/images/templates/salon-hair-braids/work-2.jpg",
+                    "src": "/images/templates/salon-hair-braids/work-2-1600.webp",
                     "alt": "Natural curls after a wash and set"
                   },
                   {
-                    "src": "/images/templates/salon-hair-braids/work-3.jpg",
+                    "src": "/images/templates/salon-hair-braids/work-3-1600.webp",
                     "alt": "Rich copper colour"
                   }
                 ]

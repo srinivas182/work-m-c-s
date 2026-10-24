@@ -83,15 +83,15 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/retail-boutique/look-1.jpg",
+                    "src": "/images/templates/retail-boutique/look-1-1600.webp",
                     "alt": "A model in a linen summer dress"
                   },
                   {
-                    "src": "/images/templates/retail-boutique/look-2.jpg",
+                    "src": "/images/templates/retail-boutique/look-2-1600.webp",
                     "alt": "Accessories on a display table"
                   },
                   {
-                    "src": "/images/templates/retail-boutique/look-3.jpg",
+                    "src": "/images/templates/retail-boutique/look-3-1600.webp",
                     "alt": "Rails of new-season clothing"
                   }
                 ],
@@ -107,15 +107,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/retail-boutique/look-1.jpg",
+                    "src": "/images/templates/retail-boutique/look-1-1600.webp",
                     "alt": "A model in a linen summer dress"
                   },
                   {
-                    "src": "/images/templates/retail-boutique/look-2.jpg",
+                    "src": "/images/templates/retail-boutique/look-2-1600.webp",
                     "alt": "Accessories on a display table"
                   },
                   {
-                    "src": "/images/templates/retail-boutique/look-3.jpg",
+                    "src": "/images/templates/retail-boutique/look-3-1600.webp",
                     "alt": "Rails of new-season clothing"
                   }
                 ]
@@ -128,7 +128,7 @@
               "props": {
                 "heading": "Come and see us",
                 "text": "Describe your store and what makes shopping with you special.",
-                "image": "/images/templates/retail-boutique/store.jpg",
+                "image": "/images/templates/retail-boutique/store-1600.webp",
                 "imageAlt": "Inside the boutique",
                 "imageSide": "left",
                 "buttonLabel": "Find us",
@@ -202,19 +202,19 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/retail-boutique/look-1.jpg",
+                    "src": "/images/templates/retail-boutique/look-1-1600.webp",
                     "alt": "A model in a linen summer dress"
                   },
                   {
-                    "src": "/images/templates/retail-boutique/look-2.jpg",
+                    "src": "/images/templates/retail-boutique/look-2-1600.webp",
                     "alt": "Accessories on a display table"
                   },
                   {
-                    "src": "/images/templates/retail-boutique/look-3.jpg",
+                    "src": "/images/templates/retail-boutique/look-3-1600.webp",
                     "alt": "Rails of new-season clothing"
                   },
                   {
-                    "src": "/images/templates/retail-boutique/store.jpg",
+                    "src": "/images/templates/retail-boutique/store-1600.webp",
                     "alt": "Inside the boutique"
                   }
                 ]

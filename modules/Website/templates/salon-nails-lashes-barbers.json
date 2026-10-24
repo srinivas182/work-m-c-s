@@ -83,15 +83,15 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/salon-nails-lashes-barbers/collage-1.jpg",
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-1-1600.webp",
                     "alt": "Gel nails in a bold pink"
                   },
                   {
-                    "src": "/images/templates/salon-nails-lashes-barbers/collage-2.jpg",
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-2-1600.webp",
                     "alt": "Lash extensions close up"
                   },
                   {
-                    "src": "/images/templates/salon-nails-lashes-barbers/collage-3.jpg",
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-3-1600.webp",
                     "alt": "Fresh fade at the barber chair"
                   }
                 ],
@@ -138,7 +138,7 @@
               "props": {
                 "heading": "Your new favourite spot",
                 "text": "Describe your studio: the vibe, the music, the coffee — why people love spending an hour with you.",
-                "image": "/images/templates/salon-nails-lashes-barbers/studio.jpg",
+                "image": "/images/templates/salon-nails-lashes-barbers/studio-1600.webp",
                 "imageAlt": "Inside the studio",
                 "imageSide": "left",
                 "buttonLabel": "Book now",
@@ -154,15 +154,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/salon-nails-lashes-barbers/work-1.jpg",
+                    "src": "/images/templates/salon-nails-lashes-barbers/work-1-1600.webp",
                     "alt": "Detailed nail art"
                   },
                   {
-                    "src": "/images/templates/salon-nails-lashes-barbers/collage-2.jpg",
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-2-1600.webp",
                     "alt": "Lash extensions close up"
                   },
                   {
-                    "src": "/images/templates/salon-nails-lashes-barbers/collage-3.jpg",
+                    "src": "/images/templates/salon-nails-lashes-barbers/collage-3-1600.webp",
                     "alt": "Fresh fade at the barber chair"
                   }
                 ]

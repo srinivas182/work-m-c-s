@@ -68,6 +68,114 @@ const STATUS: Record<Status, { icon: ReactNode; text: string; tone: string }> = 
   },
 };
 
+/**
+ * Puck's editor chrome misses some accessible names (an icon-only list "add" button, the preview
+ * frame, the zoom control, the loading indicator) and doesn't let us set them, so name them as
+ * they appear. Remove each fix if Puck adds it upstream.
+ */
+function useNameListAddButtons() {
+  useEffect(() => {
+    const name = () => {
+      document
+        .querySelectorAll<HTMLButtonElement>(
+          'button[class*="ArrayField-addButton"]:not([aria-label])',
+        )
+        .forEach((b) => {
+          if (!b.textContent?.trim()) {
+            b.setAttribute('aria-label', 'Add an item');
+            b.title = 'Add an item';
+          }
+        });
+      // Puck's preview frame, zoom control and loading indicator: give each a valid accessible name.
+      document
+        .querySelectorAll<HTMLIFrameElement>('iframe#preview-frame:not([title])')
+        .forEach((f) => {
+          f.title = 'Page preview';
+        });
+      document
+        .querySelectorAll<HTMLSelectElement>(
+          'select[class*="ViewportControls-zoomSelect"]:not([aria-label])',
+        )
+        .forEach((z) => z.setAttribute('aria-label', 'Zoom'));
+      document
+        .querySelectorAll<HTMLElement>('[class*="_Loader_"][aria-label]:not([role])')
+        .forEach((l) => l.setAttribute('role', 'img'));
+    };
+    name();
+    const observer = new MutationObserver(name);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+}
+
+const TIPS = [
+  'Click any text on the page to change it.',
+  'Select a section to change its photos and settings in the panel on the right.',
+  'Your changes save automatically. Visitors see the published version — publish when you’re ready.',
+];
+const TIPS_KEY = 'wurk.editor.tips-dismissed';
+
+/** Short tips for the moments owners get stuck; dismissed once, stays dismissed on this device. */
+function EditorTips() {
+  const [index, setIndex] = useState(() => {
+    try {
+      return window.localStorage.getItem(TIPS_KEY) === '1' ? -1 : 0;
+    } catch {
+      return 0;
+    }
+  });
+  const card = useRef<HTMLElement>(null);
+  const dismiss = () => {
+    try {
+      window.localStorage.setItem(TIPS_KEY, '1');
+    } catch {
+      // Private browsing: the tips simply return next time.
+    }
+    setIndex(-1);
+  };
+  // Once the owner taps anywhere else they're editing — the tip never stands in their way.
+  useEffect(() => {
+    if (index < 0) return;
+    const away = (e: PointerEvent) => {
+      if (card.current && !card.current.contains(e.target as Node)) dismiss();
+    };
+    document.addEventListener('pointerdown', away, true);
+    return () => document.removeEventListener('pointerdown', away, true);
+  });
+  if (index < 0) return null;
+  const last = index === TIPS.length - 1;
+  return (
+    <aside
+      aria-label="Editing tip"
+      ref={card}
+      className="fixed right-4 bottom-36 left-4 z-[70] rounded-xl bg-[#1B1640] p-4 text-sm text-white shadow-lg sm:right-auto sm:bottom-4 sm:max-w-sm"
+    >
+      <p className="mb-1 text-xs font-semibold tracking-wide text-white/70 uppercase">
+        Tip {index + 1} of {TIPS.length}
+      </p>
+      <p>{TIPS[index]}</p>
+      <div className="mt-3 flex gap-2">
+        {!last && (
+          <button
+            type="button"
+            onClick={() => setIndex(index + 1)}
+            className="rounded-md bg-white px-3 py-1.5 font-semibold text-[#1B1640]"
+          >
+            Next tip
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={dismiss}
+          className="rounded-md px-3 py-1.5 font-semibold text-white underline-offset-4 hover:underline"
+        >
+          Got it
+        </button>
+      </div>
+    </aside>
+  );
+}
+
 export default function Editor({
   page,
   revision,
@@ -79,6 +187,7 @@ export default function Editor({
   menus,
   urls,
 }: Props) {
+  useNameListAddButtons();
   const [status, setStatus] = useState<Status>('saved');
   const [message, setMessage] = useState<string | null>(null);
   const [isPublished, setPublished] = useState(published);
@@ -260,6 +369,7 @@ export default function Editor({
   return (
     <>
       <Head title={`Edit ${page.title}`} />
+      <EditorTips />
       <Puck
         config={config}
         data={initialData}

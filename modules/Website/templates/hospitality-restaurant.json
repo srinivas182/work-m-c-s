@@ -83,15 +83,15 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/hospitality-restaurant/dish-1.jpg",
+                    "src": "/images/templates/hospitality-restaurant/dish-1-1600.webp",
                     "alt": "A plated main course"
                   },
                   {
-                    "src": "/images/templates/hospitality-restaurant/room.jpg",
+                    "src": "/images/templates/hospitality-restaurant/room-1600.webp",
                     "alt": "The dining room"
                   },
                   {
-                    "src": "/images/templates/hospitality-restaurant/dish-2.jpg",
+                    "src": "/images/templates/hospitality-restaurant/dish-2-1600.webp",
                     "alt": "A dessert"
                   }
                 ],
@@ -139,7 +139,7 @@
               "props": {
                 "heading": "Our kitchen",
                 "text": "Tell guests about your food, where your ingredients come from and the people who cook it.",
-                "image": "/images/templates/hospitality-restaurant/kitchen.jpg",
+                "image": "/images/templates/hospitality-restaurant/kitchen-1600.webp",
                 "imageAlt": "Chefs at work in the kitchen",
                 "imageSide": "right",
                 "buttonLabel": "About us",
@@ -265,7 +265,7 @@
               "props": {
                 "heading": "About us",
                 "text": "Share your story — how the restaurant started and what makes it special.",
-                "image": "/images/templates/hospitality-restaurant/room.jpg",
+                "image": "/images/templates/hospitality-restaurant/room-1600.webp",
                 "imageAlt": "The dining room",
                 "imageSide": "left",
                 "buttonLabel": "",
@@ -291,15 +291,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/hospitality-restaurant/dish-1.jpg",
+                    "src": "/images/templates/hospitality-restaurant/dish-1-1600.webp",
                     "alt": "A plated main course"
                   },
                   {
-                    "src": "/images/templates/hospitality-restaurant/dish-2.jpg",
+                    "src": "/images/templates/hospitality-restaurant/dish-2-1600.webp",
                     "alt": "A dessert"
                   },
                   {
-                    "src": "/images/templates/hospitality-restaurant/kitchen.jpg",
+                    "src": "/images/templates/hospitality-restaurant/kitchen-1600.webp",
                     "alt": "Chefs at work in the kitchen"
                   }
                 ]

@@ -83,7 +83,7 @@
                 "facts": [],
                 "images": [
                   {
-                    "src": "/images/templates/spa-day-spa/hero.jpg",
+                    "src": "/images/templates/spa-day-spa/hero-1600.webp",
                     "alt": "A quiet treatment room with soft light"
                   }
                 ],
@@ -142,15 +142,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/spa-day-spa/treat-1.jpg",
+                    "src": "/images/templates/spa-day-spa/treat-1-1600.webp",
                     "alt": "Massage oils and warm towels"
                   },
                   {
-                    "src": "/images/templates/spa-day-spa/treat-2.jpg",
+                    "src": "/images/templates/spa-day-spa/treat-2-1600.webp",
                     "alt": "A facial treatment"
                   },
                   {
-                    "src": "/images/templates/spa-day-spa/treat-3.jpg",
+                    "src": "/images/templates/spa-day-spa/treat-3-1600.webp",
                     "alt": "The relaxation lounge"
                   }
                 ]
@@ -300,19 +300,19 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/spa-day-spa/room.jpg",
+                    "src": "/images/templates/spa-day-spa/room-1600.webp",
                     "alt": "A treatment room"
                   },
                   {
-                    "src": "/images/templates/spa-day-spa/treat-1.jpg",
+                    "src": "/images/templates/spa-day-spa/treat-1-1600.webp",
                     "alt": "Massage oils and warm towels"
                   },
                   {
-                    "src": "/images/templates/spa-day-spa/treat-2.jpg",
+                    "src": "/images/templates/spa-day-spa/treat-2-1600.webp",
                     "alt": "A facial treatment"
                   },
                   {
-                    "src": "/images/templates/spa-day-spa/treat-3.jpg",
+                    "src": "/images/templates/spa-day-spa/treat-3-1600.webp",
                     "alt": "The relaxation lounge"
                   }
                 ]

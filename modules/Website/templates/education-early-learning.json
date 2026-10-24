@@ -120,15 +120,15 @@
                 "intro": "",
                 "images": [
                   {
-                    "src": "/images/templates/education-early-learning/room.jpg",
+                    "src": "/images/templates/education-early-learning/room-1600.webp",
                     "alt": "A bright classroom"
                   },
                   {
-                    "src": "/images/templates/education-early-learning/play.jpg",
+                    "src": "/images/templates/education-early-learning/play-1600.webp",
                     "alt": "The play area"
                   },
                   {
-                    "src": "/images/templates/education-early-learning/garden.jpg",
+                    "src": "/images/templates/education-early-learning/garden-1600.webp",
                     "alt": "The garden"
                   }
                 ]
@@ -249,7 +249,7 @@
               "props": {
                 "heading": "About the centre",
                 "text": "Tell parents about your centre, your approach to early learning and your team.",
-                "image": "/images/templates/education-early-learning/room.jpg",
+                "image": "/images/templates/education-early-learning/room-1600.webp",
                 "imageAlt": "A bright classroom",
                 "imageSide": "right",
                 "buttonLabel": "",
