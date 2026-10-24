@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Wurk\Billing\Support;
 
-use Wurk\Billing\Contracts\CreditPricing;
 use Wurk\Billing\Models\CreditPack;
 use Wurk\Plans\Contracts\Catalog;
+use Wurk\Plans\Contracts\CreditPricing;
 use Wurk\Regions\Contracts\Countries;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 

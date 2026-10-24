@@ -18,5 +18,7 @@ Route::tenant(function (): void {
     Route::middleware('permission:credits.view-own')->group(function (): void {
         Route::get('/settings/credits', [CreditsController::class, 'mine'])->name('tenant.credits');
         Route::put('/settings/credits/alert', [CreditsController::class, 'threshold'])->name('tenant.credits.alert');
+        Route::get('/settings/credits/statement.csv', [CreditsController::class, 'statement'])->name('tenant.credits.statement');
+        Route::put('/settings/credits/limits', [CreditsController::class, 'limits'])->name('tenant.credits.limits');
     });
 });

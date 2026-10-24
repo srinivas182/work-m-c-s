@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Wurk\Billing\Contracts;
+namespace Wurk\Plans\Contracts;
 
 interface CreditPricing
 {

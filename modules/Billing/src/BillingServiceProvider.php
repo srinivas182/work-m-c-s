@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Billing\Console\DunningCommand;
 use Wurk\Billing\Console\RenewSubscriptionsCommand;
-use Wurk\Billing\Contracts\CreditPricing;
 use Wurk\Billing\Contracts\ServiceStatus;
 use Wurk\Billing\Events\PaymentFailed;
 use Wurk\Billing\Events\PaymentSucceeded;
@@ -26,6 +25,7 @@ use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\DunningServiceStatus;
 use Wurk\Billing\Support\Invoices;
 use Wurk\Billing\Support\PackCreditPricing;
+use Wurk\Plans\Contracts\CreditPricing;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
 final class BillingServiceProvider extends ModuleServiceProvider
