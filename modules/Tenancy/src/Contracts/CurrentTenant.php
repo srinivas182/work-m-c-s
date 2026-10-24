@@ -22,4 +22,7 @@ interface CurrentTenant
 
     /** ISO country code (e.g. "ZA"): currency, VAT and messaging rates follow it. */
     public function countryCode(): string;
+
+    /** When the business was created (end of signup). */
+    public function createdAt(): ?\DateTimeInterface;
 }

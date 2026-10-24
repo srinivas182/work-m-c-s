@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Wurk\Website\Http\Controllers\Admin\LaunchTimesController;
 use Wurk\Website\Http\Controllers\Admin\TemplatesController;
 use Wurk\Website\Http\Controllers\AiImageController;
 use Wurk\Website\Http\Controllers\AiWriterController;
@@ -89,3 +90,6 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
 Route::domain((string) config('wurk.domains.app'))->withoutMiddleware(['web'])
     ->middleware('throttle:5,10,quote-form')
     ->post('/forms/{handle}/quote', QuoteFormController::class)->name('website.forms.quote');
+
+Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])
+    ->get('/launch-times', LaunchTimesController::class)->name('admin.launch-times');
