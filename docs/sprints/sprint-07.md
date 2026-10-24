@@ -66,6 +66,8 @@ Same standard as Sprint 6 (approved): two distinct designs per category; honest 
 
 ### 7.6 Timed launch test
 
+**Kit:** docs/research/launch-test.md (recruiting, POPIA consent, script, observation sheet, what happens after). **Timing:** recorded automatically — Platform → Time to launch.
+
 At least five non-technical owners each launch a site from signup without help, timed and observed (remote screen-share is fine). **Pass:** median under 60 minutes and everyone succeeds without help. Every place someone hesitates is fixed in this sub-sprint and re-tested.
 
 ## 3. Out of scope
