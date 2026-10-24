@@ -75,19 +75,12 @@
               "props": {
                 "layout": "collage",
                 "heading": "Sharp cuts. Flawless nails. Lashes that turn heads.",
-                "text": "Walk out looking your best — book online in a minute.",
+                "text": "Walk out looking your best — book in a minute.",
                 "primaryLabel": "Book now",
                 "primaryHref": "/contact",
                 "secondaryLabel": "Services",
                 "secondaryHref": "/services",
-                "facts": [
-                  {
-                    "text": "Walk-ins welcome"
-                  },
-                  {
-                    "text": "Card and cash"
-                  }
-                ],
+                "facts": [],
                 "images": [
                   {
                     "src": "/images/templates/salon-nails-lashes-barbers/collage-1.jpg",
@@ -407,7 +400,7 @@
                 "items": [
                   {
                     "question": "Do I need to book?",
-                    "answer": "We recommend booking so we can give you our full attention. Walk-ins are welcome when we have a gap."
+                    "answer": "We recommend booking so we can give you our full attention."
                   },
                   {
                     "question": "How should I prepare for my appointment?",

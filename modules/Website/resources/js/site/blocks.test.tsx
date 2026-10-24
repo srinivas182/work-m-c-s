@@ -1,6 +1,7 @@
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { internationalDigits } from './blocks/Contact';
+import { gallerySpan } from './blocks/Gallery';
 import { BLOCKS } from './registry';
 import { SiteRenderer, upgradeBlock } from './SiteRenderer';
 import type { Branding, ContentDocument } from './types';
@@ -157,5 +158,31 @@ describe('main heading', () => {
     const noHero = page(['Header', 'PromotionBanner', 'ServicesPrices', 'Text', 'Footer']);
     expect(count(noHero)).toBe(1); // the first section's, not the banner's
     expect(noHero).toMatch(/<h1[^>]*>ServicesPrices heading<\/h1>/);
+  });
+});
+
+describe('gallery grid', () => {
+  /** Cells used, given the spans at a column count; must fill whole rows. */
+  const cells = (n: number, cols: 2 | 4) =>
+    Array.from({ length: n }, (_, i) => {
+      const cls = gallerySpan(i, n).split(' ');
+      const col =
+        cols === 4
+          ? Number(
+              cls.find((c) => c.startsWith('sm:col-span-'))?.slice(12) ??
+                (cls.includes('col-span-2') && i === 0 ? 2 : 1),
+            )
+          : cls.includes('col-span-2')
+            ? 2
+            : 1;
+      const row = i === 0 || (cols === 4 && cls.includes('sm:row-span-2')) ? 2 : 1;
+      return col * row;
+    }).reduce((a, b) => a + b, 0);
+
+  it('never leaves a gap, on phones or desktop, for 2 to 9 photos', () => {
+    for (let n = 2; n <= 9; n++) {
+      expect(cells(n, 2) % 2, `${n} photos on a phone`).toBe(0);
+      expect(cells(n, 4) % 4, `${n} photos on desktop`).toBe(0);
+    }
   });
 });
