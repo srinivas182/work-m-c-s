@@ -52,3 +52,12 @@ it('answers 404 for unknown businesses and pages', function () {
     $this->get('http://no-such-biz.'.config('wurk.domains.root').'/')->assertNotFound();
     $this->get($this->site.'no-such-page')->assertNotFound();
 });
+
+it('keeps the publishing request’s business context after a render runs inline (sync queue)', function () {
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Hi</h1>']))]);
+    $this->ctx->run($this->glow, function () {
+        app(Pages::class)->publish(Page::query()->where('is_home', true)->firstOrFail(), null, null);
+        expect(app(TenantContext::class)->id())->toBe($this->glow->id)
+            ->and(PageRender::query()->whereNotNull('path')->count())->toBe(1);
+    });
+});

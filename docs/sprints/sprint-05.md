@@ -23,7 +23,7 @@ Measured in Sprint 7: template previews score 65–71 on mobile because they're 
 | **Render once at publish (recommended)** | Publishing queues a job; a small **Node renderer** turns the page (content + branding + menus) into finished HTML, which is **stored and served as a file**. Visitors get static, cacheable HTML. **If the renderer is down, the live site keeps serving the last version** — only publishing waits and retries |
 | Rewrite the blocks as PHP templates | Two copies of every block would drift apart — rejected |
 
-The renderer is a pure function: content in, HTML out. It has no database access and no secrets. It runs as its own small container next to the queue workers.
+The renderer is a pure function: content in, HTML out. It has no database access and no secrets. **Simplified during 5.1:** production already ships Node and a server-rendering bundle, so the renderer is a command-line script the queued job runs (`bootstrap/site-render`) — no extra container, network call or service to monitor. The safety property is unchanged: visitors only ever get stored HTML.
 
 Interactive parts become **islands** — a few kilobytes of JavaScript each, loaded only where used: slideshow, before & after slider, mobile menu, promotion banner close, quote form.
 

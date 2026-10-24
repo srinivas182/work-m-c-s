@@ -98,5 +98,6 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
 // Public websites: {handle}.{root} (e.g. glow-salon.wurk.co.za; *.wurk.test in development and tests).
 Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'])->group(function (): void {
     Route::get('/', PublicSiteController::class)->name('website.public.home');
-    Route::get('/{slug}', PublicSiteController::class)->where('slug', '[a-z0-9-]+')->name('website.public.page');
+    // A fallback, so more specific routes on business subdomains always win.
+    Route::fallback(PublicSiteController::class)->name('website.public.page');
 });

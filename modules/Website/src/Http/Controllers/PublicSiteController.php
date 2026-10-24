@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Website\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -18,8 +19,13 @@ use Wurk\Website\Models\PageVersion;
  */
 final class PublicSiteController
 {
-    public function __invoke(string $handle, TenantDirectory $tenants, TenantContext $context, ?string $slug = null): Response
+    public function __invoke(Request $request, string $handle, TenantDirectory $tenants, TenantContext $context): Response
     {
+        $path = trim($request->path(), '/');
+        $slug = $path === '' ? null : $path;
+        if ($slug !== null && preg_match('/^[a-z0-9-]+$/', $slug) !== 1) {
+            abort(404);
+        }
         $tenant = $tenants->findByHandle($handle) ?? abort(404);
 
         return $context->run($tenant, function () use ($slug): Response {
