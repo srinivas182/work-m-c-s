@@ -16,6 +16,8 @@
         </script>
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx'])
+        {{-- A title from the first byte; each page's own title replaces it (Inertia <Head>). --}}
+        <title inertia>{{ config('app.name', 'WURK') }}</title>
         @inertiaHead
     </head>
     <body class="antialiased">

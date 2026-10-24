@@ -13,6 +13,7 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - The template accessibility scan runs one test per page (338 page checks across desktop and phone): clearer failures and no timeouts.
 
 ### Fixed
+- Every page's HTML now has a title from the first byte (it was added only by JavaScript): untitled pages for screen readers, browser tabs and link previews until scripts ran — and a CI accessibility scan that raced it.
 - Copy reviewed against the honesty rules: an invented class size, and safety claims for the early-learning centre (in its features and its headline), removed.
 
 ### Added — Sprint 7.1 (templates II, part 1)
