@@ -63,6 +63,7 @@ final class EntitlementService implements Entitlements
             'max_branches' => $version->max_branches,
             'custom_domain' => $version->custom_domain,
             'monthly_credits' => $version->monthly_credits,
+            'credit_packs_allowed' => (bool) $version->credit_packs_allowed,
             'referral_max_levels' => $version->referral_max_levels,
             'referral_max_commission_bp' => $version->referral_max_commission_bp,
         ];

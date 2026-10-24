@@ -99,7 +99,7 @@ return [
         'referrals' => ['name' => 'Customer referral programme', 'sprint' => 11],
         'marketing' => ['name' => 'Campaigns & offers', 'sprint' => 13],
         'reports' => ['name' => 'Reports', 'sprint' => 13],
-        'ai-assistant' => ['name' => 'AI assistant', 'sprint' => 14],
+        'ai-assistant' => ['name' => 'WURK AI', 'sprint' => 6],
     ],
 
     'security' => [

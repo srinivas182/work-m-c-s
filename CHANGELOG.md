@@ -4,6 +4,20 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 6.3 (WURK AI, credits and transparency)
+- **WURK AI** module: Anthropic, Google and OpenAI providers on the existing Providers screen (encrypted, write-only keys) plus a simulated provider that never answers in production. Model per task (pinned versions; "latest" aliases refused), fallback order, every attempt logged with its real cost, daily limit per business and monthly spend cap per provider.
+- **Owners:** "Write with AI" — describe the business, add services and prices, choose a tone; a confirmation shows the exact credits and balance before and after; charged once (double-clicks included), refunded automatically on failure. The first website is free on every package; later AI actions need a package that includes WURK AI. Not enough credits → Buy credits and/or Upgrade.
+- **Honesty by design:** the AI fills only whitelisted text slots; testimonials, team, prices, opening hours, qualifications and registrations are never sent or written; prices come only from the owner. Results are drafts for review.
+- **Admin → WURK AI:** this month's real cost per provider (requests, failures, fallbacks, $ and R) and per business; models and fallbacks; "try a model" with a sample and its cost; prices, exchange rate, buffer and margin; caps; model retirement dates with a "retiring soon" warning.
+- **Package cost tip:** as monthly credits are entered — cost if fully used (range across channels), share of the package price, minimum safe price per extra credit at the target margin, and which costs aren't set yet. New "Your cost per message" setting on every SMS, WhatsApp and email provider.
+- **Can buy credit packs** per package (versioned; absent means allowed). When off, purchases are refused at the server and the billing page suggests upgrading.
+- Per-action credit prices on the rate card: "AI: write a website" (20) and "AI: rewrite a section" (1) for South Africa.
+
+### Fixed
+- "Write with AI" page crashed (business resolved the wrong way) — caught by the browser test; the page now has its own test.
+- Unlabelled dropdowns on the admin AI and AI writer screens (accessibility scan).
+- A test that passed for the wrong reason (CSRF 419 instead of the production guard) now proves the guard itself.
+
 ### Added — Sprint 6.2 (category sections)
 - Ten sections: Before & after (keyboard-accessible slider or side by side), Packages & specials (expired specials hide themselves), Class timetable (week grid on desktop, days with classes on phones), Food menu (dietary tags), Rooms & rates (links out to a booking engine — never embedded), Portfolio, Accreditations, Service areas (map link, no embedded map), Promotion banner (between dates, dismissible, above the header), Quote form.
 - Quote form submissions: stored per business and emailed if the owner sets an address; consent required; hidden-field spam trap, per-visitor limit and a daily cap per business; visitors' IP addresses stored only as a hash. New Website → Enquiries screen (new first, one-tap Call / WhatsApp / Email, mark read, archive, notification email).
