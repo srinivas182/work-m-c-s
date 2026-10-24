@@ -30,9 +30,30 @@ final class SimulatedDriver implements AiDriver
             self::$failNext--;
             throw new ProviderFailed('Simulated failure');
         }
-        $text = self::$nextAnswer ?? (str_contains($system.$prompt, 'JSON') ? (string) json_encode(['note' => 'simulated']) : 'Simulated answer.');
+        $text = self::$nextAnswer ?? $this->fillSlots($prompt) ?? (str_contains($system.$prompt, 'JSON') ? (string) json_encode(['note' => 'simulated']) : 'Simulated answer.');
         self::$nextAnswer = null;
 
         return ['text' => $text, 'input_tokens' => (int) ceil(strlen($system.$prompt) / 4), 'output_tokens' => (int) ceil(strlen($text) / 4)];
+    }
+
+    /** For "write my website": fill every listed slot with clearly simulated copy. */
+    private function fillSlots(string $prompt): ?string
+    {
+        if (preg_match('/SLOTS[^:]*: (\{.*\})\s*$/s', $prompt, $m) !== 1) {
+            return null;
+        }
+        preg_match('/^Business: (.*)$/m', $prompt, $b);
+        $business = trim($b[1] ?? 'Your business');
+        $pages = [];
+        foreach ((array) json_decode($m[1], true) as $page => $blocks) {
+            foreach ((array) $blocks as $id => $fields) {
+                foreach ((array) $fields as $field => $max) {
+                    $pages[$page][$id][$field] = mb_substr("[Simulated] {$business} — {$field}", 0, (int) $max);
+                }
+            }
+        }
+        $seo = array_map(fn () => ['title' => "[Simulated] {$business}", 'description' => "[Simulated] {$business} — sample description."], $pages);
+
+        return (string) json_encode(['pages' => $pages, 'seo' => $seo]);
     }
 }
