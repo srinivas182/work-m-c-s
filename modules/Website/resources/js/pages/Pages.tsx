@@ -190,6 +190,7 @@ function DesignCard({ base, design }: { base: string; design: NonNullable<Props[
                 </a>
               </Button>
               <Button
+                aria-label={`Use this design: ${o.name}`}
                 size="sm"
                 variant="secondary"
                 onClick={() =>

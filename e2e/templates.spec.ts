@@ -19,7 +19,7 @@ test('an owner picks a design at signup, gets a full site, and can switch design
   await expectAccessible(page);
 
   // Switch to the other design in the category; content is kept.
-  await page.getByRole('button', { name: 'Use this design' }).click();
+  await page.getByRole('button', { name: 'Use this design: Warm salon (sample)' }).click();
   await expect(page.getByText(/Design changed/)).toBeVisible();
   await expect(page.getByText(/You’re using/)).toContainText('Warm salon (sample)');
   await expect(

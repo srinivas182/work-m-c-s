@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 6 · 18 – 29 January 2027 (runs before Sprint 5 — see §8) |
-| **Status** | Approved 23 Oct 2026 — 6.1 ✅ (#43), 6.2 ✅ (#44), 6.3 ✅ (#45), 6.4 in progress |
+| **Status** | Approved 23 Oct 2026 — 6.1 ✅ (#43), 6.2 ✅ (#44), 6.3 ✅ (#45), 6.4 in review |
 | **Depends on** | v0.5.0 (blocks, editor, photo uploads, menus, branding, preview); PRD §5.3 onboarding, §5.4 FR-WB-04 templates, FR-WB-06 media; sprint plan revision 3 |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -188,3 +188,4 @@ Each template: home, about, services, contact and legal pages (privacy, terms, c
 | 6.1 Template system | #43 | 595 backend tests on SQLite and MySQL 8; 127 frontend; 44 browser checks (signup with category and design, switching design, previews, admin screens scanned). Unfinished admin work from another session was found on the branch, reviewed, fixed (photo listing, partial renames, empty quota line, labels) and tested |
 | 6.2 Category sections | #44 | 600 backend tests on SQLite and MySQL 8; 214 frontend; 46 browser checks incl. accessibility scans of all 24 sections on desktop and phone. Deviation: Rooms & rates links out to a booking engine instead of embedding it (no third-party requests, POPIA). Found: pages without a Hero had no main heading |
 | 6.3 WURK AI, credits & transparency | #45 | 652 backend tests on SQLite and MySQL 8; 214 frontend; 48 browser checks. Simulated providers until WURK's API keys (settings only). Decisions: first website free on every package (PRD); the free-email fallback for essential messages moves to Sprint 8, with the first essential messages (booking reminders). Placeholders to confirm: R18/USD, 5% buffer, 40% margin. Follow-ups: two money formatters in the app (Plans pages vs shared helper); several links named only "Edit" on the packages page |
+| 6.4 First 10 templates | see PR | 658 backend tests on SQLite and MySQL 8; 269 frontend; 68 browser checks incl. every page of all 10 templates on desktop and phone. Standard approved by the client after the first two (Salon & beauty). Photos are stand-ins pending the photography decision. Found: design switching failed on shared section ids; AI never filled Text content; section links unvalidated; gallery gaps; low contrast with bright brand colours |
