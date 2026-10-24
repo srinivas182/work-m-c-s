@@ -4,6 +4,17 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 7.4 (Plan & usage)
+- **Settings → Plan & usage** (was “WURK Credits”): renewal date and amount (incl. VAT); monthly credits, storage and team members as accessible progress bars; the balance in rands (cheapest pack, incl. VAT); when monthly credits expire vs bought credits that never expire; usage by type; the price list; statement download (CSV).
+- **Spending limits**: a monthly limit for the business (set by those who manage billing) and per staff member, enforced when credits are charged, inside the balance lock. A limit is a kind of “insufficient credits”, so messaging and WURK AI handle it automatically; AI quotes explain a limit instead of offering an action that would be refused.
+- **Usage meters** (Plans contract): storage (Website) and team members, so future modules can add their own.
+- **Team-member limit enforced** wherever team members are added (it was defined and sold but never enforced; no owner invite screen exists yet, so it couldn’t be exceeded in practice).
+
+### Fixed
+- Usage “this month” counted refunded charges as spent; it’s now net of refunds.
+- A circular dependency between Plans and Access (introduced while building the staff meter) — Access now defines small contracts that Plans implements; credit pricing lives in Plans so Credits never depends on Billing.
+- Outdated copy on the credits page (“Buying credits arrives with billing”).
+
 ### Added — Sprint 7.3 (AI images and media library)
 - **AI images**: “Generate an image” in the photo picker, with the same confirmation (8 credits; balance before and after), charged once and refunded on failure. Stored through the same safe pipeline as uploads and marked as AI. Image providers in WURK AI settings: OpenAI and a simulated provider (Google once a key lets us verify its API); price per image.
 - **Decorative only, enforced on save**: AI images are allowed in the Hero and Image & text sections and refused elsewhere (galleries, Before & after, Team, Portfolio, Rooms, Reviews, Accreditations, logo) with a plain message. The editor only offers and shows AI images where allowed; a test keeps the editor's and server's lists identical. Every image request asks for no real, identifiable people, logos or brands.
