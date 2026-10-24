@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build --ssr",
+    "build": "vite build && vite build --ssr && vite build --ssr resources/js/site-render.tsx --outDir bootstrap/site-render",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write \"resources/**/*.{ts,tsx,css}\" \"modules/**/*.{ts,tsx}\" \"e2e/**/*.ts\"",

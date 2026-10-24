@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 5 · runs after Sprint 7 (sprint plan revision 3) |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 25 Oct 2026 — 5.1 in progress |
 | **Depends on** | v0.7.0 (blocks, templates, publishing, media); Sprint 7 performance findings (docs/sprints/sprint-07.md) |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
