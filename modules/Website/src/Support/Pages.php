@@ -115,6 +115,7 @@ final readonly class Pages
     public function saveDraft(Page $page, mixed $document, int $expectedRevision, ?string $by): int
     {
         $clean = ContentDocument::validate($document);
+        AiImagePlacement::check($clean);
 
         return DB::connection($this->context->connectionName())->transaction(function () use ($page, $clean, $expectedRevision, $by): int {
             $locked = Page::query()->whereKey($page->id)->lockForUpdate()->firstOrFail();

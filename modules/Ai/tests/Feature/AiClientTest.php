@@ -86,3 +86,14 @@ it('stops at the daily limit per business and the monthly spend cap per provider
     AiRequest::query()->create(['task' => 'x', 'provider' => 'anthropic', 'model' => 'm', 'cost_usd_micro' => 60000, 'status' => 'succeeded', 'created_at' => now()]);
     expect(fn () => app(Ai::class)->run('rewrite', 'S', 'P'))->toThrow(AiUnavailable::class, 'paused');
 });
+
+it('makes images with the image model, logging the price per image', function () {
+    app(ProviderSettings::class)->save('ai.openai', 'openai', ['api_key' => 'key-openai'], [], true, null);
+    Http::fake(['api.openai.com/v1/images/*' => Http::response(['data' => [['b64_json' => base64_encode('PNGBYTES')]]], 200)]);
+
+    expect(app(Ai::class)->image('A sunlit salon interior', 'T1'))->toBe('PNGBYTES');
+    Http::assertSent(fn (Request $r) => $r->url() === 'https://api.openai.com/v1/images/generations' && $r['model'] === 'gpt-image-1'
+        && str_contains($r['prompt'], 'Do not depict any real, identifiable person'));
+    expect(AiRequest::query()->where('task', 'image')->firstOrFail()->only(['provider', 'cost_usd_micro', 'status']))
+        ->toBe(['provider' => 'openai', 'cost_usd_micro' => 40000, 'status' => 'succeeded']);
+});

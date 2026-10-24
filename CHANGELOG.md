@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 7.3 (AI images and media library)
+- **AI images**: “Generate an image” in the photo picker, with the same confirmation (8 credits; balance before and after), charged once and refunded on failure. Stored through the same safe pipeline as uploads and marked as AI. Image providers in WURK AI settings: OpenAI and a simulated provider (Google once a key lets us verify its API); price per image.
+- **Decorative only, enforced on save**: AI images are allowed in the Hero and Image & text sections and refused elsewhere (galleries, Before & after, Team, Portfolio, Rooms, Reviews, Accreditations, logo) with a plain message. The editor only offers and shows AI images where allowed; a test keeps the editor's and server's lists identical. Every image request asks for no real, identifiable people, logos or brands.
+- **Media library** (Website → Media): every photo with an AI badge, size, where it's used, an editable description offered wherever it's placed, delete (refused while in use), and storage against the package quota.
+
+### Fixed
+- Photo usage detection read stored page JSON as text, where “/” is escaped — every photo looked unused, so a photo still on a page could have been deleted. It now reads the content as data, through one shared helper.
+
 ### Added — Sprint 7.2 (templates II, part 2)
 - Eight templates: Trades & home services (Solar & electrical; Home services), Education & training (Tutor & online classes; Early-learning centre), Events & creative (Photographer & events portfolio; Venue & event planner), Transport & logistics (Shuttles & tours; Couriers & removals). **All 24 templates across the 12 categories are done.**
 - The early-learning centre's sample photos show rooms and play spaces, never children (photos of children need parental consent under POPIA); registrations are left for the owner, never claimed.

@@ -22,7 +22,15 @@ interface Props {
   businessName: string;
   branding: Branding;
   menus: { header: MenuItem[]; footer: MenuItem[] };
-  urls: { pages: string; draft: string; publish: string; versions: string; photos: string };
+  urls: {
+    pages: string;
+    draft: string;
+    publish: string;
+    versions: string;
+    photos: string;
+    aiImage?: string;
+    aiQuote?: string;
+  };
 }
 
 type Status = 'saved' | 'unsaved' | 'saving' | 'conflict' | 'error';
@@ -95,6 +103,14 @@ export default function Editor({
     const base = buildConfig({
       site: { businessName, editing: true, logo: branding.logo, menus },
       photosUrl: urls.photos,
+      ai:
+        urls.aiImage && urls.aiQuote
+          ? {
+              url: urls.aiImage,
+              quoteUrl: urls.aiQuote,
+              tenantBase: urls.pages.replace(/\/website\/pages$/, ''),
+            }
+          : undefined,
     });
     // The canvas wears the site's own theme, so editing looks exactly like the published site.
     return {
@@ -117,7 +133,7 @@ export default function Editor({
         ),
       },
     };
-  }, [businessName, branding, menus, urls.photos]);
+  }, [businessName, branding, menus, urls.photos, urls.aiImage, urls.aiQuote, urls.pages]);
 
   const initialData = useMemo(() => toPuck(content), [content]);
   // Puck doesn't record the page as loaded in its history, so the first edit after

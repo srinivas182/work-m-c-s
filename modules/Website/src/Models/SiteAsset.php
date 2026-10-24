@@ -13,6 +13,8 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string $id
  * @property string $tenant_id
  * @property string $name
+ * @property string|null $description
+ * @property bool $ai_generated
  * @property int $width
  * @property int $height
  * @property int $bytes
@@ -29,6 +31,6 @@ final class SiteAsset extends Model
 
     protected function casts(): array
     {
-        return ['variants' => 'array', 'width' => 'integer', 'height' => 'integer', 'bytes' => 'integer'];
+        return ['ai_generated' => 'boolean', 'variants' => 'array', 'width' => 'integer', 'height' => 'integer', 'bytes' => 'integer'];
     }
 }

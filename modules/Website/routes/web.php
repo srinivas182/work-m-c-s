@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Website\Http\Controllers\Admin\TemplatesController;
+use Wurk\Website\Http\Controllers\AiImageController;
 use Wurk\Website\Http\Controllers\AiWriterController;
 use Wurk\Website\Http\Controllers\AssetsController;
 use Wurk\Website\Http\Controllers\BlockBoardController;
@@ -11,6 +12,7 @@ use Wurk\Website\Http\Controllers\BrandingController;
 use Wurk\Website\Http\Controllers\DraftController;
 use Wurk\Website\Http\Controllers\EditorController;
 use Wurk\Website\Http\Controllers\EnquiriesController;
+use Wurk\Website\Http\Controllers\MediaController;
 use Wurk\Website\Http\Controllers\MenusController;
 use Wurk\Website\Http\Controllers\PagesController;
 use Wurk\Website\Http\Controllers\PreviewController;
@@ -38,12 +40,16 @@ Route::tenant(function (): void {
         Route::put('/pages/{page}/draft', [DraftController::class, 'save'])->middleware('throttle:120,1,website-draft')->name('draft.save');
         Route::get('/pages/{page}/versions', [DraftController::class, 'versions'])->name('versions');
 
+        Route::get('/media', [MediaController::class, 'index'])->name('media');
+        Route::put('/media/{asset}', [MediaController::class, 'update'])->name('media.update');
+        Route::delete('/media/{asset}', [MediaController::class, 'destroy'])->name('media.destroy');
         Route::get('/photos', [AssetsController::class, 'index'])->name('photos');
         Route::post('/photos', [AssetsController::class, 'store'])->middleware('throttle:60,1,website-photos')->name('photos.store');
         Route::get('/preview', PreviewController::class)->name('preview');
         Route::get('/ai', [AiWriterController::class, 'show'])->name('ai');
         Route::get('/ai/quote', [AiWriterController::class, 'quote'])->name('ai.quote');
         Route::post('/ai/generate', [AiWriterController::class, 'generate'])->middleware('throttle:6,1,ai-generate')->name('ai.generate');
+        Route::post('/ai/image', AiImageController::class)->middleware('throttle:10,1,ai-image')->name('ai.image');
         Route::get('/enquiries', [EnquiriesController::class, 'index'])->name('enquiries');
         Route::put('/enquiries/settings', [EnquiriesController::class, 'settings'])->name('enquiries.settings');
         Route::put('/enquiries/{enquiry}', [EnquiriesController::class, 'status'])->name('enquiries.status');

@@ -14,7 +14,12 @@ import { PhotoPicker } from './PhotoPicker';
 export interface EditorDeps {
   site: SiteContext;
   photosUrl: string;
+  /** Owners only: generating AI images (the staff template editor has none). */
+  ai?: { url: string; quoteUrl: string; tenantBase: string };
 }
+
+/** Sections where AI images may be used (decoration). Mirrors the server's AiImagePlacement::ALLOWED. */
+export const AI_IMAGE_SECTIONS = ['Hero', 'ImageText'];
 
 function moneyField(label: string): PuckField {
   return {
@@ -39,7 +44,7 @@ function moneyField(label: string): PuckField {
   };
 }
 
-function toPuckField(field: Field, deps: EditorDeps): PuckField {
+function toPuckField(field: Field, deps: EditorDeps, allowAi = false): PuckField {
   switch (field.kind) {
     case 'text':
       return {
@@ -62,6 +67,8 @@ function toPuckField(field: Field, deps: EditorDeps): PuckField {
             max={1}
             withAlt={false}
             photosUrl={deps.photosUrl}
+            allowAi={allowAi}
+            ai={deps.ai}
             value={typeof value === 'string' && value !== '' ? [{ src: value, alt: '' }] : []}
             onChange={(next) => onChange(next[0]?.src ?? '')}
           />
@@ -69,7 +76,7 @@ function toPuckField(field: Field, deps: EditorDeps): PuckField {
       };
     case 'list': {
       const arrayFields = Object.fromEntries(
-        Object.entries(field.item).map(([k, f]) => [k, toPuckField(f, deps)]),
+        Object.entries(field.item).map(([k, f]) => [k, toPuckField(f, deps, allowAi)]),
       );
       const firstText = Object.entries(field.item).find(([, f]) => f.kind === 'text')?.[0];
       return {
@@ -118,7 +125,10 @@ export function buildConfig(deps: EditorDeps): Config {
       {
         label: def.label,
         fields: Object.fromEntries(
-          Object.entries(def.fields).map(([k, f]) => [k, toPuckField(f as Field, deps)]),
+          Object.entries(def.fields).map(([k, f]) => [
+            k,
+            toPuckField(f as Field, deps, AI_IMAGE_SECTIONS.includes(def.type)),
+          ]),
         ),
         defaultProps: def.defaults,
         render: (all: Record<string, unknown>) => (
