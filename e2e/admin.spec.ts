@@ -135,6 +135,10 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('heading', { level: 1, name: 'Warm salon (sample)' })).toBeVisible();
   await expectAccessible(page);
 
+  await page.goto(`${admin}/launch-times`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Time to launch' })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/settings/ai`);
   await expect(page.getByRole('heading', { level: 1, name: 'WURK AI' })).toBeVisible();
   await expectAccessible(page);
