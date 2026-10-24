@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 6.2 (category sections)
+- Ten sections: Before & after (keyboard-accessible slider or side by side), Packages & specials (expired specials hide themselves), Class timetable (week grid on desktop, days with classes on phones), Food menu (dietary tags), Rooms & rates (links out to a booking engine — never embedded), Portfolio, Accreditations, Service areas (map link, no embedded map), Promotion banner (between dates, dismissible, above the header), Quote form.
+- Quote form submissions: stored per business and emailed if the owner sets an address; consent required; hidden-field spam trap, per-visitor limit and a daily cap per business; visitors' IP addresses stored only as a hash. New Website → Enquiries screen (new first, one-tap Call / WhatsApp / Email, mark read, archive, notification email).
+- The design board shows all 24 sections, accessibility-scanned on desktop and phone.
+
+### Fixed
+- Pages without a Hero had no main heading (accessibility and SEO): the first section's heading becomes the page's only h1; four blocks that wrote their own h2 now follow the rule.
+- The Before & after caption couldn't be edited until both photos were uploaded.
+- The inline-editing safety test skipped fields in lists inside lists (e.g. a menu's dishes); nested lists are now filled and tested.
+
 ### Added — Sprint 6.1 (template system)
 - Website categories (the 12 agreed, `website:seed-categories`) and templates managed by WURK staff: create blank or as a copy, edit pages in the same visual editor owners use, template photos (same safe pipeline, kept apart from businesses' photos), preview drafts, publish immutable versions with a note, restore a version, retire. Permission `templates.manage`.
 - Signup: "What kind of business is it?" and "Choose your website design" steps with live previews (published designs only); categories appear once they have a design. Completing signup builds the site from the design (pages, menus linked to real pages, branding). Applying a design can never block signup — on failure the business gets the starter layout.
