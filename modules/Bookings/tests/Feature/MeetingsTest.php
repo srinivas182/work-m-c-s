@@ -14,6 +14,7 @@ use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Support\Booker;
+use Wurk\Bookings\Support\Reminders;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -90,6 +91,7 @@ it('keeps the booking when the provider fails, and gets the link before the remi
     expect($booking->status)->toBe('confirmed')->and($booking->meeting_url)->toBeNull();
 
     $this->travelTo(CarbonImmutable::parse('2027-05-02 09:01', 'Africa/Johannesburg'));
+    app(Reminders::class)->sendDue();
     ($this->in)(fn () => expect($booking->refresh()->meeting_url)->toBe('https://meet.google.com/later'));
 });
 
