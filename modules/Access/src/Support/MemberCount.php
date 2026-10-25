@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Access\Support;
 
+use Wurk\Access\Actions\Team;
 use Wurk\Access\Contracts\SeatPolicy;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Access\Contracts\TeamSize;
@@ -36,5 +37,10 @@ final readonly class MemberCount implements SeatPolicy, TeamDirectory, TeamSize
         }
 
         return $members;
+    }
+
+    public function add(string $identityId, string $displayName, string $role): string
+    {
+        return (string) app(Team::class)->add($identityId, $displayName, $role)->id;
     }
 }

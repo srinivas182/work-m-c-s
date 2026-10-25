@@ -12,4 +12,7 @@ interface TeamDirectory
      * @return list<array{id: string, name: string}>
      */
     public function members(): array;
+
+    /** Add a team member to the current business (seat limits and roles apply); returns the member id. */
+    public function add(string $identityId, string $displayName, string $role): string;
 }

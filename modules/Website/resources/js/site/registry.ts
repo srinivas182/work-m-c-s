@@ -21,6 +21,7 @@ import { Portfolio } from './blocks/Portfolio';
 import { Accreditations } from './blocks/Accreditations';
 import { ServiceAreas } from './blocks/ServiceAreas';
 import { QuoteForm } from './blocks/QuoteForm';
+import { BookOnline } from './blocks/BookOnline';
 import { PromotionBanner } from './blocks/PromotionBanner';
 import type { BlockDefinition } from './types';
 
@@ -50,6 +51,7 @@ export const BLOCKS: Record<string, AnyBlock> = Object.fromEntries(
     Accreditations,
     ServiceAreas,
     QuoteForm,
+    BookOnline,
     PromotionBanner,
     Text,
     CallToAction,
