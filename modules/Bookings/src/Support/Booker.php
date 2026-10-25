@@ -27,7 +27,7 @@ final readonly class Booker
     /**
      * @param  array{name: string, phone?: string|null, email?: string|null, notes?: string|null}  $customer
      */
-    public function book(BookingService $service, CarbonImmutable $startsAt, array $customer, ?string $memberId = null, string $source = 'owner', ?string $by = null, string $status = 'confirmed', bool $asOwner = false): Booking
+    public function book(BookingService $service, CarbonImmutable $startsAt, array $customer, ?string $memberId = null, string $source = 'owner', ?string $by = null, string $status = 'confirmed', bool $asOwner = false, bool $online = false): Booking
     {
         $startsAt = $startsAt->utc();
         // Owners (walk-ins, squeezing someone in) aren't held to notice, horizon or listed hours —
@@ -36,7 +36,7 @@ final readonly class Booker
             $members = $memberId !== null ? [$memberId] : array_values(DB::connection($this->context->connectionName())->table('booking_service_member')
                 ->where('service_id', $service->id)->pluck('member_id')->map(fn ($m) => (string) $m)->values()->all());
 
-            return $this->claim($service, $startsAt, $customer, $members, $source, $by, $status);
+            return $this->claim($service, $startsAt, $customer, $members, $source, $by, $status, $online);
         }
         // Open for this service at this time (hours, time off, notice) — then the database decides the race.
         $date = $startsAt->setTimezone($this->context->current()->timezone())->format('Y-m-d');
@@ -45,7 +45,7 @@ final readonly class Booker
             throw new SlotTaken;
         }
 
-        return $this->claim($service, $startsAt, $customer, $open['members'], $source, $by, $status);
+        return $this->claim($service, $startsAt, $customer, $open['members'], $source, $by, $status, $online);
     }
 
     /**
@@ -54,17 +54,17 @@ final readonly class Booker
      * @param  array{name: string, phone?: string|null, email?: string|null, notes?: string|null}  $customer
      * @param  list<string>  $members
      */
-    private function claim(BookingService $service, CarbonImmutable $startsAt, array $customer, array $members, string $source, ?string $by, string $status): Booking
+    private function claim(BookingService $service, CarbonImmutable $startsAt, array $customer, array $members, string $source, ?string $by, string $status, bool $online = false): Booking
     {
         $from = $startsAt->subMinutes($service->buffer_before_minutes);
         $until = $startsAt->addMinutes($service->duration_minutes + $service->buffer_after_minutes);
 
         foreach ($members as $member) { // "anyone": the first team member free at that time
             try {
-                $booking = DB::connection($this->context->connectionName())->transaction(function () use ($service, $startsAt, $customer, $member, $source, $by, $status, $from, $until): Booking {
+                $booking = DB::connection($this->context->connectionName())->transaction(function () use ($service, $startsAt, $customer, $member, $source, $by, $status, $from, $until, $online): Booking {
                     $booking = Booking::query()->create([
                         'service_id' => $service->id, 'member_id' => $member, 'starts_at' => Instant::db($startsAt),
-                        'ends_at' => Instant::db($startsAt->addMinutes($service->duration_minutes)), 'status' => $status,
+                        'ends_at' => Instant::db($startsAt->addMinutes($service->duration_minutes)), 'status' => $status, 'online' => $online,
                         'customer_name' => $customer['name'], 'customer_phone' => $customer['phone'] ?? null,
                         'customer_email' => $customer['email'] ?? null, 'notes' => $customer['notes'] ?? null,
                         'source' => $source, 'created_by' => $by,

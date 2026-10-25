@@ -19,10 +19,12 @@ use Wurk\Billing\Contracts\SplitPayments;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\TimeOff;
 use Wurk\Bookings\Support\CancellationPolicy;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Messaging\Contracts\Messenger;
+use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners: Bookings → Settings — services, team hours and time off. */
@@ -49,6 +51,11 @@ final class BookingSettingsController
             'banks' => fn () => app(SplitPayments::class)->banks(),
             'policy' => ['hours' => app(CancellationPolicy::class)->hours(), 'text' => (string) BookingSettings::query()->find($this->context->id())?->policy,
                 'default' => CancellationPolicy::defaultWording(app(CancellationPolicy::class)->hours())],
+            'video' => [
+                'connection' => MeetingConnection::query()->find($this->context->id())?->only(['provider', 'account_label', 'fixed_url']),
+                'available' => ['google' => ! empty(app(ProviderCredentials::class)->active('meetings.google')['credentials']['client_id'] ?? null),
+                    'zoom' => ! empty(app(ProviderCredentials::class)->active('meetings.zoom')['credentials']['client_id'] ?? null)],
+            ],
             'messages' => [
                 'channel' => BookingSettings::query()->find($this->context->id())->message_channel ?? 'email',
                 'remind_24h' => (bool) (BookingSettings::query()->find($this->context->id())->remind_24h ?? true),
@@ -71,10 +78,15 @@ final class BookingSettingsController
             'price_cents' => ['required', 'integer', 'min:0', 'max:100000000'],
             'deposit_type' => ['required', Rule::in(['none', 'fixed', 'percent'])],
             'deposit_value' => ['required', 'integer', 'min:0', $request->input('deposit_type') === 'percent' ? 'max:100' : 'max:100000000'],
+            'location_type' => ['sometimes', Rule::in(['in_person', 'online', 'either'])],
             'active' => ['boolean'],
             'members' => ['array', 'min:1'],
             'members.*' => ['string', Rule::in($memberIds)],
         ], ['members.min' => 'Choose at least one team member who does this service.']);
+        $data['location_type'] ??= 'in_person'; // omitted means in person, as stored by default
+        if ($data['location_type'] !== 'in_person' && MeetingConnection::query()->find($this->context->id()) === null) {
+            throw ValidationException::withMessages(['location_type' => 'Connect Google Meet or Zoom (or add a meeting link) under Video calls first, so clients can join.']);
+        }
 
         DB::connection($this->context->connectionName())->transaction(function () use ($data, $service): void {
             $model = $service === null ? new BookingService : BookingService::query()->findOrFail($service);

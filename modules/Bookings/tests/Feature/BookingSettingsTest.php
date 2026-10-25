@@ -131,3 +131,11 @@ it('accepts a fixed meeting link only over https', function () {
     $this->actingAs($this->owner)->put("{$this->base}/video/fixed", ['url' => 'http://meet.example.com/room'])->assertSessionHasErrors(['url' => 'Enter the full meeting link, starting with https://']);
     $this->actingAs($this->owner)->put("{$this->base}/video/fixed", ['url' => 'https://meet.example.com/room'])->assertSessionHas('status', 'Your meeting link is saved. Note: every client gets the same link.');
 });
+
+it('won’t make a service online until clients have a way to join', function () {
+    ($this->subscribe)(['bookings']);
+    $this->actingAs($this->owner)->post("{$this->base}/services", [...$this->service, 'location_type' => 'online'])
+        ->assertSessionHasErrors(['location_type' => 'Connect Google Meet or Zoom (or add a meeting link) under Video calls first, so clients can join.']);
+    $this->actingAs($this->owner)->put("{$this->base}/video/fixed", ['url' => 'https://meet.example.com/room']);
+    $this->actingAs($this->owner)->post("{$this->base}/services", [...$this->service, 'location_type' => 'online'])->assertSessionHas('status', 'Service saved.');
+});

@@ -29,6 +29,13 @@
   <section class="card" aria-label="Booking details">
     <p><strong>{{ $service }}</strong> for {{ $customer }}</p>
     <p>{{ $when }}</p>
+    @if ($online && $status === 'confirmed')
+      @if ($joinUrl)
+      <p><a href="{{ $joinUrl }}" rel="noopener noreferrer"><strong>Join online now</strong></a></p>
+      @else
+      <p>This is an online appointment. Your joining link appears here 15 minutes before it starts.</p>
+      @endif
+    @endif
     @if (! $changeable)
     <p>{{ ['cancelled' => 'This booking is cancelled.', 'expired' => 'This booking wasn’t completed: the deposit wasn’t paid in time.', 'no_show' => 'This booking was missed.', 'completed' => 'This booking is done.'][$status] ?? 'This booking can’t be changed online any more. Please contact us.' }}</p>
     @endif
