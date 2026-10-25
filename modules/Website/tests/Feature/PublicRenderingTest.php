@@ -75,3 +75,23 @@ it('re-renders every published page when branding or menus change', function () 
     Process::assertRanTimes(fn ($p) => true, 4); // two publishes, then two re-renders
     $this->get($this->site)->assertSee('<h1>New look</h1>', false);
 });
+
+it('re-renders pages with dated content (a promotion with an end date) each night — and only those', function () {
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Hi</h1>']))]);
+    $this->ctx->run($this->glow, function () {
+        $pages = app(Pages::class);
+        $home = Page::query()->where('is_home', true)->firstOrFail();
+        $doc = json_decode((string) $home->draft, true);
+        array_unshift($doc['blocks'], ['id' => 'promo', 'type' => 'PromotionBanner', 'version' => 1, 'props' => [
+            'text' => 'Winter special', 'linkLabel' => '', 'linkHref' => '', 'tone' => 'brand', 'starts' => '', 'ends' => '2027-06-30',
+        ]]);
+        $pages->saveDraft($home, $doc, $home->draft_revision, null);
+        $pages->publish($home->refresh(), null, null);                                       // dated
+        $pages->publish(Page::query()->where('slug', 'services')->firstOrFail(), null, null); // no dates
+    });
+
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Re-rendered</h1>']))]);
+    $this->artisan('website:rerender-dated')->expectsOutputToContain('1 dated page(s) queued')->assertSuccessful();
+    Process::assertRanTimes(fn ($p) => true, 3); // two publishes, then one nightly re-render
+    $this->get($this->site)->assertSee('<h1>Re-rendered</h1>', false);
+});

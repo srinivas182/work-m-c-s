@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Wurk\Website;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\InstallTemplatesCommand;
+use Wurk\Website\Console\RerenderDatedPagesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
 use Wurk\Website\Console\SeedSampleTemplatesCommand;
 use Wurk\Website\Contracts\SiteTemplates;
@@ -67,9 +69,13 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Dated content (promotions, expiring specials) refreshed just after midnight.
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('website:rerender-dated')->dailyAt('00:05')->timezone('Africa/Johannesburg')->onOneServer()->withoutOverlapping();
+        });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'website');
         if ($this->app->runningInConsole()) {
-            $this->commands([SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class]);
+            $this->commands([SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class]);
         }
     }
 }
