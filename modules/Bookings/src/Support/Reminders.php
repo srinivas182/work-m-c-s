@@ -52,6 +52,9 @@ final readonly class Reminders
                             ? Reservation::query()->whereKey($r->booking_id)->first()
                             : Booking::query()->whereKey($r->booking_id)->first();
                         if ($booking !== null && $booking->status === 'confirmed' && $booking->starts_at->isFuture()) {
+                            if ($booking instanceof Booking) {
+                                app(Meetings::class)->ensure($booking); // retry a link that failed earlier
+                            }
                             $this->messages->send($booking, 'reminder', (string) $r->kind);
                             $n++;
                         }

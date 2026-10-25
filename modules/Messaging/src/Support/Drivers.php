@@ -60,6 +60,9 @@ final class Drivers
             'payments.yoco' => ['yoco' => ['name' => 'Yoco', 'fields' => ['secret_key' => ['label' => 'Secret key', 'secret' => true]], 'settings' => []]],
             'payments.ozow' => ['ozow' => ['name' => 'Ozow', 'fields' => ['site_code' => ['label' => 'Site code', 'secret' => false], 'private_key' => ['label' => 'Private key', 'secret' => true], 'api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => ['sandbox' => 'Sandbox (1 = yes)']]],
             // WURK AI providers (Ai module): one secret key each; the model per task is chosen in AI settings.
+            // Video meetings (Sprint 9): businesses connect their own accounts through WURK's apps.
+            'meetings.google' => ['google' => ['name' => 'Google (Meet)', 'fields' => ['client_id' => ['label' => 'OAuth client ID', 'secret' => false], 'client_secret' => ['label' => 'OAuth client secret', 'secret' => true]], 'settings' => []]],
+            'meetings.zoom' => ['zoom' => ['name' => 'Zoom', 'fields' => ['client_id' => ['label' => 'OAuth client ID', 'secret' => false], 'client_secret' => ['label' => 'OAuth client secret', 'secret' => true]], 'settings' => []]],
             'ai.anthropic' => ['anthropic' => ['name' => 'Anthropic (Claude)', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
             'ai.google' => ['google' => ['name' => 'Google (Gemini)', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
             'ai.openai' => ['openai' => ['name' => 'OpenAI', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
