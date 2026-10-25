@@ -4,6 +4,16 @@ import { expect, type Page, type TestInfo } from '@playwright/test';
 
 /** No serious or critical WCAG 2.2 AA issues on the current page. */
 export async function expectAccessible(page: Page) {
+  // Judge the settled page: wait for running animations and transitions (a toast fading in,
+  // a colour change) — mid-animation, colours are briefly paler than anyone actually reads them.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  );
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
