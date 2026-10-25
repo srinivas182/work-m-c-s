@@ -80,8 +80,8 @@ final class PublicBookingController
                 return new JsonResponse(['booked' => true], 201); // a bot: no signal, no booking
             }
             $service = BookingService::query()->where('active', true)->whereKey($data['service'])->firstOrFail();
-            $deposit = $deposits->amountFor($service);
             $online = $service->location_type === 'online' || ($service->location_type === 'either' && ($data['online'] ?? false));
+            $deposit = $deposits->amountFor($service, $online);
             if ($deposit > 0 && empty($data['email'])) { // Paystack sends the receipt by email
                 throw ValidationException::withMessages(['email' => 'Please add your email — a deposit is needed for this service, and the receipt is emailed.']);
             }
