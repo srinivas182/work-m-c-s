@@ -40,14 +40,14 @@ final readonly class Booker
             try {
                 $booking = DB::connection($this->context->connectionName())->transaction(function () use ($service, $startsAt, $customer, $member, $source, $by, $status, $from, $until): Booking {
                     $booking = Booking::query()->create([
-                        'service_id' => $service->id, 'member_id' => $member, 'starts_at' => $startsAt,
-                        'ends_at' => $startsAt->addMinutes($service->duration_minutes), 'status' => $status,
+                        'service_id' => $service->id, 'member_id' => $member, 'starts_at' => Instant::db($startsAt),
+                        'ends_at' => Instant::db($startsAt->addMinutes($service->duration_minutes)), 'status' => $status,
                         'customer_name' => $customer['name'], 'customer_phone' => $customer['phone'] ?? null,
                         'customer_email' => $customer['email'] ?? null, 'notes' => $customer['notes'] ?? null,
                         'source' => $source, 'created_by' => $by,
                     ]);
                     DB::connection($this->context->connectionName())->table('booking_slots')->insert(array_map(fn (CarbonImmutable $slot) => [
-                        'member_id' => $member, 'slot_at' => $slot->format('Y-m-d H:i:s'), 'booking_id' => $booking->id, 'tenant_id' => $this->context->id(),
+                        'member_id' => $member, 'slot_at' => Instant::db($slot), 'booking_id' => $booking->id, 'tenant_id' => $this->context->id(),
                     ], Availability::slots($from, $until)));
 
                     return $booking;

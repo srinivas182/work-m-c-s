@@ -54,10 +54,10 @@ readonly class Availability
             $dayStartUtc = $day->utc();
             $dayEndUtc = $day->addDay()->utc();
             $off = TimeOff::query()->where(fn ($q) => $q->whereNull('member_id')->orWhere('member_id', $member))
-                ->where('starts_at', '<', $dayEndUtc)->where('ends_at', '>', $dayStartUtc)->get();
+                ->where('starts_at', '<', Instant::db($dayEndUtc))->where('ends_at', '>', Instant::db($dayStartUtc))->get();
             $taken = array_flip(DB::connection($this->context->connectionName())->table('booking_slots')->where('member_id', $member)
-                ->whereBetween('slot_at', [$dayStartUtc->subHours(3), $dayEndUtc->addHours(3)])->pluck('slot_at')
-                ->map(fn ($t) => CarbonImmutable::parse((string) $t, 'UTC')->getTimestamp())->all());
+                ->whereBetween('slot_at', [Instant::db($dayStartUtc->subHours(3)), Instant::db($dayEndUtc->addHours(3))])->pluck('slot_at')
+                ->map(fn ($t) => Instant::fromDb((string) $t)->getTimestamp())->all());
 
             foreach ($hours as $h) {
                 $open = CarbonImmutable::parse($day->format('Y-m-d').' '.$h->starts, $tz);

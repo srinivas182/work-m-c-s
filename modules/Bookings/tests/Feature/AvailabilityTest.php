@@ -11,6 +11,7 @@ use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\TimeOff;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
+use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\SlotTaken;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -65,10 +66,10 @@ it('blocks a booking’s time (buffers included) and frees it on cancellation', 
 it('needs notice, and respects time off — one person’s, or the whole business’s', function () {
     expect(($this->starts)(ZANELE, ($this->at)('08:30')))->not->toContain('09:00')->toContain('09:30');
 
-    ($this->in)(fn () => TimeOff::query()->create(['member_id' => ZANELE, 'starts_at' => ($this->at)('13:00')->utc(), 'ends_at' => ($this->at)('17:00')->utc()]));
+    ($this->in)(fn () => TimeOff::query()->create(['member_id' => ZANELE, 'starts_at' => Instant::db(($this->at)('13:00')), 'ends_at' => Instant::db(($this->at)('17:00'))]));
     expect(($this->starts)(ZANELE))->not->toContain('13:00')->and(($this->starts)(THABO))->toContain('13:00');
 
-    ($this->in)(fn () => TimeOff::query()->create(['member_id' => null, 'starts_at' => ($this->at)('00:00')->utc(), 'ends_at' => ($this->at)('00:00')->addDay()->utc(), 'reason' => 'Public holiday']));
+    ($this->in)(fn () => TimeOff::query()->create(['member_id' => null, 'starts_at' => Instant::db(($this->at)('00:00')), 'ends_at' => Instant::db(($this->at)('00:00')->addDay()), 'reason' => 'Public holiday']));
     expect(($this->starts)())->toBe([]);
 });
 
