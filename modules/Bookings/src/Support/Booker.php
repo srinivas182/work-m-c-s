@@ -24,19 +24,39 @@ final readonly class Booker
     /**
      * @param  array{name: string, phone?: string|null, email?: string|null, notes?: string|null}  $customer
      */
-    public function book(BookingService $service, CarbonImmutable $startsAt, array $customer, ?string $memberId = null, string $source = 'owner', ?string $by = null, string $status = 'confirmed'): Booking
+    public function book(BookingService $service, CarbonImmutable $startsAt, array $customer, ?string $memberId = null, string $source = 'owner', ?string $by = null, string $status = 'confirmed', bool $asOwner = false): Booking
     {
         $startsAt = $startsAt->utc();
+        // Owners (walk-ins, squeezing someone in) aren't held to notice, horizon or listed hours —
+        // only to the no-overlap guarantee, which the slots enforce for everyone.
+        if ($asOwner) {
+            $members = $memberId !== null ? [$memberId] : array_values(DB::connection($this->context->connectionName())->table('booking_service_member')
+                ->where('service_id', $service->id)->pluck('member_id')->map(fn ($m) => (string) $m)->values()->all());
+
+            return $this->claim($service, $startsAt, $customer, $members, $source, $by, $status);
+        }
         // Open for this service at this time (hours, time off, notice) — then the database decides the race.
         $date = $startsAt->setTimezone($this->context->current()->timezone())->format('Y-m-d');
         $open = collect($this->availability->on($service, $date, $memberId))->firstWhere('starts_at', $startsAt->toIso8601String());
         if ($open === null) {
             throw new SlotTaken;
         }
+
+        return $this->claim($service, $startsAt, $customer, $open['members'], $source, $by, $status);
+    }
+
+    /**
+     * Save the booking and claim its slots, trying each candidate team member in turn.
+     *
+     * @param  array{name: string, phone?: string|null, email?: string|null, notes?: string|null}  $customer
+     * @param  list<string>  $members
+     */
+    private function claim(BookingService $service, CarbonImmutable $startsAt, array $customer, array $members, string $source, ?string $by, string $status): Booking
+    {
         $from = $startsAt->subMinutes($service->buffer_before_minutes);
         $until = $startsAt->addMinutes($service->duration_minutes + $service->buffer_after_minutes);
 
-        foreach ($open['members'] as $member) { // "anyone": the first team member free at that time
+        foreach ($members as $member) { // "anyone": the first team member free at that time
             try {
                 $booking = DB::connection($this->context->connectionName())->transaction(function () use ($service, $startsAt, $customer, $member, $source, $by, $status, $from, $until): Booking {
                     $booking = Booking::query()->create([
@@ -61,6 +81,32 @@ final readonly class Booker
         }
 
         throw new SlotTaken;
+    }
+
+    /**
+     * Move a booking (time and/or team member) in one transaction: release its slots, claim the new
+     * ones, update it. If the new time clashes, nothing changes — it keeps its original time.
+     */
+    public function move(Booking $booking, CarbonImmutable $startsAt, ?string $memberId, ?string $by): Booking
+    {
+        $service = BookingService::query()->whereKey($booking->service_id)->firstOrFail();
+        $member = $memberId ?? $booking->member_id;
+        $startsAt = $startsAt->utc();
+        try {
+            DB::connection($this->context->connectionName())->transaction(function () use ($booking, $service, $member, $startsAt): void {
+                $db = DB::connection($this->context->connectionName());
+                $db->table('booking_slots')->where('booking_id', $booking->id)->delete();
+                $db->table('booking_slots')->insert(array_map(fn (CarbonImmutable $slot) => [
+                    'member_id' => $member, 'slot_at' => Instant::db($slot), 'booking_id' => $booking->id, 'tenant_id' => $this->context->id(),
+                ], Availability::slots($startsAt->subMinutes($service->buffer_before_minutes), $startsAt->addMinutes($service->duration_minutes + $service->buffer_after_minutes))));
+                $booking->update(['member_id' => $member, 'starts_at' => Instant::db($startsAt), 'ends_at' => Instant::db($startsAt->addMinutes($service->duration_minutes))]);
+            });
+        } catch (UniqueConstraintViolationException) {
+            throw new SlotTaken;
+        }
+        $this->audit->record('bookings.moved', 'booking', $booking->id, ['to' => $startsAt->toIso8601String(), 'by' => $by]);
+
+        return $booking->refresh();
     }
 
     /** Cancelling frees the time straight away. */

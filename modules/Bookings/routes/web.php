@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Bookings\Http\Controllers\BookingSettingsController;
+use Wurk\Bookings\Http\Controllers\CalendarController;
 use Wurk\Bookings\Http\Controllers\PublicBookingController;
 
 Route::tenant(function (): void {
+    // The calendar: everyone who can see bookings; changes need bookings.manage.
+    Route::middleware(['entitled:bookings', 'permission:bookings.view'])->prefix('bookings')->name('tenant.bookings.')->group(function (): void {
+        Route::get('/', [CalendarController::class, 'show'])->name('calendar');
+        Route::middleware('permission:bookings.manage')->group(function (): void {
+            Route::post('/', [CalendarController::class, 'store'])->name('store');
+            Route::put('/{booking}/move', [CalendarController::class, 'move'])->name('move');
+            Route::post('/{booking}/status', [CalendarController::class, 'status'])->name('status');
+        });
+    });
     Route::middleware(['entitled:bookings', 'permission:bookings.manage'])->prefix('bookings')->name('tenant.bookings.')->group(function (): void {
         Route::get('/settings', [BookingSettingsController::class, 'show'])->name('settings');
         Route::post('/services', [BookingSettingsController::class, 'saveService'])->name('services.store');
