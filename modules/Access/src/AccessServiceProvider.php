@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Octane\Events\RequestReceived;
 use Wurk\Access\Console\SyncPermissionsCommand;
 use Wurk\Access\Contracts\SeatPolicy;
+use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Access\Contracts\TeamSize;
 use Wurk\Access\Http\Middleware\RequirePermission;
 use Wurk\Access\Listeners\GrantAccessOnMembership;
@@ -32,6 +33,7 @@ final class AccessServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         $this->app->singleton(TeamSize::class, MemberCount::class);
+        $this->app->singleton(TeamDirectory::class, MemberCount::class);
         $this->app->singleton(SeatPolicy::class, MemberCount::class);
         $this->app->singleton(PermissionRegistry::class);
         $this->app->singleton(AccessManager::class);
