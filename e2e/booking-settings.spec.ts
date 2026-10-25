@@ -41,5 +41,11 @@ test('an owner sets up a service, their hours and time off', async ({ page }, te
   await policy.getByLabel('Free cancellation until (hours before)').fill('48');
   await policy.getByRole('button', { name: 'Save policy' }).click();
   await expect(page.getByText('Cancellation policy saved.')).toBeVisible();
+
+  const messages = page.getByRole('form', { name: 'Confirmations and reminders' });
+  await expect(messages.getByRole('radio', { name: /Email — Free\./ })).toBeChecked();
+  await messages.getByRole('checkbox', { name: '2 hours before' }).click();
+  await messages.getByRole('button', { name: 'Save message settings' }).click();
+  await expect(page.getByText('Message settings saved.')).toBeVisible();
   await expectAccessible(page);
 });

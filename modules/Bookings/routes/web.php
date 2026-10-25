@@ -28,6 +28,7 @@ Route::tenant(function (): void {
         Route::put('/payouts', [BookingSettingsController::class, 'connectPayouts'])->name('payouts.connect');
         Route::delete('/payouts', [BookingSettingsController::class, 'disconnectPayouts'])->name('payouts.disconnect');
         Route::put('/policy', [BookingSettingsController::class, 'savePolicy'])->name('policy.save');
+        Route::put('/messages', [BookingSettingsController::class, 'saveMessages'])->name('messages.save');
     });
 });
 

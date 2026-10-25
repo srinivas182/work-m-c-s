@@ -45,6 +45,12 @@ interface Props {
   payouts: { label: string | null };
   banks?: { code: string; name: string }[];
   policy: { hours: number; text: string; default: string };
+  messages: {
+    channel: 'email' | 'sms' | 'whatsapp';
+    remind_24h: boolean;
+    remind_2h: boolean;
+    available: { sms: boolean; whatsapp: boolean };
+  };
 }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -298,6 +304,103 @@ function HoursEditor({ member, hours }: { member: Props['team'][number]; hours: 
   );
 }
 
+function MessagesCard({ messages }: Pick<Props, 'messages'>) {
+  const form = useForm({
+    channel: messages.channel,
+    remind_24h: messages.remind_24h,
+    remind_2h: messages.remind_2h,
+  });
+  const options: {
+    value: Props['messages']['channel'];
+    label: string;
+    note: string;
+    on: boolean;
+  }[] = [
+    { value: 'email', label: 'Email', note: 'Free.', on: true },
+    {
+      value: 'sms',
+      label: 'SMS',
+      note: 'Uses WURK Credits. If credits run out, messages go by email instead.',
+      on: messages.available.sms,
+    },
+    {
+      value: 'whatsapp',
+      label: 'WhatsApp',
+      note: 'Uses WURK Credits. If credits run out, messages go by email instead.',
+      on: messages.available.whatsapp,
+    },
+  ];
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Confirmations and reminders</CardTitle>
+        <CardDescription>
+          Customers get a confirmation, reminders, and a message if their booking moves or is
+          cancelled — in WURK’s standard wording, with a link to change or cancel.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          aria-label="Confirmations and reminders"
+          className="grid gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.put(`${base()}/messages`, { preserveScroll: true });
+          }}
+        >
+          <fieldset className="grid gap-2">
+            <legend className="mb-1 text-sm font-medium">Send messages by</legend>
+            {options.map((o) => (
+              <label
+                key={o.value}
+                className={`flex items-start gap-2 text-sm ${o.on ? '' : 'text-fg-muted'}`}
+              >
+                <input
+                  type="radio"
+                  name="channel"
+                  className="mt-1"
+                  value={o.value}
+                  disabled={!o.on}
+                  checked={form.data.channel === o.value}
+                  onChange={() => form.setData('channel', o.value)}
+                />
+                <span>
+                  <strong>{o.label}</strong> — {o.on ? o.note : 'not switched on yet.'}
+                </span>
+              </label>
+            ))}
+          </fieldset>
+          <fieldset className="grid gap-2">
+            <legend className="mb-1 text-sm font-medium">Reminders</legend>
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={form.data.remind_24h}
+                onCheckedChange={(on) => form.setData('remind_24h', on === true)}
+              />
+              24 hours before
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={form.data.remind_2h}
+                onCheckedChange={(on) => form.setData('remind_2h', on === true)}
+              />
+              2 hours before
+            </label>
+          </fieldset>
+          <Button
+            type="submit"
+            variant="secondary"
+            className="justify-self-start"
+            loading={form.processing}
+          >
+            Save message settings
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 function DepositsCard({ payouts, banks, policy }: Pick<Props, 'payouts' | 'banks' | 'policy'>) {
   const connect = useForm({ bank_code: '', account_number: '' });
   const rules = useForm({ hours: policy.hours, text: policy.text });
@@ -426,6 +529,7 @@ export default function Settings({
   payouts,
   banks,
   policy,
+  messages,
 }: Props) {
   const [editing, setEditing] = useState<Service | 'new' | null>(
     services.length === 0 ? 'new' : null,
@@ -510,6 +614,7 @@ export default function Settings({
         </Card>
 
         <DepositsCard payouts={payouts} banks={banks} policy={policy} />
+        <MessagesCard messages={messages} />
 
         <Card>
           <CardHeader>
