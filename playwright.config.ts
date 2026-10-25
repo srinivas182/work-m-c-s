@@ -20,7 +20,7 @@ export default defineConfig({
     // Optional local override when the Playwright browser download is unavailable.
     // wurk.test (the marketing site's host in e2e) resolves to the local server.
     launchOptions: {
-      args: ['--host-resolver-rules=MAP wurk.test 127.0.0.1', ...(process.env.PW_CHROMIUM_PATH ? ['--no-sandbox'] : [])],
+      args: ['--host-resolver-rules=MAP wurk.test 127.0.0.1, MAP *.wurk.test 127.0.0.1', ...(process.env.PW_CHROMIUM_PATH ? ['--no-sandbox'] : [])],
       ...(process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {}),
     },
     screenshot: 'only-on-failure',
