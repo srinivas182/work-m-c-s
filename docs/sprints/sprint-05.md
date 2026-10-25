@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 5 · runs after Sprint 7 (sprint plan revision 3) |
-| **Status** | Approved 25 Oct 2026 — 5.1 ✅ (#57), 5.2 in review |
+| **Status** | Approved 25 Oct 2026 — 5.1 ✅ (#57), 5.2 ✅ (#58), 5.3 in progress |
 | **Depends on** | v0.7.0 (blocks, templates, publishing, media); Sprint 7 performance findings (docs/sprints/sprint-07.md) |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -99,4 +99,4 @@ Interactive parts become **islands** — a few kilobytes of JavaScript each, loa
 | Sub-sprint | PR | Notes |
 |---|---|---|
 | 5.1 Rendering pipeline | #57 | 687 backend tests on SQLite and MySQL 8 (also without the renderer bundle, as in CI); 363 frontend; 58 browser checks. Found: context lost after synchronous jobs; slideshow without a pause control on static pages; dated content frozen in static HTML (nightly re-render) |
-| 5.2 Serving, caching and safety | see PR | 689 backend tests on SQLite and MySQL 8 (without the renderer bundle, as in CI); 363 frontend; 58 browser checks (no content-policy errors; stylesheet proven applied). Found: a deploy would have broken published pages (baked-in asset links); unpublished pages stayed live |
+| 5.2 Serving, caching and safety | #58 | 689 backend tests on SQLite and MySQL 8 (without the renderer bundle, as in CI); 363 frontend; 58 browser checks (no content-policy errors; stylesheet proven applied). Found: a deploy would have broken published pages (baked-in asset links); unpublished pages stayed live |

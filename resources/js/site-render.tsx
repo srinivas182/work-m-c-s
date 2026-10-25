@@ -5,7 +5,7 @@
  * Uses the same SiteRenderer as the editor and previews: no second copy of any block.
  */
 import { renderToString } from 'react-dom/server';
-import { SiteRenderer } from '@modules/Website/resources/js/site/SiteRenderer';
+import { SiteRenderer, upgradeBlock } from '@modules/Website/resources/js/site/SiteRenderer';
 import { FONT_PAIRINGS } from '@modules/Website/resources/js/site/theme';
 import type { Branding, ContentDocument, MenuItem } from '@modules/Website/resources/js/site/types';
 
@@ -38,7 +38,13 @@ process.stdin.on('end', () => {
       FONT_PAIRINGS.modern ?? { display: '', body: '' };
     const first = (stack: string) => (stack.split(',')[0] ?? '').trim().replace(/^['"]|['"]$/g, '');
     const fonts = [...new Set([first(pairing.display), first(pairing.body)])];
-    process.stdout.write(JSON.stringify({ html, fonts }));
+    // Each block's final values (upgraded, defaults filled in) — what visitors actually see — so search
+    // engines and AI assistants are told exactly that (e.g. opening hours left at the section's defaults).
+    const blocks = input.document.blocks.flatMap((b) => {
+      const props = upgradeBlock(b);
+      return props ? [{ type: b.type, props }] : [];
+    });
+    process.stdout.write(JSON.stringify({ html, fonts, blocks }));
   } catch (e) {
     process.stderr.write(String(e instanceof Error ? e.stack : e));
     process.exit(1);
