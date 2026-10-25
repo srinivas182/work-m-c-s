@@ -285,6 +285,15 @@ jobs:
         env:
           APP_ENV: e2e
         run: pnpm test:e2e
+      # Every template's public home page: mobile Lighthouse ≥ 90 and layout shift < 0.1 (Sprint 5 gate).
+      - name: Performance gate (mobile Lighthouse on all 24 templates)
+        env:
+          APP_ENV: e2e
+        run: |
+          php artisan website:demo-sites --no-interaction
+          php artisan serve --host=127.0.0.1 --port=8124 > /dev/null 2>&1 &
+          for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:8124/ && break; sleep 1; done
+          CHROME_PATH="$(node -e "console.log(require('@playwright/test').chromium.executablePath())")" node scripts/performance-gate.mjs --port=8124
       - name: Summarise failures
         if: failure()
         run: node e2e/report-failures.mjs
