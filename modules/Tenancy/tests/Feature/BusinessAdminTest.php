@@ -58,7 +58,8 @@ it('suspends and reactivates with a reason recorded in the audit log', function 
     $this->actingAs($admin)->post($this->admin("/businesses/{$this->glow->id}/suspend"), ['reason' => 'Chargeback under review'])->assertSessionHas('status');
 
     expect($this->glow->fresh()->status)->toBe('suspended');
-    $this->getJson('http://glow-salon.'.config('wurk.domains.root').'/any')->assertNotFound();
+    // A suspended business's website shows nothing of the business: "temporarily unavailable" (Sprint 5 spec).
+    $this->get('http://glow-salon.'.config('wurk.domains.root').'/any')->assertStatus(503)->assertHeader('Retry-After')->assertSee('Temporarily unavailable');
 
     $event = PlatformAuditEvent::query()->where('action', 'tenant.status_changed')->latest('seq')->firstOrFail();
     expect($event->changes)->toMatchArray(['to' => 'suspended', 'reason' => 'Chargeback under review'])

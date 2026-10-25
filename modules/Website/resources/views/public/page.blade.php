@@ -10,9 +10,9 @@
 @foreach ($preloads as $font)
 <link rel="preload" href="{{ $font }}" as="font" type="font/woff2" crossorigin>
 @endforeach
-@vite('resources/css/public-site.css')
+<link rel="stylesheet" href="{{ $stylesheet }}">
 @if ($islands)
-@vite('resources/js/site-islands.ts')
+<script type="module" src="{{ $islands }}"></script>
 @endif
 </head>
 <body style="margin:0">

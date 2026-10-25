@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Tests\Support\InteractsWithShards;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Tenancy\Models\Tenant;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageRender;
 use Wurk\Website\Support\Pages;
@@ -94,4 +95,48 @@ it('re-renders pages with dated content (a promotion with an end date) each nigh
     $this->artisan('website:rerender-dated')->expectsOutputToContain('1 dated page(s) queued')->assertSuccessful();
     Process::assertRanTimes(fn ($p) => true, 3); // two publishes, then one nightly re-render
     $this->get($this->site)->assertSee('<h1>Re-rendered</h1>', false);
+});
+
+it('serves the right status for every situation, always with the security headers', function () {
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Glow live</h1>', 'fonts' => []]))]);
+    $csp = fn ($r) => $r->assertHeader('X-Content-Type-Options', 'nosniff')->assertHeader('X-Frame-Options', 'DENY')
+        ->assertHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'");
+
+    // Not published yet: coming soon, kept out of search engines.
+    $csp($this->get($this->site)->assertOk()->assertSee('Coming soon')->assertHeader('X-Robots-Tag', 'noindex'));
+
+    // Published, then renamed: the old address redirects to the new one.
+    $this->ctx->run($this->glow, function () {
+        $pages = app(Pages::class);
+        $pages->publish(Page::query()->where('is_home', true)->firstOrFail(), null, null);
+        $services = Page::query()->where('slug', 'services')->firstOrFail();
+        $pages->publish($services, null, null);
+        $pages->update($services, ['title' => 'Treatments', 'slug' => 'treatments']);
+    });
+    $csp($this->get($this->site)->assertOk()->assertSee('<h1>Glow live</h1>', false));
+    $this->get($this->site.'services')->assertStatus(301)->assertRedirect('/treatments');
+    $this->get($this->site.'treatments')->assertOk();
+    $this->get($this->site.'no-such-page')->assertNotFound()->assertSee('Glow Salon')->assertSee('Go to the home page');
+
+    // Unpublished: no longer live.
+    $this->ctx->run($this->glow, fn () => app(Pages::class)->unpublish(Page::query()->where('slug', 'treatments')->firstOrFail()));
+    $this->get($this->site.'treatments')->assertNotFound();
+
+    // Suspended: never the business's content.
+    $this->glow->update(['status' => Tenant::STATUS_SUSPENDED]);
+    $csp($this->get($this->site)->assertStatus(503)->assertHeader('Retry-After', '3600')->assertSee('Temporarily unavailable')->assertDontSee('Glow live'));
+});
+
+it('lets browsers revalidate cheaply, and never hides a new publish behind a cached copy', function () {
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>One</h1>', 'fonts' => []]))]);
+    ($this->publish)();
+    $first = $this->get($this->site)->assertOk()->assertHeader('Cache-Control', 'max-age=0, must-revalidate, public')->assertHeader('Cache-Tag', 'site-'.$this->glow->id);
+    $etag = (string) $first->headers->get('ETag');
+
+    $this->get($this->site, ['If-None-Match' => $etag])->assertStatus(304);
+
+    $this->travel(1)->minutes();
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Two</h1>', 'fonts' => []]))]);
+    ($this->publish)();
+    $this->get($this->site, ['If-None-Match' => $etag])->assertOk()->assertSee('<h1>Two</h1>', false);
 });

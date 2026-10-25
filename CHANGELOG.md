@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 5.2 (serving, caching and safety)
+- **Statuses for public sites**: "coming soon" before the first publish (not indexed); **suspended businesses show "temporarily unavailable"** (503, Retry-After) and nothing of the business; missing pages get a 404 in the business's name with a link home.
+- **Renamed pages redirect** (301) from their old addresses, so shared links keep working.
+- **Security headers** on every public response: a Content Security Policy allowing only the business's own address (no third-party requests — POPIA), no framing, no type sniffing, a strict referrer policy.
+- **Caching**: the stored render is the page cache; browsers revalidate by ETag (changing with each render and each deploy), and `Cache-Tag: site-{id}` is ready for CDN purges (Sprint 17).
+
+### Fixed
+- **A deploy would have broken every published page**: stored pages had baked-in links to hashed asset files that a new build replaces, served from the app's address. Only content is stored now; the page shell is added per request from the current build, as same-site paths.
+- **Unpublished pages stayed live**: only currently published pages are served.
+
 ### Added — Sprint 5.1 (rendering pipeline)
 - **Published pages are ready-made HTML**, rendered once at publish by Node (bootstrap/site-render) with the same SiteRenderer as the editor — no second copy of any block. Stored per published version; a failed render never takes a live site down (the previous version stays live; retried with back-off).
 - **Public websites** at `{handle}.{root}` (`*.wurk.test` in development and tests): complete HTML with JavaScript off, a public-only stylesheet (site blocks only), and no third-party requests.

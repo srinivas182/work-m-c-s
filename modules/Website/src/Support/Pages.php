@@ -12,6 +12,7 @@ use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Exceptions\DraftConflict;
 use Wurk\Website\Jobs\RenderPublishedPage;
 use Wurk\Website\Models\Page;
+use Wurk\Website\Models\PageSlug;
 use Wurk\Website\Models\PageVersion;
 use Wurk\Website\Models\Site;
 use Wurk\Website\Models\SiteLaunch;
@@ -53,12 +54,17 @@ final readonly class Pages
     /** @param  array{title: string, slug: string, seo_title?: string|null, seo_description?: string|null}  $data */
     public function update(Page $page, array $data): Page
     {
+        $previousSlug = $page->slug;
         $page->update([
             'title' => $data['title'],
-            'slug' => $page->is_home ? $page->slug : $this->checkSlug($data['slug'], $page->id),
+            'slug' => $slug = $page->is_home ? $page->slug : $this->checkSlug($data['slug'], $page->id),
             'seo_title' => $data['seo_title'] ?? null,
             'seo_description' => $data['seo_description'] ?? null,
         ]);
+        if ($slug !== $previousSlug) {
+            PageSlug::query()->updateOrCreate(['slug' => $previousSlug], ['page_id' => $page->id]); // old links keep working
+            PageSlug::query()->whereKey($slug)->delete(); // the new address is a page again, not a redirect
+        }
 
         return $page;
     }
