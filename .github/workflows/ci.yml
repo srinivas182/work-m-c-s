@@ -271,8 +271,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Prepare app (isolated .env.e2e with a business and its owner)
         run: |
+          pnpm build         # first: setup publishes demo sites, which needs the website renderer
           ./scripts/e2e-setup
-          pnpm build
       - name: Playwright browser cache
         id: pw-cache
         uses: actions/cache@v6

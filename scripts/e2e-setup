@@ -51,4 +51,8 @@ done
 php artisan packages:seed-placeholders
 
 # A published demo site per template: public-page accessibility scans and the performance gate.
+if [ ! -f bootstrap/site-render/site-render.js ]; then
+  echo "The website renderer isn't built: run 'pnpm build' first (demo sites are published, which renders them)." >&2
+  exit 1
+fi
 php artisan website:demo-sites --no-interaction > /dev/null
