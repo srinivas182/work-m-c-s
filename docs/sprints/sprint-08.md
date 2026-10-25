@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 8 (sprint plan revision 3) |
-| **Status** | Approved 26 Oct 2026 — 8.1 in review |
+| **Status** | Approved 26 Oct 2026 — 8.1 ✅ (#63), 8.2 in progress |
 | **Depends on** | v0.8.0 (public sites, islands, quote forms); WURK Credits and messaging (Sprints 2–3, 6) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -99,4 +99,4 @@ Deposits are **optional per service**. Businesses without a connected payment ac
 
 | Sub-sprint | PR | Notes |
 |---|---|---|
-| 8.1 Services, team hours and availability | see PR | 739 backend tests on SQLite and MySQL 8 (incl. a double-booking race on both); 363 frontend; 60 browser checks. Found: UTC stored against the platform's local-time convention (two-hour shift) |
+| 8.1 Services, team hours and availability | #63 | 739 backend tests on SQLite and MySQL 8 (incl. a double-booking race on both); 363 frontend; 60 browser checks. Found: UTC stored against the platform's local-time convention (two-hour shift) |
