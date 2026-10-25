@@ -32,6 +32,7 @@ final class BookingsServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->loadViewsFrom($this->modulePath('resources/views'), 'bookings');
         // A deposit Paystack reported paid: confirmed only after verifying (Deposits::confirm).
         Event::listen(DepositPaid::class, fn (DepositPaid $e) => $this->app->make(Deposits::class)->confirm($e->reference));
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {

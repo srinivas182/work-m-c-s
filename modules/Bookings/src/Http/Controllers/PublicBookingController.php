@@ -7,11 +7,14 @@ namespace Wurk\Bookings\Http\Controllers;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
+use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\SlotTaken;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\CurrentTenant;
@@ -57,9 +60,9 @@ final class PublicBookingController
         });
     }
 
-    public function book(Request $request, string $handle, Booker $booker): JsonResponse
+    public function book(Request $request, string $handle, Booker $booker, Deposits $deposits): JsonResponse
     {
-        return $this->within($handle, function (CurrentTenant $tenant) use ($request, $booker): JsonResponse {
+        return $this->within($handle, function (CurrentTenant $tenant) use ($request, $booker, $deposits): JsonResponse {
             $data = $request->validate([
                 'service' => ['required', 'string'],
                 'starts_at' => ['required', 'date'],
@@ -75,17 +78,43 @@ final class PublicBookingController
                 return new JsonResponse(['booked' => true], 201); // a bot: no signal, no booking
             }
             $service = BookingService::query()->where('active', true)->whereKey($data['service'])->firstOrFail();
+            $deposit = $deposits->amountFor($service);
+            if ($deposit > 0 && empty($data['email'])) { // Paystack sends the receipt by email
+                throw ValidationException::withMessages(['email' => 'Please add your email — a deposit is needed for this service, and the receipt is emailed.']);
+            }
             try {
                 $booking = $booker->book($service, CarbonImmutable::parse($data['starts_at']), [
                     'name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'notes' => $data['notes'] ?? null,
-                ], $data['member'] ?? null, source: 'website');
+                ], $data['member'] ?? null, source: 'website', status: $deposit > 0 ? 'pending_payment' : 'confirmed');
             } catch (SlotTaken $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
+            }
+            if ($deposit > 0) {
+                $returnUrl = $request->getSchemeAndHttpHost().'/book/return';
+                $payUrl = $deposits->start($booking, $deposit, (string) $data['email'], $returnUrl);
+                if ($payUrl === null) {
+                    $booker->cancel($booking, null, 'expired'); // payments unavailable: don't hold the time
+
+                    return new JsonResponse(['message' => 'Online payment isn’t available right now. Please call or message us to book.'], 503);
+                }
+
+                return new JsonResponse(['pay_url' => $payUrl, 'deposit_cents' => $deposit], 201);
             }
 
             return new JsonResponse(['booked' => true, 'service' => $service->name,
                 'when' => $booking->starts_at->setTimezone($tenant->timezone())->format('l j F, H:i')], 201);
         });
+    }
+
+    /** Paystack sends the customer back here after paying the deposit. */
+    public function paid(Request $request, string $handle, Deposits $deposits): Response
+    {
+        $tenant = $this->tenants->findByHandle($handle) ?? abort(404);
+        $booking = $deposits->confirm((string) $request->query('reference', ''));
+        $confirmed = $booking !== null && $booking->status === 'confirmed';
+        $when = $booking === null ? '' : $this->context->run($tenant, fn () => $booking->starts_at->setTimezone($tenant->timezone())->format('l j F, H:i'));
+
+        return new Response(view('bookings::public.paid', ['business' => $tenant->displayName(), 'confirmed' => $confirmed, 'when' => $when])->render(), $confirmed ? 200 : 202);
     }
 
     /** Only for an active business whose package includes bookings. */
