@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 8.2 (online booking and the owner calendar)
+- **Online booking API** on each business's own address (`/book/services`, `/book/times`, `POST /book`): active services and team, free times in local time, booking with consent, a spam trap and rate limits; a time taken a moment ago is refused kindly (409). Only for packages that include bookings.
+- **"Book online" website section**: service → team member ("anyone") → day → free time → details → confirmation, as a small island (DOM-built, so business names can't inject markup; announces progress; focuses the confirmation). Without JavaScript it shows how to book instead. Added to nine booking-led templates.
+- **Calendar**: day (per team member) and week views; add bookings and walk-ins (owners aren't held to notice or listed hours — never to overlaps), move atomically, mark done, no-show or cancel (frees the time). Viewing needs `bookings.view`; changes `bookings.manage`.
+- `bookings:demo` (development only) makes the demo sites bookable, so browser tests book on a published site and the public scans cover the live widget.
+- Access contract `TeamDirectory::add()`.
+
 ### Added — Sprint 8.1 (services, team hours and availability)
 - **Bookings module** (entitlement `bookings`): bookable services (length and buffers in 5-minute steps, price, who does it), weekly team hours with breaks, time off for one person or the whole business.
 - **Availability** in the business's time zone: hours and breaks, buffers that must fit inside working hours, time off, existing bookings, 60 minutes' notice, 60 days ahead; "anyone" spreads bookings across the team.

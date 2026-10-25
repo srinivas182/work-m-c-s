@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 8 (sprint plan revision 3) |
-| **Status** | Approved 26 Oct 2026 — 8.1 ✅ (#63), 8.2 in progress |
+| **Status** | Approved 26 Oct 2026 — 8.1 ✅ (#63), 8.2 in review |
 | **Depends on** | v0.8.0 (public sites, islands, quote forms); WURK Credits and messaging (Sprints 2–3, 6) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -87,6 +87,12 @@ Deposits are **optional per service**. Businesses without a connected payment ac
 4. **Tables by covers per slot** first (no floor plan) — a table plan can come later if restaurants ask.
 5. **Calendar sync** (Google, Outlook) **later**, not in this sprint.
 
+## 5a. Decided with WURK (27 Oct 2026)
+
+1. **Paystack in test mode** for now: keys entered in the admin's provider settings; only the keys change at go-live.
+2. **SMS and WhatsApp are provided by WURK** (configured by super admin), paid for with WURK Credits at rate-card prices, with free email fallback. Businesses don't bring their own providers; WhatsApp sends from WURK's Meta-verified number, naming the business. A **"bring your own sender"** add-on (own WhatsApp number or SMS sender name) can come later without changing the design.
+3. **Message wording is fixed** (not editable by owners) — required for WhatsApp templates and protects WURK's sender. Confirmation, reminder, change and cancellation messages fill in the business name, client name, service, date and time, and the manage-booking link. Owners choose channels, not words.
+
 ## 6. Needed from WURK
 
 | Item | Needed by |
@@ -100,3 +106,4 @@ Deposits are **optional per service**. Businesses without a connected payment ac
 | Sub-sprint | PR | Notes |
 |---|---|---|
 | 8.1 Services, team hours and availability | #63 | 739 backend tests on SQLite and MySQL 8 (incl. a double-booking race on both); 363 frontend; 60 browser checks. Found: UTC stored against the platform's local-time convention (two-hour shift) |
+| 8.2 Online booking and the calendar | see PR | 746 backend tests on SQLite and MySQL 8; 370 frontend; browser: settings, calendar, a customer booking on a published site (desktop and phone), 48 contact-page scans with the live widget. Found: Bookings reached into Access internals (architecture test) |
