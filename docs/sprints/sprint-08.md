@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 8 (sprint plan revision 3) |
-| **Status** | Approved 26 Oct 2026 — 8.1 ✅ (#63), 8.2 ✅ (#64), 8.3 ✅ (#65), 8.4 in review |
+| **Status** | ✅ Released as v0.9.0 (#68) |
 | **Depends on** | v0.8.0 (public sites, islands, quote forms); WURK Credits and messaging (Sprints 2–3, 6) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -109,4 +109,4 @@ Deposits are **optional per service**. Businesses without a connected payment ac
 | 8.2 Online booking and the calendar | #64 | 746 backend tests on SQLite and MySQL 8; 370 frontend; browser: settings, calendar, a customer booking on a published site (desktop and phone), 48 contact-page scans with the live widget. Found: Bookings reached into Access internals (architecture test) |
 | 8.3 Deposits and policies | #65 | Paystack test mode. 760 backend tests on SQLite and MySQL 8; 370 frontend; all browser tests. Found: unregistered return-page view; signed links invalidated by actions and the chosen date (separate signed actions; the page ignores only `date`) |
 | 8.4 Confirmations and reminders | see PR | 767 backend tests on SQLite and MySQL 8; 370 frontend; all browser tests. WhatsApp templates to be registered with Meta by WURK (names and parameters in CHANGELOG) |
-| 8.5 Restaurant table reservations | see PR | 773 backend tests on SQLite and MySQL 8; 370 frontend; all browser tests incl. a guest reserving on the published restaurant site. Found: the branch was cut from a stale local develop (rebased onto the real one before merging) |
+| 8.5 Restaurant table reservations | #67 | 773 backend tests on SQLite and MySQL 8; 370 frontend; all browser tests incl. a guest reserving on the published restaurant site. Found: the branch was cut from a stale local develop (rebased onto the real one before merging) |

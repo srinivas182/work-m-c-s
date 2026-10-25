@@ -12,7 +12,7 @@
 
 WURK earns from subscriptions (self-managed or managed packages), add-on credits and managed services. A network of **agents** sells WURK packages and earns commission through a sponsor hierarchy.
 
-> **Status:** Sprint 5 (website engine: static HTML at publish, mobile 99–100 on every template, SEO and AI answers) released — v0.8.0. Next: Sprint 8 (appointments). Plan: docs/sprint-plan.md.
+> **Status:** Sprint 8 (appointments: booking, calendar, deposits, reminders, tables) released — v0.9.0. Next: Sprint 9 (online consultations & patient documents). Plan: docs/sprint-plan.md.
 
 ## Documentation
 
