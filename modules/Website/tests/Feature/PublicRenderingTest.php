@@ -32,7 +32,7 @@ it('renders a page once at publish, with the same blocks, and serves the stored 
 
     Process::assertRan(fn (PendingProcess $p) => str_ends_with((string) end($p->command), 'site-render.js')
         && json_decode((string) $p->input, true)['site']['businessName'] === 'Glow Salon'
-        && json_decode((string) $p->input, true)['site']['formAction'] === '/forms/glow-salon/quote');
+        && json_decode((string) $p->input, true)['site']['formAction'] === '/forms/quote');
 
     $this->get($this->site)->assertOk()->assertHeader('Content-Type', 'text/html; charset=UTF-8')
         ->assertSee('<h1>Braids that last</h1>', false)->assertSee('<title>Glow Salon</title>', false);
@@ -139,4 +139,25 @@ it('lets browsers revalidate cheaply, and never hides a new publish behind a cac
     Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Two</h1>', 'fonts' => []]))]);
     ($this->publish)();
     $this->get($this->site, ['If-None-Match' => $etag])->assertOk()->assertSee('<h1>Two</h1>', false);
+});
+
+it('shows a WhatsApp chat button on every page once a WhatsApp number is published — a plain link', function () {
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Hi</h1>', 'fonts' => []]))]);
+    ($this->publish)();
+    $this->get($this->site)->assertDontSee('wa.me', false);
+
+    $this->ctx->run($this->glow, function () {
+        $pages = app(Pages::class);
+        $contact = Page::query()->where('slug', 'contact')->firstOrFail();
+        $doc = json_decode((string) $contact->draft, true);
+        foreach ($doc['blocks'] as &$b) {
+            if ($b['type'] === 'Contact') {
+                $b['props']['whatsapp'] = '082 555 0101';
+            }
+        }
+        unset($b);
+        $pages->saveDraft($contact, $doc, $contact->draft_revision, null);
+        $pages->publish($contact->refresh(), null, null);
+    });
+    $this->get($this->site)->assertSee('href="https://wa.me/27825550101"', false)->assertSee('aria-label="Chat on WhatsApp"', false); // on the home page too
 });

@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 5.4 (visitor features and the performance gate)
+- **Performance gate in CI**: mobile Lighthouse on the public home page of every template — **≥ 90 and layout shift < 0.1, enforced**. All 24 score 99–100 (layout shift ≤ 0.002, main image 1.3–2.2 s), against 65–71 for the old previews.
+- **Every public page of every template accessibility-scanned** on desktop and phone (338 checks), from demo sites (`website:demo-sites`, development and tests only). The preview scan now covers each template's home page (the preview's own controls).
+- **WhatsApp chat button** on every page once a WhatsApp number is published: a plain link (no third-party script), in WhatsApp's darker green so the icon meets the 3:1 contrast graphics need.
+
+### Fixed
+- **Quote forms on published sites would all have failed**: the form route existed only on the app's domain while pages post to their own address (and the content policy allows only that). Each site now has its own quote route, with the same spam protection.
+- Business facts (contact, services) vanished for renders that reported no block values (an empty list wasn't treated as missing).
+
 ### Added — Sprint 5.3 (search engines and AI answers)
 - Every published page: canonical address, Open Graph and social card (the page's first photo), favicon.
 - **Structured business data** (schema.org LocalBusiness) on the home page: name, description, phone or WhatsApp, email, address, **opening hours once the owner has confirmed them** (templates ship sample hours), services with prices — **no price where the price is "ask us"**, each service once.

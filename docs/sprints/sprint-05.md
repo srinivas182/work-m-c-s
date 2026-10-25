@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 5 · runs after Sprint 7 (sprint plan revision 3) |
-| **Status** | Approved 25 Oct 2026 — 5.1 ✅ (#57), 5.2 ✅ (#58), 5.3 in review |
+| **Status** | Approved 25 Oct 2026 — 5.1 ✅ (#57), 5.2 ✅ (#58), 5.3 ✅ (#59), 5.4 in review |
 | **Depends on** | v0.7.0 (blocks, templates, publishing, media); Sprint 7 performance findings (docs/sprints/sprint-07.md) |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -100,4 +100,5 @@ Interactive parts become **islands** — a few kilobytes of JavaScript each, loa
 |---|---|---|
 | 5.1 Rendering pipeline | #57 | 687 backend tests on SQLite and MySQL 8 (also without the renderer bundle, as in CI); 363 frontend; 58 browser checks. Found: context lost after synchronous jobs; slideshow without a pause control on static pages; dated content frozen in static HTML (nightly re-render) |
 | 5.2 Serving, caching and safety | #58 | 689 backend tests on SQLite and MySQL 8 (without the renderer bundle, as in CI); 363 frontend; 58 browser checks (no content-policy errors; stylesheet proven applied). Found: a deploy would have broken published pages (baked-in asset links); unpublished pages stayed live |
-| 5.3 Search engines and AI answers | see PR | 692 backend tests on SQLite and MySQL 8 (without the renderer bundle); 363 frontend; publishing browser tests; real renderer checked end to end. Found: facts read from stored content missed defaults visitors see (now from the render); services listed twice when two pages show them |
+| 5.3 Search engines and AI answers | #59 | 692 backend tests on SQLite and MySQL 8 (without the renderer bundle); 363 frontend; publishing browser tests; real renderer checked end to end. Found: facts read from stored content missed defaults visitors see (now from the render); services listed twice when two pages show them |
+| 5.4 Visitor features & performance gate | see PR | **Gate met: 24/24 templates 99–100 on mobile, layout shift ≤ 0.002.** 338 public-page accessibility checks. 694 backend tests on SQLite and MySQL 8 (without the renderer bundle); 363 frontend. Found: quote forms on live sites would all have failed (route on the app domain only); facts lost when a render reported no blocks |

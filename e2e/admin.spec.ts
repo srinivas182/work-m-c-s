@@ -74,7 +74,8 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('heading', { level: 1, name: 'Cash payments' })).toBeVisible();
   await expectAccessible(page);
 
-  await page.goto(`${admin}/businesses`);
+  // Find it as staff would: the list is newest first, 25 a page, and setup also creates the demo sites.
+  await page.goto(`${admin}/businesses?search=Glow`);
   await expect(page.getByRole('link', { name: 'Glow Salon' })).toBeVisible();
   await expectAccessible(page);
 
