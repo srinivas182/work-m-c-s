@@ -12,6 +12,7 @@ use Wurk\Bookings\Mail\BookingMessageMail;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\Reservation;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\InsufficientCredits;
 use Wurk\Credits\Contracts\SpendingLimitReached;
@@ -28,7 +29,7 @@ final readonly class BookingMessages
     public function __construct(private TenantContext $context, private Messenger $messenger, private CreditWallet $wallet) {}
 
     /** @param  string  $kind  confirmed | reminder | moved | cancelled; $occurrence makes repeats distinct (e.g. reminder_24h, moved_2) */
-    public function send(Booking $booking, string $kind, ?string $occurrence = null): void
+    public function send(Booking|Reservation $booking, string $kind, ?string $occurrence = null): void
     {
         $key = $occurrence ?? $kind;
         $db = DB::connection($this->context->connectionName());
@@ -78,16 +79,17 @@ final readonly class BookingMessages
     }
 
     /** @return array{client: string, service: string, business: string, when: string, link: string} */
-    private function vars(Booking $booking, string $kind): array
+    private function vars(Booking|Reservation $booking, string $kind): array
     {
         $tenant = $this->context->current();
+        $isTable = $booking instanceof Reservation;
 
         return [
             'client' => (string) strtok($booking->customer_name, ' '),
-            'service' => (string) BookingService::query()->whereKey($booking->service_id)->value('name'),
+            'service' => $isTable ? 'Table for '.$booking->party_size : (string) BookingService::query()->whereKey($booking->service_id)->value('name'),
             'business' => $tenant->displayName(),
             'when' => $booking->starts_at->setTimezone($tenant->timezone())->format('D j M, H:i'),
-            'link' => $kind === 'cancelled' || $booking->starts_at->isPast() ? '' : ManageLink::for($booking, $tenant->handle()),
+            'link' => $kind === 'cancelled' || $booking->starts_at->isPast() ? '' : ($isTable ? ManageLink::forTable($booking, $tenant->handle()) : ManageLink::for($booking, $tenant->handle())),
         ];
     }
 

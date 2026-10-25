@@ -110,6 +110,7 @@ const button =
   'rounded-[var(--s-radius)] bg-[var(--s-brand)] px-5 py-3 font-semibold text-[var(--s-on-brand)] disabled:opacity-60';
 
 async function booking(root: HTMLElement): Promise<void> {
+  if (root.dataset.mode === 'tables') return tables(root);
   const api = root.dataset.api ?? '/book';
   let services: BookService[] = [];
   try {
@@ -295,6 +296,167 @@ async function booking(root: HTMLElement): Promise<void> {
   memberSelect.addEventListener('change', () => void refreshTimes());
   dateInput.addEventListener('change', () => void refreshTimes());
   refreshMembers();
+  root.replaceChildren(form);
+  void refreshTimes();
+}
+
+/* Tables: guests → day → free time → details → confirmation (restaurants). Same safeguards as booking. */
+async function tables(root: HTMLElement): Promise<void> {
+  const api = `${root.dataset.api ?? '/book'}/tables`;
+  const today = new Date();
+  const iso = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const first = await fetch(`${api}/times?date=${iso(today)}&party=2`, {
+    headers: { Accept: 'application/json' },
+  }).catch(() => null);
+  if (!first?.ok) return; // tables not taken online: keep the "call or message us" fallback
+  const maxParty = ((await first.json()) as { max_party: number | null }).max_party ?? 8;
+
+  const status = el('p', { class: 'text-sm text-[var(--s-fg-muted)]' });
+  status.setAttribute('role', 'status');
+  const uid = Math.random().toString(36).slice(2, 8);
+  const labelled = (text: string, control: HTMLElement) => {
+    control.id = `${uid}-${text.replace(/\W+/g, '-').toLowerCase()}`;
+    return el('div', {}, el('label', { htmlFor: control.id, class: 'font-medium' }, text), control);
+  };
+  const party = el('select', { class: field });
+  for (let n = 1; n <= maxParty; n++)
+    party.append(
+      el('option', { value: String(n), selected: n === 2 }, `${n} guest${n === 1 ? '' : 's'}`),
+    );
+  const dateInput = el('input', {
+    type: 'date',
+    class: field,
+    value: iso(today),
+    min: iso(today),
+    max: iso(new Date(today.getTime() + 60 * 864e5)),
+  });
+  const times = el('div', { class: 'mt-2 flex flex-wrap gap-2' });
+  times.setAttribute('role', 'group');
+  times.setAttribute('aria-label', 'Free times');
+  let chosen: string | null = null;
+
+  const refreshTimes = async () => {
+    chosen = null;
+    times.replaceChildren();
+    status.textContent = 'Finding free times…';
+    const r = await fetch(`${api}/times?date=${dateInput.value}&party=${party.value}`, {
+      headers: { Accept: 'application/json' },
+    }).catch(() => null);
+    const list = r?.ok
+      ? ((await r.json()) as { times: { starts_at: string; label: string }[] }).times
+      : [];
+    for (const t of list) {
+      const b = el(
+        'button',
+        {
+          type: 'button',
+          class: 'rounded-[var(--s-radius)] border border-[var(--s-border)] px-4 py-2',
+        },
+        t.label,
+      );
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => {
+        chosen = t.starts_at;
+        times.querySelectorAll('button').forEach((x) => {
+          x.setAttribute('aria-pressed', String(x === b));
+          x.classList.toggle('bg-[var(--s-brand-soft)]', x === b);
+        });
+        status.textContent = `${t.label} selected.`;
+      });
+      times.append(b);
+    }
+    status.textContent = list.length
+      ? `${list.length} free time${list.length === 1 ? '' : 's'}. Choose one.`
+      : 'No free tables on this day for that many guests. Try another day.';
+  };
+
+  const name = el('input', { type: 'text', class: field, autocomplete: 'name', required: true });
+  const phone = el('input', { type: 'tel', class: field, autocomplete: 'tel', required: true });
+  const email = el('input', { type: 'email', class: field, autocomplete: 'email' });
+  const consent = el('input', { type: 'checkbox', required: true });
+  consent.id = `${uid}-consent`;
+  const trap = el('input', { type: 'text', name: 'website', tabIndex: -1, autocomplete: 'off' });
+  const trapWrap = el('div', { class: 'absolute -left-[9999px]' }, trap);
+  trapWrap.setAttribute('aria-hidden', 'true');
+  const submit = el('button', { type: 'submit', class: button }, 'Reserve');
+  const form = el(
+    'form',
+    { class: 'grid gap-4' },
+    labelled('Guests', party),
+    labelled('Day', dateInput),
+    times,
+    labelled('Your name', name),
+    labelled('Phone', phone),
+    labelled('Email (optional)', email),
+    el(
+      'div',
+      { class: 'flex items-start gap-2' },
+      consent,
+      el('label', { htmlFor: consent.id }, 'I agree to be contacted about my reservation.'),
+    ),
+    trapWrap,
+    submit,
+    status,
+  );
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!chosen) {
+      status.textContent = 'Please choose a time first.';
+      return;
+    }
+    submit.disabled = true;
+    const r = await fetch(api, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        starts_at: chosen,
+        party: Number(party.value),
+        name: name.value,
+        phone: phone.value,
+        email: email.value || null,
+        consent: consent.checked ? '1' : null,
+        website: trap.value,
+      }),
+    }).catch(() => null);
+    submit.disabled = false;
+    const data = r
+      ? ((await r.json().catch(() => ({}))) as {
+          when?: string;
+          service?: string;
+          message?: string;
+          manage_url?: string;
+          errors?: Record<string, string[]>;
+        })
+      : {};
+    if (r?.status === 201) {
+      const done = el(
+        'div',
+        { tabIndex: -1, class: 'grid gap-2' },
+        el('h3', { class: 'text-xl font-semibold' }, 'You’re booked'),
+        el('p', {}, `${data.service ?? 'Your table'} — ${data.when ?? ''}.`),
+        ...(data.manage_url
+          ? [
+              el(
+                'a',
+                { href: data.manage_url, class: 'underline' },
+                'Change or cancel this reservation',
+              ),
+            ]
+          : []),
+      );
+      root.replaceChildren(done);
+      done.focus();
+      return;
+    }
+    status.textContent =
+      data.message ??
+      Object.values(data.errors ?? {})[0]?.[0] ??
+      'Something went wrong. Please try again.';
+    if (r?.status === 409) void refreshTimes();
+  });
+  party.addEventListener('change', () => void refreshTimes());
+  dateInput.addEventListener('change', () => void refreshTimes());
   root.replaceChildren(form);
   void refreshTimes();
 }

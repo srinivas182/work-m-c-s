@@ -10,6 +10,8 @@ use Illuminate\Support\Str;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Models\ReservationHours;
+use Wurk\Bookings\Models\ReservationSettings;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -53,6 +55,14 @@ final class DemoBookingsCommand extends Command
                     BookingHours::query()->create(['member_id' => $memberId, 'weekday' => $day, 'starts' => '08:00', 'ends' => '20:00']);
                 }
             });
+            if (str_contains($tenant->handle(), 'restaurant')) { // the restaurant demo takes table reservations
+                $context->run($tenant, function () use ($context): void {
+                    ReservationSettings::query()->updateOrCreate(['tenant_id' => $context->id()], ['enabled' => true, 'covers' => 40, 'sitting_minutes' => 90, 'max_party' => 8, 'notice_minutes' => 60]);
+                    foreach (range(0, 6) as $day) {
+                        ReservationHours::query()->create(['weekday' => $day, 'starts' => '12:00', 'ends' => '21:00']);
+                    }
+                });
+            }
             $this->line("{$tenant->handle()}: bookable");
         }
         $entitlements->flush();

@@ -7,6 +7,7 @@ export interface BookOnlineProps extends Record<string, unknown> {
   fallbackText: string;
   fallbackLabel: string;
   fallbackHref: string;
+  mode: 'appointments' | 'tables';
 }
 
 /**
@@ -21,6 +22,14 @@ export const BookOnline: BlockDefinition<BookOnlineProps> = {
   description:
     'Customers choose a service and a free time, and book. Set services and hours in Booking settings.',
   fields: {
+    mode: {
+      kind: 'select',
+      label: 'What can customers book?',
+      options: [
+        { value: 'appointments', label: 'Appointments (services and times)' },
+        { value: 'tables', label: 'Tables (restaurants)' },
+      ],
+    },
     heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },
     intro: { kind: 'text', inline: true, label: 'Introduction', max: 200 },
     fallbackText: { kind: 'text', label: 'If online booking can’t load', max: 120 },
@@ -33,6 +42,7 @@ export const BookOnline: BlockDefinition<BookOnlineProps> = {
     fallbackText: 'Call or message us to book.',
     fallbackLabel: 'Contact us',
     fallbackHref: '/contact',
+    mode: 'appointments',
   },
   render: (p, site) => (
     <Section id="book">
@@ -53,6 +63,7 @@ export const BookOnline: BlockDefinition<BookOnlineProps> = {
         <div
           data-island="booking"
           data-api="/book"
+          data-mode={p.mode}
           className="rounded-[var(--s-radius)] border border-[var(--s-border)] p-6"
         >
           <p data-booking-fallback>
