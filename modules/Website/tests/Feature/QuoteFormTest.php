@@ -90,3 +90,11 @@ it('lets the owner read, archive and choose where requests are emailed', functio
     $this->actingAs($owner)->put("{$page}/settings", ['notify_email' => 'not-an-email'])->assertSessionHasErrors('notify_email');
     $this->actingAs($owner)->put("{$page}/settings", ['notify_email' => 'owner@glow.co.za'])->assertSessionHas('status');
 });
+
+it('takes enquiries posted from the business’s published site, on its own address', function () {
+    $site = 'http://glow-salon.'.config('wurk.domains.root');
+    $this->post($site.'/forms/quote', $this->valid)->assertOk()->assertSee('your request was sent')->assertSee('Back to the website');
+    $this->post($site.'/forms/quote', [...$this->valid, 'website' => 'http://spam.example'])->assertOk(); // spam trap: thanked, not stored
+    expect($this->ctx->run($this->glow, fn () => Enquiry::query()->count()))->toBe(1)
+        ->and($this->ctx->run($this->other, fn () => Enquiry::query()->count()))->toBe(0);
+});

@@ -35,3 +35,4 @@ _ide_helper.php
 /test-results/
 /blob-report/
 /bootstrap/ssr
+/bootstrap/site-render

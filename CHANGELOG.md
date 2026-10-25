@@ -4,6 +4,46 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 5.4 (visitor features and the performance gate)
+- **Performance gate in CI**: mobile Lighthouse on the public home page of every template — **≥ 90 and layout shift < 0.1, enforced**. All 24 score 99–100 (layout shift ≤ 0.002, main image 1.3–2.2 s), against 65–71 for the old previews.
+- **Every public page of every template accessibility-scanned** on desktop and phone (338 checks), from demo sites (`website:demo-sites`, development and tests only). The preview scan now covers each template's home page (the preview's own controls).
+- **WhatsApp chat button** on every page once a WhatsApp number is published: a plain link (no third-party script), in WhatsApp's darker green so the icon meets the 3:1 contrast graphics need.
+
+### Fixed
+- **Quote forms on published sites would all have failed**: the form route existed only on the app's domain while pages post to their own address (and the content policy allows only that). Each site now has its own quote route, with the same spam protection.
+- Business facts (contact, services) vanished for renders that reported no block values (an empty list wasn't treated as missing).
+
+### Added — Sprint 5.3 (search engines and AI answers)
+- Every published page: canonical address, Open Graph and social card (the page's first photo), favicon.
+- **Structured business data** (schema.org LocalBusiness) on the home page: name, description, phone or WhatsApp, email, address, **opening hours once the owner has confirmed them** (templates ship sample hours), services with prices — **no price where the price is "ask us"**, each service once.
+- **`sitemap.xml`, `robots.txt` and `llms.txt`** per site; sites not yet live ask not to be indexed.
+- Everything is taken from **what visitors see**: the renderer reports each block's final values (defaults filled in), stored with the render — e.g. hours left at the section's defaults are included once confirmed.
+- Owner text can't break out of the structured-data block (`</script>` escaped).
+
+### Added — Sprint 5.2 (serving, caching and safety)
+- **Statuses for public sites**: "coming soon" before the first publish (not indexed); **suspended businesses show "temporarily unavailable"** (503, Retry-After) and nothing of the business; missing pages get a 404 in the business's name with a link home.
+- **Renamed pages redirect** (301) from their old addresses, so shared links keep working.
+- **Security headers** on every public response: a Content Security Policy allowing only the business's own address (no third-party requests — POPIA), no framing, no type sniffing, a strict referrer policy.
+- **Caching**: the stored render is the page cache; browsers revalidate by ETag (changing with each render and each deploy), and `Cache-Tag: site-{id}` is ready for CDN purges (Sprint 17).
+
+### Fixed
+- **A deploy would have broken every published page**: stored pages had baked-in links to hashed asset files that a new build replaces, served from the app's address. Only content is stored now; the page shell is added per request from the current build, as same-site paths.
+- **Unpublished pages stayed live**: only currently published pages are served.
+
+### Added — Sprint 5.1 (rendering pipeline)
+- **Published pages are ready-made HTML**, rendered once at publish by Node (bootstrap/site-render) with the same SiteRenderer as the editor — no second copy of any block. Stored per published version; a failed render never takes a live site down (the previous version stays live; retried with back-off).
+- **Public websites** at `{handle}.{root}` (`*.wurk.test` in development and tests): complete HTML with JavaScript off, a public-only stylesheet (site blocks only), and no third-party requests.
+- **Fonts without layout shift**: each page preloads its two fonts (Latin, regular — the renderer reports them); size-matched fallbacks for all 14 families, generated from font metrics (`pnpm fonts:fallbacks`).
+- **Islands**: a tiny script, only on pages that need it, for before & after, the slideshow (dots, arrows, autoplay that pauses on hover/focus and never runs with reduced motion) and closing promotions.
+- **Re-rendering**: on branding and menu changes, and nightly at 00:05 SAST for pages with dated content (promotions, expiring specials).
+- `createdAt()` stays on the tenancy contract; the renderer ships in the production image.
+
+### Fixed
+- **Business context lost after a synchronous job**: the after-job reset (right for queue workers) also fired for jobs run inline in a request, leaving the rest of the request without its business.
+- **Published slideshows would have autoplayed with no pause button** (the server can't know a visitor's motion preference): the control is now always present when autoplay runs (WCAG 2.2.2).
+- The public-site route no longer swallows other routes on business subdomains (a fallback now).
+- The renderer's build output had been committed; it's ignored now.
+
 ### Added — Sprint 7.6 (preparation)
 - **Time to launch**, measured automatically: the first time a business publishes its home page, WURK records the minutes since the business was created (and its template). **Platform → Time to launch** shows each business, the median and the share launched within an hour — for the timed launch test now, and as an ongoing product metric.
 - **Timed launch test kit** (docs/research/launch-test.md): who to recruit, POPIA consent for screen recording, the session script, an observation sheet and what happens after.

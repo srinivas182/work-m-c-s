@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Wurk\Tenancy\Listeners;
 
+use Illuminate\Queue\Events\JobExceptionOccurred;
+use Illuminate\Queue\Events\JobProcessed;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -17,6 +19,12 @@ final readonly class ForgetTenantContext
 
     public function handle(object $event): void
     {
+        // A job run synchronously is part of the current unit of work (a request or a command):
+        // its own run() already restored our context, and clearing it here would leave the
+        // caller without one. Workers ("redis", "database", …) still reset after every job.
+        if (($event instanceof JobProcessed || $event instanceof JobExceptionOccurred) && $event->connectionName === 'sync') {
+            return;
+        }
         $this->context->forget();
     }
 }

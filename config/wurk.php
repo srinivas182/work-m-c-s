@@ -115,5 +115,13 @@ return [
     'marketing_ssr' => (bool) env('WURK_MARKETING_SSR', true),
 
     // Where website photos are stored (S3-compatible in production; Sprint 4.3).
+    // Published pages are rendered once, at publish, by Node (bootstrap/site-render).
+    'site_render' => [
+        'node' => env('WURK_NODE_BINARY', 'node'),
+        'script' => base_path('bootstrap/site-render/site-render.js'),
+        'timeout' => 30,
+    ],
+    'site_pages_disk' => env('WURK_SITE_PAGES_DISK', 'local'),
+
     'site_assets_disk' => env('WURK_SITE_ASSETS_DISK', 'public'),
 ];
