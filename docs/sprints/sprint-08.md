@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 8 (sprint plan revision 3) |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 26 Oct 2026 — 8.1 in progress |
 | **Depends on** | v0.8.0 (public sites, islands, quote forms); WURK Credits and messaging (Sprints 2–3, 6) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
