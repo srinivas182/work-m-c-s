@@ -36,6 +36,12 @@ final class DemoSitesCommand extends Command
                 Artisan::call('tenants:create', ['name' => 'Demo '.$key, '--handle' => $handle, '--no-interaction' => true]);
             }
             $tenant = $tenants->findByHandle($handle) ?? throw new \RuntimeException("Could not create {$handle}");
+            $published = $context->run($tenant, fn () => Page::query()->where('is_home', true)->whereNotNull('published_version_id')->exists());
+            if ($published) {
+                $this->line("{$handle}: already published");
+
+                continue;
+            }
             $context->run($tenant, function () use ($key): void {
                 app(SiteBuilder::class)->apply($key);
                 foreach (Page::query()->get() as $page) {

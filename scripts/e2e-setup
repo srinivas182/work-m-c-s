@@ -49,3 +49,6 @@ done
 
 # Example packages for the pricing page and signup.
 php artisan packages:seed-placeholders
+
+# A published demo site per template: public-page accessibility scans and the performance gate.
+php artisan website:demo-sites --no-interaction > /dev/null
