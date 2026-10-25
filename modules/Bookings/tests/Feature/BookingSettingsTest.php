@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
@@ -9,6 +11,7 @@ use Wurk\Access\Actions\Team;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\TimeOff;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
@@ -88,4 +91,43 @@ it('connects the bank for deposits, keeping only a masked label, and saves the p
     $this->actingAs($this->owner)->put("{$this->base}/policy", ['hours' => 48, 'text' => ''])->assertSessionHas('status', 'Cancellation policy saved.');
     $this->ctx->run($this->glow, fn () => expect(BookingSettings::query()->sole()->only(['payout_subaccount', 'payout_label', 'cancellation_hours']))
         ->toBe(['payout_subaccount' => 'ACCT_new', 'payout_label' => 'Capitec Bank ••••7890', 'cancellation_hours' => 48]));
+});
+
+it('connects the owner’s own Google account safely, and refuses a return that wasn’t started here', function () {
+    ($this->subscribe)(['bookings']);
+    app(ProviderSettings::class)->save('meetings.google', 'google', ['client_id' => 'gid', 'client_secret' => 'gsecret'], [], true, null);
+    $email = rtrim(strtr(base64_encode((string) json_encode(['email' => 'thandi@gmail.com'])), '+/', '-_'), '=');
+    Http::fake([
+        'oauth2.googleapis.com/token' => Http::response(['access_token' => 'at-123', 'refresh_token' => 'rt-456', 'expires_in' => 3600, 'id_token' => "h.{$email}.s"]),
+        'oauth2.googleapis.com/revoke' => Http::response([]),
+    ]);
+
+    // A forged return (no matching value in this owner's session) is refused, and nothing is stored.
+    $forged = Crypt::encryptString((string) json_encode(['tenant' => $this->glow->id, 'nonce' => 'attacker', 'exp' => now()->addMinutes(5)->getTimestamp()]));
+    $this->actingAs($this->owner)->get($this->app('/oauth/video/google/callback').'?code=attacker-code&state='.urlencode($forged))->assertForbidden();
+    $this->ctx->run($this->glow, fn () => expect(MeetingConnection::query()->count())->toBe(0));
+
+    $to = (string) $this->actingAs($this->owner)->get("{$this->base}/video/connect/google")->assertRedirect()->headers->get('Location');
+    parse_str((string) parse_url($to, PHP_URL_QUERY), $q);
+    expect($to)->toStartWith('https://accounts.google.com/o/oauth2/v2/auth')
+        ->and($q)->toMatchArray(['client_id' => 'gid', 'access_type' => 'offline', 'redirect_uri' => $this->app('/oauth/video/google/callback')])
+        ->and($q['scope'])->toContain('calendar.events');
+
+    $this->actingAs($this->owner)->get($this->app('/oauth/video/google/callback').'?code=good-code&state='.urlencode($q['state']))
+        ->assertRedirect('/glow-salon/bookings/settings')->assertSessionHas('status', 'Google Meet is connected (thandi@gmail.com). Online appointments get their own link.');
+    $this->ctx->run($this->glow, function () {
+        $c = MeetingConnection::query()->sole();
+        expect($c->access_token)->toBe('at-123')->and($c->account_label)->toBe('thandi@gmail.com')
+            ->and(DB::connection(app(TenantContext::class)->connectionName())->table('meeting_connections')->value('access_token'))->not->toContain('at-123'); // encrypted at rest
+    });
+
+    $this->actingAs($this->owner)->delete("{$this->base}/video")->assertSessionHas('status', 'The video account is disconnected. Online appointments won’t get new links until you connect again.');
+    Http::assertSent(fn ($r) => str_ends_with($r->url(), '/revoke') && $r['token'] === 'rt-456');
+    $this->ctx->run($this->glow, fn () => expect(MeetingConnection::query()->count())->toBe(0));
+});
+
+it('accepts a fixed meeting link only over https', function () {
+    ($this->subscribe)(['bookings']);
+    $this->actingAs($this->owner)->put("{$this->base}/video/fixed", ['url' => 'http://meet.example.com/room'])->assertSessionHasErrors(['url' => 'Enter the full meeting link, starting with https://']);
+    $this->actingAs($this->owner)->put("{$this->base}/video/fixed", ['url' => 'https://meet.example.com/room'])->assertSessionHas('status', 'Your meeting link is saved. Note: every client gets the same link.');
 });
