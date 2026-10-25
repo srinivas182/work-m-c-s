@@ -47,16 +47,16 @@ final readonly class PageRenderer
         $body = (string) ($out['html'] ?? '');
         $fonts = array_values(array_filter((array) ($out['fonts'] ?? []), 'is_string'));
 
-        $html = view('website::public.page', [
+        // Only the content is stored; the page shell (stylesheet, scripts, font preloads) is added when
+        // the page is served, from the current build — so a deploy never leaves pages pointing at old assets.
+        $stored = [
+            'body' => $body,
+            'fonts' => $fonts,
             'title' => $page->seo_title ?: ($page->is_home ? $this->context->current()->displayName() : $page->title.' · '.$this->context->current()->displayName()),
             'description' => $page->seo_description,
-            'preloads' => app(FontPreloads::class)->for($fonts),
-            'body' => $body,
-            'islands' => str_contains($body, 'data-island='), // the islands script only where it's needed
-        ])->render();
-
-        $path = 'rendered/'.$this->context->id().'/'.$version->id.'.html';
-        Storage::disk((string) config('wurk.site_pages_disk', 'local'))->put($path, $html);
+        ];
+        $path = 'rendered/'.$this->context->id().'/'.$version->id.'.json';
+        Storage::disk((string) config('wurk.site_pages_disk', 'local'))->put($path, (string) json_encode($stored));
         PageRender::query()->updateOrCreate(['page_version_id' => $version->id], ['path' => $path, 'rendered_at' => now(), 'error' => null]);
 
         return $path;

@@ -12,6 +12,8 @@ use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageRender;
 use Wurk\Website\Models\PageVersion;
+use Wurk\Website\Support\FontPreloads;
+use Wurk\Website\Support\PublicAssets;
 
 /**
  * Public websites at {handle}.{root}: the stored HTML of each page's newest rendered version.
@@ -39,7 +41,17 @@ final class PublicSiteController
             if ($render === null || $render->path === null) {
                 abort(404);
             }
-            $html = Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($render->path) ?? abort(404);
+            $stored = (array) json_decode((string) (Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($render->path) ?? abort(404)), true);
+            $body = (string) ($stored['body'] ?? '');
+            $assets = app(PublicAssets::class);
+            $html = view('website::public.page', [
+                'title' => (string) ($stored['title'] ?? ''),
+                'description' => $stored['description'] ?? null,
+                'preloads' => app(FontPreloads::class)->for(array_values(array_filter((array) ($stored['fonts'] ?? []), 'is_string'))),
+                'stylesheet' => $assets->stylesheet(),
+                'islands' => str_contains($body, 'data-island=') ? $assets->islands() : null,
+                'body' => $body,
+            ])->render();
 
             return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
         });
