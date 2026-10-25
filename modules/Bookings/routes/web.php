@@ -8,6 +8,7 @@ use Wurk\Bookings\Http\Controllers\CalendarController;
 use Wurk\Bookings\Http\Controllers\PublicBookingController;
 use Wurk\Bookings\Http\Controllers\PublicManageController;
 use Wurk\Bookings\Http\Controllers\PublicTableController;
+use Wurk\Bookings\Http\Controllers\TablesController;
 
 Route::tenant(function (): void {
     // The calendar: everyone who can see bookings; changes need bookings.manage.
@@ -30,6 +31,10 @@ Route::tenant(function (): void {
         Route::delete('/payouts', [BookingSettingsController::class, 'disconnectPayouts'])->name('payouts.disconnect');
         Route::put('/policy', [BookingSettingsController::class, 'savePolicy'])->name('policy.save');
         Route::put('/messages', [BookingSettingsController::class, 'saveMessages'])->name('messages.save');
+        Route::get('/tables', [TablesController::class, 'show'])->name('tables');
+        Route::post('/tables', [TablesController::class, 'store'])->name('tables.store');
+        Route::post('/tables/{reservation}/status', [TablesController::class, 'status'])->name('tables.status');
+        Route::put('/tables/settings', [TablesController::class, 'saveSettings'])->name('tables.settings');
     });
 });
 
