@@ -17,6 +17,7 @@ use Wurk\Website\Http\Controllers\MediaController;
 use Wurk\Website\Http\Controllers\MenusController;
 use Wurk\Website\Http\Controllers\PagesController;
 use Wurk\Website\Http\Controllers\PreviewController;
+use Wurk\Website\Http\Controllers\PublicSeoController;
 use Wurk\Website\Http\Controllers\PublicSiteController;
 use Wurk\Website\Http\Controllers\QuoteFormController;
 use Wurk\Website\Http\Controllers\TemplatePreviewController;
@@ -97,6 +98,9 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
 
 // Public websites: {handle}.{root} (e.g. glow-salon.wurk.co.za; *.wurk.test in development and tests).
 Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'])->group(function (): void {
+    Route::get('/robots.txt', PublicSeoController::class)->defaults('type', 'robots')->name('website.public.robots');
+    Route::get('/sitemap.xml', PublicSeoController::class)->defaults('type', 'sitemap')->name('website.public.sitemap');
+    Route::get('/llms.txt', PublicSeoController::class)->defaults('type', 'llms')->name('website.public.llms');
     Route::get('/', PublicSiteController::class)->name('website.public.home');
     // A fallback, so more specific routes on business subdomains always win.
     Route::fallback(PublicSiteController::class)->name('website.public.page');

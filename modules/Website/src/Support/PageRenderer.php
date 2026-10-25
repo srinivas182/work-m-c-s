@@ -54,6 +54,8 @@ final readonly class PageRenderer
             'fonts' => $fonts,
             'title' => $page->seo_title ?: ($page->is_home ? $this->context->current()->displayName() : $page->title.' · '.$this->context->current()->displayName()),
             'description' => $page->seo_description,
+            'image' => SiteFacts::firstImage((array) ($out['blocks'] ?? [])),
+            'blocks' => (array) ($out['blocks'] ?? []), // final values per block, for search engines and AI answers
         ];
         $path = 'rendered/'.$this->context->id().'/'.$version->id.'.json';
         Storage::disk((string) config('wurk.site_pages_disk', 'local'))->put($path, (string) json_encode($stored));

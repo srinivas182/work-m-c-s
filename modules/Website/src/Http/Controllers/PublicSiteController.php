@@ -15,8 +15,11 @@ use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageRender;
 use Wurk\Website\Models\PageSlug;
 use Wurk\Website\Models\PageVersion;
+use Wurk\Website\Models\Site;
 use Wurk\Website\Support\FontPreloads;
 use Wurk\Website\Support\PublicAssets;
+use Wurk\Website\Support\SiteFacts;
+use Wurk\Website\Support\SiteSeo;
 
 /**
  * Public websites at {handle}.{root}: each page's newest rendered version, wrapped in the page
@@ -65,6 +68,7 @@ final class PublicSiteController
                 return new Response('', 304, [...$caching, ...$this->securityHeaders()]);
             }
 
+            $site = Site::query()->find($tenant->tenantId());
             $stored = (array) json_decode((string) Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($render->path), true);
             $body = (string) ($stored['body'] ?? '');
             $html = view('website::public.page', [
@@ -74,6 +78,11 @@ final class PublicSiteController
                 'stylesheet' => $assets->stylesheet(),
                 'islands' => str_contains($body, 'data-island=') ? $assets->islands() : null,
                 'body' => $body,
+                'canonical' => request()->getSchemeAndHttpHost().($page->is_home ? '/' : '/'.$page->slug),
+                'image' => ($img = $stored['image'] ?? null) ? request()->getSchemeAndHttpHost().$img : null,
+                'siteName' => $tenant->displayName(),
+                'favicon' => $site?->branding['favicon'] ?? null,
+                'jsonLd' => $page->is_home ? json_encode(app(SiteSeo::class)->localBusiness(app(SiteFacts::class)->collect(), request()->getSchemeAndHttpHost()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
             ])->render();
 
             return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...$this->securityHeaders()]);
