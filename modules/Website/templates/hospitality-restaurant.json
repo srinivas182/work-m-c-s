@@ -335,6 +335,19 @@
               }
             },
             {
+              "id": "book-table",
+              "type": "BookOnline",
+              "version": 1,
+              "props": {
+                "mode": "tables",
+                "heading": "Book a table",
+                "intro": "Choose how many guests and a time that suits you.",
+                "fallbackText": "Call or message us to book a table.",
+                "fallbackLabel": "Contact us",
+                "fallbackHref": "/contact"
+              }
+            },
+            {
               "id": "contact",
               "type": "Contact",
               "version": 1,
