@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 9.2 (pay before the slot)
+- **The full price** as a payment option, alongside a fixed or percentage deposit — paid straight to the business before the booking is confirmed.
+- **Charge it always, or only for online appointments** (in person, clients can pay at the desk).
+- **No joining link until the payment is verified** — online appointments get their link on confirmation, and a booking awaiting payment isn't confirmed. Refunds follow the cancellation policy.
+
+### Changed
+- CI: the browser job's limit is 20 minutes (454 checks plus the 24-template performance gate outgrew 12).
+
 ### Added — Sprint 9.1 (online appointments)
 - **Where, per service**: in person, online, or the client chooses. A service can't go online until clients have a way to join.
 - **A private video link per appointment**, hosted by the business's **own** Google (Meet) or Zoom account — created before the confirmation (so the email carries it), moved and deleted with the booking; Zoom meetings use a waiting room. If the provider is down, the booking stands and the link is retried before the reminder.
