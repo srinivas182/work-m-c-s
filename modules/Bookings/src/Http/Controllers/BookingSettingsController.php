@@ -76,7 +76,8 @@ final class BookingSettingsController
             'buffer_before_minutes' => ['required', 'integer', 'min:0', 'max:120', $five],
             'buffer_after_minutes' => ['required', 'integer', 'min:0', 'max:120', $five],
             'price_cents' => ['required', 'integer', 'min:0', 'max:100000000'],
-            'deposit_type' => ['required', Rule::in(['none', 'fixed', 'percent'])],
+            'deposit_type' => ['required', Rule::in(['none', 'fixed', 'percent', 'full'])],
+            'deposit_when' => ['sometimes', Rule::in(['always', 'online'])],
             'deposit_value' => ['required', 'integer', 'min:0', $request->input('deposit_type') === 'percent' ? 'max:100' : 'max:100000000'],
             'location_type' => ['sometimes', Rule::in(['in_person', 'online', 'either'])],
             'active' => ['boolean'],
@@ -84,6 +85,7 @@ final class BookingSettingsController
             'members.*' => ['string', Rule::in($memberIds)],
         ], ['members.min' => 'Choose at least one team member who does this service.']);
         $data['location_type'] ??= 'in_person'; // omitted means in person, as stored by default
+        $data['deposit_when'] ??= 'always';
         if ($data['location_type'] !== 'in_person' && MeetingConnection::query()->find($this->context->id()) === null) {
             throw ValidationException::withMessages(['location_type' => 'Connect Google Meet or Zoom (or add a meeting link) under Video calls first, so clients can join.']);
         }

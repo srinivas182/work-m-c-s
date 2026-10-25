@@ -25,9 +25,15 @@ final readonly class Deposits
 
     public function __construct(private TenantContext $context, private SplitPayments $payments, private Booker $booker, private AuditLog $audit) {}
 
-    /** The deposit for a service, in cents (0 = none, or deposits not set up for this business). */
-    public function amountFor(BookingService $service): int
+    /**
+     * What to pay before the booking is confirmed, in cents: none, a fixed or percentage deposit, or
+     * the full price — always, or only for online appointments. 0 when payouts aren't set up.
+     */
+    public function amountFor(BookingService $service, bool $online = false): int
     {
+        if ($service->deposit_when === 'online' && ! $online) {
+            return 0; // paid at the desk in person
+        }
         if (BookingSettings::query()->find($this->context->id())?->payout_subaccount === null) {
             return 0;
         }
@@ -35,6 +41,7 @@ final readonly class Deposits
         return match ($service->deposit_type) {
             'fixed' => $service->deposit_value,
             'percent' => (int) round($service->price_cents * min(100, $service->deposit_value) / 100),
+            'full' => $service->price_cents,
             default => 0,
         };
     }
