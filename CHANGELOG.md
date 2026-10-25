@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 9.1 (online appointments)
+- **Where, per service**: in person, online, or the client chooses. A service can't go online until clients have a way to join.
+- **A private video link per appointment**, hosted by the business's **own** Google (Meet) or Zoom account — created before the confirmation (so the email carries it), moved and deleted with the booking; Zoom meetings use a waiting room. If the provider is down, the booking stands and the link is retried before the reminder.
+- **Connecting Google or Zoom** (OAuth): the business travels in an encrypted, expiring state bound to the owner's own session (a forged return is refused); tokens are encrypted at rest and refreshed automatically; disconnecting revokes access. Super admin enters WURK's Google and Zoom app credentials under providers.
+- **Fixed meeting link** as a fallback (https only), with a clear "same link for everyone" warning.
+- **Clients** choose In person / Online in "Book online"; the joining link appears on their booking page from 15 minutes before (and in emails).
+
+### Fixed
+- The handle `oauth` is reserved (the video-connection return address lives under `/oauth`).
+
 ### Added — Sprint 8.5 (restaurant table reservations)
 - **Tables by covers** (no floor plan yet): covers, sitting length, interval between times, largest party online, notice, and arrival hours per weekday (lunch and dinner).
 - **Exact capacity**: a time is offered only if the most guests present at any moment during the sitting, plus the party, fits the covers — parties that never share the room don't block each other.

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 9 (sprint plan revision 3) |
-| **Status** | Approved 27 Oct 2026 — 9.1 in progress |
+| **Status** | Approved 27 Oct 2026 — 9.1 in review |
 | **Depends on** | v0.9.0 (appointments, deposits, messages, manage links) |
 | **Legal review** | Completed (WURK, Oct 2026). **Its specific requirements are needed before 9.4 and 9.5**, which are scheduled last |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
@@ -89,3 +89,11 @@ Health records are **special personal information under POPIA**. As a baseline, 
 |---|---|
 | **The legal review's requirements** (consent wording, retention, access, telehealth conditions) | 9.4 and 9.5 |
 | **A Google Cloud OAuth app** (Calendar API) and **a Zoom app**, for businesses to connect their accounts | 9.1 (test credentials are enough to build) |
+
+---
+
+## 7. Progress log
+
+| Sub-sprint | PR | Notes |
+|---|---|---|
+| 9.1 Online appointments | see PR | 782 backend tests on SQLite and MySQL 8; 371 frontend; all browser tests incl. a customer booking online on a published site. Found: an app-domain route segment (`oauth`) not reserved as a handle (architecture test) |
