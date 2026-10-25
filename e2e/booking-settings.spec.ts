@@ -30,5 +30,16 @@ test('an owner sets up a service, their hours and time off', async ({ page }, te
   await off.getByLabel('Reason (optional)').fill('Freedom Day');
   await off.getByRole('button', { name: 'Add time off' }).click();
   await expect(page.getByText(/Everyone · .* · Freedom Day/)).toBeVisible();
+
+  // Before WURK switches on payments, owners are told plainly; the policy can still be set.
+  await expect(
+    page.getByText(
+      'Online payments aren’t switched on yet. Bookings work without deposits in the meantime.',
+    ),
+  ).toBeVisible();
+  const policy = page.getByRole('form', { name: 'Cancellation policy' });
+  await policy.getByLabel('Free cancellation until (hours before)').fill('48');
+  await policy.getByRole('button', { name: 'Save policy' }).click();
+  await expect(page.getByText('Cancellation policy saved.')).toBeVisible();
   await expectAccessible(page);
 });
