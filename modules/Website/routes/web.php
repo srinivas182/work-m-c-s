@@ -98,6 +98,9 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
 
 // Public websites: {handle}.{root} (e.g. glow-salon.wurk.co.za; *.wurk.test in development and tests).
 Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'])->group(function (): void {
+    // The quote form on the business's own address (same protections as the app-domain route: no session
+    // or CSRF, a hidden spam field, a per-visitor limit and a daily cap per business).
+    Route::post('/forms/quote', QuoteFormController::class)->middleware('throttle:5,10,quote-form')->name('website.public.quote');
     Route::get('/robots.txt', PublicSeoController::class)->defaults('type', 'robots')->name('website.public.robots');
     Route::get('/sitemap.xml', PublicSeoController::class)->defaults('type', 'sitemap')->name('website.public.sitemap');
     Route::get('/llms.txt', PublicSeoController::class)->defaults('type', 'llms')->name('website.public.llms');

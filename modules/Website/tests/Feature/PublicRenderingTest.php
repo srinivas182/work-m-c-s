@@ -32,7 +32,7 @@ it('renders a page once at publish, with the same blocks, and serves the stored 
 
     Process::assertRan(fn (PendingProcess $p) => str_ends_with((string) end($p->command), 'site-render.js')
         && json_decode((string) $p->input, true)['site']['businessName'] === 'Glow Salon'
-        && json_decode((string) $p->input, true)['site']['formAction'] === '/forms/glow-salon/quote');
+        && json_decode((string) $p->input, true)['site']['formAction'] === '/forms/quote');
 
     $this->get($this->site)->assertOk()->assertHeader('Content-Type', 'text/html; charset=UTF-8')
         ->assertSee('<h1>Braids that last</h1>', false)->assertSee('<title>Glow Salon</title>', false);

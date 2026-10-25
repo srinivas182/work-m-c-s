@@ -33,7 +33,7 @@ final readonly class PageRenderer
                 'businessName' => $this->context->current()->displayName(),
                 'logo' => $site->branding['logo'] ?? null,
                 'menus' => $this->menus->resolve($site),
-                'formAction' => route('website.forms.quote', ['handle' => $this->context->current()->handle()], false),
+                'formAction' => '/forms/quote', // posts to the business's own address (allowed by its content policy)
             ],
         ];
 
