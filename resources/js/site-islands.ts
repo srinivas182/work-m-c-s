@@ -297,7 +297,7 @@ async function booking(root: HTMLElement): Promise<void> {
         })
       : {};
     if (r?.status === 201 && (data as { pay_url?: string }).pay_url) {
-      status.textContent = 'Taking you to pay the deposit…';
+      status.textContent = 'Taking you to pay…';
       window.location.assign((data as { pay_url: string }).pay_url); // Paystack's secure checkout
       return;
     }

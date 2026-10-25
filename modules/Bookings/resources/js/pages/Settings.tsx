@@ -25,7 +25,8 @@ interface Service {
   buffer_before_minutes: number;
   buffer_after_minutes: number;
   price_cents: number;
-  deposit_type: 'none' | 'fixed' | 'percent';
+  deposit_type: 'none' | 'fixed' | 'percent' | 'full';
+  deposit_when: 'always' | 'online';
   location_type: 'in_person' | 'online' | 'either';
   deposit_value: number;
   active: boolean;
@@ -83,6 +84,7 @@ function ServiceForm({
     buffer_after_minutes: service?.buffer_after_minutes ?? 0,
     price: service ? service.price_cents / 100 : 0,
     deposit_type: service?.deposit_type ?? 'none',
+    deposit_when: service?.deposit_when ?? 'always',
     location_type: service?.location_type ?? 'in_person',
     deposit_value: service?.deposit_value ?? 0,
     active: service?.active ?? true,
@@ -160,9 +162,27 @@ function ServiceForm({
             <option value="none">No deposit</option>
             <option value="fixed">A fixed amount</option>
             <option value="percent">A percentage of the price</option>
+            <option value="full">The full price</option>
           </select>
         </Field>
-        {form.data.deposit_type !== 'none' && (
+        {form.data.location_type === 'either' && form.data.deposit_type !== 'none' && (
+          <Field
+            label="Charge it"
+            error={(form.errors as Record<string, string | undefined>).deposit_when}
+          >
+            <select
+              className={selectClass}
+              value={form.data.deposit_when}
+              onChange={(e) =>
+                form.setData('deposit_when', e.target.value as Service['deposit_when'])
+              }
+            >
+              <option value="always">Always</option>
+              <option value="online">Only for online appointments</option>
+            </select>
+          </Field>
+        )}
+        {form.data.deposit_type !== 'none' && form.data.deposit_type !== 'full' && (
           <Field
             label={form.data.deposit_type === 'percent' ? 'Deposit (%)' : 'Deposit (R)'}
             error={form.errors.deposit_value}
