@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Wurk\Bookings\Http\Controllers\BookingSettingsController;
 use Wurk\Bookings\Http\Controllers\CalendarController;
 use Wurk\Bookings\Http\Controllers\PublicBookingController;
+use Wurk\Bookings\Http\Controllers\PublicClassController;
 use Wurk\Bookings\Http\Controllers\PublicManageController;
 use Wurk\Bookings\Http\Controllers\PublicTableController;
 use Wurk\Bookings\Http\Controllers\TablesController;
@@ -53,6 +54,12 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'
     Route::middleware(['signed', 'throttle:30,1,book-manage'])->group(function (): void {
         Route::get('/tables/{reservation}', [PublicTableController::class, 'show'])->name('table');
         Route::post('/tables/{reservation}/cancel', [PublicTableController::class, 'cancel'])->name('table.cancel');
+    });
+    Route::get('/classes', [PublicClassController::class, 'index'])->middleware('throttle:60,1,book-read')->name('classes');
+    Route::post('/classes/{session}', [PublicClassController::class, 'attend'])->middleware('throttle:5,10,book-create')->name('classes.attend');
+    Route::middleware(['signed', 'throttle:30,1,book-manage'])->group(function (): void {
+        Route::get('/class/{attendee}', [PublicClassController::class, 'show'])->name('class');
+        Route::post('/class/{attendee}/cancel', [PublicClassController::class, 'leave'])->name('class.leave');
     });
     Route::get('/return', [PublicBookingController::class, 'paid'])->middleware('throttle:30,1,book-read')->name('paid');
     // The customer's own booking page: signed links (no account), expiring when the booking starts.

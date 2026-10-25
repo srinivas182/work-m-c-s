@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 9 (sprint plan revision 3) |
-| **Status** | Approved 27 Oct 2026 — 9.1 ✅ (#70), 9.2 in review |
+| **Status** | Approved 27 Oct 2026 — 9.1 ✅ (#70), 9.2 ✅ (#71), 9.3 in progress |
 | **Depends on** | v0.9.0 (appointments, deposits, messages, manage links) |
 | **Legal review** | Completed (WURK, Oct 2026). **Its specific requirements are needed before 9.4 and 9.5**, which are scheduled last |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
@@ -97,4 +97,4 @@ Health records are **special personal information under POPIA**. As a baseline, 
 | Sub-sprint | PR | Notes |
 |---|---|---|
 | 9.1 Online appointments | #70 | 782 backend tests on SQLite and MySQL 8; 371 frontend; all browser tests incl. a customer booking online on a published site. Found: an app-domain route segment (`oauth`) not reserved as a handle (architecture test) |
-| 9.2 Pay before the slot | see PR | 783 backend tests on SQLite and MySQL 8; 371 frontend; all browser tests |
+| 9.2 Pay before the slot | #71 | 783 backend tests on SQLite and MySQL 8; 371 frontend; all browser tests |
