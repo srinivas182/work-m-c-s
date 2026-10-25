@@ -25,6 +25,8 @@ export interface ClassTimetableProps extends Record<string, unknown> {
   intro: string;
   classes: TimetableClass[];
   note: string;
+  bookLabel: string;
+  bookHref: string;
 }
 
 function ClassCard({ c }: { c: TimetableClass }) {
@@ -75,9 +77,18 @@ export const ClassTimetable: BlockDefinition<ClassTimetableProps> = {
       },
     },
     note: { kind: 'text', inline: true, label: 'Note (e.g. public holiday times)', max: 160 },
+    bookLabel: { kind: 'text', label: 'Booking button text', max: 30 }, // panel only: the button is hidden until it has a link
+    bookHref: { kind: 'link', label: 'Booking button goes to (leave empty to hide it)' },
   },
   isEmpty: (p) => p.classes.length === 0,
-  defaults: { heading: 'Class timetable', intro: '', classes: [], note: '' },
+  defaults: {
+    heading: 'Class timetable',
+    intro: '',
+    classes: [],
+    note: '',
+    bookLabel: 'Book a place',
+    bookHref: '',
+  },
   render: (p, site) => {
     const byDay = DAYS.map((day) => ({
       day,
@@ -127,6 +138,14 @@ export const ClassTimetable: BlockDefinition<ClassTimetableProps> = {
           </>
         )}
         {p.note && <p className="mt-6 text-[var(--s-fg-muted)]">{p.note}</p>}
+        {p.bookHref && p.classes.length > 0 && (
+          <a
+            href={p.bookHref}
+            className="mt-6 inline-flex min-h-11 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-6 font-semibold text-[var(--s-on-brand)]"
+          >
+            {p.bookLabel || 'Book a place'}
+          </a>
+        )}
       </Section>
     );
   },
