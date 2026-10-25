@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 8 (sprint plan revision 3) |
-| **Status** | Approved 26 Oct 2026 — 8.1 ✅ (#63), 8.2 ✅ (#64), 8.3 in progress |
+| **Status** | Approved 26 Oct 2026 — 8.1 ✅ (#63), 8.2 ✅ (#64), 8.3 in review |
 | **Depends on** | v0.8.0 (public sites, islands, quote forms); WURK Credits and messaging (Sprints 2–3, 6) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -107,3 +107,4 @@ Deposits are **optional per service**. Businesses without a connected payment ac
 |---|---|---|
 | 8.1 Services, team hours and availability | #63 | 739 backend tests on SQLite and MySQL 8 (incl. a double-booking race on both); 363 frontend; 60 browser checks. Found: UTC stored against the platform's local-time convention (two-hour shift) |
 | 8.2 Online booking and the calendar | #64 | 746 backend tests on SQLite and MySQL 8; 370 frontend; browser: settings, calendar, a customer booking on a published site (desktop and phone), 48 contact-page scans with the live widget. Found: Bookings reached into Access internals (architecture test) |
+| 8.3 Deposits and policies | see PR | Paystack test mode. 760 backend tests on SQLite and MySQL 8; 370 frontend; all browser tests. Found: unregistered return-page view; signed links invalidated by actions and the chosen date (separate signed actions; the page ignores only `date`) |
