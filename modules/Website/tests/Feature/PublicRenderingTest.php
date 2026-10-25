@@ -126,3 +126,17 @@ it('serves the right status for every situation, always with the security header
     $this->glow->update(['status' => Tenant::STATUS_SUSPENDED]);
     $csp($this->get($this->site)->assertStatus(503)->assertHeader('Retry-After', '3600')->assertSee('Temporarily unavailable')->assertDontSee('Glow live'));
 });
+
+it('lets browsers revalidate cheaply, and never hides a new publish behind a cached copy', function () {
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>One</h1>', 'fonts' => []]))]);
+    ($this->publish)();
+    $first = $this->get($this->site)->assertOk()->assertHeader('Cache-Control', 'max-age=0, must-revalidate, public')->assertHeader('Cache-Tag', 'site-'.$this->glow->id);
+    $etag = (string) $first->headers->get('ETag');
+
+    $this->get($this->site, ['If-None-Match' => $etag])->assertStatus(304);
+
+    $this->travel(1)->minutes();
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Two</h1>', 'fonts' => []]))]);
+    ($this->publish)();
+    $this->get($this->site, ['If-None-Match' => $etag])->assertOk()->assertSee('<h1>Two</h1>', false);
+});

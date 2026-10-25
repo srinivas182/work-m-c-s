@@ -50,7 +50,7 @@ Interactive parts become **islands** — a few kilobytes of JavaScript each, loa
 | Renamed pages | Old addresses **redirect permanently** to the new ones (slug history), so shared links keep working |
 | Not yet published | A simple "coming soon" page (not indexed by search engines) |
 | Suspended businesses | "Temporarily unavailable" (503 with Retry-After), never the business's content |
-| Caching | Full-page cache by address and page, purged on publish, branding and menu changes; cache headers ready for Cloudflare (Sprint 17) |
+| Caching | **As built:** the stored render is the page cache (no rendering per visit); browsers revalidate by ETag (changes with each render and each deploy, so nothing stale is ever shown); `Cache-Tag: site-{id}` lets Cloudflare purge a whole site on publish (Sprint 17) |
 | Security headers | Content Security Policy allowing nothing from other sites (no third-party requests, POPIA), X-Content-Type-Options, Referrer-Policy, frame protection |
 
 ### 5.3 Search engines and AI answers (SEO & AEO)

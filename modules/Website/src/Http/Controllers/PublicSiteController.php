@@ -56,9 +56,17 @@ final class PublicSiteController
                     : $this->status($tenant->displayName(), 404, 'Page not found', 'This page doesn’t exist.', home: true);
             }
 
+            // Revalidation: the tag changes with the render and with the build, so a new publish or a
+            // deploy is never hidden behind a cached copy. Cache-Tag lets the CDN purge a whole site (Sprint 17).
+            $assets = app(PublicAssets::class);
+            $etag = '"'.sha1($render->path.'|'.$render->rendered_at?->getTimestamp().'|'.$assets->stylesheet()).'"';
+            $caching = ['ETag' => $etag, 'Cache-Control' => 'public, max-age=0, must-revalidate', 'Cache-Tag' => 'site-'.$tenant->tenantId()];
+            if (request()->header('If-None-Match') === $etag) {
+                return new Response('', 304, [...$caching, ...$this->securityHeaders()]);
+            }
+
             $stored = (array) json_decode((string) Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($render->path), true);
             $body = (string) ($stored['body'] ?? '');
-            $assets = app(PublicAssets::class);
             $html = view('website::public.page', [
                 'title' => (string) ($stored['title'] ?? $tenant->displayName()),
                 'description' => $stored['description'] ?? null,
@@ -68,7 +76,7 @@ final class PublicSiteController
                 'body' => $body,
             ])->render();
 
-            return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$this->securityHeaders()]);
+            return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...$this->securityHeaders()]);
         });
     }
 
