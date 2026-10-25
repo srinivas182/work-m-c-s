@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 5.3 (search engines and AI answers)
+- Every published page: canonical address, Open Graph and social card (the page's first photo), favicon.
+- **Structured business data** (schema.org LocalBusiness) on the home page: name, description, phone or WhatsApp, email, address, **opening hours once the owner has confirmed them** (templates ship sample hours), services with prices — **no price where the price is "ask us"**, each service once.
+- **`sitemap.xml`, `robots.txt` and `llms.txt`** per site; sites not yet live ask not to be indexed.
+- Everything is taken from **what visitors see**: the renderer reports each block's final values (defaults filled in), stored with the render — e.g. hours left at the section's defaults are included once confirmed.
+- Owner text can't break out of the structured-data block (`</script>` escaped).
+
 ### Added — Sprint 5.2 (serving, caching and safety)
 - **Statuses for public sites**: "coming soon" before the first publish (not indexed); **suspended businesses show "temporarily unavailable"** (503, Retry-After) and nothing of the business; missing pages get a 404 in the business's name with a link home.
 - **Renamed pages redirect** (301) from their old addresses, so shared links keep working.
