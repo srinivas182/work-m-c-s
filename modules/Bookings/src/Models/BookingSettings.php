@@ -13,6 +13,9 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string|null $payout_label
  * @property int $cancellation_hours
  * @property string|null $policy
+ * @property string $message_channel
+ * @property bool $remind_24h
+ * @property bool $remind_2h
  */
 final class BookingSettings extends Model
 {
@@ -30,6 +33,6 @@ final class BookingSettings extends Model
 
     protected function casts(): array
     {
-        return ['cancellation_hours' => 'integer'];
+        return ['cancellation_hours' => 'integer', 'remind_24h' => 'boolean', 'remind_2h' => 'boolean'];
     }
 }
