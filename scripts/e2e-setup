@@ -56,3 +56,4 @@ if [ ! -f bootstrap/site-render/site-render.js ]; then
   exit 1
 fi
 php artisan website:demo-sites --no-interaction > /dev/null
+php artisan bookings:demo --no-interaction > /dev/null   # the demo sites take bookings
