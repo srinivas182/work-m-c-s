@@ -1,0 +1,18 @@
+{
+    "name": "Bookings",
+    "key": "bookings",
+    "version": "0.1.0",
+    "description": "Appointments: bookable services, team hours and time off, availability, and bookings that can never overlap.",
+    "core": false,
+    "entitlement": "bookings",
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit",
+        "plans",
+        "billing",
+        "credits",
+        "messaging"
+    ]
+}

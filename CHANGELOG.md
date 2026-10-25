@@ -4,6 +4,48 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 8.5 (restaurant table reservations)
+- **Tables by covers** (no floor plan yet): covers, sitting length, interval between times, largest party online, notice, and arrival hours per weekday (lunch and dinner).
+- **Exact capacity**: a time is offered only if the most guests present at any moment during the sitting, plus the party, fits the covers — parties that never share the room don't block each other.
+- **No overbooking**: the evening is locked while capacity is re-checked and the reservation saved; tested on SQLite and MySQL 8.
+- **Online**: "Book online" in table mode (guests → day → time → details); a signed reservation page to cancel; confirmations, a 24-hour reminder and cancellations reuse the booking messages ("Table for 4"), with the same email fallback.
+- **Owners**: Bookings → Tables — the day's reservations with guests booked against covers; add a reservation (any time if there's room); seated, no-show, cancel; table settings.
+- The restaurant template takes table reservations; its demo site does too (browser tests and public scans cover the live widget).
+
+### Added — Sprint 8.4 (confirmations and reminders)
+- **Booking messages** in fixed wording (agreed with WURK): confirmed, reminder, moved and cancelled — client's first name, service, business, date and time, and the manage link. WhatsApp uses matching Meta templates (`wurk_booking_<kind>`, parameters: client, service, business, when, link) for WURK to register once.
+- **Channels**: email free; SMS and WhatsApp through WURK's providers, charged in WURK Credits first and refunded if the send fails. **Essential messages never silently stop**: when credits (or a spending limit) run out or a send fails, the message goes by free email, and the reason is recorded.
+- **Triggers**: confirmation on booking (or when the deposit is paid), a message when a booking moves or is cancelled; nothing for expired holds or no-shows. Each message is sent once.
+- **Reminders** 24 hours (default) and/or 2 hours before, via a central due list and a 5-minute sweep; moving a booking reschedules them, cancelling removes them.
+- **Settings**: the channel, with costs stated and channels WURK hasn't switched on shown as unavailable; reminder times.
+
+### Added — Sprint 8.3 (deposits and policies; Paystack test mode)
+- **Deposits paid straight to the business** through a Paystack subaccount (Billing `SplitPayments`; 0% WURK commission; the business bears Paystack's fee). Owners connect their bank in Booking settings; only a masked label (e.g. "Capitec Bank ••••7890") is kept.
+- **Deposit per service**: none, a fixed amount, or a percentage of the price. Email is required when a deposit applies.
+- **Held times**: a booking awaiting its deposit holds the time for 15 minutes; an every-minute sweep releases unpaid holds. Payment is confirmed only after verifying with Paystack, idempotently (return redirect and signed webhook); short payments aren't accepted; a payment arriving after its hold expired is refunded automatically.
+- **Cancellation policy** (default 24 hours, editable window and wording): customer cancels in time → deposit refunded; later or a no-show → kept; the business cancels → always refunded.
+- **Self-service manage link** (signed, expires at the booking's start): see the booking and the policy, what cancelling now means, cancel, or move to another free time — plain HTML, works without JavaScript.
+
+### Fixed
+- The deposit return page's view wasn't registered (customers returning from Paystack would have seen an error).
+
+### Added — Sprint 8.2 (online booking and the owner calendar)
+- **Online booking API** on each business's own address (`/book/services`, `/book/times`, `POST /book`): active services and team, free times in local time, booking with consent, a spam trap and rate limits; a time taken a moment ago is refused kindly (409). Only for packages that include bookings.
+- **"Book online" website section**: service → team member ("anyone") → day → free time → details → confirmation, as a small island (DOM-built, so business names can't inject markup; announces progress; focuses the confirmation). Without JavaScript it shows how to book instead. Added to nine booking-led templates.
+- **Calendar**: day (per team member) and week views; add bookings and walk-ins (owners aren't held to notice or listed hours — never to overlaps), move atomically, mark done, no-show or cancel (frees the time). Viewing needs `bookings.view`; changes `bookings.manage`.
+- `bookings:demo` (development only) makes the demo sites bookable, so browser tests book on a published site and the public scans cover the live widget.
+- Access contract `TeamDirectory::add()`.
+
+### Added — Sprint 8.1 (services, team hours and availability)
+- **Bookings module** (entitlement `bookings`): bookable services (length and buffers in 5-minute steps, price, who does it), weekly team hours with breaks, time off for one person or the whole business.
+- **Availability** in the business's time zone: hours and breaks, buffers that must fit inside working hours, time off, existing bookings, 60 minutes' notice, 60 days ahead; "anyone" spreads bookings across the team.
+- **No double-booking, enforced by the database**: each booking claims its 5-minute slots under a unique key per team member — tested with a race on SQLite and MySQL 8.
+- **Booking settings** screen (services, team hours, time off), accessibility-scanned on desktop and phone.
+- Access contract `TeamDirectory`; tenancy contract `timezone()`.
+
+### Fixed
+- Bookings stored times in UTC while WURK stores South African wall-clock time (APP_TIMEZONE): every booking would have been two hours out. One helper (`Instant`) now converts every stored and compared time.
+
 ### Added — Sprint 5.4 (visitor features and the performance gate)
 - **Performance gate in CI**: mobile Lighthouse on the public home page of every template — **≥ 90 and layout shift < 0.1, enforced**. All 24 score 99–100 (layout shift ≤ 0.002, main image 1.3–2.2 s), against 65–71 for the old previews.
 - **Every public page of every template accessibility-scanned** on desktop and phone (338 checks), from demo sites (`website:demo-sites`, development and tests only). The preview scan now covers each template's home page (the preview's own controls).

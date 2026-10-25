@@ -318,6 +318,18 @@
               }
             },
             {
+              "id": "book-online",
+              "type": "BookOnline",
+              "version": 1,
+              "props": {
+                "heading": "Book online",
+                "intro": "Choose a service and a time that suits you.",
+                "fallbackText": "Call or message us to book.",
+                "fallbackLabel": "Contact us",
+                "fallbackHref": "/contact"
+              }
+            },
+            {
               "id": "contact",
               "type": "Contact",
               "version": 1,

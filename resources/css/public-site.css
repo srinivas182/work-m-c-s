@@ -5,6 +5,7 @@
  */
 @import 'tailwindcss' source(none);
 @source '../../modules/Website/resources/js/site';
+@source '../js/site-islands.ts'; /* classes the booking island adds */
 @import '../../modules/Website/resources/js/site/site.css';
 
 @import '@fontsource-variable/inter';

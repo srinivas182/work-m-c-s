@@ -115,4 +115,9 @@ final class Tenant extends Model implements CentralModel, CurrentTenant
     {
         return $this->created_at;
     }
+
+    public function timezone(): string
+    {
+        return (string) ($this->timezone ?: config('app.timezone', 'Africa/Johannesburg'));
+    }
 }
