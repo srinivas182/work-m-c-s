@@ -7,7 +7,7 @@ namespace Wurk\Bookings\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Wurk\Access\Actions\Team;
+use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Plans\Contracts\Catalog;
@@ -46,11 +46,11 @@ final class DemoBookingsCommand extends Command
             }
             $catalog->subscribe($tenant->tenantId(), (string) $starter['id'], 'monthly', allowTrial: true);
             $context->run($tenant, function () use ($context): void {
-                $member = app(Team::class)->add((string) Str::ulid(), 'Demo stylist', 'staff');
+                $memberId = app(TeamDirectory::class)->add((string) Str::ulid(), 'Demo stylist', 'staff');
                 $service = BookingService::query()->create(['name' => 'Consultation', 'duration_minutes' => 30, 'price_cents' => 25000]);
-                DB::connection($context->connectionName())->table('booking_service_member')->insert(['service_id' => $service->id, 'member_id' => $member->id, 'tenant_id' => $context->id()]);
+                DB::connection($context->connectionName())->table('booking_service_member')->insert(['service_id' => $service->id, 'member_id' => $memberId, 'tenant_id' => $context->id()]);
                 foreach (range(0, 6) as $day) {
-                    BookingHours::query()->create(['member_id' => $member->id, 'weekday' => $day, 'starts' => '08:00', 'ends' => '20:00']);
+                    BookingHours::query()->create(['member_id' => $memberId, 'weekday' => $day, 'starts' => '08:00', 'ends' => '20:00']);
                 }
             });
             $this->line("{$tenant->handle()}: bookable");
