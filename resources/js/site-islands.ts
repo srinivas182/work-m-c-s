@@ -89,6 +89,7 @@ type BookService = {
   name: string;
   duration: number;
   price_cents: number;
+  location?: 'in_person' | 'online' | 'either';
   members: { id: string; name: string }[];
 };
 
@@ -154,6 +155,41 @@ async function booking(root: HTMLElement): Promise<void> {
   times.setAttribute('aria-label', 'Free times');
   let chosen: string | null = null;
 
+  // Where: a choice when the service allows either; a note when it's online only.
+  const where = el('fieldset', { class: 'grid gap-1' });
+  const whereOnline = el('input', { type: 'radio', name: 'where' });
+  const whereInPerson = el('input', { type: 'radio', name: 'where', checked: true });
+  whereOnline.id = `${uid}-where-online`;
+  whereInPerson.id = `${uid}-where-in-person`;
+  where.append(
+    el('legend', { class: 'font-medium' }, 'Where'),
+    el(
+      'div',
+      { class: 'flex items-center gap-2' },
+      whereInPerson,
+      el('label', { htmlFor: whereInPerson.id }, 'In person'),
+    ),
+    el(
+      'div',
+      { class: 'flex items-center gap-2' },
+      whereOnline,
+      el('label', { htmlFor: whereOnline.id }, 'Online (video call)'),
+    ),
+  );
+  const onlineNote = el(
+    'p',
+    { class: 'text-sm' },
+    'This is an online appointment — you’ll get a private joining link.',
+  );
+  const refreshWhere = () => {
+    const location = services.find((s) => s.id === serviceSelect.value)?.location ?? 'in_person';
+    where.hidden = location !== 'either';
+    onlineNote.hidden = location !== 'online';
+  };
+  const isOnline = () => {
+    const location = services.find((s) => s.id === serviceSelect.value)?.location ?? 'in_person';
+    return location === 'online' || (location === 'either' && whereOnline.checked);
+  };
   const refreshMembers = () => {
     const service = services.find((s) => s.id === serviceSelect.value);
     memberSelect.replaceChildren(
@@ -212,6 +248,8 @@ async function booking(root: HTMLElement): Promise<void> {
     { class: 'grid gap-4' },
     labelled('Service', serviceSelect),
     labelled('With', memberSelect),
+    where,
+    onlineNote,
     labelled('Day', dateInput),
     times,
     labelled('Your name', name),
@@ -240,6 +278,7 @@ async function booking(root: HTMLElement): Promise<void> {
       body: JSON.stringify({
         service: serviceSelect.value,
         member: memberSelect.value || null,
+        online: isOnline(),
         starts_at: chosen,
         name: name.value,
         phone: phone.value,
@@ -290,12 +329,14 @@ async function booking(root: HTMLElement): Promise<void> {
   });
 
   serviceSelect.addEventListener('change', () => {
+    refreshWhere();
     refreshMembers();
     void refreshTimes();
   });
   memberSelect.addEventListener('change', () => void refreshTimes());
   dateInput.addEventListener('change', () => void refreshTimes());
   refreshMembers();
+  refreshWhere();
   root.replaceChildren(form);
   void refreshTimes();
 }
