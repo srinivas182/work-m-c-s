@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 8.1 (services, team hours and availability)
+- **Bookings module** (entitlement `bookings`): bookable services (length and buffers in 5-minute steps, price, who does it), weekly team hours with breaks, time off for one person or the whole business.
+- **Availability** in the business's time zone: hours and breaks, buffers that must fit inside working hours, time off, existing bookings, 60 minutes' notice, 60 days ahead; "anyone" spreads bookings across the team.
+- **No double-booking, enforced by the database**: each booking claims its 5-minute slots under a unique key per team member — tested with a race on SQLite and MySQL 8.
+- **Booking settings** screen (services, team hours, time off), accessibility-scanned on desktop and phone.
+- Access contract `TeamDirectory`; tenancy contract `timezone()`.
+
+### Fixed
+- Bookings stored times in UTC while WURK stores South African wall-clock time (APP_TIMEZONE): every booking would have been two hours out. One helper (`Instant`) now converts every stored and compared time.
+
 ### Added — Sprint 5.4 (visitor features and the performance gate)
 - **Performance gate in CI**: mobile Lighthouse on the public home page of every template — **≥ 90 and layout shift < 0.1, enforced**. All 24 score 99–100 (layout shift ≤ 0.002, main image 1.3–2.2 s), against 65–71 for the old previews.
 - **Every public page of every template accessibility-scanned** on desktop and phone (338 checks), from demo sites (`website:demo-sites`, development and tests only). The preview scan now covers each template's home page (the preview's own controls).
