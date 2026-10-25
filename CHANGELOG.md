@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 8.5 (restaurant table reservations)
+- **Tables by covers** (no floor plan yet): covers, sitting length, interval between times, largest party online, notice, and arrival hours per weekday (lunch and dinner).
+- **Exact capacity**: a time is offered only if the most guests present at any moment during the sitting, plus the party, fits the covers — parties that never share the room don't block each other.
+- **No overbooking**: the evening is locked while capacity is re-checked and the reservation saved; tested on SQLite and MySQL 8.
+- **Online**: "Book online" in table mode (guests → day → time → details); a signed reservation page to cancel; confirmations, a 24-hour reminder and cancellations reuse the booking messages ("Table for 4"), with the same email fallback.
+- **Owners**: Bookings → Tables — the day's reservations with guests booked against covers; add a reservation (any time if there's room); seated, no-show, cancel; table settings.
+- The restaurant template takes table reservations; its demo site does too (browser tests and public scans cover the live widget).
+
 ### Added — Sprint 8.4 (confirmations and reminders)
 - **Booking messages** in fixed wording (agreed with WURK): confirmed, reminder, moved and cancelled — client's first name, service, business, date and time, and the manage link. WhatsApp uses matching Meta templates (`wurk_booking_<kind>`, parameters: client, service, business, when, link) for WURK to register once.
 - **Channels**: email free; SMS and WhatsApp through WURK's providers, charged in WURK Credits first and refunded if the send fails. **Essential messages never silently stop**: when credits (or a spending limit) run out or a send fails, the message goes by free email, and the reason is recorded.
