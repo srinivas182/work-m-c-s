@@ -229,10 +229,10 @@ function HoursEditor({ member, hours }: { member: Props['team'][number]; hours: 
                   type="button"
                   size="sm"
                   variant="ghost"
-                  aria-label={`Add a second stretch on ${day} (after a break)`}
+                  aria-label={`Add a break on ${day}`}
                   onClick={() => set(d, [...stretches, { starts: '13:00', ends: '17:00' }])}
                 >
-                  + After a break
+                  Add a break
                 </Button>
               )}
             </div>
