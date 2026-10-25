@@ -15,4 +15,11 @@ final class BookingsServiceProvider extends ModuleServiceProvider
             ['key' => 'bookings.manage', 'label' => 'Manage services, team hours, time off and bookings'],
         ];
     }
+
+    public function menu(): array
+    {
+        return [
+            ['label' => 'Booking settings', 'route' => 'tenant.bookings.settings', 'icon' => 'calendar', 'section' => 'Bookings', 'permission' => 'bookings.manage', 'entitlement' => 'bookings', 'order' => 210],
+        ];
+    }
 }
