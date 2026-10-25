@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -72,4 +75,34 @@ it('is not there for packages without bookings', function () {
     ($this->subscribe)(['website']);
     $this->getJson("{$this->site}/services")->assertNotFound();
     $this->postJson($this->site, $this->booking)->assertNotFound();
+});
+
+it('takes a deposit through Paystack when the service needs one, and confirms on return', function () {
+    ($this->subscribe)(['website', 'bookings']);
+    app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
+    $this->ctx->run($this->glow, function () {
+        $this->service->update(['deposit_type' => 'fixed', 'deposit_value' => 10000]);
+        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_glow']);
+    });
+    Http::fake([
+        'api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://checkout.paystack.com/abc']]),
+        'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 10000]]),
+    ]);
+
+    $this->postJson($this->site, $this->booking)->assertJsonValidationErrors(['email' => 'Please add your email — a deposit is needed for this service, and the receipt is emailed.']);
+    $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertCreated()->assertJson(['pay_url' => 'https://checkout.paystack.com/abc', 'deposit_cents' => 10000]);
+    $reference = $this->ctx->run($this->glow, fn () => Booking::query()->sole()->payment_reference);
+
+    $this->get("{$this->site}/return?reference={$reference}")->assertOk()->assertSee('You’re booked')->assertSee('Monday 3 May, 09:00');
+    $this->ctx->run($this->glow, fn () => expect(Booking::query()->sole()->status)->toBe('confirmed'));
+});
+
+it('doesn’t hold the time when payments are unavailable', function () {
+    ($this->subscribe)(['website', 'bookings']);
+    $this->ctx->run($this->glow, function () {
+        $this->service->update(['deposit_type' => 'fixed', 'deposit_value' => 10000]);
+        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_glow']);
+    }); // no Paystack keys configured
+    $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertStatus(503)->assertJson(['message' => 'Online payment isn’t available right now. Please call or message us to book.']);
+    $this->getJson("{$this->site}/times?service={$this->service->id}&date=2027-05-03")->assertJsonPath('times.0.label', '09:00'); // still free
 });

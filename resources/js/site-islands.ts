@@ -256,12 +256,26 @@ async function booking(root: HTMLElement): Promise<void> {
           errors?: Record<string, string[]>;
         })
       : {};
+    if (r?.status === 201 && (data as { pay_url?: string }).pay_url) {
+      status.textContent = 'Taking you to pay the deposit…';
+      window.location.assign((data as { pay_url: string }).pay_url); // Paystack's secure checkout
+      return;
+    }
     if (r?.status === 201) {
       const done = el(
         'div',
         { tabIndex: -1, class: 'grid gap-2' },
         el('h3', { class: 'text-xl font-semibold' }, 'You’re booked'),
         el('p', {}, `${data.service ?? 'Your booking'} — ${data.when ?? ''}.`),
+        ...((data as { manage_url?: string }).manage_url
+          ? [
+              el(
+                'a',
+                { href: (data as { manage_url: string }).manage_url, class: 'underline' },
+                'Change or cancel this booking',
+              ),
+            ]
+          : []),
       );
       root.replaceChildren(done);
       done.focus();

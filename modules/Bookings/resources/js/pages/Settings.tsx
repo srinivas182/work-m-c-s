@@ -42,6 +42,9 @@ interface Props {
     reason: string | null;
   }[];
   timezone: string;
+  payouts: { label: string | null };
+  banks?: { code: string; name: string }[];
+  policy: { hours: number; text: string; default: string };
 }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -108,6 +111,50 @@ function ServiceForm({
         {minutes('duration_minutes', 'Length (minutes)', 'In steps of 5.')}
         {minutes('buffer_before_minutes', 'Buffer before (minutes)', 'Preparation time.')}
         {minutes('buffer_after_minutes', 'Buffer after (minutes)', 'Clean-up time.')}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field
+          label="Deposit"
+          hint="Paid when booking online (once your bank is connected)."
+          error={form.errors.deposit_type}
+        >
+          <select
+            className={selectClass}
+            value={form.data.deposit_type}
+            onChange={(e) =>
+              form.setData('deposit_type', e.target.value as Service['deposit_type'])
+            }
+          >
+            <option value="none">No deposit</option>
+            <option value="fixed">A fixed amount</option>
+            <option value="percent">A percentage of the price</option>
+          </select>
+        </Field>
+        {form.data.deposit_type !== 'none' && (
+          <Field
+            label={form.data.deposit_type === 'percent' ? 'Deposit (%)' : 'Deposit (R)'}
+            error={form.errors.deposit_value}
+          >
+            <Input
+              type="number"
+              min={0}
+              step={form.data.deposit_type === 'percent' ? 1 : 0.01}
+              value={
+                form.data.deposit_type === 'percent'
+                  ? form.data.deposit_value
+                  : form.data.deposit_value / 100
+              }
+              onChange={(e) =>
+                form.setData(
+                  'deposit_value',
+                  form.data.deposit_type === 'percent'
+                    ? Number(e.target.value)
+                    : Math.round(Number(e.target.value) * 100),
+                )
+              }
+            />
+          </Field>
+        )}
       </div>
       <Field
         label="Price (R)"
@@ -251,7 +298,135 @@ function HoursEditor({ member, hours }: { member: Props['team'][number]; hours: 
   );
 }
 
-export default function Settings({ services, team, hours, timeOff, timezone }: Props) {
+function DepositsCard({ payouts, banks, policy }: Pick<Props, 'payouts' | 'banks' | 'policy'>) {
+  const connect = useForm({ bank_code: '', account_number: '' });
+  const rules = useForm({ hours: policy.hours, text: policy.text });
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Deposits and cancellations</CardTitle>
+        <CardDescription>
+          Deposits are paid straight into your bank account through Paystack — WURK never holds your
+          money. Set a deposit on each service.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-6">
+        {payouts.label ? (
+          <div className="border-border flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+            <p>
+              Deposits are paid into <strong>{payouts.label}</strong>.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.delete(`${base()}/payouts`, { preserveScroll: true })}
+            >
+              Disconnect
+            </Button>
+          </div>
+        ) : (banks ?? []).length === 0 ? (
+          <p className="text-fg-muted text-sm">
+            Online payments aren’t switched on yet. Bookings work without deposits in the meantime.
+          </p>
+        ) : (
+          <form
+            aria-label="Connect your bank account"
+            className="grid gap-4 sm:grid-cols-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              connect.put(`${base()}/payouts`, { preserveScroll: true });
+            }}
+          >
+            <Field label="Bank" error={connect.errors.bank_code}>
+              <select
+                className={selectClass}
+                value={connect.data.bank_code}
+                onChange={(e) => connect.setData('bank_code', e.target.value)}
+              >
+                <option value="">Choose your bank</option>
+                {(banks ?? []).map((b) => (
+                  <option key={b.code} value={b.code}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field
+              label="Account number"
+              hint="Only the last four digits are kept."
+              error={connect.errors.account_number}
+            >
+              <Input
+                inputMode="numeric"
+                autoComplete="off"
+                value={connect.data.account_number}
+                onChange={(e) => connect.setData('account_number', e.target.value)}
+              />
+            </Field>
+            <Button type="submit" className="justify-self-start" loading={connect.processing}>
+              Connect bank account
+            </Button>
+          </form>
+        )}
+        <form
+          aria-label="Cancellation policy"
+          className="grid gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            rules.put(`${base()}/policy`, { preserveScroll: true });
+          }}
+        >
+          <Field
+            label="Free cancellation until (hours before)"
+            hint="Cancel in time: the deposit is refunded. Later, or a missed booking: it’s kept."
+            error={rules.errors.hours}
+          >
+            <Input
+              type="number"
+              min={0}
+              max={168}
+              className="w-32"
+              value={rules.data.hours}
+              onChange={(e) => rules.setData('hours', Number(e.target.value))}
+            />
+          </Field>
+          <Field
+            label="Policy wording (optional)"
+            hint="Shown to customers. Leave empty to use the standard wording."
+            error={rules.errors.text}
+          >
+            <textarea
+              className="border-border bg-bg min-h-24 w-full rounded-md border p-3 text-sm"
+              placeholder={policy.default}
+              maxLength={2000}
+              value={rules.data.text}
+              onChange={(e) => rules.setData('text', e.target.value)}
+            />
+          </Field>
+          <Button
+            type="submit"
+            variant="secondary"
+            className="justify-self-start"
+            loading={rules.processing}
+          >
+            Save policy
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Settings({
+  services,
+  team,
+  hours,
+  timeOff,
+  timezone,
+  payouts,
+  banks,
+  policy,
+}: Props) {
   const [editing, setEditing] = useState<Service | 'new' | null>(
     services.length === 0 ? 'new' : null,
   );
@@ -333,6 +508,8 @@ export default function Settings({ services, team, hours, timeOff, timezone }: P
             )}
           </CardContent>
         </Card>
+
+        <DepositsCard payouts={payouts} banks={banks} policy={policy} />
 
         <Card>
           <CardHeader>

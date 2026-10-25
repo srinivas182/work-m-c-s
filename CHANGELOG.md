@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 8.3 (deposits and policies; Paystack test mode)
+- **Deposits paid straight to the business** through a Paystack subaccount (Billing `SplitPayments`; 0% WURK commission; the business bears Paystack's fee). Owners connect their bank in Booking settings; only a masked label (e.g. "Capitec Bank ••••7890") is kept.
+- **Deposit per service**: none, a fixed amount, or a percentage of the price. Email is required when a deposit applies.
+- **Held times**: a booking awaiting its deposit holds the time for 15 minutes; an every-minute sweep releases unpaid holds. Payment is confirmed only after verifying with Paystack, idempotently (return redirect and signed webhook); short payments aren't accepted; a payment arriving after its hold expired is refunded automatically.
+- **Cancellation policy** (default 24 hours, editable window and wording): customer cancels in time → deposit refunded; later or a no-show → kept; the business cancels → always refunded.
+- **Self-service manage link** (signed, expires at the booking's start): see the booking and the policy, what cancelling now means, cancel, or move to another free time — plain HTML, works without JavaScript.
+
+### Fixed
+- The deposit return page's view wasn't registered (customers returning from Paystack would have seen an error).
+
 ### Added — Sprint 8.2 (online booking and the owner calendar)
 - **Online booking API** on each business's own address (`/book/services`, `/book/times`, `POST /book`): active services and team, free times in local time, booking with consent, a spam trap and rate limits; a time taken a moment ago is refused kindly (409). Only for packages that include bookings.
 - **"Book online" website section**: service → team member ("anyone") → day → free time → details → confirmation, as a small island (DOM-built, so business names can't inject markup; announces progress; focuses the confirmation). Without JavaScript it shows how to book instead. Added to nine booking-led templates.
