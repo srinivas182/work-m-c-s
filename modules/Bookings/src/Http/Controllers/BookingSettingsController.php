@@ -22,6 +22,7 @@ use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\TimeOff;
 use Wurk\Bookings\Support\CancellationPolicy;
 use Wurk\Bookings\Support\Instant;
+use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners: Bookings → Settings — services, team hours and time off. */
@@ -48,6 +49,12 @@ final class BookingSettingsController
             'banks' => fn () => app(SplitPayments::class)->banks(),
             'policy' => ['hours' => app(CancellationPolicy::class)->hours(), 'text' => (string) BookingSettings::query()->find($this->context->id())?->policy,
                 'default' => CancellationPolicy::defaultWording(app(CancellationPolicy::class)->hours())],
+            'messages' => [
+                'channel' => BookingSettings::query()->find($this->context->id())->message_channel ?? 'email',
+                'remind_24h' => (bool) (BookingSettings::query()->find($this->context->id())->remind_24h ?? true),
+                'remind_2h' => (bool) (BookingSettings::query()->find($this->context->id())->remind_2h ?? false),
+                'available' => ['sms' => app(Messenger::class)->channelActive('sms'), 'whatsapp' => app(Messenger::class)->channelActive('whatsapp')],
+            ],
         ]);
     }
 
@@ -173,5 +180,15 @@ final class BookingSettingsController
         BookingSettings::query()->updateOrCreate(['tenant_id' => $this->context->id()], ['cancellation_hours' => $data['hours'], 'policy' => $data['text'] ?: null]);
 
         return back()->with('status', 'Cancellation policy saved.');
+    }
+
+    public function saveMessages(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['channel' => ['required', Rule::in(['email', 'sms', 'whatsapp'])], 'remind_24h' => ['boolean'], 'remind_2h' => ['boolean']]);
+        BookingSettings::query()->updateOrCreate(['tenant_id' => $this->context->id()], [
+            'message_channel' => $data['channel'], 'remind_24h' => (bool) ($data['remind_24h'] ?? false), 'remind_2h' => (bool) ($data['remind_2h'] ?? false),
+        ]);
+
+        return back()->with('status', 'Message settings saved.');
     }
 }

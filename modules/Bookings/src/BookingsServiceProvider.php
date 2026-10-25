@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Event;
 use Wurk\Billing\Contracts\DepositPaid;
 use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
+use Wurk\Bookings\Console\SendRemindersCommand;
+use Wurk\Bookings\Events\BookingCancelled;
+use Wurk\Bookings\Events\BookingConfirmed;
+use Wurk\Bookings\Events\BookingMoved;
+use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
@@ -35,11 +40,13 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         $this->loadViewsFrom($this->modulePath('resources/views'), 'bookings');
         // A deposit Paystack reported paid: confirmed only after verifying (Deposits::confirm).
         Event::listen(DepositPaid::class, fn (DepositPaid $e) => $this->app->make(Deposits::class)->confirm($e->reference));
+        Event::listen([BookingConfirmed::class, BookingMoved::class, BookingCancelled::class], SendBookingMessages::class);
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('bookings:expire-holds')->everyMinute()->onOneServer()->withoutOverlapping();
+            $schedule->command('bookings:send-reminders')->everyFiveMinutes()->onOneServer()->withoutOverlapping();
         });
         if ($this->app->runningInConsole()) {
-            $this->commands([DemoBookingsCommand::class, ExpireHoldsCommand::class]);
+            $this->commands([DemoBookingsCommand::class, ExpireHoldsCommand::class, SendRemindersCommand::class]);
         }
     }
 }

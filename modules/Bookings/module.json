@@ -11,6 +11,8 @@
         "access",
         "audit",
         "plans",
-        "billing"
+        "billing",
+        "credits",
+        "messaging"
     ]
 }

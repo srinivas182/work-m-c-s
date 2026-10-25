@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 8.4 (confirmations and reminders)
+- **Booking messages** in fixed wording (agreed with WURK): confirmed, reminder, moved and cancelled — client's first name, service, business, date and time, and the manage link. WhatsApp uses matching Meta templates (`wurk_booking_<kind>`, parameters: client, service, business, when, link) for WURK to register once.
+- **Channels**: email free; SMS and WhatsApp through WURK's providers, charged in WURK Credits first and refunded if the send fails. **Essential messages never silently stop**: when credits (or a spending limit) run out or a send fails, the message goes by free email, and the reason is recorded.
+- **Triggers**: confirmation on booking (or when the deposit is paid), a message when a booking moves or is cancelled; nothing for expired holds or no-shows. Each message is sent once.
+- **Reminders** 24 hours (default) and/or 2 hours before, via a central due list and a 5-minute sweep; moving a booking reschedules them, cancelling removes them.
+- **Settings**: the channel, with costs stated and channels WURK hasn't switched on shown as unavailable; reminder times.
+
 ### Added — Sprint 8.3 (deposits and policies; Paystack test mode)
 - **Deposits paid straight to the business** through a Paystack subaccount (Billing `SplitPayments`; 0% WURK commission; the business bears Paystack's fee). Owners connect their bank in Booking settings; only a masked label (e.g. "Capitec Bank ••••7890") is kept.
 - **Deposit per service**: none, a fixed amount, or a percentage of the price. Email is required when a deposit applies.
