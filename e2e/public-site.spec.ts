@@ -37,8 +37,17 @@ test('a published page is complete HTML (no JavaScript needed), accessible, and 
     if (!host.endsWith('wurk.test') && host !== '127.0.0.1' && host !== 'localhost')
       external.push(r.url());
   });
+  const blocked: string[] = [];
+  page.on('console', (m) => {
+    if (/Content Security Policy/i.test(m.text())) blocked.push(m.text());
+  });
   await page.goto(site);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  // The stylesheet really applied (served from the business's own address, allowed by the policy).
+  expect(
+    await page.getByRole('heading', { level: 1 }).evaluate((h) => getComputedStyle(h).fontFamily),
+  ).toContain('Fallback');
+  expect(blocked).toEqual([]);
   await expectAccessible(page);
   expect(external).toEqual([]);
 });
