@@ -32,6 +32,7 @@ final class BrandingController
         $site = $pages->ensureSite();
         $clean = $branding->validate($request->all());
         $site->update(['branding' => [...$site->branding, ...$clean]]);
+        $pages->rerenderPublished(); // the live site picks up the new look
         $audit->record('website.branding_changed', 'site', $site->tenant_id, $clean);
 
         return $request->wantsJson() ? new JsonResponse(['branding' => $site->branding]) : back()->with('status', 'Branding saved.');

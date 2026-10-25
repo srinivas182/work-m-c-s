@@ -7,14 +7,15 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build --ssr",
+    "build": "vite build && vite build --ssr && vite build --ssr resources/js/site-render.tsx --outDir bootstrap/site-render",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write \"resources/**/*.{ts,tsx,css}\" \"modules/**/*.{ts,tsx}\" \"e2e/**/*.ts\"",
     "format:check": "prettier --check \"resources/**/*.{ts,tsx,css}\" \"modules/**/*.{ts,tsx}\" \"e2e/**/*.ts\"",
     "test": "vitest run",
     "tokens": "tsx scripts/generate-tokens.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "fonts:fallbacks": "node scripts/font-fallbacks.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "5.3.0",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@capsizecss/metrics": "^4.4.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",

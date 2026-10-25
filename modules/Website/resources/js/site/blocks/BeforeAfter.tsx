@@ -34,13 +34,21 @@ function Slider({ item }: { item: BeforeAfterItem }) {
   const [split, setSplit] = useState(50);
   const id = useId();
   return (
-    <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--s-radius)]">
+    <div
+      data-island="before-after"
+      className="relative aspect-[4/3] overflow-hidden rounded-[var(--s-radius)]"
+    >
       {img(item.after, item.afterAlt, 'absolute inset-0 h-full w-full')}
-      <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}>
+      <div
+        data-ba-clip
+        className="absolute inset-0"
+        style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}
+      >
         {img(item.before, item.beforeAlt, 'h-full w-full')}
       </div>
       <div
         aria-hidden
+        data-ba-line
         className="pointer-events-none absolute inset-y-0 w-0.5 bg-white shadow"
         style={{ left: `${split}%` }}
       />
@@ -62,6 +70,7 @@ function Slider({ item }: { item: BeforeAfterItem }) {
       <input
         id={id}
         type="range"
+        data-ba-range
         min={0}
         max={100}
         value={split}

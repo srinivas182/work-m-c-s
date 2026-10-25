@@ -5,39 +5,43 @@ import type { Branding } from './types';
 type FontPairing = { display: string; body: string };
 
 const MODERN: FontPairing = {
-  display: "'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif",
-  body: "'Inter Variable', Inter, system-ui, sans-serif",
+  display:
+    "'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', 'Plus Jakarta Sans Fallback', system-ui, sans-serif",
+  body: "'Inter Variable', Inter, 'Inter Fallback', system-ui, sans-serif",
 };
 
 export const FONT_PAIRINGS: Record<string, FontPairing> = {
   modern: MODERN,
   classic: {
-    display: "'Playfair Display Variable', 'Playfair Display', Georgia, serif",
-    body: "'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif",
+    display:
+      "'Playfair Display Variable', 'Playfair Display', 'Playfair Display Fallback', Georgia, serif",
+    body: "'Source Sans 3 Variable', 'Source Sans 3', 'Source Sans 3 Fallback', system-ui, sans-serif",
   },
   friendly: {
-    display: "'Nunito Variable', Nunito, system-ui, sans-serif",
-    body: "'Nunito Sans Variable', 'Nunito Sans', system-ui, sans-serif",
+    display: "'Nunito Variable', Nunito, 'Nunito Fallback', system-ui, sans-serif",
+    body: "'Nunito Sans Variable', 'Nunito Sans', 'Nunito Sans Fallback', system-ui, sans-serif",
   },
   elegant: {
-    display: "'Cormorant Garamond Variable', 'Cormorant Garamond', Georgia, serif",
-    body: 'Lato, system-ui, sans-serif',
+    display:
+      "'Cormorant Garamond Variable', 'Cormorant Garamond', 'Cormorant Garamond Fallback', Georgia, serif",
+    body: "Lato, 'Lato Fallback', system-ui, sans-serif",
   },
   bold: {
-    display: "'Archivo Variable', Archivo, system-ui, sans-serif",
-    body: "'Archivo Variable', Archivo, system-ui, sans-serif",
+    display: "'Archivo Variable', Archivo, 'Archivo Fallback', system-ui, sans-serif",
+    body: "'Archivo Variable', Archivo, 'Archivo Fallback', system-ui, sans-serif",
   },
   clean: {
-    display: "'DM Sans Variable', 'DM Sans', system-ui, sans-serif",
-    body: "'DM Sans Variable', 'DM Sans', system-ui, sans-serif",
+    display: "'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', system-ui, sans-serif",
+    body: "'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', system-ui, sans-serif",
   },
   editorial: {
-    display: "'Fraunces Variable', Fraunces, Georgia, serif",
-    body: "'Work Sans Variable', 'Work Sans', system-ui, sans-serif",
+    display: "'Fraunces Variable', Fraunces, 'Fraunces Fallback', Georgia, serif",
+    body: "'Work Sans Variable', 'Work Sans', 'Work Sans Fallback', system-ui, sans-serif",
   },
   technical: {
-    display: "'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif",
-    body: "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif",
+    display:
+      "'Space Grotesk Variable', 'Space Grotesk', 'Space Grotesk Fallback', system-ui, sans-serif",
+    body: "'IBM Plex Sans Variable', 'IBM Plex Sans', 'IBM Plex Sans Fallback', system-ui, sans-serif",
   },
 };
 

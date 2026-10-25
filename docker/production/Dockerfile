@@ -84,6 +84,8 @@ COPY --chown=${APP_USER}:${APP_USER} . .
 COPY --chown=${APP_USER}:${APP_USER} --from=vendor /app/vendor ./vendor
 COPY --chown=${APP_USER}:${APP_USER} --from=assets /app/public/build ./public/build
 COPY --chown=${APP_USER}:${APP_USER} --from=assets /app/bootstrap/ssr ./bootstrap/ssr
+# The website renderer, run by queued jobs at publish (Sprint 5).
+COPY --chown=${APP_USER}:${APP_USER} --from=assets /app/bootstrap/site-render ./bootstrap/site-render
 COPY --from=node-runtime /usr/local/bin/node /usr/local/bin/node
 
 # Optimised autoloader + package discovery, then drop build-only tooling.

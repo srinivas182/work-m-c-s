@@ -23,7 +23,11 @@ function Banner({ p, site }: { p: PromotionBannerProps; site: SiteContext }) {
   const current = isCurrent(p.starts, p.ends);
   if (closed || (!current && !site.editing)) return null; // outside its dates it simply isn't shown
   return (
-    <aside aria-label="Promotion" className={`px-5 py-3 sm:px-8 ${TONES[p.tone] ?? TONES.brand}`}>
+    <aside
+      aria-label="Promotion"
+      data-island="promotion"
+      className={`px-5 py-3 sm:px-8 ${TONES[p.tone] ?? TONES.brand}`}
+    >
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-1 text-center text-sm font-medium">
         <span>{p.text}</span>
         {p.linkLabel && (
@@ -44,6 +48,7 @@ function Banner({ p, site }: { p: PromotionBannerProps; site: SiteContext }) {
           <button
             type="button"
             onClick={() => setClosed(true)}
+            data-promo-close
             aria-label="Close promotion"
             className="grid size-8 place-items-center rounded-full hover:bg-black/15"
           >

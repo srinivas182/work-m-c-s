@@ -33,6 +33,7 @@ final class MenusController
         $site = $pages->ensureSite();
         $clean = $menus->validate($request->all());
         $site->update(['menus' => [...$site->menus, ...$clean]]);
+        $pages->rerenderPublished(); // the live site picks up the new menus
         $audit->record('website.menus_changed', 'site', $site->tenant_id, ['header' => count($clean['header']), 'footer' => count($clean['footer'])]);
 
         return back()->with('status', 'Menus saved.');

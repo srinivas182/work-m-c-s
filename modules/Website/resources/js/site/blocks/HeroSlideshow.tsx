@@ -61,6 +61,8 @@ export function HeroSlideshow({
     <section
       aria-roledescription="carousel"
       aria-label={label}
+      data-island="slideshow"
+      data-autoplay={autoplay ? '1' : '0'}
       className="relative"
       onMouseEnter={() => setHeld(true)}
       onMouseLeave={() => setHeld(false)}
@@ -69,6 +71,7 @@ export function HeroSlideshow({
     >
       <ul
         ref={track}
+        data-hs-track
         className="flex snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto [&::-webkit-scrollbar]:hidden"
         onScroll={(e) => {
           const el = e.currentTarget;
@@ -103,33 +106,45 @@ export function HeroSlideshow({
                 type="button"
                 aria-label={`Show photo ${i + 1}`}
                 aria-current={i === index}
+                data-hs-dot={i}
                 onClick={() => go(i)}
                 className="grid size-6 place-items-center"
               >
                 <span
+                  data-hs-bar
                   className={`h-1.5 rounded-full transition-all ${i === index ? 'w-5 bg-[var(--s-brand)]' : 'w-1.5 bg-[var(--s-border)]'}`}
                 />
               </button>
             ))}
           </div>
           <div className="flex gap-1">
-            {autoplay && !reduced && (
+            {/* Always rendered when autoplay is on (the server can't know the visitor's motion
+                preference); hidden for reduced motion, where nothing moves (WCAG 2.2.2). */}
+            {autoplay && (
               <button
                 type="button"
+                hidden={reduced}
                 onClick={() => setPaused((v) => !v)}
+                data-hs-pause
                 aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}
                 className="grid size-11 place-items-center rounded-full border border-[var(--s-border)]"
               >
-                {playing ? (
-                  <Pause className="size-4" aria-hidden />
-                ) : (
-                  <Play className="size-4" aria-hidden />
-                )}
+                <Pause
+                  data-hs-icon="pause"
+                  className={`size-4 ${playing ? '' : 'hidden'}`}
+                  aria-hidden
+                />
+                <Play
+                  data-hs-icon="play"
+                  className={`size-4 ${playing ? 'hidden' : ''}`}
+                  aria-hidden
+                />
               </button>
             )}
             <button
               type="button"
               onClick={() => go(index - 1)}
+              data-hs-prev
               aria-label="Previous photo"
               className="grid size-11 place-items-center rounded-full border border-[var(--s-border)]"
             >
@@ -138,6 +153,7 @@ export function HeroSlideshow({
             <button
               type="button"
               onClick={() => go(index + 1)}
+              data-hs-next
               aria-label="Next photo"
               className="grid size-11 place-items-center rounded-full border border-[var(--s-border)]"
             >

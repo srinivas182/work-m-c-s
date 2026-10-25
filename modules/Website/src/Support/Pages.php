@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Exceptions\DraftConflict;
+use Wurk\Website\Jobs\RenderPublishedPage;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageVersion;
 use Wurk\Website\Models\Site;
@@ -140,6 +141,8 @@ final readonly class Pages
             ]);
             $locked->update(['published_version_id' => $version->id]);
 
+            // Rendered once, after the publish commits; visitors get the stored HTML.
+            RenderPublishedPage::dispatch($this->context->id(), $version->id)->afterCommit();
             $this->recordLaunch($page);
 
             return $version;
@@ -200,5 +203,19 @@ final readonly class Pages
             'launched_at' => now(),
             'minutes' => $created === null ? null : (int) max(0, round((now()->getTimestamp() - $created->getTimestamp()) / 60)),
         ]);
+    }
+
+    /**
+     * Branding and menus are baked into published HTML: re-render every published page
+     * (queued). Returns how many were queued.
+     */
+    public function rerenderPublished(): int
+    {
+        $versions = Page::query()->whereNotNull('published_version_id')->pluck('published_version_id');
+        foreach ($versions as $versionId) {
+            RenderPublishedPage::dispatch($this->context->id(), (string) $versionId)->afterCommit();
+        }
+
+        return $versions->count();
     }
 }
