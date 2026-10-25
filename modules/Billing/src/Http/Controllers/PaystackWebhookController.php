@@ -7,6 +7,7 @@ namespace Wurk\Billing\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Wurk\Billing\Contracts\DepositPaid;
 use Wurk\Billing\Gateways\PaymentGateway;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\Payments;
@@ -28,6 +29,8 @@ final class PaystackWebhookController
         $fresh = DB::table('gateway_events')->insertOrIgnore(['id' => $event['id'], 'gateway' => 'paystack', 'type' => $event['type'], 'received_at' => now()]) === 1;
         if ($fresh && Payment::query()->where('reference', $event['reference'])->exists()) {
             $payments->confirm($event['reference']);
+        } elseif ($fresh && $event['type'] === 'charge.success' && str_starts_with((string) $event['reference'], 'dep_')) {
+            event(new DepositPaid((string) $event['reference'])); // a booking deposit (Bookings verifies it)
         }
 
         return new Response('', 200);
