@@ -6,6 +6,7 @@ namespace Wurk\Bookings\Support;
 
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Billing\Contracts\SplitPayments;
+use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHold;
 use Wurk\Bookings\Models\BookingService;
@@ -83,6 +84,7 @@ final readonly class Deposits
             $booking->update(['status' => 'confirmed', 'paid_at' => Instant::db(now()), 'hold_expires_at' => null]);
             BookingHold::query()->whereKey($reference)->delete();
             $this->audit->record('bookings.deposit_paid', 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
+            event(new BookingConfirmed($this->context->id(), $booking->id));
 
             return $booking->refresh();
         });

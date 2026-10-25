@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\InteractsWithShards;
+use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Mail\BookingMessageMail;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
@@ -50,6 +52,7 @@ final class FakeMessenger implements Messenger
 beforeEach(function () {
     $this->travelTo(CarbonImmutable::parse('2027-05-01 10:00', 'Africa/Johannesburg'));
     Mail::fake();
+    Event::fake([BookingConfirmed::class]); // these tests send explicitly
     $this->messenger = new FakeMessenger;
     app()->instance(Messenger::class, $this->messenger);
     $this->createShards(1);

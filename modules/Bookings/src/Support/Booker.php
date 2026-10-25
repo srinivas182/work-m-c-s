@@ -8,6 +8,9 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Bookings\Events\BookingCancelled;
+use Wurk\Bookings\Events\BookingConfirmed;
+use Wurk\Bookings\Events\BookingMoved;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -73,6 +76,9 @@ final readonly class Booker
                     return $booking;
                 });
                 $this->audit->record('bookings.booked', 'booking', $booking->id, ['service' => $service->name, 'starts_at' => $startsAt->toIso8601String(), 'source' => $source]);
+                if ($status === 'confirmed') {
+                    event(new BookingConfirmed($this->context->id(), $booking->id));
+                }
 
                 return $booking;
             } catch (UniqueConstraintViolationException) {
@@ -105,6 +111,7 @@ final readonly class Booker
             throw new SlotTaken;
         }
         $this->audit->record('bookings.moved', 'booking', $booking->id, ['to' => $startsAt->toIso8601String(), 'by' => $by]);
+        event(new BookingMoved($this->context->id(), $booking->id));
 
         return $booking->refresh();
     }
@@ -117,5 +124,8 @@ final readonly class Booker
             DB::connection($this->context->connectionName())->table('booking_slots')->where('booking_id', $booking->id)->delete();
         });
         $this->audit->record('bookings.'.$status, 'booking', $booking->id, ['by' => $by]);
+        if ($status === 'cancelled') { // not for expired holds or no-shows
+            event(new BookingCancelled($this->context->id(), $booking->id));
+        }
     }
 }
