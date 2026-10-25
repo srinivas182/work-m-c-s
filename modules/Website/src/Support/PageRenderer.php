@@ -52,6 +52,7 @@ final readonly class PageRenderer
             'description' => $page->seo_description,
             'preloads' => app(FontPreloads::class)->for($fonts),
             'body' => $body,
+            'islands' => str_contains($body, 'data-island='), // the islands script only where it's needed
         ])->render();
 
         $path = 'rendered/'.$this->context->id().'/'.$version->id.'.html';

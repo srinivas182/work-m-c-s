@@ -11,6 +11,9 @@
 <link rel="preload" href="{{ $font }}" as="font" type="font/woff2" crossorigin>
 @endforeach
 @vite('resources/css/public-site.css')
+@if ($islands)
+@vite('resources/js/site-islands.ts')
+@endif
 </head>
 <body style="margin:0">
 {!! $body !!}
