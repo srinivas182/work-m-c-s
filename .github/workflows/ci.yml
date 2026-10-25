@@ -247,7 +247,7 @@ jobs:
       && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true')
       && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20 # 454 browser checks plus the 24-template performance gate (~13 min and growing)
     steps:
       - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2

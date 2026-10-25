@@ -47,5 +47,16 @@ test('an owner sets up a service, their hours and time off', async ({ page }, te
   await messages.getByRole('checkbox', { name: '2 hours before' }).click();
   await messages.getByRole('button', { name: 'Save message settings' }).click();
   await expect(page.getByText('Message settings saved.')).toBeVisible();
+
+  // Video calls: Google and Zoom need WURK's apps (not in testing); the fixed link works now.
+  await expect(page.getByText('Google Meet — not switched on yet')).toBeVisible();
+  const video = page.getByRole('form', { name: 'Use a fixed meeting link' });
+  await video
+    .getByLabel('Or use one meeting link for everyone')
+    .fill('https://meet.example.com/room');
+  await video.getByRole('button', { name: 'Save link' }).click();
+  await expect(
+    page.getByText('Your meeting link is saved. Note: every client gets the same link.'),
+  ).toBeVisible();
   await expectAccessible(page);
 });

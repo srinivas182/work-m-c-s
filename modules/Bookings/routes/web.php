@@ -9,6 +9,7 @@ use Wurk\Bookings\Http\Controllers\PublicBookingController;
 use Wurk\Bookings\Http\Controllers\PublicManageController;
 use Wurk\Bookings\Http\Controllers\PublicTableController;
 use Wurk\Bookings\Http\Controllers\TablesController;
+use Wurk\Bookings\Http\Controllers\VideoConnectionController;
 
 Route::tenant(function (): void {
     // The calendar: everyone who can see bookings; changes need bookings.manage.
@@ -31,6 +32,9 @@ Route::tenant(function (): void {
         Route::delete('/payouts', [BookingSettingsController::class, 'disconnectPayouts'])->name('payouts.disconnect');
         Route::put('/policy', [BookingSettingsController::class, 'savePolicy'])->name('policy.save');
         Route::put('/messages', [BookingSettingsController::class, 'saveMessages'])->name('messages.save');
+        Route::get('/video/connect/{provider}', [VideoConnectionController::class, 'connect'])->whereIn('provider', ['google', 'zoom'])->name('video.connect');
+        Route::put('/video/fixed', [VideoConnectionController::class, 'fixed'])->name('video.fixed');
+        Route::delete('/video', [VideoConnectionController::class, 'disconnect'])->name('video.disconnect');
         Route::get('/tables', [TablesController::class, 'show'])->name('tables');
         Route::post('/tables', [TablesController::class, 'store'])->name('tables.store');
         Route::post('/tables/{reservation}/status', [TablesController::class, 'status'])->name('tables.status');
@@ -59,3 +63,7 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'
         Route::post('/manage/{booking}/move', [PublicManageController::class, 'move'])->name('manage.move');
     });
 });
+
+// Google and Zoom send owners back here after connecting (one fixed address, registered with each provider).
+Route::domain((string) config('wurk.domains.app'))->middleware(['web', 'auth'])
+    ->get('/oauth/video/{provider}/callback', [VideoConnectionController::class, 'callback'])->whereIn('provider', ['google', 'zoom'])->name('bookings.video.callback');

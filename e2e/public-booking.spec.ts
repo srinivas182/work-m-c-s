@@ -17,6 +17,7 @@ test('a customer books online on a published site', async ({ page }, testInfo) =
   await expect(times.getByRole('button').first()).toBeVisible();
   await expectAccessible(page);
 
+  await page.getByLabel('Online (video call)').check(); // the demo Consultation lets the client choose
   await times.getByRole('button').first().click();
   await page.getByLabel('Your name').fill('Sipho Ndlovu');
   await page.getByLabel('Phone').fill('082 555 0101');

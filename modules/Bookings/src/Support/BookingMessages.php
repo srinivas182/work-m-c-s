@@ -66,7 +66,11 @@ final readonly class BookingMessages
         if ($outcome['status'] !== 'sent') {
             if (filter_var($booking->customer_email, FILTER_VALIDATE_EMAIL) !== false) {
                 try {
-                    Mail::to((string) $booking->customer_email)->send(new BookingMessageMail(MessageWording::subject($kind, $vars), MessageWording::text($kind, $vars), $vars['link'] ?: null));
+                    $text = MessageWording::text($kind, $vars);
+                    if ($booking instanceof Booking && $booking->online && $booking->meeting_url !== null && $kind !== 'cancelled') {
+                        $text .= "\n\nJoin online: {$booking->meeting_url}"; // email only — WhatsApp's approved templates can't carry it
+                    }
+                    Mail::to((string) $booking->customer_email)->send(new BookingMessageMail(MessageWording::subject($kind, $vars), $text, $vars['link'] ?: null));
                     $outcome = ['channel' => 'email', 'status' => 'sent', 'detail' => $outcome['detail']];
                 } catch (Throwable) {
                     $outcome['detail'] = trim(($outcome['detail'] ?? '').' Email didn’t send.');

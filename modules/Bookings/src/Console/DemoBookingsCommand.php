@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\ReservationHours;
 use Wurk\Bookings\Models\ReservationSettings;
 use Wurk\Plans\Contracts\Catalog;
@@ -49,7 +50,8 @@ final class DemoBookingsCommand extends Command
             $catalog->subscribe($tenant->tenantId(), (string) $starter['id'], 'monthly', allowTrial: true);
             $context->run($tenant, function () use ($context): void {
                 $memberId = app(TeamDirectory::class)->add((string) Str::ulid(), 'Demo stylist', 'staff');
-                $service = BookingService::query()->create(['name' => 'Consultation', 'duration_minutes' => 30, 'price_cents' => 25000]);
+                $service = BookingService::query()->create(['name' => 'Consultation', 'duration_minutes' => 30, 'price_cents' => 25000, 'location_type' => 'either']);
+                MeetingConnection::query()->create(['tenant_id' => $context->id(), 'provider' => 'fixed', 'fixed_url' => 'https://meet.example.com/demo']);
                 DB::connection($context->connectionName())->table('booking_service_member')->insert(['service_id' => $service->id, 'member_id' => $memberId, 'tenant_id' => $context->id()]);
                 foreach (range(0, 6) as $day) {
                     BookingHours::query()->create(['member_id' => $memberId, 'weekday' => $day, 'starts' => '08:00', 'ends' => '20:00']);

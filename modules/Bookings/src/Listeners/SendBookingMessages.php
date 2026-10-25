@@ -12,6 +12,7 @@ use Wurk\Bookings\Events\ReservationConfirmed;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\Reservation;
 use Wurk\Bookings\Support\BookingMessages;
+use Wurk\Bookings\Support\Meetings;
 use Wurk\Bookings\Support\Reminders;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -19,7 +20,7 @@ use Wurk\Tenancy\Contracts\TenantDirectory;
 /** Confirmation, change and cancellation messages, and (re)scheduling reminders. */
 final readonly class SendBookingMessages
 {
-    public function __construct(private TenantDirectory $tenants, private TenantContext $context, private BookingMessages $messages, private Reminders $reminders) {}
+    public function __construct(private TenantDirectory $tenants, private TenantContext $context, private BookingMessages $messages, private Reminders $reminders, private Meetings $meetings) {}
 
     public function handle(BookingConfirmed|BookingMoved|BookingCancelled|ReservationConfirmed|ReservationCancelled $event): void
     {
@@ -38,12 +39,15 @@ final readonly class SendBookingMessages
                 return;
             }
             if ($event instanceof BookingConfirmed) {
-                $this->messages->send($booking, 'confirmed');
+                $this->meetings->ensure($booking); // the link first, so the confirmation carries it
+                $this->messages->send($booking->refresh(), 'confirmed');
                 $this->reminders->schedule($booking);
             } elseif ($event instanceof BookingMoved) {
+                $this->meetings->moved($booking);
                 $this->messages->send($booking, 'moved', 'moved_'.$booking->starts_at->getTimestamp());
                 $this->reminders->schedule($booking);
             } else {
+                $this->meetings->cancelled($booking);
                 $this->messages->send($booking, 'cancelled');
                 $this->reminders->clear($booking->id);
             }

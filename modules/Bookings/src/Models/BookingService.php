@@ -20,6 +20,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property int $deposit_value
  * @property bool $active
  * @property int $position
+ * @property string $location_type
  */
 final class BookingService extends Model
 {

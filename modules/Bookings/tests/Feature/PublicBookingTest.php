@@ -12,6 +12,7 @@ use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
@@ -105,4 +106,19 @@ it('doesn’t hold the time when payments are unavailable', function () {
     }); // no Paystack keys configured
     $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertStatus(503)->assertJson(['message' => 'Online payment isn’t available right now. Please call or message us to book.']);
     $this->getJson("{$this->site}/times?service={$this->service->id}&date=2027-05-03")->assertJsonPath('times.0.label', '09:00'); // still free
+});
+
+it('lets the client choose online, and shows the joining link only from 15 minutes before', function () {
+    ($this->subscribe)(['website', 'bookings']);
+    $this->ctx->run($this->glow, function () {
+        $this->service->update(['location_type' => 'either']);
+        MeetingConnection::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'provider' => 'fixed', 'fixed_url' => 'https://meet.example.com/glow']);
+    });
+    expect($this->getJson("{$this->site}/services")->json('services.0.location'))->toBe('either');
+    $manage = $this->postJson($this->site, [...$this->booking, 'online' => true])->assertCreated()->json('manage_url');
+    $this->ctx->run($this->glow, fn () => expect(Booking::query()->sole()->only(['online', 'meeting_url']))->toBe(['online' => true, 'meeting_url' => 'https://meet.example.com/glow']));
+
+    $this->get($manage)->assertSee('Your joining link appears here 15 minutes before it starts.')->assertDontSee('https://meet.example.com/glow');
+    $this->travelTo(CarbonImmutable::parse('2027-05-03 08:50', 'Africa/Johannesburg'));
+    $this->get($manage)->assertSee('Join online now')->assertSee('https://meet.example.com/glow');
 });

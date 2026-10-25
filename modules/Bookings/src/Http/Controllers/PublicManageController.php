@@ -95,6 +95,8 @@ final class PublicManageController
             'signature' => ['expires' => (string) request()->query('expires'), 'signature' => (string) request()->query('signature')],
             'cancelUrl' => URL::temporarySignedRoute('bookings.public.manage.cancel', $b->starts_at, ['handle' => $tenant->handle(), 'booking' => $b->id]),
             'moveUrl' => URL::temporarySignedRoute('bookings.public.manage.move', $b->starts_at, ['handle' => $tenant->handle(), 'booking' => $b->id]),
+            'online' => $b->online,
+            'joinUrl' => $b->online && $b->meeting_url !== null && $b->status === 'confirmed' && now()->greaterThanOrEqualTo($b->starts_at->subMinutes(15)) && now()->lessThan($b->ends_at) ? $b->meeting_url : null,
             'date' => null, 'times' => [], 'notice' => null, ...$extra,
         ])->render(), 200, ['X-Robots-Tag' => 'noindex', 'Referrer-Policy' => 'no-referrer']);
     }
