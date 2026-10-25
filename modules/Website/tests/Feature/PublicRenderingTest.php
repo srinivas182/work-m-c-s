@@ -140,3 +140,24 @@ it('lets browsers revalidate cheaply, and never hides a new publish behind a cac
     ($this->publish)();
     $this->get($this->site, ['If-None-Match' => $etag])->assertOk()->assertSee('<h1>Two</h1>', false);
 });
+
+it('shows a WhatsApp chat button on every page once a WhatsApp number is published — a plain link', function () {
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Hi</h1>', 'fonts' => []]))]);
+    ($this->publish)();
+    $this->get($this->site)->assertDontSee('wa.me', false);
+
+    $this->ctx->run($this->glow, function () {
+        $pages = app(Pages::class);
+        $contact = Page::query()->where('slug', 'contact')->firstOrFail();
+        $doc = json_decode((string) $contact->draft, true);
+        foreach ($doc['blocks'] as &$b) {
+            if ($b['type'] === 'Contact') {
+                $b['props']['whatsapp'] = '082 555 0101';
+            }
+        }
+        unset($b);
+        $pages->saveDraft($contact, $doc, $contact->draft_revision, null);
+        $pages->publish($contact->refresh(), null, null);
+    });
+    $this->get($this->site)->assertSee('href="https://wa.me/27825550101"', false)->assertSee('aria-label="Chat on WhatsApp"', false); // on the home page too
+});

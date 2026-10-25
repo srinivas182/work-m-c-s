@@ -38,7 +38,9 @@ final readonly class SiteFacts
             // only until the first render finishes.
             $render = PageRender::query()->whereKey($page->published_version_id)->whereNotNull('path')->first();
             $stored = $render?->path ? (array) json_decode((string) Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($render->path), true) : [];
-            $blocks = (array) ($stored['blocks'] ?? json_decode((string) PageVersion::query()->whereKey($page->published_version_id)->value('content'), true)['blocks'] ?? []);
+            // (An empty list counts as missing: `??` alone would keep it and lose every fact.)
+            $blocks = ! empty($stored['blocks']) ? (array) $stored['blocks']
+                : (array) (json_decode((string) PageVersion::query()->whereKey($page->published_version_id)->value('content'), true)['blocks'] ?? []);
             $facts['pages'][] = ['title' => $page->title, 'path' => $page->is_home ? '/' : '/'.$page->slug, 'description' => $page->seo_description,
                 'lastmod' => ($at = PageRender::query()->whereKey($page->published_version_id)->value('rendered_at')) === null ? null : (string) $at];
             foreach ($blocks as $b) {

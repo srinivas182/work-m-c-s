@@ -69,6 +69,7 @@ final class PublicSiteController
             }
 
             $site = Site::query()->find($tenant->tenantId());
+            $facts = app(SiteFacts::class)->collect(); // once per request: structured data and the WhatsApp button
             $stored = (array) json_decode((string) Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($render->path), true);
             $body = (string) ($stored['body'] ?? '');
             $html = view('website::public.page', [
@@ -81,8 +82,11 @@ final class PublicSiteController
                 'canonical' => request()->getSchemeAndHttpHost().($page->is_home ? '/' : '/'.$page->slug),
                 'image' => ($img = $stored['image'] ?? null) ? request()->getSchemeAndHttpHost().$img : null,
                 'siteName' => $tenant->displayName(),
+                // WhatsApp chat button from the published contact details: digits, a leading 0 becomes 27
+                // (as the Contact section does). A plain link — no third-party script.
+                'whatsapp' => ($wa = preg_replace('/\D/', '', $facts['contact']['whatsapp']) ?? '') === '' ? null : (str_starts_with($wa, '0') ? '27'.substr($wa, 1) : $wa),
                 'favicon' => $site?->branding['favicon'] ?? null,
-                'jsonLd' => $page->is_home ? json_encode(app(SiteSeo::class)->localBusiness(app(SiteFacts::class)->collect(), request()->getSchemeAndHttpHost()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
+                'jsonLd' => $page->is_home ? json_encode(app(SiteSeo::class)->localBusiness($facts, request()->getSchemeAndHttpHost()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
             ])->render();
 
             return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...$this->securityHeaders()]);
