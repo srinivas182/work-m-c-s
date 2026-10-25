@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Http;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\TimeOff;
+use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -69,4 +72,20 @@ it('takes time off in local time and stores it in UTC', function () {
     ($this->subscribe)(['bookings']);
     $this->actingAs($this->owner)->post("{$this->base}/time-off", ['member_id' => null, 'starts_at' => '2027-04-27 00:00', 'ends_at' => '2027-04-28 00:00', 'reason' => 'Freedom Day'])->assertSessionHas('status');
     $this->ctx->run($this->glow, fn () => expect(TimeOff::query()->sole()->starts_at->utc()->toIso8601String())->toBe('2027-04-26T22:00:00+00:00'));
+});
+
+it('connects the bank for deposits, keeping only a masked label, and saves the policy', function () {
+    ($this->subscribe)(['bookings']);
+    app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
+    Http::fake([
+        'api.paystack.co/bank*' => Http::response(['status' => true, 'data' => [['code' => '470010', 'name' => 'Capitec Bank']]]),
+        'api.paystack.co/subaccount' => Http::response(['status' => true, 'data' => ['subaccount_code' => 'ACCT_new']]),
+    ]);
+    $this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '999', 'account_number' => '1234567890'])->assertSessionHasErrors(['bank_code' => 'Choose your bank from the list.']);
+    $this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '470010', 'account_number' => '12-34'])->assertSessionHasErrors(['account_number' => 'Enter the account number using digits only.']);
+    $this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '470010', 'account_number' => '1234567890'])->assertSessionHas('status', 'Deposits will be paid into Capitec Bank ••••7890.');
+
+    $this->actingAs($this->owner)->put("{$this->base}/policy", ['hours' => 48, 'text' => ''])->assertSessionHas('status', 'Cancellation policy saved.');
+    $this->ctx->run($this->glow, fn () => expect(BookingSettings::query()->sole()->only(['payout_subaccount', 'payout_label', 'cancellation_hours']))
+        ->toBe(['payout_subaccount' => 'ACCT_new', 'payout_label' => 'Capitec Bank ••••7890', 'cancellation_hours' => 48]));
 });

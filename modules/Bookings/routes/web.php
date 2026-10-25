@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Wurk\Bookings\Http\Controllers\BookingSettingsController;
 use Wurk\Bookings\Http\Controllers\CalendarController;
 use Wurk\Bookings\Http\Controllers\PublicBookingController;
+use Wurk\Bookings\Http\Controllers\PublicManageController;
 
 Route::tenant(function (): void {
     // The calendar: everyone who can see bookings; changes need bookings.manage.
@@ -24,6 +25,9 @@ Route::tenant(function (): void {
         Route::put('/hours/{member}', [BookingSettingsController::class, 'saveHours'])->name('hours.update');
         Route::post('/time-off', [BookingSettingsController::class, 'addTimeOff'])->name('time-off.store');
         Route::delete('/time-off/{timeOff}', [BookingSettingsController::class, 'removeTimeOff'])->name('time-off.destroy');
+        Route::put('/payouts', [BookingSettingsController::class, 'connectPayouts'])->name('payouts.connect');
+        Route::delete('/payouts', [BookingSettingsController::class, 'disconnectPayouts'])->name('payouts.disconnect');
+        Route::put('/policy', [BookingSettingsController::class, 'savePolicy'])->name('policy.save');
     });
 });
 
@@ -34,4 +38,11 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'
     Route::get('/times', [PublicBookingController::class, 'times'])->middleware('throttle:60,1,book-read')->name('times');
     Route::post('/', [PublicBookingController::class, 'book'])->middleware('throttle:5,10,book-create')->name('book');
     Route::get('/return', [PublicBookingController::class, 'paid'])->middleware('throttle:30,1,book-read')->name('paid');
+    // The customer's own booking page: signed links (no account), expiring when the booking starts.
+    // The page checks its own signature (ignoring only the chosen ?date); each action has its own signed address.
+    Route::get('/manage/{booking}', [PublicManageController::class, 'show'])->middleware('throttle:30,1,book-manage')->name('manage');
+    Route::middleware(['signed', 'throttle:30,1,book-manage'])->group(function (): void {
+        Route::post('/manage/{booking}/cancel', [PublicManageController::class, 'cancel'])->name('manage.cancel');
+        Route::post('/manage/{booking}/move', [PublicManageController::class, 'move'])->name('manage.move');
+    });
 });

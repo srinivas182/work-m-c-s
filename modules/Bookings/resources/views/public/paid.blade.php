@@ -19,6 +19,9 @@
   @if ($confirmed)
   <h1>You’re booked</h1>
   <p>Your deposit is paid and your booking is confirmed for {{ $when }}. Paystack has emailed your receipt.</p>
+  @if ($manage)
+  <p><a href="{{ $manage }}">Change or cancel this booking</a></p>
+  @endif
   @else
   <h1>We’re still confirming your payment</h1>
   <p>This can take a minute. If your payment went through, your booking will be confirmed and you’ll get a message. If not, no money was taken and the time is released after 15 minutes.</p>

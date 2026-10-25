@@ -267,6 +267,15 @@ async function booking(root: HTMLElement): Promise<void> {
         { tabIndex: -1, class: 'grid gap-2' },
         el('h3', { class: 'text-xl font-semibold' }, 'You’re booked'),
         el('p', {}, `${data.service ?? 'Your booking'} — ${data.when ?? ''}.`),
+        ...((data as { manage_url?: string }).manage_url
+          ? [
+              el(
+                'a',
+                { href: (data as { manage_url: string }).manage_url, class: 'underline' },
+                'Change or cancel this booking',
+              ),
+            ]
+          : []),
       );
       root.replaceChildren(done);
       done.focus();

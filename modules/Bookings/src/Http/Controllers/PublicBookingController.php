@@ -15,6 +15,7 @@ use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
+use Wurk\Bookings\Support\ManageLink;
 use Wurk\Bookings\Support\SlotTaken;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\CurrentTenant;
@@ -102,7 +103,8 @@ final class PublicBookingController
             }
 
             return new JsonResponse(['booked' => true, 'service' => $service->name,
-                'when' => $booking->starts_at->setTimezone($tenant->timezone())->format('l j F, H:i')], 201);
+                'when' => $booking->starts_at->setTimezone($tenant->timezone())->format('l j F, H:i'),
+                'manage_url' => ManageLink::for($booking, $tenant->handle())], 201);
         });
     }
 
@@ -114,7 +116,9 @@ final class PublicBookingController
         $confirmed = $booking !== null && $booking->status === 'confirmed';
         $when = $booking === null ? '' : $this->context->run($tenant, fn () => $booking->starts_at->setTimezone($tenant->timezone())->format('l j F, H:i'));
 
-        return new Response(view('bookings::public.paid', ['business' => $tenant->displayName(), 'confirmed' => $confirmed, 'when' => $when])->render(), $confirmed ? 200 : 202);
+        $manage = $confirmed ? $this->context->run($tenant, fn () => ManageLink::for($booking, $tenant->handle())) : null;
+
+        return new Response(view('bookings::public.paid', ['business' => $tenant->displayName(), 'confirmed' => $confirmed, 'when' => $when, 'manage' => $manage])->render(), $confirmed ? 200 : 202);
     }
 
     /** Only for an active business whose package includes bookings. */

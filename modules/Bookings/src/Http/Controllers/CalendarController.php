@@ -15,6 +15,7 @@ use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Support\Booker;
+use Wurk\Bookings\Support\CancellationPolicy;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\SlotTaken;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -97,10 +98,15 @@ final class CalendarController
     {
         $status = (string) $request->validate(['status' => ['required', Rule::in(['cancelled', 'no_show', 'completed'])]])['status'];
         $model = Booking::query()->whereKey($booking)->firstOrFail();
+        $by = (string) $request->user()?->getAuthIdentifier();
         if ($status === 'completed') {
             $model->update(['status' => 'completed']);
+        } elseif ($status === 'cancelled') {
+            if (app(CancellationPolicy::class)->businessCancels($model, $by)['refunded']) {
+                return back()->with('status', 'Booking cancelled. The deposit is being refunded.');
+            }
         } else {
-            $this->booker->cancel($model, (string) $request->user()?->getAuthIdentifier(), $status); // frees the time
+            $this->booker->cancel($model, $by, $status); // a no-show keeps any deposit; frees the time
         }
 
         return back()->with('status', ['cancelled' => 'Booking cancelled.', 'no_show' => 'Marked as a no-show.', 'completed' => 'Marked as done.'][$status]);
