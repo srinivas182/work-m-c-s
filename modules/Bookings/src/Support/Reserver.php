@@ -7,6 +7,8 @@ namespace Wurk\Bookings\Support;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Bookings\Events\ReservationCancelled;
+use Wurk\Bookings\Events\ReservationConfirmed;
 use Wurk\Bookings\Models\Reservation;
 use Wurk\Bookings\Models\ReservationSettings;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -49,6 +51,7 @@ final readonly class Reserver
             ]);
         });
         $this->audit->record('bookings.table_reserved', 'reservation', $reservation->id, ['party' => $party, 'source' => $source]);
+        event(new ReservationConfirmed($this->context->id(), $reservation->id));
 
         return $reservation;
     }
@@ -58,5 +61,8 @@ final readonly class Reserver
     {
         $reservation->update(['status' => $status]);
         $this->audit->record('bookings.table_'.$status, 'reservation', $reservation->id, ['by' => $by]);
+        if ($status === 'cancelled') {
+            event(new ReservationCancelled($this->context->id(), $reservation->id));
+        }
     }
 }

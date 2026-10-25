@@ -7,6 +7,7 @@ use Wurk\Bookings\Http\Controllers\BookingSettingsController;
 use Wurk\Bookings\Http\Controllers\CalendarController;
 use Wurk\Bookings\Http\Controllers\PublicBookingController;
 use Wurk\Bookings\Http\Controllers\PublicManageController;
+use Wurk\Bookings\Http\Controllers\PublicTableController;
 
 Route::tenant(function (): void {
     // The calendar: everyone who can see bookings; changes need bookings.manage.
@@ -38,6 +39,12 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'
     Route::get('/services', [PublicBookingController::class, 'services'])->middleware('throttle:60,1,book-read')->name('services');
     Route::get('/times', [PublicBookingController::class, 'times'])->middleware('throttle:60,1,book-read')->name('times');
     Route::post('/', [PublicBookingController::class, 'book'])->middleware('throttle:5,10,book-create')->name('book');
+    Route::get('/tables/times', [PublicTableController::class, 'times'])->middleware('throttle:60,1,book-read')->name('tables.times');
+    Route::post('/tables', [PublicTableController::class, 'reserve'])->middleware('throttle:5,10,book-create')->name('tables.reserve');
+    Route::middleware(['signed', 'throttle:30,1,book-manage'])->group(function (): void {
+        Route::get('/tables/{reservation}', [PublicTableController::class, 'show'])->name('table');
+        Route::post('/tables/{reservation}/cancel', [PublicTableController::class, 'cancel'])->name('table.cancel');
+    });
     Route::get('/return', [PublicBookingController::class, 'paid'])->middleware('throttle:30,1,book-read')->name('paid');
     // The customer's own booking page: signed links (no account), expiring when the booking starts.
     // The page checks its own signature (ignoring only the chosen ?date); each action has its own signed address.

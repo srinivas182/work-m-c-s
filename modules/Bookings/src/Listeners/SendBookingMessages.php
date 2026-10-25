@@ -7,7 +7,10 @@ namespace Wurk\Bookings\Listeners;
 use Wurk\Bookings\Events\BookingCancelled;
 use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Events\BookingMoved;
+use Wurk\Bookings\Events\ReservationCancelled;
+use Wurk\Bookings\Events\ReservationConfirmed;
 use Wurk\Bookings\Models\Booking;
+use Wurk\Bookings\Models\Reservation;
 use Wurk\Bookings\Support\BookingMessages;
 use Wurk\Bookings\Support\Reminders;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -18,8 +21,13 @@ final readonly class SendBookingMessages
 {
     public function __construct(private TenantDirectory $tenants, private TenantContext $context, private BookingMessages $messages, private Reminders $reminders) {}
 
-    public function handle(BookingConfirmed|BookingMoved|BookingCancelled $event): void
+    public function handle(BookingConfirmed|BookingMoved|BookingCancelled|ReservationConfirmed|ReservationCancelled $event): void
     {
+        if ($event instanceof ReservationConfirmed || $event instanceof ReservationCancelled) {
+            $this->reservation($event);
+
+            return;
+        }
         $tenant = $this->tenants->find($event->tenantId);
         if ($tenant === null) {
             return;
@@ -38,6 +46,27 @@ final readonly class SendBookingMessages
             } else {
                 $this->messages->send($booking, 'cancelled');
                 $this->reminders->clear($booking->id);
+            }
+        });
+    }
+
+    private function reservation(ReservationConfirmed|ReservationCancelled $event): void
+    {
+        $tenant = $this->tenants->find($event->tenantId);
+        if ($tenant === null) {
+            return;
+        }
+        $this->context->run($tenant, function () use ($event): void {
+            $reservation = Reservation::query()->whereKey($event->reservationId)->first();
+            if ($reservation === null) {
+                return;
+            }
+            if ($event instanceof ReservationConfirmed) {
+                $this->messages->send($reservation, 'confirmed');
+                $this->reminders->schedule($reservation);
+            } else {
+                $this->messages->send($reservation, 'cancelled');
+                $this->reminders->clear($reservation->id);
             }
         });
     }
