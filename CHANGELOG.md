@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 9.3 (group classes)
+- **Classes**: scheduled sessions with a capacity, in person or online, an instructor and a price (paid at the class for now). **No overbooking** — the session is locked while places are counted.
+- **One shared video link per online class** (the business's Google, Zoom or fixed link), in every attendee's email and on their page from 15 minutes before.
+- **Book online in class mode**: upcoming classes with places left (full ones shown, not selectable); confirmation with a change-or-cancel link. The class timetable section can link to booking.
+- **Owners**: Bookings → Classes — schedule, see who's coming, add someone by hand (capacity still holds), mark attended or no-show, cancel a class (everyone is told).
+- Confirmations, the 24-hour reminder and cancellations reuse the booking messages ("Class: Yoga Flow").
+- The gym template and demo book classes; browser tests and public scans cover them.
+
 ### Added — Sprint 9.2 (pay before the slot)
 - **The full price** as a payment option, alongside a fixed or percentage deposit — paid straight to the business before the booking is confirmed.
 - **Charge it always, or only for online appointments** (in person, clients can pay at the desk).
