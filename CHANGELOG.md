@@ -4,6 +4,20 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 5.1 (rendering pipeline)
+- **Published pages are ready-made HTML**, rendered once at publish by Node (bootstrap/site-render) with the same SiteRenderer as the editor — no second copy of any block. Stored per published version; a failed render never takes a live site down (the previous version stays live; retried with back-off).
+- **Public websites** at `{handle}.{root}` (`*.wurk.test` in development and tests): complete HTML with JavaScript off, a public-only stylesheet (site blocks only), and no third-party requests.
+- **Fonts without layout shift**: each page preloads its two fonts (Latin, regular — the renderer reports them); size-matched fallbacks for all 14 families, generated from font metrics (`pnpm fonts:fallbacks`).
+- **Islands**: a tiny script, only on pages that need it, for before & after, the slideshow (dots, arrows, autoplay that pauses on hover/focus and never runs with reduced motion) and closing promotions.
+- **Re-rendering**: on branding and menu changes, and nightly at 00:05 SAST for pages with dated content (promotions, expiring specials).
+- `createdAt()` stays on the tenancy contract; the renderer ships in the production image.
+
+### Fixed
+- **Business context lost after a synchronous job**: the after-job reset (right for queue workers) also fired for jobs run inline in a request, leaving the rest of the request without its business.
+- **Published slideshows would have autoplayed with no pause button** (the server can't know a visitor's motion preference): the control is now always present when autoplay runs (WCAG 2.2.2).
+- The public-site route no longer swallows other routes on business subdomains (a fallback now).
+- The renderer's build output had been committed; it's ignored now.
+
 ### Added — Sprint 7.6 (preparation)
 - **Time to launch**, measured automatically: the first time a business publishes its home page, WURK records the minutes since the business was created (and its template). **Platform → Time to launch** shows each business, the median and the share launched within an hour — for the timed launch test now, and as an ongoing product metric.
 - **Timed launch test kit** (docs/research/launch-test.md): who to recruit, POPIA consent for screen recording, the session script, an observation sheet and what happens after.

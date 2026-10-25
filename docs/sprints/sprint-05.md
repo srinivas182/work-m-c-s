@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 5 · runs after Sprint 7 (sprint plan revision 3) |
-| **Status** | Approved 25 Oct 2026 — 5.1 in progress |
+| **Status** | Approved 25 Oct 2026 — 5.1 in review |
 | **Depends on** | v0.7.0 (blocks, templates, publishing, media); Sprint 7 performance findings (docs/sprints/sprint-07.md) |
 | **Delivery** | 4 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -93,3 +93,9 @@ Interactive parts become **islands** — a few kilobytes of JavaScript each, loa
 |---|---|
 | None from WURK for building and testing (everything runs on `*.wurk.test`) | — |
 | wurk.co.za DNS, Cloudflare, cloud | Sprint 17 (going live) |
+
+## 7. Progress log
+
+| Sub-sprint | PR | Notes |
+|---|---|---|
+| 5.1 Rendering pipeline | see PR | 687 backend tests on SQLite and MySQL 8 (also without the renderer bundle, as in CI); 363 frontend; 58 browser checks. Found: context lost after synchronous jobs; slideshow without a pause control on static pages; dated content frozen in static HTML (nightly re-render) |
