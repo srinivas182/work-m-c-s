@@ -48,6 +48,7 @@
             "Wurk\\Platform\\": "modules/Platform/src/",
             "Wurk\\Regions\\": "modules/Regions/src/",
             "Wurk\\Security\\": "modules/Security/src/",
+            "Wurk\\Shop\\": "modules/Shop/src/",
             "Wurk\\Tenancy\\": "modules/Tenancy/src/",
             "Wurk\\Website\\": "modules/Website/src/"
         }

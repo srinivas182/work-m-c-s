@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 10 (sprint plan revision 3) |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 28 Oct 2026 (recommended answers to §5; WURK to confirm any fee on sales before 10.3) — 10.1 in progress |
 | **Depends on** | v0.10.0 (website engine, payments straight to the business, fixed-wording messages) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
