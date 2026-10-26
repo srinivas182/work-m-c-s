@@ -12,6 +12,9 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Confirmations, the 24-hour reminder and cancellations reuse the booking messages ("Class: Yoga Flow").
 - The gym template and demo book classes; browser tests and public scans cover them.
 
+### Fixed
+- **Public rate limits were shared across all businesses per IP address**: bookings, table reservations, classes and quote forms keyed their limit by the route's domain pattern (the same for every business), so a few bookings anywhere could block other customers on a shared mobile IP (carrier NAT). Limits are now per business and visitor (bookings and quotes: 10 per 10 minutes), with regression tests. Found when CI ran all booking tests together.
+
 ### Added — Sprint 9.2 (pay before the slot)
 - **The full price** as a payment option, alongside a fixed or percentage deposit — paid straight to the business before the booking is confirmed.
 - **Charge it always, or only for online appointments** (in person, clients can pay at the desk).
