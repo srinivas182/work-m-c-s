@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Access\Contracts\TeamDirectory;
+use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Models\MeetingConnection;
@@ -35,8 +36,9 @@ final class ClassesController
             'timezone' => $tz,
             'team' => $this->team->members(),
             'canGoOnline' => MeetingConnection::query()->find($this->context->id()) !== null,
+            'canTakePayments' => BookingSettings::query()->find($this->context->id())?->payout_subaccount !== null,
             'classes' => $sessions->map(fn (ClassSession $s) => [
-                'id' => $s->id, 'title' => $s->title, 'status' => $s->status, 'online' => $s->location_type === 'online', 'capacity' => $s->capacity,
+                'id' => $s->id, 'title' => $s->title, 'status' => $s->status, 'online' => $s->location_type === 'online', 'capacity' => $s->capacity, 'paid' => $s->pay_online,
                 'when' => $s->starts_at->setTimezone($tz)->format('D j M, H:i'), 'minutes' => (int) $s->starts_at->diffInMinutes($s->ends_at),
                 'attendees' => ($attendees[$s->id] ?? collect())->map(fn (ClassAttendee $a) => ['id' => $a->id, 'name' => $a->customer_name, 'phone' => $a->customer_phone, 'status' => $a->status])->values()->all(),
             ])->all(),
@@ -50,9 +52,13 @@ final class ClassesController
             'date' => ['required', 'date_format:Y-m-d'], 'time' => ['required', 'date_format:H:i'], 'minutes' => ['required', 'integer', 'min:10', 'max:480'],
             'capacity' => ['required', 'integer', 'min:1', 'max:1000'], 'location_type' => ['required', Rule::in(['in_person', 'online'])],
             'member' => ['nullable', 'string', Rule::in(array_column($this->team->members(), 'id'))], 'price_cents' => ['required', 'integer', 'min:0', 'max:100000000'],
+            'pay_online' => ['boolean'],
         ]);
         if ($data['location_type'] === 'online' && MeetingConnection::query()->find($this->context->id()) === null) {
             throw ValidationException::withMessages(['location_type' => 'Connect Google Meet or Zoom (or add a meeting link) in Booking settings first, so people can join.']);
+        }
+        if (($data['pay_online'] ?? false) && ($data['price_cents'] < 100 || BookingSettings::query()->find($this->context->id())?->payout_subaccount === null)) {
+            throw ValidationException::withMessages(['pay_online' => 'To take payment online, connect your bank in Booking settings and set a price.']);
         }
         $start = CarbonImmutable::parse("{$data['date']} {$data['time']}", $this->context->current()->timezone());
         if ($start->isPast()) {
@@ -61,6 +67,7 @@ final class ClassesController
         ClassSession::query()->create([
             'title' => $data['title'], 'description' => $data['description'] ?? null, 'starts_at' => Instant::db($start), 'ends_at' => Instant::db($start->addMinutes($data['minutes'])),
             'capacity' => $data['capacity'], 'location_type' => $data['location_type'], 'member_id' => $data['member'] ?? null, 'price_cents' => $data['price_cents'],
+            'pay_online' => (bool) ($data['pay_online'] ?? false),
         ]);
 
         return back()->with('status', 'Class scheduled.');
