@@ -36,6 +36,8 @@ export interface SiteContext {
   /** Where forms post (set by the public site engine); absent in the editor and previews. */
   formAction?: string;
   logo?: string | null;
+  /** Published products for shop sections (Shop module); undefined in template previews (samples shown). */
+  products?: ProductSummary[];
   /** True inside the editor: links don't navigate, empty fields show prompts. */
   editing: boolean;
 }
@@ -78,4 +80,17 @@ export interface BlockDefinition<P extends Record<string, unknown>> {
   /** True when the section has nothing to show yet: hidden on the live site, a prompt in the editor. */
   isEmpty?: (props: P) => boolean;
   render: (props: P, site: SiteContext) => ReactNode;
+}
+
+/** A product as shop sections see it (from the Shop module, via Website's ProductCatalog contract). */
+export interface ProductSummary {
+  id: string;
+  name: string;
+  slug: string;
+  category: string | null;
+  price_cents: number;
+  varies: boolean;
+  compare_at_cents: number | null;
+  photo: string | null;
+  in_stock: boolean;
 }

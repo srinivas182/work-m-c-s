@@ -5,9 +5,17 @@ declare(strict_types=1);
 namespace Wurk\Shop;
 
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Shop\Support\ShopCatalog;
+use Wurk\Website\Contracts\ProductCatalog;
 
 final class ShopServiceProvider extends ModuleServiceProvider
 {
+    public function register(): void
+    {
+        parent::register();
+        $this->app->bind(ProductCatalog::class, ShopCatalog::class); // the website's shop sections read this
+    }
+
     public function permissions(): array
     {
         return [

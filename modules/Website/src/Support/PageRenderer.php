@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageRender;
 use Wurk\Website\Models\PageVersion;
@@ -33,6 +34,7 @@ final readonly class PageRenderer
                 'businessName' => $this->context->current()->displayName(),
                 'logo' => $site->branding['logo'] ?? null,
                 'menus' => $this->menus->resolve($site),
+                'products' => app(ProductCatalog::class)->published(),
                 'formAction' => '/forms/quote', // posts to the business's own address (allowed by its content policy)
             ],
         ];

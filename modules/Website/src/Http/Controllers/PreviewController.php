@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageVersion;
 use Wurk\Website\Support\Menus;
@@ -46,6 +47,7 @@ final class PreviewController
             'branding' => $site->branding,
             'businessName' => $context->current()->displayName(),
             'menus' => ['header' => $relink($resolved['header']), 'footer' => $relink($resolved['footer'])],
+            'products' => app(ProductCatalog::class)->published(),
             'pages' => Page::query()->orderBy('position')->get(['title', 'slug', 'is_home'])->toArray(),
             'urls' => ['preview' => $base, 'pages' => route('tenant.website.pages', [], false), 'editor' => route('tenant.website.pages', [], false).'/'.$page->id.'/edit'],
         ]);

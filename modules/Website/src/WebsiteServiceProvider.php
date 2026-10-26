@@ -7,6 +7,7 @@ namespace Wurk\Website;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -15,9 +16,13 @@ use Wurk\Website\Console\InstallTemplatesCommand;
 use Wurk\Website\Console\RerenderDatedPagesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
 use Wurk\Website\Console\SeedSampleTemplatesCommand;
+use Wurk\Website\Contracts\CatalogChanged;
+use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Contracts\SiteTemplates;
+use Wurk\Website\Listeners\RerenderShopPages;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\EloquentSiteTemplates;
+use Wurk\Website\Support\NoProductCatalog;
 use Wurk\Website\Support\PageRenderer;
 use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteAssets;
@@ -73,6 +78,8 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->app->bindIf(ProductCatalog::class, NoProductCatalog::class); // Shop provides the real one
+        Event::listen(CatalogChanged::class, RerenderShopPages::class);
         // Quote forms: per business AND visitor (see the Bookings limiters for why).
         RateLimiter::for('quote-form', fn (Request $r) => Limit::perMinutes(10, 10)->by('quote-form|'.(string) $r->route('handle').'|'.$r->ip()));
         // Dated content (promotions, expiring specials) refreshed just after midnight.

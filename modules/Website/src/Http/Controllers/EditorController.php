@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Support\Menus;
 use Wurk\Website\Support\Pages;
@@ -30,6 +31,7 @@ final class EditorController
             'businessName' => $context->current()->displayName(),
             'branding' => $site->branding,
             'menus' => app(Menus::class)->resolve($site),
+            'products' => app(ProductCatalog::class)->published(),
             'urls' => [
                 'pages' => route('tenant.website.pages', [], false),
                 'draft' => $base.'/draft',

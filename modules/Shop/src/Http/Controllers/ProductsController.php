@@ -17,6 +17,7 @@ use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Models\Variant;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Contracts\CatalogChanged;
 
 /** Owners: Shop → Products — products with options and variants (own price, SKU and stock), and categories. */
 final class ProductsController
@@ -104,6 +105,7 @@ final class ProductsController
             return $model;
         });
         $this->audit->record($product === null ? 'shop.product_created' : 'shop.product_updated', 'product', $saved->id, ['name' => $saved->name]);
+        event(new CatalogChanged($this->context->id())); // pages with shop sections are re-rendered
 
         return back()->with('status', 'Product saved.');
     }
@@ -116,6 +118,7 @@ final class ProductsController
             $model->delete();
         });
         $this->audit->record('shop.product_deleted', 'product', $model->id, ['name' => $model->name]);
+        event(new CatalogChanged($this->context->id()));
 
         return back()->with('status', 'Product deleted.');
     }
