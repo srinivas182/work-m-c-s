@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 9.3b (online payment for classes)
+- **Paid online when booking**: a class's price goes straight to the business's Paystack account. The place is **held while paying (and counts toward capacity)**, confirmed only once Paystack verifies the payment, and released after 15 minutes if unpaid; late payments are refunded automatically.
+- **Refunds**: leaving in time refunds (cancellation policy); when the business cancels a class, everyone who paid is refunded.
+- Owners tick "Paid online when booking" when scheduling (needs a connected bank and a price); paid classes are marked.
+
+### Fixed
+- `class_attendees.status` widened to 20 characters — `pending_payment` (15) would have been rejected by MySQL (SQLite ignores lengths). Caught by the MySQL test run.
+
 ### Added — Sprint 9.3 (group classes)
 - **Classes**: scheduled sessions with a capacity, in person or online, an instructor and a price (paid at the class for now). **No overbooking** — the session is locked while places are counted.
 - **One shared video link per online class** (the business's Google, Zoom or fixed link), in every attendee's email and on their page from 15 minutes before.

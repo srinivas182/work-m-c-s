@@ -27,6 +27,7 @@ interface ClassRow {
   status: string;
   online: boolean;
   capacity: number;
+  paid: boolean;
   when: string;
   minutes: number;
   attendees: Attendee[];
@@ -35,6 +36,7 @@ interface Props {
   timezone: string;
   team: { id: string; name: string }[];
   canGoOnline: boolean;
+  canTakePayments: boolean;
   classes: ClassRow[];
 }
 
@@ -52,6 +54,7 @@ function ClassCard({ c }: { c: ClassRow }) {
       <CardHeader>
         <CardTitle>
           {c.title} {c.online && <Badge tone="info">Online</Badge>}{' '}
+          {c.paid && <Badge tone="neutral">Paid online</Badge>}{' '}
           {!live && <Badge tone="neutral">Cancelled</Badge>}
         </CardTitle>
         <CardDescription>
@@ -151,7 +154,7 @@ function ClassCard({ c }: { c: ClassRow }) {
   );
 }
 
-export default function Classes({ team, canGoOnline, classes }: Props) {
+export default function Classes({ team, canGoOnline, canTakePayments, classes }: Props) {
   const form = useForm({
     title: '',
     description: '',
@@ -162,6 +165,7 @@ export default function Classes({ team, canGoOnline, classes }: Props) {
     location_type: 'in_person',
     member: '',
     price_cents: 0,
+    pay_online: false,
   });
   return (
     <AppShell title="Classes">
@@ -269,7 +273,7 @@ export default function Classes({ team, canGoOnline, classes }: Props) {
               </Field>
               <Field
                 label="Price (R)"
-                hint="Shown to people booking; paid at the class."
+                hint="Shown to people booking."
                 error={form.errors.price_cents}
               >
                 <Input
@@ -282,6 +286,26 @@ export default function Classes({ team, canGoOnline, classes }: Props) {
                   }
                 />
               </Field>
+              <label
+                className={`flex items-start gap-2 text-sm sm:col-span-2 ${canTakePayments ? '' : 'text-fg-muted'}`}
+              >
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  disabled={!canTakePayments}
+                  checked={form.data.pay_online}
+                  onChange={(e) => form.setData('pay_online', e.target.checked)}
+                />
+                <span>
+                  <strong>Paid online when booking</strong> —{' '}
+                  {canTakePayments
+                    ? 'the price goes straight to your bank; places are held while people pay.'
+                    : 'connect your bank in Booking settings first.'}
+                  {form.errors.pay_online && (
+                    <span className="text-danger block">{form.errors.pay_online}</span>
+                  )}
+                </span>
+              </label>
               <Button type="submit" className="justify-self-start" loading={form.processing}>
                 Schedule class
               </Button>

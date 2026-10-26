@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
@@ -116,9 +117,11 @@ final class PublicBookingController
         $tenant = $this->tenants->findByHandle($handle) ?? abort(404);
         $booking = $deposits->confirm((string) $request->query('reference', ''));
         $confirmed = $booking !== null && $booking->status === 'confirmed';
-        $when = $booking === null ? '' : $this->context->run($tenant, fn () => $booking->starts_at->setTimezone($tenant->timezone())->format('l j F, H:i'));
-
-        $manage = $confirmed ? $this->context->run($tenant, fn () => ManageLink::for($booking, $tenant->handle())) : null;
+        // A booking or a place in a class: the class's time and link come from its session.
+        $when = $booking === null ? '' : $this->context->run($tenant, fn () => ($booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at)
+            ->setTimezone($tenant->timezone())->format('l j F, H:i'));
+        $manage = $confirmed ? $this->context->run($tenant, fn () => $booking instanceof ClassAttendee
+            ? ManageLink::forClass($booking, $tenant->handle()) : ManageLink::for($booking, $tenant->handle())) : null;
 
         return new Response(view('bookings::public.paid', ['business' => $tenant->displayName(), 'confirmed' => $confirmed, 'when' => $when, 'manage' => $manage])->render(), $confirmed ? 200 : 202);
     }

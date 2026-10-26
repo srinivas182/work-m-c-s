@@ -7,10 +7,13 @@ namespace Wurk\Bookings\Support;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Billing\Contracts\SplitPayments;
 use Wurk\Bookings\Events\BookingConfirmed;
+use Wurk\Bookings\Events\ClassJoined;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHold;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\ClassAttendee;
+use Wurk\Bookings\Models\ClassSession;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -46,8 +49,18 @@ final readonly class Deposits
         };
     }
 
+    /** What to pay for a place in a class (0 = paid at the class, or payouts not set up). */
+    public function amountForClass(ClassSession $session): int
+    {
+        if (! $session->pay_online || BookingSettings::query()->find($this->context->id())?->payout_subaccount === null) {
+            return 0;
+        }
+
+        return $session->price_cents;
+    }
+
     /** Start paying: the booking (pending_payment) holds its time; returns Paystack's checkout page. */
-    public function start(Booking $booking, int $amountCents, string $email, string $returnUrl): ?string
+    public function start(Booking|ClassAttendee $booking, int $amountCents, string $email, string $returnUrl): ?string
     {
         $reference = 'dep_'.$this->context->id().'_'.$booking->id; // routes Paystack's webhook to the business
         $expires = now()->addMinutes(self::HOLD_MINUTES);
@@ -62,7 +75,7 @@ final readonly class Deposits
      * Confirm a paid deposit by its reference (from the redirect or the webhook). Verified with Paystack;
      * safe to call twice. A payment that arrives after its hold expired is refunded.
      */
-    public function confirm(string $reference): ?Booking
+    public function confirm(string $reference): Booking|ClassAttendee|null
     {
         if (preg_match('/^dep_([0-9A-Za-z]{26})_([0-9A-Za-z]{26})$/', $reference, $m) !== 1) {
             return null;
@@ -72,8 +85,9 @@ final readonly class Deposits
             return null;
         }
 
-        return $this->context->run($tenant, function () use ($reference): ?Booking {
-            $booking = Booking::query()->where('payment_reference', $reference)->first();
+        return $this->context->run($tenant, function () use ($reference): Booking|ClassAttendee|null {
+            $booking = Booking::query()->where('payment_reference', $reference)->first()
+                ?? ClassAttendee::query()->where('payment_reference', $reference)->first();
             if ($booking === null || $booking->paid_at !== null) {
                 return $booking; // unknown, or already confirmed
             }
@@ -90,8 +104,8 @@ final readonly class Deposits
             }
             $booking->update(['status' => 'confirmed', 'paid_at' => Instant::db(now()), 'hold_expires_at' => null]);
             BookingHold::query()->whereKey($reference)->delete();
-            $this->audit->record('bookings.deposit_paid', 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
-            event(new BookingConfirmed($this->context->id(), $booking->id));
+            $this->audit->record('bookings.deposit_paid', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
+            event($booking instanceof ClassAttendee ? new ClassJoined($this->context->id(), $booking->id) : new BookingConfirmed($this->context->id(), $booking->id));
 
             return $booking->refresh();
         });
@@ -111,6 +125,8 @@ final readonly class Deposits
                         $this->booker->cancel($booking, null, 'expired');
                         $n++;
                     }
+                    // Class places held while paying: released (no message — nothing was confirmed).
+                    $n += ClassAttendee::query()->whereIn('payment_reference', $holds->pluck('reference'))->where('status', 'pending_payment')->update(['status' => 'expired']);
 
                     return $n;
                 });

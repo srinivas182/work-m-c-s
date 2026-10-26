@@ -8,10 +8,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Support\ClassBooker;
 use Wurk\Bookings\Support\ClassFull;
+use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\ManageLink;
 use Wurk\Plans\Contracts\Entitlements;
@@ -39,9 +41,9 @@ final class PublicClassController
         });
     }
 
-    public function attend(Request $request, string $handle, string $session, ClassBooker $booker): JsonResponse
+    public function attend(Request $request, string $handle, string $session, ClassBooker $booker, Deposits $deposits): JsonResponse
     {
-        return $this->within($handle, function (CurrentTenant $tenant) use ($request, $session, $booker): JsonResponse {
+        return $this->within($handle, function (CurrentTenant $tenant) use ($request, $session, $booker, $deposits): JsonResponse {
             $data = $request->validate([
                 'name' => ['required', 'string', 'max:120'], 'phone' => ['required', 'string', 'max:40'], 'email' => ['nullable', 'email', 'max:160'],
                 'consent' => ['accepted'], 'website' => ['nullable', 'string'],
@@ -50,10 +52,24 @@ final class PublicClassController
                 return new JsonResponse(['booked' => true], 201);
             }
             $class = ClassSession::query()->whereKey($session)->firstOrFail();
+            $price = $deposits->amountForClass($class);
+            if ($price > 0 && empty($data['email'])) { // Paystack sends the receipt by email
+                throw ValidationException::withMessages(['email' => 'Please add your email — this class is paid when booking, and the receipt is emailed.']);
+            }
             try {
-                $a = $booker->attend($class, ['name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null]);
+                $a = $booker->attend($class, ['name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null], 'website', $price > 0 ? 'pending_payment' : 'confirmed');
             } catch (ClassFull $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
+            }
+            if ($price > 0) {
+                $payUrl = $deposits->start($a, $price, (string) $data['email'], $request->getSchemeAndHttpHost().'/book/return');
+                if ($payUrl === null) {
+                    $a->update(['status' => 'expired']); // payments unavailable: don't hold the place
+
+                    return new JsonResponse(['message' => 'Online payment isn’t available right now. Please call or message us to book.'], 503);
+                }
+
+                return new JsonResponse(['pay_url' => $payUrl, 'deposit_cents' => $price], 201);
             }
 
             return new JsonResponse(['booked' => true, 'service' => 'Class: '.$class->title,

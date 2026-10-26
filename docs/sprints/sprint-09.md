@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 9 (sprint plan revision 3) |
-| **Status** | Approved 27 Oct 2026 — 9.1 ✅ (#70), 9.2 ✅ (#71), 9.3 in review |
+| **Status** | Approved 27 Oct 2026 — 9.1 ✅ (#70), 9.2 ✅ (#71), 9.3 ✅ (#72), 9.3b in review; 9.4–9.5 await the legal review's requirements |
 | **Depends on** | v0.9.0 (appointments, deposits, messages, manage links) |
 | **Legal review** | Completed (WURK, Oct 2026). **Its specific requirements are needed before 9.4 and 9.5**, which are scheduled last |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
@@ -98,4 +98,5 @@ Health records are **special personal information under POPIA**. As a baseline, 
 |---|---|---|
 | 9.1 Online appointments | #70 | 782 backend tests on SQLite and MySQL 8; 371 frontend; all browser tests incl. a customer booking online on a published site. Found: an app-domain route segment (`oauth`) not reserved as a handle (architecture test) |
 | 9.2 Pay before the slot | #71 | 783 backend tests on SQLite and MySQL 8; 371 frontend; all browser tests |
-| 9.3 Group classes | see PR | 786 backend tests on SQLite and MySQL 8; 371 frontend; all browser tests incl. a guest booking a class on the published gym site. Classes paid at the class; online payment for classes proposed as a follow-up. Found: public rate limits shared across all businesses per IP (fixed: per business and visitor); a button's spoken name didn't contain its visible words; an in-place-editable label on a hidden button |
+| 9.3 Group classes | #72 | 786 backend tests on SQLite and MySQL 8; 371 frontend; all browser tests incl. a guest booking a class on the published gym site. Classes paid at the class; online payment for classes proposed as a follow-up. Found: public rate limits shared across all businesses per IP (fixed: per business and visitor); a button's spoken name didn't contain its visible words; an in-place-editable label on a hidden button |
+| 9.3b Online payment for classes (agreed follow-up) | see PR | 791 backend tests on SQLite and MySQL 8; 371 frontend; booking browser tests together. Found: a status column too short for `pending_payment` on MySQL |

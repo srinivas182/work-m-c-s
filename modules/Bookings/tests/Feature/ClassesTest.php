@@ -3,13 +3,18 @@
 declare(strict_types=1);
 
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\InteractsWithShards;
 use Wurk\Bookings\Mail\BookingMessageMail;
+use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Support\ClassBooker;
+use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\Reminders;
+use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -78,4 +83,56 @@ it('reminds attendees 24 hours before', function () {
     $this->travelTo(CarbonImmutable::parse('2027-05-02 18:01', 'Africa/Johannesburg'));
     expect(app(Reminders::class)->sendDue())->toBe(1);
     expect(array_column(($this->texts)('sipho@example.com'), 0))->toBe(['Booking confirmed — Flow Studio', 'Reminder: your booking at Flow Studio']);
+});
+
+describe('paid online', function () {
+    beforeEach(function () {
+        Http::fake([
+            'api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://checkout.paystack.com/class']]),
+            'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 8000]]),
+            'api.paystack.co/refund' => Http::response(['status' => true]),
+        ]);
+        app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
+        ($this->in)(function () {
+            BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_flow']);
+            $this->class->update(['pay_online' => true, 'price_cents' => 8000]);
+        });
+        $this->refunds = fn () => count(Http::recorded(fn ($r) => str_ends_with($r->url(), '/refund')));
+    });
+
+    it('holds the place while paying, and confirms only once Paystack says it’s paid', function () {
+        $this->postJson("{$this->site}/{$this->class->id}", ['name' => 'Sipho', 'phone' => '082 555 0101', 'consent' => '1'])
+            ->assertJsonValidationErrors(['email' => 'Please add your email — this class is paid when booking, and the receipt is emailed.']);
+        ($this->join)('Sipho', 'sipho@example.com')->assertCreated()->assertJson(['pay_url' => 'https://checkout.paystack.com/class', 'deposit_cents' => 8000]);
+        expect($this->getJson($this->site)->json('classes.0.places_left'))->toBe(1) // held while paying
+            ->and(($this->texts)('sipho@example.com'))->toBe([]);                  // nothing confirmed yet
+
+        $reference = ($this->in)(fn () => ClassAttendee::query()->sole()->payment_reference);
+        $this->get('http://flow-studio.'.config('wurk.domains.root')."/book/return?reference={$reference}")->assertOk()->assertSee('You’re booked')->assertSee('/book/class/');
+        expect(array_column(($this->texts)('sipho@example.com'), 0))->toBe(['Booking confirmed — Flow Studio']);
+    });
+
+    it('gives the place back when payment doesn’t come', function () {
+        ($this->join)('Sipho', 'sipho@example.com');
+        $this->travel(16)->minutes();
+        expect(app(Deposits::class)->expireHolds())->toBe(1)
+            ->and($this->getJson($this->site)->json('classes.0.places_left'))->toBe(2);
+    });
+
+    it('refunds a place left in time, and everyone who paid when the business cancels', function () {
+        $pay = function (string $name, string $email) {
+            ($this->join)($name, $email);
+            $ref = ($this->in)(fn () => ClassAttendee::query()->where('customer_name', $name)->sole()->payment_reference);
+            $this->get('http://flow-studio.'.config('wurk.domains.root')."/book/return?reference={$ref}");
+
+            return ($this->in)(fn () => ClassAttendee::query()->where('customer_name', $name)->sole());
+        };
+        $sipho = $pay('Sipho', 'sipho@example.com');
+        $pay('Lerato', 'lerato@example.com');
+        ($this->in)(fn () => expect(app(ClassBooker::class)->leave($sipho, null))->toBeTrue()); // more than 24 hours before
+        expect(($this->refunds)())->toBe(1);
+
+        ($this->in)(fn () => app(ClassBooker::class)->cancelSession($this->class->refresh(), null));
+        expect(($this->refunds)())->toBe(2); // Lerato too
+    });
 });
