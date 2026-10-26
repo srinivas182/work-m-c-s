@@ -22,6 +22,10 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string|null $notes
  * @property string $source
  * @property int $deposit_cents
+ * @property bool $online
+ * @property string|null $meeting_provider
+ * @property string|null $meeting_id
+ * @property string|null $meeting_url
  * @property string|null $payment_reference
  * @property Carbon|null $hold_expires_at
  * @property Carbon|null $paid_at
@@ -38,7 +42,7 @@ final class Booking extends Model
 
     protected function casts(): array
     {
-        return ['starts_at' => 'datetime', 'ends_at' => 'datetime', 'deposit_cents' => 'integer', 'hold_expires_at' => 'datetime', 'paid_at' => 'datetime', 'refunded_at' => 'datetime'];
+        return ['starts_at' => 'datetime', 'ends_at' => 'datetime', 'deposit_cents' => 'integer', 'online' => 'boolean', 'hold_expires_at' => 'datetime', 'paid_at' => 'datetime', 'refunded_at' => 'datetime'];
     }
 
     /** Statuses that hold their time (claim slots). */

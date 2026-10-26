@@ -12,6 +12,7 @@ use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
@@ -105,4 +106,45 @@ it('doesn’t hold the time when payments are unavailable', function () {
     }); // no Paystack keys configured
     $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertStatus(503)->assertJson(['message' => 'Online payment isn’t available right now. Please call or message us to book.']);
     $this->getJson("{$this->site}/times?service={$this->service->id}&date=2027-05-03")->assertJsonPath('times.0.label', '09:00'); // still free
+});
+
+it('lets the client choose online, and shows the joining link only from 15 minutes before', function () {
+    ($this->subscribe)(['website', 'bookings']);
+    $this->ctx->run($this->glow, function () {
+        $this->service->update(['location_type' => 'either']);
+        MeetingConnection::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'provider' => 'fixed', 'fixed_url' => 'https://meet.example.com/glow']);
+    });
+    expect($this->getJson("{$this->site}/services")->json('services.0.location'))->toBe('either');
+    $manage = $this->postJson($this->site, [...$this->booking, 'online' => true])->assertCreated()->json('manage_url');
+    $this->ctx->run($this->glow, fn () => expect(Booking::query()->sole()->only(['online', 'meeting_url']))->toBe(['online' => true, 'meeting_url' => 'https://meet.example.com/glow']));
+
+    $this->get($manage)->assertSee('Your joining link appears here 15 minutes before it starts.')->assertDontSee('https://meet.example.com/glow');
+    $this->travelTo(CarbonImmutable::parse('2027-05-03 08:50', 'Africa/Johannesburg'));
+    $this->get($manage)->assertSee('Join online now')->assertSee('https://meet.example.com/glow');
+});
+
+it('charges the full price upfront only for online appointments — and issues the link only once paid', function () {
+    ($this->subscribe)(['website', 'bookings']);
+    app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
+    $this->ctx->run($this->glow, function () {
+        $this->service->update(['location_type' => 'either', 'deposit_type' => 'full', 'deposit_when' => 'online']);
+        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_glow']);
+        MeetingConnection::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'provider' => 'fixed', 'fixed_url' => 'https://meet.example.com/glow']);
+    });
+    Http::fake([
+        'api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://checkout.paystack.com/full']]),
+        'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 45000]]),
+    ]);
+
+    // In person: pay at the desk — confirmed straight away.
+    $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertCreated()->assertJson(['booked' => true])->assertJsonMissing(['pay_url' => 'https://checkout.paystack.com/full']);
+
+    // Online: the full price first, and no link until it's paid.
+    $this->postJson($this->site, [...$this->booking, 'starts_at' => '2027-05-03T09:00:00+00:00', 'email' => 'lerato@example.com', 'name' => 'Lerato', 'online' => true])
+        ->assertCreated()->assertJson(['pay_url' => 'https://checkout.paystack.com/full', 'deposit_cents' => 45000]);
+    $online = fn () => $this->ctx->run($this->glow, fn () => Booking::query()->where('customer_name', 'Lerato')->sole());
+    expect($online()->status)->toBe('pending_payment')->and($online()->meeting_url)->toBeNull();
+
+    $this->get("{$this->site}/return?reference={$online()->payment_reference}")->assertOk()->assertSee('You’re booked');
+    expect($online()->status)->toBe('confirmed')->and($online()->meeting_url)->toBe('https://meet.example.com/glow');
 });

@@ -25,7 +25,9 @@ interface Service {
   buffer_before_minutes: number;
   buffer_after_minutes: number;
   price_cents: number;
-  deposit_type: 'none' | 'fixed' | 'percent';
+  deposit_type: 'none' | 'fixed' | 'percent' | 'full';
+  deposit_when: 'always' | 'online';
+  location_type: 'in_person' | 'online' | 'either';
   deposit_value: number;
   active: boolean;
   members: string[];
@@ -45,6 +47,14 @@ interface Props {
   payouts: { label: string | null };
   banks?: { code: string; name: string }[];
   policy: { hours: number; text: string; default: string };
+  video: {
+    connection: {
+      provider: 'google' | 'zoom' | 'fixed';
+      account_label: string | null;
+      fixed_url: string | null;
+    } | null;
+    available: { google: boolean; zoom: boolean };
+  };
   messages: {
     channel: 'email' | 'sms' | 'whatsapp';
     remind_24h: boolean;
@@ -74,6 +84,8 @@ function ServiceForm({
     buffer_after_minutes: service?.buffer_after_minutes ?? 0,
     price: service ? service.price_cents / 100 : 0,
     deposit_type: service?.deposit_type ?? 'none',
+    deposit_when: service?.deposit_when ?? 'always',
+    location_type: service?.location_type ?? 'in_person',
     deposit_value: service?.deposit_value ?? 0,
     active: service?.active ?? true,
     members: service?.members ?? team.map((m) => m.id),
@@ -120,6 +132,22 @@ function ServiceForm({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
+          label="Where"
+          error={(form.errors as Record<string, string | undefined>).location_type}
+        >
+          <select
+            className={selectClass}
+            value={form.data.location_type}
+            onChange={(e) =>
+              form.setData('location_type', e.target.value as Service['location_type'])
+            }
+          >
+            <option value="in_person">In person</option>
+            <option value="online">Online</option>
+            <option value="either">The client chooses</option>
+          </select>
+        </Field>
+        <Field
           label="Deposit"
           hint="Paid when booking online (once your bank is connected)."
           error={form.errors.deposit_type}
@@ -134,9 +162,27 @@ function ServiceForm({
             <option value="none">No deposit</option>
             <option value="fixed">A fixed amount</option>
             <option value="percent">A percentage of the price</option>
+            <option value="full">The full price</option>
           </select>
         </Field>
-        {form.data.deposit_type !== 'none' && (
+        {form.data.location_type === 'either' && form.data.deposit_type !== 'none' && (
+          <Field
+            label="Charge it"
+            error={(form.errors as Record<string, string | undefined>).deposit_when}
+          >
+            <select
+              className={selectClass}
+              value={form.data.deposit_when}
+              onChange={(e) =>
+                form.setData('deposit_when', e.target.value as Service['deposit_when'])
+              }
+            >
+              <option value="always">Always</option>
+              <option value="online">Only for online appointments</option>
+            </select>
+          </Field>
+        )}
+        {form.data.deposit_type !== 'none' && form.data.deposit_type !== 'full' && (
           <Field
             label={form.data.deposit_type === 'percent' ? 'Deposit (%)' : 'Deposit (R)'}
             error={form.errors.deposit_value}
@@ -301,6 +347,82 @@ function HoursEditor({ member, hours }: { member: Props['team'][number]; hours: 
         Save {member.name}’s hours
       </Button>
     </section>
+  );
+}
+
+function VideoCard({ video }: Pick<Props, 'video'>) {
+  const fixed = useForm({ url: video.connection?.fixed_url ?? '' });
+  const c = video.connection;
+  const name = { google: 'Google Meet', zoom: 'Zoom', fixed: 'Your meeting link' };
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Video calls</CardTitle>
+        <CardDescription>
+          For online appointments. Connect your own account and every appointment gets its own
+          private link — the meetings are yours, not WURK’s.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        {c ? (
+          <div className="border-border flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+            <p>
+              <strong>{name[c.provider]}</strong>
+              {c.account_label ? ` — ${c.account_label}` : ''}
+              {c.provider === 'fixed' ? ' — every client gets the same link.' : ' is connected.'}
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.delete(`${base()}/video`, { preserveScroll: true })}
+            >
+              Disconnect
+            </Button>
+          </div>
+        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {(['google', 'zoom'] as const).map((p) =>
+            video.available[p] ? (
+              <a
+                key={p}
+                href={`${base()}/video/connect/${p}`}
+                className="border-border inline-flex h-10 items-center rounded-md border px-4 text-sm font-medium"
+              >
+                {c?.provider === p ? `Reconnect ${name[p]}` : `Connect ${name[p]}`}
+              </a>
+            ) : (
+              <span key={p} className="text-fg-muted inline-flex h-10 items-center text-sm">
+                {name[p]} — not switched on yet
+              </span>
+            ),
+          )}
+        </div>
+        <form
+          aria-label="Use a fixed meeting link"
+          className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end"
+          onSubmit={(e) => {
+            e.preventDefault();
+            fixed.put(`${base()}/video/fixed`, { preserveScroll: true });
+          }}
+        >
+          <Field
+            label="Or use one meeting link for everyone"
+            hint="Anyone given this link once can use it again — a connected account is safer."
+            error={fixed.errors.url}
+          >
+            <Input
+              type="url"
+              placeholder="https://"
+              value={fixed.data.url}
+              onChange={(e) => fixed.setData('url', e.target.value)}
+            />
+          </Field>
+          <Button type="submit" variant="secondary" loading={fixed.processing}>
+            Save link
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -530,6 +652,7 @@ export default function Settings({
   banks,
   policy,
   messages,
+  video,
 }: Props) {
   const [editing, setEditing] = useState<Service | 'new' | null>(
     services.length === 0 ? 'new' : null,
@@ -615,6 +738,7 @@ export default function Settings({
 
         <DepositsCard payouts={payouts} banks={banks} policy={policy} />
         <MessagesCard messages={messages} />
+        <VideoCard video={video} />
 
         <Card>
           <CardHeader>

@@ -4,6 +4,43 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 9.3b (online payment for classes)
+- **Paid online when booking**: a class's price goes straight to the business's Paystack account. The place is **held while paying (and counts toward capacity)**, confirmed only once Paystack verifies the payment, and released after 15 minutes if unpaid; late payments are refunded automatically.
+- **Refunds**: leaving in time refunds (cancellation policy); when the business cancels a class, everyone who paid is refunded.
+- Owners tick "Paid online when booking" when scheduling (needs a connected bank and a price); paid classes are marked.
+
+### Fixed
+- `class_attendees.status` widened to 20 characters — `pending_payment` (15) would have been rejected by MySQL (SQLite ignores lengths). Caught by the MySQL test run.
+
+### Added — Sprint 9.3 (group classes)
+- **Classes**: scheduled sessions with a capacity, in person or online, an instructor and a price (paid at the class for now). **No overbooking** — the session is locked while places are counted.
+- **One shared video link per online class** (the business's Google, Zoom or fixed link), in every attendee's email and on their page from 15 minutes before.
+- **Book online in class mode**: upcoming classes with places left (full ones shown, not selectable); confirmation with a change-or-cancel link. The class timetable section can link to booking.
+- **Owners**: Bookings → Classes — schedule, see who's coming, add someone by hand (capacity still holds), mark attended or no-show, cancel a class (everyone is told).
+- Confirmations, the 24-hour reminder and cancellations reuse the booking messages ("Class: Yoga Flow").
+- The gym template and demo book classes; browser tests and public scans cover them.
+
+### Fixed
+- **Public rate limits were shared across all businesses per IP address**: bookings, table reservations, classes and quote forms keyed their limit by the route's domain pattern (the same for every business), so a few bookings anywhere could block other customers on a shared mobile IP (carrier NAT). Limits are now per business and visitor (bookings and quotes: 10 per 10 minutes), with regression tests. Found when CI ran all booking tests together.
+
+### Added — Sprint 9.2 (pay before the slot)
+- **The full price** as a payment option, alongside a fixed or percentage deposit — paid straight to the business before the booking is confirmed.
+- **Charge it always, or only for online appointments** (in person, clients can pay at the desk).
+- **No joining link until the payment is verified** — online appointments get their link on confirmation, and a booking awaiting payment isn't confirmed. Refunds follow the cancellation policy.
+
+### Changed
+- CI: the browser job's limit is 20 minutes (454 checks plus the 24-template performance gate outgrew 12).
+
+### Added — Sprint 9.1 (online appointments)
+- **Where, per service**: in person, online, or the client chooses. A service can't go online until clients have a way to join.
+- **A private video link per appointment**, hosted by the business's **own** Google (Meet) or Zoom account — created before the confirmation (so the email carries it), moved and deleted with the booking; Zoom meetings use a waiting room. If the provider is down, the booking stands and the link is retried before the reminder.
+- **Connecting Google or Zoom** (OAuth): the business travels in an encrypted, expiring state bound to the owner's own session (a forged return is refused); tokens are encrypted at rest and refreshed automatically; disconnecting revokes access. Super admin enters WURK's Google and Zoom app credentials under providers.
+- **Fixed meeting link** as a fallback (https only), with a clear "same link for everyone" warning.
+- **Clients** choose In person / Online in "Book online"; the joining link appears on their booking page from 15 minutes before (and in emails).
+
+### Fixed
+- The handle `oauth` is reserved (the video-connection return address lives under `/oauth`).
+
 ### Added — Sprint 8.5 (restaurant table reservations)
 - **Tables by covers** (no floor plan yet): covers, sitting length, interval between times, largest party online, notice, and arrival hours per weekday (lunch and dinner).
 - **Exact capacity**: a time is offered only if the most guests present at any moment during the sitting, plus the party, fits the covers — parties that never share the room don't block each other.

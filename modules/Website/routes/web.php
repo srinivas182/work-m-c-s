@@ -90,7 +90,7 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
 // Public quote forms: no session or CSRF (nothing signed in to protect); hidden field,
 // per-visitor limit and a daily cap per business guard against spam.
 Route::domain((string) config('wurk.domains.app'))->withoutMiddleware(['web'])
-    ->middleware('throttle:5,10,quote-form')
+    ->middleware('throttle:quote-form')
     ->post('/forms/{handle}/quote', QuoteFormController::class)->name('website.forms.quote');
 
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])
@@ -100,7 +100,7 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
 Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'])->group(function (): void {
     // The quote form on the business's own address (same protections as the app-domain route: no session
     // or CSRF, a hidden spam field, a per-visitor limit and a daily cap per business).
-    Route::post('/forms/quote', QuoteFormController::class)->middleware('throttle:5,10,quote-form')->name('website.public.quote');
+    Route::post('/forms/quote', QuoteFormController::class)->middleware('throttle:quote-form')->name('website.public.quote');
     Route::get('/robots.txt', PublicSeoController::class)->defaults('type', 'robots')->name('website.public.robots');
     Route::get('/sitemap.xml', PublicSeoController::class)->defaults('type', 'sitemap')->name('website.public.sitemap');
     Route::get('/llms.txt', PublicSeoController::class)->defaults('type', 'llms')->name('website.public.llms');

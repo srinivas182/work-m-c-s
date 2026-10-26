@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
@@ -40,7 +41,7 @@ final class PublicBookingController
             return new JsonResponse([
                 'timezone' => $tenant->timezone(),
                 'services' => BookingService::query()->where('active', true)->orderBy('position')->orderBy('name')->get()->map(fn (BookingService $s) => [
-                    'id' => $s->id, 'name' => $s->name, 'description' => $s->description, 'duration' => $s->duration_minutes, 'price_cents' => $s->price_cents,
+                    'id' => $s->id, 'name' => $s->name, 'description' => $s->description, 'duration' => $s->duration_minutes, 'price_cents' => $s->price_cents, 'location' => $s->location_type,
                     'members' => $pivot->clone()->where('service_id', $s->id)->pluck('member_id')
                         ->filter(fn ($id) => isset($names[(string) $id]))->map(fn ($id) => ['id' => (string) $id, 'name' => $names[(string) $id]])->values()->all(),
                 ])->all(),
@@ -72,6 +73,7 @@ final class PublicBookingController
                 'phone' => ['required', 'string', 'max:40'],
                 'email' => ['nullable', 'email', 'max:160'],
                 'notes' => ['nullable', 'string', 'max:1000'],
+                'online' => ['nullable', 'boolean'],
                 'consent' => ['accepted'],
                 'website' => ['nullable', 'string'], // hidden from people: only bots fill it in
             ], ['consent.accepted' => 'Please agree to be contacted about your booking.']);
@@ -79,14 +81,15 @@ final class PublicBookingController
                 return new JsonResponse(['booked' => true], 201); // a bot: no signal, no booking
             }
             $service = BookingService::query()->where('active', true)->whereKey($data['service'])->firstOrFail();
-            $deposit = $deposits->amountFor($service);
+            $online = $service->location_type === 'online' || ($service->location_type === 'either' && ($data['online'] ?? false));
+            $deposit = $deposits->amountFor($service, $online);
             if ($deposit > 0 && empty($data['email'])) { // Paystack sends the receipt by email
                 throw ValidationException::withMessages(['email' => 'Please add your email — a deposit is needed for this service, and the receipt is emailed.']);
             }
             try {
                 $booking = $booker->book($service, CarbonImmutable::parse($data['starts_at']), [
                     'name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'notes' => $data['notes'] ?? null,
-                ], $data['member'] ?? null, source: 'website', status: $deposit > 0 ? 'pending_payment' : 'confirmed');
+                ], $data['member'] ?? null, source: 'website', status: $deposit > 0 ? 'pending_payment' : 'confirmed', online: $online);
             } catch (SlotTaken $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
             }
@@ -114,9 +117,11 @@ final class PublicBookingController
         $tenant = $this->tenants->findByHandle($handle) ?? abort(404);
         $booking = $deposits->confirm((string) $request->query('reference', ''));
         $confirmed = $booking !== null && $booking->status === 'confirmed';
-        $when = $booking === null ? '' : $this->context->run($tenant, fn () => $booking->starts_at->setTimezone($tenant->timezone())->format('l j F, H:i'));
-
-        $manage = $confirmed ? $this->context->run($tenant, fn () => ManageLink::for($booking, $tenant->handle())) : null;
+        // A booking or a place in a class: the class's time and link come from its session.
+        $when = $booking === null ? '' : $this->context->run($tenant, fn () => ($booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at)
+            ->setTimezone($tenant->timezone())->format('l j F, H:i'));
+        $manage = $confirmed ? $this->context->run($tenant, fn () => $booking instanceof ClassAttendee
+            ? ManageLink::forClass($booking, $tenant->handle()) : ManageLink::for($booking, $tenant->handle())) : null;
 
         return new Response(view('bookings::public.paid', ['business' => $tenant->displayName(), 'confirmed' => $confirmed, 'when' => $when, 'manage' => $manage])->render(), $confirmed ? 200 : 202);
     }

@@ -211,6 +211,75 @@ describe('booking island', () => {
     vi.unstubAllGlobals();
   });
 
+  it('lets the client choose online when the service allows either, and notes online-only services', async () => {
+    const two = {
+      services: [
+        {
+          id: 's1',
+          name: 'Coaching',
+          duration: 60,
+          price_cents: 0,
+          location: 'either',
+          members: [{ id: 'm1', name: 'Thandi' }],
+        },
+        {
+          id: 's2',
+          name: 'Video check-in',
+          duration: 30,
+          price_cents: 0,
+          location: 'online',
+          members: [{ id: 'm1', name: 'Thandi' }],
+        },
+      ],
+    };
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url) => {
+      if (url === '/book/services') return respond(200, two);
+      if (url.startsWith('/book/times')) return respond(200, times);
+      return respond(201, { booked: true, service: 'Coaching', when: 'Monday 3 May, 09:00' });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    mount();
+    await settle();
+    const where = document.querySelector('fieldset') as HTMLFieldSetElement;
+    const note = [...document.querySelectorAll('p')].find((p) =>
+      p.textContent?.startsWith('This is an online appointment'),
+    )!;
+    expect(where.hidden).toBe(false);
+    expect(note.hidden).toBe(true);
+    const labelled = (text: string) =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find((l) => l.textContent === text)!.htmlFor,
+      ) as HTMLInputElement;
+    expect(labelled('In person').checked).toBe(true); // in person unless the client chooses online
+    labelled('Online (video call)').click();
+
+    (
+      document.querySelector('[role="group"][aria-label="Free times"] button') as HTMLButtonElement
+    ).click();
+    labelled('Your name').value = 'Sipho';
+    labelled('Phone').value = '082 555 0101';
+    (document.querySelector('input[type="checkbox"]') as HTMLInputElement).checked = true;
+    document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    await settle();
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)![1]!.body))).toMatchObject({
+      service: 's1',
+      online: true,
+    });
+
+    mount();
+    await settle();
+    const select = [...document.querySelectorAll('select')][0] as HTMLSelectElement;
+    select.value = 's2';
+    select.dispatchEvent(new Event('change'));
+    expect((document.querySelector('fieldset') as HTMLFieldSetElement).hidden).toBe(true);
+    expect(
+      [...document.querySelectorAll('p')].find((p) =>
+        p.textContent?.startsWith('This is an online appointment'),
+      )!.hidden,
+    ).toBe(false);
+    vi.unstubAllGlobals();
+  });
+
   it('keeps the “call or message us” fallback when booking isn’t available', async () => {
     vi.stubGlobal(
       'fetch',

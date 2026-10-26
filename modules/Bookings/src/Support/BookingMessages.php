@@ -12,6 +12,7 @@ use Wurk\Bookings\Mail\BookingMessageMail;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\Reservation;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\InsufficientCredits;
@@ -29,7 +30,7 @@ final readonly class BookingMessages
     public function __construct(private TenantContext $context, private Messenger $messenger, private CreditWallet $wallet) {}
 
     /** @param  string  $kind  confirmed | reminder | moved | cancelled; $occurrence makes repeats distinct (e.g. reminder_24h, moved_2) */
-    public function send(Booking|Reservation $booking, string $kind, ?string $occurrence = null): void
+    public function send(Booking|Reservation|ClassAttendee $booking, string $kind, ?string $occurrence = null): void
     {
         $key = $occurrence ?? $kind;
         $db = DB::connection($this->context->connectionName());
@@ -66,7 +67,16 @@ final readonly class BookingMessages
         if ($outcome['status'] !== 'sent') {
             if (filter_var($booking->customer_email, FILTER_VALIDATE_EMAIL) !== false) {
                 try {
-                    Mail::to((string) $booking->customer_email)->send(new BookingMessageMail(MessageWording::subject($kind, $vars), MessageWording::text($kind, $vars), $vars['link'] ?: null));
+                    $text = MessageWording::text($kind, $vars);
+                    $join = match (true) {
+                        $booking instanceof Booking && $booking->online => $booking->meeting_url,
+                        $booking instanceof ClassAttendee && $booking->session()->location_type === 'online' => $booking->session()->meeting_url,
+                        default => null,
+                    };
+                    if ($join !== null && $kind !== 'cancelled') {
+                        $text .= "\n\nJoin online: {$join}"; // email only — WhatsApp's approved templates can't carry it
+                    }
+                    Mail::to((string) $booking->customer_email)->send(new BookingMessageMail(MessageWording::subject($kind, $vars), $text, $vars['link'] ?: null));
                     $outcome = ['channel' => 'email', 'status' => 'sent', 'detail' => $outcome['detail']];
                 } catch (Throwable) {
                     $outcome['detail'] = trim(($outcome['detail'] ?? '').' Email didn’t send.');
@@ -79,17 +89,23 @@ final readonly class BookingMessages
     }
 
     /** @return array{client: string, service: string, business: string, when: string, link: string} */
-    private function vars(Booking|Reservation $booking, string $kind): array
+    private function vars(Booking|Reservation|ClassAttendee $booking, string $kind): array
     {
         $tenant = $this->context->current();
         $isTable = $booking instanceof Reservation;
+        $session = $booking instanceof ClassAttendee ? $booking->session() : null;
+        $start = $session !== null ? $session->starts_at : $booking->starts_at;
 
         return [
             'client' => (string) strtok($booking->customer_name, ' '),
-            'service' => $isTable ? 'Table for '.$booking->party_size : (string) BookingService::query()->whereKey($booking->service_id)->value('name'),
+            'service' => $session !== null ? 'Class: '.$session->title : ($isTable ? 'Table for '.$booking->party_size : (string) BookingService::query()->whereKey($booking->service_id)->value('name')),
             'business' => $tenant->displayName(),
-            'when' => $booking->starts_at->setTimezone($tenant->timezone())->format('D j M, H:i'),
-            'link' => $kind === 'cancelled' || $booking->starts_at->isPast() ? '' : ($isTable ? ManageLink::forTable($booking, $tenant->handle()) : ManageLink::for($booking, $tenant->handle())),
+            'when' => $start->setTimezone($tenant->timezone())->format('D j M, H:i'),
+            'link' => $kind === 'cancelled' || $start->isPast() ? '' : match (true) {
+                $booking instanceof ClassAttendee => ManageLink::forClass($booking, $tenant->handle()),
+                $booking instanceof Reservation => ManageLink::forTable($booking, $tenant->handle()),
+                default => ManageLink::for($booking, $tenant->handle()),
+            },
         ];
     }
 
