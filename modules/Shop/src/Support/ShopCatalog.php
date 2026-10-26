@@ -35,4 +35,27 @@ final class ShopCatalog implements ProductCatalog
 
         return $out;
     }
+
+    public function pages(): array
+    {
+        $summaries = [];
+        foreach ($this->published() as $p) {
+            $summaries[$p['id']] = $p;
+        }
+        $out = [];
+        foreach (Product::query()->whereIn('id', array_keys($summaries))->orderBy('position')->orderBy('name')->get() as $p) {
+            $s = $summaries[$p->id];
+            $out[] = [
+                'id' => $p->id, 'name' => $p->name, 'slug' => $p->slug, 'description' => $p->description,
+                'photos' => array_values($p->photos ?? []), 'options' => array_values($p->options ?? []),
+                'price_cents' => $s['price_cents'], 'varies' => $s['varies'], 'compare_at_cents' => $s['compare_at_cents'], 'in_stock' => $s['in_stock'],
+                'variants' => array_values(Variant::query()->where('product_id', $p->id)->orderBy('position')->get()->map(fn (Variant $v) => [
+                    'id' => $v->id, 'label' => $v->label, 'price_cents' => $v->price_cents, 'compare_at_cents' => $v->compare_at_cents,
+                    'in_stock' => $v->stock === null || $v->stock > 0,
+                ])->all()),
+            ];
+        }
+
+        return $out;
+    }
 }

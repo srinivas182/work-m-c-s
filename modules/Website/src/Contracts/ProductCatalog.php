@@ -16,4 +16,11 @@ interface ProductCatalog
      * @return list<array{id: string, name: string, slug: string, category: string|null, price_cents: int, varies: bool, compare_at_cents: int|null, photo: string|null, in_stock: bool}>
      */
     public function published(): array;
+
+    /**
+     * Full details of each published product, for its own page.
+     *
+     * @return list<array{id: string, name: string, slug: string, description: string|null, photos: list<string>, options: list<string>, price_cents: int, varies: bool, compare_at_cents: int|null, in_stock: bool, variants: list<array{id: string, label: string|null, price_cents: int, compare_at_cents: int|null, in_stock: bool}>}>
+     */
+    public function pages(): array;
 }

@@ -19,6 +19,7 @@ use Wurk\Website\Jobs\RenderPublishedPage;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageVersion;
 use Wurk\Website\Support\Pages;
+use Wurk\Website\Support\ProductPages;
 use Wurk\Website\Support\SiteBuilder;
 
 uses(InteractsWithShards::class);
@@ -83,4 +84,28 @@ it('announces catalogue changes when products are saved or deleted', function ()
     $product = ($this->product)('Kasi T-shirt', 'published', [['price_cents' => 25000]]);
     ($this->in)(fn () => app(ProductsController::class)->destroy($product->id));
     Event::assertDispatched(CatalogChanged::class, fn (CatalogChanged $e) => $e->tenantId === $this->shop->id);
+});
+
+it('gives each published product its own page at /shop/{slug} — and removes it when unpublished', function () {
+    $this->artisan('website:install-templates');
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<main><h1>Kasi T-shirt</h1></main>']))]);
+    $tee = ($this->product)('Kasi T-shirt', 'published', [['price_cents' => 25000]]);
+    ($this->product)('Draft cap', 'draft', [['price_cents' => 10000]]);
+    ($this->in)(function () {
+        app(SiteBuilder::class)->apply('salon-hair-braids');
+        app(Pages::class)->publish(Page::query()->where('is_home', true)->firstOrFail(), null, null); // also queues product pages (sync here)
+    });
+    Process::assertRan(fn (PendingProcess $p) => str_contains((string) $p->input, '"product":{') && str_contains((string) $p->input, '"type":"ProductDetail"'));
+
+    $site = 'http://kasi-threads.'.config('wurk.domains.root');
+    $this->get("{$site}/shop/kasi-t-shirt")->assertOk()->assertSee('<h1>Kasi T-shirt</h1>', false)
+        ->assertHeader('Cache-Tag', 'site-'.$this->shop->id)->assertHeader('X-Frame-Options');
+    $this->get("{$site}/shop/draft-cap")->assertNotFound();
+    $this->get("{$site}/shop/no-such-thing")->assertNotFound();
+
+    ($this->in)(function () use ($tee) {
+        $tee->update(['status' => 'draft']);
+        app(ProductPages::class)->renderAll();
+    });
+    $this->get("{$site}/shop/kasi-t-shirt")->assertNotFound();
 });

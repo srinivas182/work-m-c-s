@@ -7,6 +7,7 @@ namespace Wurk\Website\Listeners;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Website\Contracts\CatalogChanged;
+use Wurk\Website\Jobs\RenderProductPages;
 use Wurk\Website\Jobs\RenderPublishedPage;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageVersion;
@@ -22,6 +23,7 @@ final readonly class RerenderShopPages
         if ($tenant === null) {
             return;
         }
+        RenderProductPages::dispatch($tenant->tenantId()); // each product's own page
         $this->context->run($tenant, function () use ($tenant): void {
             foreach (Page::query()->whereNotNull('published_version_id')->get(['id', 'published_version_id']) as $page) {
                 $content = (string) PageVersion::query()->whereKey($page->published_version_id)->value('content');

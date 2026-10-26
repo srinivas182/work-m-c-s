@@ -13,4 +13,9 @@ final class NoProductCatalog implements ProductCatalog
     {
         return [];
     }
+
+    public function pages(): array
+    {
+        return [];
+    }
 }

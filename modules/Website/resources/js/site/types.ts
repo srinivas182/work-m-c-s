@@ -38,6 +38,8 @@ export interface SiteContext {
   logo?: string | null;
   /** Published products for shop sections (Shop module); undefined in template previews (samples shown). */
   products?: ProductSummary[];
+  /** On a product page (/shop/{slug}): the product shown. */
+  product?: ProductPage;
   /** True inside the editor: links don't navigate, empty fields show prompts. */
   editing: boolean;
 }
@@ -93,4 +95,25 @@ export interface ProductSummary {
   compare_at_cents: number | null;
   photo: string | null;
   in_stock: boolean;
+}
+
+/** A product's own page (from the Shop module, via ProductCatalog::pages()). */
+export interface ProductPage {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  photos: string[];
+  options: string[];
+  price_cents: number;
+  varies: boolean;
+  compare_at_cents: number | null;
+  in_stock: boolean;
+  variants: {
+    id: string;
+    label: string | null;
+    price_cents: number;
+    compare_at_cents: number | null;
+    in_stock: boolean;
+  }[];
 }

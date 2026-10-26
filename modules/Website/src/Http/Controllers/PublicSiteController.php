@@ -9,12 +9,14 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Vite;
+use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageRender;
 use Wurk\Website\Models\PageSlug;
 use Wurk\Website\Models\PageVersion;
+use Wurk\Website\Models\ProductRender;
 use Wurk\Website\Models\Site;
 use Wurk\Website\Support\FontPreloads;
 use Wurk\Website\Support\PublicAssets;
@@ -32,6 +34,16 @@ final class PublicSiteController
         $path = trim($request->path(), '/');
         $slug = $path === '' ? null : $path;
         $tenant = $tenants->findByHandle($handle);
+        if ($tenant !== null && $tenant->isActive() && preg_match('#^shop/([a-z0-9-]+)$#', (string) $slug, $m) === 1) {
+            return $context->run($tenant, function () use ($tenant, $m): Response {
+                $render = ProductRender::query()->where('slug', $m[1])->first(); // only published products have one
+                if ($render === null) {
+                    return $this->status($tenant->displayName(), 404, 'Product not found', 'This product isn’t available.', home: true);
+                }
+
+                return $this->respond($tenant, $render->path, $render->rendered_at?->getTimestamp(), '/shop/'.$m[1], false);
+            });
+        }
         if ($tenant === null || ($slug !== null && preg_match('/^[a-z0-9-]+$/', $slug) !== 1)) {
             return $this->status($tenant?->displayName() ?? 'WURK', 404, 'Page not found', 'This page doesn’t exist.', home: $tenant !== null);
         }
@@ -59,38 +71,44 @@ final class PublicSiteController
                     : $this->status($tenant->displayName(), 404, 'Page not found', 'This page doesn’t exist.', home: true);
             }
 
-            // Revalidation: the tag changes with the render and with the build, so a new publish or a
-            // deploy is never hidden behind a cached copy. Cache-Tag lets the CDN purge a whole site (Sprint 17).
-            $assets = app(PublicAssets::class);
-            $etag = '"'.sha1($render->path.'|'.$render->rendered_at?->getTimestamp().'|'.$assets->stylesheet()).'"';
-            $caching = ['ETag' => $etag, 'Cache-Control' => 'public, max-age=0, must-revalidate', 'Cache-Tag' => 'site-'.$tenant->tenantId()];
-            if (request()->header('If-None-Match') === $etag) {
-                return new Response('', 304, [...$caching, ...$this->securityHeaders()]);
-            }
-
-            $site = Site::query()->find($tenant->tenantId());
-            $facts = app(SiteFacts::class)->collect(); // once per request: structured data and the WhatsApp button
-            $stored = (array) json_decode((string) Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($render->path), true);
-            $body = (string) ($stored['body'] ?? '');
-            $html = view('website::public.page', [
-                'title' => (string) ($stored['title'] ?? $tenant->displayName()),
-                'description' => $stored['description'] ?? null,
-                'preloads' => app(FontPreloads::class)->for(array_values(array_filter((array) ($stored['fonts'] ?? []), 'is_string'))),
-                'stylesheet' => $assets->stylesheet(),
-                'islands' => str_contains($body, 'data-island=') ? $assets->islands() : null,
-                'body' => $body,
-                'canonical' => request()->getSchemeAndHttpHost().($page->is_home ? '/' : '/'.$page->slug),
-                'image' => ($img = $stored['image'] ?? null) ? request()->getSchemeAndHttpHost().$img : null,
-                'siteName' => $tenant->displayName(),
-                // WhatsApp chat button from the published contact details: digits, a leading 0 becomes 27
-                // (as the Contact section does). A plain link — no third-party script.
-                'whatsapp' => ($wa = preg_replace('/\D/', '', $facts['contact']['whatsapp']) ?? '') === '' ? null : (str_starts_with($wa, '0') ? '27'.substr($wa, 1) : $wa),
-                'favicon' => $site?->branding['favicon'] ?? null,
-                'jsonLd' => $page->is_home ? json_encode(app(SiteSeo::class)->localBusiness($facts, request()->getSchemeAndHttpHost()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
-            ])->render();
-
-            return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...$this->securityHeaders()]);
+            return $this->respond($tenant, $render->path, $render->rendered_at?->getTimestamp(), $page->is_home ? '/' : '/'.$page->slug, $page->is_home);
         });
+    }
+
+    /** The page shell around stored content (pages and product pages share it): caching, assets, headers. */
+    private function respond(CurrentTenant $tenant, string $path, ?int $renderedAt, string $canonical, bool $home): Response
+    {
+        // Revalidation: the tag changes with the render and with the build, so a new publish or a
+        // deploy is never hidden behind a cached copy. Cache-Tag lets the CDN purge a whole site (Sprint 17).
+        $assets = app(PublicAssets::class);
+        $etag = '"'.sha1($path.'|'.$renderedAt.'|'.$assets->stylesheet()).'"';
+        $caching = ['ETag' => $etag, 'Cache-Control' => 'public, max-age=0, must-revalidate', 'Cache-Tag' => 'site-'.$tenant->tenantId()];
+        if (request()->header('If-None-Match') === $etag) {
+            return new Response('', 304, [...$caching, ...$this->securityHeaders()]);
+        }
+
+        $site = Site::query()->find($tenant->tenantId());
+        $facts = app(SiteFacts::class)->collect(); // once per request: structured data and the WhatsApp button
+        $stored = (array) json_decode((string) Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($path), true);
+        $body = (string) ($stored['body'] ?? '');
+        $html = view('website::public.page', [
+            'title' => (string) ($stored['title'] ?? $tenant->displayName()),
+            'description' => $stored['description'] ?? null,
+            'preloads' => app(FontPreloads::class)->for(array_values(array_filter((array) ($stored['fonts'] ?? []), 'is_string'))),
+            'stylesheet' => $assets->stylesheet(),
+            'islands' => str_contains($body, 'data-island=') ? $assets->islands() : null,
+            'body' => $body,
+            'canonical' => request()->getSchemeAndHttpHost().$canonical,
+            'image' => ($img = $stored['image'] ?? null) ? request()->getSchemeAndHttpHost().$img : null,
+            'siteName' => $tenant->displayName(),
+            // WhatsApp chat button from the published contact details: digits, a leading 0 becomes 27
+            // (as the Contact section does). A plain link — no third-party script.
+            'whatsapp' => ($wa = preg_replace('/\D/', '', $facts['contact']['whatsapp']) ?? '') === '' ? null : (str_starts_with($wa, '0') ? '27'.substr($wa, 1) : $wa),
+            'favicon' => $site?->branding['favicon'] ?? null,
+            'jsonLd' => $home ? json_encode(app(SiteSeo::class)->localBusiness($facts, request()->getSchemeAndHttpHost()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
+        ])->render();
+
+        return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...$this->securityHeaders()]);
     }
 
     /** @param  array<string, string>  $headers */
