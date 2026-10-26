@@ -8,6 +8,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Billing\Contracts\SplitPayments;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -42,9 +43,11 @@ final readonly class CancellationPolicy
     }
 
     /** Would cancelling now refund the deposit? */
-    public function refundsNow(Booking $booking): bool
+    public function refundsNow(Booking|ClassAttendee $booking): bool
     {
-        return $booking->paid_at !== null && $booking->refunded_at === null && now()->lessThanOrEqualTo($booking->starts_at->subHours($this->hours()));
+        $start = $booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at;
+
+        return $booking->paid_at !== null && $booking->refunded_at === null && now()->lessThanOrEqualTo($start->subHours($this->hours()));
     }
 
     /** @return array{refunded: bool} */
@@ -69,15 +72,16 @@ final readonly class CancellationPolicy
         return ['refunded' => $refunded];
     }
 
-    private function refund(Booking $booking): bool
+    /** Refund a paid deposit or class place; true if Paystack accepted it. */
+    public function refund(Booking|ClassAttendee $booking): bool
     {
         if ($booking->payment_reference === null || ! $this->payments->refund($booking->payment_reference)) {
-            $this->audit->record('bookings.refund_failed', 'booking', $booking->id, []);
+            $this->audit->record('bookings.refund_failed', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, []);
 
             return false;
         }
         $booking->update(['refunded_at' => Instant::db(now())]);
-        $this->audit->record('bookings.deposit_refunded', 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
+        $this->audit->record('bookings.deposit_refunded', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
 
         return true;
     }

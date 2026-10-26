@@ -23,6 +23,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string|null $meeting_id
  * @property string|null $meeting_url
  * @property string $status
+ * @property bool $pay_online
  */
 final class ClassSession extends Model
 {
@@ -33,12 +34,12 @@ final class ClassSession extends Model
 
     protected function casts(): array
     {
-        return ['starts_at' => 'datetime', 'ends_at' => 'datetime', 'capacity' => 'integer', 'price_cents' => 'integer'];
+        return ['starts_at' => 'datetime', 'ends_at' => 'datetime', 'capacity' => 'integer', 'price_cents' => 'integer', 'pay_online' => 'boolean'];
     }
 
-    /** Places taken (confirmed attendees). */
+    /** Places taken (confirmed, or held while paying). */
     public function taken(): int
     {
-        return ClassAttendee::query()->where('session_id', $this->id)->where('status', 'confirmed')->count();
+        return ClassAttendee::query()->where('session_id', $this->id)->whereIn('status', ClassAttendee::HOLDING)->count();
     }
 }
