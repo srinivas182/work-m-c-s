@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Wurk\Website;
 
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\DemoSitesCommand;
@@ -70,6 +73,8 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Quote forms: per business AND visitor (see the Bookings limiters for why).
+        RateLimiter::for('quote-form', fn (Request $r) => Limit::perMinutes(10, 10)->by('quote-form|'.(string) $r->route('handle').'|'.$r->ip()));
         // Dated content (promotions, expiring specials) refreshed just after midnight.
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('website:rerender-dated')->dailyAt('00:05')->timezone('Africa/Johannesburg')->onOneServer()->withoutOverlapping();

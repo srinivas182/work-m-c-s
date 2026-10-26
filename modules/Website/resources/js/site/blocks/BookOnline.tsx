@@ -7,7 +7,7 @@ export interface BookOnlineProps extends Record<string, unknown> {
   fallbackText: string;
   fallbackLabel: string;
   fallbackHref: string;
-  mode: 'appointments' | 'tables';
+  mode: 'appointments' | 'tables' | 'classes';
 }
 
 /**
@@ -28,6 +28,7 @@ export const BookOnline: BlockDefinition<BookOnlineProps> = {
       options: [
         { value: 'appointments', label: 'Appointments (services and times)' },
         { value: 'tables', label: 'Tables (restaurants)' },
+        { value: 'classes', label: 'Classes (group sessions)' },
       ],
     },
     heading: { kind: 'text', inline: true, label: 'Heading', max: 60 },

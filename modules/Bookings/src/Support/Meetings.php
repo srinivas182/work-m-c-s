@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Bookings\Support;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -11,6 +12,7 @@ use Throwable;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -39,11 +41,7 @@ final readonly class Meetings
             return;
         }
         try {
-            [$id, $url] = match ($connection->provider) {
-                'google' => $this->googleCreate($connection, $booking),
-                'zoom' => $this->zoomCreate($connection, $booking),
-                default => [null, $connection->fixed_url],
-            };
+            [$id, $url] = $this->create($connection, $this->title($booking), CarbonImmutable::instance($booking->starts_at), CarbonImmutable::instance($booking->ends_at), $booking->id);
             if ($url !== null && $url !== '') {
                 $booking->update(['meeting_provider' => $connection->provider, 'meeting_id' => $id, 'meeting_url' => $url]);
             }
@@ -62,8 +60,8 @@ final readonly class Meetings
         }
         try {
             match ($connection->provider) {
-                'google' => $this->google($connection)->patch(self::GOOGLE_EVENTS.'/'.rawurlencode($booking->meeting_id), $this->googleTimes($booking))->throw(),
-                'zoom' => $this->zoom($connection)->patch(self::ZOOM_MEETINGS.'/meetings/'.rawurlencode($booking->meeting_id), $this->zoomTimes($booking))->throw(),
+                'google' => $this->google($connection)->patch(self::GOOGLE_EVENTS.'/'.rawurlencode($booking->meeting_id), $this->googleTimes(CarbonImmutable::instance($booking->starts_at), CarbonImmutable::instance($booking->ends_at)))->throw(),
+                'zoom' => $this->zoom($connection)->patch(self::ZOOM_MEETINGS.'/meetings/'.rawurlencode($booking->meeting_id), $this->zoomTimes(CarbonImmutable::instance($booking->starts_at), CarbonImmutable::instance($booking->ends_at)))->throw(),
                 default => null,
             };
         } catch (Throwable $e) {
@@ -88,41 +86,62 @@ final readonly class Meetings
         }
     }
 
-    /** @return array{0: string, 1: string} */
-    private function googleCreate(MeetingConnection $c, Booking $b): array
+    /** One meeting for an online class session, shared by everyone attending. Safe to call again. */
+    public function ensureForClass(ClassSession $session): void
     {
-        $r = $this->google($c)->post(self::GOOGLE_EVENTS.'?conferenceDataVersion=1', [
-            'summary' => $this->title($b), ...$this->googleTimes($b),
-            'conferenceData' => ['createRequest' => ['requestId' => $b->id, 'conferenceSolutionKey' => ['type' => 'hangoutsMeet']]],
-        ])->throw();
-
-        return [(string) $r->json('id'), (string) $r->json('hangoutLink')];
+        if ($session->location_type !== 'online' || $session->meeting_url !== null) {
+            return;
+        }
+        $connection = MeetingConnection::query()->find($this->context->id());
+        if ($connection === null) {
+            return;
+        }
+        try {
+            [$id, $url] = $this->create($connection, $session->title, CarbonImmutable::instance($session->starts_at), CarbonImmutable::instance($session->ends_at), $session->id);
+            if ($url !== null && $url !== '') {
+                $session->update(['meeting_provider' => $connection->provider, 'meeting_id' => $id, 'meeting_url' => $url]);
+            }
+        } catch (Throwable $e) {
+            $this->audit->record('bookings.meeting_failed', 'class_session', $session->id, ['provider' => $connection->provider, 'error' => mb_substr($e->getMessage(), 0, 150)]);
+        }
     }
 
-    /** @return array{0: string, 1: string} */
-    private function zoomCreate(MeetingConnection $c, Booking $b): array
+    /** @return array{0: string|null, 1: string|null} */
+    private function create(MeetingConnection $c, string $title, CarbonImmutable $start, CarbonImmutable $end, string $requestId): array
     {
-        $r = $this->zoom($c)->post(self::ZOOM_MEETINGS.'/users/me/meetings', [
-            'topic' => $this->title($b), 'type' => 2, ...$this->zoomTimes($b),
-            'settings' => ['join_before_host' => false, 'waiting_room' => true],
-        ])->throw();
+        if ($c->provider === 'google') {
+            $r = $this->google($c)->post(self::GOOGLE_EVENTS.'?conferenceDataVersion=1', [
+                'summary' => $title, ...$this->googleTimes($start, $end),
+                'conferenceData' => ['createRequest' => ['requestId' => $requestId, 'conferenceSolutionKey' => ['type' => 'hangoutsMeet']]],
+            ])->throw();
 
-        return [(string) $r->json('id'), (string) $r->json('join_url')];
+            return [(string) $r->json('id'), (string) $r->json('hangoutLink')];
+        }
+        if ($c->provider === 'zoom') {
+            $r = $this->zoom($c)->post(self::ZOOM_MEETINGS.'/users/me/meetings', [
+                'topic' => $title, 'type' => 2, ...$this->zoomTimes($start, $end),
+                'settings' => ['join_before_host' => false, 'waiting_room' => true],
+            ])->throw();
+
+            return [(string) $r->json('id'), (string) $r->json('join_url')];
+        }
+
+        return [null, $c->fixed_url];
     }
 
     /** @return array<string, mixed> */
-    private function googleTimes(Booking $b): array
+    private function googleTimes(CarbonImmutable $start, CarbonImmutable $end): array
     {
         $tz = $this->context->current()->timezone();
 
-        return ['start' => ['dateTime' => $b->starts_at->setTimezone($tz)->toIso8601String(), 'timeZone' => $tz],
-            'end' => ['dateTime' => $b->ends_at->setTimezone($tz)->toIso8601String(), 'timeZone' => $tz]];
+        return ['start' => ['dateTime' => $start->setTimezone($tz)->toIso8601String(), 'timeZone' => $tz],
+            'end' => ['dateTime' => $end->setTimezone($tz)->toIso8601String(), 'timeZone' => $tz]];
     }
 
     /** @return array<string, mixed> */
-    private function zoomTimes(Booking $b): array
+    private function zoomTimes(CarbonImmutable $start, CarbonImmutable $end): array
     {
-        return ['start_time' => $b->starts_at->utc()->format('Y-m-d\TH:i:s\Z'), 'duration' => (int) $b->starts_at->diffInMinutes($b->ends_at), 'timezone' => 'UTC'];
+        return ['start_time' => $start->utc()->format('Y-m-d\TH:i:s\Z'), 'duration' => (int) $start->diffInMinutes($end), 'timezone' => 'UTC'];
     }
 
     private function title(Booking $b): string

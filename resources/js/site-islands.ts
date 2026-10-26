@@ -112,6 +112,7 @@ const button =
 
 async function booking(root: HTMLElement): Promise<void> {
   if (root.dataset.mode === 'tables') return tables(root);
+  if (root.dataset.mode === 'classes') return classes(root);
   const api = root.dataset.api ?? '/book';
   let services: BookService[] = [];
   try {
@@ -500,6 +501,150 @@ async function tables(root: HTMLElement): Promise<void> {
   dateInput.addEventListener('change', () => void refreshTimes());
   root.replaceChildren(form);
   void refreshTimes();
+}
+
+/* Classes: upcoming class → details → confirmation. Same safeguards as booking. */
+async function classes(root: HTMLElement): Promise<void> {
+  const api = `${root.dataset.api ?? '/book'}/classes`;
+  const first = await fetch(api, { headers: { Accept: 'application/json' } }).catch(() => null);
+  if (!first?.ok) return; // keep the "call or message us" fallback
+  type ClassItem = {
+    id: string;
+    title: string;
+    online: boolean;
+    when: string;
+    minutes: number;
+    price_cents: number;
+    places_left: number;
+  };
+  let list = ((await first.json()) as { classes: ClassItem[] }).classes;
+
+  const status = el('p', { class: 'text-sm text-[var(--s-fg-muted)]' });
+  status.setAttribute('role', 'status');
+  const uid = Math.random().toString(36).slice(2, 8);
+  const labelled = (text: string, control: HTMLElement) => {
+    control.id = `${uid}-${text.replace(/\W+/g, '-').toLowerCase()}`;
+    return el('div', {}, el('label', { htmlFor: control.id, class: 'font-medium' }, text), control);
+  };
+  const picker = el('div', { class: 'grid gap-2' });
+  picker.setAttribute('role', 'group');
+  picker.setAttribute('aria-label', 'Upcoming classes');
+  let chosen: string | null = null;
+  const draw = () => {
+    picker.replaceChildren();
+    if (list.length === 0) {
+      status.textContent = 'No classes in the next two weeks. Please check back soon.';
+      return;
+    }
+    for (const c of list) {
+      const full = c.places_left < 1;
+      const price = c.price_cents
+        ? ` · R${(c.price_cents / 100).toFixed(c.price_cents % 100 ? 2 : 0)}`
+        : '';
+      const b = el(
+        'button',
+        {
+          type: 'button',
+          disabled: full,
+          class: 'rounded-[var(--s-radius)] border border-[var(--s-border)] px-4 py-2 text-left',
+        },
+        `${c.title} — ${c.when} · ${c.minutes} min${c.online ? ' · Online' : ''}${price} · ${full ? 'Full' : `${c.places_left} place${c.places_left === 1 ? '' : 's'} left`}`,
+      );
+      b.setAttribute('aria-pressed', String(chosen === c.id));
+      b.addEventListener('click', () => {
+        chosen = c.id;
+        picker.querySelectorAll('button').forEach((x) => {
+          x.setAttribute('aria-pressed', String(x === b));
+          x.classList.toggle('bg-[var(--s-brand-soft)]', x === b);
+        });
+        status.textContent = `${c.title} selected.`;
+      });
+      picker.append(b);
+    }
+  };
+  const refresh = async () => {
+    const r = await fetch(api, { headers: { Accept: 'application/json' } }).catch(() => null);
+    list = r?.ok ? ((await r.json()) as { classes: ClassItem[] }).classes : [];
+    chosen = null;
+    draw();
+  };
+
+  const name = el('input', { type: 'text', class: field, autocomplete: 'name', required: true });
+  const phone = el('input', { type: 'tel', class: field, autocomplete: 'tel', required: true });
+  const email = el('input', { type: 'email', class: field, autocomplete: 'email' });
+  const consent = el('input', { type: 'checkbox', required: true });
+  consent.id = `${uid}-consent`;
+  const trap = el('input', { type: 'text', name: 'website', tabIndex: -1, autocomplete: 'off' });
+  const trapWrap = el('div', { class: 'absolute -left-[9999px]' }, trap);
+  trapWrap.setAttribute('aria-hidden', 'true');
+  const submit = el('button', { type: 'submit', class: button }, 'Book my place');
+  const form = el(
+    'form',
+    { class: 'grid gap-4' },
+    picker,
+    labelled('Your name', name),
+    labelled('Phone', phone),
+    labelled('Email (optional)', email),
+    el(
+      'div',
+      { class: 'flex items-start gap-2' },
+      consent,
+      el('label', { htmlFor: consent.id }, 'I agree to be contacted about my class.'),
+    ),
+    trapWrap,
+    submit,
+    status,
+  );
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!chosen) {
+      status.textContent = 'Please choose a class first.';
+      return;
+    }
+    submit.disabled = true;
+    const r = await fetch(`${api}/${chosen}`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name.value,
+        phone: phone.value,
+        email: email.value || null,
+        consent: consent.checked ? '1' : null,
+        website: trap.value,
+      }),
+    }).catch(() => null);
+    submit.disabled = false;
+    const data = r
+      ? ((await r.json().catch(() => ({}))) as {
+          when?: string;
+          service?: string;
+          message?: string;
+          manage_url?: string;
+          errors?: Record<string, string[]>;
+        })
+      : {};
+    if (r?.status === 201) {
+      const done = el(
+        'div',
+        { tabIndex: -1, class: 'grid gap-2' },
+        el('h3', { class: 'text-xl font-semibold' }, 'You’re booked'),
+        el('p', {}, `${data.service ?? 'Your class'} — ${data.when ?? ''}.`),
+        ...(data.manage_url
+          ? [el('a', { href: data.manage_url, class: 'underline' }, 'Change or cancel this place')]
+          : []),
+      );
+      root.replaceChildren(done);
+      done.focus();
+      return;
+    }
+    status.textContent =
+      data.message ??
+      Object.values(data.errors ?? {})[0]?.[0] ??
+      'Something went wrong. Please try again.';
+    if (r?.status === 409) void refresh();
+  });
+  root.replaceChildren(form);
+  draw();
 }
 
 const ISLANDS: Record<string, (root: HTMLElement) => void> = {

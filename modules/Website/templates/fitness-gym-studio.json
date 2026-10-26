@@ -124,7 +124,9 @@
                 "heading": "Class timetable",
                 "intro": "",
                 "classes": [],
-                "note": ""
+                "note": "",
+                "bookLabel": "Book a class",
+                "bookHref": "/contact"
               }
             },
             {
@@ -217,7 +219,9 @@
                 "heading": "Class timetable",
                 "intro": "",
                 "classes": [],
-                "note": ""
+                "note": "",
+                "bookLabel": "Book a class",
+                "bookHref": "/contact"
               }
             },
             {
@@ -322,11 +326,12 @@
               "type": "BookOnline",
               "version": 1,
               "props": {
-                "heading": "Book online",
-                "intro": "Choose a service and a time that suits you.",
+                "heading": "Book a class",
+                "intro": "Choose a class and save your place.",
                 "fallbackText": "Call or message us to book.",
                 "fallbackLabel": "Contact us",
-                "fallbackHref": "/contact"
+                "fallbackHref": "/contact",
+                "mode": "classes"
               }
             },
             {

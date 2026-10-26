@@ -7,6 +7,7 @@ namespace Wurk\Bookings\Support;
 use Illuminate\Support\Facades\DB;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\Reservation;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -17,16 +18,19 @@ final readonly class Reminders
     public function __construct(private TenantContext $context, private BookingMessages $messages) {}
 
     /** (Re)schedule a booking's reminders — on confirmation and when it moves. */
-    public function schedule(Booking|Reservation $booking): void
+    public function schedule(Booking|Reservation|ClassAttendee $booking): void
     {
         $this->clear($booking->id);
         $settings = BookingSettings::query()->find($this->context->id());
         $offsets = array_filter(['24h' => $settings === null || $settings->remind_24h ? 24 : null, '2h' => $settings !== null && $settings->remind_2h ? 2 : null]);
         foreach ($offsets as $label => $hours) {
-            $due = $booking->starts_at->subHours($hours);
+            $start = $booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at;
+            $due = $start->subHours($hours);
             if ($due->isFuture()) {
-                $prefix = $booking instanceof Reservation ? 'table_' : '';
-                DB::table('booking_reminders')->insert(['booking_id' => $booking->id, 'kind' => "{$prefix}reminder_{$label}_{$booking->starts_at->getTimestamp()}",
+                $prefix = match (true) {
+                    $booking instanceof Reservation => 'table_', $booking instanceof ClassAttendee => 'class_', default => ''
+                };
+                DB::table('booking_reminders')->insert(['booking_id' => $booking->id, 'kind' => "{$prefix}reminder_{$label}_{$start->getTimestamp()}",
                     'tenant_id' => $this->context->id(), 'due_at' => Instant::db($due)]);
             }
         }
@@ -48,6 +52,17 @@ final readonly class Reminders
                 $sent += (int) $this->context->run($tenant, function () use ($due): int {
                     $n = 0;
                     foreach ($due as $r) {
+                        if (str_starts_with((string) $r->kind, 'class_')) {
+                            $attendee = ClassAttendee::query()->whereKey($r->booking_id)->first();
+                            $session = $attendee?->session();
+                            if ($attendee !== null && $session !== null && $attendee->status === 'confirmed' && $session->status === 'scheduled' && $session->starts_at->isFuture()) {
+                                app(Meetings::class)->ensureForClass($session);
+                                $this->messages->send($attendee, 'reminder', (string) $r->kind);
+                                $n++;
+                            }
+
+                            continue;
+                        }
                         $booking = str_starts_with((string) $r->kind, 'table_')
                             ? Reservation::query()->whereKey($r->booking_id)->first()
                             : Booking::query()->whereKey($r->booking_id)->first();
