@@ -52,26 +52,26 @@ Route::tenant(function (): void {
 // Online booking on the business's own website ({handle}.{root}): no session or CSRF (nothing signed in),
 // a hidden spam field and rate limits — as on the quote form.
 Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'])->prefix('book')->name('bookings.public.')->group(function (): void {
-    Route::get('/services', [PublicBookingController::class, 'services'])->middleware('throttle:60,1,book-read')->name('services');
-    Route::get('/times', [PublicBookingController::class, 'times'])->middleware('throttle:60,1,book-read')->name('times');
-    Route::post('/', [PublicBookingController::class, 'book'])->middleware('throttle:5,10,book-create')->name('book');
-    Route::get('/tables/times', [PublicTableController::class, 'times'])->middleware('throttle:60,1,book-read')->name('tables.times');
-    Route::post('/tables', [PublicTableController::class, 'reserve'])->middleware('throttle:5,10,book-create')->name('tables.reserve');
-    Route::middleware(['signed', 'throttle:30,1,book-manage'])->group(function (): void {
+    Route::get('/services', [PublicBookingController::class, 'services'])->middleware('throttle:book-read')->name('services');
+    Route::get('/times', [PublicBookingController::class, 'times'])->middleware('throttle:book-read')->name('times');
+    Route::post('/', [PublicBookingController::class, 'book'])->middleware('throttle:book-create')->name('book');
+    Route::get('/tables/times', [PublicTableController::class, 'times'])->middleware('throttle:book-read')->name('tables.times');
+    Route::post('/tables', [PublicTableController::class, 'reserve'])->middleware('throttle:book-create')->name('tables.reserve');
+    Route::middleware(['signed', 'throttle:book-manage'])->group(function (): void {
         Route::get('/tables/{reservation}', [PublicTableController::class, 'show'])->name('table');
         Route::post('/tables/{reservation}/cancel', [PublicTableController::class, 'cancel'])->name('table.cancel');
     });
-    Route::get('/classes', [PublicClassController::class, 'index'])->middleware('throttle:60,1,book-read')->name('classes');
-    Route::post('/classes/{session}', [PublicClassController::class, 'attend'])->middleware('throttle:5,10,book-create')->name('classes.attend');
-    Route::middleware(['signed', 'throttle:30,1,book-manage'])->group(function (): void {
+    Route::get('/classes', [PublicClassController::class, 'index'])->middleware('throttle:book-read')->name('classes');
+    Route::post('/classes/{session}', [PublicClassController::class, 'attend'])->middleware('throttle:book-create')->name('classes.attend');
+    Route::middleware(['signed', 'throttle:book-manage'])->group(function (): void {
         Route::get('/class/{attendee}', [PublicClassController::class, 'show'])->name('class');
         Route::post('/class/{attendee}/cancel', [PublicClassController::class, 'leave'])->name('class.leave');
     });
-    Route::get('/return', [PublicBookingController::class, 'paid'])->middleware('throttle:30,1,book-read')->name('paid');
+    Route::get('/return', [PublicBookingController::class, 'paid'])->middleware('throttle:book-read')->name('paid');
     // The customer's own booking page: signed links (no account), expiring when the booking starts.
     // The page checks its own signature (ignoring only the chosen ?date); each action has its own signed address.
-    Route::get('/manage/{booking}', [PublicManageController::class, 'show'])->middleware('throttle:30,1,book-manage')->name('manage');
-    Route::middleware(['signed', 'throttle:30,1,book-manage'])->group(function (): void {
+    Route::get('/manage/{booking}', [PublicManageController::class, 'show'])->middleware('throttle:book-manage')->name('manage');
+    Route::middleware(['signed', 'throttle:book-manage'])->group(function (): void {
         Route::post('/manage/{booking}/cancel', [PublicManageController::class, 'cancel'])->name('manage.cancel');
         Route::post('/manage/{booking}/move', [PublicManageController::class, 'move'])->name('manage.move');
     });

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Wurk\Bookings;
 
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Billing\Contracts\DepositPaid;
 use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
@@ -44,6 +47,13 @@ final class BookingsServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'bookings');
+        // Public limits per business AND visitor: the route's domain pattern is the same for every business,
+        // so keying by it alone made all of WURK share one allowance per IP (carrier NAT puts many
+        // customers behind one IP).
+        $visitor = fn (Request $r, string $name) => $name.'|'.(string) $r->route('handle').'|'.$r->ip();
+        RateLimiter::for('book-create', fn (Request $r) => Limit::perMinutes(10, 10)->by($visitor($r, 'book-create')));
+        RateLimiter::for('book-read', fn (Request $r) => Limit::perMinute(60)->by($visitor($r, 'book-read')));
+        RateLimiter::for('book-manage', fn (Request $r) => Limit::perMinute(30)->by($visitor($r, 'book-manage')));
         // A deposit Paystack reported paid: confirmed only after verifying (Deposits::confirm).
         Event::listen(DepositPaid::class, fn (DepositPaid $e) => $this->app->make(Deposits::class)->confirm($e->reference));
         Event::listen([BookingConfirmed::class, BookingMoved::class, BookingCancelled::class, ReservationConfirmed::class, ReservationCancelled::class, ClassJoined::class, ClassLeft::class], SendBookingMessages::class);
