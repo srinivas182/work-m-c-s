@@ -152,7 +152,8 @@ it('builds the cart page only while the business takes orders online', function 
         ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
         app(ProductPages::class)->renderAll();
     });
-    Process::assertRan(fn (PendingProcess $p) => str_contains((string) $p->input, '"type":"Checkout"') && str_contains((string) $p->input, '"can_order":true'));
+    Process::assertRan(fn (PendingProcess $p) => str_contains((string) $p->input, '"type":"Checkout"'));   // the cart page
+    Process::assertRan(fn (PendingProcess $p) => str_contains((string) $p->input, '"can_order":true'));    // product pages show Add to cart
     $this->get("{$site}/cart")->assertOk()->assertSee('<h1>Your cart</h1>', false);
 
     ($this->in)(function () {
