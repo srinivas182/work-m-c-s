@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Mail;
 use Tests\Support\InteractsWithShards;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Shop\Mail\OrderPlacedMail;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
@@ -63,4 +65,12 @@ it('places the order, and its signed page says what was ordered and how to pay',
     $this->get($res->json('order_url').'x')->assertForbidden();
 
     $this->postJson("{$this->site}/cart/checkout", $this->order)->assertStatus(409)->assertJson(['message' => 'Kasi T-shirt has just sold out.']);
+});
+
+it('emails the customer their order, how to pay and the link', function () {
+    Mail::fake();
+    ($this->entitle)();
+    $url = $this->postJson("{$this->site}/cart/checkout", [...$this->order, 'email' => 'sipho@example.com'])->assertCreated()->json('order_url');
+    Mail::assertSent(OrderPlacedMail::class, fn ($m) => $m->hasTo('sipho@example.com') && $m->number === 1001
+        && $m->lines === ['1 × Kasi T-shirt — R250.00'] && $m->total === 'R250.00' && str_contains((string) $m->howToPay, '6200 0000 000') && $m->link === $url);
 });

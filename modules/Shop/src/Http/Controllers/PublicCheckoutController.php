@@ -7,8 +7,10 @@ namespace Wurk\Shop\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Shop\Mail\OrderPlacedMail;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Product;
@@ -72,8 +74,15 @@ final class PublicCheckoutController
                 return new JsonResponse(['message' => $e->getMessage()], 409);
             }
 
-            return new JsonResponse(['placed' => true, 'number' => $order->number, 'total_cents' => $order->total_cents,
-                'order_url' => URL::signedRoute('shop.public.order', ['handle' => $tenant->handle(), 'order' => $order->id])], 201);
+            $url = URL::signedRoute('shop.public.order', ['handle' => $tenant->handle(), 'order' => $order->id]);
+            if ($order->customer_email !== null) {
+                $rand = fn (int $c) => 'R'.number_format($c / 100, 2);
+                $lines = array_values(OrderItem::query()->where('order_id', $order->id)->get()->map(fn (OrderItem $i) => "{$i->quantity} × {$i->product_name}".($i->variant_label ? " ({$i->variant_label})" : '').' — '.$rand($i->line_cents))->all());
+                Mail::to($order->customer_email)->send(new OrderPlacedMail($tenant->displayName(), $order->number, $lines, $rand($order->total_cents),
+                    ShopSettings::query()->find($this->context->id())?->offline_instructions, $url));
+            }
+
+            return new JsonResponse(['placed' => true, 'number' => $order->number, 'total_cents' => $order->total_cents, 'order_url' => $url], 201);
         });
     }
 

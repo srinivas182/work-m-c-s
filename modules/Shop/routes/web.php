@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Wurk\Shop\Http\Controllers\PhotosController;
 use Wurk\Shop\Http\Controllers\ProductsController;
 use Wurk\Shop\Http\Controllers\PublicCheckoutController;
+use Wurk\Shop\Http\Controllers\ShopSettingsController;
 
 Route::tenant(function (): void {
     Route::middleware(['entitled:shop', 'permission:shop.manage'])->prefix('shop')->name('tenant.shop.')->group(function (): void {
@@ -13,6 +14,8 @@ Route::tenant(function (): void {
         Route::post('/products', [ProductsController::class, 'save'])->name('products.store');
         Route::put('/products/{product}', [ProductsController::class, 'save'])->name('products.update');
         Route::delete('/products/{product}', [ProductsController::class, 'destroy'])->name('products.destroy');
+        Route::get('/settings', [ShopSettingsController::class, 'show'])->name('settings');
+        Route::put('/settings', [ShopSettingsController::class, 'save'])->name('settings.save');
         Route::get('/photos', [PhotosController::class, 'index'])->name('photos');
         Route::post('/photos', [PhotosController::class, 'store'])->middleware('throttle:60,1,shop-photos')->name('photos.store');
         Route::post('/categories', [ProductsController::class, 'addCategory'])->name('categories.store');
