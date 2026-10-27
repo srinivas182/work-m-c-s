@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\Support\InteractsWithShards;
+use Wurk\Plans\Actions\PackageCatalog;
+use Wurk\Plans\Contracts\Catalog;
+use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Http\Controllers\ProductsController;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\Variant;
@@ -28,6 +31,21 @@ beforeEach(function () {
     Storage::fake('local');
     $this->createShards(1);
     $this->shop = $this->createTenant('kasi-threads', name: 'Kasi Threads');
+    $this->package = function (array $modules) {
+        $p = PackageCatalog::class;
+        $pkg = app($p)->create([
+            'key' => 'k'.count($modules).random_int(1, 99999), 'name' => 'Package', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 1,
+            'monthly_price_cents' => 29900, 'yearly_price_cents' => 299000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 5,
+            'multi_branch' => false, 'max_branches' => 1, 'custom_domain' => false, 'monthly_credits' => 0, 'referral_max_levels' => 7,
+            'referral_max_commission_bp' => 3000, 'managed_fee_cents' => null, 'modules' => $modules,
+        ], null);
+        $catalog = app(Catalog::class);
+        $catalog->subscriptionOf($this->shop->id) === null
+            ? $catalog->subscribe($this->shop->id, $pkg->id, 'monthly', allowTrial: true)
+            : $catalog->changePackage($this->shop->id, $pkg->id, 'monthly'); // a downgrade, as in real life
+        app(Entitlements::class)->flush();
+    };
+    ($this->package)(['website', 'shop']);
     $this->ctx = app(TenantContext::class);
     $this->in = fn (callable $fn) => $this->ctx->run($this->shop, $fn);
     $this->product = function (string $name, string $status, array $variants) {
@@ -108,4 +126,12 @@ it('gives each published product its own page at /shop/{slug} — and removes it
         app(ProductPages::class)->renderAll();
     });
     $this->get("{$site}/shop/kasi-t-shirt")->assertNotFound();
+});
+
+it('shows nothing once the business’s package no longer includes the shop', function () {
+    ($this->product)('Kasi T-shirt', 'published', [['price_cents' => 25000]]);
+    expect(($this->in)(fn () => app(ProductCatalog::class)->published()))->toHaveCount(1);
+    ($this->package)(['website', 'bookings']); // downgraded
+    expect(($this->in)(fn () => app(ProductCatalog::class)->published()))->toBe([])
+        ->and(($this->in)(fn () => app(ProductCatalog::class)->pages()))->toBe([]);
 });

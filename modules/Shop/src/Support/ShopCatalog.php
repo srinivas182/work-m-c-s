@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Wurk\Shop\Support;
 
+use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Models\Variant;
+use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\ProductCatalog;
 
 /** The Shop's published products, for the website's shop sections. */
@@ -14,6 +16,10 @@ final class ShopCatalog implements ProductCatalog
 {
     public function published(): array
     {
+        // Only while the business's package includes the shop: after a downgrade, grids hide and product pages go.
+        if (! app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'shop')) {
+            return [];
+        }
         $products = Product::query()->where('status', 'published')->orderBy('position')->orderBy('name')->get();
         $variants = Variant::query()->whereIn('product_id', $products->pluck('id'))->get()->groupBy('product_id');
         $categories = ShopCategory::query()->pluck('name', 'id');
