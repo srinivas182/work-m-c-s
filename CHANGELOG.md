@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 10.1 (catalogue)
+- **Shop module** (Growth and Pro): products with up to three options (e.g. Size, Colour) and variants — each with its own price, "was" price, SKU and stock (empty = not tracked); categories; unique slugs; variant ids kept when editing.
+- **Product photos** from the business's one photo library (Website's `MediaLibrary` contract) — shop managers needn't edit the website.
+- **Products section** for the website, rendered at publish through Website's `ProductCatalog` contract (Shop implements it; Website never depends on Shop): "from" and "was" prices, sold out; hidden when there's nothing to sell; a prompt in the editor; samples in template previews.
+- **Product pages** at `/shop/{slug}`: the site's header and footer around the product, rendered ahead of time and served through the same shell as every page; rebuilt when products, the home page, branding or menus change; removed when unpublished.
+- Only while the package includes the shop (downgrades hide grids and product pages).
+- Demo shops (`shop:demo`); "New in" products on the retail templates; the performance gate also measures product pages (`--only` for local checks) — all 100.
+
 ### Added — Sprint 9.3b (online payment for classes)
 - **Paid online when booking**: a class's price goes straight to the business's Paystack account. The place is **held while paying (and counts toward capacity)**, confirmed only once Paystack verifies the payment, and released after 15 minutes if unpaid; late payments are refunded automatically.
 - **Refunds**: leaving in time refunds (cancellation policy); when the business cancels a class, everyone who paid is refunded.

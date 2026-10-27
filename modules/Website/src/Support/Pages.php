@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Exceptions\DraftConflict;
+use Wurk\Website\Jobs\RenderProductPages;
 use Wurk\Website\Jobs\RenderPublishedPage;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageSlug;
@@ -151,6 +152,10 @@ final readonly class Pages
             RenderPublishedPage::dispatch($this->context->id(), $version->id)->afterCommit();
             $this->recordLaunch($page);
 
+            if ($page->is_home) {
+                RenderProductPages::dispatch($this->context->id()); // product pages use the home page's header and footer
+            }
+
             return $version;
         });
         $this->audit->record('website.page_published', 'page', $page->id, ['title' => $page->title, 'version' => $version->number, 'note' => $note]);
@@ -217,6 +222,7 @@ final readonly class Pages
      */
     public function rerenderPublished(): int
     {
+        RenderProductPages::dispatch($this->context->id()); // they share the header, footer and branding
         $versions = Page::query()->whereNotNull('published_version_id')->pluck('published_version_id');
         foreach ($versions as $versionId) {
             RenderPublishedPage::dispatch($this->context->id(), (string) $versionId)->afterCommit();

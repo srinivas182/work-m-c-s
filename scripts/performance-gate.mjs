@@ -12,7 +12,10 @@ import lighthouse from 'lighthouse';
 const port = Number((process.argv.find((a) => a.startsWith('--port=')) ?? '--port=8124').split('=')[1]);
 const MIN_SCORE = 90;
 const MAX_CLS = 0.1;
-const keys = readdirSync('modules/Website/templates').filter((f) => f.endsWith('.json')).map((f) => JSON.parse(readFileSync(`modules/Website/templates/${f}`, 'utf8')).key).sort();
+const all = readdirSync('modules/Website/templates').filter((f) => f.endsWith('.json')).map((f) => JSON.parse(readFileSync(`modules/Website/templates/${f}`, 'utf8')).key).sort();
+// --only=a,b measures just those templates (local checks); CI measures them all.
+const only = (process.argv.find((a) => a.startsWith('--only=')) ?? '').split('=')[1]?.split(',').filter(Boolean) ?? [];
+const keys = only.length ? all.filter((k) => only.includes(k)) : all;
 
 const chrome = await chromeLauncher.launch({
   chromePath: process.env.CHROME_PATH,
@@ -27,8 +30,14 @@ const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
 
 const rows = [];
 try {
-  for (const key of keys) {
-    const url = `http://demo-${key}.wurk.test:${port}/`;
+  // Every template's home page, plus product pages from the demo shops (shop:demo).
+  const pages = [
+    ...keys.map((key) => ({ key, url: `http://demo-${key}.wurk.test:${port}/` })),
+    ...['retail-boutique/shop/linen-summer-dress', 'retail-general-store/shop/enamel-mug']
+      .filter((path) => keys.includes(path.split('/')[0]))
+      .map((path) => ({ key: `${path.split('/')[0]} product`, url: `http://demo-${path.replace('/', '.wurk.test:' + port + '/')}` })),
+  ];
+  for (const { key, url } of pages) {
     let runs = [await measure(url)];
     if (runs[0].score < MIN_SCORE || runs[0].cls >= MAX_CLS) runs = [...runs, await measure(url), await measure(url)];
     const result = { key, score: median(runs.map((r) => r.score)), cls: median(runs.map((r) => r.cls)), lcp: median(runs.map((r) => r.lcp)), runs: runs.length };
@@ -40,5 +49,5 @@ try {
   await chrome.kill();
 }
 const failed = rows.filter((r) => !r.pass);
-console.log(`\n${rows.length - failed.length} of ${rows.length} templates pass (mobile ≥ ${MIN_SCORE}, layout shift < ${MAX_CLS}).`);
+console.log(`\n${rows.length - failed.length} of ${rows.length} pages pass (mobile ≥ ${MIN_SCORE}, layout shift < ${MAX_CLS}).`);
 process.exit(failed.length === 0 ? 0 : 1);

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 10 (sprint plan revision 3) |
-| **Status** | Specification — awaiting approval |
+| **Status** | Approved 28 Oct 2026 — 10.1 in review |
 | **Depends on** | v0.10.0 (website engine, payments straight to the business, fixed-wording messages) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -63,3 +63,15 @@ Shop sections in the retail-led templates; accessibility scans of product, cart 
 |---|---|
 | **PayFast and Yoco sandbox accounts** (merchant test credentials) | 10.3 |
 | Confirmation of WURK's fee on sales (if any) | Before 10.3 |
+
+## 7. Confirmed with WURK (29 Oct 2026)
+
+1. **WURK takes no fee on sales** — it collects only subscriptions and add-ons.
+2. **PayFast and Yoco**, test mode first; **each business enters its own keys** in Settings.
+3. **One payment setup per business for everything customers pay it** — shop sales, appointment deposits and class payments move to the business's own keys (replacing the Paystack subaccounts WURK set up in Sprints 8–9), so WURK is never involved in customer payments.
+
+## 8. Progress log
+
+| Sub-sprint | PR | Notes |
+|---|---|---|
+| 10.1 Catalogue | see PR | 840 backend tests on SQLite and MySQL 8; 375 frontend; all browser tests incl. a shopper browsing a demo shop; product pages score 100. Found: public shop pages ignored the shop entitlement (fixed) |

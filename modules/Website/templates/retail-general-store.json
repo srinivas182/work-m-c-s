@@ -86,6 +86,17 @@
               }
             },
             {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "In store now",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-6"
+              }
+            },
+            {
               "id": "why",
               "type": "FeatureGrid",
               "version": 1,
