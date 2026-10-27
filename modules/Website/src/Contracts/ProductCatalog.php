@@ -23,4 +23,7 @@ interface ProductCatalog
      * @return list<array{id: string, name: string, slug: string, description: string|null, photos: list<string>, options: list<string>, price_cents: int, varies: bool, compare_at_cents: int|null, in_stock: bool, variants: list<array{id: string, label: string|null, price_cents: int, compare_at_cents: int|null, in_stock: bool}>}>
      */
     public function pages(): array;
+
+    /** Whether customers can order online now (product pages show "Add to cart"; the cart page exists). */
+    public function canOrder(): bool;
 }

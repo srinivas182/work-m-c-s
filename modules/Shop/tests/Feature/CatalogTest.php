@@ -14,6 +14,7 @@ use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Http\Controllers\ProductsController;
 use Wurk\Shop\Models\Product;
+use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\CatalogChanged;
@@ -134,4 +135,29 @@ it('shows nothing once the business’s package no longer includes the shop', fu
     ($this->package)(['website', 'bookings']); // downgraded
     expect(($this->in)(fn () => app(ProductCatalog::class)->published()))->toBe([])
         ->and(($this->in)(fn () => app(ProductCatalog::class)->pages()))->toBe([]);
+});
+
+it('builds the cart page only while the business takes orders online', function () {
+    $this->artisan('website:install-templates');
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<main><h1>Your cart</h1></main>']))]);
+    ($this->product)('Kasi T-shirt', 'published', [['price_cents' => 25000]]);
+    ($this->in)(function () {
+        app(SiteBuilder::class)->apply('salon-hair-braids');
+        app(Pages::class)->publish(Page::query()->where('is_home', true)->firstOrFail(), null, null);
+    });
+    $site = 'http://kasi-threads.'.config('wurk.domains.root');
+    $this->get("{$site}/cart")->assertNotFound(); // ordering not switched on
+
+    ($this->in)(function () {
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+        app(ProductPages::class)->renderAll();
+    });
+    Process::assertRan(fn (PendingProcess $p) => str_contains((string) $p->input, '"type":"Checkout"') && str_contains((string) $p->input, '"can_order":true'));
+    $this->get("{$site}/cart")->assertOk()->assertSee('<h1>Your cart</h1>', false);
+
+    ($this->in)(function () {
+        ShopSettings::query()->update(['offline_enabled' => false]);
+        app(ProductPages::class)->renderAll();
+    });
+    $this->get("{$site}/cart")->assertNotFound();
 });

@@ -114,12 +114,35 @@ export const ProductDetail: BlockDefinition<Record<string, never>> = {
                 </table>
               </div>
             )}
-            <a
-              href={site.editing ? undefined : '/contact'}
-              className="inline-flex min-h-12 items-center justify-self-start rounded-[var(--s-radius)] bg-[var(--s-brand)] px-7 font-semibold text-[var(--s-on-brand)]"
-            >
-              Ask about this product
-            </a>
+            {x.can_order && !site.editing ? (
+              <div
+                data-island="add-to-cart"
+                data-product={x.name}
+                data-variants={JSON.stringify(
+                  x.variants.map((v) => ({
+                    id: v.id,
+                    label: v.label,
+                    price_cents: v.price_cents,
+                    in_stock: v.in_stock,
+                  })),
+                )}
+              >
+                {/* Without JavaScript: */}
+                <a
+                  href="/contact"
+                  className="inline-flex min-h-12 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-7 font-semibold text-[var(--s-on-brand)]"
+                >
+                  Ask about this product
+                </a>
+              </div>
+            ) : (
+              <a
+                href={site.editing ? undefined : '/contact'}
+                className="inline-flex min-h-12 items-center justify-self-start rounded-[var(--s-radius)] bg-[var(--s-brand)] px-7 font-semibold text-[var(--s-on-brand)]"
+              >
+                Ask about this product
+              </a>
+            )}
           </div>
         </div>
       </Section>

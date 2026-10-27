@@ -12,6 +12,7 @@ use Inertia\Response;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Contracts\CatalogChanged;
 
 /** Owners: Shop → Settings — collection, delivery, and paying by EFT or on collection. */
 final class ShopSettingsController
@@ -51,6 +52,7 @@ final class ShopSettingsController
             'offline_enabled' => (bool) ($data['offline_enabled'] ?? false), 'offline_instructions' => $data['offline_instructions'] ?: null, 'offline_hold_hours' => $data['offline_hold_hours'],
         ]);
         $this->audit->record('shop.settings_saved', 'shop_settings', $this->context->id(), []);
+        event(new CatalogChanged($this->context->id())); // "Add to cart" and the cart page follow the settings
 
         return back()->with('status', 'Shop settings saved.');
     }

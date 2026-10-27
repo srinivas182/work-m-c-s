@@ -19,6 +19,7 @@ use Wurk\Website\Models\PageVersion;
 use Wurk\Website\Models\ProductRender;
 use Wurk\Website\Models\Site;
 use Wurk\Website\Support\FontPreloads;
+use Wurk\Website\Support\ProductPages;
 use Wurk\Website\Support\PublicAssets;
 use Wurk\Website\Support\SiteFacts;
 use Wurk\Website\Support\SiteSeo;
@@ -34,6 +35,17 @@ final class PublicSiteController
         $path = trim($request->path(), '/');
         $slug = $path === '' ? null : $path;
         $tenant = $tenants->findByHandle($handle);
+        if ($tenant !== null && $tenant->isActive() && $slug === 'cart') {
+            $cart = $context->run($tenant, function () use ($tenant): ?Response {
+                $render = ProductRender::query()->find(ProductPages::CART); // only while the business takes orders online
+
+                return $render === null ? null : $this->respond($tenant, $render->path, $render->rendered_at?->getTimestamp(), '/cart', false);
+            });
+            if ($cart !== null) {
+                return $cart;
+            }
+            // Not taking orders: an older page at /cart (made before the shop reserved it) still shows.
+        }
         if ($tenant !== null && $tenant->isActive() && preg_match('#^shop/([a-z0-9-]+)$#', (string) $slug, $m) === 1) {
             return $context->run($tenant, function () use ($tenant, $m): Response {
                 $render = ProductRender::query()->where('slug', $m[1])->first(); // only published products have one

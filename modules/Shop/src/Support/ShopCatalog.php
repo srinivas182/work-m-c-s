@@ -7,6 +7,7 @@ namespace Wurk\Shop\Support;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
+use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\ProductCatalog;
@@ -63,5 +64,10 @@ final class ShopCatalog implements ProductCatalog
         }
 
         return $out;
+    }
+
+    public function canOrder(): bool
+    {
+        return $this->published() !== [] && (bool) ShopSettings::query()->find(app(TenantContext::class)->id())?->offline_enabled; // + card payments (10.3)
     }
 }

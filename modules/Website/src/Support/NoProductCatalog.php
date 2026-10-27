@@ -18,4 +18,9 @@ final class NoProductCatalog implements ProductCatalog
     {
         return [];
     }
+
+    public function canOrder(): bool
+    {
+        return false;
+    }
 }

@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Models\Product;
+use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -62,7 +63,11 @@ final class DemoShopCommand extends Command
                 ? $catalog->subscribe($tenant->tenantId(), (string) $growth['id'], 'monthly', allowTrial: true)
                 : $catalog->changePackage($tenant->tenantId(), (string) $growth['id'], 'monthly');
             $entitlements->flush();
-            $made = $context->run($tenant, function () use ($template, $products): bool {
+            $made = $context->run($tenant, function () use ($template, $products, $context): bool {
+                ShopSettings::query()->firstOrCreate(['tenant_id' => $context->id()], [
+                    'collection_enabled' => true, 'collection_address' => '12 Demo Street, Johannesburg', 'delivery_enabled' => true, 'delivery_fee_cents' => 6000,
+                    'offline_enabled' => true, 'offline_instructions' => "Demo Bank, account 0000 000 000 (a demo — don't pay)",
+                ]);
                 if (Product::query()->exists()) {
                     return false;
                 }
