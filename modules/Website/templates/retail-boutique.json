@@ -99,6 +99,17 @@
               }
             },
             {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "New in",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-6"
+              }
+            },
+            {
               "id": "gallery",
               "type": "Gallery",
               "version": 1,

@@ -57,3 +57,4 @@ if [ ! -f bootstrap/site-render/site-render.js ]; then
 fi
 php artisan website:demo-sites --no-interaction > /dev/null
 php artisan bookings:demo --no-interaction > /dev/null   # the demo sites take bookings
+php artisan shop:demo --no-interaction > /dev/null           # the retail demos sell (product grids and pages)
