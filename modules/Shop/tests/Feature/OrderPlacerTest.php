@@ -75,3 +75,12 @@ it('returns the stock when an order is cancelled or expires', function () {
     expect(($this->stock)($this->m))->toBe(3)->and(DB::table('shop_holds')->count())->toBe(0)
         ->and(($this->in)(fn () => $order->refresh()->status))->toBe('cancelled');
 });
+
+it('cancels unpaid orders after the hold time and returns their stock', function () {
+    ($this->place)([['variant' => $this->m->id, 'quantity' => 2]]);
+    $this->travel(71)->hours();
+    $this->artisan('shop:expire-orders')->expectsOutput('0 order(s) expired.');
+    $this->travel(2)->hours();
+    $this->artisan('shop:expire-orders')->expectsOutput('1 order(s) expired.');
+    expect(($this->stock)($this->m))->toBe(3)->and(($this->in)(fn () => Order::query()->sole()->status))->toBe('expired');
+});

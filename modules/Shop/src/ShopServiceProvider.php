@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace Wurk\Shop;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Shop\Console\DemoShopCommand;
+use Wurk\Shop\Console\ExpireOrdersCommand;
 use Wurk\Shop\Support\ShopCatalog;
 use Wurk\Website\Contracts\ProductCatalog;
 
@@ -33,8 +38,16 @@ final class ShopServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->loadViewsFrom($this->modulePath('resources/views'), 'shop');
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('shop:expire-orders')->everyFifteenMinutes()->onOneServer()->withoutOverlapping();
+        });
+        // Public limits per business AND visitor (never across all of WURK — shared mobile IPs).
+        $visitor = fn (Request $r, string $name) => $name.'|'.(string) $r->route('handle').'|'.$r->ip();
+        RateLimiter::for('shop-read', fn (Request $r) => Limit::perMinute(60)->by($visitor($r, 'shop-read')));
+        RateLimiter::for('shop-create', fn (Request $r) => Limit::perMinutes(10, 10)->by($visitor($r, 'shop-create')));
         if ($this->app->runningInConsole()) {
-            $this->commands([DemoShopCommand::class]);
+            $this->commands([DemoShopCommand::class, ExpireOrdersCommand::class]);
         }
     }
 }
