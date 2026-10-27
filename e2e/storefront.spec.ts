@@ -15,10 +15,7 @@ test('a shopper browses the grid and opens a product page', async ({ page }, tes
   await expect(page.getByRole('heading', { level: 1, name: 'Linen summer dress' })).toBeVisible();
   const table = page.getByRole('table', { name: 'Options and prices' });
   await expect(table.getByRole('row', { name: /^L .* Sold out$/ })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Ask about this product' })).toHaveAttribute(
-    'href',
-    '/contact',
-  );
+  await expect(page.getByRole('button', { name: 'Add to cart' })).toBeVisible(); // the demo shop takes orders (otherwise: “Ask about this product”)
   await expectAccessible(page);
 
   await page.goto(`http://demo-retail-boutique.wurk.test:${port}/shop/no-such-product`);

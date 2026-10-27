@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 10.2 (cart and checkout)
+- **Add to cart** on product pages (sold-out options disabled; "Ask about this product" without JavaScript), and **the cart and checkout at `/cart`**: quantities, collection or delivery with a live total, details and consent, then the customer's order page. The cart lives in the shopper's browser; **the server re-checks every price and stock level**.
+- **Never oversold**: each variant is locked and its stock taken off in the same transaction as the order — or nothing is saved. Order numbers per business (#1001…); names and prices copied into the order.
+- **Paying by EFT or on collection** (optional, per business, agreed with WURK): customers see the business's instructions with their order number as the reference; unpaid orders release their stock after the hold time (default 72 hours). Card payments follow in 10.3.
+- **Shop settings**: collection, delivery fee and areas, EFT/pay-on-collection instructions and hold time. **Order confirmation email** to the customer.
+- Demo shops take orders; the full purchase is tested in the browser on desktop and phone; product pages still score 98–100.
+
+### Fixed
+- The cart page's fixed id was 27 characters; MySQL rejected it (SQLite ignores lengths), so the cart page would never have been saved. Now 26, with a guard test.
+
 ### Changed — online appointments use pasted meeting links (agreed with WURK)
 - **Meeting links per team member**: each person's own Google Meet or Zoom link, plus an optional default for the whole business — simpler than connecting accounts. Appointments use the practitioner's link; classes the instructor's; anyone without one, the default. No calls to Google or Zoom are needed.
 - An online service needs everyone who does it to be reachable (their link, or a default); an online class needs its instructor's link (or a default).
