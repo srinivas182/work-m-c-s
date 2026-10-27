@@ -162,3 +162,7 @@ it('builds the cart page only while the business takes orders online', function 
     });
     $this->get("{$site}/cart")->assertNotFound();
 });
+
+it('uses a cart-page id that fits the product id column (26 characters)', function () {
+    expect(strlen(ProductPages::CART))->toBe(26);
+});

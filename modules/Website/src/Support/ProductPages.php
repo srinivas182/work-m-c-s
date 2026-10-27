@@ -19,7 +19,7 @@ use Wurk\Website\Models\ProductRender;
 final readonly class ProductPages
 {
     /** The cart page is stored alongside product pages under this fixed id. */
-    public const CART = '00000000000000000000000CART';
+    public const CART = '0000000000000000000000CART'; // exactly 26 characters, like every id in product_renders
 
     public function __construct(private TenantContext $context, private PageRenderer $renderer, private ProductCatalog $catalog) {}
 
