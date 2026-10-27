@@ -5,14 +5,17 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
+use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\TimeOff;
+use Wurk\Bookings\Support\MeetingLinks;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
@@ -135,7 +138,31 @@ it('accepts a fixed meeting link only over https', function () {
 it('won’t make a service online until clients have a way to join', function () {
     ($this->subscribe)(['bookings']);
     $this->actingAs($this->owner)->post("{$this->base}/services", [...$this->service, 'location_type' => 'online'])
-        ->assertSessionHasErrors(['location_type' => 'Connect Google Meet or Zoom (or add a meeting link) under Video calls first, so clients can join.']);
+        ->assertSessionHasErrors(['location_type' => 'Add a meeting link (under Meeting links) for everyone who does this service, or a link for the whole business, so clients can join.']);
     $this->actingAs($this->owner)->put("{$this->base}/video/fixed", ['url' => 'https://meet.example.com/room']);
     $this->actingAs($this->owner)->post("{$this->base}/services", [...$this->service, 'location_type' => 'online'])->assertSessionHas('status', 'Service saved.');
+});
+
+it('gives each team member their own meeting link, with a business default — and online services need everyone reachable', function () {
+    ($this->subscribe)(['bookings']);
+    [$thandi, $sipho] = $this->ctx->run($this->glow, fn () => [app(TeamDirectory::class)->members()[0]['id'], app(TeamDirectory::class)->add((string) Str::ulid(), 'Sipho', 'staff')]);
+    $online = [...$this->service, 'location_type' => 'online', 'members' => [$thandi, $sipho]];
+
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => null, 'members' => [$thandi => 'http://zoom.us/j/1']])
+        ->assertSessionHasErrors(['members.'.$thandi => 'Enter the full meeting link, starting with https://']);
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => null, 'members' => ['01J00000000000000000000099' => 'https://zoom.us/j/1']])
+        ->assertSessionHasErrors(['members' => 'That person isn’t on your team.']);
+
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => null, 'members' => [$thandi => 'https://zoom.us/j/111']])->assertSessionHas('status', 'Meeting links saved.');
+    $this->actingAs($this->owner)->post("{$this->base}/services", $online)->assertSessionHasErrors('location_type'); // Sipho has no link, no default
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => null, 'members' => [$thandi => 'https://zoom.us/j/111', $sipho => 'https://meet.google.com/abc-defg-hij']]);
+    $this->actingAs($this->owner)->post("{$this->base}/services", $online)->assertSessionHas('status', 'Service saved.');
+
+    $this->ctx->run($this->glow, function () use ($thandi, $sipho) {
+        $links = app(MeetingLinks::class);
+        expect($links->forMember($thandi))->toBe('https://zoom.us/j/111')->and($links->forMember($sipho))->toBe('https://meet.google.com/abc-defg-hij')
+            ->and($links->forMember('01J00000000000000000000099'))->toBeNull();
+    });
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => 'https://meet.google.com/our-room', 'members' => [$thandi => 'https://zoom.us/j/111', $sipho => null]]);
+    $this->ctx->run($this->glow, fn () => expect(app(MeetingLinks::class)->forMember($sipho))->toBe('https://meet.google.com/our-room')); // falls back to the default
 });

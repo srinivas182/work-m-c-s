@@ -37,7 +37,13 @@ final readonly class Meetings
             return;
         }
         $connection = MeetingConnection::query()->find($this->context->id());
-        if ($connection === null) {
+        if ($connection === null || $connection->provider === 'fixed') {
+            // Pasted links: the practitioner's own, otherwise the business default.
+            $link = app(MeetingLinks::class)->forMember($booking->member_id);
+            if ($link !== null) {
+                $booking->update(['meeting_provider' => 'link', 'meeting_id' => null, 'meeting_url' => $link]);
+            }
+
             return;
         }
         try {
@@ -93,7 +99,13 @@ final readonly class Meetings
             return;
         }
         $connection = MeetingConnection::query()->find($this->context->id());
-        if ($connection === null) {
+        if ($connection === null || $connection->provider === 'fixed') {
+            // Pasted links: the instructor's own, otherwise the business default.
+            $link = app(MeetingLinks::class)->forMember($session->member_id);
+            if ($link !== null) {
+                $session->update(['meeting_provider' => 'link', 'meeting_id' => null, 'meeting_url' => $link]);
+            }
+
             return;
         }
         try {
