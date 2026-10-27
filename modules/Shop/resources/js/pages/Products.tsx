@@ -14,6 +14,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { PhotoPicker } from '@modules/Website/resources/js/editor/PhotoPicker';
 import { Package } from 'lucide-react';
 
 interface VariantRow {
@@ -136,6 +137,21 @@ function Editor({
               onChange={(e) => form.setData('description', e.target.value)}
             />
           </Field>
+          <fieldset className="grid gap-2">
+            <legend className="mb-1 text-sm font-medium">Photos (the first is the main one)</legend>
+            <PhotoPicker
+              value={form.data.photos.map((src) => ({ src, alt: form.data.name }))}
+              onChange={(next) =>
+                form.setData(
+                  'photos',
+                  next.map((p) => p.src),
+                )
+              }
+              max={10}
+              photosUrl={`${base()}/photos`}
+              withAlt={false}
+            />
+          </fieldset>
           <fieldset className="grid gap-2">
             <legend className="mb-1 text-sm font-medium">Options (e.g. Size, Colour)</legend>
             <div className="flex flex-wrap items-end gap-2">

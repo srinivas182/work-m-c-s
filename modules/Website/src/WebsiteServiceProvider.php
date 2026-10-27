@@ -17,6 +17,7 @@ use Wurk\Website\Console\RerenderDatedPagesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
 use Wurk\Website\Console\SeedSampleTemplatesCommand;
 use Wurk\Website\Contracts\CatalogChanged;
+use Wurk\Website\Contracts\MediaLibrary;
 use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Listeners\RerenderShopPages;
@@ -27,6 +28,7 @@ use Wurk\Website\Support\PageRenderer;
 use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteAssets;
 use Wurk\Website\Support\SiteBuilder;
+use Wurk\Website\Support\SiteMediaLibrary;
 use Wurk\Website\Support\StorageMeter;
 use Wurk\Website\Support\Templates;
 use Wurk\Website\Support\TemplateSwitcher;
@@ -79,6 +81,8 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->app->bindIf(ProductCatalog::class, NoProductCatalog::class); // Shop provides the real one
+        $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);
+        $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);
         Event::listen(CatalogChanged::class, RerenderShopPages::class);
         // Quote forms: per business AND visitor (see the Bookings limiters for why).
         RateLimiter::for('quote-form', fn (Request $r) => Limit::perMinutes(10, 10)->by('quote-form|'.(string) $r->route('handle').'|'.$r->ip()));

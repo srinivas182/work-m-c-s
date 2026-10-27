@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
@@ -13,6 +15,7 @@ use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Models\Variant;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Contracts\MediaLibrary;
 
 uses(InteractsWithIdentity::class, InteractsWithShards::class);
 
@@ -86,4 +89,15 @@ it('adds categories, and keeps products when a category is removed', function ()
     $this->actingAs($this->owner)->post("{$this->base}/products", [...$this->tee, 'category_id' => $cat]);
     $this->actingAs($this->owner)->delete("{$this->base}/categories/{$cat}")->assertSessionHas('status', 'Category removed. Its products are kept.');
     ($this->in)(fn () => expect(Product::query()->sole()->category_id)->toBeNull());
+});
+
+it('uploads product photos into the business’s one photo library', function () {
+    Storage::fake('local');
+    Storage::fake('public');
+    ($this->subscribe)(['website', 'shop']);
+    $this->actingAs($this->owner)->post("{$this->base}/photos", ['photo' => UploadedFile::fake()->image('tee.jpg', 1200, 1200)])
+        ->assertCreated()->assertJsonStructure(['src']);
+    $library = $this->actingAs($this->owner)->getJson("{$this->base}/photos")->assertOk()->json();
+    expect($library['photos'])->toHaveCount(1)->and($library)->toHaveKeys(['used_mb', 'limit_mb']);
+    ($this->in)(fn () => expect(app(MediaLibrary::class)->library()['photos'])->toHaveCount(1)); // the same library Website's editor reads
 });
