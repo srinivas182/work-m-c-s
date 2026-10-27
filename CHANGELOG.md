@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Changed — online appointments use pasted meeting links (agreed with WURK)
+- **Meeting links per team member**: each person's own Google Meet or Zoom link, plus an optional default for the whole business — simpler than connecting accounts. Appointments use the practitioner's link; classes the instructor's; anyone without one, the default. No calls to Google or Zoom are needed.
+- An online service needs everyone who does it to be reachable (their link, or a default); an online class needs its instructor's link (or a default).
+- Settings → Meeting links, with a waiting-room tip. Account connections (Sprint 9.1) stay in the code, shown only if WURK enables them.
+
 ### Added — Sprint 10.1 (catalogue)
 - **Shop module** (Growth and Pro): products with up to three options (e.g. Size, Colour) and variants — each with its own price, "was" price, SKU and stock (empty = not tracked); categories; unique slugs; variant ids kept when editing.
 - **Product photos** from the business's one photo library (Website's `MediaLibrary` contract) — shop managers needn't edit the website.
