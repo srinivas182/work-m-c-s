@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 10 (sprint plan revision 3) |
-| **Status** | Approved 28 Oct 2026 — 10.1 in review |
+| **Status** | Approved 28 Oct 2026 — 10.1 ✅ (#76), 10.2 in progress |
 | **Depends on** | v0.10.0 (website engine, payments straight to the business, fixed-wording messages) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -74,4 +74,4 @@ Shop sections in the retail-led templates; accessibility scans of product, cart 
 
 | Sub-sprint | PR | Notes |
 |---|---|---|
-| 10.1 Catalogue | see PR | 840 backend tests on SQLite and MySQL 8; 375 frontend; all browser tests incl. a shopper browsing a demo shop; product pages score 100. Found: public shop pages ignored the shop entitlement (fixed) |
+| 10.1 Catalogue | #76 | 840 backend tests on SQLite and MySQL 8; 375 frontend; all browser tests incl. a shopper browsing a demo shop; product pages score 100. Found: public shop pages ignored the shop entitlement (fixed) |
