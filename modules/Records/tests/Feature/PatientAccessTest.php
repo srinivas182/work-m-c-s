@@ -105,3 +105,11 @@ it('never serves a file without an unlocked session', function () {
     $this->get($this->site.$path.'/'.$this->v1->id)->assertForbidden();
     $this->withUnencryptedCookie('rec_'.substr(hash('sha256', basename($path)), 0, 16), 'forged')->get($this->site.$path.'/'.$this->v1->id)->assertForbidden();
 });
+
+it('limits per link and visitor — page loads don’t use up the code limit', function () {
+    $path = ($this->open)();
+    foreach (range(1, 8) as $i) {
+        $this->get($this->site.$path)->assertOk();
+    }
+    $this->post($this->site.$path.'/code')->assertRedirect($path.'?sent=1'); // not "Too Many Requests"
+});
