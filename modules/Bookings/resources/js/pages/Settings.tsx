@@ -45,6 +45,11 @@ interface Props {
   }[];
   timezone: string;
   cardPayments: string[];
+  health: {
+    on: boolean;
+    consent: string;
+    registrations: Record<string, { council: string; number: string }>;
+  };
   policy: { hours: number; text: string; default: string };
   video: {
     links: { default: string | null; members: Record<string, string> };
@@ -350,6 +355,102 @@ function HoursEditor({ member, hours }: { member: Props['team'][number]; hours: 
   );
 }
 
+function HealthCard({ health, team }: Pick<Props, 'health' | 'team'>) {
+  const [editing, setEditing] = useState<string | null>(null);
+  const reg = useForm({ council: 'HPCSA', number: '' });
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Health practice</CardTitle>
+        <CardDescription>
+          For doctors, therapists and other health professionals. When it’s on, online consultations
+          show each practitioner’s registration number, and patients must agree to the
+          video-consultation terms before booking.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <Checkbox
+            checked={health.on}
+            onCheckedChange={(on) =>
+              router.put(
+                `${base()}/health`,
+                { health_practice: on === true },
+                { preserveScroll: true },
+              )
+            }
+          />
+          We’re a health practice
+        </label>
+        {health.on && (
+          <details className="border-border rounded-lg border p-3 text-sm">
+            <summary className="cursor-pointer font-medium">The terms patients agree to</summary>
+            <p className="text-fg-muted mt-2">{health.consent}</p>
+          </details>
+        )}
+        <ul className="grid gap-2" aria-label="Practitioner registrations">
+          {team.map((m) => {
+            const r = health.registrations[m.id];
+            return (
+              <li
+                key={m.id}
+                className="border-border flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm"
+              >
+                <span>
+                  <strong>{m.name}</strong> —{' '}
+                  {r ? `${r.council} ${r.number}` : 'no registration number'}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`${r ? 'Change' : 'Add'} registration for ${m.name}`}
+                  onClick={() => {
+                    setEditing(m.id);
+                    reg.setData({ council: r?.council ?? 'HPCSA', number: r?.number ?? '' });
+                  }}
+                >
+                  {r ? 'Change' : 'Add'}
+                </Button>
+                {editing === m.id && (
+                  <form
+                    aria-label={`Registration for ${m.name}`}
+                    className="grid w-full gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      reg.put(`${base()}/registrations/${m.id}`, {
+                        preserveScroll: true,
+                        onSuccess: () => setEditing(null),
+                      });
+                    }}
+                  >
+                    <Field label="Council" error={reg.errors.council}>
+                      <Input
+                        value={reg.data.council}
+                        maxLength={60}
+                        onChange={(e) => reg.setData('council', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Registration number" error={reg.errors.number}>
+                      <Input
+                        value={reg.data.number}
+                        maxLength={40}
+                        onChange={(e) => reg.setData('number', e.target.value)}
+                      />
+                    </Field>
+                    <Button type="submit" loading={reg.processing}>
+                      Save
+                    </Button>
+                  </form>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
 function VideoCard({ video, team }: Pick<Props, 'video' | 'team'>) {
   const form = useForm({
     default: video.links.default ?? '',
@@ -644,6 +745,7 @@ export default function Settings({
   timeOff,
   timezone,
   cardPayments,
+  health,
   policy,
   messages,
   video,
@@ -733,6 +835,7 @@ export default function Settings({
         <DepositsCard cardPayments={cardPayments} policy={policy} />
         <MessagesCard messages={messages} />
         <VideoCard video={video} team={team} />
+        <HealthCard health={health} team={team} />
 
         <Card>
           <CardHeader>

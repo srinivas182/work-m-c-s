@@ -52,7 +52,12 @@ final class BookingSettingsController
             'timeOff' => TimeOff::query()->where('ends_at', '>', now())->orderBy('starts_at')->get()
                 ->map(fn (TimeOff $t) => ['id' => $t->id, 'member_id' => $t->member_id, 'starts_at' => $t->starts_at->toIso8601String(), 'ends_at' => $t->ends_at->toIso8601String(), 'reason' => $t->reason])->all(),
             'timezone' => $this->context->current()->timezone(),
-            'cardPayments' => app(BusinessPayments::class)->available(), // e.g. ['yoco'] — deposits need one (Settings → Payments)
+            'cardPayments' => app(BusinessPayments::class)->available(),
+            'health' => [
+                'on' => app(HealthPractice::class)->on(),
+                'consent' => HealthPractice::CONSENT,
+                'registrations' => MemberRegistration::query()->get()->mapWithKeys(fn (MemberRegistration $r) => [$r->member_id => ['council' => $r->council, 'number' => $r->number]])->all(),
+            ], // e.g. ['yoco'] — deposits need one (Settings → Payments)
             'policy' => ['hours' => app(CancellationPolicy::class)->hours(), 'text' => (string) BookingSettings::query()->find($this->context->id())?->policy,
                 'default' => CancellationPolicy::defaultWording(app(CancellationPolicy::class)->hours())],
             'video' => [
