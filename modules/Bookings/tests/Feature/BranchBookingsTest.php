@@ -16,6 +16,9 @@ use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\BranchServices;
 use Wurk\Bookings\Support\Deposits;
+use Wurk\Plans\Actions\PackageCatalog;
+use Wurk\Plans\Contracts\Catalog;
+use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -71,4 +74,39 @@ it('shows a branch manager only their branches’ bookings', function () {
     });
     $this->actingAs($manager);
     expect(($this->in)(fn () => Booking::query()->pluck('customer_name')->all()))->toBe(['Sipho']);
+});
+
+it('lets a branch manager run their branch — hours there, not elsewhere — but not change business-wide settings', function () {
+    $p = app(PackageCatalog::class)->create([
+        'key' => 'pro', 'name' => 'Pro', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 1,
+        'monthly_price_cents' => 99900, 'yearly_price_cents' => 999000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 10,
+        'multi_branch' => true, 'max_branches' => 5, 'custom_domain' => false, 'monthly_credits' => 0, 'referral_max_levels' => 7,
+        'referral_max_commission_bp' => 3000, 'managed_fee_cents' => null, 'modules' => ['bookings'],
+    ], null);
+    app(Catalog::class)->subscribe($this->glow->id, $p->id, 'monthly', allowTrial: true);
+    app(Entitlements::class)->flush();
+    $owner = $this->person();
+    $manager = $this->person(['email' => 'musa@glow.co.za', 'phone' => '+27820000002']);
+    foreach ([$owner, $manager] as $who) {
+        $this->member($who, $this->glow);
+    }
+    ($this->in)(function () use ($owner, $manager) {
+        app(Team::class)->add($owner->id, 'Thandi', 'owner');
+        app(Team::class)->setBranches(app(Team::class)->add($manager->id, 'Musa', 'branch-manager'), [$this->sandton]);
+    });
+    $base = $this->app('/glow-salon/bookings');
+    $hours = fn (string $branch, string $starts = '09:00') => ['branch' => $branch, 'hours' => [['weekday' => 2, 'starts' => $starts, 'ends' => '12:00']]];
+
+    $this->actingAs($manager)->put("{$base}/hours/{$this->zanele}", $hours($this->sandton))->assertSessionHas('status', 'Hours saved.');
+    $this->actingAs($manager)->put("{$base}/hours/{$this->zanele}", $hours($this->main))->assertForbidden();
+    $this->actingAs($manager)->put("{$base}/services/{$this->braids->id}", ['name' => 'Cheaper braids'])->assertNotFound(); // business-wide (inside a business, a refused permission is a 404 by design)
+
+    // A person can't work two branches at once (Wednesday 09:00–12:00 is already Sandton).
+    $this->actingAs($owner)->put("{$base}/hours/{$this->zanele}", $hours($this->main, '11:00'))
+        ->assertSessionHasErrors(['hours.0.starts' => 'These hours overlap hours at another branch.']);
+
+    $this->actingAs($owner)->put("{$base}/services/{$this->braids->id}", ['name' => 'Knotless braids', 'duration_minutes' => 60, 'price_cents' => 45000, 'location_type' => 'in_person',
+        'deposit_type' => 'percent', 'deposit_value' => 20, 'buffer_before_minutes' => 0, 'buffer_after_minutes' => 0, 'members' => [$this->zanele],
+        'branches' => [['branch' => $this->main, 'price_cents' => null], ['branch' => $this->sandton, 'price_cents' => 50000]]])->assertSessionHas('status', 'Service saved.');
+    ($this->in)(fn () => expect(app(BranchServices::class)->priceAt($this->braids, $this->sandton))->toBe(50000));
 });
