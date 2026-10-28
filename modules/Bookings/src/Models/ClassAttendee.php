@@ -22,6 +22,8 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property Carbon|null $hold_expires_at
  * @property Carbon|null $paid_at
  * @property Carbon|null $refunded_at
+ * @property string|null $consent_version
+ * @property Carbon|null $consent_at
  */
 final class ClassAttendee extends Model
 {
@@ -35,7 +37,7 @@ final class ClassAttendee extends Model
 
     protected function casts(): array
     {
-        return ['deposit_cents' => 'integer', 'hold_expires_at' => 'datetime', 'paid_at' => 'datetime', 'refunded_at' => 'datetime'];
+        return ['consent_at' => 'datetime', 'deposit_cents' => 'integer', 'hold_expires_at' => 'datetime', 'paid_at' => 'datetime', 'refunded_at' => 'datetime'];
     }
 
     public function session(): ClassSession

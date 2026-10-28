@@ -4,6 +4,32 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 9.5 (patient documents)
+- **Patient records** for health practices (new Records module; permissions `records.view` and `records.manage`): patients, documents and corrections (each correction says what changed; the original is kept), the private link, an access log in plain words, and a "due for removal" list.
+- **Encrypted at rest** on a private disk, separate from website media; never public; every upload, correction, view, download, link, code and removal logged.
+- **Kept 6 years** from the patient's most recent document (a setting): removal is refused until then; afterwards patients are flagged daily (via a central list — no full scan) and the owner may remove them (logged). Nothing is deleted automatically.
+- **The patient's side**: a private link (only its hash stored; no health details in the email), then a one-time code by email or SMS (5 tries, 10 minutes; keyed hash), then a 30-minute encrypted session scoped to the link, showing only their own documents.
+
+### Fixed
+- **Rate limits per business**: unnamed throttles on public routes shared one counter per IP across every business and route — patient page loads used up the code limit, and providers' payment notifications for all businesses shared one limit. Now named limiters per business (and link/visitor, or provider), with regression tests.
+- Records' dates are DATETIME (MySQL's TIMESTAMP ends on 19 January 2038).
+
+### Added — Sprint 10.6 (payment methods)
+- **Five methods**: PayFast, Yoco, **Ozow** (instant EFT), **Peach Payments** (cards) and **EFT / bank transfer**.
+- **Businesses** (Settings → Payments): each method on or off, **test or live**, with **test and live keys kept separately** (live only once live keys are saved; keys encrypted, never shown again). Customers choose from the business's enabled methods; deposits and class payments use its card methods. EFT moved here from Shop settings.
+- **Super admin** (Payment methods): which methods businesses may offer (a method switched off disappears from every business), and **WURK's own accounts** for businesses paying WURK — the Billing page offers "Pay with…" and WURK's EFT details. Automatic monthly card charges and DebiCheck are unchanged.
+- One driver per provider, shared by businesses and WURK; every payment confirmed with the provider before it counts (Ozow: hash + Ozow's API; Peach: signed notification + status read back).
+
+### Fixed
+- Notification fields are read exactly as sent (PHP's form parser turned Peach's dotted names into underscores, which would have failed every Peach signature).
+- WURK's payment routes are registered before businesses' (the business address pattern also matched WURK's app address); "pay" and "payments" reserved as business handles.
+
+### Added — Sprint 9.4 (health consultations online)
+- **Health practice** (Booking settings): a switch, and each practitioner's **registration** (council and number, e.g. HPCSA MP0123456).
+- Online services and online classes at a health practice need **every practitioner registered**; health mode can't be switched on while any isn't, and a registration can't be removed from someone who sees patients online.
+- **Consent before an online consultation**: fixed, versioned wording (a working default for WURK's lawyers to confirm); bookings and class places without it are refused; what was agreed and when is recorded and never rewritten.
+- Registrations shown in the booking and class widgets, the confirmation, and the patient's own page (with when they agreed).
+
 ### Added — Sprint 10.4 (orders and refunds)
 - **Orders** (Shop → Orders): filters with counts (to do, awaiting payment, ready / on its way, done, cancelled); each order with items and totals, customer, collection or delivery, notes, **only the next steps that make sense**, and a **timeline** of every change (what, who, when).
 - **The journey**: paid → packed → ready for collection / out for delivery → done. Owners mark EFT orders paid; card orders are marked paid only by the verified payment.

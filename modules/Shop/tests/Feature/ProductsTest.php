@@ -9,6 +9,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -109,22 +110,22 @@ it('uploads product photos into the business’s one photo library', function ()
     ($this->in)(fn () => expect(app(MediaLibrary::class)->library()['photos'])->toHaveCount(1)); // the same library Website's editor reads
 });
 
-it('saves shop settings, insisting on a way to get orders and instructions for paying', function () {
+it('saves shop settings, insisting on a way to get orders (paying by EFT is under Settings → Payments)', function () {
     ($this->subscribe)(['website', 'shop']);
-    $base = ['collection_enabled' => false, 'collection_address' => '', 'delivery_enabled' => false, 'delivery_fee_cents' => 0, 'delivery_note' => '', 'offline_enabled' => false, 'offline_instructions' => '', 'offline_hold_hours' => 72];
+    $base = ['collection_enabled' => false, 'collection_address' => '', 'delivery_enabled' => false, 'delivery_fee_cents' => 0, 'delivery_note' => '', 'offline_hold_hours' => 72];
     $this->actingAs($this->owner)->put("{$this->base}/settings", $base)->assertSessionHasErrors(['collection_enabled' => 'Offer collection, delivery, or both.']);
     $this->actingAs($this->owner)->put("{$this->base}/settings", [...$base, 'collection_enabled' => true])->assertSessionHasErrors(['collection_address' => 'Add the address customers collect from.']);
-    $this->actingAs($this->owner)->put("{$this->base}/settings", [...$base, 'delivery_enabled' => true, 'offline_enabled' => true])->assertSessionHasErrors('offline_instructions');
-    $this->actingAs($this->owner)->put("{$this->base}/settings", [...$base, 'delivery_enabled' => true, 'delivery_fee_cents' => 6000, 'offline_enabled' => true, 'offline_instructions' => 'FNB 6200 0000 000'])
+    $this->actingAs($this->owner)->put("{$this->base}/settings", [...$base, 'delivery_enabled' => true, 'delivery_fee_cents' => 6000])
         ->assertSessionHas('status', 'Shop settings saved.');
-    ($this->in)(fn () => expect(ShopSettings::query()->sole()->only(['delivery_fee_cents', 'offline_enabled']))->toBe(['delivery_fee_cents' => 6000, 'offline_enabled' => true]));
+    ($this->in)(fn () => expect(ShopSettings::query()->sole()->only(['delivery_fee_cents', 'delivery_enabled']))->toBe(['delivery_fee_cents' => 6000, 'delivery_enabled' => true]));
 });
 
 it('alerts the people who manage the shop about a new order, and tells the customer as it moves on', function () {
     Mail::fake();
     ($this->subscribe)(['website', 'shop']);
     $order = ($this->in)(function () {
-        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id()]);
+        app(BusinessPayments::class)->setUpEft('FNB');
         $p = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
         Variant::query()->create(['product_id' => $p->id, 'price_cents' => 12000]);
         $o = app(OrderPlacer::class)->place([['variant' => Variant::query()->sole()->id, 'quantity' => 1]], ['name' => 'Sipho', 'phone' => '082', 'email' => 'sipho@example.com'], 'collection', 'offline');
@@ -147,7 +148,8 @@ it('alerts the people who manage the shop about a new order, and tells the custo
 it('shows orders by what needs doing, offers only sensible next steps, and records refunds', function () {
     ($this->subscribe)(['website', 'shop']);
     $order = ($this->in)(function () {
-        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id()]);
+        app(BusinessPayments::class)->setUpEft('FNB');
         $p = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
         Variant::query()->create(['product_id' => $p->id, 'price_cents' => 12000, 'stock' => 4]);
 

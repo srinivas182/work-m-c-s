@@ -5,12 +5,14 @@ declare(strict_types=1);
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Tests\Support\InteractsWithShards;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Gateways\PayFast;
 use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Models\PaymentAttempt;
+use Wurk\Payments\Support\PlatformMethods;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 uses(InteractsWithShards::class);
@@ -24,7 +26,7 @@ beforeEach(function () {
     $this->site = 'http://kasi-threads.'.config('wurk.domains.root');
     $this->urls = ['return' => 'https://kasi.example/done', 'cancel' => 'https://kasi.example/cart', 'notify' => 'https://kasi.example/payments/notify/x'];
     $this->secret = 'whsec_'.base64_encode('a-very-secret-key');
-    $this->connect = fn (string $provider, array $creds, ?string $secret = null) => ($this->in)(fn () => PaymentAccount::query()->create(['provider' => $provider, 'mode' => 'test', 'credentials' => $creds, 'webhook_secret' => $secret]));
+    $this->connect = fn (string $provider, array $creds, ?string $secret = null) => ($this->in)(fn () => PaymentAccount::query()->create(['provider' => $provider, 'mode' => 'test', 'test_credentials' => $creds, 'webhook_secret' => $secret]));
 });
 
 it('offers only connected providers, Yoco first', function () {
@@ -68,7 +70,7 @@ it('pays with PayFast: signed fields posted from the business’s page; only a f
     $url = ($this->in)(fn () => app(BusinessPayments::class)->start('ord_2', 89900, 'Order #1002', ['name' => 'Lerato', 'email' => 'l@example.com'], $this->urls));
     $page = $this->get($url)->assertOk()->assertSee('action="https://sandbox.payfast.co.za/eng/process"', false)->assertSee('name="m_payment_id" value="ord_2"', false);
     expect((string) $page->headers->get('Content-Security-Policy'))->toContain('form-action https://sandbox.payfast.co.za/eng/process');
-    $form = ($this->in)(fn () => PaymentAttempt::query()->find('ord_2')->form);
+    $form = ($this->in)(fn () => PaymentAttempt::query()->find('ord_2')->form['fields']);
     $fields = $form;
     unset($fields['signature']);
     expect($form['amount'])->toBe('899.00')->and($form['signature'])->toBe(PayFast::signature($fields, 'jt7NOE43FZPn'));
@@ -91,4 +93,32 @@ it('pays with PayFast: signed fields posted from the business’s page; only a f
     $itn()->assertOk();
     Event::assertDispatched(BusinessPaymentReceived::class, fn ($e) => $e->reference === 'ord_2');
     ($this->in)(fn () => expect(app(BusinessPayments::class)->verify('ord_2'))->toBe(['paid' => true, 'amount_cents' => 89900]));
+});
+
+it('offers a method only if enabled, allowed by WURK, and with keys for its mode — never manual EFT', function () {
+    ($this->connect)('yoco', ['secret_key' => 'sk_test_x'], $this->secret);
+    ($this->connect)('payfast', ['merchant_id' => '10000100', 'merchant_key' => '46f0cd694581a', 'passphrase' => 'jt7NOE43FZPn']);
+    ($this->in)(fn () => PaymentAccount::query()->create(['provider' => 'eft', 'mode' => 'live', 'live_credentials' => ['instructions' => 'FNB 62000000000']]));
+    $available = fn () => ($this->in)(fn () => app(BusinessPayments::class)->available());
+    expect($available())->toBe(['yoco', 'payfast']); // EFT is paid by hand, not online
+
+    app(PlatformMethods::class)->set('yoco', false); // WURK switches Yoco off
+    expect($available())->toBe(['payfast']);
+    app(PlatformMethods::class)->set('yoco', true);
+
+    ($this->in)(fn () => PaymentAccount::query()->where('provider', 'payfast')->update(['mode' => 'live'])); // live, but no live keys saved
+    expect($available())->toBe(['yoco']);
+    ($this->in)(fn () => PaymentAccount::query()->where('provider', 'yoco')->update(['active' => false])); // disabled
+    expect($available())->toBe([]);
+});
+
+it('limits provider notifications per business and provider — never one counter for every business', function () {
+    $key = function (string $handle) {
+        $request = Illuminate\Http\Request::create("http://{$handle}.".config('wurk.domains.root').'/payments/notify/yoco', 'POST', server: ['REMOTE_ADDR' => '41.0.0.1']); // the provider's own IP
+        $route = app('router')->getRoutes()->match($request);
+        $request->setRouteResolver(fn () => $route);
+
+        return RateLimiter::limiter('payments-notify')($request)->key;
+    };
+    expect($key('kasi-threads'))->not->toBe($key('glow-salon'))->and($key('kasi-threads'))->toBe('notify|kasi-threads|yoco');
 });

@@ -13,12 +13,12 @@
 | 2 | | Super admin | Packages & entitlements; providers; WURK Credits; security | ✅ v0.3.0 |
 | 3 | | Signup & billing | Marketing site; signup wizard; card, DebiCheck, cash; VAT invoices; dunning | ✅ v0.4.0 |
 | 4 | | Website builder | 14 premium blocks; Puck editor; photo uploads; menus; branding; site preview | ✅ v0.5.0 |
-| 5 | after 7 | Website engine | Public site rendering on name.wurk.co.za as **ready-made HTML** (preloaded fonts with size-matched fallbacks, minimal JavaScript; **mobile Lighthouse ≥ 90 and layout shift < 0.1 gated in CI** — moved from Sprint 7 after measuring); caching & purge; automatic SEO & AEO; "temporarily unavailable" page for suspended businesses; WhatsApp chat button (custom domains & SSL move to Sprint 17) | |
-| 6 | next | Templates I & AI onboarding | Category & template steps in signup; AI site generation from a few questions; 10 category sections; templates for Salon & beauty, Health, Spa & wellness, Retail, Fitness (10); legal pages generated per category; template switching with content kept; media library with quotas | |
-| 7 | 4 weeks | **Templates II & one-hour launch** *(new)* | Templates for Professional services, Car mechanics, Hospitality, Trades & home services, Education & training, Events & creative, Transport & logistics (14); licensed photo library per category; guided launch checklist with progress; in-editor tips; AI image generation (decorative only); media library; "My plan & usage" page; performance and accessibility budgets for every template; **timed launch test with 5+ non-technical owners** | |
-| 8 | 15 – 26 Feb | Appointments | Staff/branch availability; booking widget; deposits; cancellation/no-show rules; reminders; restaurant table reservations | |
-| 9 | 01 – 12 Mar | **Online consultations & patient documents** *(new)* | In-person / online / either per service; Google Meet & Zoom connections with a unique link per appointment; pay online before the slot; join window and reminders; online group classes; patient documents (secure, encrypted, audited) — **gated by legal review** | |
-| 10 | 15 – 26 Mar | Online shop | Catalogue, variants, stock, cart, checkout; PayFast, Yoco, Ozow, Paystack, Peach; orders & refunds | |
+| 5 | after 7 | Website engine | Public site rendering on name.wurk.co.za as **ready-made HTML** (preloaded fonts with size-matched fallbacks, minimal JavaScript; **mobile Lighthouse ≥ 90 and layout shift < 0.1 gated in CI** — moved from Sprint 7 after measuring); caching & purge; automatic SEO & AEO; "temporarily unavailable" page for suspended businesses; WhatsApp chat button (custom domains & SSL move to Sprint 17) | ✅ v0.8.0 |
+| 6 | next | Templates I & AI onboarding | Category & template steps in signup; AI site generation from a few questions; 10 category sections; templates for Salon & beauty, Health, Spa & wellness, Retail, Fitness (10); legal pages generated per category; template switching with content kept; media library with quotas | ✅ v0.6.0 |
+| 7 | 4 weeks | **Templates II & one-hour launch** *(new)* | Templates for Professional services, Car mechanics, Hospitality, Trades & home services, Education & training, Events & creative, Transport & logistics (14); licensed photo library per category; guided launch checklist with progress; in-editor tips; AI image generation (decorative only); media library; "My plan & usage" page; performance and accessibility budgets for every template; **timed launch test with 5+ non-technical owners** | ✅ v0.7.0 |
+| 8 | 15 – 26 Feb | Appointments | Staff/branch availability; booking widget; deposits; cancellation/no-show rules; reminders; restaurant table reservations | ✅ v0.9.0 |
+| 9 | 01 – 12 Mar | **Online consultations & patient documents** *(new)* | In-person / online / either per service; Google Meet & Zoom connections with a unique link per appointment; pay online before the slot; join window and reminders; online group classes; patient documents (secure, encrypted, audited) — **gated by legal review** | 9.1–9.3b ✅ v0.10.0 · 9.4–9.5 in progress |
+| 10 | 15 – 26 Mar | Online shop | Catalogue, variants, stock, cart, checkout; PayFast, Yoco, Ozow, Paystack, Peach; orders & refunds | ✅ v0.11.0 |
 | 11 | 29 Mar – 09 Apr | Multi-branch & shipping | Branch managers; per-branch merchant accounts, prices, stock; inter-branch settlement; courier integrations | |
 | 12 | 12 – 23 Apr | CRM & messaging | Leads & pipelines; forms & custom fields (incl. quote requests); rule-based chatbot; event template engine (email/SMS/WhatsApp) | |
 | 13 | 26 Apr – 07 May | Referral engine | Self + 7 levels; pending/available; wallet rules; attribution; customer payouts; My WURK | |
@@ -74,3 +74,9 @@
 | ~6–7 | 25–27 | 12–14 months |
 | ~10 | 19 | 9.5 months |
 | ~14 (two squads) | 14–15 | 7 months |
+
+## Decisions since revision 3
+
+- **Payment gateways (Sprint 10):** each business connects **its own PayFast or Yoco** account; WURK is never in any customer payment and takes no fee on sales. **Ozow and Peach were not built**; Paystack is used only for WURK's own subscriptions. Another gateway can be added inside the Payments module without touching shop or bookings.
+- **Dates:** the dates above are revision 3's and have slipped. Revised dates are proposed for WURK's approval (revision 4).
+- **Year 2038 (for Sprint 18, Hardening):** most tables use MySQL `TIMESTAMP`, which ends on 19 January 2038. Records (9.5) already uses `DATETIME`; the rest should be migrated well before 2038.

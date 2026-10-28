@@ -6,6 +6,7 @@ namespace Wurk\Shop\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Models\Product;
@@ -66,8 +67,9 @@ final class DemoShopCommand extends Command
             $made = $context->run($tenant, function () use ($template, $products, $context): bool {
                 ShopSettings::query()->firstOrCreate(['tenant_id' => $context->id()], [
                     'collection_enabled' => true, 'collection_address' => '12 Demo Street, Johannesburg', 'delivery_enabled' => true, 'delivery_fee_cents' => 6000,
-                    'offline_enabled' => true, 'offline_instructions' => "Demo Bank, account 0000 000 000 (a demo — don't pay)",
+
                 ]);
+                app(BusinessPayments::class)->setUpEft("Demo Bank, account 0000 000 000 (a demo — don't pay)");
                 if (Product::query()->exists()) {
                     return false;
                 }

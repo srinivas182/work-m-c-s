@@ -19,8 +19,6 @@ interface Settings {
   delivery_enabled: boolean;
   delivery_fee_cents: number;
   delivery_note: string;
-  offline_enabled: boolean;
-  offline_instructions: string;
   offline_hold_hours: number;
 }
 
@@ -106,50 +104,30 @@ export default function ShopSettings({ settings }: { settings: Settings }) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Paying by EFT or on collection</CardTitle>
+            <CardTitle>Unpaid orders</CardTitle>
             <CardDescription>
-              Customers order now and pay you directly. Stock is kept for them until you mark the
-              order paid — or it’s released after the time below.
+              How customers pay — card, instant EFT or bank transfer — is set under{' '}
+              <a
+                className="underline"
+                href={`${window.location.pathname.split('/').slice(0, 2).join('/')}/settings/payments`}
+              >
+                Settings → Payments
+              </a>
+              . Stock is kept for an order paid by bank transfer until you mark it paid, or for the
+              time below.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4">
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <Checkbox
-                checked={form.data.offline_enabled}
-                onCheckedChange={(on) => form.setData('offline_enabled', on === true)}
+          <CardContent>
+            <Field label="Keep stock for unpaid orders (hours)" error={errors.offline_hold_hours}>
+              <Input
+                type="number"
+                min={1}
+                max={720}
+                className="w-32"
+                value={form.data.offline_hold_hours}
+                onChange={(e) => form.setData('offline_hold_hours', Number(e.target.value))}
               />
-              Accept orders paid by EFT or on collection
-            </label>
-            {form.data.offline_enabled && (
-              <>
-                <Field
-                  label="How to pay"
-                  hint="Shown to customers with their order number as the reference."
-                  error={errors.offline_instructions}
-                >
-                  <textarea
-                    className={area}
-                    maxLength={2000}
-                    placeholder={'e.g. FNB, account 62000000000, branch 250655'}
-                    value={form.data.offline_instructions}
-                    onChange={(e) => form.setData('offline_instructions', e.target.value)}
-                  />
-                </Field>
-                <Field
-                  label="Keep stock for unpaid orders (hours)"
-                  error={errors.offline_hold_hours}
-                >
-                  <Input
-                    type="number"
-                    min={1}
-                    max={720}
-                    className="w-32"
-                    value={form.data.offline_hold_hours}
-                    onChange={(e) => form.setData('offline_hold_hours', Number(e.target.value))}
-                  />
-                </Field>
-              </>
-            )}
+            </Field>
           </CardContent>
         </Card>
         <Button type="submit" className="justify-self-start" loading={form.processing}>

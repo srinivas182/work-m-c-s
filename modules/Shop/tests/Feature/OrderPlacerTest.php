@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
 use Tests\Support\InteractsWithShards;
+use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Product;
@@ -21,7 +23,8 @@ beforeEach(function () {
     $this->ctx = app(TenantContext::class);
     $this->in = fn (callable $fn) => $this->ctx->run($this->shop, $fn);
     [$this->m, $this->l, $this->mug] = ($this->in)(function () {
-        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'delivery_enabled' => true, 'delivery_fee_cents' => 6000]);
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'delivery_enabled' => true, 'delivery_fee_cents' => 6000]);
+        app(BusinessPayments::class)->setUpEft('FNB, account 62000000000');
         $tee = Product::query()->create(['name' => 'Kasi T-shirt', 'slug' => 'kasi-t-shirt', 'status' => 'published', 'options' => ['Size']]);
         $mug = Product::query()->create(['name' => 'Enamel mug', 'slug' => 'enamel-mug', 'status' => 'published', 'options' => []]);
 
@@ -37,7 +40,7 @@ beforeEach(function () {
 });
 
 it('explains when ordering online isn’t available', function () {
-    ($this->in)(fn () => ShopSettings::query()->update(['offline_enabled' => false]));
+    ($this->in)(fn () => PaymentAccount::query()->where('provider', 'eft')->update(['active' => false]));
     expect(fn () => ($this->place)([['variant' => $this->m->id, 'quantity' => 1]]))->toThrow(CheckoutProblem::class, 'Ordering online isn’t available yet. Please contact us to order.');
 });
 

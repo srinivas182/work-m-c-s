@@ -25,7 +25,7 @@ async function expectAccessible(page: Page) {
 
 // The admin host is "localhost" in the e2e environment; the business back office is 127.0.0.1.
 test('WURK staff sign in with an authenticator and run the admin', async ({ page }, testInfo) => {
-  test.setTimeout(90_000);
+  test.setTimeout(150_000); // a long walk through the admin, plus up to 30 s waiting for a fresh authenticator code
   const admin = `http://localhost:${process.env.E2E_PORT ?? 8123}`;
 
   await page.goto(`${admin}/sign-in/password`);
@@ -150,5 +150,28 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
 
   await page.goto(`${admin}/roles`);
   await expect(page.getByRole('heading', { level: 1, name: 'Staff roles' })).toBeVisible();
+  await expectAccessible(page);
+
+  // Payment methods: what businesses may offer, and WURK's own accounts.
+  await page.goto(`${admin}/payment-methods`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Payment methods' })).toBeVisible();
+  await page.getByLabel('Businesses may offer Ozow').click();
+  await expect(page.getByText('Ozow is switched off for every business.')).toBeVisible();
+  await page.getByLabel('Businesses may offer Ozow').click();
+  await expect(page.getByText('Ozow can be offered by businesses.')).toBeVisible();
+  // WURK's settings are shared by the desktop and phone runs (central data): add or change, whichever applies.
+  await page.getByRole('button', { name: /^(Add|Change) bank details$/ }).click();
+  const eft = page.getByRole('form', { name: 'EFT / bank transfer live keys' });
+  await eft
+    .getByLabel('How to pay (bank, account number, branch code)')
+    .fill('WURK (Pty) Ltd, FNB 62000000000');
+  await eft.getByRole('button', { name: 'Save live details' }).click();
+  await expect(page.getByText('EFT / bank transfer live keys saved.')).toBeVisible();
+  const accepts = page.getByLabel('WURK accepts EFT / bank transfer');
+  if (!(await accepts.isChecked())) {
+    await accepts.click();
+    await expect(page.getByText('EFT / bank transfer is on in live mode.')).toBeVisible();
+  }
+  await expect(accepts).toBeChecked();
   await expectAccessible(page);
 });

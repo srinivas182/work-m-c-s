@@ -35,6 +35,8 @@ Route::tenant(function (): void {
         Route::get('/video/connect/{provider}', [VideoConnectionController::class, 'connect'])->whereIn('provider', ['google', 'zoom'])->name('video.connect');
         Route::put('/video/fixed', [VideoConnectionController::class, 'fixed'])->name('video.fixed');
         Route::put('/video/links', [BookingSettingsController::class, 'saveLinks'])->name('video.links');
+        Route::put('/health', [BookingSettingsController::class, 'saveHealth'])->name('health');
+        Route::put('/registrations/{member}', [BookingSettingsController::class, 'saveRegistration'])->name('registrations');
         Route::delete('/video', [VideoConnectionController::class, 'disconnect'])->name('video.disconnect');
         Route::get('/classes', [ClassesController::class, 'show'])->name('classes');
         Route::post('/classes', [ClassesController::class, 'store'])->name('classes.store');

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Http;
 use Throwable;
 use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Models\PaymentAttempt;
+use Wurk\Payments\Models\PlatformPaymentAccount;
+use Wurk\Payments\Models\PlatformPaymentAttempt;
 
 /**
  * PayFast (the business's own merchant account). The customer's browser POSTs signed fields to PayFast;
@@ -19,7 +21,7 @@ final class PayFast
     /** PayFast's field order for the signature. */
     private const ORDER = ['merchant_id', 'merchant_key', 'return_url', 'cancel_url', 'notify_url', 'name_first', 'email_address', 'm_payment_id', 'amount', 'item_name'];
 
-    public static function host(PaymentAccount $a): string
+    public static function host(PaymentAccount|PlatformPaymentAccount $a): string
     {
         return $a->mode === 'live' ? 'www.payfast.co.za' : 'sandbox.payfast.co.za';
     }
@@ -31,7 +33,7 @@ final class PayFast
      * @param  array{return: string, cancel: string, notify: string}  $urls
      * @return array<string, string>
      */
-    public static function form(PaymentAccount $a, PaymentAttempt $attempt, string $description, array $customer, array $urls): array
+    public static function fields(PaymentAccount|PlatformPaymentAccount $a, PaymentAttempt|PlatformPaymentAttempt $attempt, string $description, array $customer, array $urls): array
     {
         $fields = array_filter([
             'merchant_id' => $a->credentials['merchant_id'] ?? '', 'merchant_key' => $a->credentials['merchant_key'] ?? '',
@@ -47,6 +49,16 @@ final class PayFast
         }
 
         return [...$ordered, 'signature' => self::signature($ordered, (string) ($a->credentials['passphrase'] ?? ''))];
+    }
+
+    /**
+     * @param  array{name: string, email?: string|null}  $customer
+     * @param  array{return: string, cancel: string, notify: string}  $urls
+     * @return array{action: string, fields: array<string, string>}
+     */
+    public static function form(PaymentAccount|PlatformPaymentAccount $a, PaymentAttempt|PlatformPaymentAttempt $attempt, string $description, array $customer, array $urls): array
+    {
+        return ['action' => 'https://'.self::host($a).'/eng/process', 'fields' => self::fields($a, $attempt, $description, $customer, $urls)];
     }
 
     /** @param  array<string, string>  $fields  in the order they're sent */
@@ -67,7 +79,7 @@ final class PayFast
      * @param  array<string, string>  $posted  in the order received
      * @return array{reference: string, provider_id: string}|null
      */
-    public static function notification(PaymentAccount $a, array $posted): ?array
+    public static function notification(PaymentAccount|PlatformPaymentAccount $a, array $posted, PaymentAttempt|PlatformPaymentAttempt|null $attempt): ?array
     {
         $signature = (string) ($posted['signature'] ?? '');
         $fields = $posted;
@@ -75,8 +87,7 @@ final class PayFast
         if ($signature === '' || ! hash_equals(self::signature($fields, (string) ($a->credentials['passphrase'] ?? '')), $signature)) {
             return null;
         }
-        $attempt = PaymentAttempt::query()->find((string) ($posted['m_payment_id'] ?? ''));
-        if ($attempt === null || ($posted['payment_status'] ?? '') !== 'COMPLETE'
+        if ($attempt === null || $attempt->reference !== (string) ($posted['m_payment_id'] ?? '') || ($posted['payment_status'] ?? '') !== 'COMPLETE'
             || (int) round((float) ($posted['amount_gross'] ?? 0) * 100) !== $attempt->amount_cents) {
             return null;
         }
@@ -95,7 +106,7 @@ final class PayFast
     }
 
     /** PayFast's refunds API (where enabled on the account); false means the owner refunds by hand. */
-    public static function refund(PaymentAccount $a, PaymentAttempt $attempt, int $cents): bool
+    public static function refund(PaymentAccount|PlatformPaymentAccount $a, PaymentAttempt|PlatformPaymentAttempt $attempt, int $cents): bool
     {
         if ($attempt->provider_id === null || $attempt->provider_id === '') {
             return false;

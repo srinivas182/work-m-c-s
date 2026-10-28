@@ -18,6 +18,7 @@ use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\MemberMeetingLink;
 use Wurk\Bookings\Support\ClassBooker;
 use Wurk\Bookings\Support\ClassFull;
+use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\MeetingLinks;
 use Wurk\Payments\Contracts\BusinessPayments;
@@ -56,6 +57,10 @@ final class ClassesController
             'member' => ['nullable', 'string', Rule::in(array_column($this->team->members(), 'id'))], 'price_cents' => ['required', 'integer', 'min:0', 'max:100000000'],
             'pay_online' => ['boolean'],
         ]);
+        $health = app(HealthPractice::class);
+        if ($data['location_type'] === 'online' && $health->on() && $health->unregistered(array_values(array_filter([(string) ($data['member'] ?? '')]))) !== []) {
+            throw ValidationException::withMessages(['location_type' => 'Online classes at a health practice need the instructor’s registration number (under Booking settings → Health practice).']);
+        }
         $connected = in_array(MeetingConnection::query()->find($this->context->id())?->provider, ['google', 'zoom'], true);
         if ($data['location_type'] === 'online' && ! $connected && app(MeetingLinks::class)->forMember($data['member'] ?? null) === null) {
             throw ValidationException::withMessages(['location_type' => 'Add a meeting link for the instructor (or the whole business) under Meeting links in Booking settings, so people can join.']);
