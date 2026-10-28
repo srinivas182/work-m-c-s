@@ -543,8 +543,24 @@ async function classes(root: HTMLElement): Promise<void> {
     minutes: number;
     price_cents: number;
     places_left: number;
+    registration?: string | null;
   };
-  let list = ((await first.json()) as { classes: ClassItem[] }).classes;
+  const firstBody = (await first.json()) as { classes: ClassItem[]; health?: HealthTerms };
+  let list = firstBody.classes;
+  const health = firstBody.health ?? null;
+  const healthConsent = el('input', { type: 'checkbox' });
+  const healthBox = el(
+    'div',
+    {
+      class: 'flex items-start gap-2 rounded-[var(--s-radius)] border border-[var(--s-border)] p-3',
+    },
+    healthConsent,
+  );
+  const refreshHealth = () => {
+    const needed = health !== null && list.find((c) => c.id === chosen)?.online === true;
+    healthBox.hidden = !needed;
+    healthConsent.required = needed;
+  };
 
   const status = el('p', { class: 'text-sm text-[var(--s-fg-muted)]' });
   status.setAttribute('role', 'status');
@@ -575,7 +591,7 @@ async function classes(root: HTMLElement): Promise<void> {
           disabled: full,
           class: 'rounded-[var(--s-radius)] border border-[var(--s-border)] px-4 py-2 text-left',
         },
-        `${c.title} — ${c.when} · ${c.minutes} min${c.online ? ' · Online' : ''}${price} · ${full ? 'Full' : `${c.places_left} place${c.places_left === 1 ? '' : 's'} left`}`,
+        `${c.title} — ${c.when} · ${c.minutes} min${c.online ? ' · Online' : ''}${c.registration ? ` · ${c.registration}` : ''}${price} · ${full ? 'Full' : `${c.places_left} place${c.places_left === 1 ? '' : 's'} left`}`,
       );
       b.setAttribute('aria-pressed', String(chosen === c.id));
       b.addEventListener('click', () => {
@@ -585,6 +601,7 @@ async function classes(root: HTMLElement): Promise<void> {
           x.classList.toggle('bg-[var(--s-brand-soft)]', x === b);
         });
         status.textContent = `${c.title} selected.`;
+        refreshHealth();
       });
       picker.append(b);
     }
@@ -594,6 +611,7 @@ async function classes(root: HTMLElement): Promise<void> {
     list = r?.ok ? ((await r.json()) as { classes: ClassItem[] }).classes : [];
     chosen = null;
     draw();
+    refreshHealth();
   };
 
   const name = el('input', { type: 'text', class: field, autocomplete: 'name', required: true });
@@ -601,6 +619,8 @@ async function classes(root: HTMLElement): Promise<void> {
   const email = el('input', { type: 'email', class: field, autocomplete: 'email' });
   const consent = el('input', { type: 'checkbox', required: true });
   consent.id = `${uid}-consent`;
+  healthConsent.id = `${uid}-health-consent`;
+  healthBox.append(el('label', { htmlFor: healthConsent.id }, health?.consent ?? ''));
   const trap = el('input', { type: 'text', name: 'website', tabIndex: -1, autocomplete: 'off' });
   const trapWrap = el('div', { class: 'absolute -left-[9999px]' }, trap);
   trapWrap.setAttribute('aria-hidden', 'true');
@@ -612,6 +632,7 @@ async function classes(root: HTMLElement): Promise<void> {
     labelled('Your name', name),
     labelled('Phone', phone),
     labelled('Email (optional)', email),
+    healthBox,
     el(
       'div',
       { class: 'flex items-start gap-2' },
@@ -637,6 +658,7 @@ async function classes(root: HTMLElement): Promise<void> {
         phone: phone.value,
         email: email.value || null,
         consent: consent.checked ? '1' : null,
+        health_consent: healthBox.hidden ? null : healthConsent.checked,
         website: trap.value,
       }),
     }).catch(() => null);
@@ -677,6 +699,7 @@ async function classes(root: HTMLElement): Promise<void> {
   });
   root.replaceChildren(form);
   draw();
+  refreshHealth(); // hidden until an online class is chosen
 }
 
 /* ---------- Shop: the cart lives in the shopper's browser; the server re-checks every price and stock level. ---------- */

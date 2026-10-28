@@ -391,3 +391,89 @@ describe('checkout island', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('class sign-up at a health practice', () => {
+  const respond = (status: number, body: unknown) =>
+    Promise.resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+  const settle = () =>
+    new Promise((r) => setTimeout(r, 0)).then(() => new Promise((r) => setTimeout(r, 0)));
+
+  it('asks for video-consultation consent only once an online class is chosen, and sends it', async () => {
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url, init) =>
+      init?.method === 'POST'
+        ? respond(201, {
+            booked: true,
+            service: 'Class: Group therapy',
+            when: 'Monday 3 May, 18:00',
+            manage_url: '/c/x',
+          })
+        : respond(200, {
+            health: { consent: 'I agree to a consultation by video.', version: 'v1' },
+            classes: [
+              {
+                id: 'c1',
+                title: 'Group therapy',
+                online: true,
+                when: 'Mon 3 May, 18:00',
+                minutes: 60,
+                price_cents: 0,
+                places_left: 4,
+                registration: 'HPCSA PS0012345',
+              },
+              {
+                id: 'c2',
+                title: 'Walk-in clinic',
+                online: false,
+                when: 'Tue 4 May, 09:00',
+                minutes: 60,
+                price_cents: 0,
+                places_left: 4,
+                registration: null,
+              },
+            ],
+          }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    document.body.innerHTML = '<div data-island="booking" data-mode="classes"><p>Call us</p></div>';
+    startIslands(document);
+    await settle();
+    const box = () =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find(
+          (l) => l.textContent === 'I agree to a consultation by video.',
+        )!.htmlFor,
+      ) as HTMLInputElement;
+    expect(box().closest('div')!.hidden).toBe(true); // nothing chosen yet
+
+    const [online, inPerson] = [
+      ...document.querySelectorAll('[aria-label="Upcoming classes"] button'),
+    ] as [HTMLButtonElement, HTMLButtonElement];
+    expect(online.textContent).toContain('HPCSA PS0012345');
+    inPerson.click();
+    expect(box().closest('div')!.hidden).toBe(true); // in person: no video consent
+    online.click();
+    expect(box().closest('div')!.hidden).toBe(false);
+    expect(box().required).toBe(true);
+
+    box().checked = true;
+    const byLabel = (text: string) =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find((l) => l.textContent === text)!.htmlFor,
+      ) as HTMLInputElement;
+    byLabel('Your name').value = 'Sipho';
+    byLabel('Phone').value = '082 555 0101';
+    byLabel('I agree to be contacted about my class.').checked = true;
+    document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    await settle();
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)![1]!.body))).toMatchObject({
+      health_consent: true,
+      consent: '1',
+    });
+    vi.unstubAllGlobals();
+  });
+});
