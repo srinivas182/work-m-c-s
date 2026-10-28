@@ -29,6 +29,10 @@
   <section class="card" aria-label="Booking details">
     <p><strong>{{ $service }}</strong> for {{ $customer }}</p>
     <p>{{ $when }}</p>
+    @if (! empty($health))
+      <p>Your practitioner: <strong>{{ $health['practitioner'] }}</strong></p>
+      <p>You agreed to the video-consultation terms on {{ $health['agreed'] }}. Please be somewhere private when you join.</p>
+    @endif
     @if ($online && $status === 'confirmed')
       @if ($joinUrl)
       <p><a href="{{ $joinUrl }}" rel="noopener noreferrer"><strong>Join online now</strong></a></p>

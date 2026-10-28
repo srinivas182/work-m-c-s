@@ -15,6 +15,7 @@ use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\TimeOff;
+use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\MeetingLinks;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Payments\Models\PaymentAccount;
@@ -161,4 +162,22 @@ it('gives each team member their own meeting link, with a business default — a
     });
     $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => 'https://meet.google.com/our-room', 'members' => [$thandi => 'https://zoom.us/j/111', $sipho => null]]);
     $this->ctx->run($this->glow, fn () => expect(app(MeetingLinks::class)->forMember($sipho))->toBe('https://meet.google.com/our-room')); // falls back to the default
+});
+
+it('lets a health practice see patients online only with every practitioner registered', function () {
+    ($this->subscribe)(['bookings']);
+    [$thandi, $sipho] = $this->ctx->run($this->glow, fn () => [app(TeamDirectory::class)->members()[0]['id'], app(TeamDirectory::class)->add((string) Str::ulid(), 'Sipho', 'staff')]);
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => 'https://meet.google.com/our-room', 'members' => []]);
+    $this->actingAs($this->owner)->post("{$this->base}/services", [...$this->service, 'location_type' => 'online', 'members' => [$thandi]])->assertSessionHas('status', 'Service saved.');
+
+    $this->actingAs($this->owner)->put("{$this->base}/health", ['health_practice' => true])
+        ->assertSessionHasErrors(['health_practice' => 'First add registration numbers for Zanele — they see patients online.']);
+    $this->actingAs($this->owner)->put("{$this->base}/registrations/{$thandi}", ['council' => 'HPCSA', 'number' => 'mp0123456'])->assertSessionHas('status', 'Registration saved.');
+    $this->actingAs($this->owner)->put("{$this->base}/health", ['health_practice' => true])->assertSessionHas('status', 'Health practice is on: online consultations need consent and show registration numbers.');
+    $this->ctx->run($this->glow, fn () => expect(app(HealthPractice::class)->registration($thandi))->toBe('HPCSA MP0123456'));
+
+    $this->actingAs($this->owner)->post("{$this->base}/services", [...$this->service, 'name' => 'Video consult', 'location_type' => 'online', 'members' => [$thandi, $sipho]])
+        ->assertSessionHasErrors(['location_type' => 'Online consultations need each practitioner’s registration number: add it for Sipho under Health practice.']);
+    $this->actingAs($this->owner)->put("{$this->base}/registrations/{$thandi}", ['council' => 'HPCSA', 'number' => ''])
+        ->assertSessionHasErrors(['number' => 'This practitioner sees patients online — keep their registration number.']);
 });

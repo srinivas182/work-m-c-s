@@ -8,10 +8,14 @@ use Tests\Support\FakesYoco;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
+use Wurk\Access\Models\Member;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\MeetingConnection;
+use Wurk\Bookings\Models\MemberMeetingLink;
+use Wurk\Bookings\Models\MemberRegistration;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -139,4 +143,29 @@ it('charges the full price upfront only for online appointments — and issues t
 
     $this->get("{$this->site}/return?reference={$online()->payment_reference}")->assertOk()->assertSee('You’re booked');
     expect($online()->status)->toBe('confirmed')->and($online()->meeting_url)->toBe('https://meet.example.com/glow');
+});
+
+it('at a health practice, books online consultations only with the patient’s consent — and shows the practitioner’s registration', function () {
+    ($this->subscribe)(['bookings']);
+    $zanele = $this->ctx->run($this->glow, function () {
+        $this->service->update(['location_type' => 'either']);
+        $id = Member::query()->sole()->id;
+        MemberMeetingLink::query()->create(['member_id' => $id, 'url' => 'https://meet.google.com/abc']);
+        MemberRegistration::query()->create(['member_id' => $id, 'council' => 'HPCSA', 'number' => 'MP0123456']);
+        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'health_practice' => true]);
+
+        return $id;
+    });
+    $this->getJson("{$this->site}/services")->assertOk()
+        ->assertJsonPath('health.version', 'v1')->assertJsonPath('services.0.members.0.registration', 'HPCSA MP0123456');
+
+    $this->postJson("{$this->site}", [...$this->booking, 'online' => true])->assertStatus(422)
+        ->assertJsonValidationErrors(['health_consent' => 'Please read and agree to the video-consultation terms to book online.']);
+    $manage = $this->postJson("{$this->site}", [...$this->booking, 'online' => true, 'health_consent' => true])->assertCreated()->assertJsonPath('practitioner', 'HPCSA MP0123456')->json('manage_url');
+    $this->get($manage)->assertOk()->assertSee('Your practitioner: <strong>Zanele — HPCSA MP0123456</strong>', false)->assertSee('You agreed to the video-consultation terms on 1 May, 10:00');
+    $this->ctx->run($this->glow, fn () => expect(Booking::query()->sole()->only(['consent_version', 'member_id']))->toBe(['consent_version' => 'v1', 'member_id' => $zanele])
+        ->and(Booking::query()->sole()->consent_at)->not->toBeNull());
+
+    // In person needs no video consent.
+    $this->postJson("{$this->site}", [...$this->booking, 'starts_at' => '2027-05-03T09:00:00+00:00'])->assertCreated()->assertJsonPath('practitioner', null);
 });
