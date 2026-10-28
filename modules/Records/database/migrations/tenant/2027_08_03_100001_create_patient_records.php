@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    // DATETIME, not TIMESTAMP: records are kept for years, and MySQL's TIMESTAMP ends on 19 January 2038.
     public function up(): void
     {
         Schema::create('record_patients', function (Blueprint $table) {
@@ -16,9 +17,10 @@ return new class extends Migration
             $table->string('name', 120);
             $table->string('email', 160)->nullable()->index();
             $table->string('phone', 40)->nullable();
-            $table->timestamp('last_document_at')->nullable(); // retention runs from here
-            $table->timestamp('flagged_at')->nullable();       // past retention: the owner may remove
-            $table->timestamps();
+            $table->dateTime('last_document_at')->nullable(); // retention runs from here
+            $table->dateTime('flagged_at')->nullable();       // past retention: the owner may remove
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
         // Never deleted during retention; a correction is a new version pointing at the original.
         Schema::create('record_documents', function (Blueprint $table) {
@@ -33,7 +35,7 @@ return new class extends Migration
             $table->string('mime', 100);
             $table->unsignedInteger('size');
             $table->string('uploaded_by', 120);
-            $table->timestamp('created_at')->nullable();
+            $table->dateTime('created_at')->nullable();
         });
         // Every access: who, what, when (append-only).
         Schema::create('record_access_logs', function (Blueprint $table) {
@@ -45,7 +47,7 @@ return new class extends Migration
             $table->string('actor_type', 10);                    // staff | patient | system
             $table->string('actor', 120)->nullable();
             $table->string('ip', 45)->nullable();
-            $table->timestamp('created_at')->nullable();
+            $table->dateTime('created_at')->nullable();
         });
         // A patient's private link: only hashes are stored.
         Schema::create('record_links', function (Blueprint $table) {
@@ -53,10 +55,11 @@ return new class extends Migration
             $table->ulid('tenant_id')->index();
             $table->ulid('patient_id')->index();
             $table->string('code_hash', 64)->nullable();
-            $table->timestamp('code_expires_at')->nullable();
+            $table->dateTime('code_expires_at')->nullable();
             $table->unsignedTinyInteger('attempts')->default(0);
-            $table->timestamp('expires_at');
-            $table->timestamps();
+            $table->dateTime('expires_at');
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
         });
     }
 

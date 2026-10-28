@@ -8,13 +8,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    // DATETIME, not TIMESTAMP: records are kept for years, and MySQL's TIMESTAMP ends on 19 January 2038.
     public function up(): void
     {
         // Central list of when each patient's retention runs from, so the daily check visits only businesses with records due.
         Schema::create('record_retention', function (Blueprint $table) {
             $table->ulid('patient_id')->primary();
             $table->ulid('tenant_id')->index();
-            $table->timestamp('last_document_at')->index();
+            $table->dateTime('last_document_at')->index();
         });
     }
 
