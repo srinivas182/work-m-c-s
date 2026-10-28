@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 9.4 (health consultations online)
+- **Health practice** (Booking settings): a switch, and each practitioner's **registration** (council and number, e.g. HPCSA MP0123456).
+- Online services and online classes at a health practice need **every practitioner registered**; health mode can't be switched on while any isn't, and a registration can't be removed from someone who sees patients online.
+- **Consent before an online consultation**: fixed, versioned wording (a working default for WURK's lawyers to confirm); bookings and class places without it are refused; what was agreed and when is recorded and never rewritten.
+- Registrations shown in the booking and class widgets, the confirmation, and the patient's own page (with when they agreed).
+
 ### Added — Sprint 10.4 (orders and refunds)
 - **Orders** (Shop → Orders): filters with counts (to do, awaiting payment, ready / on its way, done, cancelled); each order with items and totals, customer, collection or delivery, notes, **only the next steps that make sense**, and a **timeline** of every change (what, who, when).
 - **The journey**: paid → packed → ready for collection / out for delivery → done. Owners mark EFT orders paid; card orders are marked paid only by the verified payment.
