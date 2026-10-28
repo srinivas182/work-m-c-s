@@ -29,10 +29,21 @@ test('an owner sees a new order and takes it from paid to done', async ({ page }
   await page.goto(`/${handle}/shop/settings`);
   const settings = page.getByRole('form', { name: 'Shop settings' });
   await settings.getByLabel('Collection address').fill('12 Vilakazi St, Soweto');
-  await settings.getByLabel('Accept orders paid by EFT or on collection').click();
-  await settings.getByLabel('How to pay').fill('FNB, account 6200 0000 000');
   await settings.getByRole('button', { name: 'Save shop settings' }).click();
   await expect(page.getByText('Shop settings saved.')).toBeVisible();
+
+  // Bank transfer is a payment method now (Settings → Payments).
+  await page.goto(`/${handle}/settings/payments`);
+  await page.getByRole('button', { name: 'Add bank details' }).click();
+  const eft = page.getByRole('form', { name: 'EFT / bank transfer live keys' });
+  await eft
+    .getByLabel('How to pay (bank, account number, branch code)')
+    .fill('FNB, account 6200 0000 000');
+  await eft.getByRole('button', { name: 'Save live details' }).click();
+  await expect(page.getByText('EFT / bank transfer live keys saved.')).toBeVisible();
+  await page.getByLabel('Accept EFT / bank transfer').click();
+  await expect(page.getByText('EFT / bank transfer is live.')).toBeVisible();
+  await expectAccessible(page);
 
   // A customer orders on the business's own address.
   // (The request helper doesn't share the browser's *.wurk.test mapping: send the business's address as the Host.)
