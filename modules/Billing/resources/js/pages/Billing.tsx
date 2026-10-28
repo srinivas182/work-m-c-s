@@ -59,6 +59,9 @@ interface Props {
     failure: string | null;
   }[];
   gatewayReady: boolean;
+  payMethods: { provider: string; name: string }[];
+  wurkEft: string | null;
+  reference: string;
   stage: 'none' | 'grace' | 'restricted' | 'suspended';
   packagesOnSale: {
     id: string;
@@ -561,15 +564,21 @@ export default function Billing({
   creditPacksAllowed,
   payments,
   gatewayReady,
+  payMethods,
+  wurkEft,
+  reference,
   debitOrders,
   stage,
   packagesOnSale,
   invoices,
   creditNotes,
 }: Props) {
-  const canPay = gatewayReady && account.saved;
+  const [payWith, setPayWith] = useState<string>(
+    gatewayReady ? '' : (payMethods[0]?.provider ?? ''),
+  );
+  const canPay = (gatewayReady || payMethods.length > 0) && account.saved;
   const post = (url: string, data: Record<string, unknown> = {}) =>
-    router.post(url, data as never, { preserveScroll: true });
+    router.post(url, { ...data, method: payWith || null } as never, { preserveScroll: true });
 
   return (
     <AppShell title="Billing">
@@ -598,10 +607,47 @@ export default function Billing({
             </p>
           </div>
         )}
-        {!gatewayReady && (
+        {!gatewayReady && payMethods.length === 0 && (
           <p role="status" className="bg-sunken text-fg-muted rounded-2xl p-4 text-sm">
             Card payments are being set up and open shortly.
           </p>
+        )}
+        {(gatewayReady ? 1 : 0) + payMethods.length > 1 && (
+          <fieldset className="border-border grid gap-2 rounded-2xl border p-4 text-sm">
+            <legend className="px-1 font-semibold">Pay with</legend>
+            {gatewayReady && (
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="pay-with"
+                  checked={payWith === ''}
+                  onChange={() => setPayWith('')}
+                />
+                Card (you can save it for automatic payments)
+              </label>
+            )}
+            {payMethods.map((m) => (
+              <label key={m.provider} className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="pay-with"
+                  checked={payWith === m.provider}
+                  onChange={() => setPayWith(m.provider)}
+                />
+                {m.name}
+              </label>
+            ))}
+          </fieldset>
+        )}
+        {wurkEft && (
+          <div className="border-border rounded-2xl border p-4 text-sm">
+            <p className="font-semibold">Or pay WURK by EFT</p>
+            <p className="mt-1 whitespace-pre-line">{wurkEft}</p>
+            <p className="mt-1">
+              Use <strong>{reference}</strong> as the reference. We’ll confirm it once it reaches
+              our account.
+            </p>
+          </div>
         )}
 
         {subscription && (

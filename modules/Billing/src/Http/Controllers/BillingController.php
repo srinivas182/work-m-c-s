@@ -23,6 +23,8 @@ use Wurk\Billing\Support\Dunning;
 use Wurk\Billing\Support\Payments;
 use Wurk\Billing\Support\SaBanking;
 use Wurk\Messaging\Contracts\ProviderCredentials;
+use Wurk\Payments\Contracts\PlatformPayments;
+use Wurk\Payments\Support\PlatformMethods;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Regions\Contracts\Countries;
@@ -66,6 +68,9 @@ final class BillingController
             'payments' => Payment::query()->where('tenant_id', $tenantId)->latest()->limit(20)->get()
                 ->map(fn (Payment $p) => ['id' => $p->id, 'at' => $p->created_at?->toIso8601String(), 'purpose' => $p->purpose, 'total_cents' => $p->total_cents, 'status' => $p->status, 'failure' => $p->failure])->all(),
             'gatewayReady' => $providers->active('payments.paystack') !== null,
+            'payMethods' => array_map(fn (string $p) => ['provider' => $p, 'name' => PlatformMethods::NAMES[$p]], app(PlatformPayments::class)->available()),
+            'wurkEft' => app(PlatformPayments::class)->eftInstructions(),
+            'reference' => $this->context->current()->handle(),
             'stage' => app(Dunning::class)->stage($tenantId),
             'packagesOnSale' => array_map(fn (array $p) => ['id' => $p['id'], 'name' => $p['name'], 'monthly_total_cents' => $withVat($p['monthly_cents']), 'yearly_total_cents' => $withVat($p['yearly_cents'])], $this->catalog->onSale()),
             'invoices' => Invoice::query()->where('tenant_id', $tenantId)->latest('issued_at')->limit(24)->get()
@@ -155,7 +160,7 @@ final class BillingController
             return back()->with('warning', 'Add your billing email first.');
         }
 
-        $method = request()->input('method'); // one of WURK's methods (super admin), or the default card checkout
+        $method = $purpose === 'card_check' ? null : request()->input('method'); // one of WURK's methods (super admin), or the default card checkout (a card check saves a card, so it stays on card)
         $result = $this->payments->checkout($this->context->id(), $purpose, $exclCents, $details, route('tenant.billing.return'), is_string($method) ? $method : null);
 
         return $result['url'] === null
