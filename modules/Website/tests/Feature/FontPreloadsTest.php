@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use Illuminate\Filesystem\Filesystem;
 use Wurk\Website\Support\FontPreloads;
 
 it('preloads only the Latin, normal-style file of each of the site’s fonts', function () {
     $public = sys_get_temp_dir().'/wurk-public-'.uniqid();
+    register_shutdown_function(fn () => (new Filesystem)->deleteDirectory($public)); // don't leave it behind
     mkdir("{$public}/build/assets", 0777, true);
     file_put_contents("{$public}/build/manifest.json", json_encode(['resources/css/public-site.css' => ['file' => 'assets/public-site-test.css']]));
     // As Vite minifies it: unquoted families, several subsets and styles per family.
