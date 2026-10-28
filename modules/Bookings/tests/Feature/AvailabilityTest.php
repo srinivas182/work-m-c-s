@@ -87,7 +87,7 @@ it('never double-books, even when two customers both saw the time as free (the d
     // The second customer's page still showed 10:30 as free (it was loaded before the first booking).
     app()->instance(Availability::class, new readonly class(app(TenantContext::class)) extends Availability
     {
-        public function on(BookingService $service, string $date, ?string $memberId = null, ?CarbonImmutable $now = null): array
+        public function on(BookingService $service, string $date, ?string $memberId = null, ?CarbonImmutable $now = null, ?string $branchId = null): array
         {
             return [['starts_at' => CarbonImmutable::parse('2027-05-03 10:30', 'Africa/Johannesburg')->utc()->toIso8601String(), 'members' => [ZANELE]]];
         }

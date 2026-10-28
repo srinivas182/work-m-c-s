@@ -33,8 +33,13 @@ readonly class Availability
      * @param  string  $date  local date, Y-m-d
      * @return list<array{starts_at: string, members: list<string>}> UTC ISO times, members free at each
      */
-    public function on(BookingService $service, string $date, ?string $memberId = null, ?CarbonImmutable $now = null): array
+    public function on(BookingService $service, string $date, ?string $memberId = null, ?CarbonImmutable $now = null, ?string $branchId = null): array
     {
+        $branches = app(BranchServices::class);
+        $branch = $branches->resolve($branchId);
+        if (! $branches->offeredAt($service, $branch)) {
+            return [];
+        }
         $tz = $this->context->current()->timezone();
         $now ??= CarbonImmutable::now();
         $day = CarbonImmutable::parse($date, $tz)->startOfDay();
@@ -50,7 +55,7 @@ readonly class Availability
 
         foreach ($members as $member) {
             $member = (string) $member;
-            $hours = BookingHours::query()->where('member_id', $member)->where('weekday', $day->dayOfWeekIso - 1)->orderBy('starts')->get();
+            $hours = BookingHours::query()->where('member_id', $member)->where('branch_id', $branch)->where('weekday', $day->dayOfWeekIso - 1)->orderBy('starts')->get(); // their hours at this branch
             $dayStartUtc = $day->utc();
             $dayEndUtc = $day->addDay()->utc();
             $off = TimeOff::query()->where(fn ($q) => $q->whereNull('member_id')->orWhere('member_id', $member))
