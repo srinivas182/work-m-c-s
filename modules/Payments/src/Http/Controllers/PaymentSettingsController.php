@@ -42,7 +42,7 @@ final class PaymentSettingsController
         ]);
         PaymentAccount::query()->updateOrCreate(['provider' => 'payfast'], [
             'mode' => $data['mode'], 'active' => true, 'webhook_secret' => null, 'webhook_id' => null,
-            'credentials' => ['merchant_id' => $data['merchant_id'], 'merchant_key' => $data['merchant_key'], 'passphrase' => $data['passphrase']],
+            ($data['mode'] === 'live' ? 'live_credentials' : 'test_credentials') => ['merchant_id' => $data['merchant_id'], 'merchant_key' => $data['merchant_key'], 'passphrase' => $data['passphrase']],
             'label' => 'Merchant ••••'.substr($data['merchant_id'], -4),
         ]);
         $this->audit->record('payments.connected', 'payment_account', 'payfast', ['mode' => $data['mode']]);
@@ -55,14 +55,14 @@ final class PaymentSettingsController
         $key = trim((string) $request->validate(['secret_key' => ['required', 'regex:/^sk_(test|live)_[A-Za-z0-9]+$/']],
             ['secret_key.regex' => 'Paste your Yoco secret key — it starts with sk_test_ or sk_live_ (Yoco portal → Sales → Payment gateway).'])['secret_key']);
         $mode = str_starts_with($key, 'sk_live_') ? 'live' : 'test';
-        $account = new PaymentAccount(['provider' => 'yoco', 'mode' => $mode, 'credentials' => ['secret_key' => $key]]);
+        $account = new PaymentAccount(['provider' => 'yoco', 'mode' => $mode, ($mode === 'live' ? 'live_credentials' : 'test_credentials') => ['secret_key' => $key]]);
         // Registering our notification address doubles as the connection test: a wrong key is refused here.
         $hook = Yoco::register($account, 'https://'.$this->context->current()->handle().'.'.config('wurk.domains.root').'/payments/notify/yoco');
         if ($hook === null) {
             throw ValidationException::withMessages(['secret_key' => 'Yoco didn’t accept that key. Check it and try again.']);
         }
         PaymentAccount::query()->updateOrCreate(['provider' => 'yoco'], [
-            'mode' => $mode, 'active' => true, 'credentials' => ['secret_key' => $key], 'webhook_id' => $hook[0], 'webhook_secret' => $hook[1],
+            'mode' => $mode, 'active' => true, ($mode === 'live' ? 'live_credentials' : 'test_credentials') => ['secret_key' => $key], 'webhook_id' => $hook[0], 'webhook_secret' => $hook[1],
             'label' => 'Key ••••'.substr($key, -4),
         ]);
         $this->audit->record('payments.connected', 'payment_account', 'yoco', ['mode' => $mode]);

@@ -18,15 +18,18 @@ use Wurk\Tenancy\Contracts\TenantContext;
 final readonly class Payments implements BusinessPayments
 {
     /** When both are connected, Yoco is offered first (a hosted page, no extra hop). */
-    private const PREFERENCE = ['yoco', 'payfast'];
+    private const PREFERENCE = PlatformMethods::ONLINE;
 
     public function __construct(private TenantContext $context, private AuditLog $audit) {}
 
     public function available(): array
     {
-        $active = PaymentAccount::query()->where('active', true)->pluck('provider')->all();
+        // Paid online (never manual EFT): enabled here, allowed by WURK, and with keys for the current mode.
+        $platform = app(PlatformMethods::class);
+        $ready = PaymentAccount::query()->where('active', true)->get()
+            ->filter(fn (PaymentAccount $a) => $a->hasKeys($a->mode) && $platform->available($a->provider))->pluck('provider')->all();
 
-        return array_values(array_filter(self::PREFERENCE, fn (string $p) => in_array($p, $active, true)));
+        return array_values(array_filter(self::PREFERENCE, fn (string $p) => in_array($p, $ready, true)));
     }
 
     public function start(string $reference, int $amountCents, string $description, array $customer, array $urls, ?string $provider = null): ?string

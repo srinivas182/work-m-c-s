@@ -47,7 +47,7 @@ trait FakesYoco
     /** Connect Yoco (test mode) for a business. */
     protected function connectYoco(object $tenant): void
     {
-        app(TenantContext::class)->run($tenant, fn () => PaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'credentials' => ['secret_key' => 'sk_test_x'], 'webhook_secret' => 'whsec_eA==']));
+        app(TenantContext::class)->run($tenant, fn () => PaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'test_credentials' => ['secret_key' => 'sk_test_x'], 'webhook_secret' => 'whsec_eA==']));
     }
 
     protected function yocoRefunds(): int

@@ -83,7 +83,7 @@ it('emails the customer their order, how to pay and the link', function () {
 describe('paying by card', function () {
     beforeEach(function () {
         ($this->entitle)();
-        ($this->in)(fn () => PaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'credentials' => ['secret_key' => 'sk_test_x'], 'webhook_secret' => 'whsec_eA==']));
+        ($this->in)(fn () => PaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'test_credentials' => ['secret_key' => 'sk_test_x'], 'webhook_secret' => 'whsec_eA==']));
         // One set of stubs that read the current state (stubs added later never win).
         $this->yocoState = ['status' => 200, 'state' => 'completed'];
         Http::fake([
