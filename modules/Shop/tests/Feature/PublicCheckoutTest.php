@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\InteractsWithShards;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
@@ -36,8 +37,8 @@ beforeEach(function () {
         app(Entitlements::class)->flush();
     };
     [$this->tee, $this->cap] = ($this->in)(function () {
-        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'collection_address' => '12 Vilakazi St, Soweto',
-            'offline_instructions' => "FNB Kasi Threads\nAccount 6200 0000 000, branch 250655"]);
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'collection_address' => '12 Vilakazi St, Soweto']);
+        app(BusinessPayments::class)->setUpEft("FNB Kasi Threads\nAccount 6200 0000 000, branch 250655");
         $tee = Product::query()->create(['name' => 'Kasi T-shirt', 'slug' => 'kasi-t-shirt', 'status' => 'published', 'options' => []]);
         $cap = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
 

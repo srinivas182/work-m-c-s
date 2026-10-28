@@ -82,4 +82,19 @@ final readonly class Payments implements BusinessPayments
 
         return true;
     }
+
+    public function eftInstructions(): ?string
+    {
+        $eft = PaymentAccount::query()->where('provider', 'eft')->where('active', true)->first();
+        if ($eft === null || ! $eft->hasKeys($eft->mode) || ! app(PlatformMethods::class)->available('eft')) {
+            return null;
+        }
+
+        return (string) ($eft->credentials['instructions'] ?? '') ?: null;
+    }
+
+    public function setUpEft(string $instructions): void
+    {
+        PaymentAccount::query()->updateOrCreate(['provider' => 'eft'], ['mode' => 'live', 'active' => true, 'live_credentials' => ['instructions' => $instructions], 'label' => 'Bank details saved']);
+    }
 }

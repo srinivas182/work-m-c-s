@@ -36,7 +36,8 @@ final readonly class OrderPlacer
     {
         $settings = ShopSettings::query()->find($this->context->id());
         $card = $method === 'card' && app(BusinessPayments::class)->available() !== [];
-        if (! $card && ($settings === null || $method !== 'offline' || ! $settings->offline_enabled)) {
+        $eft = $method === 'offline' && app(BusinessPayments::class)->eftInstructions() !== null; // EFT / bank transfer, from Settings → Payments
+        if (! $card && ! $eft) {
             throw new CheckoutProblem('Ordering online isn’t available yet. Please contact us to order.');
         }
         $settings ??= new ShopSettings(['collection_enabled' => true, 'delivery_enabled' => false]); // a card-only shop with nothing saved yet

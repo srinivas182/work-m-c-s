@@ -24,9 +24,9 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'
 Route::tenant(function (): void {
     Route::middleware(['permission:payments.manage'])->prefix('settings/payments')->name('tenant.payments.')->group(function (): void {
         Route::get('/', [PaymentSettingsController::class, 'show'])->name('settings');
-        Route::put('/payfast', [PaymentSettingsController::class, 'connectPayFast'])->name('payfast');
-        Route::put('/yoco', [PaymentSettingsController::class, 'connectYoco'])->middleware('throttle:10,1')->name('yoco');
-        Route::delete('/{provider}', [PaymentSettingsController::class, 'disconnect'])->whereIn('provider', ['payfast', 'yoco'])->name('disconnect');
+        Route::put('/{provider}/keys/{mode}', [PaymentSettingsController::class, 'keys'])->whereIn('provider', PlatformMethods::ALL)->whereIn('mode', ['test', 'live'])->middleware('throttle:20,1')->name('keys');
+        Route::put('/{provider}', [PaymentSettingsController::class, 'settings'])->whereIn('provider', PlatformMethods::ALL)->name('method');
+        Route::delete('/{provider}', [PaymentSettingsController::class, 'disconnect'])->whereIn('provider', PlatformMethods::ALL)->name('disconnect');
     });
 });
 

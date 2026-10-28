@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\Support\InteractsWithShards;
+use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -149,7 +151,8 @@ it('builds the cart page only while the business takes orders online', function 
     $this->get("{$site}/cart")->assertNotFound(); // ordering not switched on
 
     ($this->in)(function () {
-        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id()]);
+        app(BusinessPayments::class)->setUpEft('FNB');
         app(ProductPages::class)->renderAll();
     });
     Process::assertRan(fn (PendingProcess $p) => str_contains((string) $p->input, '"type":"Checkout"'));   // the cart page
@@ -157,7 +160,7 @@ it('builds the cart page only while the business takes orders online', function 
     $this->get("{$site}/cart")->assertOk()->assertSee('<h1>Your cart</h1>', false);
 
     ($this->in)(function () {
-        ShopSettings::query()->update(['offline_enabled' => false]);
+        PaymentAccount::query()->where('provider', 'eft')->update(['active' => false]);
         app(ProductPages::class)->renderAll();
     });
     $this->get("{$site}/cart")->assertNotFound();
@@ -177,7 +180,8 @@ it('keeps each business’s cart page apart — two businesses on one shard can 
     app(Entitlements::class)->flush();
     foreach ([$this->shop, $other] as $tenant) {
         $this->ctx->run($tenant, function () use ($tenant) {
-            ShopSettings::query()->create(['tenant_id' => $tenant->id, 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+            ShopSettings::query()->create(['tenant_id' => $tenant->id]);
+            app(BusinessPayments::class)->setUpEft('FNB');
             $p = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
             Variant::query()->create(['product_id' => $p->id, 'price_cents' => 10000]);
             app(SiteBuilder::class)->apply('salon-hair-braids');

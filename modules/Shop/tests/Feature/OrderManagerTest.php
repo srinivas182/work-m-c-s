@@ -28,7 +28,8 @@ beforeEach(function () {
     $this->ctx = app(TenantContext::class);
     $this->in = fn (callable $fn) => $this->ctx->run($this->shop, $fn);
     $this->tee = ($this->in)(function () {
-        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'delivery_enabled' => true, 'delivery_fee_cents' => 5000]);
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'delivery_enabled' => true, 'delivery_fee_cents' => 5000]);
+        app(BusinessPayments::class)->setUpEft('FNB, account 62000000000');
         $p = Product::query()->create(['name' => 'Kasi T-shirt', 'slug' => 'kasi-t-shirt', 'status' => 'published', 'options' => []]);
 
         return Variant::query()->create(['product_id' => $p->id, 'price_cents' => 25000, 'stock' => 5]);
