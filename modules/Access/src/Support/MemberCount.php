@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Wurk\Access\Support;
 
+use Wurk\Access\AccessManager;
 use Wurk\Access\Actions\Team;
 use Wurk\Access\Contracts\SeatPolicy;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Access\Contracts\TeamSize;
 use Wurk\Access\Models\Member;
+use Wurk\Identity\Contracts\PeopleDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -42,5 +44,16 @@ final readonly class MemberCount implements SeatPolicy, TeamDirectory, TeamSize
     public function add(string $identityId, string $displayName, string $role): string
     {
         return (string) app(Team::class)->add($identityId, $displayName, $role)->id;
+    }
+
+    public function emailsWithPermission(string $permission): array
+    {
+        $access = app(AccessManager::class);
+        $ids = Member::query()->where('status', 'active')->pluck('identity_id')
+            ->map(fn ($id) => (string) $id)->filter(fn (string $id) => $access->allows($id, $permission))->all();
+        $ids = array_values($ids);
+        $emails = array_filter(array_map(fn (array $c) => $c['email'], app(PeopleDirectory::class)->contacts($ids)));
+
+        return array_values(array_unique($emails));
     }
 }
