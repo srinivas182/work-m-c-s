@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
 use Wurk\Bookings\Console\SendRemindersCommand;
+use Wurk\Bookings\Contracts\HealthPracticeStatus;
 use Wurk\Bookings\Events\BookingCancelled;
 use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Events\BookingMoved;
@@ -21,6 +22,7 @@ use Wurk\Bookings\Events\ReservationCancelled;
 use Wurk\Bookings\Events\ReservationConfirmed;
 use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Support\Deposits;
+use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
@@ -42,6 +44,12 @@ final class BookingsServiceProvider extends ModuleServiceProvider
             ['label' => 'Tables', 'route' => 'tenant.bookings.tables', 'icon' => 'users', 'section' => 'Bookings', 'permission' => 'bookings.manage', 'entitlement' => 'bookings', 'order' => 205],
             ['label' => 'Booking settings', 'route' => 'tenant.bookings.settings', 'icon' => 'settings', 'section' => 'Bookings', 'permission' => 'bookings.manage', 'entitlement' => 'bookings', 'order' => 210],
         ];
+    }
+
+    public function register(): void
+    {
+        parent::register();
+        $this->app->bind(HealthPracticeStatus::class, HealthPractice::class);
     }
 
     protected function bootModule(): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Tests\Support\InteractsWithShards;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Payments\Contracts\BusinessPayments;
@@ -109,4 +110,15 @@ it('offers a method only if enabled, allowed by WURK, and with keys for its mode
     expect($available())->toBe(['yoco']);
     ($this->in)(fn () => PaymentAccount::query()->where('provider', 'yoco')->update(['active' => false])); // disabled
     expect($available())->toBe([]);
+});
+
+it('limits provider notifications per business and provider — never one counter for every business', function () {
+    $key = function (string $handle) {
+        $request = Illuminate\Http\Request::create("http://{$handle}.".config('wurk.domains.root').'/payments/notify/yoco', 'POST', server: ['REMOTE_ADDR' => '41.0.0.1']); // the provider's own IP
+        $route = app('router')->getRoutes()->match($request);
+        $request->setRouteResolver(fn () => $route);
+
+        return RateLimiter::limiter('payments-notify')($request)->key;
+    };
+    expect($key('kasi-threads'))->not->toBe($key('glow-salon'))->and($key('kasi-threads'))->toBe('notify|kasi-threads|yoco');
 });

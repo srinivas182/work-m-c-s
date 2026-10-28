@@ -1,0 +1,16 @@
+{
+    "name": "Records",
+    "key": "records",
+    "version": "0.1.0",
+    "description": "Patient documents for health practices: encrypted, never public, every access logged, kept for the retention period (POPIA special personal information).",
+    "core": false,
+    "entitlement": "bookings",
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit",
+        "identity",
+        "bookings"
+    ]
+}

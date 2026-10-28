@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Bookings\Support;
 
+use Wurk\Bookings\Contracts\HealthPracticeStatus;
 use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\MemberRegistration;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -12,7 +13,7 @@ use Wurk\Tenancy\Contracts\TenantContext;
  * Health practices: online consultations only with every condition in place — the practitioner's
  * registration shown, and the patient's consent (fixed, versioned wording) recorded before booking.
  */
-final readonly class HealthPractice
+final readonly class HealthPractice implements HealthPracticeStatus
 {
     /** Bump when the wording changes: what a patient agreed to is never rewritten. */
     public const CONSENT_VERSION = 'v1';

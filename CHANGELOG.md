@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 9.5 (patient documents)
+- **Patient records** for health practices (new Records module; permissions `records.view` and `records.manage`): patients, documents and corrections (each correction says what changed; the original is kept), the private link, an access log in plain words, and a "due for removal" list.
+- **Encrypted at rest** on a private disk, separate from website media; never public; every upload, correction, view, download, link, code and removal logged.
+- **Kept 6 years** from the patient's most recent document (a setting): removal is refused until then; afterwards patients are flagged daily (via a central list — no full scan) and the owner may remove them (logged). Nothing is deleted automatically.
+- **The patient's side**: a private link (only its hash stored; no health details in the email), then a one-time code by email or SMS (5 tries, 10 minutes; keyed hash), then a 30-minute encrypted session scoped to the link, showing only their own documents.
+
+### Fixed
+- **Rate limits per business**: unnamed throttles on public routes shared one counter per IP across every business and route — patient page loads used up the code limit, and providers' payment notifications for all businesses shared one limit. Now named limiters per business (and link/visitor, or provider), with regression tests.
+- Records' dates are DATETIME (MySQL's TIMESTAMP ends on 19 January 2038).
+
 ### Added — Sprint 10.6 (payment methods)
 - **Five methods**: PayFast, Yoco, **Ozow** (instant EFT), **Peach Payments** (cards) and **EFT / bank transfer**.
 - **Businesses** (Settings → Payments): each method on or off, **test or live**, with **test and live keys kept separately** (live only once live keys are saved; keys encrypted, never shown again). Customers choose from the business's enabled methods; deposits and class payments use its card methods. EFT moved here from Shop settings.

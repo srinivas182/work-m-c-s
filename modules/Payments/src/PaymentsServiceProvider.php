@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Wurk\Payments;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\PlatformPayments;
 use Wurk\Payments\Support\Payments;
@@ -38,5 +41,9 @@ final class PaymentsServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'payments');
+        // Never one counter per IP across every business: provider notifications all come from the provider's
+        // own IPs, so they're limited per business and provider; the hand-off page per business and visitor.
+        RateLimiter::for('payments-handoff', fn (Request $r) => Limit::perMinute(60)->by('handoff|'.(string) ($r->route('handle') ?? 'wurk').'|'.$r->ip()));
+        RateLimiter::for('payments-notify', fn (Request $r) => Limit::perMinute(600)->by('notify|'.(string) ($r->route('handle') ?? 'wurk').'|'.(string) $r->route('provider')));
     }
 }
