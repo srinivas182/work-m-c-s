@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 10 (sprint plan revision 3) |
-| **Status** | Approved 28 Oct 2026 — 10.1 ✅ (#76), 10.2 in review |
+| **Status** | Approved 28 Oct 2026 — 10.1 ✅ (#76), 10.2 ✅ (#78), 10.3 in review |
 | **Depends on** | v0.10.0 (website engine, payments straight to the business, fixed-wording messages) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -76,4 +76,5 @@ Shop sections in the retail-led templates; accessibility scans of product, cart 
 | Sub-sprint | PR | Notes |
 |---|---|---|
 | 10.1 Catalogue | #76 | 840 backend tests on SQLite and MySQL 8; 375 frontend; all browser tests incl. a shopper browsing a demo shop; product pages score 100. Found: public shop pages ignored the shop entitlement (fixed) |
-| 10.2 Cart and checkout | see PR | 855 backend tests on SQLite and MySQL 8; 375 frontend; all browser tests incl. a full purchase on desktop and phone; product pages 98–100. Found: a 27-character id MySQL rejected; an older page at /cart would have been hidden (now falls through). Owners' Orders screen and a new-order alert are in 10.4, before release |
+| 10.2 Cart and checkout | #78 | 855 backend tests on SQLite and MySQL 8; 375 frontend; all browser tests incl. a full purchase on desktop and phone; product pages 98–100. Found: a 27-character id MySQL rejected; an older page at /cart would have been hidden (now falls through). Owners' Orders screen and a new-order alert are in 10.4, before release |
+| 10.3 Card payments (business's own PayFast/Yoco) | see PR | 904 backend tests on SQLite and MySQL 8; all browser tests. Deposits and class payments moved off Paystack. Found: MySQL JSON reorders keys (PayFast form now text); test leftovers had filled the disk (cleaned up per test now) |

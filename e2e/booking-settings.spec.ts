@@ -32,11 +32,7 @@ test('an owner sets up a service, their hours and time off', async ({ page }, te
   await expect(page.getByText(/Everyone · .* · Freedom Day/)).toBeVisible();
 
   // Before WURK switches on payments, owners are told plainly; the policy can still be set.
-  await expect(
-    page.getByText(
-      'Online payments aren’t switched on yet. Bookings work without deposits in the meantime.',
-    ),
-  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Settings → Payments' })).toBeVisible(); // deposits use the business’s own PayFast or Yoco
   const policy = page.getByRole('form', { name: 'Cancellation policy' });
   await policy.getByLabel('Free cancellation until (hours before)').fill('48');
   await policy.getByRole('button', { name: 'Save policy' }).click();

@@ -5,22 +5,21 @@ declare(strict_types=1);
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Tests\Support\FakesYoco;
 use Tests\Support\InteractsWithShards;
 use Wurk\Bookings\Mail\BookingMessageMail;
-use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Support\ClassBooker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\Reminders;
-use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\TenantContext;
 
-uses(InteractsWithShards::class);
+uses(InteractsWithShards::class, FakesYoco::class);
 
 beforeEach(function () {
     $this->travelTo(CarbonImmutable::parse('2027-05-01 10:00', 'Africa/Johannesburg'));
@@ -87,14 +86,9 @@ it('reminds attendees 24 hours before', function () {
 
 describe('paid online', function () {
     beforeEach(function () {
-        Http::fake([
-            'api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://checkout.paystack.com/class']]),
-            'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 8000]]),
-            'api.paystack.co/refund' => Http::response(['status' => true]),
-        ]);
-        app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
+        $this->fakeYoco();
+        $this->connectYoco($this->studio);
         ($this->in)(function () {
-            BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_flow']);
             $this->class->update(['pay_online' => true, 'price_cents' => 8000]);
         });
         $this->refunds = fn () => count(Http::recorded(fn ($r) => str_ends_with($r->url(), '/refund')));
@@ -103,7 +97,7 @@ describe('paid online', function () {
     it('holds the place while paying, and confirms only once Paystack says it’s paid', function () {
         $this->postJson("{$this->site}/{$this->class->id}", ['name' => 'Sipho', 'phone' => '082 555 0101', 'consent' => '1'])
             ->assertJsonValidationErrors(['email' => 'Please add your email — this class is paid when booking, and the receipt is emailed.']);
-        ($this->join)('Sipho', 'sipho@example.com')->assertCreated()->assertJson(['pay_url' => 'https://checkout.paystack.com/class', 'deposit_cents' => 8000]);
+        ($this->join)('Sipho', 'sipho@example.com')->assertCreated()->assertJson(['pay_url' => 'https://c.yoco.com/checkout/ch_1', 'deposit_cents' => 8000]);
         expect($this->getJson($this->site)->json('classes.0.places_left'))->toBe(1) // held while paying
             ->and(($this->texts)('sipho@example.com'))->toBe([]);                  // nothing confirmed yet
 

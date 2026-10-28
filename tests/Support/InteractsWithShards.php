@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Support;
 
+use Illuminate\Support\Facades\DB;
 use Wurk\Tenancy\Actions\CreateTenant;
 use Wurk\Tenancy\Actions\RegisterShard;
 use Wurk\Tenancy\Models\Shard;
@@ -37,7 +38,7 @@ trait InteractsWithShards
                 ]
                 : [
                     'driver' => 'sqlite',
-                    'database' => tempnam(sys_get_temp_dir(), "wurk-shard-{$i}-").'.sqlite',
+                    'database' => $this->temporaryShardFile($i),
                     'foreign_key_constraints' => true,
                 ];
 
@@ -50,5 +51,24 @@ trait InteractsWithShards
     protected function createTenant(string $handle, ?Shard $shard = null, ?string $name = null): Tenant
     {
         return app(CreateTenant::class)($name ?? ucfirst($handle), $handle, shard: $shard);
+    }
+
+    /**
+     * A fresh SQLite file for a test shard, deleted when the test's application shuts down. (Leftover shard
+     * files once filled the disk: tens of thousands, 6 GB.)
+     */
+    private function temporaryShardFile(int $i): string
+    {
+        $placeholder = tempnam(sys_get_temp_dir(), "wurk-shard-{$i}-");
+        @unlink($placeholder); // only its unique name is needed
+        $file = $placeholder.'.sqlite';
+        $this->beforeApplicationDestroyed(function () use ($file): void {
+            DB::purge(); // close connections before removing the file
+            foreach ([$file, $file.'-journal', $file.'-wal', $file.'-shm'] as $f) {
+                @unlink($f);
+            }
+        });
+
+        return $file;
     }
 }

@@ -17,6 +17,7 @@ use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\TimeOff;
 use Wurk\Bookings\Support\MeetingLinks;
 use Wurk\Messaging\Support\ProviderSettings;
+use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -80,20 +81,15 @@ it('takes time off in local time and stores it in UTC', function () {
     $this->ctx->run($this->glow, fn () => expect(TimeOff::query()->sole()->starts_at->utc()->toIso8601String())->toBe('2027-04-26T22:00:00+00:00'));
 });
 
-it('connects the bank for deposits, keeping only a masked label, and saves the policy', function () {
+it('takes deposits through the business’s own card provider (Settings → Payments), and saves the policy', function () {
     ($this->subscribe)(['bookings']);
-    app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
-    Http::fake([
-        'api.paystack.co/bank*' => Http::response(['status' => true, 'data' => [['code' => '470010', 'name' => 'Capitec Bank']]]),
-        'api.paystack.co/subaccount' => Http::response(['status' => true, 'data' => ['subaccount_code' => 'ACCT_new']]),
-    ]);
-    $this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '999', 'account_number' => '1234567890'])->assertSessionHasErrors(['bank_code' => 'Choose your bank from the list.']);
-    $this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '470010', 'account_number' => '12-34'])->assertSessionHasErrors(['account_number' => 'Enter the account number using digits only.']);
-    $this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '470010', 'account_number' => '1234567890'])->assertSessionHas('status', 'Deposits will be paid into Capitec Bank ••••7890.');
+    $this->actingAs($this->owner)->get("{$this->base}/settings")->assertInertia(fn ($p) => $p->where('cardPayments', []));
+    $this->ctx->run($this->glow, fn () => PaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'credentials' => ['secret_key' => 'sk_test_x']]));
+    $this->actingAs($this->owner)->get("{$this->base}/settings")->assertInertia(fn ($p) => $p->where('cardPayments', ['yoco']));
+    expect($this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '470010', 'account_number' => '1234567890'])->status())->toBeIn([404, 405]); // the old bank form is gone
 
     $this->actingAs($this->owner)->put("{$this->base}/policy", ['hours' => 48, 'text' => ''])->assertSessionHas('status', 'Cancellation policy saved.');
-    $this->ctx->run($this->glow, fn () => expect(BookingSettings::query()->sole()->only(['payout_subaccount', 'payout_label', 'cancellation_hours']))
-        ->toBe(['payout_subaccount' => 'ACCT_new', 'payout_label' => 'Capitec Bank ••••7890', 'cancellation_hours' => 48]));
+    $this->ctx->run($this->glow, fn () => expect(BookingSettings::query()->sole()->cancellation_hours)->toBe(48));
 });
 
 it('connects the owner’s own Google account safely, and refuses a return that wasn’t started here', function () {

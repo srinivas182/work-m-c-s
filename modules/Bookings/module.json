@@ -13,6 +13,7 @@
         "plans",
         "billing",
         "credits",
-        "messaging"
+        "messaging",
+        "payments"
     ]
 }

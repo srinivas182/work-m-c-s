@@ -12,7 +12,6 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Access\Contracts\TeamDirectory;
-use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Models\MeetingConnection;
@@ -21,6 +20,7 @@ use Wurk\Bookings\Support\ClassBooker;
 use Wurk\Bookings\Support\ClassFull;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\MeetingLinks;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners: Bookings → Classes — schedule classes, see who's coming, mark attendance, cancel. */
@@ -38,7 +38,7 @@ final class ClassesController
             'timezone' => $tz,
             'team' => $this->team->members(),
             'canGoOnline' => MeetingConnection::query()->find($this->context->id()) !== null || MemberMeetingLink::query()->exists(),
-            'canTakePayments' => BookingSettings::query()->find($this->context->id())?->payout_subaccount !== null,
+            'canTakePayments' => app(BusinessPayments::class)->available() !== [],
             'classes' => $sessions->map(fn (ClassSession $s) => [
                 'id' => $s->id, 'title' => $s->title, 'status' => $s->status, 'online' => $s->location_type === 'online', 'capacity' => $s->capacity, 'paid' => $s->pay_online,
                 'when' => $s->starts_at->setTimezone($tz)->format('D j M, H:i'), 'minutes' => (int) $s->starts_at->diffInMinutes($s->ends_at),
@@ -60,8 +60,8 @@ final class ClassesController
         if ($data['location_type'] === 'online' && ! $connected && app(MeetingLinks::class)->forMember($data['member'] ?? null) === null) {
             throw ValidationException::withMessages(['location_type' => 'Add a meeting link for the instructor (or the whole business) under Meeting links in Booking settings, so people can join.']);
         }
-        if (($data['pay_online'] ?? false) && ($data['price_cents'] < 100 || BookingSettings::query()->find($this->context->id())?->payout_subaccount === null)) {
-            throw ValidationException::withMessages(['pay_online' => 'To take payment online, connect your bank in Booking settings and set a price.']);
+        if (($data['pay_online'] ?? false) && ($data['price_cents'] < 100 || app(BusinessPayments::class)->available() === [])) {
+            throw ValidationException::withMessages(['pay_online' => 'To take payment online, connect PayFast or Yoco under Settings → Payments, and set a price.']);
         }
         $start = CarbonImmutable::parse("{$data['date']} {$data['time']}", $this->context->current()->timezone());
         if ($start->isPast()) {

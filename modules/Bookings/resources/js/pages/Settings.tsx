@@ -44,8 +44,7 @@ interface Props {
     reason: string | null;
   }[];
   timezone: string;
-  payouts: { label: string | null };
-  banks?: { code: string; name: string }[];
+  cardPayments: string[];
   policy: { hours: number; text: string; default: string };
   video: {
     links: { default: string | null; members: Record<string, string> };
@@ -557,8 +556,7 @@ function MessagesCard({ messages }: Pick<Props, 'messages'>) {
   );
 }
 
-function DepositsCard({ payouts, banks, policy }: Pick<Props, 'payouts' | 'banks' | 'policy'>) {
-  const connect = useForm({ bank_code: '', account_number: '' });
+function DepositsCard({ cardPayments, policy }: Pick<Props, 'cardPayments' | 'policy'>) {
   const rules = useForm({ hours: policy.hours, text: policy.text });
   return (
     <Card>
@@ -570,62 +568,25 @@ function DepositsCard({ payouts, banks, policy }: Pick<Props, 'payouts' | 'banks
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
-        {payouts.label ? (
-          <div className="border-border flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
-            <p>
-              Deposits are paid into <strong>{payouts.label}</strong>.
-            </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.delete(`${base()}/payouts`, { preserveScroll: true })}
-            >
-              Disconnect
-            </Button>
-          </div>
-        ) : (banks ?? []).length === 0 ? (
-          <p className="text-fg-muted text-sm">
-            Online payments aren’t switched on yet. Bookings work without deposits in the meantime.
+        {cardPayments.length > 0 ? (
+          <p className="border-border rounded-lg border p-3">
+            Deposits are paid through your{' '}
+            <strong>
+              {cardPayments.map((p) => (p === 'yoco' ? 'Yoco' : 'PayFast')).join(' or ')}
+            </strong>{' '}
+            account — straight to you.
           </p>
         ) : (
-          <form
-            aria-label="Connect your bank account"
-            className="grid gap-4 sm:grid-cols-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              connect.put(`${base()}/payouts`, { preserveScroll: true });
-            }}
-          >
-            <Field label="Bank" error={connect.errors.bank_code}>
-              <select
-                className={selectClass}
-                value={connect.data.bank_code}
-                onChange={(e) => connect.setData('bank_code', e.target.value)}
-              >
-                <option value="">Choose your bank</option>
-                {(banks ?? []).map((b) => (
-                  <option key={b.code} value={b.code}>
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field
-              label="Account number"
-              hint="Only the last four digits are kept."
-              error={connect.errors.account_number}
+          <p className="text-fg-muted text-sm">
+            To take deposits, connect PayFast or Yoco under{' '}
+            <a
+              className="underline"
+              href={`${window.location.pathname.split('/').slice(0, 2).join('/')}/settings/payments`}
             >
-              <Input
-                inputMode="numeric"
-                autoComplete="off"
-                value={connect.data.account_number}
-                onChange={(e) => connect.setData('account_number', e.target.value)}
-              />
-            </Field>
-            <Button type="submit" className="justify-self-start" loading={connect.processing}>
-              Connect bank account
-            </Button>
-          </form>
+              Settings → Payments
+            </a>
+            . Bookings work without deposits in the meantime.
+          </p>
         )}
         <form
           aria-label="Cancellation policy"
@@ -682,8 +643,7 @@ export default function Settings({
   hours,
   timeOff,
   timezone,
-  payouts,
-  banks,
+  cardPayments,
   policy,
   messages,
   video,
@@ -770,7 +730,7 @@ export default function Settings({
           </CardContent>
         </Card>
 
-        <DepositsCard payouts={payouts} banks={banks} policy={policy} />
+        <DepositsCard cardPayments={cardPayments} policy={policy} />
         <MessagesCard messages={messages} />
         <VideoCard video={video} team={team} />
 

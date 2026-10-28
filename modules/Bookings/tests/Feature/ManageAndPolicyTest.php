@@ -6,32 +6,27 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\FakesYoco;
 use Tests\Support\InteractsWithShards;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
-use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\CancellationPolicy;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\ManageLink;
-use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Tenancy\Contracts\TenantContext;
 
-uses(InteractsWithShards::class);
+uses(InteractsWithShards::class, FakesYoco::class);
 
 const STAFF_ONE = '01J00000000000000000000001';
 
 beforeEach(function () {
     $this->travelTo(CarbonImmutable::parse('2027-05-01 10:00', 'Africa/Johannesburg'));
-    app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
-    Http::fake([
-        'api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://x']]),
-        'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 10000]]),
-        'api.paystack.co/refund' => Http::response(['status' => true]),
-    ]);
+    $this->fakeYoco();
     $this->createShards(1);
     $this->glow = $this->createTenant('glow-salon', name: 'Glow Salon');
+    $this->connectYoco($this->glow);
     $this->glow->update(['timezone' => 'Africa/Johannesburg']);
     $this->ctx = app(TenantContext::class);
     $this->in = fn (callable $fn) => $this->ctx->run($this->glow, $fn);
@@ -39,7 +34,6 @@ beforeEach(function () {
         $service = BookingService::query()->create(['name' => 'Knotless braids', 'duration_minutes' => 60, 'price_cents' => 45000, 'deposit_type' => 'fixed', 'deposit_value' => 10000]);
         DB::connection(app(TenantContext::class)->connectionName())->table('booking_service_member')->insert(['service_id' => $service->id, 'member_id' => STAFF_ONE, 'tenant_id' => app(TenantContext::class)->id()]);
         BookingHours::query()->create(['member_id' => STAFF_ONE, 'weekday' => 0, 'starts' => '09:00', 'ends' => '17:00']);
-        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_glow']);
         $b = app(Booker::class)->book($service, CarbonImmutable::parse('2027-05-03 09:00', 'Africa/Johannesburg'), ['name' => 'Sipho', 'email' => 's@example.com'], STAFF_ONE, 'website', status: 'pending_payment');
         app(Deposits::class)->start($b, 10000, 's@example.com', 'https://x');
         app(Deposits::class)->confirm((string) $b->refresh()->payment_reference); // paid

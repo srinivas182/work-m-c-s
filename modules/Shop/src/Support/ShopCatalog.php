@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Shop\Support;
 
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
@@ -68,6 +69,6 @@ final class ShopCatalog implements ProductCatalog
 
     public function canOrder(): bool
     {
-        return $this->published() !== [] && (bool) ShopSettings::query()->find(app(TenantContext::class)->id())?->offline_enabled; // + card payments (10.3)
+        return $this->published() !== [] && ((bool) ShopSettings::query()->find(app(TenantContext::class)->id())?->offline_enabled || app(BusinessPayments::class)->available() !== []);
     }
 }

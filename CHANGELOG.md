@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 10.3 (card payments into the business's own account)
+- **Payments module** (every package): each business connects **its own Yoco** (secret key tested on the spot by registering our webhook) **or PayFast** account (passphrase required) under **Settings → Payments**. Keys are encrypted and never shown again; owners see a masked label and a clear test-mode badge. New permission `payments.manage`.
+- **Verified payments only**: Yoco webhooks must be correctly signed and recent, and the checkout status is read back from Yoco; a PayFast notification counts only if its signature, PayFast's own validation ("VALID"), status and exact amount all check out.
+- **Card payment at checkout** (card or EFT when both are on): stock held for 15 minutes while paying; confirmed only after verification (notification or return); stock back at once if payment can't start; late payments refunded automatically.
+- **Deposits and class payments** now use the business's own PayFast or Yoco account too — the Paystack subaccounts WURK set up in Sprints 8–9 are retired, so WURK is never in any customer payment.
+
+### Fixed
+- PayFast's signed fields are kept in order (stored as text: MySQL's JSON type reorders keys).
+- Tests no longer leave temporary shard databases and folders behind (they had filled the disk).
+
 ### Added — Sprint 10.2 (cart and checkout)
 - **Add to cart** on product pages (sold-out options disabled; "Ask about this product" without JavaScript), and **the cart and checkout at `/cart`**: quantities, collection or delivery with a live total, details and consent, then the customer's order page. The cart lives in the shopper's browser; **the server re-checks every price and stock level**.
 - **Never oversold**: each variant is locked and its stock taken off in the same transaction as the order — or nothing is saved. Order numbers per business (#1001…); names and prices copied into the order.

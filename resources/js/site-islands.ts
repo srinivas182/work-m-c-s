@@ -749,6 +749,8 @@ async function checkout(root: HTMLElement): Promise<void> {
   };
   type Settings = {
     available: boolean;
+    card?: boolean;
+    offline?: boolean;
     collection: boolean;
     collection_address: string | null;
     delivery: boolean;
@@ -847,6 +849,30 @@ async function checkout(root: HTMLElement): Promise<void> {
   trapWrap.setAttribute('aria-hidden', 'true');
   const place = el('button', { type: 'submit', class: button }, 'Place order');
 
+  const payCard = el('input', { type: 'radio', name: `${uid}-pay`, value: 'card', checked: true });
+  payCard.id = id('pay-card');
+  const payEft = el('input', { type: 'radio', name: `${uid}-pay`, value: 'offline' });
+  payEft.id = id('pay-eft');
+  const pay = el(
+    'fieldset',
+    { class: 'grid gap-2' },
+    el('legend', { class: 'font-medium' }, 'How you’ll pay'),
+    el(
+      'div',
+      { class: 'flex items-start gap-2' },
+      payCard,
+      el('label', { htmlFor: payCard.id }, 'Card — pay now, securely'),
+    ),
+    el(
+      'div',
+      { class: 'flex items-start gap-2' },
+      payEft,
+      el('label', { htmlFor: payEft.id }, 'EFT or on collection — we’ll show you how'),
+    ),
+  );
+  pay.hidden = !(s.card && s.offline); // a choice only when both are on
+  const payment = () =>
+    s.card && s.offline ? (payCard.checked ? 'card' : 'offline') : s.card ? 'card' : 'offline';
   const delivering = () => s.delivery && (!s.collection || deliver.input.checked);
   const redraw = () => {
     if (!data) return;
@@ -915,6 +941,7 @@ async function checkout(root: HTMLElement): Promise<void> {
     { class: 'grid gap-4' },
     list,
     how,
+    pay,
     totals,
     labelled('Your name', name),
     labelled('Phone', phone),
@@ -946,6 +973,7 @@ async function checkout(root: HTMLElement): Promise<void> {
         fulfilment: delivering() ? 'delivery' : 'collection',
         address: delivering() ? address.value : null,
         notes: notes.value || null,
+        payment: payment(),
         consent: consent.checked ? '1' : null,
         website: trap.value,
       }),
@@ -954,10 +982,17 @@ async function checkout(root: HTMLElement): Promise<void> {
     const body = r
       ? ((await r.json().catch(() => ({}))) as {
           order_url?: string;
+          pay_url?: string;
           message?: string;
           errors?: Record<string, string[]>;
         })
       : {};
+    if (r?.status === 201 && body.pay_url) {
+      writeCart([]);
+      status.textContent = 'Order placed. Taking you to pay…';
+      window.location.assign(body.pay_url); // Yoco or PayFast; they bring the customer back to the order page
+      return;
+    }
     if (r?.status === 201 && body.order_url) {
       writeCart([]);
       status.textContent = 'Order placed. Taking you to your order…';
