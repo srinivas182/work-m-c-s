@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft for WURK's approval (30 Oct 2026) |
+| **Status** | Approved 30 Oct 2026 — 11.1 next |
 | **Plan (revision 3)** | 29 Mar – 09 Apr 2027 · branch managers; per-branch merchant accounts, prices, stock; inter-branch settlement; courier integrations |
 | **Builds on** | Sprint 1's branches table, branch-manager role and branch scope (unused until now); packages' `multi_branch` / `max_branches` (not yet enforced) |
 
@@ -53,3 +53,13 @@ An owner with three salons or two shops adds them in minutes, gives each manager
 ## 7. Needed from WURK
 
 Decisions A–E; Bob Go and Pargo sandbox accounts (with the payment providers' sandboxes) for one real test each before go-live.
+
+## 8. Decisions (WURK, 30 Oct 2026)
+
+| # | Decision |
+|---|---|
+| A | **Bob Go** (many couriers) **plus Pargo** pickup points |
+| B | The **business's own** courier account (as recommended) |
+| C | **Optional price per branch**, otherwise the business price |
+| D | Settlement between branches: **record what's owed; settled by hand** — no money moves through WURK |
+| E | Branch limit from the package (`max_branches`); Growth and Pro numbers to confirm in the admin |
