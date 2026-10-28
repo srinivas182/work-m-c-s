@@ -8,9 +8,11 @@ use Illuminate\Support\Facades\Mail;
 use Tests\Support\FakesYoco;
 use Tests\Support\InteractsWithShards;
 use Wurk\Bookings\Mail\BookingMessageMail;
+use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Models\MeetingConnection;
+use Wurk\Bookings\Models\MemberRegistration;
 use Wurk\Bookings\Support\ClassBooker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\Reminders;
@@ -129,4 +131,16 @@ describe('paid online', function () {
         ($this->in)(fn () => app(ClassBooker::class)->cancelSession($this->class->refresh(), null));
         expect(($this->refunds)())->toBe(2); // Lerato too
     });
+});
+
+it('at a health practice, takes a place in an online class only with consent, and shows the instructor’s registration', function () {
+    $this->ctx->run($this->studio, function () {
+        MemberRegistration::query()->create(['member_id' => '01J00000000000000000000001', 'council' => 'HPCSA', 'number' => 'PS0012345']);
+        $this->class->update(['member_id' => '01J00000000000000000000001']);
+        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'health_practice' => true]);
+    });
+    $this->getJson($this->site)->assertJsonPath('health.version', 'v1')->assertJsonPath('classes.0.registration', 'HPCSA PS0012345');
+    ($this->join)('Sipho', 'sipho@example.com')->assertStatus(422)->assertJsonValidationErrors('health_consent');
+    $this->postJson("{$this->site}/{$this->class->id}", ['name' => 'Sipho', 'phone' => '082 555 0101', 'consent' => '1', 'health_consent' => true])->assertCreated();
+    $this->ctx->run($this->studio, fn () => expect(ClassAttendee::query()->sole()->consent_version)->toBe('v1'));
 });

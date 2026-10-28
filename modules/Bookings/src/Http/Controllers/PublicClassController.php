@@ -14,6 +14,7 @@ use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Support\ClassBooker;
 use Wurk\Bookings\Support\ClassFull;
 use Wurk\Bookings\Support\Deposits;
+use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\ManageLink;
 use Wurk\Plans\Contracts\Entitlements;
@@ -30,13 +31,15 @@ final class PublicClassController
     {
         return $this->within($handle, function (CurrentTenant $tenant): JsonResponse {
             $tz = $tenant->timezone();
+            $health = app(HealthPractice::class);
             $sessions = ClassSession::query()->where('status', 'scheduled')->where('starts_at', '>', Instant::db(now()))
                 ->where('starts_at', '<', Instant::db(now()->addDays(14)))->orderBy('starts_at')->limit(60)->get();
 
-            return new JsonResponse(['classes' => $sessions->map(fn (ClassSession $s) => [
+            return new JsonResponse(['health' => $health->on() ? ['consent' => HealthPractice::CONSENT, 'version' => HealthPractice::CONSENT_VERSION] : null, 'classes' => $sessions->map(fn (ClassSession $s) => [
                 'id' => $s->id, 'title' => $s->title, 'description' => $s->description, 'online' => $s->location_type === 'online',
                 'when' => $s->starts_at->setTimezone($tz)->format('D j M, H:i'), 'minutes' => (int) $s->starts_at->diffInMinutes($s->ends_at),
                 'price_cents' => $s->price_cents, 'places_left' => max(0, $s->capacity - $s->taken()),
+                'registration' => $health->on() && $s->location_type === 'online' ? $health->registration($s->member_id) : null,
             ])->values()->all()]);
         });
     }
@@ -46,20 +49,27 @@ final class PublicClassController
         return $this->within($handle, function (CurrentTenant $tenant) use ($request, $session, $booker, $deposits): JsonResponse {
             $data = $request->validate([
                 'name' => ['required', 'string', 'max:120'], 'phone' => ['required', 'string', 'max:40'], 'email' => ['nullable', 'email', 'max:160'],
-                'consent' => ['accepted'], 'website' => ['nullable', 'string'],
+                'consent' => ['accepted'], 'health_consent' => ['nullable', 'boolean'], 'website' => ['nullable', 'string'],
             ], ['consent.accepted' => 'Please agree to be contacted about your class.']);
             if (($data['website'] ?? '') !== '') {
                 return new JsonResponse(['booked' => true], 201);
             }
             $class = ClassSession::query()->whereKey($session)->firstOrFail();
+            $consented = $class->location_type === 'online' && app(HealthPractice::class)->on();
+            if ($consented && ! ($data['health_consent'] ?? false)) {
+                throw ValidationException::withMessages(['health_consent' => 'Please read and agree to the video-consultation terms to book online.']);
+            }
             $price = $deposits->amountForClass($class);
-            if ($price > 0 && empty($data['email'])) { // Paystack sends the receipt by email
+            if ($price > 0 && empty($data['email'])) { // the payment receipt is emailed
                 throw ValidationException::withMessages(['email' => 'Please add your email — this class is paid when booking, and the receipt is emailed.']);
             }
             try {
                 $a = $booker->attend($class, ['name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null], 'website', $price > 0 ? 'pending_payment' : 'confirmed');
             } catch (ClassFull $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
+            }
+            if ($consented) {
+                $a->update(['consent_version' => HealthPractice::CONSENT_VERSION, 'consent_at' => now()]);
             }
             if ($price > 0) {
                 $payUrl = $deposits->start($a, $price, (string) $data['email'], $request->getSchemeAndHttpHost().'/book/return');
