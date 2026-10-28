@@ -159,14 +159,19 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByText('Ozow is switched off for every business.')).toBeVisible();
   await page.getByLabel('Businesses may offer Ozow').click();
   await expect(page.getByText('Ozow can be offered by businesses.')).toBeVisible();
-  await page.getByRole('button', { name: 'Add bank details' }).click();
+  // WURK's settings are shared by the desktop and phone runs (central data): add or change, whichever applies.
+  await page.getByRole('button', { name: /^(Add|Change) bank details$/ }).click();
   const eft = page.getByRole('form', { name: 'EFT / bank transfer live keys' });
   await eft
     .getByLabel('How to pay (bank, account number, branch code)')
     .fill('WURK (Pty) Ltd, FNB 62000000000');
   await eft.getByRole('button', { name: 'Save live details' }).click();
   await expect(page.getByText('EFT / bank transfer live keys saved.')).toBeVisible();
-  await page.getByLabel('WURK accepts EFT / bank transfer').click();
-  await expect(page.getByText('EFT / bank transfer is on in live mode.')).toBeVisible();
+  const accepts = page.getByLabel('WURK accepts EFT / bank transfer');
+  if (!(await accepts.isChecked())) {
+    await accepts.click();
+    await expect(page.getByText('EFT / bank transfer is on in live mode.')).toBeVisible();
+  }
+  await expect(accepts).toBeChecked();
   await expectAccessible(page);
 });
