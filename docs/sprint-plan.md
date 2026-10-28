@@ -79,3 +79,4 @@
 
 - **Payment gateways (Sprint 10):** each business connects **its own PayFast or Yoco** account; WURK is never in any customer payment and takes no fee on sales. **Ozow and Peach were not built**; Paystack is used only for WURK's own subscriptions. Another gateway can be added inside the Payments module without touching shop or bookings.
 - **Dates:** the dates above are revision 3's and have slipped. Revised dates are proposed for WURK's approval (revision 4).
+- **Year 2038 (for Sprint 18, Hardening):** most tables use MySQL `TIMESTAMP`, which ends on 19 January 2038. Records (9.5) already uses `DATETIME`; the rest should be migrated well before 2038.
