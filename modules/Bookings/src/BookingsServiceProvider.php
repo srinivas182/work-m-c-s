@@ -9,7 +9,6 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
-use Wurk\Billing\Contracts\DepositPaid;
 use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
 use Wurk\Bookings\Console\SendRemindersCommand;
@@ -22,6 +21,7 @@ use Wurk\Bookings\Events\ReservationCancelled;
 use Wurk\Bookings\Events\ReservationConfirmed;
 use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Support\Deposits;
+use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
 final class BookingsServiceProvider extends ModuleServiceProvider
@@ -55,7 +55,8 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         RateLimiter::for('book-read', fn (Request $r) => Limit::perMinute(60)->by($visitor($r, 'book-read')));
         RateLimiter::for('book-manage', fn (Request $r) => Limit::perMinute(30)->by($visitor($r, 'book-manage')));
         // A deposit Paystack reported paid: confirmed only after verifying (Deposits::confirm).
-        Event::listen(DepositPaid::class, fn (DepositPaid $e) => $this->app->make(Deposits::class)->confirm($e->reference));
+        // A provider reported a payment: deposits and class places ("dep_…") are confirmed after verifying it.
+        Event::listen(BusinessPaymentReceived::class, fn (BusinessPaymentReceived $e) => str_starts_with($e->reference, 'dep_') ? $this->app->make(Deposits::class)->confirm($e->reference) : null);
         Event::listen([BookingConfirmed::class, BookingMoved::class, BookingCancelled::class, ReservationConfirmed::class, ReservationCancelled::class, ClassJoined::class, ClassLeft::class], SendBookingMessages::class);
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('bookings:expire-holds')->everyMinute()->onOneServer()->withoutOverlapping();

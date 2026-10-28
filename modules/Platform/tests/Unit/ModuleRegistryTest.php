@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Filesystem\Filesystem;
 use Wurk\Platform\Modules\Exceptions\InvalidModuleManifest;
 use Wurk\Platform\Modules\Exceptions\ModuleDependencyException;
 use Wurk\Platform\Modules\ModuleRegistry;
@@ -12,6 +13,7 @@ use Wurk\Platform\Modules\ModuleRegistry;
 function moduleFixture(array $modules): string
 {
     $root = sys_get_temp_dir().'/wurk-modules-'.bin2hex(random_bytes(6));
+    register_shutdown_function(fn () => (new Filesystem)->deleteDirectory($root)); // don't leave it behind
 
     foreach ($modules as $dir => $manifest) {
         mkdir("{$root}/{$dir}", 0777, true);
@@ -70,6 +72,7 @@ it('rejects an invalid key', function () {
 
 it('rejects malformed json', function () {
     $root = sys_get_temp_dir().'/wurk-modules-'.bin2hex(random_bytes(6));
+    register_shutdown_function(fn () => (new Filesystem)->deleteDirectory($root)); // don't leave it behind
     mkdir("{$root}/Alpha", 0777, true);
     file_put_contents("{$root}/Alpha/module.json", '{not json');
 

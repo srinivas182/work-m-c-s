@@ -44,10 +44,10 @@ interface Props {
     reason: string | null;
   }[];
   timezone: string;
-  payouts: { label: string | null };
-  banks?: { code: string; name: string }[];
+  cardPayments: string[];
   policy: { hours: number; text: string; default: string };
   video: {
+    links: { default: string | null; members: Record<string, string> };
     connection: {
       provider: 'google' | 'zoom' | 'fixed';
       account_label: string | null;
@@ -350,77 +350,110 @@ function HoursEditor({ member, hours }: { member: Props['team'][number]; hours: 
   );
 }
 
-function VideoCard({ video }: Pick<Props, 'video'>) {
-  const fixed = useForm({ url: video.connection?.fixed_url ?? '' });
+function VideoCard({ video, team }: Pick<Props, 'video' | 'team'>) {
+  const form = useForm({
+    default: video.links.default ?? '',
+    members: Object.fromEntries(team.map((m) => [m.id, video.links.members[m.id] ?? ''])) as Record<
+      string,
+      string
+    >,
+  });
+  const errors = form.errors as Record<string, string | undefined>;
   const c = video.connection;
   const name = { google: 'Google Meet', zoom: 'Zoom', fixed: 'Your meeting link' };
+  const connectable = (['google', 'zoom'] as const).filter((p) => video.available[p]); // only if WURK enables account connections
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Video calls</CardTitle>
+        <CardTitle>Meeting links</CardTitle>
         <CardDescription>
-          For online appointments. Connect your own account and every appointment gets its own
-          private link — the meetings are yours, not WURK’s.
+          For online appointments and classes. Paste each person’s Google Meet or Zoom link —
+          clients get the link of the person they booked with.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        {c ? (
-          <div className="border-border flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
-            <p>
-              <strong>{name[c.provider]}</strong>
-              {c.account_label ? ` — ${c.account_label}` : ''}
-              {c.provider === 'fixed' ? ' — every client gets the same link.' : ' is connected.'}
-            </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.delete(`${base()}/video`, { preserveScroll: true })}
-            >
-              Disconnect
-            </Button>
-          </div>
-        ) : null}
-        <div className="flex flex-wrap gap-2">
-          {(['google', 'zoom'] as const).map((p) =>
-            video.available[p] ? (
-              <a
-                key={p}
-                href={`${base()}/video/connect/${p}`}
-                className="border-border inline-flex h-10 items-center rounded-md border px-4 text-sm font-medium"
-              >
-                {c?.provider === p ? `Reconnect ${name[p]}` : `Connect ${name[p]}`}
-              </a>
-            ) : (
-              <span key={p} className="text-fg-muted inline-flex h-10 items-center text-sm">
-                {name[p]} — not switched on yet
-              </span>
-            ),
-          )}
-        </div>
+        <p className="border-border rounded-lg border p-3 text-sm">
+          <strong>Tip:</strong> turn on the waiting room in Zoom, or let guests in from the lobby in
+          Google Meet — then you decide who joins, even if a link is shared.
+        </p>
         <form
-          aria-label="Use a fixed meeting link"
-          className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end"
+          aria-label="Meeting links"
+          className="grid gap-3"
           onSubmit={(e) => {
             e.preventDefault();
-            fixed.put(`${base()}/video/fixed`, { preserveScroll: true });
+            form.transform((d) => ({
+              default: d.default || null,
+              members: Object.fromEntries(
+                Object.entries(d.members).map(([k, v]) => [k, v || null]),
+              ),
+            }));
+            form.put(`${base()}/video/links`, { preserveScroll: true });
           }}
         >
+          {team.map((m) => (
+            <Field key={m.id} label={`${m.name}’s link`} error={errors[`members.${m.id}`]}>
+              <Input
+                type="url"
+                placeholder="https://"
+                value={form.data.members[m.id] ?? ''}
+                onChange={(e) =>
+                  form.setData('members', { ...form.data.members, [m.id]: e.target.value })
+                }
+              />
+            </Field>
+          ))}
           <Field
-            label="Or use one meeting link for everyone"
-            hint="Anyone given this link once can use it again — a connected account is safer."
-            error={fixed.errors.url}
+            label="For the whole business (optional)"
+            hint="Used for anyone without their own link."
+            error={errors.default}
           >
             <Input
               type="url"
               placeholder="https://"
-              value={fixed.data.url}
-              onChange={(e) => fixed.setData('url', e.target.value)}
+              value={form.data.default}
+              onChange={(e) => form.setData('default', e.target.value)}
             />
           </Field>
-          <Button type="submit" variant="secondary" loading={fixed.processing}>
-            Save link
+          {errors.members && <p className="text-danger text-sm">{errors.members}</p>}
+          <Button
+            type="submit"
+            variant="secondary"
+            className="justify-self-start"
+            loading={form.processing}
+          >
+            Save meeting links
           </Button>
         </form>
+        {(connectable.length > 0 || (c && c.provider !== 'fixed')) && (
+          <div className="border-border flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
+            {c && c.provider !== 'fixed' ? (
+              <>
+                <span>
+                  <strong>{name[c.provider]}</strong>
+                  {c.account_label ? ` — ${c.account_label}` : ''} is connected: each appointment
+                  gets its own private link.
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.delete(`${base()}/video`, { preserveScroll: true })}
+                >
+                  Disconnect
+                </Button>
+              </>
+            ) : (
+              connectable.map((p) => (
+                <a
+                  key={p}
+                  href={`${base()}/video/connect/${p}`}
+                  className="border-border inline-flex h-10 items-center rounded-md border px-4 font-medium"
+                >
+                  Or connect {name[p]}
+                </a>
+              ))
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -523,8 +556,7 @@ function MessagesCard({ messages }: Pick<Props, 'messages'>) {
   );
 }
 
-function DepositsCard({ payouts, banks, policy }: Pick<Props, 'payouts' | 'banks' | 'policy'>) {
-  const connect = useForm({ bank_code: '', account_number: '' });
+function DepositsCard({ cardPayments, policy }: Pick<Props, 'cardPayments' | 'policy'>) {
   const rules = useForm({ hours: policy.hours, text: policy.text });
   return (
     <Card>
@@ -536,62 +568,25 @@ function DepositsCard({ payouts, banks, policy }: Pick<Props, 'payouts' | 'banks
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
-        {payouts.label ? (
-          <div className="border-border flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
-            <p>
-              Deposits are paid into <strong>{payouts.label}</strong>.
-            </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.delete(`${base()}/payouts`, { preserveScroll: true })}
-            >
-              Disconnect
-            </Button>
-          </div>
-        ) : (banks ?? []).length === 0 ? (
-          <p className="text-fg-muted text-sm">
-            Online payments aren’t switched on yet. Bookings work without deposits in the meantime.
+        {cardPayments.length > 0 ? (
+          <p className="border-border rounded-lg border p-3">
+            Deposits are paid through your{' '}
+            <strong>
+              {cardPayments.map((p) => (p === 'yoco' ? 'Yoco' : 'PayFast')).join(' or ')}
+            </strong>{' '}
+            account — straight to you.
           </p>
         ) : (
-          <form
-            aria-label="Connect your bank account"
-            className="grid gap-4 sm:grid-cols-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              connect.put(`${base()}/payouts`, { preserveScroll: true });
-            }}
-          >
-            <Field label="Bank" error={connect.errors.bank_code}>
-              <select
-                className={selectClass}
-                value={connect.data.bank_code}
-                onChange={(e) => connect.setData('bank_code', e.target.value)}
-              >
-                <option value="">Choose your bank</option>
-                {(banks ?? []).map((b) => (
-                  <option key={b.code} value={b.code}>
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field
-              label="Account number"
-              hint="Only the last four digits are kept."
-              error={connect.errors.account_number}
+          <p className="text-fg-muted text-sm">
+            To take deposits, connect PayFast or Yoco under{' '}
+            <a
+              className="underline"
+              href={`${window.location.pathname.split('/').slice(0, 2).join('/')}/settings/payments`}
             >
-              <Input
-                inputMode="numeric"
-                autoComplete="off"
-                value={connect.data.account_number}
-                onChange={(e) => connect.setData('account_number', e.target.value)}
-              />
-            </Field>
-            <Button type="submit" className="justify-self-start" loading={connect.processing}>
-              Connect bank account
-            </Button>
-          </form>
+              Settings → Payments
+            </a>
+            . Bookings work without deposits in the meantime.
+          </p>
         )}
         <form
           aria-label="Cancellation policy"
@@ -648,8 +643,7 @@ export default function Settings({
   hours,
   timeOff,
   timezone,
-  payouts,
-  banks,
+  cardPayments,
   policy,
   messages,
   video,
@@ -736,9 +730,9 @@ export default function Settings({
           </CardContent>
         </Card>
 
-        <DepositsCard payouts={payouts} banks={banks} policy={policy} />
+        <DepositsCard cardPayments={cardPayments} policy={policy} />
         <MessagesCard messages={messages} />
-        <VideoCard video={video} />
+        <VideoCard video={video} team={team} />
 
         <Card>
           <CardHeader>

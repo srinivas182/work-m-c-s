@@ -1,0 +1,17 @@
+{
+    "name": "Shop",
+    "key": "shop",
+    "version": "0.1.0",
+    "description": "Online shop: products with variants and stock, cart, checkout, payments straight to the business, orders and refunds.",
+    "core": false,
+    "entitlement": "shop",
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit",
+        "plans",
+        "website",
+        "payments"
+    ]
+}

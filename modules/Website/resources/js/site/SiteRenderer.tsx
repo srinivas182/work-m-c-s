@@ -1,6 +1,7 @@
 import './site.css';
 import type { ReactNode } from 'react';
 import { MainHeading } from './blocks/shared';
+import { INTERNAL_BLOCKS } from './internal';
 import { BLOCKS } from './registry';
 import { siteTheme } from './theme';
 import type { Branding, ContentDocument, SiteContext, StoredBlock } from './types';
@@ -11,7 +12,7 @@ import type { Branding, ContentDocument, SiteContext, StoredBlock } from './type
  * and defaults fill any gaps only after all steps have run.
  */
 export function upgradeBlock(block: StoredBlock): Record<string, unknown> | null {
-  const def = BLOCKS[block.type];
+  const def = BLOCKS[block.type] ?? INTERNAL_BLOCKS[block.type];
   if (!def || block.version > def.version) return null; // unknown, or saved by a newer release
   let props: Record<string, unknown> = { ...block.props };
   for (let from = block.version; from < def.version; from++) {
@@ -29,7 +30,7 @@ const HEAD = new Set(['PromotionBanner', 'Header']);
 const FOOT = new Set(['Footer']);
 
 function renderBlock(block: StoredBlock, site: SiteContext) {
-  const def = BLOCKS[block.type];
+  const def = BLOCKS[block.type] ?? INTERNAL_BLOCKS[block.type];
   const props = upgradeBlock(block);
   const out = def && props ? def.render(props as never, site) : null;
   // A block with nothing to show (e.g. an empty gallery on a live site) leaves no trace.

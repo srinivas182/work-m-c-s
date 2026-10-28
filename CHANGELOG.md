@@ -4,6 +4,45 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 10.4 (orders and refunds)
+- **Orders** (Shop → Orders): filters with counts (to do, awaiting payment, ready / on its way, done, cancelled); each order with items and totals, customer, collection or delivery, notes, **only the next steps that make sense**, and a **timeline** of every change (what, who, when).
+- **The journey**: paid → packed → ready for collection / out for delivery → done. Owners mark EFT orders paid; card orders are marked paid only by the verified payment.
+- **Cancel** before it leaves (stock back; card payments refunded in full) and **refund** all or part (card refunds through the provider, never more than what's left; optional restock; EFT refunds recorded).
+- **New-order alert** to everyone who can manage the shop (Access: `TeamDirectory::emailsWithPermission`), and **customer emails** as the order moves on (paid, ready, on its way, cancelled, refunded).
+
+### Added — Sprint 10.3 (card payments into the business's own account)
+- **Payments module** (every package): each business connects **its own Yoco** (secret key tested on the spot by registering our webhook) **or PayFast** account (passphrase required) under **Settings → Payments**. Keys are encrypted and never shown again; owners see a masked label and a clear test-mode badge. New permission `payments.manage`.
+- **Verified payments only**: Yoco webhooks must be correctly signed and recent, and the checkout status is read back from Yoco; a PayFast notification counts only if its signature, PayFast's own validation ("VALID"), status and exact amount all check out.
+- **Card payment at checkout** (card or EFT when both are on): stock held for 15 minutes while paying; confirmed only after verification (notification or return); stock back at once if payment can't start; late payments refunded automatically.
+- **Deposits and class payments** now use the business's own PayFast or Yoco account too — the Paystack subaccounts WURK set up in Sprints 8–9 are retired, so WURK is never in any customer payment.
+
+### Fixed
+- PayFast's signed fields are kept in order (stored as text: MySQL's JSON type reorders keys).
+- Tests no longer leave temporary shard databases and folders behind (they had filled the disk).
+
+### Added — Sprint 10.2 (cart and checkout)
+- **Add to cart** on product pages (sold-out options disabled; "Ask about this product" without JavaScript), and **the cart and checkout at `/cart`**: quantities, collection or delivery with a live total, details and consent, then the customer's order page. The cart lives in the shopper's browser; **the server re-checks every price and stock level**.
+- **Never oversold**: each variant is locked and its stock taken off in the same transaction as the order — or nothing is saved. Order numbers per business (#1001…); names and prices copied into the order.
+- **Paying by EFT or on collection** (optional, per business, agreed with WURK): customers see the business's instructions with their order number as the reference; unpaid orders release their stock after the hold time (default 72 hours). Card payments follow in 10.3.
+- **Shop settings**: collection, delivery fee and areas, EFT/pay-on-collection instructions and hold time. **Order confirmation email** to the customer.
+- Demo shops take orders; the full purchase is tested in the browser on desktop and phone; product pages still score 98–100.
+
+### Fixed
+- **Cart pages are kept per business**: they were stored under one fixed id, but that id is unique across a whole shard — so only one business per shared shard could ever have had a cart. Now keyed by the business's own id, tested with two businesses on one shard. Found when CI's fresh setup failed (the two retail demos share a shard).
+
+### Changed — online appointments use pasted meeting links (agreed with WURK)
+- **Meeting links per team member**: each person's own Google Meet or Zoom link, plus an optional default for the whole business — simpler than connecting accounts. Appointments use the practitioner's link; classes the instructor's; anyone without one, the default. No calls to Google or Zoom are needed.
+- An online service needs everyone who does it to be reachable (their link, or a default); an online class needs its instructor's link (or a default).
+- Settings → Meeting links, with a waiting-room tip. Account connections (Sprint 9.1) stay in the code, shown only if WURK enables them.
+
+### Added — Sprint 10.1 (catalogue)
+- **Shop module** (Growth and Pro): products with up to three options (e.g. Size, Colour) and variants — each with its own price, "was" price, SKU and stock (empty = not tracked); categories; unique slugs; variant ids kept when editing.
+- **Product photos** from the business's one photo library (Website's `MediaLibrary` contract) — shop managers needn't edit the website.
+- **Products section** for the website, rendered at publish through Website's `ProductCatalog` contract (Shop implements it; Website never depends on Shop): "from" and "was" prices, sold out; hidden when there's nothing to sell; a prompt in the editor; samples in template previews.
+- **Product pages** at `/shop/{slug}`: the site's header and footer around the product, rendered ahead of time and served through the same shell as every page; rebuilt when products, the home page, branding or menus change; removed when unpublished.
+- Only while the package includes the shop (downgrades hide grids and product pages).
+- Demo shops (`shop:demo`); "New in" products on the retail templates; the performance gate also measures product pages (`--only` for local checks) — all 100.
+
 ### Added — Sprint 9.3b (online payment for classes)
 - **Paid online when booking**: a class's price goes straight to the business's Paystack account. The place is **held while paying (and counts toward capacity)**, confirmed only once Paystack verifies the payment, and released after 15 minutes if unpaid; late payments are refunded automatically.
 - **Refunds**: leaving in time refunds (cancellation policy); when the business cancels a class, everyone who paid is refunded.

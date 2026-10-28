@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageRender;
 use Wurk\Website\Models\PageVersion;
@@ -25,27 +26,9 @@ final readonly class PageRenderer
     public function render(PageVersion $version): string
     {
         $page = Page::query()->withTrashed()->findOrFail($version->page_id);
-        $site = Site::query()->findOrFail($this->context->id());
-        $input = [
-            'document' => json_decode($version->content, true),
-            'branding' => $site->branding,
-            'site' => [
-                'businessName' => $this->context->current()->displayName(),
-                'logo' => $site->branding['logo'] ?? null,
-                'menus' => $this->menus->resolve($site),
-                'formAction' => '/forms/quote', // posts to the business's own address (allowed by its content policy)
-            ],
-        ];
-
-        $result = Process::timeout((int) config('wurk.site_render.timeout', 30))
-            ->input((string) json_encode($input))
-            ->run([(string) config('wurk.site_render.node', 'node'), (string) config('wurk.site_render.script')]);
-        if (! $result->successful()) {
-            throw new RuntimeException('Rendering failed: '.mb_substr(trim($result->errorOutput()), 0, 200));
-        }
-        $out = (array) json_decode($result->output(), true);
-        $body = (string) ($out['html'] ?? '');
-        $fonts = array_values(array_filter((array) ($out['fonts'] ?? []), 'is_string'));
+        $out = $this->renderDocument((array) json_decode($version->content, true));
+        $body = $out['html'];
+        $fonts = $out['fonts'];
 
         // Only the content is stored; the page shell (stylesheet, scripts, font preloads) is added when
         // the page is served, from the current build — so a deploy never leaves pages pointing at old assets.
@@ -62,5 +45,38 @@ final readonly class PageRenderer
         PageRender::query()->updateOrCreate(['page_version_id' => $version->id], ['path' => $path, 'rendered_at' => now(), 'error' => null]);
 
         return $path;
+    }
+
+    /**
+     * Render a content document with the site's branding, menus and products (pages and product pages).
+     *
+     * @param  array<string, mixed>  $document
+     * @param  array<string, mixed>  $site  extra site context (e.g. the product a product page shows)
+     * @return array{html: string, fonts: list<string>, blocks: array<int|string, mixed>}
+     */
+    public function renderDocument(array $document, array $site = []): array
+    {
+        $record = Site::query()->findOrFail($this->context->id());
+        $input = [
+            'document' => $document,
+            'branding' => $record->branding,
+            'site' => [
+                'businessName' => $this->context->current()->displayName(),
+                'logo' => $record->branding['logo'] ?? null,
+                'menus' => $this->menus->resolve($record),
+                'products' => app(ProductCatalog::class)->published(),
+                'formAction' => '/forms/quote', // posts to the business's own address (allowed by its content policy)
+                ...$site,
+            ],
+        ];
+        $result = Process::timeout((int) config('wurk.site_render.timeout', 30))
+            ->input((string) json_encode($input))
+            ->run([(string) config('wurk.site_render.node', 'node'), (string) config('wurk.site_render.script')]);
+        if (! $result->successful()) {
+            throw new RuntimeException('Rendering failed: '.mb_substr(trim($result->errorOutput()), 0, 200));
+        }
+        $out = (array) json_decode($result->output(), true);
+
+        return ['html' => (string) ($out['html'] ?? ''), 'fonts' => array_values(array_filter((array) ($out['fonts'] ?? []), 'is_string')), 'blocks' => (array) ($out['blocks'] ?? [])];
     }
 }

@@ -5,15 +5,19 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
+use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\TimeOff;
+use Wurk\Bookings\Support\MeetingLinks;
 use Wurk\Messaging\Support\ProviderSettings;
+use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -77,20 +81,15 @@ it('takes time off in local time and stores it in UTC', function () {
     $this->ctx->run($this->glow, fn () => expect(TimeOff::query()->sole()->starts_at->utc()->toIso8601String())->toBe('2027-04-26T22:00:00+00:00'));
 });
 
-it('connects the bank for deposits, keeping only a masked label, and saves the policy', function () {
+it('takes deposits through the business’s own card provider (Settings → Payments), and saves the policy', function () {
     ($this->subscribe)(['bookings']);
-    app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
-    Http::fake([
-        'api.paystack.co/bank*' => Http::response(['status' => true, 'data' => [['code' => '470010', 'name' => 'Capitec Bank']]]),
-        'api.paystack.co/subaccount' => Http::response(['status' => true, 'data' => ['subaccount_code' => 'ACCT_new']]),
-    ]);
-    $this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '999', 'account_number' => '1234567890'])->assertSessionHasErrors(['bank_code' => 'Choose your bank from the list.']);
-    $this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '470010', 'account_number' => '12-34'])->assertSessionHasErrors(['account_number' => 'Enter the account number using digits only.']);
-    $this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '470010', 'account_number' => '1234567890'])->assertSessionHas('status', 'Deposits will be paid into Capitec Bank ••••7890.');
+    $this->actingAs($this->owner)->get("{$this->base}/settings")->assertInertia(fn ($p) => $p->where('cardPayments', []));
+    $this->ctx->run($this->glow, fn () => PaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'credentials' => ['secret_key' => 'sk_test_x']]));
+    $this->actingAs($this->owner)->get("{$this->base}/settings")->assertInertia(fn ($p) => $p->where('cardPayments', ['yoco']));
+    expect($this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '470010', 'account_number' => '1234567890'])->status())->toBeIn([404, 405]); // the old bank form is gone
 
     $this->actingAs($this->owner)->put("{$this->base}/policy", ['hours' => 48, 'text' => ''])->assertSessionHas('status', 'Cancellation policy saved.');
-    $this->ctx->run($this->glow, fn () => expect(BookingSettings::query()->sole()->only(['payout_subaccount', 'payout_label', 'cancellation_hours']))
-        ->toBe(['payout_subaccount' => 'ACCT_new', 'payout_label' => 'Capitec Bank ••••7890', 'cancellation_hours' => 48]));
+    $this->ctx->run($this->glow, fn () => expect(BookingSettings::query()->sole()->cancellation_hours)->toBe(48));
 });
 
 it('connects the owner’s own Google account safely, and refuses a return that wasn’t started here', function () {
@@ -135,7 +134,31 @@ it('accepts a fixed meeting link only over https', function () {
 it('won’t make a service online until clients have a way to join', function () {
     ($this->subscribe)(['bookings']);
     $this->actingAs($this->owner)->post("{$this->base}/services", [...$this->service, 'location_type' => 'online'])
-        ->assertSessionHasErrors(['location_type' => 'Connect Google Meet or Zoom (or add a meeting link) under Video calls first, so clients can join.']);
+        ->assertSessionHasErrors(['location_type' => 'Add a meeting link (under Meeting links) for everyone who does this service, or a link for the whole business, so clients can join.']);
     $this->actingAs($this->owner)->put("{$this->base}/video/fixed", ['url' => 'https://meet.example.com/room']);
     $this->actingAs($this->owner)->post("{$this->base}/services", [...$this->service, 'location_type' => 'online'])->assertSessionHas('status', 'Service saved.');
+});
+
+it('gives each team member their own meeting link, with a business default — and online services need everyone reachable', function () {
+    ($this->subscribe)(['bookings']);
+    [$thandi, $sipho] = $this->ctx->run($this->glow, fn () => [app(TeamDirectory::class)->members()[0]['id'], app(TeamDirectory::class)->add((string) Str::ulid(), 'Sipho', 'staff')]);
+    $online = [...$this->service, 'location_type' => 'online', 'members' => [$thandi, $sipho]];
+
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => null, 'members' => [$thandi => 'http://zoom.us/j/1']])
+        ->assertSessionHasErrors(['members.'.$thandi => 'Enter the full meeting link, starting with https://']);
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => null, 'members' => ['01J00000000000000000000099' => 'https://zoom.us/j/1']])
+        ->assertSessionHasErrors(['members' => 'That person isn’t on your team.']);
+
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => null, 'members' => [$thandi => 'https://zoom.us/j/111']])->assertSessionHas('status', 'Meeting links saved.');
+    $this->actingAs($this->owner)->post("{$this->base}/services", $online)->assertSessionHasErrors('location_type'); // Sipho has no link, no default
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => null, 'members' => [$thandi => 'https://zoom.us/j/111', $sipho => 'https://meet.google.com/abc-defg-hij']]);
+    $this->actingAs($this->owner)->post("{$this->base}/services", $online)->assertSessionHas('status', 'Service saved.');
+
+    $this->ctx->run($this->glow, function () use ($thandi, $sipho) {
+        $links = app(MeetingLinks::class);
+        expect($links->forMember($thandi))->toBe('https://zoom.us/j/111')->and($links->forMember($sipho))->toBe('https://meet.google.com/abc-defg-hij')
+            ->and($links->forMember('01J00000000000000000000099'))->toBeNull();
+    });
+    $this->actingAs($this->owner)->put("{$this->base}/video/links", ['default' => 'https://meet.google.com/our-room', 'members' => [$thandi => 'https://zoom.us/j/111', $sipho => null]]);
+    $this->ctx->run($this->glow, fn () => expect(app(MeetingLinks::class)->forMember($sipho))->toBe('https://meet.google.com/our-room')); // falls back to the default
 });

@@ -176,7 +176,7 @@ jobs:
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18 # ~8 min and growing with each sub-sprint
     services:
       mysql:
         image: mysql:8.4

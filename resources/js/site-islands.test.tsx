@@ -291,3 +291,103 @@ describe('booking island', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('checkout island', () => {
+  const respond = (status: number, body: unknown) =>
+    Promise.resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+  const settle = () =>
+    new Promise((r) => setTimeout(r, 0)).then(() => new Promise((r) => setTimeout(r, 0)));
+  const priced = (card: boolean, offline: boolean) => ({
+    lines: [
+      {
+        variant: 'v1',
+        name: 'Linen dress',
+        label: 'M',
+        slug: 'linen-dress',
+        unit_cents: 89900,
+        quantity: 1,
+        available: 5,
+      },
+    ],
+    subtotal_cents: 89900,
+    checkout: {
+      available: true,
+      card,
+      offline,
+      collection: true,
+      collection_address: '12 Demo St',
+      delivery: false,
+      delivery_fee_cents: 0,
+      delivery_note: null,
+    },
+  });
+  const mount = () => {
+    localStorage.setItem('wurk-cart', JSON.stringify([{ variant: 'v1', quantity: 1 }]));
+    document.body.innerHTML = '<div data-island="checkout"><p>Your cart is empty.</p></div>';
+    startIslands(document);
+  };
+  const legend = () =>
+    [...document.querySelectorAll('legend')]
+      .find((l) => l.textContent === 'How you’ll pay')
+      ?.closest('fieldset') as HTMLFieldSetElement;
+  const fill = () => {
+    const byLabel = (text: string) =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find((l) => l.textContent === text)!.htmlFor,
+      ) as HTMLInputElement;
+    byLabel('Your name').value = 'Sipho';
+    byLabel('Phone').value = '082 555 0101';
+    byLabel('I agree to be contacted about my order.').checked = true;
+    document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+  };
+
+  it('offers card or EFT when both are on, and sends a card order to the provider', async () => {
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url) =>
+      url === '/cart/price'
+        ? respond(200, priced(true, true))
+        : respond(201, {
+            placed: true,
+            pay_url: 'https://c.yoco.com/checkout/ch_9',
+            order_url: '/order/x',
+          }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    mount();
+    await settle();
+    expect(legend().hidden).toBe(false);
+    fill();
+    await settle();
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)![1]!.body))).toMatchObject({
+      payment: 'card',
+      fulfilment: 'collection',
+    });
+    expect(document.querySelector('[role="status"]')!.textContent).toBe(
+      'Order placed. Taking you to pay…',
+    );
+    expect(localStorage.getItem('wurk-cart')).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
+  it('hides the choice when only EFT is on, and orders by EFT', async () => {
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url) =>
+      url === '/cart/price'
+        ? respond(200, priced(false, true))
+        : respond(201, { placed: true, order_url: '/order/x' }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    mount();
+    await settle();
+    expect(legend().hidden).toBe(true);
+    fill();
+    await settle();
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)![1]!.body))).toMatchObject({
+      payment: 'offline',
+    });
+    vi.unstubAllGlobals();
+  });
+});

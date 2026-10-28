@@ -13,6 +13,7 @@ use Wurk\Bookings\Mail\BookingMessageMail;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\MeetingConnection;
+use Wurk\Bookings\Models\MemberMeetingLink;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Reminders;
 use Wurk\Messaging\Support\ProviderSettings;
@@ -100,4 +101,15 @@ it('makes no video calls for in-person bookings', function () {
     ($this->connect)('google');
     ($this->book)(online: false);
     Http::assertNothingSent();
+});
+
+it('uses the practitioner’s own meeting link, otherwise the business default', function () {
+    Http::fake();
+    ($this->in)(fn () => MemberMeetingLink::query()->create(['member_id' => '01J00000000000000000000001', 'url' => 'https://zoom.us/j/thandi']));
+    expect(($this->book)()->only(['meeting_provider', 'meeting_url']))->toBe(['meeting_provider' => 'link', 'meeting_url' => 'https://zoom.us/j/thandi']);
+
+    ($this->in)(fn () => MemberMeetingLink::query()->delete());
+    ($this->connect)('fixed', ['fixed_url' => 'https://meet.google.com/our-room']);
+    expect(($this->book)(at: '2027-05-03 11:00')->meeting_url)->toBe('https://meet.google.com/our-room');
+    Http::assertNothingSent(); // pasted links need no calls to Google or Zoom
 });

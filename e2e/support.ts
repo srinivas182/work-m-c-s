@@ -45,12 +45,13 @@ export async function signUpBusiness(
     category: 'Salon & beauty',
     design: 'Warm salon (sample)',
   },
+  pkg = 'starter', // the package to sign up on (Growth and Pro include the shop)
 ): Promise<string> {
   const digits = String(Date.now()).slice(-7);
   const e164 = `+2782${digits}`;
   const handle = `${prefix}-${testInfo.project.name}-${digits}`;
 
-  await page.goto('/signup?package=starter');
+  await page.goto(`/signup?package=${pkg}`);
   await page.getByLabel(/^Business name/).fill(`E2E Studio ${digits}`); // never a seeded name (e.g. "Glow Salon")
   await page.getByLabel(/^First name/).fill('Thandi');
   await page.getByLabel(/^Last name/).fill('Mokoena');

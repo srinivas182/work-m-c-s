@@ -652,11 +652,373 @@ async function classes(root: HTMLElement): Promise<void> {
   draw();
 }
 
+/* ---------- Shop: the cart lives in the shopper's browser; the server re-checks every price and stock level. ---------- */
+type CartLine = { variant: string; quantity: number };
+const CART_KEY = 'wurk-cart';
+const readCart = (): CartLine[] => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CART_KEY) ?? '[]') as unknown;
+    return Array.isArray(raw)
+      ? (raw as CartLine[]).filter((l) => typeof l?.variant === 'string' && Number(l.quantity) > 0)
+      : [];
+  } catch {
+    return [];
+  }
+};
+const writeCart = (lines: CartLine[]) => {
+  try {
+    if (lines.length) localStorage.setItem(CART_KEY, JSON.stringify(lines));
+    else localStorage.removeItem(CART_KEY);
+  } catch {
+    /* storage blocked: the cart lasts this page only */
+  }
+};
+const randOf = (c: number) => `R${(c / 100).toFixed(2)}`;
+
+/* Add to cart (product pages). */
+function addToCart(root: HTMLElement): void {
+  const variants = JSON.parse(root.dataset.variants ?? '[]') as {
+    id: string;
+    label: string | null;
+    price_cents: number;
+    in_stock: boolean;
+  }[];
+  if (!variants.some((v) => v.in_stock)) {
+    root.replaceChildren(el('p', { class: 'font-semibold' }, 'Sold out'));
+    return;
+  }
+  const uid = Math.random().toString(36).slice(2, 8);
+  const status = el('p', { class: 'text-sm' });
+  status.setAttribute('role', 'status');
+  const choose = el('select', { class: field });
+  for (const v of variants)
+    choose.append(
+      el(
+        'option',
+        { value: v.id, disabled: !v.in_stock },
+        `${v.label ?? root.dataset.product ?? ''} — ${randOf(v.price_cents)}${v.in_stock ? '' : ' (sold out)'}`,
+      ),
+    );
+  choose.value = variants.find((v) => v.in_stock)?.id ?? '';
+  choose.id = `${uid}-variant`;
+  const qty = el('input', { type: 'number', min: '1', max: '50', value: '1', class: field });
+  qty.id = `${uid}-qty`;
+  const add = el('button', { type: 'submit', class: button }, 'Add to cart');
+  const form = el('form', { class: 'grid gap-3' });
+  if (variants.length > 1)
+    form.append(
+      el('div', {}, el('label', { htmlFor: choose.id, class: 'font-medium' }, 'Choose'), choose),
+    );
+  form.append(
+    el(
+      'div',
+      { class: 'max-w-32' },
+      el('label', { htmlFor: qty.id, class: 'font-medium' }, 'Quantity'),
+      qty,
+    ),
+    add,
+    status,
+  );
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const quantity = Math.min(50, Math.max(1, Number(qty.value) || 1));
+    const cart = readCart();
+    const line = cart.find((l) => l.variant === choose.value);
+    if (line) line.quantity = Math.min(50, line.quantity + quantity);
+    else cart.push({ variant: choose.value, quantity });
+    writeCart(cart);
+    const count = cart.reduce((n, l) => n + l.quantity, 0);
+    status.replaceChildren(
+      `Added to your cart (${count} item${count === 1 ? '' : 's'}). `,
+      el('a', { href: '/cart', class: 'font-semibold underline' }, 'View cart and check out'),
+    );
+  });
+  root.replaceChildren(form);
+}
+
+/* The cart and checkout (/cart). */
+async function checkout(root: HTMLElement): Promise<void> {
+  type Priced = {
+    variant: string;
+    name: string;
+    label: string | null;
+    slug: string;
+    unit_cents: number;
+    quantity: number;
+    available: number;
+  };
+  type Settings = {
+    available: boolean;
+    card?: boolean;
+    offline?: boolean;
+    collection: boolean;
+    collection_address: string | null;
+    delivery: boolean;
+    delivery_fee_cents: number;
+    delivery_note: string | null;
+  };
+  const uid = Math.random().toString(36).slice(2, 8);
+  const status = el('p', { class: 'text-sm' });
+  status.setAttribute('role', 'status');
+  const empty = () =>
+    root.replaceChildren(
+      el('p', {}, 'Your cart is empty.'),
+      el('a', { href: '/', class: 'font-semibold underline' }, 'Continue shopping'),
+    );
+
+  const price = async (): Promise<{ lines: Priced[]; checkout: Settings } | null> => {
+    const r = await fetch('/cart/price', {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lines: readCart() }),
+    }).catch(() => null);
+    return r?.ok ? ((await r.json()) as { lines: Priced[]; checkout: Settings }) : null;
+  };
+  let data = readCart().length ? await price() : null;
+  if (!data || data.lines.length === 0) {
+    writeCart([]);
+    empty();
+    return;
+  }
+  writeCart(
+    data.lines.map((l) => ({
+      variant: l.variant,
+      quantity: Math.min(l.quantity, Math.max(1, l.available)),
+    })),
+  ); // drop what's gone
+  if (!data.checkout.available) {
+    root.replaceChildren(
+      el('p', {}, 'Ordering online isn’t available right now. Please contact us to order.'),
+    );
+    return;
+  }
+
+  const list = el('ul', { class: 'grid gap-3' });
+  list.setAttribute('aria-label', 'Items in your cart');
+  const totals = el('p', { class: 'text-lg font-semibold' });
+  const id = (name: string) => `${uid}-${name}`;
+  const radio = (value: string, text: string, checked: boolean) => {
+    const input = el('input', { type: 'radio', name: `${uid}-how`, value, checked });
+    input.id = id(value);
+    return {
+      input,
+      row: el(
+        'div',
+        { class: 'flex items-start gap-2' },
+        input,
+        el('label', { htmlFor: input.id }, text),
+      ),
+    };
+  };
+  const s = data.checkout;
+  const collect = radio(
+    'collection',
+    `Collect${s.collection_address ? ` — ${s.collection_address}` : ''}`,
+    s.collection,
+  );
+  const deliver = radio(
+    'delivery',
+    `Delivery — ${randOf(s.delivery_fee_cents)}${s.delivery_note ? ` (${s.delivery_note})` : ''}`,
+    !s.collection,
+  );
+  const how = el(
+    'fieldset',
+    { class: 'grid gap-2' },
+    el('legend', { class: 'font-medium' }, 'How you’ll get it'),
+  );
+  if (s.collection) how.append(collect.row);
+  if (s.delivery) how.append(deliver.row);
+  const input = (name: string, type: string, extra: Partial<HTMLInputElement> = {}) => {
+    const i = el('input', { type, class: field, ...extra });
+    i.id = id(name);
+    return i;
+  };
+  const labelled = (text: string, control: HTMLElement) =>
+    el('div', {}, el('label', { htmlFor: control.id, class: 'font-medium' }, text), control);
+  const name = input('name', 'text', { autocomplete: 'name', required: true });
+  const phone = input('phone', 'tel', { autocomplete: 'tel', required: true });
+  const email = input('email', 'email', { autocomplete: 'email' });
+  const address = el('textarea', { class: field, rows: 3 });
+  address.id = id('address');
+  const addressRow = labelled('Delivery address', address);
+  const notes = input('notes', 'text');
+  const consent = el('input', { type: 'checkbox', required: true });
+  consent.id = id('consent');
+  const trap = el('input', { type: 'text', name: 'website', tabIndex: -1, autocomplete: 'off' });
+  const trapWrap = el('div', { class: 'absolute -left-[9999px]' }, trap);
+  trapWrap.setAttribute('aria-hidden', 'true');
+  const place = el('button', { type: 'submit', class: button }, 'Place order');
+
+  const payCard = el('input', { type: 'radio', name: `${uid}-pay`, value: 'card', checked: true });
+  payCard.id = id('pay-card');
+  const payEft = el('input', { type: 'radio', name: `${uid}-pay`, value: 'offline' });
+  payEft.id = id('pay-eft');
+  const pay = el(
+    'fieldset',
+    { class: 'grid gap-2' },
+    el('legend', { class: 'font-medium' }, 'How you’ll pay'),
+    el(
+      'div',
+      { class: 'flex items-start gap-2' },
+      payCard,
+      el('label', { htmlFor: payCard.id }, 'Card — pay now, securely'),
+    ),
+    el(
+      'div',
+      { class: 'flex items-start gap-2' },
+      payEft,
+      el('label', { htmlFor: payEft.id }, 'EFT or on collection — we’ll show you how'),
+    ),
+  );
+  pay.hidden = !(s.card && s.offline); // a choice only when both are on
+  const payment = () =>
+    s.card && s.offline ? (payCard.checked ? 'card' : 'offline') : s.card ? 'card' : 'offline';
+  const delivering = () => s.delivery && (!s.collection || deliver.input.checked);
+  const redraw = () => {
+    if (!data) return;
+    const cur = data; // checked once; the handlers below use it
+    list.replaceChildren();
+    let subtotal = 0;
+    for (const line of cur.lines) {
+      subtotal += line.unit_cents * line.quantity;
+      const q = el('input', {
+        type: 'number',
+        min: '1',
+        max: String(Math.max(1, line.available)),
+        value: String(line.quantity),
+        class: `${field} max-w-24`,
+      });
+      q.id = id(`qty-${line.variant}`);
+      const what = `${line.name}${line.label ? ` (${line.label})` : ''}`;
+      q.addEventListener('change', () => {
+        line.quantity = Math.min(Math.max(1, line.available), Math.max(1, Number(q.value) || 1));
+        writeCart(cur.lines.map((l) => ({ variant: l.variant, quantity: l.quantity })));
+        redraw();
+      });
+      const remove = el('button', { type: 'button', class: 'underline' }, 'Remove');
+      remove.setAttribute('aria-label', `Remove ${what}`);
+      remove.addEventListener('click', () => {
+        cur.lines = cur.lines.filter((l) => l !== line);
+        writeCart(cur.lines.map((l) => ({ variant: l.variant, quantity: l.quantity })));
+        if (cur.lines.length === 0) empty();
+        else redraw();
+      });
+      list.append(
+        el(
+          'li',
+          {
+            class:
+              'flex flex-wrap items-end justify-between gap-3 border-b border-[var(--s-border)] pb-3',
+          },
+          el(
+            'div',
+            {},
+            el('a', { href: `/shop/${line.slug}`, class: 'font-semibold underline' }, what),
+            el(
+              'p',
+              { class: 'text-sm' },
+              `${randOf(line.unit_cents)} each${line.available === 0 ? ' — sold out' : ''}`,
+            ),
+          ),
+          el(
+            'div',
+            { class: 'flex items-end gap-3' },
+            el('div', {}, el('label', { htmlFor: q.id, class: 'text-sm' }, 'Quantity'), q),
+            remove,
+          ),
+        ),
+      );
+    }
+    const fee = delivering() ? s.delivery_fee_cents : 0;
+    addressRow.hidden = !delivering();
+    totals.textContent = `Total ${randOf(subtotal + fee)} (incl. VAT${fee ? `, delivery ${randOf(fee)}` : ''})`;
+  };
+  collect.input.addEventListener('change', redraw);
+  deliver.input.addEventListener('change', redraw);
+
+  const form = el(
+    'form',
+    { class: 'grid gap-4' },
+    list,
+    how,
+    pay,
+    totals,
+    labelled('Your name', name),
+    labelled('Phone', phone),
+    labelled('Email (for your receipt, optional)', email),
+    addressRow,
+    labelled('Notes (optional)', notes),
+    el(
+      'div',
+      { class: 'flex items-start gap-2' },
+      consent,
+      el('label', { htmlFor: consent.id }, 'I agree to be contacted about my order.'),
+    ),
+    trapWrap,
+    place,
+    status,
+  );
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    place.disabled = true;
+    status.textContent = 'Placing your order…';
+    const r = await fetch('/cart/checkout', {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: readCart(),
+        name: name.value,
+        phone: phone.value,
+        email: email.value || null,
+        fulfilment: delivering() ? 'delivery' : 'collection',
+        address: delivering() ? address.value : null,
+        notes: notes.value || null,
+        payment: payment(),
+        consent: consent.checked ? '1' : null,
+        website: trap.value,
+      }),
+    }).catch(() => null);
+    place.disabled = false;
+    const body = r
+      ? ((await r.json().catch(() => ({}))) as {
+          order_url?: string;
+          pay_url?: string;
+          message?: string;
+          errors?: Record<string, string[]>;
+        })
+      : {};
+    if (r?.status === 201 && body.pay_url) {
+      writeCart([]);
+      status.textContent = 'Order placed. Taking you to pay…';
+      window.location.assign(body.pay_url); // Yoco or PayFast; they bring the customer back to the order page
+      return;
+    }
+    if (r?.status === 201 && body.order_url) {
+      writeCart([]);
+      status.textContent = 'Order placed. Taking you to your order…';
+      window.location.assign(body.order_url);
+      return;
+    }
+    status.textContent =
+      body.message ??
+      Object.values(body.errors ?? {})[0]?.[0] ??
+      'Something went wrong. Please try again.';
+    if (r?.status === 409) {
+      data = await price(); // stock changed: show what's available now
+      if (data && data.lines.length) redraw();
+    }
+  });
+  root.replaceChildren(form);
+  redraw();
+}
+
 const ISLANDS: Record<string, (root: HTMLElement) => void> = {
   'before-after': beforeAfter,
   slideshow,
   promotion,
   booking: (root) => void booking(root),
+  'add-to-cart': addToCart,
+  checkout: (root) => void checkout(root),
 };
 
 export function startIslands(scope: ParentNode = document): void {

@@ -15,16 +15,18 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Audit\Contracts\AuditLog;
-use Wurk\Billing\Contracts\SplitPayments;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\MeetingConnection;
+use Wurk\Bookings\Models\MemberMeetingLink;
 use Wurk\Bookings\Models\TimeOff;
 use Wurk\Bookings\Support\CancellationPolicy;
 use Wurk\Bookings\Support\Instant;
+use Wurk\Bookings\Support\MeetingLinks;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\ProviderCredentials;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners: Bookings → Settings — services, team hours and time off. */
@@ -47,11 +49,11 @@ final class BookingSettingsController
             'timeOff' => TimeOff::query()->where('ends_at', '>', now())->orderBy('starts_at')->get()
                 ->map(fn (TimeOff $t) => ['id' => $t->id, 'member_id' => $t->member_id, 'starts_at' => $t->starts_at->toIso8601String(), 'ends_at' => $t->ends_at->toIso8601String(), 'reason' => $t->reason])->all(),
             'timezone' => $this->context->current()->timezone(),
-            'payouts' => ['label' => BookingSettings::query()->find($this->context->id())?->payout_label],
-            'banks' => fn () => app(SplitPayments::class)->banks(),
+            'cardPayments' => app(BusinessPayments::class)->available(), // e.g. ['yoco'] — deposits need one (Settings → Payments)
             'policy' => ['hours' => app(CancellationPolicy::class)->hours(), 'text' => (string) BookingSettings::query()->find($this->context->id())?->policy,
                 'default' => CancellationPolicy::defaultWording(app(CancellationPolicy::class)->hours())],
             'video' => [
+                'links' => ['default' => app(MeetingLinks::class)->default(), 'members' => MemberMeetingLink::query()->pluck('url', 'member_id')->all()],
                 'connection' => MeetingConnection::query()->find($this->context->id())?->only(['provider', 'account_label', 'fixed_url']),
                 'available' => ['google' => ! empty(app(ProviderCredentials::class)->active('meetings.google')['credentials']['client_id'] ?? null),
                     'zoom' => ! empty(app(ProviderCredentials::class)->active('meetings.zoom')['credentials']['client_id'] ?? null)],
@@ -86,8 +88,8 @@ final class BookingSettingsController
         ], ['members.min' => 'Choose at least one team member who does this service.']);
         $data['location_type'] ??= 'in_person'; // omitted means in person, as stored by default
         $data['deposit_when'] ??= 'always';
-        if ($data['location_type'] !== 'in_person' && MeetingConnection::query()->find($this->context->id()) === null) {
-            throw ValidationException::withMessages(['location_type' => 'Connect Google Meet or Zoom (or add a meeting link) under Video calls first, so clients can join.']);
+        if ($data['location_type'] !== 'in_person' && ! $this->reachable((array) ($data['members'] ?? []))) {
+            throw ValidationException::withMessages(['location_type' => 'Add a meeting link (under Meeting links) for everyone who does this service, or a link for the whole business, so clients can join.']);
         }
 
         DB::connection($this->context->connectionName())->transaction(function () use ($data, $service): void {
@@ -158,36 +160,6 @@ final class BookingSettingsController
         return back()->with('status', 'Time off removed.');
     }
 
-    /** Connect the business's bank for deposits (a Paystack subaccount). Only a masked label is kept. */
-    public function connectPayouts(Request $request, SplitPayments $payments): RedirectResponse
-    {
-        $data = $request->validate(['bank_code' => ['required', 'string', 'max:20'], 'account_number' => ['required', 'string', 'regex:/^\d{6,16}$/']],
-            ['account_number.regex' => 'Enter the account number using digits only.']);
-        $bank = collect($payments->banks())->firstWhere('code', $data['bank_code']);
-        if ($bank === null) {
-            throw ValidationException::withMessages(['bank_code' => 'Choose your bank from the list.']);
-        }
-        try {
-            $code = $payments->createSubaccount($this->context->current()->displayName(), $data['bank_code'], $data['account_number']);
-        } catch (\RuntimeException $e) {
-            throw ValidationException::withMessages(['account_number' => $e->getMessage()]);
-        }
-        BookingSettings::query()->updateOrCreate(['tenant_id' => $this->context->id()], [
-            'payout_subaccount' => $code, 'payout_label' => $bank['name'].' ••••'.substr($data['account_number'], -4),
-        ]);
-        $this->audit->record('bookings.payouts_connected', 'booking_settings', $this->context->id(), ['bank' => $bank['name']]);
-
-        return back()->with('status', 'Deposits will be paid into '.$bank['name'].' ••••'.substr($data['account_number'], -4).'.');
-    }
-
-    public function disconnectPayouts(): RedirectResponse
-    {
-        BookingSettings::query()->whereKey($this->context->id())->update(['payout_subaccount' => null, 'payout_label' => null]);
-        $this->audit->record('bookings.payouts_disconnected', 'booking_settings', $this->context->id(), []);
-
-        return back()->with('status', 'Deposits are switched off until you connect a bank account again.');
-    }
-
     public function savePolicy(Request $request): RedirectResponse
     {
         $data = $request->validate(['hours' => ['required', 'integer', 'min:0', 'max:168'], 'text' => ['nullable', 'string', 'max:2000']]);
@@ -204,5 +176,51 @@ final class BookingSettingsController
         ]);
 
         return back()->with('status', 'Message settings saved.');
+    }
+
+    /**
+     * Can everyone who does a service be reached online? (Their own meeting link, or a business default.)
+     *
+     * @param  array<int|string, mixed>  $members
+     */
+    private function reachable(array $members): bool
+    {
+        $links = app(MeetingLinks::class);
+        $provider = MeetingConnection::query()->find($this->context->id())?->provider;
+        if (in_array($provider, ['google', 'zoom'], true) || $links->default() !== null) {
+            return true; // a connected account (if WURK enables it) or a link for the whole business
+        }
+
+        return $members !== [] && collect($members)->every(fn ($m) => $links->forMember((string) $m) !== null);
+    }
+
+    /** Meeting links: one per team member, plus a default for the whole business. */
+    public function saveLinks(Request $request): RedirectResponse
+    {
+        $team = array_column($this->team->members(), 'id');
+        $data = $request->validate([
+            'default' => ['nullable', 'url:https', 'max:500'],
+            'members' => ['array'], 'members.*' => ['nullable', 'url:https', 'max:500'],
+        ], ['default.url' => 'Enter the full meeting link, starting with https://', 'members.*.url' => 'Enter the full meeting link, starting with https://']);
+        foreach (array_keys($data['members'] ?? []) as $member) {
+            if (! in_array($member, $team, true)) {
+                throw ValidationException::withMessages(['members' => 'That person isn’t on your team.']);
+            }
+        }
+        DB::connection($this->context->connectionName())->transaction(function () use ($data): void {
+            if (! empty($data['default'])) {
+                MeetingConnection::query()->updateOrCreate(['tenant_id' => $this->context->id()], ['provider' => 'fixed', 'fixed_url' => $data['default'], 'access_token' => null, 'refresh_token' => null, 'expires_at' => null, 'account_label' => null]);
+            } else {
+                MeetingConnection::query()->where('provider', 'fixed')->delete();
+            }
+            foreach ($data['members'] ?? [] as $member => $url) {
+                empty($url)
+                    ? MemberMeetingLink::query()->whereKey($member)->delete()
+                    : MemberMeetingLink::query()->updateOrCreate(['member_id' => $member], ['url' => $url]);
+            }
+        });
+        $this->audit->record('bookings.meeting_links_saved', 'booking_settings', $this->context->id(), []);
+
+        return back()->with('status', 'Meeting links saved.');
     }
 }

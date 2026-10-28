@@ -32,11 +32,7 @@ test('an owner sets up a service, their hours and time off', async ({ page }, te
   await expect(page.getByText(/Everyone · .* · Freedom Day/)).toBeVisible();
 
   // Before WURK switches on payments, owners are told plainly; the policy can still be set.
-  await expect(
-    page.getByText(
-      'Online payments aren’t switched on yet. Bookings work without deposits in the meantime.',
-    ),
-  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Settings → Payments' })).toBeVisible(); // deposits use the business’s own PayFast or Yoco
   const policy = page.getByRole('form', { name: 'Cancellation policy' });
   await policy.getByLabel('Free cancellation until (hours before)').fill('48');
   await policy.getByRole('button', { name: 'Save policy' }).click();
@@ -48,15 +44,14 @@ test('an owner sets up a service, their hours and time off', async ({ page }, te
   await messages.getByRole('button', { name: 'Save message settings' }).click();
   await expect(page.getByText('Message settings saved.')).toBeVisible();
 
-  // Video calls: Google and Zoom need WURK's apps (not in testing); the fixed link works now.
-  await expect(page.getByText('Google Meet — not switched on yet')).toBeVisible();
-  const video = page.getByRole('form', { name: 'Use a fixed meeting link' });
-  await video
-    .getByLabel('Or use one meeting link for everyone')
-    .fill('https://meet.example.com/room');
-  await video.getByRole('button', { name: 'Save link' }).click();
-  await expect(
-    page.getByText('Your meeting link is saved. Note: every client gets the same link.'),
-  ).toBeVisible();
+  // Meeting links: pasted per person, with a default for the whole business (no account connections offered).
+  const links = page.getByRole('form', { name: 'Meeting links' });
+  await expect(page.getByText(/turn on the waiting room in Zoom/)).toBeVisible();
+  await expect(page.getByRole('link', { name: /Or connect/ })).toHaveCount(0);
+  await links
+    .getByLabel('For the whole business (optional)')
+    .fill('https://meet.google.com/our-room');
+  await links.getByRole('button', { name: 'Save meeting links' }).click();
+  await expect(page.getByText('Meeting links saved.')).toBeVisible();
   await expectAccessible(page);
 });
