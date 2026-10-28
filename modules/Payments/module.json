@@ -1,0 +1,13 @@
+{
+    "name": "Payments",
+    "key": "payments",
+    "version": "0.1.0",
+    "description": "Each business's own card payments (PayFast, Yoco): customers pay the business directly — WURK is never in the money flow.",
+    "core": true,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit"
+    ]
+}
