@@ -90,8 +90,10 @@ type BookService = {
   duration: number;
   price_cents: number;
   location?: 'in_person' | 'online' | 'either';
-  members: { id: string; name: string }[];
+  members: { id: string; name: string; registration?: string | null }[];
 };
+/** A health practice: fixed, versioned consent wording for online consultations. */
+type HealthTerms = { consent: string; version: string } | null;
 
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -115,10 +117,13 @@ async function booking(root: HTMLElement): Promise<void> {
   if (root.dataset.mode === 'classes') return classes(root);
   const api = root.dataset.api ?? '/book';
   let services: BookService[] = [];
+  let health: HealthTerms = null;
   try {
     const r = await fetch(`${api}/services`, { headers: { Accept: 'application/json' } });
     if (!r.ok) return; // not available: keep the "call or message us" fallback
-    services = ((await r.json()) as { services: BookService[] }).services;
+    const body = (await r.json()) as { services: BookService[]; health?: HealthTerms };
+    services = body.services;
+    health = body.health ?? null;
   } catch {
     return;
   }
@@ -187,6 +192,21 @@ async function booking(root: HTMLElement): Promise<void> {
     where.hidden = location !== 'either';
     onlineNote.hidden = location !== 'online';
   };
+  const healthConsent = el('input', { type: 'checkbox' });
+  healthConsent.id = `${uid}-health-consent`;
+  const healthBox = el(
+    'div',
+    {
+      class: 'flex items-start gap-2 rounded-[var(--s-radius)] border border-[var(--s-border)] p-3',
+    },
+    healthConsent,
+    el('label', { htmlFor: healthConsent.id }, health?.consent ?? ''),
+  );
+  const refreshHealth = () => {
+    const needed = health !== null && isOnline();
+    healthBox.hidden = !needed;
+    healthConsent.required = needed;
+  };
   const isOnline = () => {
     const location = services.find((s) => s.id === serviceSelect.value)?.location ?? 'in_person';
     return location === 'online' || (location === 'either' && whereOnline.checked);
@@ -195,7 +215,9 @@ async function booking(root: HTMLElement): Promise<void> {
     const service = services.find((s) => s.id === serviceSelect.value);
     memberSelect.replaceChildren(
       el('option', { value: '' }, 'Anyone'),
-      ...(service?.members ?? []).map((m) => el('option', { value: m.id }, m.name)),
+      ...(service?.members ?? []).map((m) =>
+        el('option', { value: m.id }, m.registration ? `${m.name} — ${m.registration}` : m.name),
+      ),
     );
   };
   const refreshTimes = async () => {
@@ -256,6 +278,7 @@ async function booking(root: HTMLElement): Promise<void> {
     labelled('Your name', name),
     labelled('Phone', phone),
     labelled('Email (optional)', email),
+    healthBox,
     el(
       'div',
       { class: 'flex items-start gap-2' },
@@ -280,6 +303,7 @@ async function booking(root: HTMLElement): Promise<void> {
         service: serviceSelect.value,
         member: memberSelect.value || null,
         online: isOnline(),
+        health_consent: health !== null && isOnline() ? healthConsent.checked : null,
         starts_at: chosen,
         name: name.value,
         phone: phone.value,
@@ -331,6 +355,7 @@ async function booking(root: HTMLElement): Promise<void> {
 
   serviceSelect.addEventListener('change', () => {
     refreshWhere();
+    refreshHealth();
     refreshMembers();
     void refreshTimes();
   });
@@ -338,6 +363,8 @@ async function booking(root: HTMLElement): Promise<void> {
   dateInput.addEventListener('change', () => void refreshTimes());
   refreshMembers();
   refreshWhere();
+  refreshHealth();
+  where.addEventListener('change', refreshHealth);
   root.replaceChildren(form);
   void refreshTimes();
 }

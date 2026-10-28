@@ -170,7 +170,7 @@ describe('booking island', () => {
       ) as HTMLInputElement;
     byLabel('Your name').value = 'Sipho';
     byLabel('Phone').value = '082 555 0101';
-    (document.querySelector('input[type="checkbox"]') as HTMLInputElement).checked = true;
+    byLabel('I agree to be contacted about my booking.').checked = true; // by its label, as a person would
     document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
     await settle();
 
