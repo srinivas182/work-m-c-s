@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 10 (sprint plan revision 3) |
-| **Status** | 10.1–10.5 ✅ released as v0.11.0 · **10.6 Payment methods** approved 30 Oct 2026, in progress |
+| **Status** | 10.1–10.5 ✅ released as v0.11.0 · **10.6 Payment methods** in review |
 | **Depends on** | v0.10.0 (website engine, payments straight to the business, fixed-wording messages) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -100,3 +100,13 @@ Shop sections in the retail-led templates; accessibility scans of product, cart 
 **Delivery:** (1) method model — enable/disable, test/live, separate keys, EFT as a method, platform availability; (2) Ozow and Peach drivers (simulated until sandbox accounts arrive); (3) super admin screens and paying WURK invoices; (4) business screens, checkout, browser tests.
 
 **Needed from WURK:** Ozow and Peach sandbox accounts (with PayFast and Yoco) for one real test of each before going live.
+
+### 10.6 progress and notes
+
+| Item | Notes |
+|---|---|
+| Delivered | Methods, per-mode keys, platform availability, WURK's own accounts and Billing "Pay with…", business and admin screens, Ozow and Peach drivers. 924 backend tests on SQLite; Payments, Billing and Shop on MySQL 8; 378 frontend; browser tests for the owner (EFT, orders) and super admin (Payment methods), with accessibility scans |
+| **To confirm with sandbox accounts** | Ozow and Peach endpoints and field names are in `modules/Payments/config/payments.php`, so a correction is a config change. One real test payment with each of the four before going live |
+| Ozow refunds | Not automated: the owner refunds in Ozow's portal and records the refund (the order screen says so) |
+| A method switched off by WURK | Stops being offered at once; businesses see "WURK has switched this off" on Settings → Payments (rather than a message) |
+| Paying WURK by EFT | WURK's bank details are shown on the Billing page with the business's handle as reference; WURK records the payment on the existing cash-payments screen |
