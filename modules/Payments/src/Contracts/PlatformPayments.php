@@ -17,6 +17,9 @@ interface PlatformPayments
     /** Whether this payment was started through one of WURK's methods (so it's verified here). */
     public function handles(string $reference): bool;
 
+    /** A method's name for people ("Yoco", "EFT / bank transfer"). */
+    public function name(string $provider): string;
+
     /** WURK's EFT instructions, if EFT is enabled. */
     public function eftInstructions(): ?string;
 

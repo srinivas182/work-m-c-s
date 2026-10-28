@@ -24,7 +24,6 @@ use Wurk\Billing\Support\Payments;
 use Wurk\Billing\Support\SaBanking;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Payments\Contracts\PlatformPayments;
-use Wurk\Payments\Support\PlatformMethods;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Regions\Contracts\Countries;
@@ -68,7 +67,7 @@ final class BillingController
             'payments' => Payment::query()->where('tenant_id', $tenantId)->latest()->limit(20)->get()
                 ->map(fn (Payment $p) => ['id' => $p->id, 'at' => $p->created_at?->toIso8601String(), 'purpose' => $p->purpose, 'total_cents' => $p->total_cents, 'status' => $p->status, 'failure' => $p->failure])->all(),
             'gatewayReady' => $providers->active('payments.paystack') !== null,
-            'payMethods' => array_map(fn (string $p) => ['provider' => $p, 'name' => PlatformMethods::NAMES[$p]], app(PlatformPayments::class)->available()),
+            'payMethods' => array_map(fn (string $p) => ['provider' => $p, 'name' => app(PlatformPayments::class)->name($p)], app(PlatformPayments::class)->available()),
             'wurkEft' => app(PlatformPayments::class)->eftInstructions(),
             'reference' => $this->context->current()->handle(),
             'stage' => app(Dunning::class)->stage($tenantId),
