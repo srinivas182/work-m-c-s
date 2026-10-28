@@ -18,6 +18,7 @@ use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
 use Wurk\Shop\Support\CheckoutProblem;
+use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderPlacer;
 use Wurk\Tenancy\Contracts\CurrentTenant;
@@ -80,6 +81,7 @@ final class PublicCheckoutController
             }
 
             $url = URL::signedRoute('shop.public.order', ['handle' => $tenant->handle(), 'order' => $order->id]);
+            app(OrderMessages::class)->newOrder($order); // the shop's managers are told straight away
             if ($method === 'card') {
                 $pay = app(BusinessPayments::class)->start('shop-'.$order->id, $order->total_cents, "Order #{$order->number}",
                     ['name' => $order->customer_name, 'email' => $order->customer_email], ['return' => $url, 'cancel' => $request->getSchemeAndHttpHost().'/cart']);

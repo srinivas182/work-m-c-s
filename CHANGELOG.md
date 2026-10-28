@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 10.4 (orders and refunds)
+- **Orders** (Shop → Orders): filters with counts (to do, awaiting payment, ready / on its way, done, cancelled); each order with items and totals, customer, collection or delivery, notes, **only the next steps that make sense**, and a **timeline** of every change (what, who, when).
+- **The journey**: paid → packed → ready for collection / out for delivery → done. Owners mark EFT orders paid; card orders are marked paid only by the verified payment.
+- **Cancel** before it leaves (stock back; card payments refunded in full) and **refund** all or part (card refunds through the provider, never more than what's left; optional restock; EFT refunds recorded).
+- **New-order alert** to everyone who can manage the shop (Access: `TeamDirectory::emailsWithPermission`), and **customer emails** as the order moves on (paid, ready, on its way, cancelled, refunded).
+
 ### Added — Sprint 10.3 (card payments into the business's own account)
 - **Payments module** (every package): each business connects **its own Yoco** (secret key tested on the spot by registering our webhook) **or PayFast** account (passphrase required) under **Settings → Payments**. Keys are encrypted and never shown again; owners see a masked label and a clear test-mode badge. New permission `payments.manage`.
 - **Verified payments only**: Yoco webhooks must be correctly signed and recent, and the checkout status is read back from Yoco; a PayFast notification counts only if its signature, PayFast's own validation ("VALID"), status and exact amount all check out.

@@ -15,4 +15,12 @@ interface TeamDirectory
 
     /** Add a team member to the current business (seat limits and roles apply); returns the member id. */
     public function add(string $identityId, string $displayName, string $role): string;
+
+    /**
+     * Email addresses of the current business's active team members who have a permission (by the same
+     * rule as every screen) — e.g. who to alert about a new order.
+     *
+     * @return list<string>
+     */
+    public function emailsWithPermission(string $permission): array;
 }

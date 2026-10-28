@@ -46,7 +46,9 @@ final readonly class OrderPayments
             return;
         }
         if ($order->status === 'awaiting_payment') {
-            $order->update(['status' => 'paid', 'hold_expires_at' => null]);
+            $order->update(['status' => 'paid', 'hold_expires_at' => null, 'paid_at' => now()]);
+            app(OrderManager::class)->log($order, 'paid', 'Payment provider');
+            event(new OrderStatusChanged(app(TenantContext::class)->id(), $order->id, 'paid'));
             DB::table('shop_holds')->where('order_id', $order->id)->delete();
             $this->audit->record('shop.order_paid', 'order', $order->id, ['cents' => $order->total_cents]);
         } elseif (in_array($order->status, ['expired', 'cancelled'], true)) {

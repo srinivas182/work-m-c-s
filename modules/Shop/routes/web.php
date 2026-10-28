@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Wurk\Shop\Http\Controllers\OrdersController;
 use Wurk\Shop\Http\Controllers\PhotosController;
 use Wurk\Shop\Http\Controllers\ProductsController;
 use Wurk\Shop\Http\Controllers\PublicCheckoutController;
@@ -14,6 +15,11 @@ Route::tenant(function (): void {
         Route::post('/products', [ProductsController::class, 'save'])->name('products.store');
         Route::put('/products/{product}', [ProductsController::class, 'save'])->name('products.update');
         Route::delete('/products/{product}', [ProductsController::class, 'destroy'])->name('products.destroy');
+        Route::get('/orders', [OrdersController::class, 'index'])->name('orders');
+        Route::get('/orders/{order}', [OrdersController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{order}/advance', [OrdersController::class, 'advance'])->name('orders.advance');
+        Route::post('/orders/{order}/cancel', [OrdersController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/orders/{order}/refund', [OrdersController::class, 'refund'])->name('orders.refund');
         Route::get('/settings', [ShopSettingsController::class, 'show'])->name('settings');
         Route::put('/settings', [ShopSettingsController::class, 'save'])->name('settings.save');
         Route::get('/photos', [PhotosController::class, 'index'])->name('photos');

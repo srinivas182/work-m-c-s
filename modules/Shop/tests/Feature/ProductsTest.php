@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
@@ -11,10 +12,15 @@ use Wurk\Access\Actions\Team;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Shop\Mail\NewOrderMail;
+use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
+use Wurk\Shop\Support\OrderManager;
+use Wurk\Shop\Support\OrderMessages;
+use Wurk\Shop\Support\OrderPlacer;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\MediaLibrary;
 
@@ -112,4 +118,52 @@ it('saves shop settings, insisting on a way to get orders and instructions for p
     $this->actingAs($this->owner)->put("{$this->base}/settings", [...$base, 'delivery_enabled' => true, 'delivery_fee_cents' => 6000, 'offline_enabled' => true, 'offline_instructions' => 'FNB 6200 0000 000'])
         ->assertSessionHas('status', 'Shop settings saved.');
     ($this->in)(fn () => expect(ShopSettings::query()->sole()->only(['delivery_fee_cents', 'offline_enabled']))->toBe(['delivery_fee_cents' => 6000, 'offline_enabled' => true]));
+});
+
+it('alerts the people who manage the shop about a new order, and tells the customer as it moves on', function () {
+    Mail::fake();
+    ($this->subscribe)(['website', 'shop']);
+    $order = ($this->in)(function () {
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+        $p = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
+        Variant::query()->create(['product_id' => $p->id, 'price_cents' => 12000]);
+        $o = app(OrderPlacer::class)->place([['variant' => Variant::query()->sole()->id, 'quantity' => 1]], ['name' => 'Sipho', 'phone' => '082', 'email' => 'sipho@example.com'], 'collection', 'offline');
+        app(OrderMessages::class)->newOrder($o);
+
+        return $o;
+    });
+    Mail::assertSent(NewOrderMail::class, fn ($m) => $m->hasTo('thandi@glow.co.za') && $m->number === 1001 && $m->total === 'R120.00'
+        && str_contains($m->how, 'mark it paid') && str_ends_with($m->link, '/kasi-threads/shop/orders/'.$order->id));
+
+    ($this->in)(function () use ($order) {
+        foreach (['paid', 'packed', 'ready'] as $step) {
+            app(OrderManager::class)->advance($order->refresh(), $step, 'Thabo');
+        }
+    });
+    $subjects = Mail::sent(OrderUpdateMail::class, fn ($m) => $m->hasTo('sipho@example.com'))->map(fn ($m) => $m->envelope()->subject)->values()->all();
+    expect($subjects)->toBe(['Payment received — order #1001 · Kasi-threads', 'Ready for collection — order #1001 · Kasi-threads']); // not "packed"
+});
+
+it('shows orders by what needs doing, offers only sensible next steps, and records refunds', function () {
+    ($this->subscribe)(['website', 'shop']);
+    $order = ($this->in)(function () {
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+        $p = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
+        Variant::query()->create(['product_id' => $p->id, 'price_cents' => 12000, 'stock' => 4]);
+
+        return app(OrderPlacer::class)->place([['variant' => Variant::query()->sole()->id, 'quantity' => 2]], ['name' => 'Sipho', 'phone' => '082 555 0101'], 'collection', 'offline');
+    });
+    $this->actingAs($this->owner)->get("{$this->base}/orders?show=awaiting")->assertInertia(fn (Assert $p) => $p->component('Shop::Orders')
+        ->where('counts.awaiting', 1)->where('counts.todo', 0)->where('orders.0.number', 1001));
+    $this->actingAs($this->owner)->get("{$this->base}/orders/{$order->id}")->assertInertia(fn (Assert $p) => $p->component('Shop::Order')
+        ->where('order.next', ['paid'])->where('order.can_cancel', true)->where('order.can_refund', false));
+
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/advance", ['to' => 'done'])->assertSessionHasErrors(['order' => 'That step doesn’t follow from where this order is.']);
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/advance", ['to' => 'paid'])->assertSessionHas('status', 'Marked as paid.');
+    $this->actingAs($this->owner)->get("{$this->base}/orders/{$order->id}")->assertInertia(fn (Assert $p) => $p->where('order.next', ['packed', 'ready'])->where('order.can_refund', true)
+        ->where('order.timeline.1.event', 'paid')->where('order.timeline.1.by', 'Thandi Mokoena'));
+
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/refund", ['amount_cents' => 5000, 'restock' => false])->assertSessionHas('status', 'Refund recorded — the customer has been told.');
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/refund", ['amount_cents' => 50000, 'restock' => false])->assertSessionHasErrors(['order' => 'Refund up to R190.00 (what’s left of this order).']);
+    ($this->in)(fn () => expect($order->refresh()->refunded_cents)->toBe(5000));
 });
