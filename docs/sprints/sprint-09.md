@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 9 (sprint plan revision 3) |
-| **Status** | ✅ Complete — 9.1–9.3b (v0.10.0), 9.1b (v0.11.0), 9.4 (#83), 9.5 in review |
+| **Status** | ✅ Complete — released in v0.10.0, v0.11.0 (9.1b) and v0.12.0 (9.4, 9.5) |
 | **Depends on** | v0.9.0 (appointments, deposits, messages, manage links) |
 | **Legal review** | Completed (WURK, Oct 2026). **Its specific requirements are needed before 9.4 and 9.5**, which are scheduled last |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
@@ -102,7 +102,7 @@ Health records are **special personal information under POPIA**. As a baseline, 
 | 9.3b Online payment for classes (agreed follow-up) | #73 | 791 backend tests on SQLite and MySQL 8; 371 frontend; booking browser tests together. Found: a status column too short for `pending_payment` on MySQL |
 | 9.1b Meeting links per team member (agreed change) | #77 | 842 backend tests on SQLite and MySQL 8; booking browser tests |
 | 9.4 Health consultations online | #83 | 913 backend tests on SQLite; Bookings on MySQL 8; 378 frontend; browser test of the Health practice card. Consent wording is a working default for the lawyers to confirm |
-| 9.5 Patient documents | see PR | 977 backend tests on SQLite; Records and Payments on MySQL 8; all browser tests incl. the full patient journey (desktop and phone). Found: rate limits shared per IP across businesses (also in Payments — fixed); MySQL TIMESTAMP's 2038 limit (Records uses DATETIME) |
+| 9.5 Patient documents | #85 | 977 backend tests on SQLite; Records and Payments on MySQL 8; all browser tests incl. the full patient journey (desktop and phone). Found: rate limits shared per IP across businesses (also in Payments — fixed); MySQL TIMESTAMP's 2038 limit (Records uses DATETIME) |
 
 ## 8. Changes agreed with WURK (29 Oct 2026)
 

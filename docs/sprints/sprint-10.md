@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 10 (sprint plan revision 3) |
-| **Status** | 10.1–10.5 ✅ released as v0.11.0 · **10.6 Payment methods** in review |
+| **Status** | ✅ Complete — 10.1–10.5 in v0.11.0, 10.6 in v0.12.0 (#84) |
 | **Depends on** | v0.10.0 (website engine, payments straight to the business, fixed-wording messages) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
