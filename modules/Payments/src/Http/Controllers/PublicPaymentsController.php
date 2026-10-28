@@ -6,10 +6,9 @@ namespace Wurk\Payments\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Wurk\Payments\Gateways\PayFast;
-use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Models\PaymentAttempt;
 use Wurk\Payments\Support\Payments;
+use Wurk\Payments\Support\PlatformMethods;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -25,10 +24,9 @@ final class PublicPaymentsController
 
         return $this->context->run($tenant, function () use ($tenant, $reference): Response {
             $attempt = PaymentAttempt::query()->findOrFail($reference);
-            $account = PaymentAccount::query()->where('provider', 'payfast')->firstOrFail();
-            abort_if($attempt->provider !== 'payfast' || $attempt->status !== 'pending' || $attempt->form === null, 404);
-            $action = 'https://'.PayFast::host($account).'/eng/process';
-            $html = view('payments::payfast', ['business' => $tenant->displayName(), 'action' => $action, 'fields' => $attempt->form])->render();
+            abort_if($attempt->status !== 'pending' || $attempt->form === null, 404);
+            $action = $attempt->form['action'];
+            $html = view('payments::handoff', ['business' => $tenant->displayName(), 'provider' => PlatformMethods::NAMES[$attempt->provider] ?? 'payment', 'action' => $action, 'fields' => $attempt->form['fields']])->render();
 
             // Its own policy: the form may post to PayFast (and nowhere else).
             return new Response($html, 200, ['Content-Security-Policy' => "default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-".base64_encode(hash('sha256', 'document.forms[0].submit();', true))."'; form-action {$action}; base-uri 'none'; frame-ancestors 'none'",
@@ -39,16 +37,21 @@ final class PublicPaymentsController
     public function notify(Request $request, string $handle, string $provider): Response
     {
         $tenant = $this->tenants->findByHandle($handle);
-        if ($tenant === null || ! in_array($provider, ['payfast', 'yoco'], true)) {
+        if ($tenant === null || ! in_array($provider, PlatformMethods::ONLINE, true)) {
             return new Response('', 404);
         }
         $headers = array_map(fn ($v) => (string) ($v[0] ?? ''), $request->headers->all());
-        $raw = [];
-        parse_str($request->getContent(), $raw); // in the order PayFast sent them (its signature depends on it)
+        // Parsed by hand, in the order sent and with names exactly as sent: PHP's parse_str turns dots into
+        // underscores ("result.code" → "result_code"), which would break every Peach signature.
         $posted = [];
-        foreach ($raw as $k => $v) {
-            if (is_string($v)) { // only plain fields count
-                $posted[(string) $k] = $v;
+        foreach (explode('&', $request->getContent()) as $pair) {
+            if ($pair === '' || ! str_contains($pair, '=')) {
+                continue;
+            }
+            [$k, $v] = explode('=', $pair, 2);
+            $key = urldecode($k);
+            if (! str_contains($key, '[')) { // only plain fields count
+                $posted[$key] = urldecode($v);
             }
         }
         $ok = $this->context->run($tenant, fn () => app(Payments::class)->notified($provider, $request->getContent(), $posted, $headers));

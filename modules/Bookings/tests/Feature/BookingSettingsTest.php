@@ -85,7 +85,7 @@ it('takes time off in local time and stores it in UTC', function () {
 it('takes deposits through the business’s own card provider (Settings → Payments), and saves the policy', function () {
     ($this->subscribe)(['bookings']);
     $this->actingAs($this->owner)->get("{$this->base}/settings")->assertInertia(fn ($p) => $p->where('cardPayments', []));
-    $this->ctx->run($this->glow, fn () => PaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'credentials' => ['secret_key' => 'sk_test_x']]));
+    $this->ctx->run($this->glow, fn () => PaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'test_credentials' => ['secret_key' => 'sk_test_x']]));
     $this->actingAs($this->owner)->get("{$this->base}/settings")->assertInertia(fn ($p) => $p->where('cardPayments', ['yoco']));
     expect($this->actingAs($this->owner)->put("{$this->base}/payouts", ['bank_code' => '470010', 'account_number' => '1234567890'])->status())->toBeIn([404, 405]); // the old bank form is gone
 

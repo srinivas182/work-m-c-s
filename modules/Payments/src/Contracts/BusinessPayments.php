@@ -36,4 +36,10 @@ interface BusinessPayments
 
     /** Refund all or part of a paid payment (cents); false if the provider refused — the owner refunds by hand. */
     public function refund(string $reference, ?int $amountCents = null): bool;
+
+    /** The business's EFT / bank transfer instructions — only if EFT is enabled, allowed by WURK and saved for its mode. */
+    public function eftInstructions(): ?string;
+
+    /** Switch on EFT / bank transfer with these instructions (demo shops, onboarding). */
+    public function setUpEft(string $instructions): void;
 }

@@ -16,6 +16,7 @@ use Wurk\Billing\Models\PaymentMethod;
 use Wurk\Billing\Support\Payments;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Messaging\Support\ProviderSettings;
+use Wurk\Payments\Models\PlatformPaymentAccount;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Models\TenantSubscription;
@@ -156,4 +157,19 @@ it('keeps billing to people allowed to manage it', function () {
 
     $this->actingAs($desk)->get($this->app('/glow-salon/settings/billing'))->assertNotFound();
     $this->actingAs($this->staffWithRole('support'))->get($this->admin('/credits/packs'))->assertForbidden();
+});
+
+it('offers WURK’s own methods on the Billing page, and buys credits through the one chosen', function () {
+    Http::fake([
+        'payments.yoco.com/api/checkouts' => Http::response(['id' => 'ch_w', 'redirectUrl' => 'https://c.yoco.com/checkout/ch_w'], 200),
+    ]);
+    app(Catalog::class)->markPaid($this->glow->id, now(), now()->addMonth());
+    PlatformPaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'active' => true, 'test_credentials' => ['secret_key' => 'sk_test_wurk']]);
+    PlatformPaymentAccount::query()->create(['provider' => 'eft', 'mode' => 'live', 'active' => true, 'live_credentials' => ['instructions' => 'WURK (Pty) Ltd, FNB 62000000000']]);
+    $pack = CreditPack::query()->create(['name' => 'Small', 'credits' => 100, 'price_cents' => 10000]);
+
+    $this->actingAs($this->owner)->get($this->app('/glow-salon/settings/billing'))->assertInertia(fn ($p) => $p
+        ->where('payMethods', [['provider' => 'yoco', 'name' => 'Yoco']])->where('wurkEft', 'WURK (Pty) Ltd, FNB 62000000000')->where('reference', 'glow-salon'));
+    $this->actingAs($this->owner)->post($this->app('/glow-salon/settings/billing/credits'), ['pack_id' => $pack->id, 'method' => 'yoco'])
+        ->assertRedirect('https://c.yoco.com/checkout/ch_w'); // straight to WURK's Yoco checkout
 });

@@ -50,8 +50,8 @@ final class PublicCheckoutController
             $s = ShopSettings::query()->find($this->context->id());
 
             return new JsonResponse(['lines' => $lines, 'subtotal_cents' => array_sum(array_map(fn ($l) => $l['unit_cents'] * $l['quantity'], $lines)), 'checkout' => [
-                'available' => (bool) $s?->offline_enabled || app(BusinessPayments::class)->available() !== [],
-                'card' => app(BusinessPayments::class)->available() !== [], 'offline' => (bool) $s?->offline_enabled,
+                'available' => app(BusinessPayments::class)->eftInstructions() !== null || app(BusinessPayments::class)->available() !== [],
+                'card' => app(BusinessPayments::class)->available() !== [], 'offline' => app(BusinessPayments::class)->eftInstructions() !== null,
                 'collection' => $s === null || $s->collection_enabled, 'collection_address' => $s?->collection_address,
                 'delivery' => (bool) $s?->delivery_enabled, 'delivery_fee_cents' => (int) $s?->delivery_fee_cents, 'delivery_note' => $s?->delivery_note,
             ]]);
@@ -97,7 +97,7 @@ final class PublicCheckoutController
                 $rand = fn (int $c) => 'R'.number_format($c / 100, 2);
                 $lines = array_values(OrderItem::query()->where('order_id', $order->id)->get()->map(fn (OrderItem $i) => "{$i->quantity} × {$i->product_name}".($i->variant_label ? " ({$i->variant_label})" : '').' — '.$rand($i->line_cents))->all());
                 Mail::to($order->customer_email)->send(new OrderPlacedMail($tenant->displayName(), $order->number, $lines, $rand($order->total_cents),
-                    ShopSettings::query()->find($this->context->id())?->offline_instructions, $url));
+                    app(BusinessPayments::class)->eftInstructions(), $url));
             }
 
             return new JsonResponse(['placed' => true, 'number' => $order->number, 'total_cents' => $order->total_cents, 'order_url' => $url], 201);
@@ -118,7 +118,7 @@ final class PublicCheckoutController
             $s = ShopSettings::query()->find($this->context->id());
             $html = view('shop::public.order', [
                 'business' => $tenant->displayName(), 'order' => $o, 'items' => OrderItem::query()->where('order_id', $o->id)->get(),
-                'instructions' => $o->status === 'awaiting_payment' && $o->payment_method === 'offline' ? $s?->offline_instructions : null,
+                'instructions' => $o->status === 'awaiting_payment' && $o->payment_method === 'offline' ? app(BusinessPayments::class)->eftInstructions() : null,
                 'collection' => $o->fulfilment === 'collection' ? $s?->collection_address : null,
                 'placed' => $o->created_at->setTimezone($tenant->timezone())->format('j F Y, H:i'),
             ])->render();

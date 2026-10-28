@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 9 (sprint plan revision 3) |
-| **Status** | Approved 27 Oct 2026 — 9.1–9.3b ✅ (v0.10.0), 9.1b ✅ (v0.11.0), 9.4 in review, 9.5 next |
+| **Status** | Approved 27 Oct 2026 — 9.1–9.3b ✅ (v0.10.0), 9.1b ✅ (v0.11.0), 9.4 ✅ (#83), 9.5 after 10.6 |
 | **Depends on** | v0.9.0 (appointments, deposits, messages, manage links) |
 | **Legal review** | Completed (WURK, Oct 2026). **Its specific requirements are needed before 9.4 and 9.5**, which are scheduled last |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
@@ -101,10 +101,15 @@ Health records are **special personal information under POPIA**. As a baseline, 
 | 9.3 Group classes | #72 | 786 backend tests on SQLite and MySQL 8; 371 frontend; all browser tests incl. a guest booking a class on the published gym site. Classes paid at the class; online payment for classes proposed as a follow-up. Found: public rate limits shared across all businesses per IP (fixed: per business and visitor); a button's spoken name didn't contain its visible words; an in-place-editable label on a hidden button |
 | 9.3b Online payment for classes (agreed follow-up) | #73 | 791 backend tests on SQLite and MySQL 8; 371 frontend; booking browser tests together. Found: a status column too short for `pending_payment` on MySQL |
 | 9.1b Meeting links per team member (agreed change) | #77 | 842 backend tests on SQLite and MySQL 8; booking browser tests |
-| 9.4 Health consultations online | see PR | 913 backend tests on SQLite; Bookings on MySQL 8; 378 frontend; browser test of the Health practice card. Consent wording is a working default for the lawyers to confirm |
+| 9.4 Health consultations online | #83 | 913 backend tests on SQLite; Bookings on MySQL 8; 378 frontend; browser test of the Health practice card. Consent wording is a working default for the lawyers to confirm |
 
 ## 8. Changes agreed with WURK (29 Oct 2026)
 
 1. **Meeting links, not account connections**: businesses paste a Google Meet or Zoom link — **one per team member**, with a business default — instead of connecting Google or Zoom accounts (too hard for most owners). The account-connection code stays, hidden unless WURK enables it. Owners are advised to use the waiting room / lobby.
 2. **Legal review done**; 9.4–9.5 proceed with configurable defaults: consent before an online consultation, practitioner registration number shown, access only for staff the practice allows.
 3. **Patient records can never be deleted** — append-only: corrections add a new version (the original kept), every view logged. *For the lawyers:* keeping records indefinitely goes beyond the HPCSA minimum (6 years; until 21 for minors) and POPIA's "no longer than necessary" — a defined period can be set later without a rebuild.
+
+## 9. Decisions (30 Oct 2026)
+
+1. **Consent wording confirmed by WURK's lawyers** (version v1, as built in 9.4).
+2. **Patient records are kept for 6 years** (replacing "never deleted"): nobody can delete a record during the 6 years, counted from the patient's most recent document; corrections add a new version. After 6 years records are flagged for the practice, and the owner can remove them securely (logged). Nothing is deleted automatically. The period is a setting.

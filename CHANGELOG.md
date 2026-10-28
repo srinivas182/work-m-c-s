@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 10.6 (payment methods)
+- **Five methods**: PayFast, Yoco, **Ozow** (instant EFT), **Peach Payments** (cards) and **EFT / bank transfer**.
+- **Businesses** (Settings → Payments): each method on or off, **test or live**, with **test and live keys kept separately** (live only once live keys are saved; keys encrypted, never shown again). Customers choose from the business's enabled methods; deposits and class payments use its card methods. EFT moved here from Shop settings.
+- **Super admin** (Payment methods): which methods businesses may offer (a method switched off disappears from every business), and **WURK's own accounts** for businesses paying WURK — the Billing page offers "Pay with…" and WURK's EFT details. Automatic monthly card charges and DebiCheck are unchanged.
+- One driver per provider, shared by businesses and WURK; every payment confirmed with the provider before it counts (Ozow: hash + Ozow's API; Peach: signed notification + status read back).
+
+### Fixed
+- Notification fields are read exactly as sent (PHP's form parser turned Peach's dotted names into underscores, which would have failed every Peach signature).
+- WURK's payment routes are registered before businesses' (the business address pattern also matched WURK's app address); "pay" and "payments" reserved as business handles.
+
 ### Added — Sprint 9.4 (health consultations online)
 - **Health practice** (Booking settings): a switch, and each practitioner's **registration** (council and number, e.g. HPCSA MP0123456).
 - Online services and online classes at a health practice need **every practitioner registered**; health mode can't be switched on while any isn't, and a registration can't be removed from someone who sees patients online.

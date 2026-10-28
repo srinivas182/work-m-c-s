@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Sprint** | 10 (sprint plan revision 3) |
-| **Status** | ✅ Complete — released as v0.11.0 |
+| **Status** | 10.1–10.5 ✅ released as v0.11.0 · **10.6 Payment methods** in review |
 | **Depends on** | v0.10.0 (website engine, payments straight to the business, fixed-wording messages) |
 | **Delivery** | 5 sub-sprints, one PR each into `develop`; each passes the full CI run (every job checked) before merging |
 
@@ -80,3 +80,33 @@ Shop sections in the retail-led templates; accessibility scans of product, cart 
 | 10.3 Card payments (business’s own PayFast/Yoco) | #79 | 904 backend tests on SQLite and MySQL 8; all browser tests. Deposits and class payments moved off Paystack. Found: MySQL JSON reorders keys (PayFast form now text); test leftovers had filled the disk (cleaned up per test now) |
 | 10.4 Orders and refunds | #80 | 910 backend tests on SQLite and MySQL 8; all browser tests incl. an owner taking an order from paid to done. Found: a guessed colour class failed contrast on the Orders tabs |
 | 10.5 Templates and quality | (within #76–#80) | Delivered along the way: shop sections in the retail templates (10.1); accessibility scans of product, cart, checkout and order pages on desktop and phone (10.1–10.4); product pages in the performance gate, 98–100 |
+
+## 9. Sprint 10.6 — Payment methods (agreed with WURK, 30 Oct 2026)
+
+**Methods:** PayFast, Yoco, Ozow, Peach Payments, and EFT / bank transfer.
+
+| Who | Controls |
+|---|---|
+| **Super admin — methods businesses may offer** | Each method on or off platform-wide. A method switched off disappears from every business's settings and checkout; businesses using it are told. |
+| **Super admin — WURK's own payments** | The same methods for WURK's own invoices: each enabled or disabled, **test or live**, test and live keys kept separately. Businesses choose how to pay a WURK invoice from the enabled ones. Automatic monthly card charges and DebiCheck are unchanged. |
+| **Business — its own payments** (Settings → Payments) | From the methods WURK allows: each enabled or disabled, **test or live**, test and live keys kept separately. Customers choose from the business's enabled methods at checkout; deposits and class payments use its card methods. |
+
+**Rules**
+- Live mode can't be chosen until live keys are saved; keys are encrypted and never shown again.
+- Every card or instant-EFT payment is confirmed **with the provider** before an order, booking or invoice counts; refunds go through the provider where it supports them, otherwise the owner refunds and records it.
+- EFT / bank transfer shows the account's instructions with a reference; it's marked paid by hand.
+- One driver per provider in the Payments module, used for both businesses and WURK.
+
+**Delivery:** (1) method model — enable/disable, test/live, separate keys, EFT as a method, platform availability; (2) Ozow and Peach drivers (simulated until sandbox accounts arrive); (3) super admin screens and paying WURK invoices; (4) business screens, checkout, browser tests.
+
+**Needed from WURK:** Ozow and Peach sandbox accounts (with PayFast and Yoco) for one real test of each before going live.
+
+### 10.6 progress and notes
+
+| Item | Notes |
+|---|---|
+| Delivered | Methods, per-mode keys, platform availability, WURK's own accounts and Billing "Pay with…", business and admin screens, Ozow and Peach drivers. 924 backend tests on SQLite; Payments, Billing and Shop on MySQL 8; 378 frontend; browser tests for the owner (EFT, orders) and super admin (Payment methods), with accessibility scans |
+| **To confirm with sandbox accounts** | Ozow and Peach endpoints and field names are in `modules/Payments/config/payments.php`, so a correction is a config change. One real test payment with each of the four before going live |
+| Ozow refunds | Not automated: the owner refunds in Ozow's portal and records the refund (the order screen says so) |
+| A method switched off by WURK | Stops being offered at once; businesses see "WURK has switched this off" on Settings → Payments (rather than a message) |
+| Paying WURK by EFT | WURK's bank details are shown on the Billing page with the business's handle as reference; WURK records the payment on the existing cash-payments screen |
