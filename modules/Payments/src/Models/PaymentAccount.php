@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Wurk\Payments\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Wurk\Tenancy\Contracts\BelongsToTenant;
@@ -24,6 +23,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
 final class PaymentAccount extends Model
 {
     use BelongsToTenant;
+    use HasPaymentKeys;
     use HasUlids;
 
     protected $guarded = [];
@@ -33,21 +33,5 @@ final class PaymentAccount extends Model
     protected function casts(): array
     {
         return ['test_credentials' => 'encrypted:array', 'live_credentials' => 'encrypted:array', 'webhook_secret' => 'encrypted', 'active' => 'boolean'];
-    }
-
-    /**
-     * The keys for the current mode (test or live) — what the gateways use.
-     *
-     * @return Attribute<array<string, string>, never>
-     */
-    protected function credentials(): Attribute
-    {
-        return Attribute::get(fn (): array => (array) (($this->mode === 'live' ? $this->live_credentials : $this->test_credentials) ?? []));
-    }
-
-    /** Whether keys are saved for a mode. */
-    public function hasKeys(string $mode): bool
-    {
-        return (($mode === 'live' ? $this->live_credentials : $this->test_credentials) ?? []) !== [];
     }
 }

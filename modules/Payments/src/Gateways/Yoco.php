@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Http;
 use Throwable;
 use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Models\PaymentAttempt;
+use Wurk\Payments\Models\PlatformPaymentAccount;
+use Wurk\Payments\Models\PlatformPaymentAttempt;
 
 /**
  * Yoco Checkout (the business's own account): a hosted checkout per payment; webhooks signed with a
@@ -18,7 +20,7 @@ final class Yoco
 {
     public const API = 'https://payments.yoco.com/api';
 
-    private static function http(PaymentAccount $a): PendingRequest
+    private static function http(PaymentAccount|PlatformPaymentAccount $a): PendingRequest
     {
         return Http::timeout(20)->acceptJson()->withToken((string) ($a->credentials['secret_key'] ?? ''));
     }
@@ -29,7 +31,7 @@ final class Yoco
      * @param  array{return: string, cancel: string, notify: string}  $urls
      * @return array{0: string, 1: string}|null
      */
-    public static function start(PaymentAccount $a, PaymentAttempt $attempt, array $urls): ?array
+    public static function start(PaymentAccount|PlatformPaymentAccount $a, PaymentAttempt|PlatformPaymentAttempt $attempt, array $urls): ?array
     {
         try {
             $r = self::http($a)->withHeaders(['Idempotency-Key' => $attempt->reference])->post(self::API.'/checkouts', [
@@ -45,7 +47,7 @@ final class Yoco
     }
 
     /** @return array{paid: bool, amount_cents: int} */
-    public static function verify(PaymentAccount $a, PaymentAttempt $attempt): array
+    public static function verify(PaymentAccount|PlatformPaymentAccount $a, PaymentAttempt|PlatformPaymentAttempt $attempt): array
     {
         try {
             $r = self::http($a)->get(self::API.'/checkouts/'.rawurlencode((string) $attempt->provider_id));
@@ -56,7 +58,7 @@ final class Yoco
         return ['paid' => $r->successful() && $r->json('status') === 'completed', 'amount_cents' => (int) $r->json('amount', 0)];
     }
 
-    public static function refund(PaymentAccount $a, PaymentAttempt $attempt, int $cents): bool
+    public static function refund(PaymentAccount|PlatformPaymentAccount $a, PaymentAttempt|PlatformPaymentAttempt $attempt, int $cents): bool
     {
         try {
             return self::http($a)->withHeaders(['Idempotency-Key' => 'refund-'.$attempt->reference.'-'.$cents])
@@ -72,7 +74,7 @@ final class Yoco
      *
      * @return array{0: string, 1: string}|null
      */
-    public static function register(PaymentAccount $a, string $url): ?array
+    public static function register(PaymentAccount|PlatformPaymentAccount $a, string $url): ?array
     {
         try {
             $r = self::http($a)->post(self::API.'/webhooks', ['name' => 'WURK', 'url' => $url]);
@@ -88,7 +90,7 @@ final class Yoco
      *
      * @param  array<string, string>  $headers
      */
-    public static function notification(PaymentAccount $a, string $body, array $headers): ?string
+    public static function notification(PaymentAccount|PlatformPaymentAccount $a, string $body, array $headers): ?string
     {
         $id = $headers['webhook-id'] ?? '';
         $timestamp = $headers['webhook-timestamp'] ?? '';

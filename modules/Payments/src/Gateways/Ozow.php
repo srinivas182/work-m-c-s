@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Http;
 use Throwable;
 use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Models\PaymentAttempt;
+use Wurk\Payments\Models\PlatformPaymentAccount;
+use Wurk\Payments\Models\PlatformPaymentAttempt;
 
 /**
  * Ozow (instant EFT, the business's own site). The customer's browser posts a hashed form to Ozow; a
@@ -34,7 +36,7 @@ final class Ozow
      * @param  array{return: string, cancel: string, notify: string}  $urls
      * @return array{action: string, fields: array<string, string>}
      */
-    public static function form(PaymentAccount $a, PaymentAttempt $attempt, array $urls): array
+    public static function form(PaymentAccount|PlatformPaymentAccount $a, PaymentAttempt|PlatformPaymentAttempt $attempt, array $urls): array
     {
         $fields = [
             'SiteCode' => (string) ($a->credentials['site_code'] ?? ''), 'CountryCode' => 'ZA', 'CurrencyCode' => 'ZAR',
@@ -57,7 +59,7 @@ final class Ozow
      * @param  array<string, string>  $posted
      * @return array{reference: string, provider_id: string}|null
      */
-    public static function notification(PaymentAccount $a, array $posted): ?array
+    public static function notification(PaymentAccount|PlatformPaymentAccount $a, array $posted): ?array
     {
         $values = array_map(fn (string $k) => $posted[$k] ?? '', self::NOTIFY_ORDER);
         if (! hash_equals(self::hash($values, (string) ($a->credentials['private_key'] ?? '')), strtolower((string) ($posted['Hash'] ?? '')))) {
@@ -72,7 +74,7 @@ final class Ozow
      *
      * @return array{paid: bool, amount_cents: int}
      */
-    public static function verify(PaymentAccount $a, PaymentAttempt $attempt): array
+    public static function verify(PaymentAccount|PlatformPaymentAccount $a, PaymentAttempt|PlatformPaymentAttempt $attempt): array
     {
         try {
             $r = Http::timeout(20)->acceptJson()->withHeaders(['ApiKey' => (string) ($a->credentials['api_key'] ?? '')])
