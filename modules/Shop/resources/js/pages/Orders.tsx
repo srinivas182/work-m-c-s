@@ -59,7 +59,7 @@ export default function Orders({
               key={key}
               href={`${base}?show=${key}`}
               aria-current={show === key ? 'page' : undefined}
-              className={`rounded-full border px-3 py-1 text-sm ${show === key ? 'border-primary bg-primary text-on-primary' : 'border-border'}`}
+              className={`rounded-full border px-3 py-1 text-sm ${show === key ? 'border-primary bg-primary text-primary-fg' : 'border-border'}`}
             >
               {label}
               {counts[key] !== undefined ? ` (${counts[key]})` : ''}
