@@ -8,11 +8,13 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
+use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\CancellationPolicy;
+use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\SlotTaken;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -96,6 +98,10 @@ final class PublicManageController
             'cancelUrl' => URL::temporarySignedRoute('bookings.public.manage.cancel', $b->starts_at, ['handle' => $tenant->handle(), 'booking' => $b->id]),
             'moveUrl' => URL::temporarySignedRoute('bookings.public.manage.move', $b->starts_at, ['handle' => $tenant->handle(), 'booking' => $b->id]),
             'online' => $b->online,
+            'health' => $b->online && $b->consent_at !== null ? [
+                'practitioner' => trim((array_column(app(TeamDirectory::class)->members(), 'name', 'id')[(string) $b->member_id] ?? '').' — '.(app(HealthPractice::class)->registration($b->member_id) ?? ''), ' —'),
+                'agreed' => $b->consent_at->setTimezone($tz)->format('j F, H:i'),
+            ] : null,
             'joinUrl' => $b->online && $b->meeting_url !== null && $b->status === 'confirmed' && now()->greaterThanOrEqualTo($b->starts_at->subMinutes(15)) && now()->lessThan($b->ends_at) ? $b->meeting_url : null,
             'date' => null, 'times' => [], 'notice' => null, ...$extra,
         ])->render(), 200, ['X-Robots-Tag' => 'noindex', 'Referrer-Policy' => 'no-referrer']);

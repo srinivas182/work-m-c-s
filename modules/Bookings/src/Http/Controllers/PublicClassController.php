@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
+use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Support\ClassBooker;
@@ -115,6 +116,10 @@ final class PublicClassController
             $live = $s->status === 'scheduled' && $a->status === 'confirmed';
             $html = view('bookings::public.class', [
                 'business' => $tenant->displayName(), 'title' => $s->title, 'customer' => $a->customer_name,
+                'health' => $s->location_type === 'online' && $a->consent_at !== null ? [
+                    'practitioner' => trim((array_column(app(TeamDirectory::class)->members(), 'name', 'id')[(string) $s->member_id] ?? '').' — '.(app(HealthPractice::class)->registration($s->member_id) ?? ''), ' —'),
+                    'agreed' => $a->consent_at->setTimezone($tenant->timezone())->format('j F, H:i'),
+                ] : null,
                 'when' => $s->starts_at->setTimezone($tenant->timezone())->format('l j F, H:i'), 'notice' => $notice,
                 'status' => $s->status === 'cancelled' ? 'class_cancelled' : $a->status, 'changeable' => $live && $s->starts_at->isFuture(),
                 'online' => $s->location_type === 'online' && $live,

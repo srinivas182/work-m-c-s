@@ -161,7 +161,8 @@ it('at a health practice, books online consultations only with the patient’s c
 
     $this->postJson("{$this->site}", [...$this->booking, 'online' => true])->assertStatus(422)
         ->assertJsonValidationErrors(['health_consent' => 'Please read and agree to the video-consultation terms to book online.']);
-    $this->postJson("{$this->site}", [...$this->booking, 'online' => true, 'health_consent' => true])->assertCreated()->assertJsonPath('practitioner', 'HPCSA MP0123456');
+    $manage = $this->postJson("{$this->site}", [...$this->booking, 'online' => true, 'health_consent' => true])->assertCreated()->assertJsonPath('practitioner', 'HPCSA MP0123456')->json('manage_url');
+    $this->get($manage)->assertOk()->assertSee('Your practitioner: <strong>Zanele — HPCSA MP0123456</strong>', false)->assertSee('You agreed to the video-consultation terms on 1 May, 10:00');
     $this->ctx->run($this->glow, fn () => expect(Booking::query()->sole()->only(['consent_version', 'member_id']))->toBe(['consent_version' => 'v1', 'member_id' => $zanele])
         ->and(Booking::query()->sole()->consent_at)->not->toBeNull());
 
