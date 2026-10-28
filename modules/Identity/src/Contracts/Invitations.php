@@ -14,5 +14,12 @@ interface Invitations
     /** @return list<array{id: string, email: string, role: string, expires_at: string}> open staff invitations */
     public function pendingStaff(): array;
 
+    /**
+     * Open invitations to a business's team.
+     *
+     * @return list<array{id: string, email: string, role: string, expires_at: string}>
+     */
+    public function pendingMembers(string $tenantId): array;
+
     public function revoke(string $invitationId): void;
 }

@@ -23,6 +23,7 @@ use Wurk\Tenancy\Console\MigrateShardsCommand;
 use Wurk\Tenancy\Console\RegisterShardCommand;
 use Wurk\Tenancy\Console\RunForTenantsCommand;
 use Wurk\Tenancy\Context\TenantContextManager;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Tenancy\Contracts\TenantProvisioner;
@@ -34,12 +35,14 @@ use Wurk\Tenancy\Models\Tenant;
 use Wurk\Tenancy\Policies\BranchPolicy;
 use Wurk\Tenancy\Policies\TenantPolicy;
 use Wurk\Tenancy\Resolution\EloquentTenantDirectory;
+use Wurk\Tenancy\Support\Branches;
 use Wurk\Tenancy\Support\HandleRules;
 
 final class TenancyServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(BranchDirectory::class, Branches::class);
         $this->app->singleton(TenantProvisioner::class, TenantProvisioning::class);
         $this->app->singleton(TenantContext::class, TenantContextManager::class);
         $this->app->singleton(TenantDirectory::class, EloquentTenantDirectory::class);

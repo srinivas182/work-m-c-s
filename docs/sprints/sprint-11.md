@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved 30 Oct 2026 — 11.1 next |
+| **Status** | Approved 30 Oct 2026 — 11.1 in review |
 | **Plan (revision 3)** | 29 Mar – 09 Apr 2027 · branch managers; per-branch merchant accounts, prices, stock; inter-branch settlement; courier integrations |
 | **Builds on** | Sprint 1's branches table, branch-manager role and branch scope (unused until now); packages' `multi_branch` / `max_branches` (not yet enforced) |
 
@@ -63,3 +63,9 @@ Decisions A–E; Bob Go and Pargo sandbox accounts (with the payment providers' 
 | C | **Optional price per branch**, otherwise the business price |
 | D | Settlement between branches: **record what's owed; settled by hand** — no money moves through WURK |
 | E | Branch limit from the package (`max_branches`); Growth and Pro numbers to confirm in the admin |
+
+## 9. Progress log
+
+| Part | PR | Notes |
+|---|---|---|
+| 11.1 Branches and team | see PR | Found that owners had no Team screen (invite, roles, branches) — added, since branch managers depend on it. 1,025 backend tests on SQLite; Team, Tenancy, Access, Identity on MySQL 8; all browser tests (now run in three parts). Fixed: Branch's fillable list dropped the new fields |
