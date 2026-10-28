@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
@@ -11,10 +12,15 @@ use Wurk\Access\Actions\Team;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Shop\Mail\NewOrderMail;
+use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
+use Wurk\Shop\Support\OrderManager;
+use Wurk\Shop\Support\OrderMessages;
+use Wurk\Shop\Support\OrderPlacer;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\MediaLibrary;
 
@@ -112,4 +118,28 @@ it('saves shop settings, insisting on a way to get orders and instructions for p
     $this->actingAs($this->owner)->put("{$this->base}/settings", [...$base, 'delivery_enabled' => true, 'delivery_fee_cents' => 6000, 'offline_enabled' => true, 'offline_instructions' => 'FNB 6200 0000 000'])
         ->assertSessionHas('status', 'Shop settings saved.');
     ($this->in)(fn () => expect(ShopSettings::query()->sole()->only(['delivery_fee_cents', 'offline_enabled']))->toBe(['delivery_fee_cents' => 6000, 'offline_enabled' => true]));
+});
+
+it('alerts the people who manage the shop about a new order, and tells the customer as it moves on', function () {
+    Mail::fake();
+    ($this->subscribe)(['website', 'shop']);
+    $order = ($this->in)(function () {
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+        $p = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
+        Variant::query()->create(['product_id' => $p->id, 'price_cents' => 12000]);
+        $o = app(OrderPlacer::class)->place([['variant' => Variant::query()->sole()->id, 'quantity' => 1]], ['name' => 'Sipho', 'phone' => '082', 'email' => 'sipho@example.com'], 'collection', 'offline');
+        app(OrderMessages::class)->newOrder($o);
+
+        return $o;
+    });
+    Mail::assertSent(NewOrderMail::class, fn ($m) => $m->hasTo('thandi@glow.co.za') && $m->number === 1001 && $m->total === 'R120.00'
+        && str_contains($m->how, 'mark it paid') && str_ends_with($m->link, '/kasi-threads/shop/orders/'.$order->id));
+
+    ($this->in)(function () use ($order) {
+        foreach (['paid', 'packed', 'ready'] as $step) {
+            app(OrderManager::class)->advance($order->refresh(), $step, 'Thabo');
+        }
+    });
+    $subjects = Mail::sent(OrderUpdateMail::class, fn ($m) => $m->hasTo('sipho@example.com'))->map(fn ($m) => $m->envelope()->subject)->values()->all();
+    expect($subjects)->toBe(['Payment received — order #1001 · Kasi-threads', 'Ready for collection — order #1001 · Kasi-threads']); // not "packed"
 });

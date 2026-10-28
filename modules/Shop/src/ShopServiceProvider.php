@@ -13,7 +13,9 @@ use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Shop\Console\DemoShopCommand;
 use Wurk\Shop\Console\ExpireOrdersCommand;
+use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
+use Wurk\Shop\Support\OrderStatusChanged;
 use Wurk\Shop\Support\ShopCatalog;
 use Wurk\Website\Contracts\ProductCatalog;
 
@@ -44,6 +46,7 @@ final class ShopServiceProvider extends ModuleServiceProvider
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'shop');
         Event::listen(BusinessPaymentReceived::class, [OrderPayments::class, 'handle']);
+        Event::listen(OrderStatusChanged::class, [OrderMessages::class, 'handle']);
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('shop:expire-orders')->everyFifteenMinutes()->onOneServer()->withoutOverlapping();
         });
