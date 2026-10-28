@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 11.1 (branches and team)
+- **Branches** (Settings → Branches): address, phone, close and reopen (history kept; the main branch stays open), within the package's limit (`multi_branch` / `max_branches`, now enforced). Other modules read and manage branches through Tenancy's new `BranchDirectory` contract.
+- **Team** (Settings → Team) — owners couldn't manage their team before: members with their role and branches; invite by email with a role (seat limit checked), cancel invitations; change roles; limit people to branches (a branch manager always has particular branches); remove someone (their history is kept). Owners can't change or remove themselves, and the business never loses its last owner.
+
+### Fixed
+- Branch's fillable list silently dropped new fields (closing a branch, address and phone).
+
 ### Added — Sprint 9.5 (patient documents)
 - **Patient records** for health practices (new Records module; permissions `records.view` and `records.manage`): patients, documents and corrections (each correction says what changed; the original is kept), the private link, an access log in plain words, and a "due for removal" list.
 - **Encrypted at rest** on a private disk, separate from website media; never public; every upload, correction, view, download, link, code and removal logged.
