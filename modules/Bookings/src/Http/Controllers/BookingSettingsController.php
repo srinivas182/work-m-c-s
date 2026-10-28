@@ -18,10 +18,13 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
+use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\MemberMeetingLink;
+use Wurk\Bookings\Models\MemberRegistration;
 use Wurk\Bookings\Models\TimeOff;
 use Wurk\Bookings\Support\CancellationPolicy;
+use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\MeetingLinks;
 use Wurk\Messaging\Contracts\Messenger;
@@ -88,6 +91,11 @@ final class BookingSettingsController
         ], ['members.min' => 'Choose at least one team member who does this service.']);
         $data['location_type'] ??= 'in_person'; // omitted means in person, as stored by default
         $data['deposit_when'] ??= 'always';
+        $health = app(HealthPractice::class);
+        $missing = $data['location_type'] !== 'in_person' && $health->on() ? $health->unregistered(array_values(array_map('strval', (array) ($data['members'] ?? [])))) : [];
+        if ($missing !== []) {
+            throw ValidationException::withMessages(['location_type' => 'Online consultations need each practitioner’s registration number: add it for '.$this->names($missing).' under Health practice.']);
+        }
         if ($data['location_type'] !== 'in_person' && ! $this->reachable((array) ($data['members'] ?? []))) {
             throw ValidationException::withMessages(['location_type' => 'Add a meeting link (under Meeting links) for everyone who does this service, or a link for the whole business, so clients can join.']);
         }
@@ -222,5 +230,57 @@ final class BookingSettingsController
         $this->audit->record('bookings.meeting_links_saved', 'booking_settings', $this->context->id(), []);
 
         return back()->with('status', 'Meeting links saved.');
+    }
+
+    /** @param  list<string>  $ids */
+    private function names(array $ids): string
+    {
+        $names = array_column(array_filter($this->team->members(), fn (array $m) => in_array($m['id'], $ids, true)), 'name');
+
+        return implode(', ', $names !== [] ? $names : ['each practitioner']);
+    }
+
+    /** Health practice: on/off — refused while an online service or upcoming online class has an unregistered practitioner. */
+    public function saveHealth(Request $request): RedirectResponse
+    {
+        $on = (bool) $request->validate(['health_practice' => ['required', 'boolean']])['health_practice'];
+        if ($on) {
+            $online = BookingService::query()->where('location_type', '!=', 'in_person')->pluck('id');
+            $people = DB::connection($this->context->connectionName())->table('booking_service_member')->whereIn('service_id', $online)->pluck('member_id')
+                ->merge(ClassSession::query()->where('location_type', 'online')->where('starts_at', '>', now())->where('status', '!=', 'cancelled')->pluck('member_id'))
+                ->filter()->map(fn ($id) => (string) $id)->unique()->values()->all();
+            $missing = app(HealthPractice::class)->unregistered(array_values($people));
+            if ($missing !== []) {
+                throw ValidationException::withMessages(['health_practice' => 'First add registration numbers for '.$this->names($missing).' — they see patients online.']);
+            }
+        }
+        BookingSettings::query()->updateOrCreate(['tenant_id' => $this->context->id()], ['health_practice' => $on]);
+        $this->audit->record('bookings.health_practice', 'booking_settings', $this->context->id(), ['on' => $on]);
+
+        return back()->with('status', $on ? 'Health practice is on: online consultations need consent and show registration numbers.' : 'Health practice is off.');
+    }
+
+    /** A practitioner's professional registration (shown to patients). */
+    public function saveRegistration(Request $request, string $member): RedirectResponse
+    {
+        if (! in_array($member, array_column($this->team->members(), 'id'), true)) {
+            abort(404);
+        }
+        $data = $request->validate(['council' => ['nullable', 'string', 'max:60'], 'number' => ['nullable', 'string', 'max:40', 'regex:/^[A-Za-z0-9 \/-]*$/']],
+            ['number.regex' => 'Use letters, numbers, spaces, / or - only.']);
+        if (trim((string) ($data['number'] ?? '')) === '') {
+            $online = BookingService::query()->where('location_type', '!=', 'in_person')->pluck('id');
+            $stillOnline = DB::connection($this->context->connectionName())->table('booking_service_member')->whereIn('service_id', $online)->where('member_id', $member)->exists();
+            if ($stillOnline && app(HealthPractice::class)->on()) {
+                throw ValidationException::withMessages(['number' => 'This practitioner sees patients online — keep their registration number.']);
+            }
+            MemberRegistration::query()->whereKey($member)->delete();
+
+            return back()->with('status', 'Registration removed.');
+        }
+        MemberRegistration::query()->updateOrCreate(['member_id' => $member], ['council' => trim((string) ($data['council'] ?: 'HPCSA')), 'number' => strtoupper(trim((string) $data['number']))]);
+        $this->audit->record('bookings.registration_saved', 'member', $member, []);
+
+        return back()->with('status', 'Registration saved.');
     }
 }
