@@ -116,4 +116,6 @@ export interface ProductPage {
     compare_at_cents: number | null;
     in_stock: boolean;
   }[];
+  /** Whether customers can order online now (Add to cart), otherwise "Ask about this product". */
+  can_order?: boolean;
 }

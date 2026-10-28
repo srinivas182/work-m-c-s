@@ -13,6 +13,7 @@ use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
+use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\MediaLibrary;
@@ -100,4 +101,15 @@ it('uploads product photos into the business’s one photo library', function ()
     $library = $this->actingAs($this->owner)->getJson("{$this->base}/photos")->assertOk()->json();
     expect($library['photos'])->toHaveCount(1)->and($library)->toHaveKeys(['used_mb', 'limit_mb']);
     ($this->in)(fn () => expect(app(MediaLibrary::class)->library()['photos'])->toHaveCount(1)); // the same library Website's editor reads
+});
+
+it('saves shop settings, insisting on a way to get orders and instructions for paying', function () {
+    ($this->subscribe)(['website', 'shop']);
+    $base = ['collection_enabled' => false, 'collection_address' => '', 'delivery_enabled' => false, 'delivery_fee_cents' => 0, 'delivery_note' => '', 'offline_enabled' => false, 'offline_instructions' => '', 'offline_hold_hours' => 72];
+    $this->actingAs($this->owner)->put("{$this->base}/settings", $base)->assertSessionHasErrors(['collection_enabled' => 'Offer collection, delivery, or both.']);
+    $this->actingAs($this->owner)->put("{$this->base}/settings", [...$base, 'collection_enabled' => true])->assertSessionHasErrors(['collection_address' => 'Add the address customers collect from.']);
+    $this->actingAs($this->owner)->put("{$this->base}/settings", [...$base, 'delivery_enabled' => true, 'offline_enabled' => true])->assertSessionHasErrors('offline_instructions');
+    $this->actingAs($this->owner)->put("{$this->base}/settings", [...$base, 'delivery_enabled' => true, 'delivery_fee_cents' => 6000, 'offline_enabled' => true, 'offline_instructions' => 'FNB 6200 0000 000'])
+        ->assertSessionHas('status', 'Shop settings saved.');
+    ($this->in)(fn () => expect(ShopSettings::query()->sole()->only(['delivery_fee_cents', 'offline_enabled']))->toBe(['delivery_fee_cents' => 6000, 'offline_enabled' => true]));
 });
