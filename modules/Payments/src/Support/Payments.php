@@ -37,6 +37,7 @@ final readonly class Payments implements BusinessPayments
             return null;
         }
         $attempt = PaymentAttempt::query()->updateOrCreate(['reference' => $reference], ['provider' => $account->provider, 'amount_cents' => $amountCents, 'status' => 'pending']);
+        $urls['notify'] = 'https://'.$this->context->current()->handle().'.'.config('wurk.domains.root').'/payments/notify/'.$account->provider;
         if ($account->provider === 'yoco') {
             $started = Yoco::start($account, $attempt, $urls);
             if ($started === null) {

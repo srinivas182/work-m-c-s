@@ -2,12 +2,17 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\InteractsWithShards;
+use Wurk\Payments\Contracts\BusinessPaymentReceived;
+use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Mail\OrderPlacedMail;
+use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
@@ -73,4 +78,58 @@ it('emails the customer their order, how to pay and the link', function () {
     $url = $this->postJson("{$this->site}/cart/checkout", [...$this->order, 'email' => 'sipho@example.com'])->assertCreated()->json('order_url');
     Mail::assertSent(OrderPlacedMail::class, fn ($m) => $m->hasTo('sipho@example.com') && $m->number === 1001
         && $m->lines === ['1 × Kasi T-shirt — R250.00'] && $m->total === 'R250.00' && str_contains((string) $m->howToPay, '6200 0000 000') && $m->link === $url);
+});
+
+describe('paying by card', function () {
+    beforeEach(function () {
+        ($this->entitle)();
+        ($this->in)(fn () => PaymentAccount::query()->create(['provider' => 'yoco', 'mode' => 'test', 'credentials' => ['secret_key' => 'sk_test_x'], 'webhook_secret' => 'whsec_eA==']));
+        // One set of stubs that read the current state (stubs added later never win).
+        $this->yocoState = ['status' => 200, 'state' => 'completed'];
+        Http::fake([
+            'payments.yoco.com/api/checkouts' => fn () => Http::response(['id' => 'ch_9', 'redirectUrl' => 'https://c.yoco.com/checkout/ch_9'], $this->yocoState['status']),
+            'payments.yoco.com/api/checkouts/ch_9' => fn () => Http::response(['id' => 'ch_9', 'status' => $this->yocoState['state'], 'amount' => 25000]),
+            'payments.yoco.com/api/checkouts/ch_9/refund' => Http::response(['status' => 'succeeded']),
+        ]);
+        $this->yoco = function (int $status = 200, string $state = 'completed') {
+            $this->yocoState = ['status' => $status, 'state' => $state];
+        };
+        $this->stock = fn () => ($this->in)(fn () => $this->tee->refresh()->stock);
+    });
+
+    it('offers card and EFT, and takes the stock while the customer pays', function () {
+        ($this->yoco)(state: 'created');
+        $this->postJson("{$this->site}/cart/price", ['lines' => []])->assertJsonPath('checkout.card', true)->assertJsonPath('checkout.offline', true);
+        $res = $this->postJson("{$this->site}/cart/checkout", [...$this->order, 'payment' => 'card'])->assertCreated()->assertJson(['pay_url' => 'https://c.yoco.com/checkout/ch_9']);
+        expect(($this->stock)())->toBe(0);
+        ($this->in)(fn () => expect(Order::query()->sole()->hold_expires_at->diffInMinutes(now(), true))->toBeLessThanOrEqual(15.0));
+        $this->get($res->json('order_url'))->assertSee('Waiting for payment'); // Yoco says not paid yet
+    });
+
+    it('confirms the order when the customer comes back paid', function () {
+        ($this->yoco)();
+        $url = $this->postJson("{$this->site}/cart/checkout", [...$this->order, 'payment' => 'card'])->json('order_url');
+        $this->get($url)->assertOk()->assertSee('Paid — thank you');
+        ($this->in)(fn () => expect(Order::query()->sole()->status)->toBe('paid'));
+        expect(DB::table('shop_holds')->count())->toBe(0);
+    });
+
+    it('gives the stock straight back if card payment can’t start', function () {
+        ($this->yoco)(status: 500);
+        $this->postJson("{$this->site}/cart/checkout", [...$this->order, 'payment' => 'card'])->assertStatus(503)
+            ->assertJson(['message' => 'Card payment isn’t available right now. Please try again shortly, or contact us.']);
+        expect(($this->stock)())->toBe(1);
+    });
+
+    it('refunds a payment that arrives after the stock hold expired', function () {
+        ($this->yoco)(state: 'created');
+        $this->postJson("{$this->site}/cart/checkout", [...$this->order, 'payment' => 'card']);
+        $this->travel(16)->minutes();
+        $this->artisan('shop:expire-orders')->expectsOutput('1 order(s) expired.');
+        ($this->yoco)(); // now Yoco says it was paid
+        $id = ($this->in)(fn () => Order::query()->sole()->id);
+        event(new BusinessPaymentReceived($this->shop->id, 'shop-'.$id));
+        Http::assertSent(fn ($r) => str_ends_with($r->url(), '/ch_9/refund'));
+        ($this->in)(fn () => expect(Order::query()->sole()->status)->toBe('expired'));
+    });
 });

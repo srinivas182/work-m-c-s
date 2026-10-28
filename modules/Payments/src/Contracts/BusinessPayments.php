@@ -22,7 +22,8 @@ interface BusinessPayments
      * form page on the business's own address (PayFast requires a POST).
      *
      * @param  array{name: string, email?: string|null}  $customer
-     * @param  array{return: string, cancel: string, notify: string}  $urls
+     *                                                              The reference must be unique across all businesses (use a ULID-based one, e.g. "shop-<order id>").
+     * @param  array{return: string, cancel: string}  $urls
      */
     public function start(string $reference, int $amountCents, string $description, array $customer, array $urls, ?string $provider = null): ?string;
 

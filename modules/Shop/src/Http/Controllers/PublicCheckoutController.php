@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Mail\OrderPlacedMail;
 use Wurk\Shop\Models\Order;
@@ -17,6 +18,7 @@ use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
 use Wurk\Shop\Support\CheckoutProblem;
+use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderPlacer;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -47,7 +49,8 @@ final class PublicCheckoutController
             $s = ShopSettings::query()->find($this->context->id());
 
             return new JsonResponse(['lines' => $lines, 'subtotal_cents' => array_sum(array_map(fn ($l) => $l['unit_cents'] * $l['quantity'], $lines)), 'checkout' => [
-                'available' => (bool) $s?->offline_enabled,
+                'available' => (bool) $s?->offline_enabled || app(BusinessPayments::class)->available() !== [],
+                'card' => app(BusinessPayments::class)->available() !== [], 'offline' => (bool) $s?->offline_enabled,
                 'collection' => $s === null || $s->collection_enabled, 'collection_address' => $s?->collection_address,
                 'delivery' => (bool) $s?->delivery_enabled, 'delivery_fee_cents' => (int) $s?->delivery_fee_cents, 'delivery_note' => $s?->delivery_note,
             ]]);
@@ -61,20 +64,33 @@ final class PublicCheckoutController
                 'lines' => ['required', 'array', 'min:1', 'max:30'], 'lines.*.variant' => ['required', 'string'], 'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:'.OrderPlacer::MAX_QUANTITY],
                 'name' => ['required', 'string', 'max:120'], 'phone' => ['required', 'string', 'max:40'], 'email' => ['nullable', 'email', 'max:160'],
                 'fulfilment' => ['required', 'in:collection,delivery'], 'address' => ['nullable', 'string', 'max:400'], 'notes' => ['nullable', 'string', 'max:1000'],
+                'payment' => ['nullable', 'in:card,offline'],
                 'consent' => ['accepted'], 'website' => ['nullable', 'string'],
             ], ['consent.accepted' => 'Please agree to be contacted about your order.']);
+            $method = $data['payment'] ?? (app(BusinessPayments::class)->available() !== [] ? 'card' : 'offline');
             if (($data['website'] ?? '') !== '') {
                 return new JsonResponse(['placed' => true], 201); // a bot: no signal, no order
             }
             try {
                 $order = $placer->place(array_values(array_map(fn ($l) => ['variant' => (string) $l['variant'], 'quantity' => (int) $l['quantity']], $data['lines'])),
                     ['name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'address' => $data['address'] ?? null, 'notes' => $data['notes'] ?? null],
-                    $data['fulfilment'], 'offline');
+                    $data['fulfilment'], $method);
             } catch (CheckoutProblem $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
             }
 
             $url = URL::signedRoute('shop.public.order', ['handle' => $tenant->handle(), 'order' => $order->id]);
+            if ($method === 'card') {
+                $pay = app(BusinessPayments::class)->start('shop-'.$order->id, $order->total_cents, "Order #{$order->number}",
+                    ['name' => $order->customer_name, 'email' => $order->customer_email], ['return' => $url, 'cancel' => $request->getSchemeAndHttpHost().'/cart']);
+                if ($pay === null) {
+                    $placer->release($order, 'cancelled', null); // can't take payment right now: give the stock straight back
+
+                    return new JsonResponse(['message' => 'Card payment isn’t available right now. Please try again shortly, or contact us.'], 503);
+                }
+
+                return new JsonResponse(['placed' => true, 'number' => $order->number, 'total_cents' => $order->total_cents, 'pay_url' => $pay, 'order_url' => $url], 201);
+            }
             if ($order->customer_email !== null) {
                 $rand = fn (int $c) => 'R'.number_format($c / 100, 2);
                 $lines = array_values(OrderItem::query()->where('order_id', $order->id)->get()->map(fn (OrderItem $i) => "{$i->quantity} × {$i->product_name}".($i->variant_label ? " ({$i->variant_label})" : '').' — '.$rand($i->line_cents))->all());
@@ -93,6 +109,10 @@ final class PublicCheckoutController
 
         return $this->context->run($tenant, function () use ($tenant, $order): Response {
             $o = Order::query()->whereKey($order)->firstOrFail();
+            if ($o->payment_method === 'card' && $o->status === 'awaiting_payment') {
+                app(OrderPayments::class)->settle($o); // back from paying: confirm it now (the notification may follow)
+                $o->refresh();
+            }
             $s = ShopSettings::query()->find($this->context->id());
             $html = view('shop::public.order', [
                 'business' => $tenant->displayName(), 'order' => $o, 'items' => OrderItem::query()->where('order_id', $o->id)->get(),

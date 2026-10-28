@@ -7,10 +7,13 @@ namespace Wurk\Shop;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Shop\Console\DemoShopCommand;
 use Wurk\Shop\Console\ExpireOrdersCommand;
+use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\ShopCatalog;
 use Wurk\Website\Contracts\ProductCatalog;
 
@@ -40,6 +43,7 @@ final class ShopServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'shop');
+        Event::listen(BusinessPaymentReceived::class, [OrderPayments::class, 'handle']);
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('shop:expire-orders')->everyFifteenMinutes()->onOneServer()->withoutOverlapping();
         });

@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('provider_id', 100)->nullable()->index(); // Yoco checkout id / PayFast pf_payment_id
             $table->unsignedInteger('amount_cents');
             $table->string('status', 12)->default('pending'); // pending | paid | refunded
-            $table->json('form')->nullable();                  // PayFast: the signed fields the customer's browser posts
+            $table->text('form')->nullable(); // PayFast's signed fields, as JSON in TEXT: MySQL's JSON type reorders keys, and PayFast's signature depends on order
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();
         });

@@ -6,6 +6,7 @@ namespace Wurk\Shop\Support;
 
 use Illuminate\Support\Facades\DB;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Product;
@@ -22,6 +23,9 @@ final readonly class OrderPlacer
 {
     public const MAX_QUANTITY = 50;
 
+    /** Card payments: the stock is held while the customer pays. */
+    public const CARD_HOLD_MINUTES = 15;
+
     public function __construct(private TenantContext $context, private AuditLog $audit) {}
 
     /**
@@ -31,9 +35,11 @@ final readonly class OrderPlacer
     public function place(array $lines, array $customer, string $fulfilment, string $method): Order
     {
         $settings = ShopSettings::query()->find($this->context->id());
-        if ($settings === null || ($method === 'offline' && ! $settings->offline_enabled) || $method !== 'offline') {
+        $card = $method === 'card' && app(BusinessPayments::class)->available() !== [];
+        if (! $card && ($settings === null || $method !== 'offline' || ! $settings->offline_enabled)) {
             throw new CheckoutProblem('Ordering online isn’t available yet. Please contact us to order.');
         }
+        $settings ??= new ShopSettings(['collection_enabled' => true, 'delivery_enabled' => false]); // a card-only shop with nothing saved yet
         if (($fulfilment === 'collection' && ! $settings->collection_enabled) || ($fulfilment === 'delivery' && ! $settings->delivery_enabled) || ! in_array($fulfilment, ['collection', 'delivery'], true)) {
             throw new CheckoutProblem('Please choose collection or delivery.');
         }
@@ -49,7 +55,8 @@ final readonly class OrderPlacer
         }
 
         $order = DB::connection($this->context->connectionName())->transaction(function () use ($wanted, $customer, $fulfilment, $method): Order {
-            $settings = ShopSettings::query()->lockForUpdate()->findOrFail($this->context->id());
+            $settings = ShopSettings::query()->lockForUpdate()->find($this->context->id())
+                ?? ShopSettings::query()->create(['tenant_id' => $this->context->id()]); // card-only shops may not have saved settings
             $items = [];
             $subtotal = 0;
             foreach (Variant::query()->whereIn('id', array_keys($wanted))->orderBy('id')->lockForUpdate()->get() as $variant) {
@@ -79,7 +86,7 @@ final readonly class OrderPlacer
                 'customer_name' => $customer['name'], 'customer_phone' => $customer['phone'], 'customer_email' => $customer['email'] ?? null,
                 'delivery_address' => $fulfilment === 'delivery' ? ($customer['address'] ?? null) : null, 'notes' => $customer['notes'] ?? null,
                 'subtotal_cents' => $subtotal, 'delivery_cents' => $delivery, 'total_cents' => $subtotal + $delivery,
-                'hold_expires_at' => now()->addHours($settings->offline_hold_hours),
+                'hold_expires_at' => $method === 'card' ? now()->addMinutes(self::CARD_HOLD_MINUTES) : now()->addHours($settings->offline_hold_hours),
             ]);
             foreach ($items as $item) {
                 OrderItem::query()->create(['order_id' => $order->id, ...$item]);
