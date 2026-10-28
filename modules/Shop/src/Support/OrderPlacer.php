@@ -97,6 +97,7 @@ final readonly class OrderPlacer
         });
         DB::table('shop_holds')->insert(['order_id' => $order->id, 'tenant_id' => $this->context->id(), 'expires_at' => $order->hold_expires_at]);
         $this->audit->record('shop.order_placed', 'order', $order->id, ['number' => $order->number, 'total_cents' => $order->total_cents]);
+        app(OrderManager::class)->log($order, 'placed', 'Customer');
 
         return $order;
     }
@@ -116,5 +117,8 @@ final readonly class OrderPlacer
         });
         DB::table('shop_holds')->where('order_id', $order->id)->delete();
         $this->audit->record('shop.order_'.$status, 'order', $order->id, ['by' => $by]);
+        if ($status === 'expired') {
+            app(OrderManager::class)->log($order, 'expired', null, null, 'Payment didn’t arrive in time; stock returned');
+        }
     }
 }

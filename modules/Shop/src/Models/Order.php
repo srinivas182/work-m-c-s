@@ -24,6 +24,8 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property int $delivery_cents
  * @property int $total_cents
  * @property Carbon|null $hold_expires_at
+ * @property int $refunded_cents
+ * @property Carbon|null $paid_at
  * @property Carbon $created_at
  */
 final class Order extends Model
@@ -40,6 +42,6 @@ final class Order extends Model
 
     protected function casts(): array
     {
-        return ['number' => 'integer', 'subtotal_cents' => 'integer', 'delivery_cents' => 'integer', 'total_cents' => 'integer', 'hold_expires_at' => 'datetime'];
+        return ['number' => 'integer', 'subtotal_cents' => 'integer', 'delivery_cents' => 'integer', 'total_cents' => 'integer', 'hold_expires_at' => 'datetime', 'refunded_cents' => 'integer', 'paid_at' => 'datetime'];
     }
 }
