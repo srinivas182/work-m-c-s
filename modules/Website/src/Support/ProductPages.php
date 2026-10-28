@@ -18,8 +18,15 @@ use Wurk\Website\Models\ProductRender;
  */
 final readonly class ProductPages
 {
-    /** The cart page is stored alongside product pages under this fixed id. */
-    public const CART = '0000000000000000000000CART'; // exactly 26 characters, like every id in product_renders
+    /**
+     * The cart page is stored alongside product pages under the business's own id: product_id is unique
+     * across the whole shard (shared by many businesses), so one fixed id would let only one business per
+     * shard have a cart. Business ids are globally unique and never equal a product id.
+     */
+    public static function cartId(string $tenantId): string
+    {
+        return $tenantId;
+    }
 
     public function __construct(private TenantContext $context, private PageRenderer $renderer, private ProductCatalog $catalog) {}
 
@@ -29,7 +36,7 @@ final readonly class ProductPages
         $products = $this->catalog->pages();
         $disk = Storage::disk((string) config('wurk.site_pages_disk', 'local'));
         $canOrder = $this->catalog->canOrder();
-        $keep = [...array_column($products, 'id'), ...($canOrder ? [self::CART] : [])];
+        $keep = [...array_column($products, 'id'), ...($canOrder ? [self::cartId($this->context->id())] : [])];
         $stale = ProductRender::query()->whereNotIn('product_id', $keep)->get();
         foreach ($stale as $old) {
             $disk->delete($old->path);
@@ -64,7 +71,7 @@ final readonly class ProductPages
             $out = $this->renderer->renderDocument([...$document, 'blocks' => array_values(array_filter([$header, ['id' => 'checkout', 'type' => 'Checkout', 'version' => 1, 'props' => []], $footer]))]);
             $path = 'rendered/'.$this->context->id().'/products/cart.json';
             $disk->put($path, (string) json_encode(['body' => $out['html'], 'fonts' => $out['fonts'], 'blocks' => $out['blocks'], 'title' => 'Your cart · '.$business, 'description' => null, 'image' => null]));
-            ProductRender::query()->updateOrCreate(['product_id' => self::CART], ['slug' => 'cart', 'path' => $path, 'rendered_at' => now()]);
+            ProductRender::query()->updateOrCreate(['product_id' => self::cartId($this->context->id())], ['slug' => 'cart', 'path' => $path, 'rendered_at' => now()]);
         }
 
         return count($products);

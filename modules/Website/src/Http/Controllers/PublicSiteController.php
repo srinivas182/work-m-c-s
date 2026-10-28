@@ -37,7 +37,7 @@ final class PublicSiteController
         $tenant = $tenants->findByHandle($handle);
         if ($tenant !== null && $tenant->isActive() && $slug === 'cart') {
             $cart = $context->run($tenant, function () use ($tenant): ?Response {
-                $render = ProductRender::query()->find(ProductPages::CART); // only while the business takes orders online
+                $render = ProductRender::query()->find(ProductPages::cartId($tenant->tenantId())); // only while the business takes orders online
 
                 return $render === null ? null : $this->respond($tenant, $render->path, $render->rendered_at?->getTimestamp(), '/cart', false);
             });

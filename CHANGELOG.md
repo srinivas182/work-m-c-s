@@ -12,7 +12,7 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Demo shops take orders; the full purchase is tested in the browser on desktop and phone; product pages still score 98–100.
 
 ### Fixed
-- The cart page's fixed id was 27 characters; MySQL rejected it (SQLite ignores lengths), so the cart page would never have been saved. Now 26, with a guard test.
+- **Cart pages are kept per business**: they were stored under one fixed id, but that id is unique across a whole shard — so only one business per shared shard could ever have had a cart. Now keyed by the business's own id, tested with two businesses on one shard. Found when CI's fresh setup failed (the two retail demos share a shard).
 
 ### Changed — online appointments use pasted meeting links (agreed with WURK)
 - **Meeting links per team member**: each person's own Google Meet or Zoom link, plus an optional default for the whole business — simpler than connecting accounts. Appointments use the practitioner's link; classes the instructor's; anyone without one, the default. No calls to Google or Zoom are needed.

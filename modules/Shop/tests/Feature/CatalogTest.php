@@ -163,6 +163,29 @@ it('builds the cart page only while the business takes orders online', function 
     $this->get("{$site}/cart")->assertNotFound();
 });
 
-it('uses a cart-page id that fits the product id column (26 characters)', function () {
-    expect(strlen(ProductPages::CART))->toBe(26);
+it('keeps each business’s cart page apart — two businesses on one shard can both take orders', function () {
+    $this->artisan('website:install-templates');
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<main><h1>Your cart</h1></main>']))]);
+    $other = $this->createTenant('other-shop', name: 'Other Shop');
+    $growth = app(PackageCatalog::class)->create([
+        'key' => 'growth-both', 'name' => 'Growth', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 2,
+        'monthly_price_cents' => 59900, 'yearly_price_cents' => 599000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 5,
+        'multi_branch' => false, 'max_branches' => 1, 'custom_domain' => false, 'monthly_credits' => 0, 'referral_max_levels' => 7,
+        'referral_max_commission_bp' => 3000, 'managed_fee_cents' => null, 'modules' => ['website', 'shop'],
+    ], null);
+    app(Catalog::class)->subscribe($other->id, $growth->id, 'monthly', allowTrial: true); // both businesses sell, on the same shard
+    app(Entitlements::class)->flush();
+    foreach ([$this->shop, $other] as $tenant) {
+        $this->ctx->run($tenant, function () use ($tenant) {
+            ShopSettings::query()->create(['tenant_id' => $tenant->id, 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+            $p = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
+            Variant::query()->create(['product_id' => $p->id, 'price_cents' => 10000]);
+            app(SiteBuilder::class)->apply('salon-hair-braids');
+            app(Pages::class)->publish(Page::query()->where('is_home', true)->firstOrFail(), null, null); // renders product pages and the cart
+        });
+    }
+    expect(ProductPages::cartId($this->shop->id))->not->toBe(ProductPages::cartId($other->id))
+        ->and(strlen(ProductPages::cartId($this->shop->id)))->toBe(26);
+    $this->get('http://kasi-threads.'.config('wurk.domains.root').'/cart')->assertOk();
+    $this->get('http://other-shop.'.config('wurk.domains.root').'/cart')->assertOk(); // the second business on the shard too
 });
