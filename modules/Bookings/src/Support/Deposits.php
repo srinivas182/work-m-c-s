@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace Wurk\Bookings\Support;
 
 use Wurk\Audit\Contracts\AuditLog;
-use Wurk\Billing\Contracts\SplitPayments;
 use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Events\ClassJoined;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHold;
 use Wurk\Bookings\Models\BookingService;
-use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -26,7 +25,7 @@ final readonly class Deposits
 {
     public const HOLD_MINUTES = 15;
 
-    public function __construct(private TenantContext $context, private SplitPayments $payments, private Booker $booker, private AuditLog $audit) {}
+    public function __construct(private TenantContext $context, private BusinessPayments $payments, private Booker $booker, private AuditLog $audit) {}
 
     /**
      * What to pay before the booking is confirmed, in cents: none, a fixed or percentage deposit, or
@@ -37,7 +36,7 @@ final readonly class Deposits
         if ($service->deposit_when === 'online' && ! $online) {
             return 0; // paid at the desk in person
         }
-        if (BookingSettings::query()->find($this->context->id())?->payout_subaccount === null) {
+        if ($this->payments->available() === []) { // no card payments connected (Settings → Payments)
             return 0;
         }
 
@@ -52,7 +51,7 @@ final readonly class Deposits
     /** What to pay for a place in a class (0 = paid at the class, or payouts not set up). */
     public function amountForClass(ClassSession $session): int
     {
-        if (! $session->pay_online || BookingSettings::query()->find($this->context->id())?->payout_subaccount === null) {
+        if (! $session->pay_online || $this->payments->available() === []) {
             return 0;
         }
 
@@ -66,9 +65,12 @@ final readonly class Deposits
         $expires = now()->addMinutes(self::HOLD_MINUTES);
         $booking->update(['deposit_cents' => $amountCents, 'payment_reference' => $reference, 'hold_expires_at' => Instant::db($expires)]);
         BookingHold::query()->updateOrCreate(['reference' => $reference], ['tenant_id' => $this->context->id(), 'expires_at' => Instant::db($expires)]);
-        $subaccount = (string) BookingSettings::query()->findOrFail($this->context->id())->payout_subaccount;
+        $name = $booking->customer_name;
+        $what = $booking instanceof ClassAttendee ? 'Class: '.$booking->session()->title : 'Booking deposit';
 
-        return $this->payments->checkout($email, $amountCents, $reference, $returnUrl, $subaccount, ['booking' => $booking->id, 'business' => $this->context->id()]);
+        // The return address carries the reference (Yoco and PayFast don't add it).
+        return $this->payments->start($reference, $amountCents, $what, ['name' => $name, 'email' => $email],
+            ['return' => $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference), 'cancel' => (string) preg_replace('#/book/return.*$#', '/', $returnUrl)]); // cancelling goes back to the home page
     }
 
     /**

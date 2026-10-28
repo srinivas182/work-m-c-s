@@ -6,25 +6,24 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\FakesYoco;
 use Tests\Support\InteractsWithShards;
-use Wurk\Billing\Contracts\DepositPaid;
 use Wurk\Bookings\Models\BookingHold;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
-use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
-use Wurk\Messaging\Support\ProviderSettings;
+use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Tenancy\Contracts\TenantContext;
 
-uses(InteractsWithShards::class);
+uses(InteractsWithShards::class, FakesYoco::class);
 
 const STYLIST = '01J00000000000000000000001';
 
 beforeEach(function () {
     $this->travelTo(CarbonImmutable::parse('2027-05-01 10:00', 'Africa/Johannesburg'));
-    app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
+    $this->fakeYoco();
     $this->createShards(1);
     $this->glow = $this->createTenant('glow-salon');
     $this->glow->update(['timezone' => 'Africa/Johannesburg']);
@@ -37,62 +36,63 @@ beforeEach(function () {
 
         return $service;
     });
-    $this->hold = fn () => ($this->in)(function () {
-        BookingSettings::query()->updateOrCreate(['tenant_id' => app(TenantContext::class)->id()], ['payout_subaccount' => 'ACCT_glow']);
-        $booking = app(Booker::class)->book($this->service, CarbonImmutable::parse('2027-05-03 09:00', 'Africa/Johannesburg'), ['name' => 'Sipho', 'email' => 'sipho@example.com'], STYLIST, 'website', status: 'pending_payment');
-        $url = app(Deposits::class)->start($booking, app(Deposits::class)->amountFor($this->service), 'sipho@example.com', 'https://glow.example/book/return');
+    $this->hold = function () {
+        $this->connectYoco($this->glow);
 
-        return [$booking->refresh(), $url];
-    });
+        return ($this->in)(function () {
+            $booking = app(Booker::class)->book($this->service, CarbonImmutable::parse('2027-05-03 09:00', 'Africa/Johannesburg'), ['name' => 'Sipho', 'email' => 'sipho@example.com'], STYLIST, 'website', status: 'pending_payment');
+            $url = app(Deposits::class)->start($booking, app(Deposits::class)->amountFor($this->service), 'sipho@example.com', 'https://glow.example/book/return');
+
+            return [$booking->refresh(), $url];
+        });
+    };
     $this->free = fn () => ($this->in)(fn () => collect(app(Availability::class)->on($this->service, '2027-05-03'))->pluck('starts_at')->contains('2027-05-03T07:00:00+00:00'));
 });
 
-it('asks for a deposit only once payouts are set up — fixed or a share of the price', function () {
+it('asks for a deposit only once card payments are connected — fixed or a share of the price', function () {
+    ($this->in)(fn () => expect(app(Deposits::class)->amountFor($this->service))->toBe(0));
+    $this->connectYoco($this->glow);
     ($this->in)(function () {
-        expect(app(Deposits::class)->amountFor($this->service))->toBe(0);
-        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_glow']);
         expect(app(Deposits::class)->amountFor($this->service))->toBe(10000);
         $this->service->update(['deposit_type' => 'percent', 'deposit_value' => 20]);
         expect(app(Deposits::class)->amountFor($this->service))->toBe(9000);
     });
 });
 
-it('holds the time while paying, then confirms once — verified with Paystack', function () {
-    Http::fake([
-        'api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://checkout.paystack.com/abc']]),
-        'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 10000]]),
-    ]);
+it('holds the time while paying into the business’s own account, then confirms once — verified with Yoco', function () {
+    $this->yoco['paid'] = false;
     [$booking, $url] = ($this->hold)();
-    expect($url)->toBe('https://checkout.paystack.com/abc')->and($booking->status)->toBe('pending_payment')
+    expect($url)->toBe('https://c.yoco.com/checkout/ch_1')->and($booking->status)->toBe('pending_payment')
         ->and($booking->payment_reference)->toBe('dep_'.$this->glow->id.'_'.$booking->id)->and(($this->free)())->toBeFalse();
-    Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/transaction/initialize') && $r['subaccount'] === 'ACCT_glow' && $r['amount'] === 10000);
+    Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/api/checkouts') && $r['amount'] === 10000
+        && $r['successUrl'] === 'https://glow.example/book/return?reference='.rawurlencode($booking->payment_reference) && $r['cancelUrl'] === 'https://glow.example/');
 
-    event(new DepositPaid($booking->payment_reference)); // the webhook
-    app(Deposits::class)->confirm($booking->payment_reference); // and the redirect
+    app(Deposits::class)->confirm($booking->payment_reference); // not paid yet
+    ($this->in)(fn () => expect($booking->refresh()->status)->toBe('pending_payment'));
+    $this->yoco['paid'] = true;
+    event(new BusinessPaymentReceived($this->glow->id, $booking->payment_reference)); // the webhook
+    app(Deposits::class)->confirm($booking->payment_reference);                        // and the return
     ($this->in)(fn () => expect($booking->refresh()->status)->toBe('confirmed')->and($booking->paid_at)->not->toBeNull());
-    Http::assertSentCount(2); // initialize + one verify: confirming twice doesn't re-verify
     expect(BookingHold::query()->count())->toBe(0);
 });
 
 it('does not accept a short payment', function () {
-    Http::fake(['api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://x']]),
-        'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 100]])]);
+    $this->yoco['amount'] = 100;
     [$booking] = ($this->hold)();
     app(Deposits::class)->confirm($booking->payment_reference);
     ($this->in)(fn () => expect($booking->refresh()->status)->toBe('pending_payment'));
 });
 
 it('releases an unpaid hold after 15 minutes, and refunds a payment that arrives too late', function () {
-    Http::fake(['api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://x']]),
-        'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 10000]]),
-        'api.paystack.co/refund' => Http::response(['status' => true])]);
+    $this->yoco['paid'] = false;
     [$booking] = ($this->hold)();
     $this->travel(14)->minutes();
     expect(app(Deposits::class)->expireHolds())->toBe(0);
     $this->travel(2)->minutes();
     expect(app(Deposits::class)->expireHolds())->toBe(1)->and(($this->free)())->toBeTrue();
 
-    app(Deposits::class)->confirm($booking->payment_reference); // paid after the hold expired
+    $this->yoco['paid'] = true; // paid after the hold expired
+    app(Deposits::class)->confirm($booking->payment_reference);
     ($this->in)(fn () => expect($booking->refresh()->status)->toBe('expired')->and($booking->refunded_at)->not->toBeNull());
-    Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/refund') && $r['transaction'] === $booking->payment_reference);
+    expect($this->yocoRefunds())->toBe(1);
 });

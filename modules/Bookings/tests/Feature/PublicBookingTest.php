@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
+use Tests\Support\FakesYoco;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
-use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\MeetingConnection;
-use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\TenantContext;
 
-uses(InteractsWithIdentity::class, InteractsWithShards::class);
+uses(InteractsWithIdentity::class, InteractsWithShards::class, FakesYoco::class);
 
 beforeEach(function () {
     $this->travelTo(CarbonImmutable::parse('2027-05-01 10:00', 'Africa/Johannesburg'));
@@ -80,18 +78,14 @@ it('is not there for packages without bookings', function () {
 
 it('takes a deposit through Paystack when the service needs one, and confirms on return', function () {
     ($this->subscribe)(['website', 'bookings']);
-    app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
+    $this->connectYoco($this->glow);
     $this->ctx->run($this->glow, function () {
         $this->service->update(['deposit_type' => 'fixed', 'deposit_value' => 10000]);
-        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_glow']);
     });
-    Http::fake([
-        'api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://checkout.paystack.com/abc']]),
-        'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 10000]]),
-    ]);
+    $this->fakeYoco();
 
     $this->postJson($this->site, $this->booking)->assertJsonValidationErrors(['email' => 'Please add your email — a deposit is needed for this service, and the receipt is emailed.']);
-    $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertCreated()->assertJson(['pay_url' => 'https://checkout.paystack.com/abc', 'deposit_cents' => 10000]);
+    $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertCreated()->assertJson(['pay_url' => 'https://c.yoco.com/checkout/ch_1', 'deposit_cents' => 10000]);
     $reference = $this->ctx->run($this->glow, fn () => Booking::query()->sole()->payment_reference);
 
     $this->get("{$this->site}/return?reference={$reference}")->assertOk()->assertSee('You’re booked')->assertSee('Monday 3 May, 09:00');
@@ -100,9 +94,11 @@ it('takes a deposit through Paystack when the service needs one, and confirms on
 
 it('doesn’t hold the time when payments are unavailable', function () {
     ($this->subscribe)(['website', 'bookings']);
+    $this->fakeYoco();
+    $this->connectYoco($this->glow);
+    $this->yoco['up'] = false; // connected, but Yoco can't be reached
     $this->ctx->run($this->glow, function () {
         $this->service->update(['deposit_type' => 'fixed', 'deposit_value' => 10000]);
-        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_glow']);
     }); // no Paystack keys configured
     $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertStatus(503)->assertJson(['message' => 'Online payment isn’t available right now. Please call or message us to book.']);
     $this->getJson("{$this->site}/times?service={$this->service->id}&date=2027-05-03")->assertJsonPath('times.0.label', '09:00'); // still free
@@ -125,23 +121,19 @@ it('lets the client choose online, and shows the joining link only from 15 minut
 
 it('charges the full price upfront only for online appointments — and issues the link only once paid', function () {
     ($this->subscribe)(['website', 'bookings']);
-    app(ProviderSettings::class)->save('payments.paystack', 'paystack', ['public_key' => 'pk', 'secret_key' => 'sk_test'], [], true, null);
+    $this->connectYoco($this->glow);
     $this->ctx->run($this->glow, function () {
         $this->service->update(['location_type' => 'either', 'deposit_type' => 'full', 'deposit_when' => 'online']);
-        BookingSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'payout_subaccount' => 'ACCT_glow']);
         MeetingConnection::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'provider' => 'fixed', 'fixed_url' => 'https://meet.example.com/glow']);
     });
-    Http::fake([
-        'api.paystack.co/transaction/initialize' => Http::response(['status' => true, 'data' => ['authorization_url' => 'https://checkout.paystack.com/full']]),
-        'api.paystack.co/transaction/verify/*' => Http::response(['status' => true, 'data' => ['status' => 'success', 'amount' => 45000]]),
-    ]);
+    $this->fakeYoco();
 
     // In person: pay at the desk — confirmed straight away.
-    $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertCreated()->assertJson(['booked' => true])->assertJsonMissing(['pay_url' => 'https://checkout.paystack.com/full']);
+    $this->postJson($this->site, [...$this->booking, 'email' => 'sipho@example.com'])->assertCreated()->assertJson(['booked' => true])->assertJsonMissing(['pay_url' => 'https://c.yoco.com/checkout/ch_1']);
 
     // Online: the full price first, and no link until it's paid.
     $this->postJson($this->site, [...$this->booking, 'starts_at' => '2027-05-03T09:00:00+00:00', 'email' => 'lerato@example.com', 'name' => 'Lerato', 'online' => true])
-        ->assertCreated()->assertJson(['pay_url' => 'https://checkout.paystack.com/full', 'deposit_cents' => 45000]);
+        ->assertCreated()->assertJson(['pay_url' => 'https://c.yoco.com/checkout/ch_1', 'deposit_cents' => 45000]);
     $online = fn () => $this->ctx->run($this->glow, fn () => Booking::query()->where('customer_name', 'Lerato')->sole());
     expect($online()->status)->toBe('pending_payment')->and($online()->meeting_url)->toBeNull();
 

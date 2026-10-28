@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Wurk\Bookings\Support;
 
 use Wurk\Audit\Contracts\AuditLog;
-use Wurk\Billing\Contracts\SplitPayments;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -20,7 +20,7 @@ final readonly class CancellationPolicy
 {
     public const DEFAULT_HOURS = 24;
 
-    public function __construct(private TenantContext $context, private SplitPayments $payments, private Booker $booker, private AuditLog $audit) {}
+    public function __construct(private TenantContext $context, private BusinessPayments $payments, private Booker $booker, private AuditLog $audit) {}
 
     public function hours(): int
     {

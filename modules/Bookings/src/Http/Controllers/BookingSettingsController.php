@@ -15,7 +15,6 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Audit\Contracts\AuditLog;
-use Wurk\Billing\Contracts\SplitPayments;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
@@ -27,6 +26,7 @@ use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\MeetingLinks;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\ProviderCredentials;
+use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners: Bookings → Settings — services, team hours and time off. */
@@ -49,8 +49,7 @@ final class BookingSettingsController
             'timeOff' => TimeOff::query()->where('ends_at', '>', now())->orderBy('starts_at')->get()
                 ->map(fn (TimeOff $t) => ['id' => $t->id, 'member_id' => $t->member_id, 'starts_at' => $t->starts_at->toIso8601String(), 'ends_at' => $t->ends_at->toIso8601String(), 'reason' => $t->reason])->all(),
             'timezone' => $this->context->current()->timezone(),
-            'payouts' => ['label' => BookingSettings::query()->find($this->context->id())?->payout_label],
-            'banks' => fn () => app(SplitPayments::class)->banks(),
+            'cardPayments' => app(BusinessPayments::class)->available(), // e.g. ['yoco'] — deposits need one (Settings → Payments)
             'policy' => ['hours' => app(CancellationPolicy::class)->hours(), 'text' => (string) BookingSettings::query()->find($this->context->id())?->policy,
                 'default' => CancellationPolicy::defaultWording(app(CancellationPolicy::class)->hours())],
             'video' => [
@@ -159,36 +158,6 @@ final class BookingSettingsController
         TimeOff::query()->findOrFail($timeOff)->delete();
 
         return back()->with('status', 'Time off removed.');
-    }
-
-    /** Connect the business's bank for deposits (a Paystack subaccount). Only a masked label is kept. */
-    public function connectPayouts(Request $request, SplitPayments $payments): RedirectResponse
-    {
-        $data = $request->validate(['bank_code' => ['required', 'string', 'max:20'], 'account_number' => ['required', 'string', 'regex:/^\d{6,16}$/']],
-            ['account_number.regex' => 'Enter the account number using digits only.']);
-        $bank = collect($payments->banks())->firstWhere('code', $data['bank_code']);
-        if ($bank === null) {
-            throw ValidationException::withMessages(['bank_code' => 'Choose your bank from the list.']);
-        }
-        try {
-            $code = $payments->createSubaccount($this->context->current()->displayName(), $data['bank_code'], $data['account_number']);
-        } catch (\RuntimeException $e) {
-            throw ValidationException::withMessages(['account_number' => $e->getMessage()]);
-        }
-        BookingSettings::query()->updateOrCreate(['tenant_id' => $this->context->id()], [
-            'payout_subaccount' => $code, 'payout_label' => $bank['name'].' ••••'.substr($data['account_number'], -4),
-        ]);
-        $this->audit->record('bookings.payouts_connected', 'booking_settings', $this->context->id(), ['bank' => $bank['name']]);
-
-        return back()->with('status', 'Deposits will be paid into '.$bank['name'].' ••••'.substr($data['account_number'], -4).'.');
-    }
-
-    public function disconnectPayouts(): RedirectResponse
-    {
-        BookingSettings::query()->whereKey($this->context->id())->update(['payout_subaccount' => null, 'payout_label' => null]);
-        $this->audit->record('bookings.payouts_disconnected', 'booking_settings', $this->context->id(), []);
-
-        return back()->with('status', 'Deposits are switched off until you connect a bank account again.');
     }
 
     public function savePolicy(Request $request): RedirectResponse
