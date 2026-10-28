@@ -94,7 +94,7 @@ final class Yoco
     {
         $id = $headers['webhook-id'] ?? '';
         $timestamp = $headers['webhook-timestamp'] ?? '';
-        $secret = (string) $a->webhook_secret;
+        $secret = (string) ($a->credentials['webhook_secret'] ?? $a->webhook_secret); // this mode's own secret
         if ($id === '' || $timestamp === '' || $secret === '' || abs(now()->getTimestamp() - (int) $timestamp) > 180) {
             return null;
         }

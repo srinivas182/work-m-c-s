@@ -40,6 +40,8 @@ return [
             'help', 'login', 'logout', 'mail', 'my', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
             'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'templates', 'forms', 'settings', 'webhooks', 'signup', 'oauth',
+            'pay',
+            'payments',
         ],
 
         // Default capacity of a shared shard (tenants per database).

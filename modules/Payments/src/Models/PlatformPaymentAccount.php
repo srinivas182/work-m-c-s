@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Payments\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Wurk\Tenancy\Contracts\CentralModel;
 
 /**
  * WURK's own account with a provider (central).
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $label
  * @property bool $active
  */
-final class PlatformPaymentAccount extends Model
+final class PlatformPaymentAccount extends Model implements CentralModel
 {
     use HasPaymentKeys;
 

@@ -6,6 +6,7 @@ namespace Wurk\Payments\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Wurk\Tenancy\Contracts\CentralModel;
 
 /**
  * A payment to WURK (central).
@@ -18,7 +19,7 @@ use Illuminate\Support\Carbon;
  * @property array{action: string, fields: array<string, string>}|null $form
  * @property Carbon|null $paid_at
  */
-final class PlatformPaymentAttempt extends Model
+final class PlatformPaymentAttempt extends Model implements CentralModel
 {
     public $incrementing = false;
 
