@@ -16,6 +16,7 @@ use Wurk\Billing\Models\BillingAccount;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Models\PaymentMethod;
 use Wurk\Credits\Contracts\CreditWallet;
+use Wurk\Payments\Contracts\PlatformPayments;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Regions\Contracts\Countries;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -42,9 +43,19 @@ final readonly class Payments
      * @param  array<string, mixed>  $details
      * @return array{payment: Payment, url: string|null}
      */
-    public function checkout(string $tenantId, string $purpose, int $exclCents, array $details, string $returnUrl): array
+    public function checkout(string $tenantId, string $purpose, int $exclCents, array $details, string $returnUrl, ?string $method = null): array
     {
         $payment = $this->create($tenantId, $purpose, $exclCents, $details);
+        $wurk = app(PlatformPayments::class);
+        if ($method !== null && in_array($method, $wurk->available(), true)) { // one of WURK's own methods (super admin)
+            $url = $wurk->start($payment->reference, $payment->total_cents, 'WURK '.$purpose, ['name' => $this->email($tenantId), 'email' => $this->email($tenantId)],
+                ['return' => $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($payment->reference), 'cancel' => $returnUrl], $method);
+            if ($url === null) {
+                $payment->update(['status' => 'failed', 'failure' => 'Could not start checkout']);
+            }
+
+            return ['payment' => $payment, 'url' => $url];
+        }
         $url = $this->gateway->checkout($this->email($tenantId), $payment->total_cents, $payment->currency, $payment->reference, $returnUrl, [
             'tenant_id' => $tenantId, 'purpose' => $purpose, 'payment_id' => $payment->id,
         ]);
@@ -74,6 +85,13 @@ final readonly class Payments
     /** Confirms by reference with the gateway (e.g. when the person returns from checkout). */
     public function confirm(string $reference): Payment
     {
+        $wurk = app(PlatformPayments::class);
+        if ($wurk->handles($reference)) { // paid through one of WURK's own methods: ask that provider
+            $v = $wurk->verify($reference);
+
+            return $this->settle($reference, $v['paid'] ? new GatewayResult('succeeded', $v['amount_cents'], 'ZAR', $reference) : new GatewayResult('pending'));
+        }
+
         return $this->settle($reference, $this->gateway->verify($reference));
     }
 

@@ -14,6 +14,9 @@ interface PlatformPayments
      */
     public function available(): array;
 
+    /** Whether this payment was started through one of WURK's methods (so it's verified here). */
+    public function handles(string $reference): bool;
+
     /** WURK's EFT instructions, if EFT is enabled. */
     public function eftInstructions(): ?string;
 

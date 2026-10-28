@@ -155,7 +155,8 @@ final class BillingController
             return back()->with('warning', 'Add your billing email first.');
         }
 
-        $result = $this->payments->checkout($this->context->id(), $purpose, $exclCents, $details, route('tenant.billing.return'));
+        $method = request()->input('method'); // one of WURK's methods (super admin), or the default card checkout
+        $result = $this->payments->checkout($this->context->id(), $purpose, $exclCents, $details, route('tenant.billing.return'), is_string($method) ? $method : null);
 
         return $result['url'] === null
             ? back()->with('warning', 'Card payments aren’t available right now. Please try again shortly.')

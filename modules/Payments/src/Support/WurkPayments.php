@@ -22,6 +22,11 @@ final readonly class WurkPayments implements PlatformPayments
         return array_values(array_filter(PlatformMethods::ONLINE, fn (string $p) => in_array($p, $ready, true)));
     }
 
+    public function handles(string $reference): bool
+    {
+        return PlatformPaymentAttempt::query()->whereKey($reference)->exists();
+    }
+
     public function eftInstructions(): ?string
     {
         $eft = PlatformPaymentAccount::query()->where('provider', 'eft')->where('active', true)->first();

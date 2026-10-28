@@ -27,6 +27,8 @@ use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\DunningServiceStatus;
 use Wurk\Billing\Support\Invoices;
 use Wurk\Billing\Support\PackCreditPricing;
+use Wurk\Billing\Support\Payments;
+use Wurk\Payments\Contracts\PlatformPaymentReceived;
 use Wurk\Plans\Contracts\CreditPricing;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
@@ -71,6 +73,7 @@ final class BillingServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        Event::listen(PlatformPaymentReceived::class, fn (PlatformPaymentReceived $e) => Payment::query()->where('reference', $e->reference)->exists() ? $this->app->make(Payments::class)->confirm($e->reference) : null);
         $this->loadViewsFrom($this->modulePath('resources/views'), 'billing');
 
         // Separate counters per action: Laravel's default throttle key is per user only,
