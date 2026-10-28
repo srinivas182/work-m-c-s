@@ -31,7 +31,7 @@ final class PayFast
      * @param  array{return: string, cancel: string, notify: string}  $urls
      * @return array<string, string>
      */
-    public static function form(PaymentAccount $a, PaymentAttempt $attempt, string $description, array $customer, array $urls): array
+    public static function fields(PaymentAccount $a, PaymentAttempt $attempt, string $description, array $customer, array $urls): array
     {
         $fields = array_filter([
             'merchant_id' => $a->credentials['merchant_id'] ?? '', 'merchant_key' => $a->credentials['merchant_key'] ?? '',
@@ -47,6 +47,16 @@ final class PayFast
         }
 
         return [...$ordered, 'signature' => self::signature($ordered, (string) ($a->credentials['passphrase'] ?? ''))];
+    }
+
+    /**
+     * @param  array{name: string, email?: string|null}  $customer
+     * @param  array{return: string, cancel: string, notify: string}  $urls
+     * @return array{action: string, fields: array<string, string>}
+     */
+    public static function form(PaymentAccount $a, PaymentAttempt $attempt, string $description, array $customer, array $urls): array
+    {
+        return ['action' => 'https://'.self::host($a).'/eng/process', 'fields' => self::fields($a, $attempt, $description, $customer, $urls)];
     }
 
     /** @param  array<string, string>  $fields  in the order they're sent */

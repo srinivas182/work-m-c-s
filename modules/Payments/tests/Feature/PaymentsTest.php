@@ -69,7 +69,7 @@ it('pays with PayFast: signed fields posted from the business’s page; only a f
     $url = ($this->in)(fn () => app(BusinessPayments::class)->start('ord_2', 89900, 'Order #1002', ['name' => 'Lerato', 'email' => 'l@example.com'], $this->urls));
     $page = $this->get($url)->assertOk()->assertSee('action="https://sandbox.payfast.co.za/eng/process"', false)->assertSee('name="m_payment_id" value="ord_2"', false);
     expect((string) $page->headers->get('Content-Security-Policy'))->toContain('form-action https://sandbox.payfast.co.za/eng/process');
-    $form = ($this->in)(fn () => PaymentAttempt::query()->find('ord_2')->form);
+    $form = ($this->in)(fn () => PaymentAttempt::query()->find('ord_2')->form['fields']);
     $fields = $form;
     unset($fields['signature']);
     expect($form['amount'])->toBe('899.00')->and($form['signature'])->toBe(PayFast::signature($fields, 'jt7NOE43FZPn'));

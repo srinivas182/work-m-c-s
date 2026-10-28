@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\URL;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Gateways\Ozow;
 use Wurk\Payments\Gateways\PayFast;
+use Wurk\Payments\Gateways\Peach;
 use Wurk\Payments\Gateways\Yoco;
 use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Models\PaymentAttempt;
@@ -41,8 +43,8 @@ final readonly class Payments implements BusinessPayments
         }
         $attempt = PaymentAttempt::query()->updateOrCreate(['reference' => $reference], ['provider' => $account->provider, 'amount_cents' => $amountCents, 'status' => 'pending']);
         $urls['notify'] = 'https://'.$this->context->current()->handle().'.'.config('wurk.domains.root').'/payments/notify/'.$account->provider;
-        if ($account->provider === 'yoco') {
-            $started = Yoco::start($account, $attempt, $urls);
+        if (in_array($account->provider, ['yoco', 'peach'], true)) { // hosted pages: redirect
+            $started = $account->provider === 'yoco' ? Yoco::start($account, $attempt, $urls) : Peach::start($account, $attempt, $urls);
             if ($started === null) {
                 return null;
             }
@@ -50,7 +52,8 @@ final readonly class Payments implements BusinessPayments
 
             return $started[0];
         }
-        $attempt->update(['form' => PayFast::form($account, $attempt, $description, $customer, $urls)]);
+        // Form posts (PayFast, Ozow): a hand-off page on the business's address sends the browser on.
+        $attempt->update(['form' => $account->provider === 'ozow' ? Ozow::form($account, $attempt, $urls) : PayFast::form($account, $attempt, $description, $customer, $urls)]);
 
         return URL::signedRoute('payments.public.pay', ['handle' => $this->context->current()->handle(), 'reference' => $reference], now()->addHour());
     }
@@ -65,7 +68,11 @@ final readonly class Payments implements BusinessPayments
         if ($attempt->provider === 'payfast') { // confirmed only by a notification that passed every check
             return ['paid' => $attempt->status === 'paid', 'amount_cents' => $attempt->status === 'paid' ? $attempt->amount_cents : 0];
         }
-        $result = Yoco::verify($account, $attempt);
+        $result = match ($attempt->provider) {
+            'ozow' => Ozow::verify($account, $attempt),
+            'peach' => Peach::verify($account, $attempt),
+            default => Yoco::verify($account, $attempt),
+        };
         if ($result['paid'] && $attempt->status === 'pending') {
             $attempt->update(['status' => 'paid', 'paid_at' => now()]);
         }
@@ -81,7 +88,12 @@ final readonly class Payments implements BusinessPayments
             return false;
         }
         $cents = min($attempt->amount_cents, $amountCents ?? $attempt->amount_cents);
-        $ok = $attempt->provider === 'yoco' ? Yoco::refund($account, $attempt, $cents) : PayFast::refund($account, $attempt, $cents);
+        $ok = match ($attempt->provider) {
+            'yoco' => Yoco::refund($account, $attempt, $cents),
+            'peach' => Peach::refund($account, $attempt, $cents),
+            'payfast' => PayFast::refund($account, $attempt, $cents),
+            default => false, // Ozow: refunded in Ozow's portal, then recorded by the owner
+        };
         $this->audit->record($ok ? 'payments.refunded' : 'payments.refund_failed', 'payment', $reference, ['cents' => $cents, 'provider' => $attempt->provider]);
         if ($ok && $cents === $attempt->amount_cents) {
             $attempt->update(['status' => 'refunded']);
@@ -111,6 +123,22 @@ final readonly class Payments implements BusinessPayments
             }
             if ($attempt->status === 'pending') {
                 $attempt->update(['status' => 'paid', 'paid_at' => now(), 'provider_id' => $n['provider_id']]);
+            }
+        } elseif ($provider === 'ozow') {
+            $n = Ozow::notification($account, $posted);
+            $attempt = $n === null ? null : PaymentAttempt::query()->find($n['reference']);
+            if ($attempt === null || $n === null) {
+                return false;
+            }
+            $attempt->update(['provider_id' => $n['provider_id']]);
+            if (! $this->verify($attempt->reference)['paid']) { // the hash alone confirms nothing: ask Ozow
+                return false;
+            }
+        } elseif ($provider === 'peach') {
+            $reference = Peach::notification($account, $posted);
+            $attempt = $reference === null ? null : PaymentAttempt::query()->find($reference);
+            if ($attempt === null || ! $this->verify($attempt->reference)['paid']) {
+                return false;
             }
         } else {
             $checkout = Yoco::notification($account, $body, $headers);

@@ -13,6 +13,7 @@ final class PaymentsServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         parent::register();
+        $this->mergeConfigFrom($this->modulePath('config/payments.php'), 'payments');
         $this->app->bind(BusinessPayments::class, Payments::class);
     }
 
