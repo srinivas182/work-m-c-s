@@ -18,7 +18,7 @@ return [
     'corner_styles' => ['square', 'soft', 'round'],
 
     // Slugs that belong to the site engine (sitemaps, assets, feeds — Sprint 5).
-    'reserved_slugs' => ['api', 'assets', 'build', 'cart', 'checkout', 'feed', 'llms.txt', 'login', 'robots.txt', 'search', 'sitemap', 'sitemap.xml', 'static', 'wurk'],
+    'reserved_slugs' => ['api', 'assets', 'build', 'cart', 'checkout', 'records', 'feed', 'llms.txt', 'login', 'robots.txt', 'search', 'sitemap', 'sitemap.xml', 'static', 'wurk'],
 
     'max_document_bytes' => 512 * 1024,
 
