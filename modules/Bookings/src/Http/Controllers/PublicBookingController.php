@@ -15,11 +15,13 @@ use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
+use Wurk\Bookings\Support\BranchServices;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\ManageLink;
 use Wurk\Bookings\Support\SlotTaken;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -40,11 +42,17 @@ final class PublicBookingController
             $health = app(HealthPractice::class);
             $pivot = DB::connection($this->context->connectionName())->table('booking_service_member');
 
+            $branchServices = app(BranchServices::class);
+            $open = app(BranchDirectory::class)->open();
+
             return new JsonResponse([
                 'timezone' => $tenant->timezone(),
+                // With several branches, customers choose one first; each service lists where it's offered and its price there.
+                'branches' => count($open) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name'], 'address' => $b['address']], $open) : [],
                 'health' => $health->on() ? ['consent' => HealthPractice::CONSENT, 'version' => HealthPractice::CONSENT_VERSION] : null,
                 'services' => BookingService::query()->where('active', true)->orderBy('position')->orderBy('name')->get()->map(fn (BookingService $s) => [
                     'id' => $s->id, 'name' => $s->name, 'description' => $s->description, 'duration' => $s->duration_minutes, 'price_cents' => $s->price_cents, 'location' => $s->location_type,
+                    'at' => array_values(array_map(fn (array $b) => ['branch' => $b['id'], 'price_cents' => $branchServices->priceAt($s, $b['id'])], array_filter($open, fn (array $b) => $branchServices->offeredAt($s, $b['id'])))),
                     'members' => $pivot->clone()->where('service_id', $s->id)->pluck('member_id')
                         ->filter(fn ($id) => isset($names[(string) $id]))->map(fn ($id) => ['id' => (string) $id, 'name' => $names[(string) $id], 'registration' => $health->on() ? $health->registration((string) $id) : null])->values()->all(),
                 ])->all(),
@@ -55,13 +63,13 @@ final class PublicBookingController
     public function times(Request $request, string $handle, Availability $availability): JsonResponse
     {
         return $this->within($handle, function (CurrentTenant $tenant) use ($request, $availability): JsonResponse {
-            $data = $request->validate(['service' => ['required', 'string'], 'date' => ['required', 'date_format:Y-m-d'], 'member' => ['nullable', 'string']]);
+            $data = $request->validate(['service' => ['required', 'string'], 'date' => ['required', 'date_format:Y-m-d'], 'member' => ['nullable', 'string'], 'branch' => ['nullable', 'string']]);
             $service = BookingService::query()->where('active', true)->whereKey($data['service'])->firstOrFail();
 
             return new JsonResponse(['date' => $data['date'], 'times' => array_map(fn (array $t) => [
                 'starts_at' => $t['starts_at'],
                 'label' => CarbonImmutable::parse($t['starts_at'])->setTimezone($tenant->timezone())->format('H:i'),
-            ], $availability->on($service, $data['date'], $data['member'] ?? null))]);
+            ], $availability->on($service, $data['date'], $data['member'] ?? null, null, $data['branch'] ?? null))]);
         });
     }
 
@@ -70,6 +78,7 @@ final class PublicBookingController
         return $this->within($handle, function (CurrentTenant $tenant) use ($request, $booker, $deposits): JsonResponse {
             $data = $request->validate([
                 'service' => ['required', 'string'],
+                'branch' => ['nullable', 'string'],
                 'starts_at' => ['required', 'date'],
                 'member' => ['nullable', 'string'],
                 'name' => ['required', 'string', 'max:120'],
@@ -91,14 +100,15 @@ final class PublicBookingController
             if ($consented && ! ($data['health_consent'] ?? false)) {
                 throw ValidationException::withMessages(['health_consent' => 'Please read and agree to the video-consultation terms to book online.']);
             }
-            $deposit = $deposits->amountFor($service, $online);
+            $branch = app(BranchServices::class)->resolve($data['branch'] ?? null); // an open branch, or the main one
+            $deposit = $deposits->amountFor($service, $online, $branch);
             if ($deposit > 0 && empty($data['email'])) { // the payment receipt is emailed
                 throw ValidationException::withMessages(['email' => 'Please add your email — a deposit is needed for this service, and the receipt is emailed.']);
             }
             try {
                 $booking = $booker->book($service, CarbonImmutable::parse($data['starts_at']), [
                     'name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'notes' => $data['notes'] ?? null,
-                ], $data['member'] ?? null, source: 'website', status: $deposit > 0 ? 'pending_payment' : 'confirmed', online: $online);
+                ], $data['member'] ?? null, source: 'website', status: $deposit > 0 ? 'pending_payment' : 'confirmed', online: $online, branchId: $branch);
             } catch (SlotTaken $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
             }

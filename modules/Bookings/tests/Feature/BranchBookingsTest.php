@@ -110,3 +110,23 @@ it('lets a branch manager run their branch — hours there, not elsewhere — bu
         'branches' => [['branch' => $this->main, 'price_cents' => null], ['branch' => $this->sandton, 'price_cents' => 50000]]])->assertSessionHas('status', 'Service saved.');
     ($this->in)(fn () => expect(app(BranchServices::class)->priceAt($this->braids, $this->sandton))->toBe(50000));
 });
+
+it('lets customers choose a branch on the website, with that branch’s times and price', function () {
+    $p = app(PackageCatalog::class)->create([
+        'key' => 'pro', 'name' => 'Pro', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 1,
+        'monthly_price_cents' => 99900, 'yearly_price_cents' => 999000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 10,
+        'multi_branch' => true, 'max_branches' => 5, 'custom_domain' => false, 'monthly_credits' => 0, 'referral_max_levels' => 7,
+        'referral_max_commission_bp' => 3000, 'managed_fee_cents' => null, 'modules' => ['bookings'],
+    ], null);
+    app(Catalog::class)->subscribe($this->glow->id, $p->id, 'monthly', allowTrial: true);
+    app(Entitlements::class)->flush();
+    ($this->in)(fn () => app(BranchServices::class)->set($this->braids, [$this->main => null, $this->sandton => 50000]));
+    $site = 'http://glow-salon.'.config('wurk.domains.root').'/book';
+
+    $this->getJson("{$site}/services")->assertOk()->assertJsonCount(2, 'branches')->assertJsonPath('branches.0.id', $this->main)
+        ->assertJsonPath('services.0.at.1', ['branch' => $this->sandton, 'price_cents' => 50000]);
+    $times = $this->getJson("{$site}/times?service={$this->braids->id}&date=2027-05-04&branch={$this->sandton}")->assertOk()->json('times');
+    expect($times)->not->toBeEmpty();
+    $this->postJson($site, ['service' => $this->braids->id, 'branch' => $this->sandton, 'starts_at' => $times[0]['starts_at'], 'name' => 'Sipho', 'phone' => '082 555 0101', 'consent' => '1'])->assertCreated();
+    ($this->in)(fn () => expect(Booking::query()->sole()->branch_id)->toBe($this->sandton));
+});
