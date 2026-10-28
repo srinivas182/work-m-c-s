@@ -32,6 +32,14 @@ return [
 
     'disks' => [
 
+        // Patient records (Sprint 9.5): files are encrypted before they're written; never public.
+        'records' => [
+            'driver' => 'local',
+            'root' => storage_path('app/records'),
+            'visibility' => 'private',
+            'throw' => true,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

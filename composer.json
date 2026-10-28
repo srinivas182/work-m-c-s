@@ -47,6 +47,7 @@
             "Wurk\\Payments\\": "modules/Payments/src/",
             "Wurk\\Plans\\": "modules/Plans/src/",
             "Wurk\\Platform\\": "modules/Platform/src/",
+            "Wurk\\Records\\": "modules/Records/src/",
             "Wurk\\Regions\\": "modules/Regions/src/",
             "Wurk\\Security\\": "modules/Security/src/",
             "Wurk\\Shop\\": "modules/Shop/src/",
