@@ -49,13 +49,11 @@ test('a health practice registers its practitioner and offers video consultation
   await expect(page.getByRole('heading', { level: 1, name: 'Lerato Mokoena' })).toBeVisible();
   const doc = page.getByRole('form', { name: 'Add a document' });
   await doc.getByLabel('Title').fill('Assessment');
-  await doc
-    .getByLabel(/^File/)
-    .setInputFiles({
-      name: 'assessment.txt',
-      mimeType: 'text/plain',
-      buffer: Buffer.from('Lower back strain, grade 1'),
-    });
+  await doc.getByLabel(/^File/).setInputFiles({
+    name: 'assessment.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('Lower back strain, grade 1'),
+  });
   await doc.getByRole('button', { name: 'Add' }).click();
   await expect(page.getByText('Document added.')).toBeVisible();
   await page.getByRole('button', { name: 'Send private link' }).click();
