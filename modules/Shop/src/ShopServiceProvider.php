@@ -37,6 +37,7 @@ final class ShopServiceProvider extends ModuleServiceProvider
     public function menu(): array
     {
         return [
+            ['label' => 'Orders', 'route' => 'tenant.shop.orders', 'icon' => 'shopping-bag', 'section' => 'Shop', 'permission' => 'shop.manage', 'entitlement' => 'shop', 'order' => 295],
             ['label' => 'Products', 'route' => 'tenant.shop.products', 'icon' => 'package', 'section' => 'Shop', 'permission' => 'shop.manage', 'entitlement' => 'shop', 'order' => 300],
             ['label' => 'Shop settings', 'route' => 'tenant.shop.settings', 'icon' => 'settings', 'section' => 'Shop', 'permission' => 'shop.manage', 'entitlement' => 'shop', 'order' => 310],
         ];

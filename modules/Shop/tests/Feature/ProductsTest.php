@@ -143,3 +143,27 @@ it('alerts the people who manage the shop about a new order, and tells the custo
     $subjects = Mail::sent(OrderUpdateMail::class, fn ($m) => $m->hasTo('sipho@example.com'))->map(fn ($m) => $m->envelope()->subject)->values()->all();
     expect($subjects)->toBe(['Payment received — order #1001 · Kasi-threads', 'Ready for collection — order #1001 · Kasi-threads']); // not "packed"
 });
+
+it('shows orders by what needs doing, offers only sensible next steps, and records refunds', function () {
+    ($this->subscribe)(['website', 'shop']);
+    $order = ($this->in)(function () {
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'offline_enabled' => true, 'offline_instructions' => 'FNB']);
+        $p = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
+        Variant::query()->create(['product_id' => $p->id, 'price_cents' => 12000, 'stock' => 4]);
+
+        return app(OrderPlacer::class)->place([['variant' => Variant::query()->sole()->id, 'quantity' => 2]], ['name' => 'Sipho', 'phone' => '082 555 0101'], 'collection', 'offline');
+    });
+    $this->actingAs($this->owner)->get("{$this->base}/orders?show=awaiting")->assertInertia(fn (Assert $p) => $p->component('Shop::Orders')
+        ->where('counts.awaiting', 1)->where('counts.todo', 0)->where('orders.0.number', 1001));
+    $this->actingAs($this->owner)->get("{$this->base}/orders/{$order->id}")->assertInertia(fn (Assert $p) => $p->component('Shop::Order')
+        ->where('order.next', ['paid'])->where('order.can_cancel', true)->where('order.can_refund', false));
+
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/advance", ['to' => 'done'])->assertSessionHasErrors(['order' => 'That step doesn’t follow from where this order is.']);
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/advance", ['to' => 'paid'])->assertSessionHas('status', 'Marked as paid.');
+    $this->actingAs($this->owner)->get("{$this->base}/orders/{$order->id}")->assertInertia(fn (Assert $p) => $p->where('order.next', ['packed', 'ready'])->where('order.can_refund', true)
+        ->where('order.timeline.1.event', 'paid')->where('order.timeline.1.by', 'Thandi Mokoena'));
+
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/refund", ['amount_cents' => 5000, 'restock' => false])->assertSessionHas('status', 'Refund recorded — the customer has been told.');
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/refund", ['amount_cents' => 50000, 'restock' => false])->assertSessionHasErrors(['order' => 'Refund up to R190.00 (what’s left of this order).']);
+    ($this->in)(fn () => expect($order->refresh()->refunded_cents)->toBe(5000));
+});
