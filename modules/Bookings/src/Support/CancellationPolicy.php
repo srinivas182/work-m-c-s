@@ -9,6 +9,7 @@ use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -72,7 +73,7 @@ final readonly class CancellationPolicy
         return ['refunded' => $refunded];
     }
 
-    /** Refund a paid deposit or class place; true if Paystack accepted it. */
+    /** Refund a paid deposit or class place; true if the payment provider accepted it. */
     public function refund(Booking|ClassAttendee $booking): bool
     {
         if ($booking->payment_reference === null || ! $this->payments->refund($booking->payment_reference)) {
@@ -81,6 +82,8 @@ final readonly class CancellationPolicy
             return false;
         }
         $booking->update(['refunded_at' => Instant::db(now())]);
+        $supplier = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id;
+        app(BranchLedger::class)->record($this->payments->receivedBy($booking->payment_reference), $supplier, -$booking->deposit_cents, 'refund', $booking->payment_reference, 'Refund: '.$booking->customer_name);
         $this->audit->record('bookings.deposit_refunded', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
 
         return true;

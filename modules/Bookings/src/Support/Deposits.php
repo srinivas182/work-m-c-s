@@ -13,6 +13,7 @@ use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -110,6 +111,9 @@ final readonly class Deposits
             }
             $booking->update(['status' => 'confirmed', 'paid_at' => Instant::db(now()), 'hold_expires_at' => null]);
             BookingHold::query()->whereKey($reference)->delete();
+            $supplier = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id;
+            app(BranchLedger::class)->record($this->payments->receivedBy($reference), $supplier, $booking->deposit_cents,
+                $booking instanceof ClassAttendee ? 'class' : 'deposit', $reference, $booking instanceof ClassAttendee ? 'Class place: '.$booking->session()->title : 'Booking deposit: '.$booking->customer_name);
             $this->audit->record('bookings.deposit_paid', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
             event($booking instanceof ClassAttendee ? new ClassJoined($this->context->id(), $booking->id) : new BookingConfirmed($this->context->id(), $booking->id));
 

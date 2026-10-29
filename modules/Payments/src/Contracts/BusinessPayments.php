@@ -42,4 +42,10 @@ interface BusinessPayments
 
     /** Switch on EFT / bank transfer with these instructions (demo shops, onboarding). */
     public function setUpEft(string $instructions): void;
+
+    /** Which branch's own account received a payment (null = the business-wide account). */
+    public function receivedBy(string $reference): ?string;
+
+    /** Which branch's own account a payment by this method at this branch would go to (null = the business's). */
+    public function accountBranch(string $provider, ?string $branchId): ?string;
 }

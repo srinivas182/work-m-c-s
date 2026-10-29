@@ -20,6 +20,7 @@ use Wurk\Shop\Support\CheckoutProblem;
 use Wurk\Shop\Support\OrderManager;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPlacer;
+use Wurk\Team\Support\Settlements;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -101,4 +102,23 @@ it('alerts a branch manager only about their branch’s orders (owners about all
         return Mail::sent(NewOrderMail::class)->flatMap(fn ($m) => array_column($m->to, 'address'))->sort()->values()->all();
     };
     expect($to($this->sandton))->toBe(['musa@kasi.co.za', 'owner@kasi.co.za'])->and($to($this->main))->toBe(['owner@kasi.co.za']);
+});
+
+it('records what one branch owes another, nets refunds, and settles a month by hand', function () {
+    // Sandton has no EFT of its own, so the customer pays into the business's (= the main branch's) account.
+    $sandtonOrder = ($this->order)($this->sandton, 1); // R270 at Sandton
+    $mainOrder = ($this->order)($this->main, 1);
+    ($this->in)(function () use ($sandtonOrder, $mainOrder) {
+        foreach ([$sandtonOrder, $mainOrder] as $o) {
+            app(OrderManager::class)->advance($o->refresh(), 'paid', 'Thabo');
+        }
+        app(OrderManager::class)->refund($sandtonOrder->refresh(), 5000, false, 'Thabo');
+    });
+    $statement = ($this->in)(fn () => app(Settlements::class)->statement(now()->format('Y-m')));
+    expect($statement)->toHaveCount(1) // the main-branch order owes nobody
+        ->and($statement[0])->toMatchArray(['from' => $this->main, 'to' => $this->sandton, 'total_cents' => 22000, 'settled' => false])
+        ->and(array_column($statement[0]['entries'], 'amount_cents'))->toBe([27000, -5000]);
+
+    ($this->in)(fn () => expect(app(Settlements::class)->settle(now()->format('Y-m'), $this->main, $this->sandton, 'Thandi'))->toBe(2)
+        ->and(app(Settlements::class)->statement(now()->format('Y-m'))[0]['settled'])->toBeTrue());
 });
