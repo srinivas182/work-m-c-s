@@ -24,6 +24,7 @@ interface Row {
   payment: string;
   fulfilment: string;
   placed: string;
+  branch: string | null;
 }
 
 const TABS: [string, string][] = [
@@ -82,6 +83,7 @@ export default function Orders({
                 >
                   <span>
                     <strong>#{o.number}</strong> · {o.customer} · {o.placed}
+                    {o.branch ? ` · ${o.branch}` : ''}
                   </span>
                   <span className="flex items-center gap-2 text-sm">
                     {rand(o.total_cents)} · {o.payment === 'card' ? 'Card' : 'EFT'} ·{' '}

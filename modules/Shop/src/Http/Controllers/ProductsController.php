@@ -30,7 +30,10 @@ final class ProductsController
     {
         $variants = Variant::query()->orderBy('position')->get()->groupBy('product_id');
 
+        $stock = app(BranchStock::class);
+
         return Inertia::render('Shop::Products', [
+            'branches' => array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name']], app(BranchDirectory::class)->open()),
             'categories' => ShopCategory::query()->orderBy('position')->orderBy('name')->get(['id', 'name'])->all(),
             'products' => Product::query()->orderBy('position')->orderBy('name')->get()->map(fn (Product $p) => [
                 'id' => $p->id, 'name' => $p->name, 'slug' => $p->slug, 'description' => $p->description, 'category_id' => $p->category_id,
@@ -38,6 +41,7 @@ final class ProductsController
                 'variants' => ($variants[$p->id] ?? collect())->map(fn (Variant $v) => [
                     'id' => $v->id, 'values' => $v->values ?? (object) [], 'sku' => $v->sku, 'price_cents' => $v->price_cents,
                     'compare_at_cents' => $v->compare_at_cents, 'stock' => $v->stock,
+                    'stock_at' => (object) $stock->stockMap($v), 'prices' => (object) $stock->priceMap($v),
                 ])->values()->all(),
             ])->all(),
         ]);

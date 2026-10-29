@@ -104,6 +104,26 @@ final readonly class BranchStock
         }
     }
 
+    /**
+     * Stock per branch (tracked variants), for the product editor.
+     *
+     * @return array<string, int>
+     */
+    public function stockMap(Variant $variant): array
+    {
+        return $variant->stock === null ? [] : array_map('intval', $this->db()->table('shop_stock')->where('variant_id', $variant->id)->pluck('quantity', 'branch_id')->all());
+    }
+
+    /**
+     * Price overrides per branch, for the product editor.
+     *
+     * @return array<string, int>
+     */
+    public function priceMap(Variant $variant): array
+    {
+        return array_map('intval', $this->db()->table('shop_variant_prices')->where('variant_id', $variant->id)->pluck('price_cents', 'branch_id')->all());
+    }
+
     /** The variant's price at a branch (an override, or its own price). */
     public function priceAt(Variant $variant, ?string $branchId): int
     {

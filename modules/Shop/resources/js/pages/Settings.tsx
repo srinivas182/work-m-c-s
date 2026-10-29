@@ -20,11 +20,18 @@ interface Settings {
   delivery_fee_cents: number;
   delivery_note: string;
   offline_hold_hours: number;
+  ships_from_branch_id: string | null;
 }
 
 const area = 'min-h-24 w-full rounded-md border border-border bg-bg p-3 text-sm';
 
-export default function ShopSettings({ settings }: { settings: Settings }) {
+export default function ShopSettings({
+  settings,
+  branches,
+}: {
+  settings: Settings;
+  branches: { id: string; name: string }[];
+}) {
   const form = useForm<Settings>({ ...settings });
   const errors = form.errors as Record<string, string | undefined>;
   return (
@@ -74,6 +81,21 @@ export default function ShopSettings({ settings }: { settings: Settings }) {
               />
               We deliver
             </label>
+            {form.data.delivery_enabled && branches.length > 1 && (
+              <Field label="Deliveries ship from">
+                <select
+                  className="border-border bg-bg h-10 w-full rounded-md border px-3 text-sm"
+                  value={form.data.ships_from_branch_id ?? ''}
+                  onChange={(e) => form.setData('ships_from_branch_id', e.target.value)}
+                >
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
             {form.data.delivery_enabled && (
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Delivery fee (R)" error={errors.delivery_fee_cents}>
