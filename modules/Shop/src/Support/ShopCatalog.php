@@ -9,6 +9,7 @@ use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Models\Variant;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\ProductCatalog;
 
@@ -70,6 +71,9 @@ final class ShopCatalog implements ProductCatalog
     {
         $payments = app(BusinessPayments::class);
 
-        return $this->published() !== [] && ($payments->available() !== [] || $payments->eftInstructions() !== null);
+        // The business, or any open branch, can take payment.
+        $branches = [null, ...array_column(app(BranchDirectory::class)->open(), 'id')];
+
+        return $this->published() !== [] && collect($branches)->contains(fn (?string $b) => $payments->available($b) !== [] || $payments->eftInstructions($b) !== null);
     }
 }

@@ -55,8 +55,8 @@ final class PublicCheckoutController
             $s = ShopSettings::query()->find($this->context->id());
 
             return new JsonResponse(['lines' => $lines, 'subtotal_cents' => array_sum(array_map(fn ($l) => $l['unit_cents'] * $l['quantity'], $lines)), 'checkout' => [
-                'available' => app(BusinessPayments::class)->eftInstructions() !== null || app(BusinessPayments::class)->available() !== [],
-                'card' => app(BusinessPayments::class)->available() !== [], 'offline' => app(BusinessPayments::class)->eftInstructions() !== null,
+                'available' => app(BusinessPayments::class)->eftInstructions($branch) !== null || app(BusinessPayments::class)->available($branch) !== [],
+                'card' => app(BusinessPayments::class)->available($branch) !== [], 'offline' => app(BusinessPayments::class)->eftInstructions($branch) !== null,
                 'collection' => $s === null || $s->collection_enabled, 'collection_address' => $s?->collection_address,
                 // Several branches: customers choose where to collect from.
                 'branches' => count(app(BranchDirectory::class)->open()) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name'], 'address' => $b['address']], app(BranchDirectory::class)->open()) : [],
@@ -76,7 +76,8 @@ final class PublicCheckoutController
                 'payment' => ['nullable', 'in:card,offline'],
                 'consent' => ['accepted'], 'website' => ['nullable', 'string'],
             ], ['consent.accepted' => 'Please agree to be contacted about your order.']);
-            $method = $data['payment'] ?? (app(BusinessPayments::class)->available() !== [] ? 'card' : 'offline');
+            $fulfilling = app(BranchStock::class)->fulfilling($data['fulfilment'], $data['branch'] ?? null);
+            $method = $data['payment'] ?? (app(BusinessPayments::class)->available($fulfilling) !== [] ? 'card' : 'offline');
             if (($data['website'] ?? '') !== '') {
                 return new JsonResponse(['placed' => true], 201); // a bot: no signal, no order
             }
@@ -92,7 +93,7 @@ final class PublicCheckoutController
             app(OrderMessages::class)->newOrder($order); // the shop's managers are told straight away
             if ($method === 'card') {
                 $pay = app(BusinessPayments::class)->start('shop-'.$order->id, $order->total_cents, "Order #{$order->number}",
-                    ['name' => $order->customer_name, 'email' => $order->customer_email], ['return' => $url, 'cancel' => $request->getSchemeAndHttpHost().'/cart']);
+                    ['name' => $order->customer_name, 'email' => $order->customer_email], ['return' => $url, 'cancel' => $request->getSchemeAndHttpHost().'/cart'], branchId: $order->branch_id);
                 if ($pay === null) {
                     $placer->release($order, 'cancelled', null); // can't take payment right now: give the stock straight back
 
@@ -105,7 +106,7 @@ final class PublicCheckoutController
                 $rand = fn (int $c) => 'R'.number_format($c / 100, 2);
                 $lines = array_values(OrderItem::query()->where('order_id', $order->id)->get()->map(fn (OrderItem $i) => "{$i->quantity} × {$i->product_name}".($i->variant_label ? " ({$i->variant_label})" : '').' — '.$rand($i->line_cents))->all());
                 Mail::to($order->customer_email)->send(new OrderPlacedMail($tenant->displayName(), $order->number, $lines, $rand($order->total_cents),
-                    app(BusinessPayments::class)->eftInstructions(), $url));
+                    app(BusinessPayments::class)->eftInstructions($order->branch_id), $url));
             }
 
             return new JsonResponse(['placed' => true, 'number' => $order->number, 'total_cents' => $order->total_cents, 'order_url' => $url], 201);
@@ -126,7 +127,7 @@ final class PublicCheckoutController
             $s = ShopSettings::query()->find($this->context->id());
             $html = view('shop::public.order', [
                 'business' => $tenant->displayName(), 'order' => $o, 'items' => OrderItem::query()->where('order_id', $o->id)->get(),
-                'instructions' => $o->status === 'awaiting_payment' && $o->payment_method === 'offline' ? app(BusinessPayments::class)->eftInstructions() : null,
+                'instructions' => $o->status === 'awaiting_payment' && $o->payment_method === 'offline' ? app(BusinessPayments::class)->eftInstructions($o->branch_id) : null,
                 'collection' => $o->fulfilment === 'collection' ? $s?->collection_address : null,
                 'placed' => $o->created_at->setTimezone($tenant->timezone())->format('j F Y, H:i'),
             ])->render();
