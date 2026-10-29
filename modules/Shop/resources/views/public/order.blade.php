@@ -26,9 +26,19 @@
   <section class="card" aria-label="How to pay">
     <h2>How to pay</h2>
     <p class="pre">{{ $instructions }}</p>
-    <p>Use <strong>#{{ $order->number }}</strong> as your reference.</p>
+        <p>Use <strong>#{{ $order->number }}</strong> as your reference.</p>
   </section>
   @endif
+
+  @if ($order->tracking_reference)
+  <section class="card" aria-label="Tracking">
+    <h2>{{ $order->shipping_provider === 'pargo' ? 'On its way to your pickup point' : 'On its way' }}</h2>
+    @if ($order->pickup_point_name)<p>Collect from: {{ $order->pickup_point_name }}</p>@endif
+    <p>Tracking number: <strong>{{ $order->tracking_reference }}</strong></p>
+    @if ($order->tracking_url && str_starts_with($order->tracking_url, 'https://'))<p><a href="{{ $order->tracking_url }}" rel="noreferrer">Track your parcel</a></p>@endif
+  </section>
+  @endif
+
 
   <section class="card" aria-label="Your order">
     <h2>Your order</h2>

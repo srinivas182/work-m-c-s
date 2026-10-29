@@ -7,6 +7,8 @@ namespace Wurk\Shop\Support;
 use Illuminate\Support\Facades\DB;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Shipping\Contracts\Couriers;
+use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Product;
@@ -32,10 +34,12 @@ final readonly class OrderPlacer
     /**
      * @param  list<array{variant: string, quantity: int}>  $lines
      * @param  array{name: string, phone: string, email?: string|null, address?: string|null, notes?: string|null}  $customer
+     * @param  array{provider: string, service?: string|null, pickup_point?: string|null, pickup_point_name?: string|null, to?: array{street: string, suburb?: string|null, city: string, postal_code: string}}|null  $shipping  courier delivery (Bob Go) or a Pargo pickup point
      */
-    public function place(array $lines, array $customer, string $fulfilment, string $method, ?string $branch = null): Order
+    public function place(array $lines, array $customer, string $fulfilment, string $method, ?string $branch = null, ?array $shipping = null): Order
     {
         $branch = app(BranchStock::class)->fulfilling($fulfilment, $branch); // the branch that fulfils this order
+        $courier = $fulfilment === 'delivery' && $shipping !== null ? $this->courierFee($lines, $branch, $shipping) : null; // asked before any locks are taken
         $settings = ShopSettings::query()->find($this->context->id());
         $card = $method === 'card' && app(BusinessPayments::class)->available($branch) !== []; // at the fulfilling branch
         $eft = $method === 'offline' && app(BusinessPayments::class)->eftInstructions($branch) !== null; // EFT / bank transfer, from Settings → Payments
@@ -43,10 +47,10 @@ final readonly class OrderPlacer
             throw new CheckoutProblem('Ordering online isn’t available yet. Please contact us to order.');
         }
         $settings ??= new ShopSettings(['collection_enabled' => true, 'delivery_enabled' => false]); // a card-only shop with nothing saved yet
-        if (($fulfilment === 'collection' && ! $settings->collection_enabled) || ($fulfilment === 'delivery' && ! $settings->delivery_enabled) || ! in_array($fulfilment, ['collection', 'delivery'], true)) {
+        if (($fulfilment === 'collection' && ! $settings->collection_enabled) || ($fulfilment === 'delivery' && ! $settings->delivery_enabled && $shipping === null) || ! in_array($fulfilment, ['collection', 'delivery'], true)) {
             throw new CheckoutProblem('Please choose collection or delivery.');
         }
-        if ($fulfilment === 'delivery' && trim((string) ($customer['address'] ?? '')) === '') {
+        if ($fulfilment === 'delivery' && $shipping === null && trim((string) ($customer['address'] ?? '')) === '') {
             throw new CheckoutProblem('Please add the delivery address.');
         }
         $wanted = [];
@@ -57,7 +61,7 @@ final readonly class OrderPlacer
             throw new CheckoutProblem('Your cart is empty.');
         }
 
-        $order = DB::connection($this->context->connectionName())->transaction(function () use ($wanted, $customer, $fulfilment, $method, $branch): Order {
+        $order = DB::connection($this->context->connectionName())->transaction(function () use ($wanted, $customer, $fulfilment, $method, $branch, $courier, $shipping): Order {
             $stock = app(BranchStock::class);
             $settings = ShopSettings::query()->lockForUpdate()->find($this->context->id())
                 ?? ShopSettings::query()->create(['tenant_id' => $this->context->id()])->refresh(); // shops that never saved settings: re-read for the defaults (order numbers start at 1001)
@@ -85,11 +89,18 @@ final readonly class OrderPlacer
             if (count($items) !== count($wanted)) {
                 throw new CheckoutProblem('Something in your cart isn’t available any more. Please check your cart.');
             }
-            $delivery = $fulfilment === 'delivery' ? $settings->delivery_fee_cents : 0;
+            $delivery = $fulfilment === 'delivery' ? ($courier ?? $settings->delivery_fee_cents) : 0;
             $order = Order::query()->create([
                 'number' => $settings->next_order_number, 'branch_id' => $branch, 'status' => 'awaiting_payment', 'payment_method' => $method, 'fulfilment' => $fulfilment,
                 'customer_name' => $customer['name'], 'customer_phone' => $customer['phone'], 'customer_email' => $customer['email'] ?? null,
-                'delivery_address' => $fulfilment === 'delivery' ? ($customer['address'] ?? null) : null, 'notes' => $customer['notes'] ?? null,
+                'delivery_address' => $fulfilment !== 'delivery' ? null : match ($shipping['provider'] ?? null) {
+                    'bobgo' => implode(', ', array_filter([$shipping['to']['street'] ?? null, $shipping['to']['suburb'] ?? null, $shipping['to']['city'] ?? null, $shipping['to']['postal_code'] ?? null])),
+                    'pargo' => 'Pargo pickup point: '.($shipping['pickup_point_name'] ?? $shipping['pickup_point'] ?? ''),
+                    default => $customer['address'] ?? null,
+                }, 'notes' => $customer['notes'] ?? null,
+                'shipping_provider' => $fulfilment === 'delivery' ? ($shipping['provider'] ?? null) : null, 'shipping_service' => $shipping['service'] ?? null,
+                'pickup_point' => $shipping['pickup_point'] ?? null, 'pickup_point_name' => $shipping['pickup_point_name'] ?? null,
+                'shipping_to' => ($shipping['provider'] ?? null) === 'bobgo' ? ($shipping['to'] ?? null) : null,
                 'subtotal_cents' => $subtotal, 'delivery_cents' => $delivery, 'total_cents' => $subtotal + $delivery,
                 'hold_expires_at' => $method === 'card' ? now()->addMinutes(self::CARD_HOLD_MINUTES) : now()->addHours($settings->offline_hold_hours),
             ]);
@@ -127,5 +138,45 @@ final readonly class OrderPlacer
         if ($status === 'expired') {
             app(OrderManager::class)->log($order, 'expired', null, null, 'Payment didn’t arrive in time; stock returned');
         }
+    }
+
+    /**
+     * The courier's fee, checked with the courier now (never the price the browser showed).
+     *
+     * @param  list<array{variant: string, quantity: int}>  $lines
+     * @param  array<string, mixed>  $shipping
+     */
+    private function courierFee(array $lines, string $branch, array $shipping): int
+    {
+        $couriers = app(Couriers::class);
+        if (($shipping['provider'] ?? null) === 'pargo') {
+            $rate = $couriers->options($branch)['pickup_rate_cents'];
+            if ($rate === null || empty($shipping['pickup_point'])) {
+                throw new CheckoutProblem('Choose a pickup point.');
+            }
+
+            return $rate;
+        }
+        if (($shipping['provider'] ?? null) !== 'bobgo' || empty($shipping['service']) || ! is_array($shipping['to'] ?? null)) {
+            throw new CheckoutProblem('Choose how you’d like it delivered.');
+        }
+        $variants = Variant::query()->whereIn('id', array_column($lines, 'variant'))->get()->keyBy('id');
+        $value = 0;
+        $items = 0;
+        foreach ($lines as $line) {
+            if (($v = $variants[$line['variant']] ?? null) !== null) {
+                $value += app(BranchStock::class)->priceAt($v, $branch) * $line['quantity'];
+                $items += $line['quantity'];
+            }
+        }
+        try {
+            $to = (array) $shipping['to'];
+            $rates = $couriers->rates($branch, ['street' => (string) ($to['street'] ?? ''), 'suburb' => isset($to['suburb']) ? (string) $to['suburb'] : null, 'city' => (string) ($to['city'] ?? ''), 'postal_code' => (string) ($to['postal_code'] ?? '')], $value, max(0.1, $items * (float) config('shipping.item_kg', 0.5)));
+        } catch (ShippingProblem $e) {
+            throw new CheckoutProblem($e->getMessage());
+        }
+        $chosen = collect($rates)->firstWhere('service', $shipping['service']);
+
+        return $chosen === null ? throw new CheckoutProblem('That delivery option is no longer available — please choose again.') : $chosen['cents'];
     }
 }

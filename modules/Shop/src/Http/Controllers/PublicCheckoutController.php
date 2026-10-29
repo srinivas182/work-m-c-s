@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Shipping\Contracts\Couriers;
+use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Mail\OrderPlacedMail;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
@@ -39,6 +41,7 @@ final class PublicCheckoutController
             $data = $request->validate(['branch' => ['nullable', 'string'], 'fulfilment' => ['nullable', 'in:collection,delivery'], 'lines' => ['present', 'array', 'max:30'], 'lines.*.variant' => ['required', 'string'], 'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:'.OrderPlacer::MAX_QUANTITY]]);
             $stock = app(BranchStock::class);
             $branch = $stock->fulfilling((string) ($data['fulfilment'] ?? 'collection'), $data['branch'] ?? null);
+            $couriers = app(Couriers::class)->options($stock->fulfilling('delivery', null));
             $variants = Variant::query()->whereIn('id', array_column($data['lines'], 'variant'))->get()->keyBy('id');
             $products = Product::query()->whereIn('id', $variants->pluck('product_id'))->where('status', 'published')->get()->keyBy('id');
             $lines = [];
@@ -61,7 +64,9 @@ final class PublicCheckoutController
                 // Several branches: customers choose where to collect from.
                 'branches' => count(app(BranchDirectory::class)->open()) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name'], 'address' => $b['address']], app(BranchDirectory::class)->open()) : [],
                 'branch' => $branch,
-                'delivery' => (bool) $s?->delivery_enabled, 'delivery_fee_cents' => (int) $s?->delivery_fee_cents, 'delivery_note' => $s?->delivery_note,
+                'delivery' => (bool) $s?->delivery_enabled || $couriers['courier'] || $couriers['pickup_points'], 'flat_delivery' => (bool) $s?->delivery_enabled,
+                'delivery_fee_cents' => (int) $s?->delivery_fee_cents, 'delivery_note' => $s?->delivery_note,
+                'couriers' => $couriers, // Bob Go (live rates) and Pargo (pickup points) from the ships-from branch
             ]]);
         });
     }
@@ -72,7 +77,11 @@ final class PublicCheckoutController
             $data = $request->validate([
                 'lines' => ['required', 'array', 'min:1', 'max:30'], 'lines.*.variant' => ['required', 'string'], 'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:'.OrderPlacer::MAX_QUANTITY],
                 'name' => ['required', 'string', 'max:120'], 'phone' => ['required', 'string', 'max:40'], 'email' => ['nullable', 'email', 'max:160'],
-                'fulfilment' => ['required', 'in:collection,delivery'], 'branch' => ['nullable', 'string'], 'address' => ['nullable', 'string', 'max:400'], 'notes' => ['nullable', 'string', 'max:1000'],
+                'fulfilment' => ['required', 'in:collection,delivery'], 'branch' => ['nullable', 'string'],
+                'shipping' => ['nullable', 'array'], 'shipping.provider' => ['required_with:shipping', 'in:bobgo,pargo'], 'shipping.service' => ['nullable', 'string', 'max:120'],
+                'shipping.pickup_point' => ['nullable', 'string', 'max:60'], 'shipping.pickup_point_name' => ['nullable', 'string', 'max:200'],
+                'shipping.to' => ['nullable', 'array'], 'shipping.to.street' => ['nullable', 'string', 'max:200'], 'shipping.to.suburb' => ['nullable', 'string', 'max:120'],
+                'shipping.to.city' => ['nullable', 'string', 'max:120'], 'shipping.to.postal_code' => ['nullable', 'string', 'max:10'], 'address' => ['nullable', 'string', 'max:400'], 'notes' => ['nullable', 'string', 'max:1000'],
                 'payment' => ['nullable', 'in:card,offline'],
                 'consent' => ['accepted'], 'website' => ['nullable', 'string'],
             ], ['consent.accepted' => 'Please agree to be contacted about your order.']);
@@ -84,7 +93,7 @@ final class PublicCheckoutController
             try {
                 $order = $placer->place(array_values(array_map(fn ($l) => ['variant' => (string) $l['variant'], 'quantity' => (int) $l['quantity']], $data['lines'])),
                     ['name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'address' => $data['address'] ?? null, 'notes' => $data['notes'] ?? null],
-                    $data['fulfilment'], $method, $data['branch'] ?? null);
+                    $data['fulfilment'], $method, $data['branch'] ?? null, $data['shipping'] ?? null);
             } catch (CheckoutProblem $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
             }
@@ -145,5 +154,51 @@ final class PublicCheckoutController
         }
 
         return $this->context->run($tenant, fn () => $fn($tenant));
+    }
+
+    /**
+     * Courier options for the cart: live Bob Go rates for an address, or the nearest Pargo pickup points.
+     * Prices shown here are checked again when the order is placed.
+     */
+    public function shipping(Request $request, string $handle): JsonResponse
+    {
+        return $this->within($handle, function () use ($request): JsonResponse {
+            $data = $request->validate([
+                'kind' => ['required', 'in:rates,points'], 'lines' => ['required', 'array', 'min:1', 'max:30'], 'lines.*.variant' => ['required', 'string'], 'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:'.OrderPlacer::MAX_QUANTITY],
+                'to.street' => ['required_if:kind,rates', 'nullable', 'string', 'max:200'], 'to.suburb' => ['nullable', 'string', 'max:120'],
+                'to.city' => ['required_if:kind,rates', 'nullable', 'string', 'max:120'], 'to.postal_code' => ['required_if:kind,rates', 'nullable', 'string', 'max:10'],
+                'near' => ['required_if:kind,points', 'nullable', 'string', 'max:200'],
+            ]);
+            $branch = app(BranchStock::class)->fulfilling('delivery', null);
+            [$value, $kg] = $this->parcel($data['lines'], $branch);
+            try {
+                return new JsonResponse($data['kind'] === 'rates'
+                    ? ['rates' => app(Couriers::class)->rates($branch, ['street' => (string) $data['to']['street'], 'suburb' => $data['to']['suburb'] ?? null, 'city' => (string) $data['to']['city'], 'postal_code' => (string) $data['to']['postal_code']], $value, $kg)]
+                    : ['points' => app(Couriers::class)->pickupPoints($branch, (string) $data['near']), 'rate_cents' => app(Couriers::class)->options($branch)['pickup_rate_cents']]);
+            } catch (ShippingProblem $e) {
+                return new JsonResponse(['message' => $e->getMessage()], 422);
+            }
+        });
+    }
+
+    /**
+     * The parcel's value and weight (items count as config('shipping.item_kg') each until products have weights).
+     *
+     * @param  array<int, array{variant: string, quantity: int|string}>  $lines
+     * @return array{0: int, 1: float}
+     */
+    private function parcel(array $lines, string $branch): array
+    {
+        $variants = Variant::query()->whereIn('id', array_column($lines, 'variant'))->get()->keyBy('id');
+        $value = 0;
+        $items = 0;
+        foreach ($lines as $line) {
+            if (($v = $variants[$line['variant']] ?? null) !== null) {
+                $value += app(BranchStock::class)->priceAt($v, $branch) * (int) $line['quantity'];
+                $items += (int) $line['quantity'];
+            }
+        }
+
+        return [$value, max(0.1, $items * (float) config('shipping.item_kg', 0.5))];
     }
 }

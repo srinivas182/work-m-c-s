@@ -62,6 +62,16 @@ test('an owner adds a branch and invites a branch manager', async ({ page }, tes
   await expect(page.getByText('EFT / bank transfer live keys saved.')).toBeVisible();
   await expectAccessible(page);
 
+  // Shipping: couriers for the business or a branch.
+  await page.goto(`/${handle}/settings/shipping`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Shipping' })).toBeVisible();
+  await expect(page.getByText('Bob Go (courier delivery)')).toBeVisible();
+  await page.getByLabel('Accounts for').selectOption({ label: 'Sandton' });
+  await expect(
+    page.getByText('Without its own account, this branch uses the business’s.'),
+  ).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`/${handle}/settings/team`);
   await expect(page.getByRole('heading', { level: 1, name: 'Team' })).toBeVisible();
   await expect(page.getByRole('list', { name: 'Team members' }).getByText('You')).toBeVisible();

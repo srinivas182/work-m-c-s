@@ -11,8 +11,10 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Shipping\Contracts\ShipmentUpdated;
 use Wurk\Shop\Console\DemoShopCommand;
 use Wurk\Shop\Console\ExpireOrdersCommand;
+use Wurk\Shop\Listeners\MarkDeliveredOrders;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderStatusChanged;
@@ -49,6 +51,7 @@ final class ShopServiceProvider extends ModuleServiceProvider
         $this->loadViewsFrom($this->modulePath('resources/views'), 'shop');
         Event::listen(BusinessPaymentReceived::class, [OrderPayments::class, 'handle']);
         Event::listen(OrderStatusChanged::class, [OrderMessages::class, 'handle']);
+        Event::listen(ShipmentUpdated::class, [MarkDeliveredOrders::class, 'handle']); // a courier delivered it
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('shop:expire-orders')->everyFifteenMinutes()->onOneServer()->withoutOverlapping();
         });

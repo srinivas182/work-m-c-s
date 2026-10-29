@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 11.6 (shipping)
+- **Shipping** (new module; Settings → Shipping): the business's own **Bob Go** (courier delivery at live rates) and **Pargo** (pickup points, flat rate) accounts, for the business or a branch, test or live; credentials checked with the courier before saving. WURK never pays couriers.
+- **Checkout**: "How should we deliver?" — the shop's own flat-fee delivery, a courier at live prices for the customer's address, or a Pargo pickup point near them; the courier's price is checked again when the order is placed.
+- **Orders**: "Create shipment" saves the tracking number and label and sends the order out for delivery; customers see tracking on their order page; Bob Go's signed tracking updates mark delivered orders done.
+- Provider request/response details and Bob Go's signature header are marked to confirm against Bob Go and Pargo sandbox accounts before go-live. Items count as 0.5 kg each until products have weights.
+
+### Fixed
+- The payments permission label listed only PayFast and Yoco.
+
 ### Added — Sprint 11.5 (settlement between branches)
 - **What one branch owes another** is recorded when one branch's account is paid for something another branch supplied (card and EFT orders, booking deposits, class places; the business-wide account counts as the main branch's). Refunds and card cancellations net it off. Nothing is recorded within a branch.
 - **Between branches** (Settings → Branches): monthly statements per pair of branches, with what makes up each amount; owners mark a month settled (who and when). Records only — no money moves through WURK. Branch managers see their branches only.
