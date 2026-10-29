@@ -120,4 +120,14 @@ final readonly class Payments implements BusinessPayments
     {
         PaymentAccount::query()->updateOrCreate(['provider' => 'eft', 'branch_id' => null], ['mode' => 'live', 'active' => true, 'live_credentials' => ['instructions' => $instructions], 'label' => 'Bank details saved']);
     }
+
+    public function receivedBy(string $reference): ?string
+    {
+        return PaymentAttempt::query()->find($reference)?->branch_id;
+    }
+
+    public function accountBranch(string $provider, ?string $branchId): ?string
+    {
+        return $this->accountFor($provider, $branchId)?->branch_id;
+    }
 }

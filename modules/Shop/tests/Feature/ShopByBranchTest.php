@@ -20,6 +20,7 @@ use Wurk\Shop\Support\CheckoutProblem;
 use Wurk\Shop\Support\OrderManager;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPlacer;
+use Wurk\Team\Support\Settlements;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -101,4 +102,38 @@ it('alerts a branch manager only about their branch’s orders (owners about all
         return Mail::sent(NewOrderMail::class)->flatMap(fn ($m) => array_column($m->to, 'address'))->sort()->values()->all();
     };
     expect($to($this->sandton))->toBe(['musa@kasi.co.za', 'owner@kasi.co.za'])->and($to($this->main))->toBe(['owner@kasi.co.za']);
+});
+
+it('records what one branch owes another, nets refunds, and settles a month by hand', function () {
+    // Sandton has no EFT of its own, so the customer pays into the business's (= the main branch's) account.
+    $sandtonOrder = ($this->order)($this->sandton, 1); // R270 at Sandton
+    $mainOrder = ($this->order)($this->main, 1);
+    ($this->in)(function () use ($sandtonOrder, $mainOrder) {
+        foreach ([$sandtonOrder, $mainOrder] as $o) {
+            app(OrderManager::class)->advance($o->refresh(), 'paid', 'Thabo');
+        }
+        app(OrderManager::class)->refund($sandtonOrder->refresh(), 5000, false, 'Thabo');
+    });
+    $statement = ($this->in)(fn () => app(Settlements::class)->statement(now()->format('Y-m')));
+    expect($statement)->toHaveCount(1) // the main-branch order owes nobody
+        ->and($statement[0])->toMatchArray(['from' => $this->main, 'to' => $this->sandton, 'total_cents' => 22000, 'settled' => false])
+        ->and(array_column($statement[0]['entries'], 'amount_cents'))->toBe([27000, -5000]);
+
+    ($this->in)(fn () => expect(app(Settlements::class)->settle(now()->format('Y-m'), $this->main, $this->sandton, 'Thandi'))->toBe(2)
+        ->and(app(Settlements::class)->statement(now()->format('Y-m'))[0]['settled'])->toBeTrue());
+});
+
+it('shows the owner each month’s statement, with branch names, and settles it', function () {
+    $owner = $this->person(['email' => 'owner@kasi.co.za', 'phone' => '+27820000004']);
+    $this->member($owner, $this->shop);
+    ($this->in)(function () use ($owner) {
+        app(Team::class)->add($owner->id, 'Thandi', 'owner');
+        app(OrderManager::class)->advance(($this->order)($this->sandton, 1)->refresh(), 'paid', 'Thabo');
+    });
+    $mainName = ($this->in)(fn () => app(BranchDirectory::class)->open()[0]['name']); // the main branch is listed first
+    $base = $this->app('/kasi-threads/settings/branches/settlements');
+    $this->actingAs($owner)->get($base)->assertInertia(fn (Assert $p) => $p->component('Team::Settlements')
+        ->where('pairs.0.from_name', $mainName)->where('pairs.0.to_name', 'Sandton')->where('pairs.0.total_cents', 27000)->where('canSettle', true));
+    $this->actingAs($owner)->post("{$base}/settle", ['month' => now()->format('Y-m'), 'from' => $this->main, 'to' => $this->sandton])->assertSessionHas('status', 'Marked as settled.');
+    $this->actingAs($owner)->get($base)->assertInertia(fn (Assert $p) => $p->where('pairs.0.settled', true));
 });

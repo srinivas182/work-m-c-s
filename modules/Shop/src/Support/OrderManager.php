@@ -11,6 +11,7 @@ use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Variant;
+use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -52,6 +53,8 @@ final readonly class OrderManager
         });
         if ($to === 'paid') {
             DB::table('shop_holds')->where('order_id', $order->id)->delete(); // the stock is theirs now
+            // Paid by EFT into the account whose details the customer was given (the branch's own, or the business's).
+            app(BranchLedger::class)->record($this->payments->accountBranch('eft', $order->branch_id), $order->branch_id, $order->total_cents, 'order', 'shop-'.$order->id, "Order #{$order->number} (EFT)");
         }
         $this->audit->record('shop.order_'.$to, 'order', $order->id, ['by' => $by]);
         event(new OrderStatusChanged($this->context->id(), $order->id, $to));
@@ -71,6 +74,7 @@ final readonly class OrderManager
             $refunded = $this->payments->refund('shop-'.$order->id);
             if ($refunded) {
                 $order->update(['refunded_cents' => $order->total_cents]);
+                app(BranchLedger::class)->record($this->payments->receivedBy('shop-'.$order->id), $order->branch_id, -$order->total_cents, 'refund', 'shop-'.$order->id, "Order #{$order->number} cancelled");
                 $this->log($order, 'refunded', 'Payment provider', $order->total_cents);
             }
         }
@@ -106,6 +110,8 @@ final readonly class OrderManager
                 }
             }
             $order->update(['refunded_cents' => $order->refunded_cents + $amount]);
+            $received = $order->payment_method === 'card' ? $this->payments->receivedBy('shop-'.$order->id) : $this->payments->accountBranch('eft', $order->branch_id);
+            app(BranchLedger::class)->record($received, $order->branch_id, -$amount, 'refund', 'shop-'.$order->id, "Order #{$order->number} refund");
             $this->log($order, 'refunded', $by, $amount, $note ?? ($restock ? 'Stock returned' : null));
         });
         $this->audit->record('shop.order_refunded', 'order', $order->id, ['cents' => $amount, 'by' => $by]);

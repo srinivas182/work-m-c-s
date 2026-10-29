@@ -9,6 +9,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Shop\Models\Order;
+use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -48,6 +49,7 @@ final readonly class OrderPayments
         if ($order->status === 'awaiting_payment') {
             $order->update(['status' => 'paid', 'hold_expires_at' => null, 'paid_at' => now()]);
             app(OrderManager::class)->log($order, 'paid', 'Payment provider');
+            app(BranchLedger::class)->record($this->payments->receivedBy($reference), $order->branch_id, $order->total_cents, 'order', $reference, "Order #{$order->number}");
             event(new OrderStatusChanged(app(TenantContext::class)->id(), $order->id, 'paid'));
             DB::table('shop_holds')->where('order_id', $order->id)->delete();
             $this->audit->record('shop.order_paid', 'order', $order->id, ['cents' => $order->total_cents]);

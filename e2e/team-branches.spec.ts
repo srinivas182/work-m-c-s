@@ -17,6 +17,10 @@ test('an owner adds a branch and invites a branch manager', async ({ page }, tes
     '12 Rivonia Rd, Sandton',
   );
   await expectAccessible(page);
+  await page.getByRole('link', { name: /Between branches/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Between branches' })).toBeVisible();
+  await expect(page.getByText('Nothing owed this month')).toBeVisible();
+  await expectAccessible(page);
 
   // Bookings by branch: hours at the new branch.
   await page.goto(`/${handle}/bookings/settings`);

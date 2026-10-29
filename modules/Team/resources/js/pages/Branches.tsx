@@ -80,6 +80,16 @@ export default function Branches({
           title="Branches"
           description={`${open} of ${limit} ${limit === 1 ? 'branch' : 'branches'} open on your package. Each branch can have its own team, hours, stock and payment accounts.`}
         />
+        {open > 1 && (
+          <p className="text-sm">
+            <a
+              className="underline"
+              href={`${window.location.pathname.replace(/\/$/, '')}/settlements`}
+            >
+              Between branches — what one branch owes another
+            </a>
+          </p>
+        )}
         {error && (
           <p role="alert" className="text-danger text-sm">
             {error}
