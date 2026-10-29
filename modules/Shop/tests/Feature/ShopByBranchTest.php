@@ -122,3 +122,18 @@ it('records what one branch owes another, nets refunds, and settles a month by h
     ($this->in)(fn () => expect(app(Settlements::class)->settle(now()->format('Y-m'), $this->main, $this->sandton, 'Thandi'))->toBe(2)
         ->and(app(Settlements::class)->statement(now()->format('Y-m'))[0]['settled'])->toBeTrue());
 });
+
+it('shows the owner each month’s statement, with branch names, and settles it', function () {
+    $owner = $this->person(['email' => 'owner@kasi.co.za', 'phone' => '+27820000004']);
+    $this->member($owner, $this->shop);
+    ($this->in)(function () use ($owner) {
+        app(Team::class)->add($owner->id, 'Thandi', 'owner');
+        app(OrderManager::class)->advance(($this->order)($this->sandton, 1)->refresh(), 'paid', 'Thabo');
+    });
+    $mainName = ($this->in)(fn () => app(BranchDirectory::class)->open()[0]['name']); // the main branch is listed first
+    $base = $this->app('/kasi-threads/settings/branches/settlements');
+    $this->actingAs($owner)->get($base)->assertInertia(fn (Assert $p) => $p->component('Team::Settlements')
+        ->where('pairs.0.from_name', $mainName)->where('pairs.0.to_name', 'Sandton')->where('pairs.0.total_cents', 27000)->where('canSettle', true));
+    $this->actingAs($owner)->post("{$base}/settle", ['month' => now()->format('Y-m'), 'from' => $this->main, 'to' => $this->sandton])->assertSessionHas('status', 'Marked as settled.');
+    $this->actingAs($owner)->get($base)->assertInertia(fn (Assert $p) => $p->where('pairs.0.settled', true));
+});
