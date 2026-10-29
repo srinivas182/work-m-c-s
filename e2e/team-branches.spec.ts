@@ -25,6 +25,24 @@ test('an owner adds a branch and invites a branch manager', async ({ page }, tes
   await expect(hours).toBeVisible();
   await expectAccessible(page);
 
+  // Shop by branch: stock at each branch; the list shows the total.
+  await page.goto(`/${handle}/shop/products`);
+  await page.getByRole('button', { name: 'Add a product' }).click();
+  const product = page.getByRole('form', { name: 'Add a product' });
+  await product.getByLabel('Name').fill('Cap');
+  await product.getByLabel('Price (R)').fill('120');
+  await product
+    .getByLabel(/^Stock at Main|^Stock at /)
+    .first()
+    .fill('2');
+  await product.getByLabel('Stock at Sandton').fill('3');
+  await product.getByLabel('Price at Sandton (R, optional)').fill('130');
+  await product.getByLabel('Show in the shop').check();
+  await product.getByRole('button', { name: 'Save product' }).click();
+  await expect(page.getByText('Product saved.')).toBeVisible();
+  await expect(page.getByText(/5 in stock/)).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`/${handle}/settings/team`);
   await expect(page.getByRole('heading', { level: 1, name: 'Team' })).toBeVisible();
   await expect(page.getByRole('list', { name: 'Team members' }).getByText('You')).toBeVisible();
