@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
@@ -10,12 +11,14 @@ use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Shop\Mail\NewOrderMail;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\Variant;
 use Wurk\Shop\Support\BranchStock;
 use Wurk\Shop\Support\CheckoutProblem;
 use Wurk\Shop\Support\OrderManager;
+use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPlacer;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -78,4 +81,24 @@ it('shows a branch manager only their branch’s orders, and not the products', 
     $this->actingAs($manager)->get($this->app('/kasi-threads/shop/orders?show=all'))->assertInertia(fn (Assert $p) => $p->component('Shop::Orders')->has('orders', 1));
     $this->actingAs($manager)->get($this->app('/kasi-threads/shop/products'))->assertNotFound(); // products are business-wide
     ($this->in)(fn () => expect(Order::query()->withoutGlobalScope('branch')->count())->toBe(2));
+});
+
+it('alerts a branch manager only about their branch’s orders (owners about all)', function () {
+    Mail::fake();
+    $owner = $this->person(['email' => 'owner@kasi.co.za', 'phone' => '+27820000004']);
+    $manager = $this->person(['email' => 'musa@kasi.co.za', 'phone' => '+27820000003']);
+    foreach ([$owner, $manager] as $who) {
+        $this->member($who, $this->shop);
+    }
+    ($this->in)(function () use ($owner, $manager) {
+        app(Team::class)->add($owner->id, 'Thandi', 'owner');
+        app(Team::class)->setBranches(app(Team::class)->add($manager->id, 'Musa', 'branch-manager'), [$this->sandton]);
+    });
+    $to = function (string $branch) {
+        Mail::fake();
+        ($this->in)(fn () => app(OrderMessages::class)->newOrder(($this->order)($branch, 1)));
+
+        return Mail::sent(NewOrderMail::class)->flatMap(fn ($m) => array_column($m->to, 'address'))->sort()->values()->all();
+    };
+    expect($to($this->sandton))->toBe(['musa@kasi.co.za', 'owner@kasi.co.za'])->and($to($this->main))->toBe(['owner@kasi.co.za']);
 });

@@ -50,11 +50,12 @@ final readonly class MemberCount implements SeatPolicy, TeamDirectory, TeamSize
         return (string) app(Team::class)->add($identityId, $displayName, $role)->id;
     }
 
-    public function emailsWithPermission(string $permission): array
+    public function emailsWithPermission(string $permission, ?string $branchId = null): array
     {
         $access = app(AccessManager::class);
         $ids = Member::query()->where('status', 'active')->pluck('identity_id')
-            ->map(fn ($id) => (string) $id)->filter(fn (string $id) => $access->allows($id, $permission))->all();
+            ->map(fn ($id) => (string) $id)->filter(fn (string $id) => $access->allows($id, $permission)
+                && ($branchId === null || ($limit = $access->branchRestriction($id)) === null || in_array($branchId, $limit, true)))->all();
         $ids = array_values($ids);
         $emails = array_filter(array_map(fn (array $c) => $c['email'], app(PeopleDirectory::class)->contacts($ids)));
 

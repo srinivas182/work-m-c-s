@@ -29,7 +29,8 @@ final readonly class OrderMessages
         $how = ($order->payment_method === 'card' ? 'Paying by card' : 'Paying by EFT or on collection — mark it paid when the money arrives')
             .' · '.($order->fulfilment === 'delivery' ? 'Delivery' : 'Collection');
         $link = 'https://'.config('wurk.domains.app').'/'.$this->context->current()->handle().'/shop/orders/'.$order->id;
-        foreach ($this->team->emailsWithPermission('shop.orders') as $email) {
+        // Branch managers are alerted only about their branches' orders.
+        foreach ($this->team->emailsWithPermission('shop.orders', $order->branch_id) as $email) {
             Mail::to($email)->send(new NewOrderMail($order->number, $order->customer_name, $lines, $rand($order->total_cents), $how, $link));
         }
     }

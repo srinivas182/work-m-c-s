@@ -18,11 +18,12 @@ interface TeamDirectory
 
     /**
      * Email addresses of the current business's active team members who have a permission (by the same
-     * rule as every screen) — e.g. who to alert about a new order.
+     * rule as every screen) — e.g. who to alert about a new order. With a branch, people limited to
+     * other branches are left out.
      *
      * @return list<string>
      */
-    public function emailsWithPermission(string $permission): array;
+    public function emailsWithPermission(string $permission, ?string $branchId = null): array;
 
     /**
      * Everyone on the team, with their role and branches (an empty list with all_branches = true means every branch).
