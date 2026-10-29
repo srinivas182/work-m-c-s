@@ -65,6 +65,15 @@ it('delivers by courier at the courier’s current price, and ships with trackin
         expect($shipped->status)->toBe('out_for_delivery')->and($shipped->tracking_reference)->toBe('BG123')->and($shipped->label_url)->toBe('https://bobgo.example/waybill.pdf');
     });
     Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/shipments') && $r['delivery_address']['city'] === 'Soweto' && $r['custom_order_number'] === 'shop-'.$order->id);
+
+    // Bob Go reports the delivery: only with the account's webhook secret; then the order is done.
+    ($this->in)(fn () => ShippingAccount::query()->where('provider', 'bobgo')->sole()->update(['test_credentials' => ['api_key' => 'bg_test_key', 'webhook_secret' => 'whsec']]));
+    $body = json_encode(['tracking_reference' => 'BG123', 'status' => 'delivered']);
+    $notify = fn (string $signature) => $this->call('POST', "{$this->site}/shipping/notify/bobgo", [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_X_BOBGO_SIGNATURE' => $signature], $body);
+    $notify('forged')->assertStatus(400);
+    expect(($this->in)(fn () => $order->refresh()->status))->toBe('out_for_delivery');
+    $notify(hash_hmac('sha256', (string) $body, 'whsec'))->assertOk();
+    expect(($this->in)(fn () => $order->refresh()->status))->toBe('done');
 });
 
 it('sends an order to a Pargo pickup point at the flat rate', function () {

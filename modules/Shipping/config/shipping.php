@@ -13,6 +13,8 @@ return [
         'test' => 'https://api.staging.pargo.co.za',
         'live' => 'https://api.pargo.co.za',
     ],
+    // Bob Go's tracking updates: an HMAC-SHA256 of the raw body with the webhook secret — CONFIRM the header name with Bob Go.
+    'bobgo_signature_header' => 'X-Bobgo-Signature',
     'timeout' => 15,
     // Products don't have weights yet: each item counts as this many kilograms for courier rates.
     'item_kg' => 0.5,
