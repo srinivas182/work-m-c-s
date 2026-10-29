@@ -18,6 +18,7 @@ export interface Method {
   allowed?: boolean; // business: has WURK switched it on?
   available?: boolean; // admin: may businesses offer it?
   account?: Account | null;
+  branches?: Record<string, Account | null>; // several branches: each branch's own account
   wurk?: Account | null;
 }
 interface Account {
@@ -55,11 +56,13 @@ function KeysForm({
   m,
   mode,
   base,
+  q,
   done,
 }: {
   m: Method;
   mode: 'test' | 'live';
   base: string;
+  q: string;
   done: () => void;
 }) {
   const form = useForm<Record<string, string>>(
@@ -72,7 +75,10 @@ function KeysForm({
       className="grid gap-3 sm:grid-cols-2"
       onSubmit={(e) => {
         e.preventDefault();
-        form.put(`${base}/${m.provider}/keys/${mode}`, { preserveScroll: true, onSuccess: done });
+        form.put(`${base}/${m.provider}/keys/${mode}${q}`, {
+          preserveScroll: true,
+          onSuccess: done,
+        });
       }}
     >
       {FIELDS[m.provider].map(([key, label, secret]) =>
@@ -106,18 +112,22 @@ export function MethodCard({
   m,
   base,
   admin = false,
+  branch = null,
 }: {
   m: Method;
   base: string;
   admin?: boolean;
+  /** Managing a branch's own account (else the business's). */
+  branch?: string | null;
 }) {
-  const a = admin ? m.wurk : m.account;
+  const a = admin ? m.wurk : branch ? (m.branches?.[branch] ?? null) : m.account;
+  const q = branch ? `?branch=${encodeURIComponent(branch)}` : '';
   const [editing, setEditing] = useState<'test' | 'live' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const blocked = !admin && m.allowed === false;
   const save = (active: boolean, mode: 'test' | 'live') =>
     router.put(
-      `${base}/${m.provider}`,
+      `${base}/${m.provider}${q}`,
       { active, mode },
       {
         preserveScroll: true,
@@ -208,13 +218,17 @@ export function MethodCard({
                   variant="ghost"
                   size="sm"
                   aria-label={`Disconnect ${m.name}`}
-                  onClick={() => router.delete(`${base}/${m.provider}`, { preserveScroll: true })}
+                  onClick={() =>
+                    router.delete(`${base}/${m.provider}${q}`, { preserveScroll: true })
+                  }
                 >
                   Disconnect
                 </Button>
               )}
             </div>
-            {editing && <KeysForm m={m} mode={editing} base={base} done={() => setEditing(null)} />}
+            {editing && (
+              <KeysForm m={m} mode={editing} base={base} q={q} done={() => setEditing(null)} />
+            )}
           </>
         )}
       </CardContent>
