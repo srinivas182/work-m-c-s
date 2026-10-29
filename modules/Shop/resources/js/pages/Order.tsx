@@ -20,6 +20,8 @@ interface OrderData {
   status: string;
   payment: 'card' | 'offline';
   fulfilment: 'collection' | 'delivery';
+  branch: string | null;
+
   customer: { name: string; phone: string; email: string | null };
   address: string | null;
   notes: string | null;
@@ -63,7 +65,7 @@ export default function Order({ order: o }: { order: OrderData }) {
       <div className="grid max-w-4xl gap-6">
         <PageHeader
           title={`Order #${o.number}`}
-          description={`${o.payment === 'card' ? 'Card' : 'EFT or on collection'} · ${o.fulfilment === 'delivery' ? 'Delivery' : 'Collection'}`}
+          description={`${o.payment === 'card' ? 'Card' : 'EFT or on collection'} · ${o.fulfilment === 'delivery' ? 'Delivery' : 'Collection'}${o.branch ? ` · ${o.branch}` : ''}`}
           actions={
             <Badge tone={o.status === 'awaiting_payment' ? 'warning' : 'neutral'}>
               {STATUS[o.status] ?? o.status}

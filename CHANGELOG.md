@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 11.3 (shop by branch)
+- **Stock per branch** (the product's stock is the total, so pages and "sold out" work as before); existing stock moved to each business's main branch.
+- **Orders fulfilled by a branch**: collection from the branch the customer chooses (checkout asks where, and re-prices for that branch), delivery from a "ships from" branch. Never oversold per branch; cancelled, expired and restocked items go back to their branch.
+- **Optional prices per branch** (product editor), used by the cart, checkout and orders.
+- **Orders get their own permission** (`shop.orders`): branch managers see and handle only their branches' orders, and are alerted only about those; products, prices and shop settings stay business-wide (`shop.manage`).
+
+### Fixed
+- A shop that never saved its shop settings couldn't take an order (no order number).
+- A single-branch shop's stock total was reset to 0 when saving a product (caught by the browser tests during this sprint; regression test).
+
 ### Added — Sprint 11.2 (bookings by branch)
 - **Bookings, classes, reservations and team hours belong to a branch** (existing rows moved to each business's main branch; anything created without a branch goes there too — single-branch businesses see no change).
 - **Hours per branch** (someone can work Mondays at one branch and Tuesdays at another; never two branches at once); a person's booked time is shared across branches, so no double bookings.

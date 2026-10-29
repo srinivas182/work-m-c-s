@@ -841,6 +841,12 @@ async function checkout(root: HTMLElement): Promise<void> {
     delivery: boolean;
     delivery_fee_cents: number;
     delivery_note: string | null;
+    branches?: { id: string; name: string; address: string | null }[]; // several branches: where to collect
+    branch?: string;
+  };
+  let picked: { branch: string | null; fulfilment: string } = {
+    branch: null,
+    fulfilment: 'collection',
   };
   const uid = Math.random().toString(36).slice(2, 8);
   const status = el('p', { class: 'text-sm' });
@@ -855,7 +861,11 @@ async function checkout(root: HTMLElement): Promise<void> {
     const r = await fetch('/cart/price', {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lines: readCart() }),
+      body: JSON.stringify({
+        lines: readCart(),
+        branch: picked.branch,
+        fulfilment: picked.fulfilment,
+      }), // stock and prices at the branch that fulfils it
     }).catch(() => null);
     return r?.ok ? ((await r.json()) as { lines: Priced[]; checkout: Settings }) : null;
   };
@@ -1018,14 +1028,42 @@ async function checkout(root: HTMLElement): Promise<void> {
     addressRow.hidden = !delivering();
     totals.textContent = `Total ${randOf(subtotal + fee)} (incl. VAT${fee ? `, delivery ${randOf(fee)}` : ''})`;
   };
-  collect.input.addEventListener('change', redraw);
-  deliver.input.addEventListener('change', redraw);
+  // Several branches: customers choose where to collect from; stock and prices follow the branch.
+  const branchPick = el('select', { class: field });
+  for (const b of s.branches ?? [])
+    branchPick.append(
+      el('option', { value: b.id }, b.address ? `${b.name} — ${b.address}` : b.name),
+    );
+  if (s.branch) branchPick.value = s.branch;
+  branchPick.id = id('collect-from');
+  const branchRow = el(
+    'div',
+    {},
+    el('label', { htmlFor: branchPick.id, class: 'font-medium' }, 'Collect from'),
+    branchPick,
+  );
+  const several = (s.branches ?? []).length > 1;
+  const reprice = async () => {
+    picked = {
+      branch: delivering() ? null : several ? branchPick.value : null,
+      fulfilment: delivering() ? 'delivery' : 'collection',
+    };
+    branchRow.hidden = !several || delivering();
+    const fresh = await price();
+    if (fresh && fresh.lines.length) data = fresh;
+    redraw();
+  };
+  branchPick.addEventListener('change', () => void reprice());
+  collect.input.addEventListener('change', () => void reprice());
+  deliver.input.addEventListener('change', () => void reprice());
+  branchRow.hidden = !several || delivering();
 
   const form = el(
     'form',
     { class: 'grid gap-4' },
     list,
     how,
+    branchRow,
     pay,
     totals,
     labelled('Your name', name),
@@ -1056,6 +1094,7 @@ async function checkout(root: HTMLElement): Promise<void> {
         phone: phone.value,
         email: email.value || null,
         fulfilment: delivering() ? 'delivery' : 'collection',
+        branch: !delivering() && several ? branchPick.value : null,
         address: delivering() ? address.value : null,
         notes: notes.value || null,
         payment: payment(),

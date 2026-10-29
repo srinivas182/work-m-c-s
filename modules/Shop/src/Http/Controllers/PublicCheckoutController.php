@@ -17,10 +17,12 @@ use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
+use Wurk\Shop\Support\BranchStock;
 use Wurk\Shop\Support\CheckoutProblem;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderPlacer;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -34,7 +36,9 @@ final class PublicCheckoutController
     public function price(Request $request, string $handle): JsonResponse
     {
         return $this->within($handle, function () use ($request): JsonResponse {
-            $data = $request->validate(['lines' => ['present', 'array', 'max:30'], 'lines.*.variant' => ['required', 'string'], 'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:'.OrderPlacer::MAX_QUANTITY]]);
+            $data = $request->validate(['branch' => ['nullable', 'string'], 'fulfilment' => ['nullable', 'in:collection,delivery'], 'lines' => ['present', 'array', 'max:30'], 'lines.*.variant' => ['required', 'string'], 'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:'.OrderPlacer::MAX_QUANTITY]]);
+            $stock = app(BranchStock::class);
+            $branch = $stock->fulfilling((string) ($data['fulfilment'] ?? 'collection'), $data['branch'] ?? null);
             $variants = Variant::query()->whereIn('id', array_column($data['lines'], 'variant'))->get()->keyBy('id');
             $products = Product::query()->whereIn('id', $variants->pluck('product_id'))->where('status', 'published')->get()->keyBy('id');
             $lines = [];
@@ -44,8 +48,9 @@ final class PublicCheckoutController
                 if ($v === null || $p === null) {
                     continue; // gone: dropped from the cart
                 }
+                $at = $stock->at($v, $branch); // in stock at this branch (null = not tracked)
                 $lines[] = ['variant' => $v->id, 'name' => $p->name, 'label' => $v->label, 'slug' => $p->slug, 'photo' => ($p->photos ?? [])[0] ?? null,
-                    'unit_cents' => $v->price_cents, 'quantity' => (int) $line['quantity'], 'available' => $v->stock === null ? OrderPlacer::MAX_QUANTITY : max(0, $v->stock)];
+                    'unit_cents' => $stock->priceAt($v, $branch), 'quantity' => (int) $line['quantity'], 'available' => $at === null ? OrderPlacer::MAX_QUANTITY : max(0, $at)];
             }
             $s = ShopSettings::query()->find($this->context->id());
 
@@ -53,6 +58,9 @@ final class PublicCheckoutController
                 'available' => app(BusinessPayments::class)->eftInstructions() !== null || app(BusinessPayments::class)->available() !== [],
                 'card' => app(BusinessPayments::class)->available() !== [], 'offline' => app(BusinessPayments::class)->eftInstructions() !== null,
                 'collection' => $s === null || $s->collection_enabled, 'collection_address' => $s?->collection_address,
+                // Several branches: customers choose where to collect from.
+                'branches' => count(app(BranchDirectory::class)->open()) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name'], 'address' => $b['address']], app(BranchDirectory::class)->open()) : [],
+                'branch' => $branch,
                 'delivery' => (bool) $s?->delivery_enabled, 'delivery_fee_cents' => (int) $s?->delivery_fee_cents, 'delivery_note' => $s?->delivery_note,
             ]]);
         });
@@ -64,7 +72,7 @@ final class PublicCheckoutController
             $data = $request->validate([
                 'lines' => ['required', 'array', 'min:1', 'max:30'], 'lines.*.variant' => ['required', 'string'], 'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:'.OrderPlacer::MAX_QUANTITY],
                 'name' => ['required', 'string', 'max:120'], 'phone' => ['required', 'string', 'max:40'], 'email' => ['nullable', 'email', 'max:160'],
-                'fulfilment' => ['required', 'in:collection,delivery'], 'address' => ['nullable', 'string', 'max:400'], 'notes' => ['nullable', 'string', 'max:1000'],
+                'fulfilment' => ['required', 'in:collection,delivery'], 'branch' => ['nullable', 'string'], 'address' => ['nullable', 'string', 'max:400'], 'notes' => ['nullable', 'string', 'max:1000'],
                 'payment' => ['nullable', 'in:card,offline'],
                 'consent' => ['accepted'], 'website' => ['nullable', 'string'],
             ], ['consent.accepted' => 'Please agree to be contacted about your order.']);
@@ -75,7 +83,7 @@ final class PublicCheckoutController
             try {
                 $order = $placer->place(array_values(array_map(fn ($l) => ['variant' => (string) $l['variant'], 'quantity' => (int) $l['quantity']], $data['lines'])),
                     ['name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'address' => $data['address'] ?? null, 'notes' => $data['notes'] ?? null],
-                    $data['fulfilment'], $method);
+                    $data['fulfilment'], $method, $data['branch'] ?? null);
             } catch (CheckoutProblem $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
             }

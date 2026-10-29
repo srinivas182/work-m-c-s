@@ -12,6 +12,7 @@ use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -32,8 +33,9 @@ final readonly class OrderPlacer
      * @param  list<array{variant: string, quantity: int}>  $lines
      * @param  array{name: string, phone: string, email?: string|null, address?: string|null, notes?: string|null}  $customer
      */
-    public function place(array $lines, array $customer, string $fulfilment, string $method): Order
+    public function place(array $lines, array $customer, string $fulfilment, string $method, ?string $branch = null): Order
     {
+        $branch = app(BranchStock::class)->fulfilling($fulfilment, $branch); // the branch that fulfils this order
         $settings = ShopSettings::query()->find($this->context->id());
         $card = $method === 'card' && app(BusinessPayments::class)->available() !== [];
         $eft = $method === 'offline' && app(BusinessPayments::class)->eftInstructions() !== null; // EFT / bank transfer, from Settings → Payments
@@ -55,9 +57,10 @@ final readonly class OrderPlacer
             throw new CheckoutProblem('Your cart is empty.');
         }
 
-        $order = DB::connection($this->context->connectionName())->transaction(function () use ($wanted, $customer, $fulfilment, $method): Order {
+        $order = DB::connection($this->context->connectionName())->transaction(function () use ($wanted, $customer, $fulfilment, $method, $branch): Order {
+            $stock = app(BranchStock::class);
             $settings = ShopSettings::query()->lockForUpdate()->find($this->context->id())
-                ?? ShopSettings::query()->create(['tenant_id' => $this->context->id()]); // card-only shops may not have saved settings
+                ?? ShopSettings::query()->create(['tenant_id' => $this->context->id()])->refresh(); // shops that never saved settings: re-read for the defaults (order numbers start at 1001)
             $items = [];
             $subtotal = 0;
             foreach (Variant::query()->whereIn('id', array_keys($wanted))->orderBy('id')->lockForUpdate()->get() as $variant) {
@@ -67,23 +70,24 @@ final readonly class OrderPlacer
                     throw new CheckoutProblem("{$name} isn’t available any more. Please remove it from your cart.");
                 }
                 $quantity = $wanted[$variant->id];
-                if ($variant->stock !== null && $variant->stock < $quantity) {
+                $tracked = $variant->stock !== null;
+                $short = $stock->take($variant, $branch, $quantity); // locked; at the fulfilling branch
+                if ($short !== null) {
                     $what = $variant->label ? "{$name} ({$variant->label})" : $name;
-                    throw new CheckoutProblem($variant->stock === 0 ? "{$what} has just sold out." : "Only {$variant->stock} of {$what} left — please change the quantity.");
+                    $where = count(app(BranchDirectory::class)->open()) > 1 ? ' at this branch' : '';
+                    throw new CheckoutProblem($short === 0 ? "{$what} has just sold out{$where}." : "Only {$short} of {$what} left{$where} — please change the quantity.");
                 }
-                if ($variant->stock !== null) {
-                    $variant->update(['stock' => $variant->stock - $quantity]);
-                }
-                $items[] = ['variant_id' => $variant->id, 'product_name' => $product->name, 'variant_label' => $variant->label, 'unit_cents' => $variant->price_cents,
-                    'quantity' => $quantity, 'stock_tracked' => $variant->stock !== null, 'line_cents' => $variant->price_cents * $quantity];
-                $subtotal += $variant->price_cents * $quantity;
+                $unit = $stock->priceAt($variant, $branch); // the price at this branch
+                $items[] = ['variant_id' => $variant->id, 'product_name' => $product->name, 'variant_label' => $variant->label, 'unit_cents' => $unit,
+                    'quantity' => $quantity, 'stock_tracked' => $tracked, 'line_cents' => $unit * $quantity];
+                $subtotal += $unit * $quantity;
             }
             if (count($items) !== count($wanted)) {
                 throw new CheckoutProblem('Something in your cart isn’t available any more. Please check your cart.');
             }
             $delivery = $fulfilment === 'delivery' ? $settings->delivery_fee_cents : 0;
             $order = Order::query()->create([
-                'number' => $settings->next_order_number, 'status' => 'awaiting_payment', 'payment_method' => $method, 'fulfilment' => $fulfilment,
+                'number' => $settings->next_order_number, 'branch_id' => $branch, 'status' => 'awaiting_payment', 'payment_method' => $method, 'fulfilment' => $fulfilment,
                 'customer_name' => $customer['name'], 'customer_phone' => $customer['phone'], 'customer_email' => $customer['email'] ?? null,
                 'delivery_address' => $fulfilment === 'delivery' ? ($customer['address'] ?? null) : null, 'notes' => $customer['notes'] ?? null,
                 'subtotal_cents' => $subtotal, 'delivery_cents' => $delivery, 'total_cents' => $subtotal + $delivery,
@@ -112,7 +116,9 @@ final readonly class OrderPlacer
         DB::connection($this->context->connectionName())->transaction(function () use ($order, $status): void {
             foreach (OrderItem::query()->where('order_id', $order->id)->where('stock_tracked', true)->get() as $item) {
                 $variant = Variant::query()->whereKey($item->variant_id)->lockForUpdate()->first();
-                $variant?->update(['stock' => (int) $variant->stock + $item->quantity]);
+                if ($variant !== null) {
+                    app(BranchStock::class)->give($variant, (string) $order->branch_id, $item->quantity); // back to the branch it came from
+                }
             }
             $order->update(['status' => $status, 'hold_expires_at' => null]);
         });

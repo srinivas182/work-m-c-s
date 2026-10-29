@@ -24,6 +24,8 @@ interface VariantRow {
   price_cents: number;
   compare_at_cents: number | null;
   stock: number | null;
+  stock_at?: Record<string, number>; // several branches
+  prices?: Record<string, number | null>; // several branches: optional price there
 }
 interface ProductRow {
   id: string;
@@ -37,6 +39,7 @@ interface ProductRow {
   variants: VariantRow[];
 }
 interface Props {
+  branches: { id: string; name: string }[];
   categories: { id: string; name: string }[];
   products: ProductRow[];
 }
@@ -55,12 +58,15 @@ const blankVariant = (options: string[]): VariantRow => ({
 function Editor({
   product,
   categories,
+  branches,
   onDone,
 }: {
   product: ProductRow | null;
   categories: Props['categories'];
+  branches: Props['branches'];
   onDone: () => void;
 }) {
+  const several = branches.length > 1;
   const form = useForm({
     name: product?.name ?? '',
     description: product?.description ?? '',
@@ -100,7 +106,32 @@ function Editor({
           className="grid gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            form.transform((d) => ({ ...d, category_id: d.category_id || null }));
+            form.transform((d) => ({
+              ...d,
+              category_id: d.category_id || null,
+              // Several branches: stock per branch (all empty = not tracked) and optional prices there.
+              variants: several
+                ? d.variants.map((v) => {
+                    const at = Object.fromEntries(
+                      Object.entries(v.stock_at ?? {}).filter(
+                        ([, q]) => q !== null && !Number.isNaN(q),
+                      ),
+                    );
+                    return {
+                      ...v,
+                      stock: Object.keys(at).length
+                        ? Object.values(at).reduce((a, b) => a + b, 0)
+                        : null,
+                      stock_at: Object.keys(at).length ? at : undefined,
+                    };
+                  })
+                : d.variants.map(
+                    (v) =>
+                      Object.fromEntries(
+                        Object.entries(v).filter(([k]) => k !== 'stock_at' && k !== 'prices'),
+                      ) as VariantRow,
+                  ), // one branch: just the total
+            }));
             const opts = { preserveScroll: true, onSuccess: onDone };
             if (product) form.put(`${base()}/products/${product.id}`, opts);
             else form.post(`${base()}/products`, opts);
@@ -244,18 +275,65 @@ function Editor({
                     onChange={(e) => setVariant(i, { sku: e.target.value })}
                   />
                 </Field>
-                <Field label="Stock" error={errors[`variants.${i}.stock`]}>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={v.stock ?? ''}
-                    onChange={(e) =>
-                      setVariant(i, {
-                        stock: e.target.value === '' ? null : Number(e.target.value),
-                      })
-                    }
-                  />
-                </Field>
+                {several ? (
+                  <fieldset className="grid gap-2 sm:col-span-2">
+                    <legend className="text-sm font-medium">Stock and price by branch</legend>
+                    {branches.map((b) => (
+                      <div key={b.id} className="flex flex-wrap items-end gap-3 text-sm">
+                        <span className="w-28 font-medium">{b.name}</span>
+                        <Field label={`Stock at ${b.name}`}>
+                          <Input
+                            type="number"
+                            min={0}
+                            className="w-24"
+                            value={v.stock_at?.[b.id] ?? ''}
+                            onChange={(e) => {
+                              const next = Object.fromEntries(
+                                Object.entries(v.stock_at ?? {}).filter(([id]) => id !== b.id),
+                              );
+                              setVariant(i, {
+                                stock_at:
+                                  e.target.value === ''
+                                    ? next
+                                    : { ...next, [b.id]: Number(e.target.value) },
+                              });
+                            }}
+                          />
+                        </Field>
+                        <Field label={`Price at ${b.name} (R, optional)`}>
+                          <Input
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            className="w-28"
+                            value={v.prices?.[b.id] != null ? (v.prices[b.id] as number) / 100 : ''}
+                            onChange={(e) =>
+                              setVariant(i, {
+                                prices: { ...(v.prices ?? {}), [b.id]: cents(e.target.value) },
+                              })
+                            }
+                          />
+                        </Field>
+                      </div>
+                    ))}
+                    <p className="text-fg-muted text-xs">
+                      Leave every stock box empty if you don’t track stock.
+                    </p>
+                  </fieldset>
+                ) : (
+                  <Field label="Stock" error={errors[`variants.${i}.stock`]}>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={v.stock ?? ''}
+                      onChange={(e) =>
+                        setVariant(i, {
+                          stock: e.target.value === '' ? null : Number(e.target.value),
+                        })
+                      }
+                    />
+                  </Field>
+                )}
                 {form.data.variants.length > 1 && (
                   <Button
                     type="button"
@@ -310,7 +388,7 @@ function Editor({
   );
 }
 
-export default function Products({ categories, products }: Props) {
+export default function Products({ categories, products, branches }: Props) {
   const [editing, setEditing] = useState<ProductRow | 'new' | null>(null);
   const category = useForm({ name: '' });
   return (
@@ -328,6 +406,7 @@ export default function Products({ categories, products }: Props) {
           <Editor
             product={editing === 'new' ? null : editing}
             categories={categories}
+            branches={branches}
             onDone={() => setEditing(null)}
           />
         )}

@@ -100,7 +100,9 @@ final readonly class OrderManager
             if ($restock) {
                 foreach (OrderItem::query()->where('order_id', $order->id)->where('stock_tracked', true)->get() as $item) {
                     $variant = Variant::query()->whereKey($item->variant_id)->lockForUpdate()->first();
-                    $variant?->update(['stock' => (int) $variant->stock + $item->quantity]);
+                    if ($variant !== null) {
+                        app(BranchStock::class)->give($variant, (string) $order->branch_id, $item->quantity); // back to the branch it came from
+                    }
                 }
             }
             $order->update(['refunded_cents' => $order->refunded_cents + $amount]);
