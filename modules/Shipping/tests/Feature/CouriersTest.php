@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Http;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Shipping\Contracts\Couriers;
+use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shipping\Models\Shipment;
 use Wurk\Shipping\Models\ShippingAccount;
-use Wurk\Shipping\Support\ShippingProblem;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 

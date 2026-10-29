@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Wurk\Shipping\Support;
+namespace Wurk\Shipping\Contracts;
 
 use RuntimeException;
 

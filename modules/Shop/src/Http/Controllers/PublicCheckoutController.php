@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\URL;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shipping\Contracts\Couriers;
-use Wurk\Shipping\Support\ShippingProblem;
+use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Mail\OrderPlacedMail;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;

@@ -7,8 +7,8 @@ namespace Wurk\Shipping\Gateways;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Throwable;
+use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shipping\Models\ShippingAccount;
-use Wurk\Shipping\Support\ShippingProblem;
 
 /**
  * Bob Go (many couriers): rates at checkout, shipments and tracking, with the business's API key.

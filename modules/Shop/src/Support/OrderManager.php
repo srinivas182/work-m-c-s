@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Shipping\Contracts\Couriers;
-use Wurk\Shipping\Support\ShippingProblem;
+use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Variant;

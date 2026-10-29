@@ -6,6 +6,7 @@ namespace Wurk\Shipping\Support;
 
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Shipping\Contracts\Couriers;
+use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shipping\Gateways\BobGo;
 use Wurk\Shipping\Gateways\Pargo;
 use Wurk\Shipping\Models\Shipment;

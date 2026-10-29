@@ -6,8 +6,8 @@ namespace Wurk\Shipping\Gateways;
 
 use Illuminate\Support\Facades\Http;
 use Throwable;
+use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shipping\Models\ShippingAccount;
-use Wurk\Shipping\Support\ShippingProblem;
 
 /**
  * Pargo pickup points: the nearest points to an address, and warehouse-to-pickup-point orders, with the
