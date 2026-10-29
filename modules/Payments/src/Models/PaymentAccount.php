@@ -19,6 +19,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string|null $webhook_id
  * @property string|null $label
  * @property bool $active
+ * @property string|null $branch_id
  */
 final class PaymentAccount extends Model
 {

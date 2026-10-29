@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 11.4 (payments by branch)
+- **A branch can have its own payment accounts** (PayFast, Yoco, Ozow, Peach, EFT — test or live, keys per mode), set by the owner under Settings → Payments ("Accounts for"); without one, the branch uses the business's.
+- Payments go through the branch they belong to (shop orders: the fulfilling branch; deposits: the booking's; classes: the session's), and are verified and refunded through the account used. Providers' notifications say which branch (each account's own signature and secrets).
+
 ### Added — Sprint 11.3 (shop by branch)
 - **Stock per branch** (the product's stock is the total, so pages and "sold out" work as before); existing stock moved to each business's main branch.
 - **Orders fulfilled by a branch**: collection from the branch the customer chooses (checkout asks where, and re-prices for that branch), delivery from a "ships from" branch. Never oversold per branch; cancelled, expired and restocked items go back to their branch.

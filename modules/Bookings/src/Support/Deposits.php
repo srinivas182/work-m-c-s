@@ -36,7 +36,7 @@ final readonly class Deposits
         if ($service->deposit_when === 'online' && ! $online) {
             return 0; // paid at the desk in person
         }
-        if ($this->payments->available() === []) { // no card payments connected (Settings → Payments)
+        if ($this->payments->available($branchId) === []) { // no card payments for this branch (Settings → Payments)
             return 0;
         }
 
@@ -53,7 +53,7 @@ final readonly class Deposits
     /** What to pay for a place in a class (0 = paid at the class, or payouts not set up). */
     public function amountForClass(ClassSession $session): int
     {
-        if (! $session->pay_online || $this->payments->available() === []) {
+        if (! $session->pay_online || $this->payments->available($session->branch_id) === []) {
             return 0;
         }
 
@@ -71,8 +71,10 @@ final readonly class Deposits
         $what = $booking instanceof ClassAttendee ? 'Class: '.$booking->session()->title : 'Booking deposit';
 
         // The return address carries the reference (Yoco and PayFast don't add it).
+        $branch = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id; // the branch's own account, if it has one
+
         return $this->payments->start($reference, $amountCents, $what, ['name' => $name, 'email' => $email],
-            ['return' => $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference), 'cancel' => (string) preg_replace('#/book/return.*$#', '/', $returnUrl)]); // cancelling goes back to the home page
+            ['return' => $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference), 'cancel' => (string) preg_replace('#/book/return.*$#', '/', $returnUrl)], branchId: $branch); // cancelling goes back to the home page
     }
 
     /**

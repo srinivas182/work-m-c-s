@@ -37,8 +37,8 @@ final readonly class OrderPlacer
     {
         $branch = app(BranchStock::class)->fulfilling($fulfilment, $branch); // the branch that fulfils this order
         $settings = ShopSettings::query()->find($this->context->id());
-        $card = $method === 'card' && app(BusinessPayments::class)->available() !== [];
-        $eft = $method === 'offline' && app(BusinessPayments::class)->eftInstructions() !== null; // EFT / bank transfer, from Settings → Payments
+        $card = $method === 'card' && app(BusinessPayments::class)->available($branch) !== []; // at the fulfilling branch
+        $eft = $method === 'offline' && app(BusinessPayments::class)->eftInstructions($branch) !== null; // EFT / bank transfer, from Settings → Payments
         if (! $card && ! $eft) {
             throw new CheckoutProblem('Ordering online isn’t available yet. Please contact us to order.');
         }

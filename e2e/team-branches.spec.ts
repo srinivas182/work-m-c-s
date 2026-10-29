@@ -43,6 +43,21 @@ test('an owner adds a branch and invites a branch manager', async ({ page }, tes
   await expect(page.getByText(/5 in stock/)).toBeVisible();
   await expectAccessible(page);
 
+  // Payments by branch: Sandton gets its own bank details.
+  await page.goto(`/${handle}/settings/payments`);
+  await page.getByLabel('Accounts for').selectOption({ label: 'Sandton' });
+  await expect(
+    page.getByText('A method this branch doesn’t have its own account for uses the business’s.'),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Add bank details' }).click();
+  const eft = page.getByRole('form', { name: 'EFT / bank transfer live keys' });
+  await eft
+    .getByLabel('How to pay (bank, account number, branch code)')
+    .fill('Capitec, Sandton account 1234567890');
+  await eft.getByRole('button', { name: 'Save live details' }).click();
+  await expect(page.getByText('EFT / bank transfer live keys saved.')).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`/${handle}/settings/team`);
   await expect(page.getByRole('heading', { level: 1, name: 'Team' })).toBeVisible();
   await expect(page.getByRole('list', { name: 'Team members' }).getByText('You')).toBeVisible();

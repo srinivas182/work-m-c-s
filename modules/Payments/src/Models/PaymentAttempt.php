@@ -16,6 +16,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string $status
  * @property Carbon|null $paid_at
  * @property array{action: string, fields: array<string, string>}|null $form
+ * @property string|null $branch_id
  */
 final class PaymentAttempt extends Model
 {
