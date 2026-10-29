@@ -1,0 +1,13 @@
+{
+    "name": "Crm",
+    "key": "crm",
+    "version": "0.1.0",
+    "description": "Contacts (one per person, built from bookings, orders, class places, forms and chats), pipelines, forms and the chatbot.",
+    "core": true,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit"
+    ]
+}

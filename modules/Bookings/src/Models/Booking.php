@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Wurk\Access\Contracts\BelongsToBranch;
+use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Tenancy\Contracts\BelongsToTenant;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 
@@ -59,6 +60,11 @@ final class Booking extends Model
     {
         self::creating(function (self $row): void {
             $row->branch_id ??= app(BranchDirectory::class)->main();
+        });
+        // Everyone who books becomes (or is matched to) a contact.
+        self::created(function (self $b): void {
+            $service = BookingService::query()->find($b->service_id)->name ?? 'Booking';
+            app(ContactBook::class)->remember($b->customer_name, $b->customer_phone, $b->customer_email, 'booking', $b->id, $b->branch_id, $service.' · '.$b->starts_at);
         });
     }
 }

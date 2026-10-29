@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
@@ -136,4 +137,15 @@ it('shows the owner each month’s statement, with branch names, and settles it'
         ->where('pairs.0.from_name', $mainName)->where('pairs.0.to_name', 'Sandton')->where('pairs.0.total_cents', 27000)->where('canSettle', true));
     $this->actingAs($owner)->post("{$base}/settle", ['month' => now()->format('Y-m'), 'from' => $this->main, 'to' => $this->sandton])->assertSessionHas('status', 'Marked as settled.');
     $this->actingAs($owner)->get($base)->assertInertia(fn (Assert $p) => $p->where('pairs.0.settled', true));
+});
+
+it('makes one contact of someone who orders twice, however they write their number', function () {
+    ($this->in)(function () {
+        app(OrderPlacer::class)->place([['variant' => $this->tee->id, 'quantity' => 1]], ['name' => 'Sipho', 'phone' => '082 555 0101'], 'collection', 'offline', $this->main);
+        app(OrderPlacer::class)->place([['variant' => $this->tee->id, 'quantity' => 1]], ['name' => 'Sipho M', 'phone' => '+27 82 555 0101'], 'collection', 'offline', $this->sandton);
+        $db = DB::connection(app(TenantContext::class)->connectionName());
+        expect($db->table('contacts')->count())->toBe(1)->and($db->table('contacts')->value('phone'))->toBe('+27825550101')
+            ->and($db->table('contact_links')->where('source_type', 'order')->count())->toBe(2)
+            ->and($db->table('contact_links')->pluck('branch_id')->sort()->values()->all())->toBe(collect([$this->main, $this->sandton])->sort()->values()->all());
+    });
 });
