@@ -627,3 +627,103 @@ describe('checkout with several branches', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('checkout with couriers', () => {
+  const respond = (status: number, body: unknown) =>
+    Promise.resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+  const settle = () =>
+    new Promise((r) => setTimeout(r, 0)).then(() => new Promise((r) => setTimeout(r, 0)));
+
+  it('gets live courier prices for an address, adds the chosen one to the total, and orders with it', async () => {
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url) => {
+      if (url === '/cart/price')
+        return respond(200, {
+          lines: [
+            {
+              variant: 'v1',
+              name: 'Kasi T-shirt',
+              label: null,
+              slug: 'kasi-t-shirt',
+              unit_cents: 25000,
+              quantity: 1,
+              available: 3,
+            },
+          ],
+          subtotal_cents: 25000,
+          checkout: {
+            available: true,
+            card: false,
+            offline: true,
+            collection: false,
+            collection_address: null,
+            delivery: true,
+            flat_delivery: false,
+            delivery_fee_cents: 0,
+            delivery_note: null,
+            couriers: { courier: true, pickup_points: true, pickup_rate_cents: 6000 },
+          },
+        });
+      if (url === '/cart/shipping')
+        return respond(200, {
+          rates: [{ service: 'ECO', name: 'Economy', cents: 9950, eta: null }],
+        });
+      return respond(201, { placed: true, order_url: '/order/x' });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    localStorage.setItem('wurk-cart', JSON.stringify([{ variant: 'v1', quantity: 1 }]));
+    document.body.innerHTML = '<div data-island="checkout"><p>Your cart is empty.</p></div>';
+    startIslands(document);
+    await settle();
+    const byLabel = <T extends HTMLElement>(text: string) =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find((l) => l.textContent === text)!.htmlFor,
+      ) as T;
+    const way = byLabel<HTMLSelectElement>('How should we deliver?');
+    expect([...way.options].map((o) => o.textContent)).toEqual([
+      'Courier (live prices)',
+      'Pargo pickup point — R60.00',
+    ]);
+
+    way.value = 'pickup';
+    way.dispatchEvent(new Event('change'));
+    byLabel<HTMLInputElement>('Your name').value = 'Sipho';
+    byLabel<HTMLInputElement>('Phone').value = '082 555 0101';
+    byLabel<HTMLInputElement>('I agree to be contacted about my order.').checked = true;
+    document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    expect(document.body.textContent).toContain('Please choose a pickup point.');
+
+    way.value = 'courier';
+    way.dispatchEvent(new Event('change'));
+    byLabel<HTMLInputElement>('Street address').value = '1 Vilakazi St';
+    byLabel<HTMLInputElement>('City or town').value = 'Soweto';
+    byLabel<HTMLInputElement>('Postal code').value = '1804';
+    [...document.querySelectorAll('button')]
+      .find((b) => b.textContent === 'Get courier prices')!
+      .click();
+    await settle();
+    const eco = document.querySelector<HTMLInputElement>(
+      '[role="radiogroup"][aria-label="Courier options"] input',
+    )!;
+    eco.checked = true;
+    eco.dispatchEvent(new Event('change'));
+    expect(document.body.textContent).toContain('Total R349.50');
+
+    document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    await settle();
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)![1]!.body))).toMatchObject({
+      fulfilment: 'delivery',
+      address: null,
+      shipping: {
+        provider: 'bobgo',
+        service: 'ECO',
+        to: { street: '1 Vilakazi St', city: 'Soweto', postal_code: '1804' },
+      },
+    });
+    vi.unstubAllGlobals();
+  });
+});

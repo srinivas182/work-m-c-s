@@ -843,6 +843,8 @@ async function checkout(root: HTMLElement): Promise<void> {
     delivery_note: string | null;
     branches?: { id: string; name: string; address: string | null }[]; // several branches: where to collect
     branch?: string;
+    flat_delivery?: boolean; // the shop's own flat-fee delivery
+    couriers?: { courier: boolean; pickup_points: boolean; pickup_rate_cents: number | null };
   };
   let picked: { branch: string | null; fulfilment: string } = {
     branch: null,
@@ -913,7 +915,9 @@ async function checkout(root: HTMLElement): Promise<void> {
   );
   const deliver = radio(
     'delivery',
-    `Delivery — ${randOf(s.delivery_fee_cents)}${s.delivery_note ? ` (${s.delivery_note})` : ''}`,
+    s.flat_delivery === false
+      ? 'Delivery'
+      : `Delivery — ${randOf(s.delivery_fee_cents)}${s.delivery_note ? ` (${s.delivery_note})` : ''}`,
     !s.collection,
   );
   const how = el(
@@ -936,6 +940,148 @@ async function checkout(root: HTMLElement): Promise<void> {
   const address = el('textarea', { class: field, rows: 3 });
   address.id = id('address');
   const addressRow = labelled('Delivery address', address);
+  // Couriers (several ways to deliver): the shop's own flat fee, a courier at live prices (Bob Go), or a Pargo pickup point.
+  const c = s.couriers ?? { courier: false, pickup_points: false, pickup_rate_cents: null };
+  const ways: [string, string][] = [
+    ...(s.flat_delivery !== false
+      ? [['flat', `Our own delivery — ${randOf(s.delivery_fee_cents)}`] as [string, string]]
+      : []),
+    ...(c.courier ? [['courier', 'Courier (live prices)'] as [string, string]] : []),
+    ...(c.pickup_points
+      ? [['pickup', `Pargo pickup point — ${randOf(c.pickup_rate_cents ?? 0)}`] as [string, string]]
+      : []),
+  ];
+  const way = el('select', { class: field });
+  for (const [v, t] of ways) way.append(el('option', { value: v }, t));
+  way.id = id('way');
+  const wayRow = labelled('How should we deliver?', way);
+  let rate: { service: string; name: string; cents: number } | null = null;
+  let point: { code: string; name: string } | null = null;
+  const to = {
+    street: input('street', 'text'),
+    suburb: input('suburb', 'text'),
+    city: input('city', 'text'),
+    postal_code: input('postal-code', 'text'),
+  };
+  const rates = el('div', {
+    role: 'radiogroup',
+    ariaLabel: 'Courier options',
+    class: 'grid gap-2',
+  });
+  const getRates = el(
+    'button',
+    { type: 'button', class: 'underline justify-self-start' },
+    'Get courier prices',
+  );
+  const courierRow = el(
+    'div',
+    { class: 'grid gap-3' },
+    labelled('Street address', to.street),
+    labelled('Suburb', to.suburb),
+    labelled('City or town', to.city),
+    labelled('Postal code', to.postal_code),
+    getRates,
+    rates,
+  );
+  const near = input('near', 'text');
+  const points = el('div', {
+    role: 'radiogroup',
+    ariaLabel: 'Pickup points',
+    class: 'grid gap-2',
+  });
+  const findPoints = el(
+    'button',
+    { type: 'button', class: 'underline justify-self-start' },
+    'Find pickup points',
+  );
+  const pickupRow = el(
+    'div',
+    { class: 'grid gap-3' },
+    labelled('Your area or address', near),
+    findPoints,
+    points,
+  );
+  const ask = async (body: Record<string, unknown>) => {
+    const r = await fetch('/cart/shipping', {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lines: readCart(), ...body }),
+    }).catch(() => null);
+    const json = r
+      ? ((await r.json().catch(() => ({}))) as {
+          rates?: { service: string; name: string; cents: number; eta: string | null }[];
+          points?: { code: string; name: string; address: string }[];
+          message?: string;
+        })
+      : {};
+    if (!r || !r.ok)
+      status.textContent = json.message ?? 'We couldn’t reach the courier. Please try again.';
+    return r && r.ok ? json : null;
+  };
+  const choices = (
+    box: HTMLElement,
+    name: string,
+    items: { key: string; label: string; pick: () => void }[],
+  ) => {
+    box.replaceChildren();
+    for (const it of items) {
+      const r = el('input', { type: 'radio', name: `${name}-${uid}`, value: it.key });
+      r.addEventListener('change', () => {
+        it.pick();
+        redraw();
+      });
+      box.append(el('label', { class: 'flex items-center gap-2' }, r, it.label));
+    }
+  };
+  getRates.addEventListener('click', () => {
+    void ask({
+      kind: 'rates',
+      to: {
+        street: to.street.value,
+        suburb: to.suburb.value || null,
+        city: to.city.value,
+        postal_code: to.postal_code.value,
+      },
+    }).then((j) => {
+      rate = null;
+      const list = j?.rates ?? [];
+      if (j)
+        status.textContent = list.length
+          ? `${list.length} courier options.`
+          : 'No courier options for this address.';
+      choices(
+        rates,
+        'rate',
+        list.map((x) => ({
+          key: x.service,
+          label: `${x.name} — ${randOf(x.cents)}${x.eta ? ` (by ${x.eta})` : ''}`,
+          pick: () => (rate = x),
+        })),
+      );
+      redraw();
+    });
+  });
+  findPoints.addEventListener('click', () => {
+    void ask({ kind: 'points', near: near.value }).then((j) => {
+      point = null;
+      const list = j?.points ?? [];
+      if (j)
+        status.textContent = list.length
+          ? `${list.length} pickup points near you.`
+          : 'No pickup points found near there.';
+      choices(
+        points,
+        'point',
+        list.map((x) => ({
+          key: x.code,
+          label: `${x.name} — ${x.address}`,
+          pick: () => (point = { code: x.code, name: x.name }),
+        })),
+      );
+      redraw();
+    });
+  });
+  way.addEventListener('change', () => redraw());
   const notes = input('notes', 'text');
   const consent = el('input', { type: 'checkbox', required: true });
   consent.id = id('consent');
@@ -1024,8 +1170,18 @@ async function checkout(root: HTMLElement): Promise<void> {
         ),
       );
     }
-    const fee = delivering() ? s.delivery_fee_cents : 0;
-    addressRow.hidden = !delivering();
+    const mode = ways.length ? way.value : 'flat';
+    const fee = !delivering()
+      ? 0
+      : mode === 'courier'
+        ? (rate?.cents ?? 0)
+        : mode === 'pickup'
+          ? (c.pickup_rate_cents ?? 0)
+          : s.delivery_fee_cents;
+    wayRow.hidden = !delivering() || ways.length < 2;
+    addressRow.hidden = !delivering() || mode !== 'flat';
+    courierRow.hidden = !delivering() || mode !== 'courier';
+    pickupRow.hidden = !delivering() || mode !== 'pickup';
     totals.textContent = `Total ${randOf(subtotal + fee)} (incl. VAT${fee ? `, delivery ${randOf(fee)}` : ''})`;
   };
   // Several branches: customers choose where to collect from; stock and prices follow the branch.
@@ -1069,7 +1225,11 @@ async function checkout(root: HTMLElement): Promise<void> {
     labelled('Your name', name),
     labelled('Phone', phone),
     labelled('Email (for your receipt, optional)', email),
+    wayRow,
     addressRow,
+    courierRow,
+    pickupRow,
+
     labelled('Notes (optional)', notes),
     el(
       'div',
@@ -1083,6 +1243,15 @@ async function checkout(root: HTMLElement): Promise<void> {
   );
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const mode = ways.length ? way.value : 'flat';
+    if (delivering() && mode === 'courier' && !rate) {
+      status.textContent = 'Please choose a courier option.';
+      return;
+    }
+    if (delivering() && mode === 'pickup' && !point) {
+      status.textContent = 'Please choose a pickup point.';
+      return;
+    }
     place.disabled = true;
     status.textContent = 'Placing your order…';
     const r = await fetch('/cart/checkout', {
@@ -1095,7 +1264,24 @@ async function checkout(root: HTMLElement): Promise<void> {
         email: email.value || null,
         fulfilment: delivering() ? 'delivery' : 'collection',
         branch: !delivering() && several ? branchPick.value : null,
-        address: delivering() ? address.value : null,
+        address: delivering() && mode === 'flat' ? address.value : null,
+        shipping:
+          !delivering() || mode === 'flat'
+            ? null
+            : mode === 'courier' && rate
+              ? {
+                  provider: 'bobgo',
+                  service: rate.service,
+                  to: {
+                    street: to.street.value,
+                    suburb: to.suburb.value || null,
+                    city: to.city.value,
+                    postal_code: to.postal_code.value,
+                  },
+                }
+              : point
+                ? { provider: 'pargo', pickup_point: point.code, pickup_point_name: point.name }
+                : null,
         notes: notes.value || null,
         payment: payment(),
         consent: consent.checked ? '1' : null,
