@@ -18,6 +18,13 @@ test('an owner adds a branch and invites a branch manager', async ({ page }, tes
   );
   await expectAccessible(page);
 
+  // Bookings by branch: hours at the new branch.
+  await page.goto(`/${handle}/bookings/settings`);
+  await page.getByLabel('Hours at').selectOption({ label: 'Sandton' });
+  const hours = page.getByRole('region', { name: /’s hours$/ }).first();
+  await expect(hours).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`/${handle}/settings/team`);
   await expect(page.getByRole('heading', { level: 1, name: 'Team' })).toBeVisible();
   await expect(page.getByRole('list', { name: 'Team members' }).getByText('You')).toBeVisible();

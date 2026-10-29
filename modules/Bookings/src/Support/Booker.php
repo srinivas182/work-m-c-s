@@ -27,8 +27,9 @@ final readonly class Booker
     /**
      * @param  array{name: string, phone?: string|null, email?: string|null, notes?: string|null}  $customer
      */
-    public function book(BookingService $service, CarbonImmutable $startsAt, array $customer, ?string $memberId = null, string $source = 'owner', ?string $by = null, string $status = 'confirmed', bool $asOwner = false, bool $online = false): Booking
+    public function book(BookingService $service, CarbonImmutable $startsAt, array $customer, ?string $memberId = null, string $source = 'owner', ?string $by = null, string $status = 'confirmed', bool $asOwner = false, bool $online = false, ?string $branchId = null): Booking
     {
+        $branch = app(BranchServices::class)->resolve($branchId); // an open branch, or the main one
         $startsAt = $startsAt->utc();
         // Owners (walk-ins, squeezing someone in) aren't held to notice, horizon or listed hours —
         // only to the no-overlap guarantee, which the slots enforce for everyone.
@@ -36,16 +37,16 @@ final readonly class Booker
             $members = $memberId !== null ? [$memberId] : array_values(DB::connection($this->context->connectionName())->table('booking_service_member')
                 ->where('service_id', $service->id)->pluck('member_id')->map(fn ($m) => (string) $m)->values()->all());
 
-            return $this->claim($service, $startsAt, $customer, $members, $source, $by, $status, $online);
+            return $this->claim($service, $startsAt, $customer, $members, $source, $by, $status, $online, branch: $branch);
         }
         // Open for this service at this time (hours, time off, notice) — then the database decides the race.
         $date = $startsAt->setTimezone($this->context->current()->timezone())->format('Y-m-d');
-        $open = collect($this->availability->on($service, $date, $memberId))->firstWhere('starts_at', $startsAt->toIso8601String());
+        $open = collect($this->availability->on($service, $date, $memberId, null, $branch))->firstWhere('starts_at', $startsAt->toIso8601String());
         if ($open === null) {
             throw new SlotTaken;
         }
 
-        return $this->claim($service, $startsAt, $customer, $open['members'], $source, $by, $status, $online);
+        return $this->claim($service, $startsAt, $customer, $open['members'], $source, $by, $status, $online, branch: $branch);
     }
 
     /**
@@ -54,20 +55,20 @@ final readonly class Booker
      * @param  array{name: string, phone?: string|null, email?: string|null, notes?: string|null}  $customer
      * @param  list<string>  $members
      */
-    private function claim(BookingService $service, CarbonImmutable $startsAt, array $customer, array $members, string $source, ?string $by, string $status, bool $online = false): Booking
+    private function claim(BookingService $service, CarbonImmutable $startsAt, array $customer, array $members, string $source, ?string $by, string $status, bool $online = false, ?string $branch = null): Booking
     {
         $from = $startsAt->subMinutes($service->buffer_before_minutes);
         $until = $startsAt->addMinutes($service->duration_minutes + $service->buffer_after_minutes);
 
         foreach ($members as $member) { // "anyone": the first team member free at that time
             try {
-                $booking = DB::connection($this->context->connectionName())->transaction(function () use ($service, $startsAt, $customer, $member, $source, $by, $status, $from, $until, $online): Booking {
+                $booking = DB::connection($this->context->connectionName())->transaction(function () use ($service, $startsAt, $customer, $member, $source, $by, $status, $from, $until, $online, $branch): Booking {
                     $booking = Booking::query()->create([
                         'service_id' => $service->id, 'member_id' => $member, 'starts_at' => Instant::db($startsAt),
                         'ends_at' => Instant::db($startsAt->addMinutes($service->duration_minutes)), 'status' => $status, 'online' => $online,
                         'customer_name' => $customer['name'], 'customer_phone' => $customer['phone'] ?? null,
                         'customer_email' => $customer['email'] ?? null, 'notes' => $customer['notes'] ?? null,
-                        'source' => $source, 'created_by' => $by,
+                        'source' => $source, 'created_by' => $by, 'branch_id' => $branch,
                     ]);
                     DB::connection($this->context->connectionName())->table('booking_slots')->insert(array_map(fn (CarbonImmutable $slot) => [
                         'member_id' => $member, 'slot_at' => Instant::db($slot), 'booking_id' => $booking->id, 'tenant_id' => $this->context->id(),

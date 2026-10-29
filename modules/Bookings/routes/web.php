@@ -25,19 +25,23 @@ Route::tenant(function (): void {
     });
     Route::middleware(['entitled:bookings', 'permission:bookings.manage'])->prefix('bookings')->name('tenant.bookings.')->group(function (): void {
         Route::get('/settings', [BookingSettingsController::class, 'show'])->name('settings');
-        Route::post('/services', [BookingSettingsController::class, 'saveService'])->name('services.store');
-        Route::put('/services/{service}', [BookingSettingsController::class, 'saveService'])->name('services.update');
         Route::put('/hours/{member}', [BookingSettingsController::class, 'saveHours'])->name('hours.update');
+        // Business-wide: services and prices, policy, messages, meeting links, health practice, table settings.
+        Route::middleware('permission:bookings.settings')->group(function (): void {
+            Route::post('/services', [BookingSettingsController::class, 'saveService'])->name('services.store');
+            Route::put('/services/{service}', [BookingSettingsController::class, 'saveService'])->name('services.update');
+            Route::put('/policy', [BookingSettingsController::class, 'savePolicy'])->name('policy.save');
+            Route::put('/messages', [BookingSettingsController::class, 'saveMessages'])->name('messages.save');
+            Route::get('/video/connect/{provider}', [VideoConnectionController::class, 'connect'])->whereIn('provider', ['google', 'zoom'])->name('video.connect');
+            Route::put('/video/fixed', [VideoConnectionController::class, 'fixed'])->name('video.fixed');
+            Route::put('/video/links', [BookingSettingsController::class, 'saveLinks'])->name('video.links');
+            Route::put('/health', [BookingSettingsController::class, 'saveHealth'])->name('health');
+            Route::put('/registrations/{member}', [BookingSettingsController::class, 'saveRegistration'])->name('registrations');
+            Route::delete('/video', [VideoConnectionController::class, 'disconnect'])->name('video.disconnect');
+            Route::put('/tables/settings', [TablesController::class, 'saveSettings'])->name('tables.settings');
+        });
         Route::post('/time-off', [BookingSettingsController::class, 'addTimeOff'])->name('time-off.store');
         Route::delete('/time-off/{timeOff}', [BookingSettingsController::class, 'removeTimeOff'])->name('time-off.destroy');
-        Route::put('/policy', [BookingSettingsController::class, 'savePolicy'])->name('policy.save');
-        Route::put('/messages', [BookingSettingsController::class, 'saveMessages'])->name('messages.save');
-        Route::get('/video/connect/{provider}', [VideoConnectionController::class, 'connect'])->whereIn('provider', ['google', 'zoom'])->name('video.connect');
-        Route::put('/video/fixed', [VideoConnectionController::class, 'fixed'])->name('video.fixed');
-        Route::put('/video/links', [BookingSettingsController::class, 'saveLinks'])->name('video.links');
-        Route::put('/health', [BookingSettingsController::class, 'saveHealth'])->name('health');
-        Route::put('/registrations/{member}', [BookingSettingsController::class, 'saveRegistration'])->name('registrations');
-        Route::delete('/video', [VideoConnectionController::class, 'disconnect'])->name('video.disconnect');
         Route::get('/classes', [ClassesController::class, 'show'])->name('classes');
         Route::post('/classes', [ClassesController::class, 'store'])->name('classes.store');
         Route::post('/classes/{session}/attendees', [ClassesController::class, 'addAttendee'])->name('classes.attendees');
@@ -46,7 +50,6 @@ Route::tenant(function (): void {
         Route::get('/tables', [TablesController::class, 'show'])->name('tables');
         Route::post('/tables', [TablesController::class, 'store'])->name('tables.store');
         Route::post('/tables/{reservation}/status', [TablesController::class, 'status'])->name('tables.status');
-        Route::put('/tables/settings', [TablesController::class, 'saveSettings'])->name('tables.settings');
     });
 });
 

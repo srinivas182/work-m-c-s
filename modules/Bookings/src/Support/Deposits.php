@@ -31,7 +31,7 @@ final readonly class Deposits
      * What to pay before the booking is confirmed, in cents: none, a fixed or percentage deposit, or
      * the full price — always, or only for online appointments. 0 when payouts aren't set up.
      */
-    public function amountFor(BookingService $service, bool $online = false): int
+    public function amountFor(BookingService $service, bool $online = false, ?string $branchId = null): int
     {
         if ($service->deposit_when === 'online' && ! $online) {
             return 0; // paid at the desk in person
@@ -40,10 +40,12 @@ final readonly class Deposits
             return 0;
         }
 
+        $price = app(BranchServices::class)->priceAt($service, $branchId); // the price at this branch (an override, or the service's own)
+
         return match ($service->deposit_type) {
             'fixed' => $service->deposit_value,
-            'percent' => (int) round($service->price_cents * min(100, $service->deposit_value) / 100),
-            'full' => $service->price_cents,
+            'percent' => (int) round($price * min(100, $service->deposit_value) / 100),
+            'full' => $price,
             default => 0,
         };
     }

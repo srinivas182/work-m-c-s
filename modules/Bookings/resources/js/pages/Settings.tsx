@@ -31,11 +31,20 @@ interface Service {
   deposit_value: number;
   active: boolean;
   members: string[];
+  branches?: { branch: string; price_cents: number | null }[]; // none = every branch
 }
 interface Props {
   services: Service[];
   team: { id: string; name: string }[];
-  hours: { member_id: string; weekday: number; starts: string; ends: string }[];
+  hours: {
+    member_id: string;
+    branch_id: string | null;
+    weekday: number;
+    starts: string;
+    ends: string;
+  }[];
+  branches: { id: string; name: string }[];
+  canSettings: boolean;
   timeOff: {
     id: string;
     member_id: string | null;
@@ -75,12 +84,23 @@ const selectClass = 'h-10 w-full rounded-md border border-border bg-bg px-3 text
 function ServiceForm({
   service,
   team,
+  branches,
   onDone,
 }: {
   service: Service | null;
   team: Props['team'];
+  branches: Props['branches'];
   onDone: () => void;
 }) {
+  const [everywhere, setEverywhere] = useState((service?.branches ?? []).length === 0);
+  const [offered, setOffered] = useState<Record<string, string>>(
+    Object.fromEntries(
+      (service?.branches ?? []).map((b) => [
+        b.branch,
+        b.price_cents === null ? '' : String(b.price_cents / 100),
+      ]),
+    ),
+  );
   const form = useForm({
     name: service?.name ?? '',
     description: service?.description ?? '',
@@ -97,7 +117,20 @@ function ServiceForm({
   });
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    form.transform(({ price, ...d }) => ({ ...d, price_cents: Math.round(Number(price) * 100) }));
+    form.transform(({ price, ...d }) => ({
+      ...d,
+      price_cents: Math.round(Number(price) * 100),
+      ...(branches.length > 1
+        ? {
+            branches: everywhere
+              ? []
+              : Object.entries(offered).map(([branch, p]) => ({
+                  branch,
+                  price_cents: p === '' ? null : Math.round(Number(p) * 100),
+                })),
+          }
+        : {}),
+    }));
     const options = { preserveScroll: true, onSuccess: onDone };
     if (service) form.put(`${base()}/services/${service.id}`, options);
     else form.post(`${base()}/services`, options);
@@ -244,6 +277,48 @@ function ServiceForm({
         ))}
         {form.errors.members && <p className="text-danger-11 text-sm">{form.errors.members}</p>}
       </fieldset>
+      {branches.length > 1 && (
+        <fieldset className="grid gap-2">
+          <legend className="mb-1 text-sm font-medium">Offered at</legend>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox checked={everywhere} onCheckedChange={(on) => setEverywhere(on === true)} />
+            Every branch (including new ones), at this price
+          </label>
+          {!everywhere &&
+            branches.map((b) => (
+              <div key={b.id} className="flex flex-wrap items-center gap-3 text-sm">
+                <label className="flex items-center gap-2">
+                  <Checkbox
+                    checked={b.id in offered}
+                    onCheckedChange={(on) =>
+                      setOffered(
+                        on === true
+                          ? { ...offered, [b.id]: '' }
+                          : Object.fromEntries(
+                              Object.entries(offered).filter(([id]) => id !== b.id),
+                            ),
+                      )
+                    }
+                  />
+                  {b.name}
+                </label>
+                {b.id in offered && (
+                  <label className="flex items-center gap-2">
+                    Price here (R, optional)
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="w-28"
+                      value={offered[b.id]}
+                      onChange={(e) => setOffered({ ...offered, [b.id]: e.target.value })}
+                    />
+                  </label>
+                )}
+              </div>
+            ))}
+        </fieldset>
+      )}
       <div className="flex gap-2">
         <Button type="submit" loading={form.processing}>
           Save service
@@ -256,11 +331,24 @@ function ServiceForm({
   );
 }
 
-function HoursEditor({ member, hours }: { member: Props['team'][number]; hours: Props['hours'] }) {
+function HoursEditor({
+  member,
+  hours,
+  branch,
+}: {
+  member: Props['team'][number];
+  hours: Props['hours'];
+  branch: string | null;
+}) {
   // Up to two stretches a day; the gap between them is a break.
   const initial = DAYS.map((_, d) =>
     hours
-      .filter((h) => h.member_id === member.id && h.weekday === d)
+      .filter(
+        (h) =>
+          h.member_id === member.id &&
+          h.weekday === d &&
+          (branch === null || h.branch_id === branch),
+      )
       .map((h) => ({ starts: h.starts, ends: h.ends })),
   );
   const [days, setDays] = useState(initial);
@@ -272,7 +360,10 @@ function HoursEditor({ member, hours }: { member: Props['team'][number]; hours: 
     setSaving(true);
     router.put(
       `${base()}/hours/${member.id}`,
-      { hours: days.flatMap((stretches, weekday) => stretches.map((s) => ({ weekday, ...s }))) },
+      {
+        branch,
+        hours: days.flatMap((stretches, weekday) => stretches.map((s) => ({ weekday, ...s }))),
+      },
       {
         preserveScroll: true,
         onFinish: () => setSaving(false),
@@ -742,6 +833,8 @@ export default function Settings({
   services,
   team,
   hours,
+  branches,
+  canSettings,
   timeOff,
   timezone,
   cardPayments,
@@ -750,6 +843,7 @@ export default function Settings({
   messages,
   video,
 }: Props) {
+  const [hoursBranch, setHoursBranch] = useState<string | null>(branches[0]?.id ?? null);
   const [editing, setEditing] = useState<Service | 'new' | null>(
     services.length === 0 ? 'new' : null,
   );
@@ -789,7 +883,12 @@ export default function Settings({
               {services.map((s) =>
                 editing !== 'new' && editing?.id === s.id ? (
                   <li key={s.id}>
-                    <ServiceForm service={s} team={team} onDone={() => setEditing(null)} />
+                    <ServiceForm
+                      service={s}
+                      team={team}
+                      branches={branches}
+                      onDone={() => setEditing(null)}
+                    />
                   </li>
                 ) : (
                   <li
@@ -806,36 +905,49 @@ export default function Settings({
                         {s.members.map((id) => who(id)).join(', ')}
                       </p>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      aria-label={`Edit ${s.name}`}
-                      onClick={() => setEditing(s)}
-                    >
-                      Edit
-                    </Button>
+                    {canSettings && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        aria-label={`Edit ${s.name}`}
+                        onClick={() => setEditing(s)}
+                      >
+                        Edit
+                      </Button>
+                    )}
                   </li>
                 ),
               )}
             </ul>
             {editing === 'new' ? (
-              <ServiceForm service={null} team={team} onDone={() => setEditing(null)} />
+              <ServiceForm
+                service={null}
+                team={team}
+                branches={branches}
+                onDone={() => setEditing(null)}
+              />
             ) : (
-              <Button
-                variant="secondary"
-                className="justify-self-start"
-                onClick={() => setEditing('new')}
-              >
-                Add a service
-              </Button>
+              canSettings && (
+                <Button
+                  variant="secondary"
+                  className="justify-self-start"
+                  onClick={() => setEditing('new')}
+                >
+                  Add a service
+                </Button>
+              )
             )}
           </CardContent>
         </Card>
 
-        <DepositsCard cardPayments={cardPayments} policy={policy} />
-        <MessagesCard messages={messages} />
-        <VideoCard video={video} team={team} />
-        <HealthCard health={health} team={team} />
+        {canSettings && (
+          <>
+            <DepositsCard cardPayments={cardPayments} policy={policy} />
+            <MessagesCard messages={messages} />
+            <VideoCard video={video} team={team} />
+            <HealthCard health={health} team={team} />
+          </>
+        )}
 
         <Card>
           <CardHeader>
@@ -845,8 +957,29 @@ export default function Settings({
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-8">
+            {branches.length > 1 && (
+              <label className="flex items-center gap-2 text-sm font-medium">
+                Hours at
+                <select
+                  className="border-border bg-bg h-10 rounded-md border px-3"
+                  value={hoursBranch ?? ''}
+                  onChange={(e) => setHoursBranch(e.target.value)}
+                >
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             {team.map((m) => (
-              <HoursEditor key={m.id} member={m} hours={hours} />
+              <HoursEditor
+                key={`${m.id}-${hoursBranch ?? 'all'}`}
+                member={m}
+                hours={hours}
+                branch={branches.length > 1 ? hoursBranch : null}
+              />
             ))}
           </CardContent>
         </Card>

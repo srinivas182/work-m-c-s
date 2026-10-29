@@ -7,7 +7,9 @@ namespace Wurk\Bookings\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Wurk\Access\Contracts\BelongsToBranch;
 use Wurk\Tenancy\Contracts\BelongsToTenant;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 
 /**
  * @property string $id
@@ -32,9 +34,11 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property Carbon|null $refunded_at
  * @property string|null $consent_version
  * @property Carbon|null $consent_at
+ * @property string|null $branch_id
  */
 final class Booking extends Model
 {
+    use BelongsToBranch;
     use BelongsToTenant;
     use HasUlids;
 
@@ -49,4 +53,12 @@ final class Booking extends Model
 
     /** Statuses that hold their time (claim slots). */
     public const ACTIVE = ['pending_payment', 'confirmed'];
+
+    /** Anything created without a branch belongs to the business's main branch (as existing rows were moved). */
+    protected static function booted(): void
+    {
+        self::creating(function (self $row): void {
+            $row->branch_id ??= app(BranchDirectory::class)->main();
+        });
+    }
 }

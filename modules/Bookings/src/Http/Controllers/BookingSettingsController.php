@@ -9,10 +9,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Wurk\Access\Contracts\BranchRestriction;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Bookings\Models\BookingHours;
@@ -23,6 +25,7 @@ use Wurk\Bookings\Models\MeetingConnection;
 use Wurk\Bookings\Models\MemberMeetingLink;
 use Wurk\Bookings\Models\MemberRegistration;
 use Wurk\Bookings\Models\TimeOff;
+use Wurk\Bookings\Support\BranchServices;
 use Wurk\Bookings\Support\CancellationPolicy;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\Instant;
@@ -30,6 +33,7 @@ use Wurk\Bookings\Support\MeetingLinks;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners: Bookings → Settings — services, team hours and time off. */
@@ -45,10 +49,14 @@ final class BookingSettingsController
             'services' => BookingService::query()->orderBy('position')->orderBy('name')->get()->map(fn (BookingService $s) => [
                 ...$s->only(['id', 'name', 'description', 'duration_minutes', 'buffer_before_minutes', 'buffer_after_minutes', 'price_cents', 'deposit_type', 'deposit_value', 'active']),
                 'members' => $db->table('booking_service_member')->where('service_id', $s->id)->pluck('member_id')->all(),
+                'branches' => $db->table('booking_service_branch')->where('service_id', $s->id)->get(['branch_id', 'price_cents'])
+                    ->map(fn ($r) => ['branch' => (string) $r->branch_id, 'price_cents' => $r->price_cents === null ? null : (int) $r->price_cents])->all(), // none = every branch
             ])->all(),
+            'branches' => array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name']], app(BranchDirectory::class)->open()),
+            'canSettings' => Gate::allows('bookings.settings'),
             'team' => $this->team->members(),
-            'hours' => BookingHours::query()->orderBy('weekday')->orderBy('starts')->get(['member_id', 'weekday', 'starts', 'ends'])
-                ->map(fn (BookingHours $h) => ['member_id' => $h->member_id, 'weekday' => $h->weekday, 'starts' => substr($h->starts, 0, 5), 'ends' => substr($h->ends, 0, 5)])->all(),
+            'hours' => BookingHours::query()->orderBy('weekday')->orderBy('starts')->get(['member_id', 'branch_id', 'weekday', 'starts', 'ends'])
+                ->map(fn (BookingHours $h) => ['member_id' => $h->member_id, 'branch_id' => $h->branch_id, 'weekday' => $h->weekday, 'starts' => substr($h->starts, 0, 5), 'ends' => substr($h->ends, 0, 5)])->all(),
             'timeOff' => TimeOff::query()->where('ends_at', '>', now())->orderBy('starts_at')->get()
                 ->map(fn (TimeOff $t) => ['id' => $t->id, 'member_id' => $t->member_id, 'starts_at' => $t->starts_at->toIso8601String(), 'ends_at' => $t->ends_at->toIso8601String(), 'reason' => $t->reason])->all(),
             'timezone' => $this->context->current()->timezone(),
@@ -93,6 +101,9 @@ final class BookingSettingsController
             'active' => ['boolean'],
             'members' => ['array', 'min:1'],
             'members.*' => ['string', Rule::in($memberIds)],
+            'branches' => ['nullable', 'array'], // none = every branch
+            'branches.*.branch' => ['required', 'string', Rule::in(array_column(app(BranchDirectory::class)->open(), 'id'))],
+            'branches.*.price_cents' => ['nullable', 'integer', 'min:0', 'max:100000000'],
         ], ['members.min' => 'Choose at least one team member who does this service.']);
         $data['location_type'] ??= 'in_person'; // omitted means in person, as stored by default
         $data['deposit_when'] ??= 'always';
@@ -105,12 +116,18 @@ final class BookingSettingsController
             throw ValidationException::withMessages(['location_type' => 'Add a meeting link (under Meeting links) for everyone who does this service, or a link for the whole business, so clients can join.']);
         }
 
-        DB::connection($this->context->connectionName())->transaction(function () use ($data, $service): void {
+        $branchPrices = $request->has('branches')
+            ? collect((array) ($data['branches'] ?? []))->mapWithKeys(fn (array $b) => [(string) $b['branch'] => isset($b['price_cents']) ? (int) $b['price_cents'] : null])->all()
+            : null;
+        DB::connection($this->context->connectionName())->transaction(function () use ($data, $service, $branchPrices): void {
             $model = $service === null ? new BookingService : BookingService::query()->findOrFail($service);
-            $model->fill(Arr::except($data, ['members']))->save();
+            $model->fill(Arr::except($data, ['members', 'branches']))->save();
             $pivot = DB::connection($this->context->connectionName())->table('booking_service_member');
             $pivot->where('service_id', $model->id)->delete();
             $pivot->insert(array_map(fn (string $m) => ['service_id' => $model->id, 'member_id' => $m, 'tenant_id' => $this->context->id()], array_values(array_unique($data['members']))));
+            if ($branchPrices !== null) { // where it's offered, and any price per branch
+                app(BranchServices::class)->set($model, $branchPrices);
+            }
             $this->audit->record($service === null ? 'bookings.service_created' : 'bookings.service_updated', 'booking_service', $model->id, ['name' => $model->name]);
         });
 
@@ -127,7 +144,15 @@ final class BookingSettingsController
             'hours.*.weekday' => ['required', 'integer', 'between:0,6'],
             'hours.*.starts' => $time,
             'hours.*.ends' => $time,
+            'branch' => ['nullable', 'string'],
         ])['hours'];
+        $branch = app(BranchServices::class)->resolve($request->input('branch'));
+        $allowed = app(BranchRestriction::class)->branchRestriction((string) $request->user()?->getAuthIdentifier());
+        if ($allowed !== null && ! in_array($branch, $allowed, true)) {
+            abort(403); // a branch manager sets hours only at their branches
+        }
+        // A person can't be in two places: their hours at other branches count as taken.
+        $elsewhere = BookingHours::query()->withoutGlobalScope('branch')->where('member_id', $member)->where('branch_id', '!=', $branch)->get(['weekday', 'starts', 'ends']);
         foreach ($rows as $i => $row) {
             if ($row['ends'] <= $row['starts']) {
                 throw ValidationException::withMessages(["hours.{$i}.ends" => 'The end must be after the start.']);
@@ -137,14 +162,19 @@ final class BookingSettingsController
                     throw ValidationException::withMessages(["hours.{$i}.starts" => 'These hours overlap other hours on the same day.']);
                 }
             }
+            foreach ($elsewhere as $other) {
+                if ((int) $other->weekday === (int) $row['weekday'] && substr((string) $other->starts, 0, 5) < $row['ends'] && substr((string) $other->ends, 0, 5) > $row['starts']) {
+                    throw ValidationException::withMessages(["hours.{$i}.starts" => 'These hours overlap hours at another branch.']);
+                }
+            }
         }
-        DB::connection($this->context->connectionName())->transaction(function () use ($member, $rows): void {
-            BookingHours::query()->where('member_id', $member)->delete();
+        DB::connection($this->context->connectionName())->transaction(function () use ($member, $rows, $branch): void {
+            BookingHours::query()->where('member_id', $member)->where('branch_id', $branch)->delete(); // only their hours at this branch
             foreach ($rows as $row) {
-                BookingHours::query()->create(['member_id' => $member, ...$row]);
+                BookingHours::query()->create(['member_id' => $member, 'branch_id' => $branch, ...$row]);
             }
         });
-        $this->audit->record('bookings.hours_updated', 'member', $member, ['stretches' => count($rows)]);
+        $this->audit->record('bookings.hours_updated', 'member', $member, ['stretches' => count($rows), 'branch' => $branch]);
 
         return back()->with('status', 'Hours saved.');
     }
