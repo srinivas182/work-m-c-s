@@ -60,7 +60,7 @@ final readonly class OrderPlacer
         $order = DB::connection($this->context->connectionName())->transaction(function () use ($wanted, $customer, $fulfilment, $method, $branch): Order {
             $stock = app(BranchStock::class);
             $settings = ShopSettings::query()->lockForUpdate()->find($this->context->id())
-                ?? ShopSettings::query()->create(['tenant_id' => $this->context->id()]); // card-only shops may not have saved settings
+                ?? ShopSettings::query()->create(['tenant_id' => $this->context->id()])->refresh(); // shops that never saved settings: re-read for the defaults (order numbers start at 1001)
             $items = [];
             $subtotal = 0;
             foreach (Variant::query()->whereIn('id', array_keys($wanted))->orderBy('id')->lockForUpdate()->get() as $variant) {

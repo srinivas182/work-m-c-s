@@ -33,7 +33,7 @@ final class SystemRoles
         self::BRANCH_MANAGER => [
             'name' => 'Branch manager',
             'scope' => Permission::BUSINESS,
-            'permissions' => ['branches.view', 'team.view', 'bookings.view', 'bookings.manage'], // limited to their branches by the branch scope
+            'permissions' => ['branches.view', 'team.view', 'bookings.view', 'bookings.manage', 'shop.orders'], // limited to their branches by the branch scope
             'branch_restricted' => true,
         ],
         self::STAFF => ['name' => 'Staff', 'scope' => Permission::BUSINESS, 'permissions' => ['branches.view']],
