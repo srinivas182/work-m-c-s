@@ -7,6 +7,7 @@ namespace Wurk\Bookings\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Tenancy\Contracts\BelongsToTenant;
 
 /**
@@ -43,5 +44,14 @@ final class ClassAttendee extends Model
     public function session(): ClassSession
     {
         return ClassSession::query()->whereKey($this->session_id)->firstOrFail();
+    }
+
+    /** Everyone who takes a class place becomes (or is matched to) a contact. */
+    protected static function booted(): void
+    {
+        self::created(function (self $a): void {
+            $session = ClassSession::query()->find($a->session_id);
+            app(ContactBook::class)->remember($a->customer_name, $a->customer_phone, $a->customer_email, 'class', $a->id, $session?->branch_id, 'Class: '.($session->title ?? 'class'));
+        });
     }
 }

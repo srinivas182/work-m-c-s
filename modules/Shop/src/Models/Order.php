@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Wurk\Access\Contracts\BelongsToBranch;
+use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Tenancy\Contracts\BelongsToTenant;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 
@@ -62,6 +63,10 @@ final class Order extends Model
     {
         self::creating(function (self $order): void {
             $order->branch_id ??= app(BranchDirectory::class)->main();
+        });
+        // Everyone who orders becomes (or is matched to) a contact.
+        self::created(function (self $o): void {
+            app(ContactBook::class)->remember($o->customer_name, $o->customer_phone, $o->customer_email, 'order', $o->id, $o->branch_id, "Order #{$o->number}");
         });
     }
 }

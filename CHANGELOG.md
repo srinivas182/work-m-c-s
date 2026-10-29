@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 12.1 (contacts)
+- **Contacts** (Customers → Contacts; new Crm module, `contacts.view` / `contacts.manage`): one contact per person per business, matched by exact phone or email (South African numbers written one way), built automatically from bookings, class places and orders, with their branch. Search by name, number or email; tags and notes; a contact's history; merge (nothing deleted) and split (exact undo); CSV export (audited, not cached). Branch managers see their branches' contacts.
+- Marketing consent is recorded only when given, with where; patient records stay out of the CRM.
+- **Release step (v0.14.0):** `php artisan crm:link-existing` once after migrating — makes contacts of existing customers (safe to run again). See docs/deployment/docker.md.
+
 ### Added — Sprint 11.6 (shipping)
 - **Shipping** (new module; Settings → Shipping): the business's own **Bob Go** (courier delivery at live rates) and **Pargo** (pickup points, flat rate) accounts, for the business or a branch, test or live; credentials checked with the courier before saving. WURK never pays couriers.
 - **Checkout**: "How should we deliver?" — the shop's own flat-fee delivery, a courier at live prices for the customer's address, or a Pargo pickup point near them; the courier's price is checked again when the order is placed.

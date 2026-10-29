@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved 31 Oct 2026 — 12.1 next |
+| **Status** | Approved 31 Oct 2026 — 12.1 in review |
 | **Plan (revision 3)** | 12 – 23 Apr 2027 · leads and pipelines; forms and custom fields (incl. quote requests); rule-based chatbot; event template engine (email/SMS/WhatsApp) |
 | **Builds on** | Messaging (SMS, WhatsApp and email behind one `Messenger`, with delivery records); booking messages (9.x); the website builder's blocks |
 
@@ -59,3 +59,9 @@ Decisions A–D; the WhatsApp templates with Meta; SMS/WhatsApp provider account
 | B | The chatbot is **rule-based only** this sprint |
 | C | Marketing messages **only with recorded consent** (one-tap unsubscribe); service messages don't need it |
 | D | WhatsApp: **Meta-approved templates** for business-initiated messages; free-form only inside the 24-hour window |
+
+## 9. Progress log
+
+| Part | PR | Notes |
+|---|---|---|
+| 12.1 Contacts | see PR | Found no shared customer list; contacts link the existing records without changing them. 1,151 backend tests on SQLite; Crm and shop contacts on MySQL 8; all browser tests. Fixed in review: a streamed export ran after the business's context ended; the merge search now uses its own JSON endpoint |
