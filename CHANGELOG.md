@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 11.5 (settlement between branches)
+- **What one branch owes another** is recorded when one branch's account is paid for something another branch supplied (card and EFT orders, booking deposits, class places; the business-wide account counts as the main branch's). Refunds and card cancellations net it off. Nothing is recorded within a branch.
+- **Between branches** (Settings → Branches): monthly statements per pair of branches, with what makes up each amount; owners mark a month settled (who and when). Records only — no money moves through WURK. Branch managers see their branches only.
+
 ### Added — Sprint 11.4 (payments by branch)
 - **A branch can have its own payment accounts** (PayFast, Yoco, Ozow, Peach, EFT — test or live, keys per mode), set by the owner under Settings → Payments ("Accounts for"); without one, the branch uses the business's.
 - Payments go through the branch they belong to (shop orders: the fulfilling branch; deposits: the booking's; classes: the session's), and are verified and refunded through the account used. Providers' notifications say which branch (each account's own signature and secrets).

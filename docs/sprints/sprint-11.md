@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved 30 Oct 2026 — 11.1 ✅ (#89), 11.2 ✅ (#90), 11.3 ✅ (#91), 11.4 in review |
+| **Status** | Approved 30 Oct 2026 — 11.1 ✅ (#89), 11.2 ✅ (#90), 11.3 ✅ (#91), 11.4 ✅ (#92), 11.5 in review |
 | **Plan (revision 3)** | 29 Mar – 09 Apr 2027 · branch managers; per-branch merchant accounts, prices, stock; inter-branch settlement; courier integrations |
 | **Builds on** | Sprint 1's branches table, branch-manager role and branch scope (unused until now); packages' `multi_branch` / `max_branches` (not yet enforced) |
 
@@ -71,4 +71,5 @@ Decisions A–E; Bob Go and Pargo sandbox accounts (with the payment providers' 
 | 11.1 Branches and team | #89 | Found that owners had no Team screen (invite, roles, branches) — added, since branch managers depend on it. 1,025 backend tests on SQLite; Team, Tenancy, Access, Identity on MySQL 8; all browser tests (now run in three parts). Fixed: Branch's fillable list dropped the new fields |
 | 11.2 Bookings by branch | #90 | Split booking permissions so branch managers can't change business-wide settings (new `bookings.settings`). 1,030 backend tests on SQLite; Bookings on MySQL 8; 379 frontend; all browser tests. Found: bookings, classes and reservations already had an unused `branch_id` (Sprint 8) — filled for every existing row |
 | 11.3 Shop by branch | #91 | Split shop permissions (new `shop.orders`). 1,034 backend tests on SQLite; Shop and Access on MySQL 8; 379 frontend; all browser tests. Found: shops without saved settings couldn't take orders; single-branch stock zeroed on save (both fixed, with regression tests) |
-| 11.4 Payments by branch | see PR | Every account lookup now says business or branch (8 places). 1,038 backend tests on SQLite; Payments and Shop on MySQL 8; all browser tests |
+| 11.4 Payments by branch | #92 | Every account lookup now says business or branch (8 places). 1,038 backend tests on SQLite; Payments and Shop on MySQL 8; all browser tests |
+| 11.5 Settlement between branches | see PR | 1,040 backend tests on SQLite; Shop, Team and refunds on MySQL 8; all browser tests (now run in four parts) |
