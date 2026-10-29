@@ -26,7 +26,7 @@ final class PaymentsServiceProvider extends ModuleServiceProvider
     public function permissions(): array
     {
         return [
-            ['key' => 'payments.manage', 'label' => 'Connect card payments (PayFast, Yoco)'],
+            ['key' => 'payments.manage', 'label' => 'Connect payment methods (PayFast, Yoco, Ozow, Peach, EFT)'],
         ];
     }
 
