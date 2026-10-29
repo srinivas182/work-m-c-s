@@ -15,6 +15,7 @@ Route::tenant(function (): void {
         Route::get('/orders', [OrdersController::class, 'index'])->name('orders');
         Route::get('/orders/{order}', [OrdersController::class, 'show'])->name('orders.show');
         Route::post('/orders/{order}/advance', [OrdersController::class, 'advance'])->name('orders.advance');
+        Route::post('/orders/{order}/ship', [OrdersController::class, 'ship'])->middleware('throttle:20,1,shop-ship')->name('orders.ship');
         Route::post('/orders/{order}/cancel', [OrdersController::class, 'cancel'])->name('orders.cancel');
         Route::post('/orders/{order}/refund', [OrdersController::class, 'refund'])->name('orders.refund');
     });

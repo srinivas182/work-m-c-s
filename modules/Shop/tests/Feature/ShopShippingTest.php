@@ -68,12 +68,12 @@ it('delivers by courier at the courier’s current price, and ships with trackin
 });
 
 it('sends an order to a Pargo pickup point at the flat rate', function () {
-    $r = ($this->checkout)(['provider' => 'pargo', 'pickup_point' => 'pup123', 'pickup_point_name' => 'Corner Café']);
-    $r->assertCreated();
+    $orderUrl = ($this->checkout)(['provider' => 'pargo', 'pickup_point' => 'pup123', 'pickup_point_name' => 'Corner Café'])->assertCreated()->json('order_url'); // the customer's signed link
     $order = ($this->in)(fn () => Order::query()->sole());
     expect($order->delivery_cents)->toBe(6000)->and($order->delivery_address)->toBe('Pargo pickup point: Corner Café');
     ($this->in)(function () use ($order) {
         app(OrderManager::class)->advance($order->refresh(), 'paid', 'Thabo');
         expect(app(OrderManager::class)->ship($order->refresh(), 'Thabo')->tracking_reference)->toBe('WAY9');
     });
+    $this->get($orderUrl)->assertOk()->assertSee('On its way to your pickup point')->assertSee('Collect from: Corner Café', false)->assertSee('WAY9');
 });

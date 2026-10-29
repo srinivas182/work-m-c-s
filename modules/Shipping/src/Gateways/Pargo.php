@@ -80,4 +80,16 @@ final class Pargo
             'tracking_url' => $waybill === null ? null : 'https://pargo.co.za/track-trace/?code='.rawurlencode((string) $waybill), // confirm
             'label_url' => $r->json('data.attributes.orderData.orderLabel') === null ? null : (string) $r->json('data.attributes.orderData.orderLabel')]; // confirm
     }
+
+    /** Check a username and password work (Pargo issues a token). */
+    public static function check(ShippingAccount $account): bool
+    {
+        try {
+            self::token($account);
+
+            return true;
+        } catch (ShippingProblem) {
+            return false;
+        }
+    }
 }
