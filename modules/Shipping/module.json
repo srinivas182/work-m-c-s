@@ -1,0 +1,13 @@
+{
+    "name": "Shipping",
+    "key": "shipping",
+    "version": "0.1.0",
+    "description": "Couriers through the business's own accounts: Bob Go (live rates, shipments, tracking) and Pargo (pickup points). Per business or per branch; test or live.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit"
+    ]
+}

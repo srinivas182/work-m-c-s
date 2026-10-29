@@ -1,0 +1,15 @@
+{
+    "name": "Team",
+    "key": "team",
+    "version": "0.1.0",
+    "description": "Team & branches: the owner's screens for branches (within the package's limit) and team members (invite, role, branches).",
+    "core": true,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "identity",
+        "access",
+        "plans",
+        "audit"
+    ]
+}

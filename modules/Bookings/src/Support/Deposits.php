@@ -13,6 +13,7 @@ use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -31,19 +32,21 @@ final readonly class Deposits
      * What to pay before the booking is confirmed, in cents: none, a fixed or percentage deposit, or
      * the full price — always, or only for online appointments. 0 when payouts aren't set up.
      */
-    public function amountFor(BookingService $service, bool $online = false): int
+    public function amountFor(BookingService $service, bool $online = false, ?string $branchId = null): int
     {
         if ($service->deposit_when === 'online' && ! $online) {
             return 0; // paid at the desk in person
         }
-        if ($this->payments->available() === []) { // no card payments connected (Settings → Payments)
+        if ($this->payments->available($branchId) === []) { // no card payments for this branch (Settings → Payments)
             return 0;
         }
 
+        $price = app(BranchServices::class)->priceAt($service, $branchId); // the price at this branch (an override, or the service's own)
+
         return match ($service->deposit_type) {
             'fixed' => $service->deposit_value,
-            'percent' => (int) round($service->price_cents * min(100, $service->deposit_value) / 100),
-            'full' => $service->price_cents,
+            'percent' => (int) round($price * min(100, $service->deposit_value) / 100),
+            'full' => $price,
             default => 0,
         };
     }
@@ -51,7 +54,7 @@ final readonly class Deposits
     /** What to pay for a place in a class (0 = paid at the class, or payouts not set up). */
     public function amountForClass(ClassSession $session): int
     {
-        if (! $session->pay_online || $this->payments->available() === []) {
+        if (! $session->pay_online || $this->payments->available($session->branch_id) === []) {
             return 0;
         }
 
@@ -69,8 +72,10 @@ final readonly class Deposits
         $what = $booking instanceof ClassAttendee ? 'Class: '.$booking->session()->title : 'Booking deposit';
 
         // The return address carries the reference (Yoco and PayFast don't add it).
+        $branch = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id; // the branch's own account, if it has one
+
         return $this->payments->start($reference, $amountCents, $what, ['name' => $name, 'email' => $email],
-            ['return' => $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference), 'cancel' => (string) preg_replace('#/book/return.*$#', '/', $returnUrl)]); // cancelling goes back to the home page
+            ['return' => $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference), 'cancel' => (string) preg_replace('#/book/return.*$#', '/', $returnUrl)], branchId: $branch); // cancelling goes back to the home page
     }
 
     /**
@@ -106,6 +111,9 @@ final readonly class Deposits
             }
             $booking->update(['status' => 'confirmed', 'paid_at' => Instant::db(now()), 'hold_expires_at' => null]);
             BookingHold::query()->whereKey($reference)->delete();
+            $supplier = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id;
+            app(BranchLedger::class)->record($this->payments->receivedBy($reference), $supplier, $booking->deposit_cents,
+                $booking instanceof ClassAttendee ? 'class' : 'deposit', $reference, $booking instanceof ClassAttendee ? 'Class place: '.$booking->session()->title : 'Booking deposit: '.$booking->customer_name);
             $this->audit->record('bookings.deposit_paid', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
             event($booking instanceof ClassAttendee ? new ClassJoined($this->context->id(), $booking->id) : new BookingConfirmed($this->context->id(), $booking->id));
 

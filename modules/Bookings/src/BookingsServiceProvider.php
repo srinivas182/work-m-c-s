@@ -32,7 +32,8 @@ final class BookingsServiceProvider extends ModuleServiceProvider
     {
         return [
             ['key' => 'bookings.view', 'label' => 'See the bookings calendar'],
-            ['key' => 'bookings.manage', 'label' => 'Manage services, team hours, time off and bookings'],
+            ['key' => 'bookings.manage', 'label' => 'Manage team hours, time off, classes and bookings'],
+            ['key' => 'bookings.settings', 'label' => 'Change services, prices and booking settings for the whole business'],
         ];
     }
 

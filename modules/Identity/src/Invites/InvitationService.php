@@ -37,6 +37,13 @@ final class InvitationService implements Invitations
             ->all());
     }
 
+    public function pendingMembers(string $tenantId): array
+    {
+        return array_values(Invitation::query()->where('kind', Invitation::KIND_MEMBER)->where('tenant_id', $tenantId)->whereNull('accepted_at')
+            ->whereNull('revoked_at')->where('expires_at', '>', now())->latest()->get()
+            ->map(fn (Invitation $i) => ['id' => $i->id, 'email' => $i->destination(), 'role' => $i->role, 'expires_at' => $i->expires_at->toIso8601String()])->all());
+    }
+
     public function revoke(string $invitationId): void
     {
         Invitation::query()->whereKey($invitationId)->whereNull('accepted_at')->update(['revoked_at' => now()]);

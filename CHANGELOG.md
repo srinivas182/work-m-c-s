@@ -4,6 +4,47 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 11.6 (shipping)
+- **Shipping** (new module; Settings → Shipping): the business's own **Bob Go** (courier delivery at live rates) and **Pargo** (pickup points, flat rate) accounts, for the business or a branch, test or live; credentials checked with the courier before saving. WURK never pays couriers.
+- **Checkout**: "How should we deliver?" — the shop's own flat-fee delivery, a courier at live prices for the customer's address, or a Pargo pickup point near them; the courier's price is checked again when the order is placed.
+- **Orders**: "Create shipment" saves the tracking number and label and sends the order out for delivery; customers see tracking on their order page; Bob Go's signed tracking updates mark delivered orders done.
+- Provider request/response details and Bob Go's signature header are marked to confirm against Bob Go and Pargo sandbox accounts before go-live. Items count as 0.5 kg each until products have weights.
+
+### Fixed
+- The payments permission label listed only PayFast and Yoco.
+
+### Added — Sprint 11.5 (settlement between branches)
+- **What one branch owes another** is recorded when one branch's account is paid for something another branch supplied (card and EFT orders, booking deposits, class places; the business-wide account counts as the main branch's). Refunds and card cancellations net it off. Nothing is recorded within a branch.
+- **Between branches** (Settings → Branches): monthly statements per pair of branches, with what makes up each amount; owners mark a month settled (who and when). Records only — no money moves through WURK. Branch managers see their branches only.
+
+### Added — Sprint 11.4 (payments by branch)
+- **A branch can have its own payment accounts** (PayFast, Yoco, Ozow, Peach, EFT — test or live, keys per mode), set by the owner under Settings → Payments ("Accounts for"); without one, the branch uses the business's.
+- Payments go through the branch they belong to (shop orders: the fulfilling branch; deposits: the booking's; classes: the session's), and are verified and refunded through the account used. Providers' notifications say which branch (each account's own signature and secrets).
+
+### Added — Sprint 11.3 (shop by branch)
+- **Stock per branch** (the product's stock is the total, so pages and "sold out" work as before); existing stock moved to each business's main branch.
+- **Orders fulfilled by a branch**: collection from the branch the customer chooses (checkout asks where, and re-prices for that branch), delivery from a "ships from" branch. Never oversold per branch; cancelled, expired and restocked items go back to their branch.
+- **Optional prices per branch** (product editor), used by the cart, checkout and orders.
+- **Orders get their own permission** (`shop.orders`): branch managers see and handle only their branches' orders, and are alerted only about those; products, prices and shop settings stay business-wide (`shop.manage`).
+
+### Fixed
+- A shop that never saved its shop settings couldn't take an order (no order number).
+- A single-branch shop's stock total was reset to 0 when saving a product (caught by the browser tests during this sprint; regression test).
+
+### Added — Sprint 11.2 (bookings by branch)
+- **Bookings, classes, reservations and team hours belong to a branch** (existing rows moved to each business's main branch; anything created without a branch goes there too — single-branch businesses see no change).
+- **Hours per branch** (someone can work Mondays at one branch and Tuesdays at another; never two branches at once); a person's booked time is shared across branches, so no double bookings.
+- **Services offered at chosen branches**, with an optional **price per branch** (deposits use it).
+- **Customers choose a branch first** on the website (several branches only), then see that branch's services, prices and times.
+- **Branch managers run their branch**: bookings, hours, time off, classes and tables at their branches only. A new permission, `bookings.settings`, covers business-wide booking settings (services and prices, policy, messages, meeting links, health practice, table settings); `bookings.manage` is now day-to-day only.
+
+### Added — Sprint 11.1 (branches and team)
+- **Branches** (Settings → Branches): address, phone, close and reopen (history kept; the main branch stays open), within the package's limit (`multi_branch` / `max_branches`, now enforced). Other modules read and manage branches through Tenancy's new `BranchDirectory` contract.
+- **Team** (Settings → Team) — owners couldn't manage their team before: members with their role and branches; invite by email with a role (seat limit checked), cancel invitations; change roles; limit people to branches (a branch manager always has particular branches); remove someone (their history is kept). Owners can't change or remove themselves, and the business never loses its last owner.
+
+### Fixed
+- Branch's fillable list silently dropped new fields (closing a branch, address and phone).
+
 ### Added — Sprint 9.5 (patient documents)
 - **Patient records** for health practices (new Records module; permissions `records.view` and `records.manage`): patients, documents and corrections (each correction says what changed; the original is kept), the private link, an access log in plain words, and a "due for removal" list.
 - **Encrypted at rest** on a private disk, separate from website media; never public; every upload, correction, view, download, link, code and removal logged.

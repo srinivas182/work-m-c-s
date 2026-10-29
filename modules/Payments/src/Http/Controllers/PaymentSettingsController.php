@@ -16,6 +16,7 @@ use Wurk\Payments\Gateways\Yoco;
 use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Support\KeyFields;
 use Wurk\Payments\Support\PlatformMethods;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -28,14 +29,19 @@ final class PaymentSettingsController
 
     public function show(): Response
     {
-        $accounts = PaymentAccount::query()->get()->keyBy('provider');
+        $all = PaymentAccount::query()->get();
+        $summary = fn (?PaymentAccount $a) => $a === null ? null : ['active' => $a->active, 'mode' => $a->mode, 'label' => $a->label, 'has_test' => $a->hasKeys('test'), 'has_live' => $a->hasKeys('live')];
+        $branches = app(BranchDirectory::class)->open();
 
-        return Inertia::render('Payments::Settings', ['methods' => array_map(fn (string $p) => [
-            'provider' => $p, 'name' => PlatformMethods::NAMES[$p], 'allowed' => $this->platform->available($p),
-            'account' => ($a = $accounts[$p] ?? null) === null ? null : [
-                'active' => $a->active, 'mode' => $a->mode, 'label' => $a->label, 'has_test' => $a->hasKeys('test'), 'has_live' => $a->hasKeys('live'),
-            ],
-        ], PlatformMethods::ALL)]);
+        return Inertia::render('Payments::Settings', [
+            'methods' => array_map(fn (string $p) => [
+                'provider' => $p, 'name' => PlatformMethods::NAMES[$p], 'allowed' => $this->platform->available($p),
+                'account' => $summary($all->first(fn (PaymentAccount $a) => $a->provider === $p && $a->branch_id === null)),
+                // Several branches: a branch's own account (otherwise it uses the business's).
+                'branches' => count($branches) > 1 ? (object) collect($branches)->mapWithKeys(fn (array $b) => [$b['id'] => $summary($all->first(fn (PaymentAccount $a) => $a->provider === $p && $a->branch_id === $b['id']))])->all() : (object) [],
+            ], PlatformMethods::ALL),
+            'branches' => count($branches) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name']], $branches) : [],
+        ]);
     }
 
     /** Keys for one mode (test or live). */
@@ -45,14 +51,16 @@ final class PaymentSettingsController
         $keys = array_map(fn ($v) => trim((string) $v), $request->validate(KeyFields::rules($provider, $mode), KeyFields::messages($mode)));
         if ($provider === 'yoco') { // registering our notification address tests the key, and gives this mode its own signing secret
             $probe = new PaymentAccount(['provider' => 'yoco', 'mode' => $mode, $mode.'_credentials' => $keys]);
-            $hook = Yoco::register($probe, 'https://'.$this->context->current()->handle().'.'.config('wurk.domains.root').'/payments/notify/yoco');
+            $forBranch = $this->branch($request); // a branch's own key: its webhook says which branch (its own secret)
+            $hook = Yoco::register($probe, 'https://'.$this->context->current()->handle().'.'.config('wurk.domains.root').'/payments/notify/yoco'.($forBranch ? '?branch='.$forBranch : ''));
             if ($hook === null) {
                 throw ValidationException::withMessages(['secret_key' => 'Yoco didn’t accept that key. Check it and try again.']);
             }
             $keys['webhook_id'] = $hook[0];
             $keys['webhook_secret'] = $hook[1];
         }
-        $account = PaymentAccount::query()->where('provider', $provider)->first() ?? new PaymentAccount(['provider' => $provider, 'mode' => $mode, 'active' => false]);
+        $branch = $this->branch($request);
+        $account = $this->find($provider, $branch) ?? new PaymentAccount(['provider' => $provider, 'branch_id' => $branch, 'mode' => $mode, 'active' => false]);
         $account->fill([$mode.'_credentials' => $keys, 'label' => KeyFields::label($provider, $keys)])->save();
         $this->audit->record('payments.keys_saved', 'payment_account', $provider, ['mode' => $mode]);
 
@@ -63,7 +71,8 @@ final class PaymentSettingsController
     public function settings(Request $request, string $provider): RedirectResponse
     {
         $data = $request->validate(['active' => ['required', 'boolean'], 'mode' => ['required', 'in:test,live']]);
-        $account = PaymentAccount::query()->where('provider', $provider)->first();
+        $account = $this->find($provider, $this->branch($request));
+
         if ($data['active'] && ! $this->platform->available($provider)) {
             throw ValidationException::withMessages(['mode' => 'WURK has switched '.PlatformMethods::NAMES[$provider].' off for now.']);
         }
@@ -77,9 +86,9 @@ final class PaymentSettingsController
         return back()->with('status', ! $data['active'] ? "{$name} is off." : ($data['mode'] === 'test' ? "{$name} is on in test mode — no real money moves." : "{$name} is live."));
     }
 
-    public function disconnect(string $provider): RedirectResponse
+    public function disconnect(Request $request, string $provider): RedirectResponse
     {
-        $account = PaymentAccount::query()->where('provider', $provider)->firstOrFail();
+        $account = $this->find($provider, $this->branch($request)) ?? abort(404);
         if ($provider === 'yoco') {
             foreach (['test', 'live'] as $mode) { // best effort: stop Yoco calling us
                 $keys = $mode === 'live' ? $account->live_credentials : $account->test_credentials;
@@ -95,5 +104,23 @@ final class PaymentSettingsController
         $this->audit->record('payments.disconnected', 'payment_account', $provider, []);
 
         return back()->with('status', PlatformMethods::NAMES[$provider].' is disconnected. Customers can’t pay with it any more.');
+    }
+
+    /** The branch a setting is for (?branch=…), or null for the whole business. Only open branches. */
+    private function branch(Request $request): ?string
+    {
+        $branch = $request->query('branch');
+        if ($branch === null || $branch === '') {
+            return null;
+        }
+        abort_unless(in_array($branch, array_column(app(BranchDirectory::class)->open(), 'id'), true), 404);
+
+        return (string) $branch;
+    }
+
+    private function find(string $provider, ?string $branch): ?PaymentAccount
+    {
+        return PaymentAccount::query()->where('provider', $provider)
+            ->when($branch === null, fn ($q) => $q->whereNull('branch_id'), fn ($q) => $q->where('branch_id', $branch))->first();
     }
 }

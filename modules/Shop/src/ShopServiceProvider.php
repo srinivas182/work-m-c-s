@@ -11,8 +11,10 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Shipping\Contracts\ShipmentUpdated;
 use Wurk\Shop\Console\DemoShopCommand;
 use Wurk\Shop\Console\ExpireOrdersCommand;
+use Wurk\Shop\Listeners\MarkDeliveredOrders;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderStatusChanged;
@@ -30,14 +32,15 @@ final class ShopServiceProvider extends ModuleServiceProvider
     public function permissions(): array
     {
         return [
-            ['key' => 'shop.manage', 'label' => 'Manage products, stock and orders'],
+            ['key' => 'shop.manage', 'label' => 'Manage products, prices, stock and shop settings'],
+            ['key' => 'shop.orders', 'label' => 'See and handle orders'],
         ];
     }
 
     public function menu(): array
     {
         return [
-            ['label' => 'Orders', 'route' => 'tenant.shop.orders', 'icon' => 'shopping-bag', 'section' => 'Shop', 'permission' => 'shop.manage', 'entitlement' => 'shop', 'order' => 295],
+            ['label' => 'Orders', 'route' => 'tenant.shop.orders', 'icon' => 'shopping-bag', 'section' => 'Shop', 'permission' => 'shop.orders', 'entitlement' => 'shop', 'order' => 295],
             ['label' => 'Products', 'route' => 'tenant.shop.products', 'icon' => 'package', 'section' => 'Shop', 'permission' => 'shop.manage', 'entitlement' => 'shop', 'order' => 300],
             ['label' => 'Shop settings', 'route' => 'tenant.shop.settings', 'icon' => 'settings', 'section' => 'Shop', 'permission' => 'shop.manage', 'entitlement' => 'shop', 'order' => 310],
         ];
@@ -48,6 +51,7 @@ final class ShopServiceProvider extends ModuleServiceProvider
         $this->loadViewsFrom($this->modulePath('resources/views'), 'shop');
         Event::listen(BusinessPaymentReceived::class, [OrderPayments::class, 'handle']);
         Event::listen(OrderStatusChanged::class, [OrderMessages::class, 'handle']);
+        Event::listen(ShipmentUpdated::class, [MarkDeliveredOrders::class, 'handle']); // a courier delivered it
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('shop:expire-orders')->everyFifteenMinutes()->onOneServer()->withoutOverlapping();
         });

@@ -477,3 +477,253 @@ describe('class sign-up at a health practice', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('booking widget with several branches', () => {
+  const respond = (status: number, body: unknown) =>
+    Promise.resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+  const settle = () =>
+    new Promise((r) => setTimeout(r, 0)).then(() => new Promise((r) => setTimeout(r, 0)));
+
+  it('asks which branch first, then shows that branch’s services, prices and times', async () => {
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url) =>
+      url.startsWith('/book/services')
+        ? respond(200, {
+            timezone: 'Africa/Johannesburg',
+            branches: [
+              { id: 'b-main', name: 'Main', address: '1 Vilakazi St' },
+              { id: 'b-sandton', name: 'Sandton', address: '12 Rivonia Rd' },
+            ],
+            services: [
+              {
+                id: 's-braids',
+                name: 'Braids',
+                duration: 60,
+                price_cents: 45000,
+                members: [],
+                at: [
+                  { branch: 'b-main', price_cents: 45000 },
+                  { branch: 'b-sandton', price_cents: 50000 },
+                ],
+              },
+              {
+                id: 's-colour',
+                name: 'Colour',
+                duration: 90,
+                price_cents: 60000,
+                members: [],
+                at: [{ branch: 'b-main', price_cents: 60000 }],
+              },
+            ],
+          })
+        : respond(200, { date: '2027-05-04', times: [] }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    document.body.innerHTML = '<div data-island="booking" data-api="/book"><p>Call us</p></div>';
+    startIslands(document);
+    await settle();
+    const select = (label: string) =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find((l) => l.textContent === label)!.htmlFor,
+      ) as HTMLSelectElement;
+    const options = () => [...select('Service').options].map((o) => o.textContent);
+
+    expect([...select('Branch').options].map((o) => o.textContent)).toEqual([
+      'Main — 1 Vilakazi St',
+      'Sandton — 12 Rivonia Rd',
+    ]);
+    expect(options()).toEqual(['Braids (60 min, R450)', 'Colour (90 min, R600)']);
+    select('Branch').value = 'b-sandton';
+    select('Branch').dispatchEvent(new Event('change'));
+    await settle();
+    expect(options()).toEqual(['Braids (60 min, R500)']); // Colour isn't offered in Sandton
+    expect(String(fetchMock.mock.calls.at(-1)![0])).toContain('branch=b-sandton');
+    vi.unstubAllGlobals();
+  });
+});
+
+describe('checkout with several branches', () => {
+  const respond = (status: number, body: unknown) =>
+    Promise.resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+  const settle = () =>
+    new Promise((r) => setTimeout(r, 0)).then(() => new Promise((r) => setTimeout(r, 0)));
+
+  it('asks where to collect from, re-prices for that branch, and orders there', async () => {
+    const priced = (branch: string, unit: number) => ({
+      lines: [
+        {
+          variant: 'v1',
+          name: 'Kasi T-shirt',
+          label: null,
+          slug: 'kasi-t-shirt',
+          unit_cents: unit,
+          quantity: 1,
+          available: 3,
+        },
+      ],
+      subtotal_cents: unit,
+      checkout: {
+        available: true,
+        card: false,
+        offline: true,
+        collection: true,
+        collection_address: null,
+        delivery: false,
+        delivery_fee_cents: 0,
+        delivery_note: null,
+        branches: [
+          { id: 'b-main', name: 'Main', address: '1 Vilakazi St' },
+          { id: 'b-sandton', name: 'Sandton', address: '12 Rivonia Rd' },
+        ],
+        branch,
+      },
+    });
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url, init) => {
+      if (url !== '/cart/price') return respond(201, { placed: true, order_url: '/order/x' });
+      const branch = (JSON.parse(String(init?.body)) as { branch: string | null }).branch;
+      return respond(
+        200,
+        branch === 'b-sandton' ? priced('b-sandton', 27000) : priced('b-main', 25000),
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    localStorage.setItem('wurk-cart', JSON.stringify([{ variant: 'v1', quantity: 1 }]));
+    document.body.innerHTML = '<div data-island="checkout"><p>Your cart is empty.</p></div>';
+    startIslands(document);
+    await settle();
+    const byLabel = <T extends HTMLElement>(text: string) =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find((l) => l.textContent === text)!.htmlFor,
+      ) as T;
+    const pick = byLabel<HTMLSelectElement>('Collect from');
+    expect([...pick.options].map((o) => o.textContent)).toEqual([
+      'Main — 1 Vilakazi St',
+      'Sandton — 12 Rivonia Rd',
+    ]);
+
+    pick.value = 'b-sandton';
+    pick.dispatchEvent(new Event('change'));
+    await settle();
+    expect(document.body.textContent).toContain('Total R270.00');
+
+    byLabel<HTMLInputElement>('Your name').value = 'Sipho';
+    byLabel<HTMLInputElement>('Phone').value = '082 555 0101';
+    byLabel<HTMLInputElement>('I agree to be contacted about my order.').checked = true;
+    document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    await settle();
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)![1]!.body))).toMatchObject({
+      branch: 'b-sandton',
+      fulfilment: 'collection',
+    });
+    vi.unstubAllGlobals();
+  });
+});
+
+describe('checkout with couriers', () => {
+  const respond = (status: number, body: unknown) =>
+    Promise.resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+  const settle = () =>
+    new Promise((r) => setTimeout(r, 0)).then(() => new Promise((r) => setTimeout(r, 0)));
+
+  it('gets live courier prices for an address, adds the chosen one to the total, and orders with it', async () => {
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url) => {
+      if (url === '/cart/price')
+        return respond(200, {
+          lines: [
+            {
+              variant: 'v1',
+              name: 'Kasi T-shirt',
+              label: null,
+              slug: 'kasi-t-shirt',
+              unit_cents: 25000,
+              quantity: 1,
+              available: 3,
+            },
+          ],
+          subtotal_cents: 25000,
+          checkout: {
+            available: true,
+            card: false,
+            offline: true,
+            collection: false,
+            collection_address: null,
+            delivery: true,
+            flat_delivery: false,
+            delivery_fee_cents: 0,
+            delivery_note: null,
+            couriers: { courier: true, pickup_points: true, pickup_rate_cents: 6000 },
+          },
+        });
+      if (url === '/cart/shipping')
+        return respond(200, {
+          rates: [{ service: 'ECO', name: 'Economy', cents: 9950, eta: null }],
+        });
+      return respond(201, { placed: true, order_url: '/order/x' });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    localStorage.setItem('wurk-cart', JSON.stringify([{ variant: 'v1', quantity: 1 }]));
+    document.body.innerHTML = '<div data-island="checkout"><p>Your cart is empty.</p></div>';
+    startIslands(document);
+    await settle();
+    const byLabel = <T extends HTMLElement>(text: string) =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find((l) => l.textContent === text)!.htmlFor,
+      ) as T;
+    const way = byLabel<HTMLSelectElement>('How should we deliver?');
+    expect([...way.options].map((o) => o.textContent)).toEqual([
+      'Courier (live prices)',
+      'Pargo pickup point — R60.00',
+    ]);
+
+    way.value = 'pickup';
+    way.dispatchEvent(new Event('change'));
+    byLabel<HTMLInputElement>('Your name').value = 'Sipho';
+    byLabel<HTMLInputElement>('Phone').value = '082 555 0101';
+    byLabel<HTMLInputElement>('I agree to be contacted about my order.').checked = true;
+    document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    expect(document.body.textContent).toContain('Please choose a pickup point.');
+
+    way.value = 'courier';
+    way.dispatchEvent(new Event('change'));
+    byLabel<HTMLInputElement>('Street address').value = '1 Vilakazi St';
+    byLabel<HTMLInputElement>('City or town').value = 'Soweto';
+    byLabel<HTMLInputElement>('Postal code').value = '1804';
+    [...document.querySelectorAll('button')]
+      .find((b) => b.textContent === 'Get courier prices')!
+      .click();
+    await settle();
+    const eco = document.querySelector<HTMLInputElement>(
+      '[role="radiogroup"][aria-label="Courier options"] input',
+    )!;
+    eco.checked = true;
+    eco.dispatchEvent(new Event('change'));
+    expect(document.body.textContent).toContain('Total R349.50');
+
+    document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    await settle();
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)![1]!.body))).toMatchObject({
+      fulfilment: 'delivery',
+      address: null,
+      shipping: {
+        provider: 'bobgo',
+        service: 'ECO',
+        to: { street: '1 Vilakazi St', city: 'Soweto', postal_code: '1804' },
+      },
+    });
+    vi.unstubAllGlobals();
+  });
+});

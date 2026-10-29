@@ -15,6 +15,7 @@ use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Support\CheckoutProblem;
 use Wurk\Shop\Support\OrderManager;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners: Shop → Orders — the list, one order with its timeline, and what can be done with it now. */
@@ -39,6 +40,7 @@ final class OrdersController
             $query->whereIn('status', self::FILTERS[$filter]);
         }
         $tz = $this->context->current()->timezone();
+        $names = $this->branchNames();
 
         return Inertia::render('Shop::Orders', [
             'show' => isset(self::FILTERS[$filter]) ? $filter : 'all',
@@ -46,6 +48,7 @@ final class OrdersController
             'orders' => $query->limit(100)->get()->map(fn (Order $o) => [
                 'id' => $o->id, 'number' => $o->number, 'customer' => $o->customer_name, 'total_cents' => $o->total_cents, 'status' => $o->status,
                 'payment' => $o->payment_method, 'fulfilment' => $o->fulfilment, 'placed' => $o->created_at->setTimezone($tz)->format('j M, H:i'),
+                'branch' => $names[(string) $o->branch_id] ?? null,
             ])->all(),
         ]);
     }
@@ -64,6 +67,12 @@ final class OrdersController
 
         return Inertia::render('Shop::Order', ['order' => [
             'id' => $o->id, 'number' => $o->number, 'status' => $o->status, 'payment' => $o->payment_method, 'fulfilment' => $o->fulfilment,
+            'branch' => $this->branchNames()[(string) $o->branch_id] ?? null,
+            'shipping' => $o->shipping_provider === null ? null : [
+                'provider' => $o->shipping_provider, 'service' => $o->shipping_service, 'pickup_point' => $o->pickup_point_name,
+                'tracking_reference' => $o->tracking_reference, 'tracking_url' => $o->tracking_url, 'label_url' => $o->label_url,
+                'can_ship' => $o->tracking_reference === null && in_array($o->status, ['paid', 'packed'], true),
+            ],
             'customer' => ['name' => $o->customer_name, 'phone' => $o->customer_phone, 'email' => $o->customer_email],
             'address' => $o->delivery_address, 'notes' => $o->notes,
             'subtotal_cents' => $o->subtotal_cents, 'delivery_cents' => $o->delivery_cents, 'total_cents' => $o->total_cents, 'refunded_cents' => $o->refunded_cents,
@@ -86,6 +95,12 @@ final class OrdersController
 
         return $this->attempt(fn () => $this->orders->advance($this->find($order), $to, $this->who($request)),
             ['paid' => 'Marked as paid.', 'packed' => 'Marked as packed.', 'ready' => 'Marked ready — the customer has been told.', 'out_for_delivery' => 'Marked as on its way — the customer has been told.', 'done' => 'Marked as done.'][$to]);
+    }
+
+    /** Create the courier shipment (Bob Go or Pargo) for a paid order; it goes out for delivery. */
+    public function ship(Request $request, string $order): RedirectResponse
+    {
+        return $this->attempt(fn () => $this->orders->ship($this->find($order), $this->who($request)), 'Shipment created — the order is on its way.');
     }
 
     public function cancel(Request $request, string $order): RedirectResponse
@@ -131,5 +146,17 @@ final class OrdersController
         }
 
         return back()->with('status', $done);
+    }
+
+    /**
+     * Branch names by id — only with several branches (one branch needs no label).
+     *
+     * @return array<string, string>
+     */
+    private function branchNames(): array
+    {
+        $open = app(BranchDirectory::class)->all();
+
+        return count(array_filter($open, fn (array $b) => ! $b['closed'])) > 1 ? array_column($open, 'name', 'id') : [];
     }
 }

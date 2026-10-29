@@ -54,7 +54,7 @@ final class PublicPaymentsController
                 $posted[$key] = urldecode($v);
             }
         }
-        $ok = $this->context->run($tenant, fn () => app(Payments::class)->notified($provider, $request->getContent(), $posted, $headers));
+        $ok = $this->context->run($tenant, fn () => app(Payments::class)->notified($provider, $request->getContent(), $posted, $headers, $request->query('branch') !== null ? (string) $request->query('branch') : null));
 
         return new Response('', $ok ? 200 : 400);
     }

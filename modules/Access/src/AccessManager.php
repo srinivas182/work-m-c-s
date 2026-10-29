@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Access;
 
+use Wurk\Access\Contracts\BranchRestriction;
 use Wurk\Access\Models\Member;
 use Wurk\Access\Models\PlatformRole;
 use Wurk\Access\Models\PlatformRoleAssignment;
@@ -22,7 +23,7 @@ use Wurk\Tenancy\Contracts\TenantContext;
  * context, or in a business they do not belong to, the answer is always no.
  * Results are memoised per request and cleared when the context changes.
  */
-final class AccessManager
+final class AccessManager implements BranchRestriction
 {
     /** @var array<string, list<string>> */
     private array $memo = [];

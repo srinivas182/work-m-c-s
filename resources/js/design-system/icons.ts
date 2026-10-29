@@ -9,6 +9,8 @@ import {
   Receipt,
   CreditCard,
   FileLock,
+  MapPin,
+  Truck,
   BarChart3,
   Building2,
   Calendar,
@@ -44,6 +46,9 @@ export const icons: Record<string, LucideIcon> = {
   receipt: Receipt,
   'credit-card': CreditCard,
   'file-lock': FileLock,
+  'map-pin': MapPin,
+  truck: Truck,
+  users: Users,
   coins: Coins,
   'lock-keyhole': LockKeyhole,
   'user-cog': UserCog,
@@ -67,7 +72,6 @@ export const icons: Record<string, LucideIcon> = {
   settings: Settings,
   'shield-check': ShieldCheck,
   'shopping-bag': ShoppingBag,
-  users: Users,
   wallet: Wallet,
 };
 

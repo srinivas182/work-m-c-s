@@ -20,6 +20,17 @@ interface OrderData {
   status: string;
   payment: 'card' | 'offline';
   fulfilment: 'collection' | 'delivery';
+  branch: string | null;
+  shipping: {
+    provider: 'bobgo' | 'pargo';
+    service: string | null;
+    pickup_point: string | null;
+    tracking_reference: string | null;
+    tracking_url: string | null;
+    label_url: string | null;
+    can_ship: boolean;
+  } | null;
+
   customer: { name: string; phone: string; email: string | null };
   address: string | null;
   notes: string | null;
@@ -63,7 +74,7 @@ export default function Order({ order: o }: { order: OrderData }) {
       <div className="grid max-w-4xl gap-6">
         <PageHeader
           title={`Order #${o.number}`}
-          description={`${o.payment === 'card' ? 'Card' : 'EFT or on collection'} · ${o.fulfilment === 'delivery' ? 'Delivery' : 'Collection'}`}
+          description={`${o.payment === 'card' ? 'Card' : 'EFT or on collection'} · ${o.fulfilment === 'delivery' ? 'Delivery' : 'Collection'}${o.branch ? ` · ${o.branch}` : ''}`}
           actions={
             <Badge tone={o.status === 'awaiting_payment' ? 'warning' : 'neutral'}>
               {STATUS[o.status] ?? o.status}
@@ -75,6 +86,57 @@ export default function Order({ order: o }: { order: OrderData }) {
             ← All orders
           </Link>
         </p>
+        {o.shipping && (
+          <section
+            aria-label="Shipping"
+            className="border-border grid gap-2 rounded-lg border p-4 text-sm"
+          >
+            <p>
+              <strong>
+                {o.shipping.provider === 'pargo' ? 'Pargo pickup point' : 'Courier (Bob Go)'}
+              </strong>
+              {o.shipping.pickup_point
+                ? ` · ${o.shipping.pickup_point}`
+                : o.shipping.service
+                  ? ` · ${o.shipping.service}`
+                  : ''}
+            </p>
+            {o.shipping.tracking_reference ? (
+              <p className="flex flex-wrap gap-3">
+                <span>Tracking: {o.shipping.tracking_reference}</span>
+                {o.shipping.tracking_url && (
+                  <a
+                    className="underline"
+                    href={o.shipping.tracking_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Track it
+                  </a>
+                )}
+                {o.shipping.label_url && (
+                  <a
+                    className="underline"
+                    href={o.shipping.label_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Print the label
+                  </a>
+                )}
+              </p>
+            ) : (
+              o.shipping.can_ship && (
+                <Button
+                  className="justify-self-start"
+                  onClick={() => router.post(`${base}/ship`, {}, { preserveScroll: true })}
+                >
+                  Create shipment
+                </Button>
+              )
+            )}
+          </section>
+        )}
         {err && (
           <p role="alert" className="border-danger text-danger rounded-lg border p-3 text-sm">
             {err}
