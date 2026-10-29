@@ -18,6 +18,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string|null $offline_instructions
  * @property int $offline_hold_hours
  * @property int $next_order_number
+ * @property string|null $ships_from_branch_id
  */
 final class ShopSettings extends Model
 {

@@ -16,6 +16,8 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Models\Variant;
+use Wurk\Shop\Support\BranchStock;
+use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\CatalogChanged;
 
@@ -59,6 +61,10 @@ final class ProductsController
             'variants.*.price_cents' => ['required', 'integer', 'min:0', 'max:100000000'],
             'variants.*.compare_at_cents' => ['nullable', 'integer', 'max:100000000'],
             'variants.*.stock' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'variants.*.stock_at' => ['nullable', 'array'],            // several branches: stock per branch
+            'variants.*.stock_at.*' => ['integer', 'min:0', 'max:1000000'],
+            'variants.*.prices' => ['nullable', 'array'],              // several branches: optional price per branch
+            'variants.*.prices.*' => ['nullable', 'integer', 'min:0', 'max:100000000'],
         ], ['variants.min' => 'Add at least one price (a variant).', 'options.*.distinct' => 'Each option needs a different name.']);
 
         $options = array_values($data['options']);
@@ -95,9 +101,14 @@ final class ProductsController
                 $given = (array) $v['values'];
                 $values = $options === [] ? null : array_combine($options, array_map(fn (string $o) => (string) $given[$o], $options)); // stored in option order
                 $attrs = ['product_id' => $model->id, 'values' => $values, 'label' => $values ? implode(' / ', $values) : null, 'sku' => $v['sku'] ?? null,
-                    'price_cents' => $v['price_cents'], 'compare_at_cents' => $v['compare_at_cents'] ?? null, 'stock' => $v['stock'] ?? null, 'position' => $position];
+                    'price_cents' => $v['price_cents'], 'compare_at_cents' => $v['compare_at_cents'] ?? null, 'position' => $position];
                 $variant = ! empty($v['id']) ? Variant::query()->where('product_id', $model->id)->whereKey($v['id'])->first() : null;
                 $variant ? $variant->update($attrs) : $variant = Variant::query()->create($attrs);
+                // Stock per branch (several branches), or the total at the main branch; the variant's total follows.
+                $open = array_column(app(BranchDirectory::class)->open(), 'id');
+                $perBranch = isset($v['stock_at']) ? array_intersect_key(array_map('intval', (array) $v['stock_at']), array_flip($open)) : null;
+                app(BranchStock::class)->set($variant, $perBranch ?? (($v['stock'] ?? null) === null ? null : [app(BranchDirectory::class)->main() => (int) $v['stock']]));
+                app(BranchStock::class)->setPrices($variant, array_intersect_key((array) ($v['prices'] ?? []), array_flip($open)));
                 $keep[] = $variant->id;
             }
             Variant::query()->where('product_id', $model->id)->whereNotIn('id', $keep)->delete();
