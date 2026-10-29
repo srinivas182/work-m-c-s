@@ -43,6 +43,12 @@ it('finds contacts by number however it’s written, and by tag', function () {
     $this->actingAs($this->owner)->get("{$this->base}?tag=vip")->assertInertia(fn (Assert $p) => $p->has('contacts', 1)->where('contacts.0.name', 'Lerato'));
 });
 
+it('finds contacts to merge by name, number or email (owners only)', function () {
+    $this->actingAs($this->owner)->getJson("{$this->base}/search?q=sipho")->assertOk()->assertJsonCount(2, 'contacts');
+    $this->actingAs($this->owner)->getJson("{$this->base}/search?q=".urlencode('082 555 0101'))->assertJsonPath('contacts.0.name', 'Sipho');
+    $this->actingAs($this->manager)->getJson("{$this->base}/search?q=sipho")->assertForbidden();
+});
+
 it('merges two contacts into one history, and splits them back exactly', function () {
     $this->actingAs($this->owner)->post("{$this->base}/{$this->sipho}/merge", ['other' => $this->work])->assertSessionHas('status', 'Sipho (work) merged into Sipho. You can split them again from this page.');
     $this->actingAs($this->owner)->get($this->base)->assertInertia(fn (Assert $p) => $p->has('contacts', 2)); // the merged one is hidden

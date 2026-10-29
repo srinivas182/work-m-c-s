@@ -28,6 +28,14 @@ docker run --rm --env-file production.env wurk:<version> migrate
 
 On start-up each role caches configuration, routes, views and events (`php artisan optimize`) from the runtime environment.
 
+### Version-specific release steps
+
+Run these once, after `migrate`, when deploying the version shown (any other command is passed straight to the container):
+
+| From version | Step | Why |
+|---|---|---|
+| v0.14.0 | `docker run --rm --env-file production.env wurk:<version> php artisan crm:link-existing` | Makes contacts of customers from before contacts existed (bookings, class places, orders). Safe to run again. |
+
 ## Required environment
 
 | Variable | Example | Notes |

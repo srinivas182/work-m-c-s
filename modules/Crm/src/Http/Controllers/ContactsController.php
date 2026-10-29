@@ -6,6 +6,7 @@ namespace Wurk\Crm\Http\Controllers;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
@@ -43,6 +44,21 @@ final class ContactsController
             'pages' => ['current' => $page->currentPage(), 'last' => $page->lastPage(), 'total' => $page->total()],
             'q' => $q, 'tag' => $tag, 'canManage' => Gate::allows('contacts.manage'),
         ]);
+    }
+
+    /** Contacts matching a name, number or email (for merging), as JSON. */
+    public function search(Request $request): JsonResponse
+    {
+        Gate::authorize('contacts.manage');
+        $q = trim((string) $request->query('q', ''));
+        if (mb_strlen($q) < 2) {
+            return new JsonResponse(['contacts' => []]);
+        }
+        $phone = Phone::normalise($q);
+        $rows = $this->visible($request)->where(fn ($w) => $w->where('name', 'like', '%'.$q.'%')->orWhere('email', 'like', '%'.mb_strtolower($q).'%')
+            ->when($phone !== null && strlen($phone) > 5, fn ($w) => $w->orWhere('phone', 'like', '%'.ltrim((string) $phone, '+').'%')))->orderBy('name')->limit(10)->get();
+
+        return new JsonResponse(['contacts' => $rows->map(fn (Contact $c) => ['id' => $c->id, 'name' => $c->name, 'phone' => $c->phone, 'email' => $c->email])->all()]);
     }
 
     public function show(Request $request, string $contact): Response
