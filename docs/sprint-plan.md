@@ -20,7 +20,7 @@
 | 9 | 01 – 12 Mar | **Online consultations & patient documents** *(new)* | In-person / online / either per service; Google Meet & Zoom connections with a unique link per appointment; pay online before the slot; join window and reminders; online group classes; patient documents (secure, encrypted, audited) — **gated by legal review** | ✅ v0.10.0 – v0.12.0 |
 | 10 | 15 – 26 Mar | Online shop | Catalogue, variants, stock, cart, checkout; PayFast, Yoco, Ozow, Paystack, Peach; orders & refunds | ✅ v0.11.0 |
 | 11 | 29 Mar – 09 Apr | Multi-branch & shipping | Branch managers; per-branch merchant accounts, prices, stock; inter-branch settlement; courier integrations | ✅ v0.13.0 (#89–#94) |
-| 12 | 12 – 23 Apr | CRM & messaging | Leads & pipelines; forms & custom fields (incl. quote requests); rule-based chatbot; event template engine (email/SMS/WhatsApp) | Spec drafted (docs/sprints/sprint-12.md) |
+| 12 | 12 – 23 Apr | CRM & messaging | Leads & pipelines; forms & custom fields (incl. quote requests); rule-based chatbot; event template engine (email/SMS/WhatsApp) | Spec approved 31 Oct 2026 (docs/sprints/sprint-12.md) |
 | 13 | 26 Apr – 07 May | Referral engine | Self + 7 levels; pending/available; wallet rules; attribution; customer payouts; My WURK | |
 | 14 | 10 – 21 May | Agents | Sponsor hierarchy; package commissions & clawback; EFT payouts; agent dashboard; demo sites | |
 | 15 | 24 May – 04 Jun | Reports & campaigns | Tenant reports; SaaS metrics; **profit per package, pricing simulator, provider reconciliation, margin alerts**; analytics; campaigns & offers with credit estimates; monthly usage summary; auto top-up | |
