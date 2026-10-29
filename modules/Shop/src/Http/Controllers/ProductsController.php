@@ -110,7 +110,8 @@ final class ProductsController
                 $variant ? $variant->update($attrs) : $variant = Variant::query()->create($attrs);
                 // Stock per branch (several branches), or the total at the main branch; the variant's total follows.
                 $open = array_column(app(BranchDirectory::class)->open(), 'id');
-                $perBranch = isset($v['stock_at']) ? array_intersect_key(array_map('intval', (array) $v['stock_at']), array_flip($open)) : null;
+                // Per branch only with several branches and a non-empty list (a single-branch editor sends the total).
+                $perBranch = count($open) > 1 && ! empty($v['stock_at']) ? array_intersect_key(array_map('intval', (array) $v['stock_at']), array_flip($open)) : null;
                 app(BranchStock::class)->set($variant, $perBranch ?? (($v['stock'] ?? null) === null ? null : [app(BranchDirectory::class)->main() => (int) $v['stock']]));
                 app(BranchStock::class)->setPrices($variant, array_intersect_key((array) ($v['prices'] ?? []), array_flip($open)));
                 $keep[] = $variant->id;

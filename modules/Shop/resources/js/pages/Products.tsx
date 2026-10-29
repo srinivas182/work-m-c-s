@@ -125,7 +125,12 @@ function Editor({
                       stock_at: Object.keys(at).length ? at : undefined,
                     };
                   })
-                : d.variants,
+                : d.variants.map(
+                    (v) =>
+                      Object.fromEntries(
+                        Object.entries(v).filter(([k]) => k !== 'stock_at' && k !== 'prices'),
+                      ) as VariantRow,
+                  ), // one branch: just the total
             }));
             const opts = { preserveScroll: true, onSuccess: onDone };
             if (product) form.put(`${base()}/products/${product.id}`, opts);

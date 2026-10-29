@@ -169,3 +169,11 @@ it('shows orders by what needs doing, offers only sensible next steps, and recor
     $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/refund", ['amount_cents' => 50000, 'restock' => false])->assertSessionHasErrors(['order' => 'Refund up to R190.00 (what’s left of this order).']);
     ($this->in)(fn () => expect($order->refresh()->refunded_cents)->toBe(5000));
 });
+
+it('keeps the stock total when a single-branch shop saves a product with an empty per-branch list', function () {
+    ($this->subscribe)(['website', 'shop']);
+    $payload = ['name' => 'Cap', 'status' => 'published', 'options' => [], 'photos' => [], 'variants' => [['values' => [], 'price_cents' => 12000, 'stock' => 5, 'stock_at' => [], 'prices' => []]]];
+    $r = $this->actingAs($this->owner)->post("{$this->base}/products", $payload);
+    $r->assertSessionHasNoErrors()->assertSessionHas('status', 'Product saved.');
+    ($this->in)(fn () => expect(Variant::query()->sole()->stock)->toBe(5));
+});
