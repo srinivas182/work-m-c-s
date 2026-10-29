@@ -14,4 +14,6 @@ return [
         'live' => 'https://api.pargo.co.za',
     ],
     'timeout' => 15,
+    // Products don't have weights yet: each item counts as this many kilograms for courier rates.
+    'item_kg' => 0.5,
 ];

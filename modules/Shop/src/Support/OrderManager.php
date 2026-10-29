@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Shipping\Contracts\Couriers;
+use Wurk\Shipping\Support\ShippingProblem;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Variant;
@@ -124,5 +126,31 @@ final readonly class OrderManager
             'id' => (string) Str::ulid(), 'tenant_id' => $this->context->id(), 'order_id' => $order->id, 'event' => $event,
             'amount_cents' => $cents, 'note' => $note, 'by' => $by, 'created_at' => now(),
         ]);
+    }
+
+    /**
+     * Create the courier shipment for a paid courier or Pargo order (through the fulfilling branch's account,
+     * else the business's); saves the tracking and label, and sends the order out for delivery.
+     */
+    public function ship(Order $order, string $by): Order
+    {
+        if ($order->shipping_provider === null || ! in_array($order->status, ['paid', 'packed'], true)) {
+            throw new CheckoutProblem('Only a paid courier or pickup-point order can be shipped.');
+        }
+        $kg = max(0.1, (int) OrderItem::query()->where('order_id', $order->id)->sum('quantity') * (float) config('shipping.item_kg', 0.5));
+        $details = ['provider' => $order->shipping_provider, 'service' => $order->shipping_service, 'pickup_point' => $order->pickup_point,
+            'name' => $order->customer_name, 'phone' => $order->customer_phone, 'email' => $order->customer_email, 'value_cents' => $order->subtotal_cents, 'weight_kg' => $kg];
+        if ($order->shipping_provider === 'bobgo') {
+            $details['to'] = $order->shipping_to ?? ['street' => (string) $order->delivery_address]; // the structured address given at checkout
+        }
+        try {
+            $sent = app(Couriers::class)->ship('shop-'.$order->id, $order->branch_id, $details);
+        } catch (ShippingProblem $e) {
+            throw new CheckoutProblem($e->getMessage());
+        }
+        $order->update(['tracking_reference' => $sent['tracking_reference'], 'tracking_url' => $sent['tracking_url'], 'label_url' => $sent['label_url']]);
+        $this->advance($order->refresh(), 'out_for_delivery', $by);
+
+        return $order->refresh();
     }
 }

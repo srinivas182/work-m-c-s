@@ -37,6 +37,7 @@ Route::tenant(function (): void {
 // The cart and checkout on the business's own address (limits per business and visitor).
 Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'])->name('shop.public.')->group(function (): void {
     Route::post('/cart/price', [PublicCheckoutController::class, 'price'])->middleware('throttle:shop-read')->name('price');
+    Route::post('/cart/shipping', [PublicCheckoutController::class, 'shipping'])->middleware('throttle:shop-read')->name('shipping');
     Route::post('/cart/checkout', [PublicCheckoutController::class, 'checkout'])->middleware('throttle:shop-create')->name('checkout');
     Route::get('/order/{order}', [PublicCheckoutController::class, 'order'])->middleware(['signed', 'throttle:shop-read'])->name('order');
 });
