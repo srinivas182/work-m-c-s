@@ -31,6 +31,7 @@ return new class extends Migration
         // What a contact has done: bookings, orders, class places, form replies, chats.
         Schema::create('contact_links', function (Blueprint $table) {
             $table->ulid('contact_id')->index();
+            $table->ulid('original_contact_id')->index();   // who it first belonged to (so a merge can be undone)
             $table->ulid('tenant_id')->index();
             $table->string('source_type', 20);                 // booking | order | class | form | chat
             $table->string('source_id', 100);

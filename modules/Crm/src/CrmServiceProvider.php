@@ -25,6 +25,11 @@ final class CrmServiceProvider extends ModuleServiceProvider
         }
     }
 
+    public function menu(): array
+    {
+        return [['label' => 'Contacts', 'route' => 'tenant.contacts', 'icon' => 'users', 'section' => 'Customers', 'permission' => 'contacts.view', 'order' => 300]];
+    }
+
     public function permissions(): array
     {
         return [

@@ -30,8 +30,11 @@ final readonly class Contacts implements ContactBook
                 $contact->fill(['marketing_consent_at' => now(), 'marketing_consent_source' => $consentSource]);
             }
             $contact->fill(['last_seen_at' => now()])->save();
-            $db->table('contact_links')->updateOrInsert(['source_type' => $sourceType, 'source_id' => $sourceId],
-                ['contact_id' => $contact->id, 'tenant_id' => $this->context->id(), 'branch_id' => $branchId, 'summary' => mb_substr($summary, 0, 200), 'occurred_at' => now()]);
+            $link = ['source_type' => $sourceType, 'source_id' => $sourceId];
+            $row = ['tenant_id' => $this->context->id(), 'branch_id' => $branchId, 'summary' => mb_substr($summary, 0, 200)];
+            $db->table('contact_links')->where($link)->exists()
+                ? $db->table('contact_links')->where($link)->update($row) // already linked: keep its contact and history
+                : $db->table('contact_links')->insert([...$link, ...$row, 'contact_id' => $contact->id, 'original_contact_id' => $contact->id, 'occurred_at' => now()]);
 
             return $contact->id;
         });
@@ -50,5 +53,29 @@ final readonly class Contacts implements ContactBook
         }
 
         return $found;
+    }
+
+    /** Merge another contact into this one: its links move here, it points here; nothing is deleted. */
+    public function merge(Contact $keep, Contact $other): void
+    {
+        abort_if($keep->id === $other->id || $other->merged_into !== null, 422);
+        DB::connection($this->context->connectionName())->transaction(function () use ($keep, $other): void {
+            DB::connection($this->context->connectionName())->table('contact_links')->where('contact_id', $other->id)->update(['contact_id' => $keep->id]);
+            $keep->fill(array_filter(['phone' => $keep->phone ?? $other->phone, 'email' => $keep->email ?? $other->email,
+                'tags' => array_values(array_unique([...($keep->tags ?? []), ...($other->tags ?? [])])),
+                'marketing_consent_at' => $keep->marketing_consent_at ?? $other->marketing_consent_at, 'marketing_consent_source' => $keep->marketing_consent_source ?? $other->marketing_consent_source,
+            ], fn ($v) => $v !== null))->save();
+            $other->update(['merged_into' => $keep->id]);
+        });
+    }
+
+    /** Undo a merge: the merged contact gets back exactly the records that were first its own. */
+    public function split(Contact $merged): void
+    {
+        abort_if($merged->merged_into === null, 422);
+        DB::connection($this->context->connectionName())->transaction(function () use ($merged): void {
+            DB::connection($this->context->connectionName())->table('contact_links')->where('original_contact_id', $merged->id)->update(['contact_id' => $merged->id]);
+            $merged->update(['merged_into' => null]);
+        });
     }
 }
