@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 11.2 (bookings by branch)
+- **Bookings, classes, reservations and team hours belong to a branch** (existing rows moved to each business's main branch; anything created without a branch goes there too — single-branch businesses see no change).
+- **Hours per branch** (someone can work Mondays at one branch and Tuesdays at another; never two branches at once); a person's booked time is shared across branches, so no double bookings.
+- **Services offered at chosen branches**, with an optional **price per branch** (deposits use it).
+- **Customers choose a branch first** on the website (several branches only), then see that branch's services, prices and times.
+- **Branch managers run their branch**: bookings, hours, time off, classes and tables at their branches only. A new permission, `bookings.settings`, covers business-wide booking settings (services and prices, policy, messages, meeting links, health practice, table settings); `bookings.manage` is now day-to-day only.
+
 ### Added — Sprint 11.1 (branches and team)
 - **Branches** (Settings → Branches): address, phone, close and reopen (history kept; the main branch stays open), within the package's limit (`multi_branch` / `max_branches`, now enforced). Other modules read and manage branches through Tenancy's new `BranchDirectory` contract.
 - **Team** (Settings → Team) — owners couldn't manage their team before: members with their role and branches; invite by email with a role (seat limit checked), cancel invitations; change roles; limit people to branches (a branch manager always has particular branches); remove someone (their history is kept). Owners can't change or remove themselves, and the business never loses its last owner.
