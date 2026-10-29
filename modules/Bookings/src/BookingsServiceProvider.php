@@ -21,8 +21,12 @@ use Wurk\Bookings\Events\ClassLeft;
 use Wurk\Bookings\Events\ReservationCancelled;
 use Wurk\Bookings\Events\ReservationConfirmed;
 use Wurk\Bookings\Listeners\SendBookingMessages;
+use Wurk\Bookings\Models\Booking;
+use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
+use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
@@ -65,6 +69,19 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         RateLimiter::for('book-manage', fn (Request $r) => Limit::perMinute(30)->by($visitor($r, 'book-manage')));
         // A deposit Paystack reported paid: confirmed only after verifying (Deposits::confirm).
         // A provider reported a payment: deposits and class places ("dep_…") are confirmed after verifying it.
+        Event::listen(ContactsBackfillRequested::class, function (): void { // existing customers → contacts
+            $book = app(ContactBook::class);
+            Booking::query()->orderBy('id')->chunk(500, function ($rows) use ($book): void {
+                foreach ($rows as $b) {
+                    $book->remember($b->customer_name, $b->customer_phone, $b->customer_email, 'booking', $b->id, $b->branch_id, 'Booking · '.$b->starts_at);
+                }
+            });
+            ClassAttendee::query()->orderBy('id')->chunk(500, function ($rows) use ($book): void {
+                foreach ($rows as $a) {
+                    $book->remember($a->customer_name, $a->customer_phone, $a->customer_email, 'class', $a->id, null, 'Class place');
+                }
+            });
+        });
         Event::listen(BusinessPaymentReceived::class, fn (BusinessPaymentReceived $e) => str_starts_with($e->reference, 'dep_') ? $this->app->make(Deposits::class)->confirm($e->reference) : null);
         Event::listen([BookingConfirmed::class, BookingMoved::class, BookingCancelled::class, ReservationConfirmed::class, ReservationCancelled::class, ClassJoined::class, ClassLeft::class], SendBookingMessages::class);
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {

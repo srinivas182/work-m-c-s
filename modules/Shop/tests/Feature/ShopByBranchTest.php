@@ -149,3 +149,21 @@ it('makes one contact of someone who orders twice, however they write their numb
             ->and($db->table('contact_links')->pluck('branch_id')->sort()->values()->all())->toBe(collect([$this->main, $this->sandton])->sort()->values()->all());
     });
 });
+
+it('makes contacts of customers from before contacts existed, and running it again changes nothing', function () {
+    ($this->in)(function () {
+        Order::withoutEvents(function () { // as if placed before contacts existed
+            foreach ([['Sipho', '082 555 0101', 1], ['Sipho M', '+27825550101', 2], ['Lerato', '083 000 0000', 3]] as [$name, $phone, $n]) {
+                Order::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'number' => 900 + $n, 'branch_id' => $this->main, 'status' => 'done', 'payment_method' => 'offline', 'fulfilment' => 'collection',
+                    'customer_name' => $name, 'customer_phone' => $phone, 'subtotal_cents' => 1000, 'delivery_cents' => 0, 'total_cents' => 1000]);
+            }
+        });
+    });
+    $count = fn () => ($this->in)(fn () => [DB::connection(app(TenantContext::class)->connectionName())->table('contacts')->count(),
+        DB::connection(app(TenantContext::class)->connectionName())->table('contact_links')->count()]);
+    expect($count())->toBe([0, 0]);
+    $this->artisan('crm:link-existing')->assertSuccessful();
+    expect($count())->toBe([2, 3]); // Sipho (two orders) and Lerato
+    $this->artisan('crm:link-existing')->assertSuccessful();
+    expect($count())->toBe([2, 3]);
+});
