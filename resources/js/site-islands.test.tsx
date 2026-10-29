@@ -477,3 +477,71 @@ describe('class sign-up at a health practice', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('booking widget with several branches', () => {
+  const respond = (status: number, body: unknown) =>
+    Promise.resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+  const settle = () =>
+    new Promise((r) => setTimeout(r, 0)).then(() => new Promise((r) => setTimeout(r, 0)));
+
+  it('asks which branch first, then shows that branch’s services, prices and times', async () => {
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url) =>
+      url.startsWith('/book/services')
+        ? respond(200, {
+            timezone: 'Africa/Johannesburg',
+            branches: [
+              { id: 'b-main', name: 'Main', address: '1 Vilakazi St' },
+              { id: 'b-sandton', name: 'Sandton', address: '12 Rivonia Rd' },
+            ],
+            services: [
+              {
+                id: 's-braids',
+                name: 'Braids',
+                duration: 60,
+                price_cents: 45000,
+                members: [],
+                at: [
+                  { branch: 'b-main', price_cents: 45000 },
+                  { branch: 'b-sandton', price_cents: 50000 },
+                ],
+              },
+              {
+                id: 's-colour',
+                name: 'Colour',
+                duration: 90,
+                price_cents: 60000,
+                members: [],
+                at: [{ branch: 'b-main', price_cents: 60000 }],
+              },
+            ],
+          })
+        : respond(200, { date: '2027-05-04', times: [] }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    document.body.innerHTML = '<div data-island="booking" data-api="/book"><p>Call us</p></div>';
+    startIslands(document);
+    await settle();
+    const select = (label: string) =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find((l) => l.textContent === label)!.htmlFor,
+      ) as HTMLSelectElement;
+    const options = () => [...select('Service').options].map((o) => o.textContent);
+
+    expect([...select('Branch').options].map((o) => o.textContent)).toEqual([
+      'Main — 1 Vilakazi St',
+      'Sandton — 12 Rivonia Rd',
+    ]);
+    expect(options()).toEqual(['Braids (60 min, R450)', 'Colour (90 min, R600)']);
+    select('Branch').value = 'b-sandton';
+    select('Branch').dispatchEvent(new Event('change'));
+    await settle();
+    expect(options()).toEqual(['Braids (60 min, R500)']); // Colour isn't offered in Sandton
+    expect(String(fetchMock.mock.calls.at(-1)![0])).toContain('branch=b-sandton');
+    vi.unstubAllGlobals();
+  });
+});

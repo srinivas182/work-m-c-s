@@ -91,7 +91,10 @@ type BookService = {
   price_cents: number;
   location?: 'in_person' | 'online' | 'either';
   members: { id: string; name: string; registration?: string | null }[];
+  /** Where it's offered, and its price there (several branches only). */
+  at?: { branch: string; price_cents: number }[];
 };
+type BookBranch = { id: string; name: string; address: string | null };
 /** A health practice: fixed, versioned consent wording for online consultations. */
 type HealthTerms = { consent: string; version: string } | null;
 
@@ -118,11 +121,17 @@ async function booking(root: HTMLElement): Promise<void> {
   const api = root.dataset.api ?? '/book';
   let services: BookService[] = [];
   let health: HealthTerms = null;
+  let branches: BookBranch[] = [];
   try {
     const r = await fetch(`${api}/services`, { headers: { Accept: 'application/json' } });
     if (!r.ok) return; // not available: keep the "call or message us" fallback
-    const body = (await r.json()) as { services: BookService[]; health?: HealthTerms };
+    const body = (await r.json()) as {
+      services: BookService[];
+      health?: HealthTerms;
+      branches?: BookBranch[];
+    };
     services = body.services;
+    branches = body.branches ?? [];
     health = body.health ?? null;
   } catch {
     return;
@@ -136,15 +145,31 @@ async function booking(root: HTMLElement): Promise<void> {
     control.id = `${uid}-${text.replace(/\W+/g, '-').toLowerCase()}`;
     return el('div', {}, el('label', { htmlFor: control.id, class: 'font-medium' }, text), control);
   };
-  const serviceSelect = el('select', { class: field });
-  for (const s of services)
-    serviceSelect.append(
-      el(
-        'option',
-        { value: s.id },
-        `${s.name} (${s.duration} min${s.price_cents ? `, R${(s.price_cents / 100).toFixed(s.price_cents % 100 ? 2 : 0)}` : ''})`,
-      ),
+  // With several branches, customers choose one first; services and prices are for that branch.
+  const branchSelect = el('select', { class: field });
+  for (const b of branches)
+    branchSelect.append(
+      el('option', { value: b.id }, b.address ? `${b.name} — ${b.address}` : b.name),
     );
+  const serviceSelect = el('select', { class: field });
+  const fillServices = () => {
+    const keep = serviceSelect.value;
+    serviceSelect.replaceChildren();
+    for (const s of services) {
+      const here = branches.length ? s.at?.find((a) => a.branch === branchSelect.value) : undefined;
+      if (branches.length && !here) continue; // not offered at this branch
+      const price = here?.price_cents ?? s.price_cents;
+      serviceSelect.append(
+        el(
+          'option',
+          { value: s.id },
+          `${s.name} (${s.duration} min${price ? `, R${(price / 100).toFixed(price % 100 ? 2 : 0)}` : ''})`,
+        ),
+      );
+    }
+    if ([...serviceSelect.options].some((o) => o.value === keep)) serviceSelect.value = keep;
+  };
+  fillServices();
   const memberSelect = el('select', { class: field });
   const today = new Date();
   const iso = (d: Date) =>
@@ -226,6 +251,7 @@ async function booking(root: HTMLElement): Promise<void> {
     status.textContent = 'Finding free times…';
     const q = new URLSearchParams({ service: serviceSelect.value, date: dateInput.value });
     if (memberSelect.value) q.set('member', memberSelect.value);
+    if (branches.length) q.set('branch', branchSelect.value);
     const r = await fetch(`${api}/times?${q}`, { headers: { Accept: 'application/json' } }).catch(
       () => null,
     );
@@ -269,6 +295,7 @@ async function booking(root: HTMLElement): Promise<void> {
   const form = el(
     'form',
     { class: 'grid gap-4' },
+    ...(branches.length ? [labelled('Branch', branchSelect)] : []),
     labelled('Service', serviceSelect),
     labelled('With', memberSelect),
     where,
@@ -301,6 +328,7 @@ async function booking(root: HTMLElement): Promise<void> {
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({
         service: serviceSelect.value,
+        branch: branches.length ? branchSelect.value : null,
         member: memberSelect.value || null,
         online: isOnline(),
         health_consent: health !== null && isOnline() ? healthConsent.checked : null,
@@ -361,6 +389,13 @@ async function booking(root: HTMLElement): Promise<void> {
   });
   memberSelect.addEventListener('change', () => void refreshTimes());
   dateInput.addEventListener('change', () => void refreshTimes());
+  branchSelect.addEventListener('change', () => {
+    fillServices();
+    refreshWhere();
+    refreshHealth();
+    refreshMembers();
+    void refreshTimes();
+  });
   refreshMembers();
   refreshWhere();
   refreshHealth();
