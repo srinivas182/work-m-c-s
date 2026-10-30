@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved 31 Oct 2026 — 12.1 in review |
+| **Status** | Approved 31 Oct 2026 — 12.1 ✅ (#97), 12.2 in review |
 | **Plan (revision 3)** | 12 – 23 Apr 2027 · leads and pipelines; forms and custom fields (incl. quote requests); rule-based chatbot; event template engine (email/SMS/WhatsApp) |
 | **Builds on** | Messaging (SMS, WhatsApp and email behind one `Messenger`, with delivery records); booking messages (9.x); the website builder's blocks |
 
@@ -64,4 +64,5 @@ Decisions A–D; the WhatsApp templates with Meta; SMS/WhatsApp provider account
 
 | Part | PR | Notes |
 |---|---|---|
-| 12.1 Contacts | see PR | Found no shared customer list; contacts link the existing records without changing them. 1,151 backend tests on SQLite; Crm and shop contacts on MySQL 8; all browser tests. Fixed in review: a streamed export ran after the business's context ended; the merge search now uses its own JSON endpoint |
+| 12.1 Contacts | #97 | Found no shared customer list; contacts link the existing records without changing them. 1,151 backend tests on SQLite; Crm and shop contacts on MySQL 8; all browser tests. Fixed in review: a streamed export ran after the business's context ended; the merge search now uses its own JSON endpoint |
+| 12.2 Pipelines | see PR | The leads screens existed from an interrupted session: reviewed and completed rather than rebuilt (per the project's rule). Fixed: stage removal didn't reach the server; follow-up times 2 h off. 1,157 backend tests on SQLite; Crm on MySQL 8; all browser tests incl. the leads journey |

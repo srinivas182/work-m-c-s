@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 12.2 (pipelines)
+- **Leads** (Customers → Leads; `leads.view` / `leads.manage`): every business starts with a Sales pipeline (New → Contacted → Quoted → Won / Lost) whose stages can be renamed, added, reordered and removed (not while they still hold leads; one open stage always remains). Leads carry a value, source, assignee, branch and follow-up date; a board (moved with a stage choice, so it works by keyboard) and a list, open leads by default with won and lost on request; a lead page with its full history; New lead from a contact's page.
+- **Follow-up reminders**: a daily email (07:00 South Africa) to the assignee — once per follow-up date, never for closed leads, with the contact's name only.
+- Branch managers handle their branches' leads and leads assigned to them.
+
+### Fixed
+- Follow-up times were stored two hours off (found while completing an interrupted session's work).
+- Removing a stage on the pipeline screen didn't remove it on the server.
+
 ### Added — Sprint 12.1 (contacts)
 - **Contacts** (Customers → Contacts; new Crm module, `contacts.view` / `contacts.manage`): one contact per person per business, matched by exact phone or email (South African numbers written one way), built automatically from bookings, class places and orders, with their branch. Search by name, number or email; tags and notes; a contact's history; merge (nothing deleted) and split (exact undo); CSV export (audited, not cached). Branch managers see their branches' contacts.
 - Marketing consent is recorded only when given, with where; patient records stay out of the CRM.

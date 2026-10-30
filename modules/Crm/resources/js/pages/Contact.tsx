@@ -49,6 +49,7 @@ export default function Contact({
   const [found, setFound] = useState<
     { id: string; name: string; phone: string | null; email: string | null }[] | null
   >(null);
+  const lead = useForm({ contact: c.id, title: '', value: '' });
   const form = useForm({
     name: c.name,
     phone: c.phone ?? '',
@@ -173,6 +174,43 @@ export default function Contact({
             )}
           </CardContent>
         </Card>
+        {canManage && (
+          <Card>
+            <CardHeader>
+              <CardTitle>New lead</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form
+                aria-label="New lead"
+                className="flex flex-wrap items-end gap-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  lead.post(list.replace(/\/contacts$/, '/leads'), { preserveScroll: true });
+                }}
+              >
+                <Field label="What it’s about" error={lead.errors.title}>
+                  <Input
+                    value={lead.data.title}
+                    onChange={(e) => lead.setData('title', e.target.value)}
+                  />
+                </Field>
+                <Field label="Value (R, optional)" error={lead.errors.value}>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    className="w-32"
+                    value={lead.data.value}
+                    onChange={(e) => lead.setData('value', e.target.value)}
+                  />
+                </Field>
+                <Button type="submit" variant="secondary" loading={lead.processing}>
+                  Add lead
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader>
             <CardTitle>History</CardTitle>
