@@ -115,12 +115,14 @@ export default function Leads({
   stages,
   leads,
   view,
+  closed,
   canManage,
 }: {
   pipeline: { id: string; name: string };
   stages: Stage[];
   leads: LeadRow[];
   view: 'board' | 'list';
+  closed: boolean;
   canManage: boolean;
 }) {
   const base = window.location.pathname.replace(/\/$/, '');
@@ -174,6 +176,12 @@ export default function Leads({
                 className={view === 'list' ? 'font-semibold' : 'underline'}
               >
                 List
+              </Link>
+              <Link
+                href={closed ? `${base}?view=${view}` : `${base}?view=${view}&show=closed`}
+                className="underline"
+              >
+                {closed ? 'Show open leads' : 'Show won and lost'}
               </Link>
               {canManage && (
                 <button type="button" className="underline" onClick={() => setEditing(!editing)}>

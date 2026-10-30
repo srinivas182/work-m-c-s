@@ -31,13 +31,16 @@ final class LeadsController
         $pipeline = $this->leads->pipeline();
         $team = $this->teamNames();
         $tz = $this->context->current()->timezone();
-        $rows = $this->visible($request)->where('pipeline_id', $pipeline->id)->orderByDesc('updated_at')->limit(500)->get();
+        $closed = $request->query('show') === 'closed'; // open leads by default; won and lost on request
+        $rows = $this->visible($request)->where('pipeline_id', $pipeline->id)->when($closed, fn ($q) => $q->whereNotNull('closed_at'), fn ($q) => $q->whereNull('closed_at'))
+            ->orderByDesc('updated_at')->limit(500)->get();
         $names = Contact::query()->whereIn('id', $rows->pluck('contact_id'))->pluck('name', 'id');
 
         return Inertia::render('Crm::Leads', [
             'pipeline' => ['id' => $pipeline->id, 'name' => $pipeline->name],
             'stages' => $this->stages($pipeline->id),
             'view' => $request->query('view') === 'list' ? 'list' : 'board',
+            'closed' => $closed,
             'leads' => $rows->map(fn (Lead $l) => ['id' => $l->id, 'title' => $l->title, 'contact' => (string) ($names[$l->contact_id] ?? ''), 'stage' => $l->stage_id, 'source' => $l->source,
                 'value_cents' => $l->value_cents, 'assignee' => $team[(string) $l->assigned_to] ?? null,
                 'follow_up' => $l->follow_up_at?->setTimezone($tz)->format('j M'), 'overdue' => $l->closed_at === null && $l->follow_up_at !== null && $l->follow_up_at->isPast()])->all(),
@@ -122,7 +125,15 @@ final class LeadsController
         if (! in_array('open', $kinds, true)) {
             return back()->withErrors(['stages' => 'Keep at least one open stage.']);
         }
-        DB::connection($this->context->connectionName())->transaction(function () use ($d, $pipeline): void {
+        // Stages left out are removed — only when no leads are in them.
+        $kept = array_values(array_filter(array_map(fn (array $s) => $s['id'] ?? null, $d['stages'])));
+        foreach (Stage::query()->where('pipeline_id', $pipeline->id)->whereNotIn('id', $kept)->get() as $gone) {
+            if (Lead::query()->withoutGlobalScopes()->where('stage_id', $gone->id)->exists()) {
+                return back()->withErrors(['stages' => "“{$gone->name}” still has leads — move them first."]);
+            }
+        }
+        DB::connection($this->context->connectionName())->transaction(function () use ($d, $pipeline, $kept): void {
+            Stage::query()->where('pipeline_id', $pipeline->id)->whereNotIn('id', $kept)->delete();
             foreach (array_values($d['stages']) as $i => $s) {
                 $stage = isset($s['id']) ? Stage::query()->where('pipeline_id', $pipeline->id)->whereKey($s['id'])->firstOrFail() : new Stage(['pipeline_id' => $pipeline->id]);
                 $stage->fill(['name' => trim($s['name']), 'kind' => $s['kind'], 'position' => $i])->save();
