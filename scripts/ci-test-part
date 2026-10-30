@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Prints the test folders for one part of the MySQL test run (CI splits it in three).
+# Parts 1 and 2 are explicit lists of database-heavy modules; part 3 is everything else — so a new module
+# is always tested (it lands in part 3), and no test can be left out of every part.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+PART1=(Website Identity Tenancy Messaging Audit Records Health Team Admin Regions)
+PART2=(Bookings Billing Access Payments Credits Ai Plans Features Security Marketing)
+in_list() { local x="$1"; shift; for y in "$@"; do [[ "$x" == "$y" ]] && return 0; done; return 1; }
+case "${1:-}" in
+  1) for m in "${PART1[@]}"; do [[ -d "modules/$m/tests" ]] && echo "modules/$m/tests"; done ;;
+  2) for m in "${PART2[@]}"; do [[ -d "modules/$m/tests" ]] && echo "modules/$m/tests"; done ;;
+  3) echo tests
+     for d in modules/*/tests; do m="${d#modules/}"; m="${m%/tests}"
+       in_list "$m" "${PART1[@]}" || in_list "$m" "${PART2[@]}" || echo "$d"; done ;;
+  *) echo "usage: $0 1|2|3" >&2; exit 2 ;;
+esac

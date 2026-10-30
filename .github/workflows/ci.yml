@@ -172,11 +172,17 @@ jobs:
         run: vendor/bin/pest --parallel --compact
 
   backend-tests-mysql:
-    name: Backend · tests on MySQL 8 (real shards)
+    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 3)
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 18 # ~8 min and growing with each sub-sprint
+    # Split in three: each part has its own MySQL server, so the shared shard databases never collide.
+    # (One job took ~15 min by Sprint 12.2 and grew every sprint.)
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [1, 2, 3]
+    timeout-minutes: 10
     services:
       mysql:
         image: mysql:8.4
@@ -217,8 +223,10 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
-      - name: Pest (MySQL, sequential — shards are shared databases)
-        run: vendor/bin/pest --compact
+      # Parts come from scripts/ci-test-part: two explicit module lists, and part 3 is everything else, so
+      # every test runs exactly once (Pest's --shard dropped about half the suite here, so it isn't used).
+      - name: Pest (MySQL, sequential within the part — shards are shared databases)
+        run: vendor/bin/pest --compact $(scripts/ci-test-part ${{ matrix.part }})
 
   frontend-tests:
     name: Frontend · tests & build
@@ -240,14 +248,19 @@ jobs:
         run: pnpm build
 
   e2e:
-    name: E2E · smoke & accessibility
+    name: E2E · ${{ matrix.part == 'performance' && 'performance gate' || format('smoke & accessibility ({0})', matrix.part) }}
     needs: [changes, backend-quick, frontend-quick]
     if: >-
       always() && !cancelled() && !contains(needs.*.result, 'failure')
       && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true')
       && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # 454 browser checks plus the 24-template performance gate (~13 min and growing)
+    # Three parts: the browser suite in two halves, and the 24-template performance gate on its own.
+    strategy:
+      fail-fast: false
+      matrix:
+        part: ['1/2', '2/2', 'performance']
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
@@ -281,12 +294,14 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
-      - name: Playwright
+      - name: Playwright (half ${{ matrix.part }})
+        if: matrix.part != 'performance'
         env:
           APP_ENV: e2e
-        run: pnpm test:e2e
+        run: pnpm test:e2e --shard=${{ matrix.part }}
       # Every template's public home page: mobile Lighthouse ≥ 90 and layout shift < 0.1 (Sprint 5 gate).
       - name: Performance gate (mobile Lighthouse on all 24 templates)
+        if: matrix.part == 'performance'
         env:
           APP_ENV: e2e
         run: |
@@ -301,7 +316,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
+          name: playwright-report-${{ strategy.job-index }}
           path: playwright-report
           retention-days: 7
 
