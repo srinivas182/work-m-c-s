@@ -51,7 +51,23 @@ An owner opens Contacts and sees everyone who has booked, bought, enquired or ch
 
 Decisions A–D; the WhatsApp templates with Meta; SMS/WhatsApp provider accounts (for test sends).
 
-## 8. Decisions (WURK, 31 Oct 2026)
+## 7a. 12.3 in detail (forms) — written after reviewing what exists
+
+**Already there (Sprint 6.2):** Quote form and Contact form blocks; submissions stored as *enquiries* (name, phone, email, service, message, consent time, hashed IP, status), emailed to the business and listed under Website → Enquiries; consent to be contacted is required (POPIA); a hidden field catches bots; rate limits. **12.3 builds on this — no second form system.**
+
+| # | Part | What |
+|---|---|---|
+| 1 | **Enquiries become contacts** | Every enquiry is matched to (or creates) a contact, so it appears in their history. Existing enquiries are added by the same release step as 12.1 (`crm:link-existing`). |
+| 2 | **Leads from forms** | Each form has "Open a lead for each reply" — on by default for quote forms, off for contact forms. The lead's source is *form* or *quote*, with the service and message as its first note. |
+| 3 | **Marketing consent** | An optional, unticked "Send me news and offers" on every form, recorded with its source only when ticked (decision C). The required "contact me about this" tick stays as it is. |
+| 4 | **Your own fields** | Owners add questions to a form in the website editor: short text, long text, choice, date, yes/no; each can be required. Answers are stored with the enquiry and shown in Enquiries and on the contact. |
+| 5 | **More kinds of form** | A general *Form* block for enquiries, waiting lists and registrations of interest (title, purpose, own fields), alongside the existing Quote and Contact blocks. |
+| 6 | **Enquiries ↔ CRM** | Enquiries link to their contact and lead; the lead page shows the enquiry. |
+| 7 | **CI balance** | Move two modules into MySQL part 3 (parts took 6m53 / 7m24 / 4m24). |
+
+**File uploads on public forms** (in the original 12.3 line) are **proposed for a follow-up (12.3b)**: they need size and type limits (images and PDF, ≤ 5 MB), private storage, owner-only download and malware checks before being exposed to the public — worth doing properly rather than squeezing in.
+
+
 
 | # | Decision |
 |---|---|
@@ -66,4 +82,4 @@ Decisions A–D; the WhatsApp templates with Meta; SMS/WhatsApp provider account
 |---|---|---|
 | 12.1 Contacts | #97 | Found no shared customer list; contacts link the existing records without changing them. 1,151 backend tests on SQLite; Crm and shop contacts on MySQL 8; all browser tests. Fixed in review: a streamed export ran after the business's context ended; the merge search now uses its own JSON endpoint |
 | 12.2 Pipelines | #98 | The leads screens existed from an interrupted session: reviewed and completed rather than rebuilt (per the project's rule). Fixed: stage removal didn't reach the server; follow-up times 2 h off. 1,157 backend tests on SQLite; Crm on MySQL 8; all browser tests incl. the leads journey |
-| 12.6 (CI, brought forward) | see PR | The MySQL job reached ~15 min of its 18 after 12.2. Split in three (own MySQL server each) and the browser job in three (two halves + the performance gate). Pest's --shard covered only 618 of 1,157 tests, so the split uses scripts/ci-test-part (two module lists; part 3 is everything else) — verified locally: 232 + 214 + 711 = 1,157 |
+| 12.6 (CI, brought forward) | #99 | The MySQL job reached ~15 min of its 18 after 12.2. Split in three (own MySQL server each) and the browser job in three (two halves + the performance gate). Pest's --shard covered only 618 of 1,157 tests, so the split uses scripts/ci-test-part (two module lists; part 3 is everything else) — verified locally: 232 + 214 + 711 = 1,157 |
