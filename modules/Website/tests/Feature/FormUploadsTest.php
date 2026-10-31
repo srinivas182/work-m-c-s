@@ -13,6 +13,7 @@ use Wurk\Plans\Contracts\Catalog;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Models\EnquiryFile;
+use Wurk\Website\Support\StorageMeter;
 use Wurk\Website\Support\Uploads\FormFiles;
 use Wurk\Website\Support\Uploads\VirusScanner;
 
@@ -104,4 +105,28 @@ it('lists a reply’s files for the owner and downloads clean ones only — as a
     $this->actingAs($owner)->get("{$base}/01HZZZZZZZZZZZZZZZZZZZZZZZ/files/{$f->id}")->assertNotFound(); // not this enquiry's file
     $this->ctx->run($this->glow, fn () => EnquiryFile::query()->whereKey($f->id)->update(['status' => 'pending']));
     $this->actingAs($owner)->get("{$base}/{$f->enquiry_id}/files/{$f->id}")->assertNotFound(); // not scanned yet
+});
+
+it('removes files of enquiries archived for over a year (logged), keeps the rest, and counts held files towards storage', function () {
+    $this->post($this->url, [...$this->valid, 'files' => [($this->jpeg)()]])->assertOk();
+    $this->post($this->url, [...$this->valid, 'name' => 'Lerato', 'files' => [($this->jpeg)()]])->assertOk();
+    [$old, $kept] = $this->ctx->run($this->glow, function () {
+        $rows = Enquiry::query()->orderBy('name')->get(); // Lerato, Sipho
+        Enquiry::query()->whereKey($rows[1]->id)->update(['status' => 'archived', 'created_at' => now()->subMonths(13)]);
+        Enquiry::query()->whereKey($rows[0]->id)->update(['created_at' => now()->subMonths(13)]); // old, but not archived
+
+        return [$rows[1]->id, $rows[0]->id];
+    });
+    $used = fn () => app(StorageMeter::class)->measure($this->glow->id)['used'];
+    $before = $this->ctx->run($this->glow, fn () => (int) EnquiryFile::query()->sum('size'));
+    expect($before)->toBeGreaterThan(0);
+
+    $this->artisan('website:expire-form-files')->assertSuccessful();
+    $this->ctx->run($this->glow, function () use ($old, $kept) {
+        expect(EnquiryFile::query()->where('enquiry_id', $old)->sole()->only(['status', 'path']))->toBe(['status' => 'removed', 'path' => null])
+            ->and(EnquiryFile::query()->where('enquiry_id', $kept)->sole()->status)->toBe('clean');
+    });
+    $after = $this->ctx->run($this->glow, fn () => (int) EnquiryFile::query()->whereNotNull('path')->sum('size'));
+    expect($after)->toBeLessThan($before)->and($after)->toBeGreaterThan(0);
+    expect($used())->toBeFloat();
 });

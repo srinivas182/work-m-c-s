@@ -14,6 +14,7 @@ use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\DemoSitesCommand;
+use Wurk\Website\Console\ExpireFormFilesCommand;
 use Wurk\Website\Console\InstallTemplatesCommand;
 use Wurk\Website\Console\RerenderDatedPagesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
@@ -106,10 +107,11 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         // Dated content (promotions, expiring specials) refreshed just after midnight.
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('website:rerender-dated')->dailyAt('00:05')->timezone('Africa/Johannesburg')->onOneServer()->withoutOverlapping();
+            $schedule->command('website:expire-form-files')->dailyAt('03:15')->onOneServer()->withoutOverlapping();
         });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'website');
         if ($this->app->runningInConsole()) {
-            $this->commands([SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
+            $this->commands([ExpireFormFilesCommand::class, SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
         }
     }
 }

@@ -8,6 +8,7 @@ use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
+use Wurk\Website\Models\EnquiryFile;
 
 final readonly class StorageMeter implements UsageMeter
 {
@@ -16,7 +17,9 @@ final readonly class StorageMeter implements UsageMeter
     public function measure(string $tenantId): array
     {
         $tenant = $this->tenants->find($tenantId);
-        $bytes = $tenant === null ? 0 : (int) $this->context->run($tenant, fn () => app(SiteAssets::class)->usedBytes());
+        // Site media, plus files visitors attached to forms (still held — removed files no longer count).
+        $bytes = $tenant === null ? 0 : (int) $this->context->run($tenant, fn () => app(SiteAssets::class)->usedBytes()
+            + (int) EnquiryFile::query()->whereNotNull('path')->sum('size'));
 
         return ['label' => 'Storage', 'used' => round($bytes / 1048576, 1), 'included' => ($this->entitlements->limits($tenantId)['storage_mb'] ?? null) ?: null, 'unit' => 'MB'];
     }
