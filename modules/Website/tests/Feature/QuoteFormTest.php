@@ -98,3 +98,21 @@ it('takes enquiries posted from the business’s published site, on its own addr
     expect($this->ctx->run($this->glow, fn () => Enquiry::query()->count()))->toBe(1)
         ->and($this->ctx->run($this->other, fn () => Enquiry::query()->count()))->toBe(0);
 });
+
+it('makes each reply a contact, opens a lead when the form asks, and records marketing consent only when ticked', function () {
+    $this->post($this->url, [...$this->valid, 'lead' => '1'])->assertOk();                                  // quote form: opens a lead; news not ticked
+    $this->post($this->url, [...$this->valid, 'phone' => '+27 82 555 0101', 'lead' => '0', 'news' => '1'])->assertOk(); // same person; no lead; ticked news
+    $this->ctx->run($this->glow, function () {
+        $db = DB::connection(app(TenantContext::class)->connectionName());
+        $enquiries = Enquiry::query()->orderBy('created_at')->orderBy('id')->get();
+        expect($db->table('contacts')->count())->toBe(1)                                                     // one person, two replies
+            ->and($enquiries->pluck('contact_id')->unique()->count())->toBe(1)
+            ->and($enquiries->whereNotNull('lead_id')->count())->toBe(1)
+            ->and($enquiries->whereNotNull('marketing_consent_at')->count())->toBe(1)
+            ->and($db->table('contacts')->value('marketing_consent_source'))->toBe('Website form');
+        $lead = $db->table('leads')->first();
+        expect($lead->title)->toBe('Quote request: Solar install')->and($lead->source)->toBe('quote')
+            ->and($db->table('lead_events')->where('lead_id', $lead->id)->value('detail'))->toBe('Quote for a 5 kW system please.');
+    });
+    expect($this->ctx->run($this->other, fn () => DB::connection(app(TenantContext::class)->connectionName())->table('contacts')->count()))->toBe(0);
+});

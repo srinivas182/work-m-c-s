@@ -9,6 +9,8 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\DemoSitesCommand;
@@ -21,6 +23,7 @@ use Wurk\Website\Contracts\MediaLibrary;
 use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Listeners\RerenderShopPages;
+use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\EloquentSiteTemplates;
 use Wurk\Website\Support\NoProductCatalog;
@@ -84,6 +87,17 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);
         $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);
         Event::listen(CatalogChanged::class, RerenderShopPages::class);
+        Event::listen(ContactsBackfillRequested::class, function (): void { // past enquiries → contacts (the 12.1 release step)
+            $book = app(ContactBook::class);
+            Enquiry::query()->orderBy('id')->chunk(500, function ($rows) use ($book): void {
+                foreach ($rows as $e) {
+                    $contact = $book->remember($e->name, $e->phone, $e->email, 'form', $e->id, null, $e->service !== null ? 'Quote request: '.$e->service : 'Website enquiry');
+                    if ($e->contact_id === null) {
+                        $e->update(['contact_id' => $contact]);
+                    }
+                }
+            });
+        });
         // Quote forms: per business AND visitor (see the Bookings limiters for why).
         RateLimiter::for('quote-form', fn (Request $r) => Limit::perMinutes(10, 10)->by('quote-form|'.(string) $r->route('handle').'|'.$r->ip()));
         // Dated content (promotions, expiring specials) refreshed just after midnight.

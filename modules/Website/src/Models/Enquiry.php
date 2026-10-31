@@ -21,6 +21,9 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string $ip_hash
  * @property string $status
  * @property Carbon $created_at
+ * @property string|null $contact_id
+ * @property string|null $lead_id
+ * @property Carbon|null $marketing_consent_at
  */
 final class Enquiry extends Model
 {

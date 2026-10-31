@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\LeadBook;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Website\Mail\EnquiryMail;
@@ -39,6 +41,8 @@ final class QuoteFormController
             'service' => ['nullable', 'string', 'max:80'],
             'message' => ['required', 'string', 'max:2000'],
             'consent' => ['accepted'],
+            'news' => ['nullable'],        // optional, unticked: marketing consent only when ticked
+            'lead' => ['nullable', 'in:0,1'], // the form's “open a lead for each reply” setting
         ], [
             'phone.required_without' => 'Give a phone number or an email so the business can reply.',
             'email.required_without' => 'Give a phone number or an email so the business can reply.',
@@ -52,11 +56,20 @@ final class QuoteFormController
         RateLimiter::hit($capKey, 86400);
 
         $notify = $context->run($tenant, function () use ($data, $request): ?string {
-            Enquiry::query()->create([
+            $news = $request->boolean('news');
+            $enquiry = Enquiry::query()->create([
                 'name' => $data['name'], 'phone' => $data['phone'] ?? null, 'email' => $data['email'] ?? null,
                 'service' => $data['service'] ?? null, 'message' => $data['message'], 'consented_at' => now(),
+                'marketing_consent_at' => $news ? now() : null,
                 'ip_hash' => hash_hmac('sha256', (string) $request->ip(), (string) config('app.key')), 'created_at' => now(),
             ]);
+            // The CRM: the person becomes (or joins) a contact; quote forms open a lead by default.
+            $what = ($data['service'] ?? null) !== null ? 'Quote request: '.$data['service'] : 'Website enquiry';
+            $contact = app(ContactBook::class)->remember($data['name'], $data['phone'] ?? null, $data['email'] ?? null, 'form', $enquiry->id, null, $what, $news ? 'Website form' : null);
+            $lead = ($data['lead'] ?? '0') === '1'
+                ? app(LeadBook::class)->open($contact, $what, ($data['service'] ?? null) !== null ? 'quote' : 'form', null, null, $data['message'])
+                : null;
+            $enquiry->update(['contact_id' => $contact, 'lead_id' => $lead]);
 
             return Site::query()->first()?->settings['enquiry_email'] ?? null;
         });

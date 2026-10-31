@@ -8,6 +8,10 @@ export interface QuoteFormProps extends Record<string, unknown> {
   services: { name: string }[];
   detailsLabel: string;
   submitLabel: string;
+  /** 'yes': each reply opens a lead in the CRM. */
+  leads?: 'yes' | 'no';
+  /** 'yes': an optional, unticked “Send me news and offers”. */
+  askNews?: 'yes' | 'no';
 }
 
 const input =
@@ -34,6 +38,22 @@ export const QuoteForm: BlockDefinition<QuoteFormProps> = {
     },
     detailsLabel: { kind: 'text', label: 'Question for details', max: 80 },
     submitLabel: { kind: 'text', inline: true, label: 'Button', max: 30 },
+    leads: {
+      kind: 'select',
+      label: 'Open a lead for each reply',
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No' },
+      ],
+    },
+    askNews: {
+      kind: 'select',
+      label: 'Ask if they’d like news and offers',
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No' },
+      ],
+    },
   },
   defaults: {
     heading: 'Request a quote',
@@ -41,6 +61,8 @@ export const QuoteForm: BlockDefinition<QuoteFormProps> = {
     services: [],
     detailsLabel: 'Tell us about the job',
     submitLabel: 'Send request',
+    leads: 'yes',
+    askNews: 'yes',
   },
   render: (p, site) => <QuoteFormView p={p} action={site.formAction} editing={site.editing} />,
 };
@@ -141,6 +163,19 @@ function QuoteFormView({
             this.
           </span>
         </label>
+        <input type="hidden" name="lead" value={p.leads === 'no' ? '0' : '1'} />
+        {p.askNews !== 'no' && (
+          <label className="flex items-start gap-3 text-sm" htmlFor={`${id}-news`}>
+            <input
+              id={`${id}-news`}
+              name="news"
+              type="checkbox"
+              value="1"
+              className="mt-1 size-5 accent-[var(--s-brand)]"
+            />
+            <span>Send me news and offers (optional). I can unsubscribe at any time.</span>
+          </label>
+        )}
         <div className="flex flex-wrap items-center gap-4">
           <button
             type="submit"
