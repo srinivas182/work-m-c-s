@@ -213,7 +213,8 @@ jobs:
         env:
           CLAMAV_LIVE: '1'
           CLAMAV_HOST: 127.0.0.1
-        run: vendor/bin/pest --group=clamav --compact
+        # --fail-on-skipped: if the test ever skips here, the job fails — so a pass means a real scan.
+        run: vendor/bin/pest --group=clamav --fail-on-skipped --compact
 
   backend-tests-mysql:
     name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 3)
