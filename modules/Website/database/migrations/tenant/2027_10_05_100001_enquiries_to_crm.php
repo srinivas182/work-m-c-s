@@ -15,11 +15,12 @@ return new class extends Migration
             $table->ulid('contact_id')->nullable()->index();
             $table->ulid('lead_id')->nullable();
             $table->dateTime('marketing_consent_at')->nullable();
+            $table->json('answers')->nullable(); // the business's own questions and the visitor's answers
         });
     }
 
     public function down(): void
     {
-        Schema::table('enquiries', fn (Blueprint $table) => $table->dropColumn(['contact_id', 'lead_id', 'marketing_consent_at']));
+        Schema::table('enquiries', fn (Blueprint $table) => $table->dropColumn(['contact_id', 'lead_id', 'marketing_consent_at', 'answers']));
     }
 };

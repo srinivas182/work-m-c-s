@@ -23,6 +23,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property Carbon $created_at
  * @property string|null $contact_id
  * @property string|null $lead_id
+ * @property list<array{q: string, a: string}>|null $answers
  * @property Carbon|null $marketing_consent_at
  */
 final class Enquiry extends Model
@@ -36,6 +37,6 @@ final class Enquiry extends Model
 
     protected function casts(): array
     {
-        return ['consented_at' => 'datetime', 'created_at' => 'datetime'];
+        return ['answers' => 'array', 'consented_at' => 'datetime', 'created_at' => 'datetime'];
     }
 }

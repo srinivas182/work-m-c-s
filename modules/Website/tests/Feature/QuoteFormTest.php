@@ -116,3 +116,19 @@ it('makes each reply a contact, opens a lead when the form asks, and records mar
     });
     expect($this->ctx->run($this->other, fn () => DB::connection(app(TenantContext::class)->connectionName())->table('contacts')->count()))->toBe(0);
 });
+
+it('takes a general form’s own questions: a waiting list without a message, answers stored and in the owner’s email and the lead', function () {
+    $this->ctx->run($this->glow, fn () => Site::query()->firstOrFail()->update(['settings' => ['enquiry_email' => 'owner@glow.co.za']]));
+    $this->post($this->url, ['name' => 'Lerato', 'email' => 'lerato@example.com', 'consent' => '1', 'form' => 'waiting_list', 'lead' => '1',
+        'answers' => [['q' => 'Which class?', 'a' => 'Saturday yoga'], ['q' => 'Anything else?', 'a' => '']]])->assertOk();
+    $this->postJson($this->url, ['name' => 'Bob', 'email' => 'bob@example.com', 'consent' => '1'])->assertStatus(422)->assertJsonValidationErrors('message'); // quote forms still need a message (no session on this public route)
+
+    Mail::assertSent(EnquiryMail::class, fn ($m) => str_contains($m->render(), 'Someone joined your waiting list') && str_contains($m->render(), 'Which class?: Saturday yoga') && ! str_contains($m->render(), 'Anything else?'));
+    $this->ctx->run($this->glow, function () {
+        $e = Enquiry::query()->sole();
+        $db = DB::connection(app(TenantContext::class)->connectionName());
+        expect($e->form)->toBe('waiting_list')->and($e->answers)->toBe([['q' => 'Which class?', 'a' => 'Saturday yoga']])
+            ->and($db->table('leads')->value('title'))->toBe('Waiting list: Lerato')
+            ->and($db->table('lead_events')->value('detail'))->toBe('Which class?: Saturday yoga');
+    });
+});
