@@ -105,6 +105,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         // Quote forms: per business AND visitor (see the Bookings limiters for why).
         // The chatbot: per business AND visitor (never one counter across businesses).
         RateLimiter::for('chat', fn (Request $r) => Limit::perMinute(60)->by('chat|'.(string) $r->route('handle').'|'.$r->ip()));
+        RateLimiter::for('chat-handoff', fn (Request $r) => Limit::perMinutes(10, 5)->by('chat-handoff|'.(string) $r->route('handle').'|'.$r->ip()));
         RateLimiter::for('quote-form', fn (Request $r) => Limit::perMinutes(10, 10)->by('quote-form|'.(string) $r->route('handle').'|'.$r->ip()));
         // Dated content (promotions, expiring specials) refreshed just after midnight.
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {

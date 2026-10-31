@@ -11,7 +11,11 @@ use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteBuilder;
 
 uses(InteractsWithShards::class);
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Wurk\Website\Mail\ChatHandoffMail;
 use Wurk\Website\Models\ChatAnswer;
+use Wurk\Website\Models\ChatHandoff;
 use Wurk\Website\Models\Site;
 use Wurk\Website\Support\ChatBot;
 
@@ -106,4 +110,39 @@ it('follows the facts unless the owner rewrote an answer, and links only to the 
     expect(collect($c['buttons'])->firstWhere('label', 'Call us')['answer'])->toBe('Call us on 083 000 0000.')   // followed the facts
         ->and(collect($c['buttons'])->firstWhere('label', 'Prices')['answer'])->toBe('Ask us for a quote.')         // the owner's words kept
         ->and(collect($c['buttons'])->firstWhere('label', 'Gallery')['link'])->toBeNull();                         // not one of the site's pages
+});
+
+it('hands a chat to a person: stored with consent, a contact and lead, and the owner emailed — spam and missing details refused', function () {
+    Mail::fake();
+    ($this->launch)();
+    $chat = ['name' => 'Sipho', 'phone' => '082 555 0101', 'message' => 'Can I book a wedding party of 6?', 'consent' => '1',
+        'transcript' => [['from' => 'bot', 'text' => 'Hi! How can we help?'], ['from' => 'visitor', 'text' => 'wedding group booking']]];
+    $this->postJson($this->base.'/chat/handoff', $chat)->assertNotFound(); // off
+    ($this->turnOn)(['enquiry_email' => 'owner@glow.co.za']);
+
+    $this->postJson($this->base.'/chat/handoff', [...$chat, 'consent' => null])->assertStatus(422)->assertJsonValidationErrors('consent');
+    $this->postJson($this->base.'/chat/handoff', [...$chat, 'phone' => null])->assertStatus(422)->assertJsonValidationErrors('phone');
+    $this->postJson($this->base.'/chat/handoff', [...$chat, 'website' => 'spam.example'])->assertOk(); // a bot: “accepted”, nothing kept
+    expect($this->ctx->run($this->glow, fn () => ChatHandoff::query()->count()))->toBe(0);
+
+    $this->postJson($this->base.'/chat/handoff', $chat)->assertOk()->assertJsonPath('reply', 'Thanks — we’ll get back to you as soon as we can.');
+    $this->ctx->run($this->glow, function () {
+        $h = ChatHandoff::query()->sole();
+        $db = DB::connection(app(TenantContext::class)->connectionName());
+        expect($h->transcript)->toHaveCount(2)->and($h->contact_id)->not->toBeNull()->and($h->marketing_consent_at)->toBeNull()
+            ->and($db->table('contact_links')->where('source_type', 'chat')->count())->toBe(1)
+            ->and($db->table('leads')->value('title'))->toBe('Chat: Sipho')->and($db->table('leads')->value('source'))->toBe('chat');
+    });
+    Mail::assertSent(ChatHandoffMail::class, fn ($m) => $m->hasTo('owner@glow.co.za')
+        && str_contains($m->render(), 'Them: wedding group booking') && str_contains($m->render(), 'Can I book a wedding party of 6?'));
+});
+
+it('counts taps on the business’s own buttons only — anonymously', function () {
+    ($this->launch)();
+    ($this->turnOn)();
+    $this->postJson($this->base.'/chat/tap', ['label' => 'Prices'])->assertOk();
+    $this->postJson($this->base.'/chat/tap', ['label' => 'Prices'])->assertOk();
+    $this->postJson($this->base.'/chat/tap', ['label' => 'Not a button'])->assertOk();
+    $rows = $this->ctx->run($this->glow, fn () => DB::connection(app(TenantContext::class)->connectionName())->table('chat_taps')->get(['label', 'taps'])->map(fn ($r) => (array) $r)->all());
+    expect($rows)->toBe([['label' => 'Prices', 'taps' => 2]]);
 });

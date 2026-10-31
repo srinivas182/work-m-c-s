@@ -105,6 +105,8 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'
     Route::post('/forms/quote', QuoteFormController::class)->middleware('throttle:quote-form')->name('website.public.quote');
     // The chatbot's answers (only when switched on); per business and visitor.
     Route::get('/chat', [PublicChatController::class, 'config'])->middleware('throttle:chat')->name('website.public.chat');
+    Route::post('/chat/handoff', [PublicChatController::class, 'handoff'])->middleware('throttle:chat-handoff')->name('website.public.chat.handoff');
+    Route::post('/chat/tap', [PublicChatController::class, 'tap'])->middleware('throttle:chat')->name('website.public.chat.tap');
     Route::get('/robots.txt', PublicSeoController::class)->defaults('type', 'robots')->name('website.public.robots');
     Route::get('/sitemap.xml', PublicSeoController::class)->defaults('type', 'sitemap')->name('website.public.sitemap');
     Route::get('/llms.txt', PublicSeoController::class)->defaults('type', 'llms')->name('website.public.llms');
