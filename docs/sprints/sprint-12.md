@@ -83,7 +83,7 @@ Decisions A–D; the WhatsApp templates with Meta; SMS/WhatsApp provider account
 | 12.1 Contacts | #97 | Found no shared customer list; contacts link the existing records without changing them. 1,151 backend tests on SQLite; Crm and shop contacts on MySQL 8; all browser tests. Fixed in review: a streamed export ran after the business's context ended; the merge search now uses its own JSON endpoint |
 | 12.2 Pipelines | #98 | The leads screens existed from an interrupted session: reviewed and completed rather than rebuilt (per the project's rule). Fixed: stage removal didn't reach the server; follow-up times 2 h off. 1,157 backend tests on SQLite; Crm on MySQL 8; all browser tests incl. the leads journey |
 | 12.6 (CI, brought forward) | #99 | The MySQL job reached ~15 min of its 18 after 12.2. Split in three (own MySQL server each) and the browser job in three (two halves + the performance gate). Pest's --shard covered only 618 of 1,157 tests, so the split uses scripts/ci-test-part (two module lists; part 3 is everything else) — verified locally: 232 + 214 + 711 = 1,157 |
-| 12.3 Forms | see PR | Continued from another session's branch (its detailed spec, approved; uploads moved to 12.3b). Builds on Sprint 6.2's forms. 1,160 backend tests on SQLite; forms and CRM on MySQL 8 (caught: MySQL's JSON type reorders keys — test made order-free); 388 frontend; all browser tests incl. a real quote request through Enquiries to the contact |
+| 12.3 Forms | #100 | Continued from another session's branch (its detailed spec, approved; uploads moved to 12.3b). Builds on Sprint 6.2's forms. 1,160 backend tests on SQLite; forms and CRM on MySQL 8 (caught: MySQL's JSON type reorders keys — test made order-free); 388 frontend; all browser tests incl. a real quote request through Enquiries to the contact |
 
 ## 7b. Sprint 12.3b in detail — file uploads on public forms (approved 31 Oct 2026)
 
@@ -120,3 +120,4 @@ Visitors can attach files to a form (a photo of the job, a plan, a CV) — safel
 |---|---|
 | A | **ClamAV** in its own container next to WURK's; files are held until scanned |
 | B | **Images and PDFs only** at launch |
+| 12.3b File uploads | see PR | Decisions: ClamAV; images and PDFs. HEIC dropped (GD can't re-save it; iPhones send JPEG). 1,165 backend tests on SQLite; uploads on MySQL 8; all browser tests incl. a held upload; CI scans EICAR with a real ClamAV |
