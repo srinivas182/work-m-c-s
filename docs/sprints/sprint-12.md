@@ -160,3 +160,26 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | B | **Every page when switched on** (off by default); the owner can hide it on chosen pages |
 | C | Reply times from the site's **confirmed hours**; otherwise "as soon as we can" |
 | 12.4 Chatbot | see PR | Decisions A–C as recommended. Found in testing: the page ETag ignored the chat's state; showing the chat depended on an asset address (empty in tests and before a build); the conversation lost its list meaning; focus left the chat after a hand-off. 1,172 backend tests on SQLite; chatbot on MySQL 8; 390 frontend; all browser tests incl. the full chat journey on a published demo site |
+
+## 7d. Sprint 12.5 in detail — message templates (draft for WURK's approval, 31 Oct 2026)
+
+**Two findings first.** (1) Booking messages were built with *fixed wording — owners choose channels, not words — as agreed with WURK* (Sprint 8). This sprint's plan ("word every message in one place") changes that agreement, so it needs WURK's decision (A). (2) WhatsApp messages use templates WURK registers once with Meta; a business can't have its own WhatsApp wording without registering its own templates with Meta. So WhatsApp wording stays fixed whatever is decided (decision D, already agreed).
+
+**What's in scope:** messages a business sends *to its customers* — bookings (confirmed, reminder, moved, cancelled), class places, and orders (placed, and the updates WURK sends today: paid, ready for collection, on its way, cancelled, refunded). **Out of scope (fixed):** WURK's own messages — invoices, sign-in codes, invitations, patient-record codes — and alerts to owners.
+
+| Part | What |
+|---|---|
+| **1. Settings → Messages** | One list of every customer message, grouped (bookings, classes, orders), showing each channel the business uses (email, SMS, WhatsApp) and today's wording. |
+| **2. Rewording email and SMS** | (If A is yes.) The owner can rewrite the subject and text of email and SMS messages, using placeholders ({client}, {service}, {when}, {business}, {link}, {order}); a preview with sample details; an SMS length and cost counter; "Back to standard wording". |
+| **3. Safety rails** | Messages that carry a link the customer needs (change/cancel a booking, view an order) must keep {link}; only known placeholders; plain text only (no HTML); length limits (SMS 2 parts by default); every change logged. |
+| **4. Test send** | Send any message to the owner's own email or phone with sample details. |
+| **5. WhatsApp** | Shown read-only with the Meta-approved wording and why it can't be changed; uses the same placeholders. |
+| **6. Tests** | Standard wording unchanged until edited (today's exact text); placeholders filled; required {link} enforced; unknown placeholders refused; SMS counter; test sends; isolation; accessibility. |
+
+### Decisions needed from WURK
+
+| # | Question | Recommendation |
+|---|---|---|
+| A | **Change the "fixed wording" agreement?** | **Yes for email and SMS**, with the safety rails above (a business's tone matters, and the rails keep the essential parts); **WhatsApp stays fixed** (Meta). If no, 12.5 becomes part 1 + 4 + 5 only (one place to see every message, and test sends). |
+| B | **Test sends by SMS** | **Count towards the business's SMS credits** like any other SMS (email test sends are free). |
+| C | **Automatic replies to enquiries and chats** | Not today. **Add later** as an optional "We got your message" email — not in this sprint. |
