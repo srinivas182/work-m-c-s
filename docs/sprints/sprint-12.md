@@ -122,7 +122,7 @@ Visitors can attach files to a form (a photo of the job, a plan, a CV) — safel
 | B | **Images and PDFs only** at launch |
 | 12.3b File uploads | see PR | Decisions: ClamAV; images and PDFs. HEIC dropped (GD can't re-save it; iPhones send JPEG). 1,165 backend tests on SQLite; uploads on MySQL 8; all browser tests incl. a held upload; CI scans EICAR with a real ClamAV |
 
-## 7c. Sprint 12.4 in detail — the chatbot (draft for WURK's approval, 31 Oct 2026)
+## 7c. Sprint 12.4 in detail — the chatbot (approved 31 Oct 2026)
 
 A rule-based assistant on the business's website (decision B: no AI this sprint). It answers common questions instantly, points people to booking, the shop or WhatsApp, and when someone wants a person, takes their details as a contact and lead.
 
@@ -151,3 +151,11 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | Slower pages | Loaded only on use; the performance gate covers every template. |
 | Spam through the hand-off | The same protections as forms (hidden field, limits per business and visitor, consent tick). |
 | Wrong answers after facts change | Ready-made answers follow the facts unless rewritten; the designer flags answers that mention old details. |
+
+### Decisions (WURK, 31 Oct 2026)
+
+| # | Decision |
+|---|---|
+| A | Store **only chats that reach a person**, with consent; otherwise anonymous button counts only |
+| B | **Every page when switched on** (off by default); the owner can hide it on chosen pages |
+| C | Reply times from the site's **confirmed hours**; otherwise "as soon as we can" |
