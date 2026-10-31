@@ -132,3 +132,23 @@ it('takes a general form’s own questions: a waiting list without a message, an
             ->and($db->table('lead_events')->value('detail'))->toBe('Which class?: Saturday yoga');
     });
 });
+
+it('shows the owner each enquiry’s kind, answers, and links to its contact and lead', function () {
+    $owner = $this->person();
+    $this->member($owner, $this->glow);
+    $package = app(PackageCatalog::class)->create([
+        'key' => 'starter', 'name' => 'Starter', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 1,
+        'monthly_price_cents' => 29900, 'yearly_price_cents' => 299000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 3,
+        'multi_branch' => false, 'max_branches' => 1, 'custom_domain' => false, 'monthly_credits' => 0, 'referral_max_levels' => 7,
+        'referral_max_commission_bp' => 3000, 'managed_fee_cents' => null, 'modules' => ['website'],
+    ], null);
+    app(Catalog::class)->subscribe($this->glow->id, $package->id, 'monthly', allowTrial: true);
+    $this->ctx->run($this->glow, fn () => app(Team::class)->add($owner->id, 'Owner', 'owner'));
+    $this->post($this->url, [...$this->valid, 'lead' => '1', 'answers' => [['q' => 'Roof type?', 'a' => 'Tiles']]])->assertOk();
+    [$contact, $lead] = $this->ctx->run($this->glow, fn () => [Enquiry::query()->value('contact_id'), Enquiry::query()->value('lead_id')]);
+
+    $this->actingAs($owner)->get($this->app('/glow-salon/website/enquiries'))->assertInertia(fn (Assert $p) => $p->component('Website::Enquiries')
+        ->where('enquiries.0.form', 'quote')->where('enquiries.0.answers.0', ['q' => 'Roof type?', 'a' => 'Tiles'])
+        ->where('enquiries.0.contact_id', $contact)->where('enquiries.0.lead_id', $lead));
+    expect($contact)->not->toBeNull()->and($lead)->not->toBeNull();
+});
