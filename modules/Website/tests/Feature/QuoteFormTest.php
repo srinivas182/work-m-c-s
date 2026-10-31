@@ -127,7 +127,7 @@ it('takes a general form’s own questions: a waiting list without a message, an
     $this->ctx->run($this->glow, function () {
         $e = Enquiry::query()->sole();
         $db = DB::connection(app(TenantContext::class)->connectionName());
-        expect($e->form)->toBe('waiting_list')->and($e->answers)->toBe([['q' => 'Which class?', 'a' => 'Saturday yoga']])
+        expect($e->form)->toBe('waiting_list')->and($e->answers)->toEqual([['q' => 'Which class?', 'a' => 'Saturday yoga']]) // MySQL's JSON type reorders keys
             ->and($db->table('leads')->value('title'))->toBe('Waiting list: Lerato')
             ->and($db->table('lead_events')->value('detail'))->toBe('Which class?: Saturday yoga');
     });
