@@ -18,7 +18,7 @@ export interface QuoteFormProps extends Record<string, unknown> {
 
 export interface Question extends Record<string, unknown> {
   label: string;
-  type: 'short' | 'long' | 'choice' | 'date' | 'yesno';
+  type: 'short' | 'long' | 'choice' | 'date' | 'yesno' | 'file';
   choices: string;
   required: 'yes' | 'no';
 }
@@ -39,6 +39,7 @@ export const QUESTIONS_FIELD = {
         { value: 'choice', label: 'A choice' },
         { value: 'date', label: 'A date' },
         { value: 'yesno', label: 'Yes or no' },
+        { value: 'file', label: 'Attach a file (photos or PDFs)' },
       ],
     },
     choices: { kind: 'text' as const, label: 'Choices (separated by commas)', max: 300 },
@@ -129,6 +130,7 @@ export function QuoteFormView({
       <Heading intro={p.intro}>{p.heading}</Heading>
       <form
         method="post"
+        encType="multipart/form-data"
         action={live ? action : undefined}
         className="mt-8 grid gap-5"
         onSubmit={live ? undefined : (e) => e.preventDefault()}
@@ -204,8 +206,27 @@ export function QuoteFormView({
                   {q.label}
                   {!req && <span className="font-normal text-[var(--s-muted)]"> (optional)</span>}
                 </span>
-                <input type="hidden" name={`answers[${i}][q]`} value={q.label} />
-                {q.type === 'long' ? (
+                {q.type !== 'file' && (
+                  <input type="hidden" name={`answers[${i}][q]`} value={q.label} />
+                )}
+                {q.type === 'file' ? (
+                  <>
+                    {/* Only these types: iPhones then send photos as JPEG. */}
+                    <input
+                      id={qid}
+                      name="files[]"
+                      type="file"
+                      multiple
+                      required={req}
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      aria-describedby={`${qid}-help`}
+                      className={input}
+                    />
+                    <span id={`${qid}-help`} className="text-sm text-[var(--s-muted)]">
+                      Photos (JPEG, PNG or WebP) or PDFs — up to 3 files, 5 MB each.
+                    </span>
+                  </>
+                ) : q.type === 'long' ? (
                   <textarea
                     id={qid}
                     name={`answers[${i}][a]`}

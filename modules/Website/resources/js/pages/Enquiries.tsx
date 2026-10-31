@@ -26,6 +26,12 @@ interface Enquiry {
   at: string;
   form: string;
   answers: { q: string; a: string }[];
+  files: {
+    id: string;
+    name: string;
+    size: number;
+    status: 'pending' | 'clean' | 'infected' | 'removed';
+  }[];
   contact_id: string | null;
   lead_id: string | null;
 }
@@ -112,6 +118,34 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
                       </dl>
                     )}
                     {e.message && <p className="whitespace-pre-line">{e.message}</p>}
+                    {e.files.length > 0 && (
+                      <ul aria-label="Files" className="grid gap-1 text-sm">
+                        {e.files.map((f) => (
+                          <li key={f.id} className="flex flex-wrap gap-2">
+                            {f.status === 'clean' ? (
+                              <a
+                                className="underline"
+                                href={`${base}/${e.id}/files/${f.id}`}
+                                download
+                              >
+                                {f.name}
+                              </a>
+                            ) : (
+                              <span>{f.name}</span>
+                            )}
+                            <span className="text-fg-muted">
+                              {f.status === 'pending'
+                                ? 'Being checked'
+                                : f.status === 'infected'
+                                  ? 'Removed: it failed the malware check'
+                                  : f.status === 'removed'
+                                    ? 'Removed'
+                                    : `${Math.max(1, Math.round(f.size / 1024))} KB`}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     {(e.contact_id || e.lead_id) && (
                       <p className="flex flex-wrap gap-3 text-sm">
                         {e.contact_id && (

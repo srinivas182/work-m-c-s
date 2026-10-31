@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
+use Wurk\Access\Actions\Team;
+use Wurk\Plans\Actions\PackageCatalog;
+use Wurk\Plans\Contracts\Catalog;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Models\EnquiryFile;
@@ -76,4 +79,29 @@ it('refuses disguised files, risky PDFs and too many files — saving nothing', 
     $this->postJson($this->url, [...$this->valid, 'files' => [$pdf]])->assertStatus(422)->assertJsonPath('errors.files.0', 'That PDF contains scripts or attachments we can’t accept — please save it as a plain PDF.');
     $this->postJson($this->url, [...$this->valid, 'files' => [($this->jpeg)(), ($this->jpeg)(), ($this->jpeg)(), ($this->jpeg)()]])->assertStatus(422)->assertJsonValidationErrors('files');
     expect($this->ctx->run($this->glow, fn () => [Enquiry::query()->count(), EnquiryFile::query()->count()]))->toBe([0, 0]);
+});
+
+it('lists a reply’s files for the owner and downloads clean ones only — as an attachment, sandboxed, not cached', function () {
+    $owner = $this->person();
+    $this->member($owner, $this->glow);
+    $package = app(PackageCatalog::class)->create([
+        'key' => 'starter', 'name' => 'Starter', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 1,
+        'monthly_price_cents' => 29900, 'yearly_price_cents' => 299000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 3,
+        'multi_branch' => false, 'max_branches' => 1, 'custom_domain' => false, 'monthly_credits' => 0, 'referral_max_levels' => 7,
+        'referral_max_commission_bp' => 3000, 'managed_fee_cents' => null, 'modules' => ['website'],
+    ], null);
+    app(Catalog::class)->subscribe($this->glow->id, $package->id, 'monthly', allowTrial: true);
+    $this->ctx->run($this->glow, fn () => app(Team::class)->add($owner->id, 'Owner', 'owner'));
+    $this->post($this->url, [...$this->valid, 'files' => [($this->jpeg)()]])->assertOk();
+    $f = ($this->file)();
+    $base = $this->app('/glow-salon/website/enquiries');
+
+    $this->actingAs($owner)->get($base)->assertInertia(fn ($p) => $p->where('enquiries.0.files.0.name', 'roof.jpg')->where('enquiries.0.files.0.status', 'clean'));
+    $r = $this->actingAs($owner)->get("{$base}/{$f->enquiry_id}/files/{$f->id}")->assertOk()
+        ->assertHeader('X-Content-Type-Options', 'nosniff')->assertHeader('Cache-Control', 'no-store, private')->assertHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    expect($r->headers->get('Content-Disposition'))->toStartWith('attachment')->and(substr((string) $r->getContent(), 0, 2))->toBe("\xFF\xD8");
+
+    $this->actingAs($owner)->get("{$base}/01HZZZZZZZZZZZZZZZZZZZZZZZ/files/{$f->id}")->assertNotFound(); // not this enquiry's file
+    $this->ctx->run($this->glow, fn () => EnquiryFile::query()->whereKey($f->id)->update(['status' => 'pending']));
+    $this->actingAs($owner)->get("{$base}/{$f->enquiry_id}/files/{$f->id}")->assertNotFound(); // not scanned yet
 });
