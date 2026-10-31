@@ -99,6 +99,7 @@ describe('the chat panel', () => {
       'Not sure — talk to someone?',
     ]);
     expect(log()).toContain('Thanks — we’ll get back to you as soon as we can.');
+    expect(document.activeElement).toBe(input); // focus stays inside the chat after the form goes
 
     dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect((dialog as HTMLElement).hidden).toBe(true);

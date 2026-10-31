@@ -106,12 +106,18 @@ function build(c: Config, opener: HTMLButtonElement): HTMLElement {
     close,
   );
   close.style.color = '#fff';
-  const log = el('ol', {
-    role: 'log',
-    'aria-live': 'polite',
-    'aria-label': 'Conversation',
-    style: 'list-style:none;margin:0;padding:16px;display:grid;gap:8px;overflow-y:auto;flex:1',
-  });
+  // A live log (announced) holding a real list of messages — role="log" on the list itself would remove its list meaning.
+  const messages = el('ol', { style: 'list-style:none;margin:0;padding:0;display:grid;gap:8px' });
+  const log = el(
+    'div',
+    {
+      role: 'log',
+      'aria-live': 'polite',
+      'aria-label': 'Conversation',
+      style: 'padding:16px;overflow-y:auto;flex:1',
+    },
+    messages,
+  );
   const say = (line: Line, link: Link = null) => {
     transcript.push(line);
     const bubble = el(
@@ -133,7 +139,7 @@ function build(c: Config, opener: HTMLButtonElement): HTMLElement {
       if (link.kind === 'whatsapp' || link.kind === 'map') a.setAttribute('rel', 'noopener');
       bubble.append(a);
     }
-    log.append(bubble);
+    messages.append(bubble);
     log.scrollTop = log.scrollHeight;
   };
   const quick = el('div', {
@@ -221,8 +227,11 @@ function build(c: Config, opener: HTMLButtonElement): HTMLElement {
     opener.focus();
   };
   close.addEventListener('click', hide);
+  // Escape closes the chat wherever focus is while it's open.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !box.hidden) hide();
+  });
   box.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') hide();
     if (e.key !== 'Tab') return; // keep focus inside the dialog
     const focusable = [
       ...box.querySelectorAll<HTMLElement>(
@@ -327,7 +336,9 @@ function handoffForm(c: Config, transcript: Line[], say: (l: Line) => void): HTM
       status.textContent = json.message ?? 'That didn’t send — please try again.';
       return;
     }
+    const back = form.closest('[role="dialog"]')?.querySelector<HTMLElement>('[data-first]');
     form.remove();
+    back?.focus(); // the form had focus: keep it inside the chat
     say({
       from: 'bot',
       text: json.reply ?? `Thanks — ${c.reply.charAt(0).toLowerCase()}${c.reply.slice(1)}`,
