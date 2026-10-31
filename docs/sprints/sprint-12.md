@@ -165,7 +165,7 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 
 **Two findings first.** (1) Booking messages were built with *fixed wording — owners choose channels, not words — as agreed with WURK* (Sprint 8). This sprint's plan ("word every message in one place") changes that agreement, so it needs WURK's decision (A). (2) WhatsApp messages use templates WURK registers once with Meta; a business can't have its own WhatsApp wording without registering its own templates with Meta. So WhatsApp wording stays fixed whatever is decided (decision D, already agreed).
 
-**What's in scope:** messages a business sends *to its customers* — bookings (confirmed, reminder, moved, cancelled), class places, and orders (placed, and each update: paid, packed, ready, on its way, done, cancelled, refunded). **Out of scope (fixed):** WURK's own messages — invoices, sign-in codes, invitations, patient-record codes — and alerts to owners.
+**What's in scope:** messages a business sends *to its customers* — bookings (confirmed, reminder, moved, cancelled), class places, and orders (placed, and the updates WURK sends today: paid, ready for collection, on its way, cancelled, refunded). **Out of scope (fixed):** WURK's own messages — invoices, sign-in codes, invitations, patient-record codes — and alerts to owners.
 
 | Part | What |
 |---|---|
