@@ -6,6 +6,7 @@ namespace Wurk\Website\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Website\Models\Enquiry;
@@ -23,7 +24,10 @@ final class EnquiriesController
             'view' => $view,
             'enquiries' => Enquiry::query()->when($view === 'archived', fn ($q) => $q->where('status', 'archived'), fn ($q) => $q->where('status', '!=', 'archived'))
                 ->latest('created_at')->limit(200)->get()
-                ->map(fn (Enquiry $e) => [...$e->only(['id', 'name', 'phone', 'email', 'service', 'message', 'status']), 'at' => $e->created_at->toIso8601String()])->all(),
+                ->map(fn (Enquiry $e) => [...$e->only(['id', 'name', 'phone', 'email', 'service', 'message', 'status', 'form']), 'at' => $e->created_at->toIso8601String(),
+                    'answers' => $e->answers ?? [],
+                    // Links into the CRM, for people allowed to see contacts and leads.
+                    'contact_id' => Gate::allows('contacts.view') ? $e->contact_id : null, 'lead_id' => Gate::allows('leads.view') ? $e->lead_id : null])->all(),
             'newCount' => Enquiry::query()->where('status', 'new')->count(),
             'notifyEmail' => $site->settings['enquiry_email'] ?? '',
             'base' => route('tenant.website.enquiries', [], false),

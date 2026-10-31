@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 12.3 (forms)
+- **Form replies join the CRM**: every reply becomes (or joins) a contact; past enquiries via `crm:link-existing`. Quote forms open a lead per reply by default (a setting on the block), with the message and answers as its first note.
+- **Optional "Send me news and offers"** on forms — unticked; marketing consent recorded only when ticked, with where.
+- **Your own questions** on forms (short or long text, a choice, a date, yes/no; required or optional), stored with the enquiry and shown in the owner's email, the lead and Enquiries.
+- **A general Form block** for enquiries, waiting lists and registrations of interest, sharing the Quote form's view, spam protection and limits; the message is optional.
+- **Enquiries** show the form's kind, the answers, and links to the contact and lead (for those allowed to see them).
+- CI: the MySQL parts rebalanced (Billing and Tenancy moved to part 3); every test still runs exactly once.
+
 ### Added — Sprint 12.2 (pipelines)
 - **Leads** (Customers → Leads; `leads.view` / `leads.manage`): every business starts with a Sales pipeline (New → Contacted → Quoted → Won / Lost) whose stages can be renamed, added, reordered and removed (not while they still hold leads; one open stage always remains). Leads carry a value, source, assignee, branch and follow-up date; a board (moved with a stage choice, so it works by keyboard) and a list, open leads by default with won and lost on request; a lead page with its full history; New lead from a contact's page.
 - **Follow-up reminders**: a daily email (07:00 South Africa) to the assignee — once per follow-up date, never for closed leads, with the contact's name only.

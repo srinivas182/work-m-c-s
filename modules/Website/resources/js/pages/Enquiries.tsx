@@ -24,7 +24,18 @@ interface Enquiry {
   message: string;
   status: 'new' | 'read' | 'archived';
   at: string;
+  form: string;
+  answers: { q: string; a: string }[];
+  contact_id: string | null;
+  lead_id: string | null;
 }
+
+const KIND: Record<string, string> = {
+  quote: 'Quote request',
+  enquiry: 'Enquiry',
+  waiting_list: 'Waiting list',
+  interest: 'Registration of interest',
+};
 
 interface Props {
   view: 'open' | 'archived';
@@ -41,6 +52,7 @@ const waNumber = (phone: string) => {
 };
 
 export default function Enquiries({ view, enquiries, newCount, notifyEmail, base }: Props) {
+  const appBase = `/${window.location.pathname.split('/')[1] ?? ''}`; // the business's back office (/{handle})
   const form = useForm({ notify_email: notifyEmail });
   const setStatus = (e: Enquiry, status: Enquiry['status']) =>
     router.put(`${base}/${e.id}`, { status }, { preserveScroll: true });
@@ -85,8 +97,35 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
                         {new Date(e.at).toLocaleString()}
                       </span>
                     </div>
-                    {e.service && <p className="text-fg-muted text-sm font-medium">{e.service}</p>}
-                    <p className="whitespace-pre-line">{e.message}</p>
+                    <p className="text-fg-muted text-sm font-medium">
+                      {KIND[e.form] ?? 'Enquiry'}
+                      {e.service ? ` · ${e.service}` : ''}
+                    </p>
+                    {e.answers.length > 0 && (
+                      <dl className="grid gap-1 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4">
+                        {e.answers.map((a, k) => (
+                          <div key={k} className="contents">
+                            <dt className="font-medium">{a.q}</dt>
+                            <dd>{a.a}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )}
+                    {e.message && <p className="whitespace-pre-line">{e.message}</p>}
+                    {(e.contact_id || e.lead_id) && (
+                      <p className="flex flex-wrap gap-3 text-sm">
+                        {e.contact_id && (
+                          <a className="underline" href={`${appBase}/contacts/${e.contact_id}`}>
+                            Contact
+                          </a>
+                        )}
+                        {e.lead_id && (
+                          <a className="underline" href={`${appBase}/leads/${e.lead_id}`}>
+                            Lead
+                          </a>
+                        )}
+                      </p>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       {e.phone && (
                         <>

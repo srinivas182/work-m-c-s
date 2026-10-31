@@ -4,8 +4,8 @@
 # is always tested (it lands in part 3), and no test can be left out of every part.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-PART1=(Website Identity Tenancy Messaging Audit Records Health Team Admin Regions)
-PART2=(Bookings Billing Access Payments Credits Ai Plans Features Security Marketing)
+PART1=(Website Identity Messaging Audit Records Health Team Admin Regions)
+PART2=(Bookings Access Payments Credits Ai Plans Features Security Marketing)
 in_list() { local x="$1"; shift; for y in "$@"; do [[ "$x" == "$y" ]] && return 0; done; return 1; }
 case "${1:-}" in
   1) for m in "${PART1[@]}"; do [[ -d "modules/$m/tests" ]] && echo "modules/$m/tests"; done ;;

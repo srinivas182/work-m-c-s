@@ -98,3 +98,57 @@ it('takes enquiries posted from the business’s published site, on its own addr
     expect($this->ctx->run($this->glow, fn () => Enquiry::query()->count()))->toBe(1)
         ->and($this->ctx->run($this->other, fn () => Enquiry::query()->count()))->toBe(0);
 });
+
+it('makes each reply a contact, opens a lead when the form asks, and records marketing consent only when ticked', function () {
+    $this->post($this->url, [...$this->valid, 'lead' => '1'])->assertOk();                                  // quote form: opens a lead; news not ticked
+    $this->post($this->url, [...$this->valid, 'phone' => '+27 82 555 0101', 'lead' => '0', 'news' => '1'])->assertOk(); // same person; no lead; ticked news
+    $this->ctx->run($this->glow, function () {
+        $db = DB::connection(app(TenantContext::class)->connectionName());
+        $enquiries = Enquiry::query()->orderBy('created_at')->orderBy('id')->get();
+        expect($db->table('contacts')->count())->toBe(1)                                                     // one person, two replies
+            ->and($enquiries->pluck('contact_id')->unique()->count())->toBe(1)
+            ->and($enquiries->whereNotNull('lead_id')->count())->toBe(1)
+            ->and($enquiries->whereNotNull('marketing_consent_at')->count())->toBe(1)
+            ->and($db->table('contacts')->value('marketing_consent_source'))->toBe('Website form');
+        $lead = $db->table('leads')->first();
+        expect($lead->title)->toBe('Quote request: Solar install')->and($lead->source)->toBe('quote')
+            ->and($db->table('lead_events')->where('lead_id', $lead->id)->value('detail'))->toBe('Quote for a 5 kW system please.');
+    });
+    expect($this->ctx->run($this->other, fn () => DB::connection(app(TenantContext::class)->connectionName())->table('contacts')->count()))->toBe(0);
+});
+
+it('takes a general form’s own questions: a waiting list without a message, answers stored and in the owner’s email and the lead', function () {
+    $this->ctx->run($this->glow, fn () => Site::query()->firstOrFail()->update(['settings' => ['enquiry_email' => 'owner@glow.co.za']]));
+    $this->post($this->url, ['name' => 'Lerato', 'email' => 'lerato@example.com', 'consent' => '1', 'form' => 'waiting_list', 'lead' => '1',
+        'answers' => [['q' => 'Which class?', 'a' => 'Saturday yoga'], ['q' => 'Anything else?', 'a' => '']]])->assertOk();
+    $this->postJson($this->url, ['name' => 'Bob', 'email' => 'bob@example.com', 'consent' => '1'])->assertStatus(422)->assertJsonValidationErrors('message'); // quote forms still need a message (no session on this public route)
+
+    Mail::assertSent(EnquiryMail::class, fn ($m) => str_contains($m->render(), 'Someone joined your waiting list') && str_contains($m->render(), 'Which class?: Saturday yoga') && ! str_contains($m->render(), 'Anything else?'));
+    $this->ctx->run($this->glow, function () {
+        $e = Enquiry::query()->sole();
+        $db = DB::connection(app(TenantContext::class)->connectionName());
+        expect($e->form)->toBe('waiting_list')->and($e->answers)->toEqual([['q' => 'Which class?', 'a' => 'Saturday yoga']]) // MySQL's JSON type reorders keys
+            ->and($db->table('leads')->value('title'))->toBe('Waiting list: Lerato')
+            ->and($db->table('lead_events')->value('detail'))->toBe('Which class?: Saturday yoga');
+    });
+});
+
+it('shows the owner each enquiry’s kind, answers, and links to its contact and lead', function () {
+    $owner = $this->person();
+    $this->member($owner, $this->glow);
+    $package = app(PackageCatalog::class)->create([
+        'key' => 'starter', 'name' => 'Starter', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 1,
+        'monthly_price_cents' => 29900, 'yearly_price_cents' => 299000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 3,
+        'multi_branch' => false, 'max_branches' => 1, 'custom_domain' => false, 'monthly_credits' => 0, 'referral_max_levels' => 7,
+        'referral_max_commission_bp' => 3000, 'managed_fee_cents' => null, 'modules' => ['website'],
+    ], null);
+    app(Catalog::class)->subscribe($this->glow->id, $package->id, 'monthly', allowTrial: true);
+    $this->ctx->run($this->glow, fn () => app(Team::class)->add($owner->id, 'Owner', 'owner'));
+    $this->post($this->url, [...$this->valid, 'lead' => '1', 'answers' => [['q' => 'Roof type?', 'a' => 'Tiles']]])->assertOk();
+    [$contact, $lead] = $this->ctx->run($this->glow, fn () => [Enquiry::query()->value('contact_id'), Enquiry::query()->value('lead_id')]);
+
+    $this->actingAs($owner)->get($this->app('/glow-salon/website/enquiries'))->assertInertia(fn (Assert $p) => $p->component('Website::Enquiries')
+        ->where('enquiries.0.form', 'quote')->where('enquiries.0.answers.0', ['q' => 'Roof type?', 'a' => 'Tiles'])
+        ->where('enquiries.0.contact_id', $contact)->where('enquiries.0.lead_id', $lead));
+    expect($contact)->not->toBeNull()->and($lead)->not->toBeNull();
+});

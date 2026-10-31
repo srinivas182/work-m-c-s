@@ -32,8 +32,8 @@ const render = (blocks: ContentDocument['blocks'], editing = false) =>
   );
 
 describe('block library', () => {
-  it('has 26 blocks whose types and versions the server accepts', () => {
-    expect(Object.keys(BLOCKS)).toHaveLength(26); // + Book online (Sprint 8.2), Products (Sprint 10.1)
+  it('has 27 blocks whose types and versions the server accepts', () => {
+    expect(Object.keys(BLOCKS)).toHaveLength(27); // + Book online (Sprint 8.2), Products (Sprint 10.1), Form (Sprint 12.3)
     for (const [type, def] of Object.entries(BLOCKS)) {
       expect(type).toMatch(/^[A-Z][A-Za-z0-9]{1,40}$/);
       expect(def.type).toBe(type);
@@ -253,5 +253,37 @@ describe('empty sections', () => {
 
   it('show a prompt in the editor', () => {
     expect(html(true)).toContain('Add a testimonial from a real customer.');
+  });
+});
+
+describe('general form', () => {
+  it('asks the business’s own questions, marks optional ones, and sends its purpose', () => {
+    const html = render([
+      {
+        id: 'form-1',
+        type: 'Form',
+        version: 1,
+        props: {
+          ...BLOCKS.Form!.defaults,
+          purpose: 'waiting_list',
+          questions: [
+            {
+              label: 'Which class?',
+              type: 'choice',
+              choices: 'Saturday yoga, Sunday pilates',
+              required: 'yes',
+            },
+            { label: 'Start date', type: 'date', choices: '', required: 'no' },
+          ],
+        },
+      },
+    ]);
+    expect(html).toContain('Which class?');
+    expect(html).toContain('Saturday yoga');
+    expect(html).toContain('Start date<span');
+    expect(html).toContain('(optional)');
+    expect(html).toContain('name="form" value="waiting_list"');
+    expect(html).toContain('name="answers[0][q]" value="Which class?"');
+    expect(html).not.toMatch(/name="message"[^>]*required/);
   });
 });
