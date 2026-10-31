@@ -14,6 +14,7 @@ use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\DemoSitesCommand;
+use Wurk\Website\Console\ExpireFormFilesCommand;
 use Wurk\Website\Console\InstallTemplatesCommand;
 use Wurk\Website\Console\RerenderDatedPagesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
@@ -35,11 +36,14 @@ use Wurk\Website\Support\SiteMediaLibrary;
 use Wurk\Website\Support\StorageMeter;
 use Wurk\Website\Support\Templates;
 use Wurk\Website\Support\TemplateSwitcher;
+use Wurk\Website\Support\Uploads\ClamdScanner;
+use Wurk\Website\Support\Uploads\VirusScanner;
 
 final class WebsiteServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(VirusScanner::class, ClamdScanner::class);
         $this->app->tag([StorageMeter::class], UsageMeter::TAG);
         $this->mergeConfigFrom($this->modulePath('config/website.php'), 'website');
         $this->app->singleton(Branding::class);
@@ -103,10 +107,11 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         // Dated content (promotions, expiring specials) refreshed just after midnight.
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('website:rerender-dated')->dailyAt('00:05')->timezone('Africa/Johannesburg')->onOneServer()->withoutOverlapping();
+            $schedule->command('website:expire-form-files')->dailyAt('03:15')->onOneServer()->withoutOverlapping();
         });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'website');
         if ($this->app->runningInConsole()) {
-            $this->commands([SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
+            $this->commands([ExpireFormFilesCommand::class, SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
         }
     }
 }

@@ -56,6 +56,7 @@ Route::tenant(function (): void {
         Route::post('/ai/image', AiImageController::class)->middleware('throttle:10,1,ai-image')->name('ai.image');
         Route::get('/enquiries', [EnquiriesController::class, 'index'])->name('enquiries');
         Route::put('/enquiries/settings', [EnquiriesController::class, 'settings'])->name('enquiries.settings');
+        Route::get('/enquiries/{enquiry}/files/{file}', [EnquiriesController::class, 'file'])->middleware('throttle:60,1,enquiry-files')->name('enquiries.file');
         Route::put('/enquiries/{enquiry}', [EnquiriesController::class, 'status'])->name('enquiries.status');
         Route::get('/menus', [MenusController::class, 'show'])->name('menus');
         Route::put('/menus', [MenusController::class, 'update'])->name('menus.update');

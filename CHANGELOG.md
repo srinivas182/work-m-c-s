@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 12.3b (file uploads on public forms)
+- **"Attach a file"** questions on the Quote and Form blocks: JPEG, PNG, WebP or PDF, up to 3 files of 5 MB each.
+- **Checked on arrival**: the real type is read from the file's contents; images are re-saved (hidden content, metadata and location dropped); PDFs with scripts, launch actions or attachments are refused; one bad file refuses the whole reply.
+- **Malware scanning with ClamAV**: files are encrypted on a private disk and held ("Being checked") until scanned clean; infected files are deleted and logged; while the scanner is down files stay held and are retried.
+- **Owner-only downloads** from Enquiries — clean files only, always saved (never opened in the browser), sandboxed, not cached, logged.
+- Uploads count towards the package's storage; files of enquiries archived over 12 months are removed daily (logged; a setting).
+- **Deployment (v0.14.0):** run ClamAV next to WURK — see "Malware scanning (ClamAV)" in docs/deployment/docker.md. CI scans the standard antivirus test file with a real ClamAV.
+- HEIC is not accepted (it can't be re-saved safely here); iPhones send JPEG to these forms.
+
 ### Added — Sprint 12.3 (forms)
 - **Form replies join the CRM**: every reply becomes (or joins) a contact; past enquiries via `crm:link-existing`. Quote forms open a lead per reply by default (a setting on the block), with the message and answers as its first note.
 - **Optional "Send me news and offers"** on forms — unticked; marketing consent recorded only when ticked, with where.

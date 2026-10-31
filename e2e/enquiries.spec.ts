@@ -30,7 +30,35 @@ test('a visitor’s quote request reaches Enquiries with its answers, and links 
   await expect(page.getByText('Tiles')).toBeVisible();
   await expectAccessible(page);
 
-  await page.getByRole('link', { name: 'Contact', exact: true }).click(); // exact: the sidebar also has “Contacts”
+  // A visitor's photo: held as "Being checked" (no scanner in this environment), so it can't be downloaded yet.
+  const png = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    'base64',
+  );
+  const withFile = await page.request.post(`/forms/${handle}/quote`, {
+    multipart: {
+      name: 'Lerato M',
+      phone: '083 000 0000',
+      message: 'Photo attached.',
+      consent: '1',
+      form: 'quote',
+      'files[]': { name: 'kitchen.png', mimeType: 'image/png', buffer: png },
+    },
+  });
+  expect(withFile.ok()).toBeTruthy();
+  await page.reload();
+  const files = page.getByRole('list', { name: 'Files' });
+  await expect(files).toContainText('kitchen.png');
+  await expect(files).toContainText('Being checked');
+  await expect(files.getByRole('link')).toHaveCount(0);
+  await expectAccessible(page);
+
+  // Sipho's enquiry (exact: the sidebar also has “Contacts”).
+  await page
+    .getByRole('listitem')
+    .filter({ hasText: 'Sipho Ndlovu' })
+    .getByRole('link', { name: 'Contact', exact: true })
+    .click();
   await expect(page.getByRole('heading', { level: 1, name: 'Sipho Ndlovu' })).toBeVisible();
   await expect(page.getByRole('list', { name: 'History' })).toContainText(
     'Quote request: Solar install',

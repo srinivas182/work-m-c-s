@@ -6,8 +6,10 @@ namespace Wurk\Website\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\LeadBook;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -15,6 +17,7 @@ use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Website\Mail\EnquiryMail;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Models\Site;
+use Wurk\Website\Support\Uploads\FormFiles;
 
 /**
  * Public quote form submissions (no session, no CSRF: there is no signed-in state to
@@ -41,6 +44,8 @@ final class QuoteFormController
             'service' => ['nullable', 'string', 'max:80'],
             'form' => ['nullable', 'in:quote,enquiry,waiting_list,interest'],
             'message' => [$request->input('form', 'quote') === 'quote' ? 'required' : 'nullable', 'string', 'max:2000'], // only quote forms require it
+            'files' => ['nullable', 'array', 'max:'.FormFiles::MAX_FILES],
+            'files.*' => ['file', 'max:'.FormFiles::MAX_KB],
             'answers' => ['nullable', 'array', 'max:15'],
             'answers.*.q' => ['required', 'string', 'max:120'],
             'answers.*.a' => ['nullable', 'string', 'max:1000'],
@@ -60,6 +65,13 @@ final class QuoteFormController
         RateLimiter::hit($capKey, 86400);
 
         $notify = $context->run($tenant, function () use ($data, $request): ?string {
+            // Every file is checked before anything is saved: a bad file refuses the whole reply, clearly.
+            $files = array_values(array_filter((array) $request->file('files', []), fn ($f) => $f instanceof UploadedFile));
+            foreach ($files as $f) {
+                if (($problem = app(FormFiles::class)->problem($f)) !== null) {
+                    throw ValidationException::withMessages(['files' => $problem]);
+                }
+            }
             $news = $request->boolean('news');
             $answers = array_values(array_filter(array_map(fn (array $x) => ['q' => trim((string) $x['q']), 'a' => trim((string) ($x['a'] ?? ''))], $data['answers'] ?? []), fn (array $x) => $x['a'] !== ''));
             $enquiry = Enquiry::query()->create([
@@ -82,6 +94,9 @@ final class QuoteFormController
                 ? app(LeadBook::class)->open($contact, $what, $kind === 'quote' && ($data['service'] ?? null) !== null ? 'quote' : 'form', null, null, $note === '' ? null : $note)
                 : null;
             $enquiry->update(['contact_id' => $contact, 'lead_id' => $lead]);
+            foreach ($files as $f) {
+                app(FormFiles::class)->store($f, $enquiry->id); // encrypted; held until scanned clean
+            }
 
             return Site::query()->first()?->settings['enquiry_email'] ?? null;
         });
