@@ -120,7 +120,7 @@ Visitors can attach files to a form (a photo of the job, a plan, a CV) — safel
 |---|---|
 | A | **ClamAV** in its own container next to WURK's; files are held until scanned |
 | B | **Images and PDFs only** at launch |
-| 12.3b File uploads | see PR | Decisions: ClamAV; images and PDFs. HEIC dropped (GD can't re-save it; iPhones send JPEG). 1,165 backend tests on SQLite; uploads on MySQL 8; all browser tests incl. a held upload; CI scans EICAR with a real ClamAV |
+| 12.3b File uploads | #102 | Decisions: ClamAV; images and PDFs. HEIC dropped (GD can't re-save it; iPhones send JPEG). 1,165 backend tests on SQLite; uploads on MySQL 8; all browser tests incl. a held upload; CI scans EICAR with a real ClamAV |
 
 ## 7c. Sprint 12.4 in detail — the chatbot (approved 31 Oct 2026)
 
@@ -159,3 +159,4 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | A | Store **only chats that reach a person**, with consent; otherwise anonymous button counts only |
 | B | **Every page when switched on** (off by default); the owner can hide it on chosen pages |
 | C | Reply times from the site's **confirmed hours**; otherwise "as soon as we can" |
+| 12.4 Chatbot | see PR | Decisions A–C as recommended. Found in testing: the page ETag ignored the chat's state; showing the chat depended on an asset address (empty in tests and before a build); the conversation lost its list meaning; focus left the chat after a hand-off. 1,172 backend tests on SQLite; chatbot on MySQL 8; 390 frontend; all browser tests incl. the full chat journey on a published demo site |

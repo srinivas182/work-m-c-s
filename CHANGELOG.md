@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 12.4 (the website chat)
+- **A rule-based chat** on the business's website (off by default; every page when on; hidden on chosen pages). Ready-made answers from what the business published — prices, location and map, call, WhatsApp, and opening hours once confirmed — follow those details until the owner rewrites them.
+- **Website → Chat**: greeting, fallback, quick buttons (up to 8) and keyword answers with links (the site's own pages, call, WhatsApp, map, email), a preview, and the most-used buttons.
+- **Talk to someone**: a visitor's details and the conversation are stored only then, with consent (decision A) — a contact, a lead (a setting), and the owner emailed; reply times from confirmed hours (decision C). Spam field, per-visitor limit, daily cap per business. **Customers → Chats** lists them.
+- **Accessible and light**: a labelled dialog (focus kept inside, Escape closes it from anywhere, answers announced), full screen on phones; answers matched on the visitor's device; the panel's code loads only on first use; anonymous counts of button taps only.
+- Published pages' ETag includes the chat's state, so switching it reaches visitors at once.
+
 ### Added — Sprint 12.3b (file uploads on public forms)
 - **"Attach a file"** questions on the Quote and Form blocks: JPEG, PNG, WebP or PDF, up to 3 files of 5 MB each.
 - **Checked on arrival**: the real type is read from the file's contents; images are re-saved (hidden content, metadata and location dropped); PDFs with scripts, launch actions or attachments are refused; one bad file refuses the whole reply.

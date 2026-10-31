@@ -23,6 +23,12 @@ final class PublicAssets
         return $this->path('resources/js/site-islands.ts');
     }
 
+    /** The chat's small loader (the panel itself loads only when the chat is first opened). */
+    public function chat(): string
+    {
+        return $this->path('resources/js/site-chat.ts');
+    }
+
     private function path(string $entry): string
     {
         $url = Vite::asset($entry);
