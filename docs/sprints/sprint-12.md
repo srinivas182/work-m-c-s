@@ -121,3 +121,33 @@ Visitors can attach files to a form (a photo of the job, a plan, a CV) — safel
 | A | **ClamAV** in its own container next to WURK's; files are held until scanned |
 | B | **Images and PDFs only** at launch |
 | 12.3b File uploads | see PR | Decisions: ClamAV; images and PDFs. HEIC dropped (GD can't re-save it; iPhones send JPEG). 1,165 backend tests on SQLite; uploads on MySQL 8; all browser tests incl. a held upload; CI scans EICAR with a real ClamAV |
+
+## 7c. Sprint 12.4 in detail — the chatbot (draft for WURK's approval, 31 Oct 2026)
+
+A rule-based assistant on the business's website (decision B: no AI this sprint). It answers common questions instantly, points people to booking, the shop or WhatsApp, and when someone wants a person, takes their details as a contact and lead.
+
+| Part | What |
+|---|---|
+| **1. Ready-made answers** | Switching the chat on starts it with answers built from what WURK already knows (`SiteFacts`): hours, address and map, phone and WhatsApp, services and prices, booking and shop links. The owner reviews them before going live; when the facts change, the answers follow (unless the owner rewrote them). |
+| **2. The owner's chat designer** | Website → Chat: a greeting; up to **8 quick buttons** ("Prices", "Book", "Where are you?"), each with an answer (text, plus an optional link — booking, shop, a page, call, WhatsApp, map); **keyword answers** (words like "price, cost, how much" lead to an answer); a fallback when nothing matches ("I'm not sure — would you like someone to get back to you?"); a live preview. |
+| **3. Hand-off to a person** | "Talk to someone": name, phone or email, a short message, the required "contact me about this" tick and the optional "news and offers" tick (as forms). The person becomes a contact (source: chat), a lead opens (a setting, on by default), and the owner is emailed — like a form reply, with spam protection and limits per business and visitor. Outside business hours it says when they'll hear back. |
+| **4. Chats in the back office** | Customers → Chats: each hand-off with its conversation, linked to the contact and lead. |
+| **5. The visitor's side** | A button in the corner of every page (when on); opens a panel (full screen on phones); works by keyboard and screen reader (a labelled dialog, focus kept inside, answers announced); the business's colours. Answers are matched on the visitor's device — typing isn't sent anywhere until they ask for a person. |
+| **6. Speed** | The chat's code loads only when the button is first tapped (or after the page has settled), so every page still passes the mobile performance gate. |
+| **7. Tests** | Ready-made answers from facts; keyword matching (case, punctuation, several words); hand-off → contact, lead, email; limits and spam; out of hours; isolation between businesses; accessibility of the panel (keyboard, focus, announcements) on desktop and phone; the performance gate. |
+
+### Decisions needed from WURK
+
+| # | Question | Recommendation |
+|---|---|---|
+| A | **What is stored?** | **Only conversations that end in a hand-off** (with consent), kept with the contact. Chats that never reach a person aren't stored — just anonymous counts of which buttons are used, so owners can improve the answers. (Storing every chat would hold people's typing without consent.) |
+| B | **Where does it appear?** | **Every page of the site when switched on** (off by default); the owner can hide it on chosen pages. |
+| C | **Opening hours** | Use the hours already confirmed in the site's facts; with none, the hand-off says "We'll get back to you as soon as we can." |
+
+### Risks
+
+| Risk | Mitigation |
+|---|---|
+| Slower pages | Loaded only on use; the performance gate covers every template. |
+| Spam through the hand-off | The same protections as forms (hidden field, limits per business and visitor, consent tick). |
+| Wrong answers after facts change | Ready-made answers follow the facts unless rewritten; the designer flags answers that mention old details. |
