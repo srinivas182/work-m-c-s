@@ -85,7 +85,7 @@ Decisions A–D; the WhatsApp templates with Meta; SMS/WhatsApp provider account
 | 12.6 (CI, brought forward) | #99 | The MySQL job reached ~15 min of its 18 after 12.2. Split in three (own MySQL server each) and the browser job in three (two halves + the performance gate). Pest's --shard covered only 618 of 1,157 tests, so the split uses scripts/ci-test-part (two module lists; part 3 is everything else) — verified locally: 232 + 214 + 711 = 1,157 |
 | 12.3 Forms | see PR | Continued from another session's branch (its detailed spec, approved; uploads moved to 12.3b). Builds on Sprint 6.2's forms. 1,160 backend tests on SQLite; forms and CRM on MySQL 8 (caught: MySQL's JSON type reorders keys — test made order-free); 388 frontend; all browser tests incl. a real quote request through Enquiries to the contact |
 
-## 7b. Sprint 12.3b in detail — file uploads on public forms (draft for WURK's approval, 31 Oct 2026)
+## 7b. Sprint 12.3b in detail — file uploads on public forms (approved 31 Oct 2026)
 
 Visitors can attach files to a form (a photo of the job, a plan, a CV) — safely. Public uploads are the riskiest thing a website accepts, so every layer below applies.
 
@@ -113,3 +113,10 @@ Visitors can attach files to a form (a photo of the job, a plan, a CV) — safel
 | A scanner outage blocks downloads | Files are kept "being checked" and released automatically when the scanner is back; the owner still sees the reply and the file's name. |
 | Storage abuse | Size and count limits, the form's rate limit, and the package's storage meter. |
 | Privacy (CVs, photos of homes) | Encrypted, private, owner-only, logged, and removed with archived enquiries after 12 months. |
+
+### Decisions (WURK, 31 Oct 2026)
+
+| # | Decision |
+|---|---|
+| A | **ClamAV** in its own container next to WURK's; files are held until scanned |
+| B | **Images and PDFs only** at launch |
