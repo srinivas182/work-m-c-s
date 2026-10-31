@@ -171,6 +171,50 @@ jobs:
       - name: Pest
         run: vendor/bin/pest --parallel --compact
 
+  backend-clamav:
+    name: Backend · malware scanner (real ClamAV)
+    needs: [changes, backend-quick]
+    if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      clamav:
+        image: clamav/clamav:1.4
+        ports:
+          - 3310:3310
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+      - name: Composer cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      # ClamAV loads its virus list before answering (usually 1–3 minutes).
+      - name: Wait for ClamAV
+        run: |
+          for i in $(seq 1 60); do
+            if printf 'zPING\0' | nc -w 3 127.0.0.1 3310 | grep -q PONG; then echo "ClamAV is ready"; exit 0; fi
+            sleep 5
+          done
+          echo "::error::ClamAV didn't start in 5 minutes"; exit 1
+      - name: Scan the antivirus test file and an ordinary file
+        env:
+          CLAMAV_LIVE: '1'
+          CLAMAV_HOST: 127.0.0.1
+        run: vendor/bin/pest --group=clamav --compact
+
   backend-tests-mysql:
     name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 3)
     needs: [changes, backend-quick]
@@ -410,7 +454,7 @@ jobs:
   ci:
     name: CI
     if: always()
-    needs: [changes, backend-quick, frontend-quick, backend-tests, backend-tests-mysql, frontend-tests, e2e, docker-dev, docker-prod]
+    needs: [changes, backend-quick, frontend-quick, backend-tests, backend-clamav, backend-tests-mysql, frontend-tests, e2e, docker-dev, docker-prod]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

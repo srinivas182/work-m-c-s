@@ -28,6 +28,16 @@ docker run --rm --env-file production.env wurk:<version> migrate
 
 On start-up each role caches configuration, routes, views and events (`php artisan optimize`) from the runtime environment.
 
+### Malware scanning (ClamAV) — from v0.14.0
+
+Files visitors attach to forms are held until ClamAV scans them. Run it next to WURK's containers, on the same private network, with a volume for its virus list (it updates itself several times a day):
+
+```bash
+docker run -d --name clamav --network wurk --restart unless-stopped -v clamav:/var/lib/clamav clamav/clamav:1.4
+```
+
+Point WURK at it with `CLAMAV_HOST=clamav` (and `CLAMAV_PORT=3310`, the default). It needs about **1.5 GB of memory** and takes 1–2 minutes to load its virus list after starting; until then, and whenever it's unavailable, uploaded files stay "being checked" and are released automatically once it's back. Never expose port 3310 to the internet.
+
 ### Version-specific release steps
 
 Run these once, after `migrate`, when deploying the version shown (any other command is passed straight to the container):
