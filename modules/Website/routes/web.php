@@ -17,6 +17,7 @@ use Wurk\Website\Http\Controllers\MediaController;
 use Wurk\Website\Http\Controllers\MenusController;
 use Wurk\Website\Http\Controllers\PagesController;
 use Wurk\Website\Http\Controllers\PreviewController;
+use Wurk\Website\Http\Controllers\PublicChatController;
 use Wurk\Website\Http\Controllers\PublicSeoController;
 use Wurk\Website\Http\Controllers\PublicSiteController;
 use Wurk\Website\Http\Controllers\QuoteFormController;
@@ -102,6 +103,8 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'
     // The quote form on the business's own address (same protections as the app-domain route: no session
     // or CSRF, a hidden spam field, a per-visitor limit and a daily cap per business).
     Route::post('/forms/quote', QuoteFormController::class)->middleware('throttle:quote-form')->name('website.public.quote');
+    // The chatbot's answers (only when switched on); per business and visitor.
+    Route::get('/chat', [PublicChatController::class, 'config'])->middleware('throttle:chat')->name('website.public.chat');
     Route::get('/robots.txt', PublicSeoController::class)->defaults('type', 'robots')->name('website.public.robots');
     Route::get('/sitemap.xml', PublicSeoController::class)->defaults('type', 'sitemap')->name('website.public.sitemap');
     Route::get('/llms.txt', PublicSeoController::class)->defaults('type', 'llms')->name('website.public.llms');
