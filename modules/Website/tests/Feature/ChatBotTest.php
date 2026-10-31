@@ -188,3 +188,21 @@ it('lets the owner design the chat: settings, answers (rewritten only when chang
     $this->postJson($this->base.'/chat/handoff', ['name' => 'Sipho', 'phone' => '082 555 0101', 'consent' => '1', 'transcript' => [['from' => 'visitor', 'text' => 'hi']]])->assertOk();
     $this->actingAs($owner)->get($this->app('/glow-salon/website/chats'))->assertInertia(fn ($p) => $p->component('Website::Chats')->where('chats.0.name', 'Sipho')->where('chats.0.lead_id', null));
 });
+
+it('puts the chat on published pages when on (not where hidden), and switching it changes the page’s ETag', function () {
+    ($this->launch)();
+    $home = $this->get($this->base.'/')->assertOk();
+    $etagOff = $home->headers->get('ETag');
+    expect($home->getContent())->not->toContain('data-chat-open');
+
+    ($this->turnOn)();
+    $on = $this->get($this->base.'/')->assertOk();
+    expect($on->getContent())->toContain('data-chat-open')->toContain('aria-label="Chat with us"')
+        ->and($on->headers->get('ETag'))->not->toBe($etagOff); // browsers fetch the page again
+
+    $this->ctx->run($this->glow, function () {
+        $site = Site::query()->firstOrFail();
+        $site->update(['settings' => array_replace_recursive((array) $site->settings, ['chat' => ['hidden' => ['/']]])]);
+    });
+    expect($this->get($this->base.'/')->getContent())->not->toContain('data-chat-open'); // hidden on the home page
+});
