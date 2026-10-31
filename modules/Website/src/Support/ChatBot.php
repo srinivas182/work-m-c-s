@@ -100,7 +100,7 @@ final readonly class ChatBot
     }
 
     /** @param array<string, mixed> $facts */
-    private function factAnswer(string $fact, array $facts): ?string
+    public function factAnswer(string $fact, array $facts): ?string
     {
         $c = (array) $facts['contact'];
 

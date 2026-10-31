@@ -81,6 +81,8 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
             ['label' => 'Write with AI', 'route' => 'tenant.website.ai', 'icon' => 'sparkles', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
             ['label' => 'Media', 'route' => 'tenant.website.media', 'icon' => 'image', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 104],
             ['label' => 'Enquiries', 'route' => 'tenant.website.enquiries', 'icon' => 'inbox', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 103],
+            ['label' => 'Chat', 'route' => 'tenant.website.chat', 'icon' => 'message-circle', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 104],
+            ['label' => 'Chats', 'route' => 'tenant.website.chats', 'icon' => 'message-circle', 'section' => 'Customers', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 320],
             ['label' => 'Menus', 'route' => 'tenant.website.menus', 'icon' => 'menu', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 101],
         ];
     }

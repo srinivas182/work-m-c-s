@@ -22,6 +22,7 @@ use Wurk\Website\Http\Controllers\PublicSeoController;
 use Wurk\Website\Http\Controllers\PublicSiteController;
 use Wurk\Website\Http\Controllers\QuoteFormController;
 use Wurk\Website\Http\Controllers\TemplatePreviewController;
+use Wurk\Website\Http\Controllers\WebsiteChatController;
 
 Route::get('/_blocks', BlockBoardController::class)->name('website.block-board');
 
@@ -55,6 +56,11 @@ Route::tenant(function (): void {
         Route::get('/ai/quote', [AiWriterController::class, 'quote'])->name('ai.quote');
         Route::post('/ai/generate', [AiWriterController::class, 'generate'])->middleware('throttle:6,1,ai-generate')->name('ai.generate');
         Route::post('/ai/image', AiImageController::class)->middleware('throttle:10,1,ai-image')->name('ai.image');
+        Route::get('/chat', [WebsiteChatController::class, 'designer'])->name('chat');
+        Route::put('/chat/settings', [WebsiteChatController::class, 'settings'])->name('chat.settings');
+        Route::put('/chat/answers', [WebsiteChatController::class, 'answers'])->name('chat.answers');
+        Route::get('/chats', [WebsiteChatController::class, 'chats'])->name('chats');
+        Route::put('/chats/{chat}', [WebsiteChatController::class, 'status'])->name('chats.status');
         Route::get('/enquiries', [EnquiriesController::class, 'index'])->name('enquiries');
         Route::put('/enquiries/settings', [EnquiriesController::class, 'settings'])->name('enquiries.settings');
         Route::get('/enquiries/{enquiry}/files/{file}', [EnquiriesController::class, 'file'])->middleware('throttle:60,1,enquiry-files')->name('enquiries.file');

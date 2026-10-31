@@ -3,21 +3,25 @@
 declare(strict_types=1);
 
 use Illuminate\Process\PendingProcess;
-use Illuminate\Support\Facades\Process;
-use Tests\Support\InteractsWithShards;
-use Wurk\Tenancy\Contracts\TenantContext;
-use Wurk\Website\Models\Page;
-use Wurk\Website\Support\Pages;
-use Wurk\Website\Support\SiteBuilder;
-
-uses(InteractsWithShards::class);
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Process;
+use Tests\Support\InteractsWithIdentity;
+use Tests\Support\InteractsWithShards;
+use Wurk\Access\Actions\Team;
+use Wurk\Plans\Actions\PackageCatalog;
+use Wurk\Plans\Contracts\Catalog;
+use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Mail\ChatHandoffMail;
 use Wurk\Website\Models\ChatAnswer;
 use Wurk\Website\Models\ChatHandoff;
+use Wurk\Website\Models\Page;
 use Wurk\Website\Models\Site;
 use Wurk\Website\Support\ChatBot;
+use Wurk\Website\Support\Pages;
+use Wurk\Website\Support\SiteBuilder;
+
+uses(InteractsWithShards::class, InteractsWithIdentity::class);
 
 beforeEach(function () {
     // Like the real renderer: report each block's final values, filling the hours section's defaults
@@ -145,4 +149,42 @@ it('counts taps on the business’s own buttons only — anonymously', function 
     $this->postJson($this->base.'/chat/tap', ['label' => 'Not a button'])->assertOk();
     $rows = $this->ctx->run($this->glow, fn () => DB::connection(app(TenantContext::class)->connectionName())->table('chat_taps')->get(['label', 'taps'])->map(fn ($r) => (array) $r)->all());
     expect($rows)->toBe([['label' => 'Prices', 'taps' => 2]]);
+});
+
+it('lets the owner design the chat: settings, answers (rewritten only when changed), limits, and see hand-offs in Chats', function () {
+    ($this->launch)();
+    $owner = $this->person();
+    $this->member($owner, $this->glow);
+    $package = app(PackageCatalog::class)->create([
+        'key' => 'starter', 'name' => 'Starter', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 1,
+        'monthly_price_cents' => 29900, 'yearly_price_cents' => 299000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 3,
+        'multi_branch' => false, 'max_branches' => 1, 'custom_domain' => false, 'monthly_credits' => 0, 'referral_max_levels' => 7,
+        'referral_max_commission_bp' => 3000, 'managed_fee_cents' => null, 'modules' => ['website'],
+    ], null);
+    app(Catalog::class)->subscribe($this->glow->id, $package->id, 'monthly', allowTrial: true);
+    $this->ctx->run($this->glow, fn () => app(Team::class)->add($owner->id, 'Owner', 'owner'));
+    $base = $this->app('/glow-salon/website/chat');
+
+    $page = $this->actingAs($owner)->get($base)->assertInertia(fn ($p) => $p->component('Website::Chat')->where('settings.enabled', false));
+    $answers = $page->viewData('page')['props']['answers'];
+    expect(array_column($answers, 'label'))->toContain('Prices', 'Call us');
+
+    $this->actingAs($owner)->put("{$base}/settings", ['enabled' => true, 'greeting' => 'Hello!', 'fallback' => 'Ask a person?', 'hidden' => ['/'], 'leads' => false])
+        ->assertSessionHas('status', 'Chat saved — it’s on your website.');
+    $this->getJson($this->base.'/chat')->assertOk()->assertJsonPath('greeting', 'Hello!')->assertJsonPath('hidden', ['/']);
+
+    $rows = array_map(fn ($a) => $a['label'] === 'Prices' ? [...$a, 'answer' => 'Ask us for a quote.'] : $a, $answers);
+    $rows[] = ['kind' => 'keyword', 'label' => null, 'keywords' => 'parking, park', 'answer' => 'There’s free parking behind the salon.', 'link_kind' => 'none', 'link_target' => null];
+    $this->actingAs($owner)->put("{$base}/answers", ['answers' => $rows])->assertSessionHas('status', 'Answers saved.');
+    $this->ctx->run($this->glow, function () {
+        expect(ChatAnswer::query()->where('label', 'Prices')->value('edited'))->toBeTrue()
+            ->and(ChatAnswer::query()->where('label', 'Call us')->value('edited'))->toBeFalse(); // unchanged: still follows the facts
+    });
+    expect(collect($this->getJson($this->base.'/chat')->json('keywords'))->firstWhere('words', ['parking', 'park'])['answer'])->toBe('There’s free parking behind the salon.');
+
+    $nine = array_map(fn ($i) => ['kind' => 'button', 'label' => "B{$i}", 'keywords' => null, 'answer' => 'x', 'link_kind' => 'none', 'link_target' => null], range(1, 9));
+    $this->actingAs($owner)->put("{$base}/answers", ['answers' => $nine])->assertSessionHasErrors(['answers' => 'Up to 8 buttons — turn some into keyword answers.']);
+
+    $this->postJson($this->base.'/chat/handoff', ['name' => 'Sipho', 'phone' => '082 555 0101', 'consent' => '1', 'transcript' => [['from' => 'visitor', 'text' => 'hi']]])->assertOk();
+    $this->actingAs($owner)->get($this->app('/glow-salon/website/chats'))->assertInertia(fn ($p) => $p->component('Website::Chats')->where('chats.0.name', 'Sipho')->where('chats.0.lead_id', null));
 });
