@@ -27,6 +27,13 @@ return [
     | {handle}.{root} or a custom domain: public business websites
     */
 
+    // Malware scanning of files visitors upload (ClamAV's clamd, in its own container).
+    'clamav' => [
+        'host' => env('CLAMAV_HOST', 'clamav'),
+        'port' => (int) env('CLAMAV_PORT', 3310),
+        'timeout' => (int) env('CLAMAV_TIMEOUT', 30),
+    ],
+
     'domains' => [
         'root' => $root,
         'admin' => env('WURK_ADMIN_DOMAIN', 'admin.'.$root),

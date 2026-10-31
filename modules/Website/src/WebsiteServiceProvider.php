@@ -35,11 +35,14 @@ use Wurk\Website\Support\SiteMediaLibrary;
 use Wurk\Website\Support\StorageMeter;
 use Wurk\Website\Support\Templates;
 use Wurk\Website\Support\TemplateSwitcher;
+use Wurk\Website\Support\Uploads\ClamdScanner;
+use Wurk\Website\Support\Uploads\VirusScanner;
 
 final class WebsiteServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(VirusScanner::class, ClamdScanner::class);
         $this->app->tag([StorageMeter::class], UsageMeter::TAG);
         $this->mergeConfigFrom($this->modulePath('config/website.php'), 'website');
         $this->app->singleton(Branding::class);
