@@ -84,3 +84,32 @@ Decisions A–D; the WhatsApp templates with Meta; SMS/WhatsApp provider account
 | 12.2 Pipelines | #98 | The leads screens existed from an interrupted session: reviewed and completed rather than rebuilt (per the project's rule). Fixed: stage removal didn't reach the server; follow-up times 2 h off. 1,157 backend tests on SQLite; Crm on MySQL 8; all browser tests incl. the leads journey |
 | 12.6 (CI, brought forward) | #99 | The MySQL job reached ~15 min of its 18 after 12.2. Split in three (own MySQL server each) and the browser job in three (two halves + the performance gate). Pest's --shard covered only 618 of 1,157 tests, so the split uses scripts/ci-test-part (two module lists; part 3 is everything else) — verified locally: 232 + 214 + 711 = 1,157 |
 | 12.3 Forms | see PR | Continued from another session's branch (its detailed spec, approved; uploads moved to 12.3b). Builds on Sprint 6.2's forms. 1,160 backend tests on SQLite; forms and CRM on MySQL 8 (caught: MySQL's JSON type reorders keys — test made order-free); 388 frontend; all browser tests incl. a real quote request through Enquiries to the contact |
+
+## 7b. Sprint 12.3b in detail — file uploads on public forms (draft for WURK's approval, 31 Oct 2026)
+
+Visitors can attach files to a form (a photo of the job, a plan, a CV) — safely. Public uploads are the riskiest thing a website accepts, so every layer below applies.
+
+| Part | What |
+|---|---|
+| **1. A "File" question** | A new question type on Quote and Form blocks: "Attach a file", optional or required, up to **3 files per reply**, **5 MB each**. Allowed: **JPEG, PNG, WebP, HEIC and PDF** only. |
+| **2. Checked on arrival** | The file's real type is read from its contents (never trusted from its name or the browser); anything else is refused. Images are **re-saved** (which strips hidden content and location data); PDFs containing JavaScript or embedded files are refused. |
+| **3. Malware scan** | Every file is scanned before anyone can open it (decision A below). A file that hasn't been scanned yet shows "Being checked" and can't be downloaded; one that fails is deleted and logged. |
+| **4. Private storage** | Encrypted on a private disk (as patient records, 9.5) — never public, never on the website's address. |
+| **5. Owner-only download** | From the enquiry (and the contact's page), for people allowed to see enquiries; downloads are always "save as" (never opened in the browser), logged, and not cached. |
+| **6. Limits and clean-up** | Uploads count towards the package's storage; the per-business form limit applies; files of archived enquiries are removed after 12 months (a setting) — logged. |
+| **7. Tests** | Wrong types disguised as images, oversized files, too many files, PDFs with JavaScript, the scanner unavailable (files held, not released), downloads by people without access (refused), and a browser test with an accessibility scan. |
+
+### Decision needed from WURK
+
+| # | Question | Recommendation |
+|---|---|---|
+| A | **How are files scanned for malware?** | **ClamAV** (free, open source) running as its own container next to WURK's; the app sends each file to it and waits for the answer. Its virus list updates itself several times a day. Needs ~1.5 GB of memory on the server. *Alternatives:* a cloud scanning service (sends customers' files to a third party — not recommended under POPIA); or no scanning, relying on type checks and re-saving only (cheaper, weaker). |
+| B | **Allowed file types** | Images and PDFs only (as above). Office documents (Word, Excel) can carry macros — not recommended at launch. |
+
+### Risks
+
+| Risk | Mitigation |
+|---|---|
+| A scanner outage blocks downloads | Files are kept "being checked" and released automatically when the scanner is back; the owner still sees the reply and the file's name. |
+| Storage abuse | Size and count limits, the form's rate limit, and the package's storage meter. |
+| Privacy (CVs, photos of homes) | Encrypted, private, owner-only, logged, and removed with archived enquiries after 12 months. |
