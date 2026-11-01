@@ -15,6 +15,7 @@ use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Support\CheckoutProblem;
 use Wurk\Shop\Support\OrderManager;
+use Wurk\Shop\Support\ShopParcels;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -71,6 +72,8 @@ final class OrdersController
             'shipping' => $o->shipping_provider === null ? null : [
                 'provider' => $o->shipping_provider, 'service' => $o->shipping_service, 'pickup_point' => $o->pickup_point_name,
                 'tracking_reference' => $o->tracking_reference, 'tracking_url' => $o->tracking_url, 'label_url' => $o->label_url,
+                // Courier orders: the box to pack it in, or a warning when none of the business's boxes fits.
+                'parcel' => $o->shipping_provider === 'bobgo' ? app(ShopParcels::class)->plan(OrderItem::query()->where('order_id', $o->id)->get()->groupBy('variant_id')->map(fn ($r) => (int) $r->sum('quantity'))->all()) : null,
                 'can_ship' => $o->tracking_reference === null && in_array($o->status, ['paid', 'packed'], true),
             ],
             'customer' => ['name' => $o->customer_name, 'phone' => $o->customer_phone, 'email' => $o->customer_email],

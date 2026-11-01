@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Models\Variant;
@@ -34,13 +35,16 @@ final class ProductsController
 
         return Inertia::render('Shop::Products', [
             'branches' => array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name']], app(BranchDirectory::class)->open()),
+            // Courier delivery on: how many products use the default weight (no weight on the product or any variant).
+            'missingWeights' => app(Couriers::class)->options(null)['courier'] ? Product::query()->whereNull('weight_g')
+                ->whereNotIn('id', Variant::query()->whereNotNull('weight_g')->select('product_id'))->count() : null,
             'categories' => ShopCategory::query()->orderBy('position')->orderBy('name')->get(['id', 'name'])->all(),
             'products' => Product::query()->orderBy('position')->orderBy('name')->get()->map(fn (Product $p) => [
                 'id' => $p->id, 'name' => $p->name, 'slug' => $p->slug, 'description' => $p->description, 'category_id' => $p->category_id,
-                'status' => $p->status, 'options' => $p->options ?? [], 'photos' => $p->photos ?? [],
+                'status' => $p->status, 'options' => $p->options ?? [], 'photos' => $p->photos ?? [], ...self::measures($p),
                 'variants' => ($variants[$p->id] ?? collect())->map(fn (Variant $v) => [
                     'id' => $v->id, 'values' => $v->values ?? (object) [], 'sku' => $v->sku, 'price_cents' => $v->price_cents,
-                    'compare_at_cents' => $v->compare_at_cents, 'stock' => $v->stock,
+                    'compare_at_cents' => $v->compare_at_cents, 'stock' => $v->stock, ...self::measures($v),
                     'stock_at' => (object) $stock->stockMap($v), 'prices' => (object) $stock->priceMap($v),
                 ])->values()->all(),
             ])->all(),
@@ -58,6 +62,15 @@ final class ProductsController
             'options.*' => ['required', 'string', 'max:30', 'distinct'],
             'photos' => ['present', 'array', 'max:10'],
             'photos.*' => ['string', 'max:500'],
+            // Weight (kg) and size (cm), optional; a variant's own override the product's. Sizes: all three or none.
+            'weight_kg' => ['nullable', 'numeric', 'min:0.001', 'max:1000'],
+            'length_cm' => ['nullable', 'numeric', 'min:0.1', 'max:500', 'required_with:width_cm,height_cm'],
+            'width_cm' => ['nullable', 'numeric', 'min:0.1', 'max:500', 'required_with:length_cm,height_cm'],
+            'height_cm' => ['nullable', 'numeric', 'min:0.1', 'max:500', 'required_with:length_cm,width_cm'],
+            'variants.*.weight_kg' => ['nullable', 'numeric', 'min:0.001', 'max:1000'],
+            'variants.*.length_cm' => ['nullable', 'numeric', 'min:0.1', 'max:500', 'required_with:variants.*.width_cm,variants.*.height_cm'],
+            'variants.*.width_cm' => ['nullable', 'numeric', 'min:0.1', 'max:500', 'required_with:variants.*.length_cm,variants.*.height_cm'],
+            'variants.*.height_cm' => ['nullable', 'numeric', 'min:0.1', 'max:500', 'required_with:variants.*.length_cm,variants.*.width_cm'],
             'variants' => ['required', 'array', 'min:1', 'max:100'],
             'variants.*.id' => ['nullable', 'string'],
             'variants.*.values' => ['present', 'array'],
@@ -98,14 +111,14 @@ final class ProductsController
                 $model->slug = $this->uniqueSlug($data['name'], $model->exists ? $model->id : null);
             }
             $model->fill(['name' => $data['name'], 'description' => $data['description'] ?? null, 'category_id' => $data['category_id'] ?? null,
-                'status' => $data['status'], 'options' => $options, 'photos' => array_values($data['photos'])])->save();
+                'status' => $data['status'], 'options' => $options, 'photos' => array_values($data['photos']), ...self::stored($data)])->save();
 
             $keep = [];
             foreach (array_values($data['variants']) as $position => $v) {
                 $given = (array) $v['values'];
                 $values = $options === [] ? null : array_combine($options, array_map(fn (string $o) => (string) $given[$o], $options)); // stored in option order
                 $attrs = ['product_id' => $model->id, 'values' => $values, 'label' => $values ? implode(' / ', $values) : null, 'sku' => $v['sku'] ?? null,
-                    'price_cents' => $v['price_cents'], 'compare_at_cents' => $v['compare_at_cents'] ?? null, 'position' => $position];
+                    'price_cents' => $v['price_cents'], 'compare_at_cents' => $v['compare_at_cents'] ?? null, 'position' => $position, ...self::stored($v)];
                 $variant = ! empty($v['id']) ? Variant::query()->where('product_id', $model->id)->whereKey($v['id'])->first() : null;
                 $variant ? $variant->update($attrs) : $variant = Variant::query()->create($attrs);
                 // Stock per branch (several branches), or the total at the main branch; the variant's total follows.
@@ -168,5 +181,27 @@ final class ProductsController
         }
 
         return $slug;
+    }
+
+    /**
+     * Weight in kg and size in cm for the screen (stored in grams and millimetres).
+     *
+     * @return array{weight_kg: float|null, length_cm: float|null, width_cm: float|null, height_cm: float|null}
+     */
+    private static function measures(Product|Variant $m): array
+    {
+        return ['weight_kg' => $m->weight_g === null ? null : $m->weight_g / 1000, 'length_cm' => $m->length_mm === null ? null : $m->length_mm / 10,
+            'width_cm' => $m->width_mm === null ? null : $m->width_mm / 10, 'height_cm' => $m->height_mm === null ? null : $m->height_mm / 10];
+    }
+
+    /**
+     * @param  array<string, mixed>  $d
+     * @return array{weight_g: int|null, length_mm: int|null, width_mm: int|null, height_mm: int|null}
+     */
+    private static function stored(array $d): array
+    {
+        $n = fn (string $k, int $by) => isset($d[$k]) && $d[$k] !== '' ? (int) round((float) $d[$k] * $by) : null;
+
+        return ['weight_g' => $n('weight_kg', 1000), 'length_mm' => $n('length_cm', 10), 'width_mm' => $n('width_cm', 10), 'height_mm' => $n('height_cm', 10)];
     }
 }
