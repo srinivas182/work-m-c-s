@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Payments\Contracts\BusinessPayments;
@@ -47,7 +49,7 @@ beforeEach(function () {
     ]);
     $this->site = 'http://kasi-threads.'.config('wurk.domains.root');
     $this->to = ['street' => '1 Vilakazi St', 'suburb' => 'Orlando West', 'city' => 'Soweto', 'postal_code' => '1804'];
-    $this->checkout = fn (array $shipping) => $this->postJson("{$this->site}/cart/checkout", ['lines' => [['variant' => $this->tee->id, 'quantity' => 1]], 'name' => 'Sipho', 'phone' => '082 555 0101',
+    $this->checkout = fn (array $shipping, int $quantity = 1) => $this->postJson("{$this->site}/cart/checkout", ['lines' => [['variant' => $this->tee->id, 'quantity' => $quantity]], 'name' => 'Sipho', 'phone' => '082 555 0101',
         'fulfilment' => 'delivery', 'payment' => 'offline', 'consent' => '1', 'shipping' => $shipping]);
 });
 
@@ -85,4 +87,30 @@ it('sends an order to a Pargo pickup point at the flat rate', function () {
         expect(app(OrderManager::class)->ship($order->refresh(), 'Thabo')->tracking_reference)->toBe('WAY9');
     });
     $this->get($orderUrl)->assertOk()->assertSee('On its way to your pickup point')->assertSee('Collect from: Corner Café', false)->assertSee('WAY9');
+});
+
+it('uses real weights, sizes and the business’s boxes — the same parcel for the quote, the order and the shipment', function () {
+    ($this->in)(function () {
+        $this->tee->update(['weight_g' => 180, 'length_mm' => 300, 'width_mm' => 250, 'height_mm' => 20]);
+        foreach ([['Small', 200, 150, 100, 2000], ['Medium', 400, 300, 200, 10000]] as $i => [$n, $l, $w, $h, $max]) {
+            DB::connection(app(TenantContext::class)->connectionName())->table('shipping_boxes')->insert(['id' => (string) Str::ulid(),
+                'tenant_id' => app(TenantContext::class)->id(), 'name' => $n, 'length_mm' => $l, 'width_mm' => $w, 'height_mm' => $h, 'max_weight_g' => $max, 'position' => $i]);
+        }
+    });
+    $two = [['variant' => $this->tee->id, 'quantity' => 2]];
+    $this->postJson("{$this->site}/cart/shipping", ['kind' => 'rates', 'lines' => $two, 'to' => $this->to])->assertOk();
+    ($this->checkout)(['provider' => 'bobgo', 'service' => 'ECO', 'to' => $this->to], 2)->assertCreated();
+    ($this->in)(function () {
+        $order = Order::query()->sole();
+        app(OrderManager::class)->advance($order, 'paid', 'Thabo');
+        app(OrderManager::class)->ship($order->refresh(), 'Thabo');
+    });
+    // A 30 cm tee is too long for Small (20 cm): two go in Medium, 0.36 kg — the same everywhere.
+    $box = ['length' => 40, 'width' => 30, 'height' => 20];
+    $quotes = Http::recorded(fn (Request $r) => str_ends_with($r->url(), '/rates-at-checkout'));
+    expect($quotes)->toHaveCount(2); // the quote, and the re-check when the order was placed
+    foreach ($quotes as [$r]) {
+        expect($r['items'][0]['weight'])->toBe(0.36)->and(array_intersect_key($r['items'][0], $box))->toEqual($box);
+    }
+    Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/shipments') && $r['parcels'][0]['weight'] === 0.36 && $r['parcels'][0]['length'] === 40 && $r['parcels'][0]['height'] === 20);
 });
