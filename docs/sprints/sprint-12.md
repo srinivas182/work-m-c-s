@@ -193,3 +193,23 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | B | SMS test sends **count towards the business's SMS credits**; email test sends are free. |
 | C | **Include now**: an optional "We got your message" email for form replies and chat hand-offs (part 7). |
 | 12.5 Message templates | see PR | Decisions A (rewording with rails), B (SMS tests use credits), C (auto-reply now). Found: an architecture breach (Website using Messaging's mail class — now via the contract); a flaky phone accessibility scan traced by measurement to axe misjudging stacked toasts. 1,177 backend tests on SQLite; Messaging on MySQL 8; 390 frontend; all browser tests |
+
+## 7e. Sprint 12.6 in detail — product weights (draft for WURK's approval, 31 Oct 2026)
+
+Courier rates and shipments use **0.5 kg per item** today (Sprint 11.6) — wrong for anything light (jewellery) or heavy (furniture), so customers are over- or under-charged for delivery. This lets businesses give products their real weight.
+
+| Part | What |
+|---|---|
+| **1. A weight on products** | An optional weight on each product, entered in kg (e.g. 0.25), stored in grams; a variant can have its own (a large size weighs more), otherwise it uses the product's. |
+| **2. Parcel weight** | The parcel weighs the sum of each item's weight × quantity. **One calculation** is used both for the rates shown at checkout and for booking the shipment, so the two can never differ. |
+| **3. Items without a weight** | Use the business's **default weight** (Settings → Shipping; starts at 0.5 kg, as today) — so nothing changes for a business until it adds weights. |
+| **4. Gentle nudge** | When courier delivery is on, the Products list says how many products have no weight ("3 products use the 0.5 kg default"), with a filter to find them. |
+| **5. Tests** | Rates and shipments use real weights; variant overrides product; default for the rest; the same weight at checkout and when booking; nothing changes without weights; isolation. |
+
+### Decisions needed from WURK
+
+| # | Question | Recommendation |
+|---|---|---|
+| A | **Units** | Enter in **kg** (decimals), stored in grams. |
+| B | **Parcel size (length × width × height)?** Couriers also charge by size for bulky, light items. | **Not now** — weight only; add sizes later if businesses ship bulky items (Bob Go accepts them; the business would need to measure every product). |
+| C | **Default for items without a weight** | **0.5 kg, changeable per business** in Settings → Shipping. |
