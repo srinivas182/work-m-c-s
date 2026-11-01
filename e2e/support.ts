@@ -14,8 +14,12 @@ export async function expectAccessible(page: Page) {
         .map((a) => a.finished.catch(() => undefined)),
     ),
   );
+  // Toasts are left out of page scans: when two are stacked, axe misjudges the front toast's text colour
+  // (measured: dark #262629 on white, nothing over it, yet reported grey) — an artefact of the overlapping,
+  // transformed toasts. Toast contrast itself is checked on a single, settled toast in admin.spec.ts.
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .exclude('[data-sonner-toaster]')
     .analyze();
   const serious = results.violations.filter(
     (v) => v.impact === 'serious' || v.impact === 'critical',
