@@ -30,7 +30,7 @@ final class MessagesController
                 $now = $this->templates->current($key, $channel);
                 $channels[] = ['channel' => $channel, ...$now, 'preview' => $this->templates->sample($key, $channel)];
             }
-            $rows[] = ['key' => $key, 'group' => $def['group'], 'label' => $def['label'], 'placeholders' => $def['placeholders'], 'required' => $def['required'],
+            $rows[] = ['key' => $key, 'group' => $def['group'], 'label' => $def['label'], 'placeholders' => $def['placeholders'], 'required' => $def['required'], 'sample' => $def['sample'],
                 'channels' => $channels, 'whatsapp' => (bool) ($def['whatsapp'] ?? false), 'optional' => (bool) ($def['optional'] ?? false),
                 'enabled' => $this->templates->enabled($key)];
         }
