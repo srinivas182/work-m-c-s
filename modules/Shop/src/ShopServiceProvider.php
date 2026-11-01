@@ -11,12 +11,14 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Shipping\Contracts\ShipmentUpdated;
 use Wurk\Shop\Console\DemoShopCommand;
 use Wurk\Shop\Console\ExpireOrdersCommand;
 use Wurk\Shop\Listeners\MarkDeliveredOrders;
+use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
@@ -29,6 +31,11 @@ final class ShopServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         parent::register();
+        $this->callAfterResolving(MessageTemplates::class, function (MessageTemplates $t): void {
+            foreach (OrderUpdateMail::definitions() as $key => $def) {
+                $t->define($key, $def); // Settings → Messages
+            }
+        });
         $this->app->bind(ProductCatalog::class, ShopCatalog::class); // the website's shop sections read this
     }
 

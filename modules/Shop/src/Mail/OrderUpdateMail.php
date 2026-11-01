@@ -19,15 +19,34 @@ final class OrderUpdateMail extends Mailable
         'refunded' => ['Refund', 'We’ve refunded :amount for your order #:number.'],
     ];
 
-    public function __construct(public readonly string $business, public readonly string $status, public readonly int $number, public readonly string $link, public readonly string $amount = '') {}
+    /**
+     * The order messages for Settings → Messages (email only): today's wording is the standard.
+     *
+     * @return array<string, array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, channels: list<string>}>
+     */
+    public static function definitions(): array
+    {
+        $sample = ['business' => 'Kasi Threads', 'number' => '1042', 'amount' => 'R250.00'];
+        $out = ['order.placed' => ['group' => 'Orders', 'label' => 'Order placed', 'placeholders' => ['business', 'number'], 'required' => [],
+            'subject' => 'Your order #{number} — {business}', 'text' => 'Thank you for your order with {business}.', 'sample' => $sample, 'channels' => ['email']]];
+        foreach (self::WORDING as $status => [$label, $text]) {
+            $out['order.'.$status] = ['group' => 'Orders', 'label' => 'Order: '.mb_strtolower($label), 'placeholders' => $status === 'refunded' ? ['business', 'number', 'amount'] : ['business', 'number'],
+                'required' => [], 'subject' => $label.' — order #{number} · {business}', 'text' => strtr($text, [':number' => '{number}', ':amount' => '{amount}']), 'sample' => $sample, 'channels' => ['email']];
+        }
+
+        return $out;
+    }
+
+    /** The subject and message are worded by the sender (the business's wording, else the standard). */
+    public function __construct(public readonly string $business, public readonly string $subjectLine, public readonly string $message, public readonly string $link) {}
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: self::WORDING[$this->status][0]." — order #{$this->number} · {$this->business}");
+        return new Envelope(subject: $this->subjectLine);
     }
 
     public function content(): Content
     {
-        return new Content(text: 'shop::mail.order-update', with: ['message' => strtr(self::WORDING[$this->status][1], [':number' => (string) $this->number, ':amount' => $this->amount])]);
+        return new Content(text: 'shop::mail.order-update', with: ['message' => $this->message]);
     }
 }

@@ -17,7 +17,7 @@ final class Templates implements MessageTemplates
 
     public const EMAIL_MAX = 2000;
 
-    /** @var array<string, array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp?: bool, optional?: bool}> */
+    /** @var array<string, array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp?: bool, optional?: bool, channels?: list<string>}> */
     private array $definitions = [];
 
     public function define(string $key, array $definition): void
@@ -25,7 +25,7 @@ final class Templates implements MessageTemplates
         $this->definitions[$key] = $definition;
     }
 
-    /** @return array<string, array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp?: bool, optional?: bool}> */
+    /** @return array<string, array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp?: bool, optional?: bool, channels?: list<string>}> */
     public function definitions(): array
     {
         return $this->definitions;
@@ -72,6 +72,8 @@ final class Templates implements MessageTemplates
         $problems = [];
         if (! in_array($channel, self::CHANNELS, true)) {
             $problems['channel'] = 'Only email and SMS can be reworded — WhatsApp uses Meta-approved wording.';
+        } elseif (! in_array($channel, $def['channels'] ?? self::CHANNELS, true)) {
+            $problems['channel'] = 'This message is only sent by '.implode(' and ', $def['channels'] ?? self::CHANNELS).'.';
         }
         foreach (array_filter([$subject, $text]) as $part) {
             preg_match_all('/\{([a-z_]+)\}/', $part, $m);
@@ -110,7 +112,7 @@ final class Templates implements MessageTemplates
         MessageTemplate::query()->where('key', $key)->where('channel', $channel)->delete();
     }
 
-    /** @return array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp?: bool, optional?: bool} */
+    /** @return array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp?: bool, optional?: bool, channels?: list<string>} */
     private function definition(string $key): array
     {
         return $this->definitions[$key] ?? throw new \InvalidArgumentException("Unknown message: {$key}");

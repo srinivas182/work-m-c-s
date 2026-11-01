@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shipping\Contracts\Couriers;
@@ -114,7 +115,7 @@ final class PublicCheckoutController
             if ($order->customer_email !== null) {
                 $rand = fn (int $c) => 'R'.number_format($c / 100, 2);
                 $lines = array_values(OrderItem::query()->where('order_id', $order->id)->get()->map(fn (OrderItem $i) => "{$i->quantity} × {$i->product_name}".($i->variant_label ? " ({$i->variant_label})" : '').' — '.$rand($i->line_cents))->all());
-                Mail::to($order->customer_email)->send(new OrderPlacedMail($tenant->displayName(), $order->number, $lines, $rand($order->total_cents),
+                Mail::to($order->customer_email)->send(new OrderPlacedMail($tenant->displayName(), app(MessageTemplates::class)->subject('order.placed', $placedVars = ['business' => $tenant->displayName(), 'number' => (string) $order->number]), app(MessageTemplates::class)->text('order.placed', 'email', $placedVars), $order->number, $lines, $rand($order->total_cents),
                     app(BusinessPayments::class)->eftInstructions($order->branch_id), $url));
             }
 

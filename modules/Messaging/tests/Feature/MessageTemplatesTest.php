@@ -55,3 +55,14 @@ it('keeps rewording inside the safety rails', function () {
     // “Cancelled” has no link to keep.
     expect(($this->problem)(fn () => ($this->in)($this->glow, fn () => app(Templates::class)->save('booking.cancelled', 'sms', null, 'Sorry {client}, {service} on {when} is off.', 'Thandi'))))->toBe([]);
 });
+
+it('words order emails exactly as before, and keeps them email-only', function () {
+    $t = app(MessageTemplates::class);
+    $vars = ['business' => 'Kasi Threads', 'number' => '1042', 'amount' => 'R250.00'];
+    ($this->in)($this->glow, fn () => expect($t->subject('order.placed', $vars))->toBe('Your order #1042 — Kasi Threads')
+        ->and($t->text('order.placed', 'email', $vars))->toBe('Thank you for your order with Kasi Threads.')
+        ->and($t->subject('order.paid', $vars))->toBe('Payment received — order #1042 · Kasi Threads')
+        ->and($t->text('order.refunded', 'email', $vars))->toBe('We’ve refunded R250.00 for your order #1042.'));
+    expect(($this->problem)(fn () => ($this->in)($this->glow, fn () => app(Templates::class)->save('order.paid', 'sms', null, 'Paid! #{number}', 'Thandi'))))
+        ->toBe(['channel' => 'This message is only sent by email.']);
+});

@@ -11,7 +11,7 @@ namespace Wurk\Messaging\Contracts;
 interface MessageTemplates
 {
     /**
-     * @param  array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp?: bool, optional?: bool}  $definition
+     * @param  array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp?: bool, optional?: bool, channels?: list<string>}  $definition
      */
     public function define(string $key, array $definition): void;
 
