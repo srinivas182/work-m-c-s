@@ -194,7 +194,7 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | C | **Include now**: an optional "We got your message" email for form replies and chat hand-offs (part 7). |
 | 12.5 Message templates | see PR | Decisions A (rewording with rails), B (SMS tests use credits), C (auto-reply now). Found: an architecture breach (Website using Messaging's mail class — now via the contract); a flaky phone accessibility scan traced by measurement to axe misjudging stacked toasts. 1,177 backend tests on SQLite; Messaging on MySQL 8; 390 frontend; all browser tests |
 
-## 7e. Sprint 12.6 in detail — product weights (draft for WURK's approval, 31 Oct 2026)
+## 7e. Sprint 12.6 in detail — product weights and parcel sizes (draft for WURK's approval, 31 Oct 2026)
 
 Courier rates and shipments use **0.5 kg per item** today (Sprint 11.6) — wrong for anything light (jewellery) or heavy (furniture), so customers are over- or under-charged for delivery. This lets businesses give products their real weight.
 
@@ -204,7 +204,10 @@ Courier rates and shipments use **0.5 kg per item** today (Sprint 11.6) — wron
 | **2. Parcel weight** | The parcel weighs the sum of each item's weight × quantity. **One calculation** is used both for the rates shown at checkout and for booking the shipment, so the two can never differ. |
 | **3. Items without a weight** | Use the business's **default weight** (Settings → Shipping; starts at 0.5 kg, as today) — so nothing changes for a business until it adds weights. |
 | **4. Gentle nudge** | When courier delivery is on, the Products list says how many products have no weight ("3 products use the 0.5 kg default"), with a filter to find them. |
-| **5. Tests** | Rates and shipments use real weights; variant overrides product; default for the rest; the same weight at checkout and when booking; nothing changes without weights; isolation. |
+| **5. Product sizes** (decision B) | Optional length × width × height in cm on products (a variant can have its own). |
+| **6. The business's boxes** | Settings → Shipping: the boxes the business ships in (name, inside size in cm, weight limit) — e.g. Small, Medium, Large. |
+| **7. Choosing the box** | Each order ships as **one parcel**: the **smallest box** whose volume holds the items' total volume, that fits the largest item, and within its weight limit. The box's size and the total weight go to the courier (Bob Go accepts parcel sizes; field names confirmed with the sandbox). With no boxes or sizes set, nothing changes (weight only, as today). If no box fits, rates use the courier's size-based weight (L×W×H ÷ 5,000 per item, whichever is more: that or the actual weight) and the owner sees "may need more than one parcel". One calculation for checkout rates and booking. |
+| **8. Tests** | Real weights and sizes; variant overrides product; defaults; box choice (smallest that fits by volume, largest item and weight; none fits → size-based weight and a warning); the same parcel at checkout and when booking; nothing changes until a business adds weights/sizes/boxes; isolation; accessibility. |
 
 ### Decisions needed from WURK
 
@@ -213,3 +216,11 @@ Courier rates and shipments use **0.5 kg per item** today (Sprint 11.6) — wron
 | A | **Units** | Enter in **kg** (decimals), stored in grams. |
 | B | **Parcel size (length × width × height)?** Couriers also charge by size for bulky, light items. | **Not now** — weight only; add sizes later if businesses ship bulky items (Bob Go accepts them; the business would need to measure every product). |
 | C | **Default for items without a weight** | **0.5 kg, changeable per business** in Settings → Shipping. |
+
+### Decisions so far (WURK, 31 Oct 2026)
+
+| # | Decision |
+|---|---|
+| A | Weights in **kg** (decimals), stored in grams |
+| B | **Include parcel sizes now** — product sizes and the business's boxes (parts 5–7; the box design awaits WURK's confirmation) |
+| C | Default **0.5 kg**, changeable per business |
