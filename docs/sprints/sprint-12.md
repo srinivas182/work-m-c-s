@@ -161,7 +161,7 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | C | Reply times from the site's **confirmed hours**; otherwise "as soon as we can" |
 | 12.4 Chatbot | see PR | Decisions A–C as recommended. Found in testing: the page ETag ignored the chat's state; showing the chat depended on an asset address (empty in tests and before a build); the conversation lost its list meaning; focus left the chat after a hand-off. 1,172 backend tests on SQLite; chatbot on MySQL 8; 390 frontend; all browser tests incl. the full chat journey on a published demo site |
 
-## 7d. Sprint 12.5 in detail — message templates (draft for WURK's approval, 31 Oct 2026)
+## 7d. Sprint 12.5 in detail — message templates (approved 31 Oct 2026)
 
 **Two findings first.** (1) Booking messages were built with *fixed wording — owners choose channels, not words — as agreed with WURK* (Sprint 8). This sprint's plan ("word every message in one place") changes that agreement, so it needs WURK's decision (A). (2) WhatsApp messages use templates WURK registers once with Meta; a business can't have its own WhatsApp wording without registering its own templates with Meta. So WhatsApp wording stays fixed whatever is decided (decision D, already agreed).
 
@@ -174,6 +174,7 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | **3. Safety rails** | Messages that carry a link the customer needs (change/cancel a booking, view an order) must keep {link}; only known placeholders; plain text only (no HTML); length limits (SMS 2 parts by default); every change logged. |
 | **4. Test send** | Send any message to the owner's own email or phone with sample details. |
 | **5. WhatsApp** | Shown read-only with the Meta-approved wording and why it can't be changed; uses the same placeholders. |
+| **7. "We got your message" auto-reply** | (Decision C.) An optional email — off until the owner switches it on — to anyone who sends a form reply or asks for a person in the chat *and gave an email*: thanks them, says when to expect a reply (confirmed hours, as the chat), and can be reworded like the other emails. Never sent to phone-only senders (an SMS would cost credits unasked). Service message, not marketing. |
 | **6. Tests** | Standard wording unchanged until edited (today's exact text); placeholders filled; required {link} enforced; unknown placeholders refused; SMS counter; test sends; isolation; accessibility. |
 
 ### Decisions needed from WURK
@@ -183,3 +184,11 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | A | **Change the "fixed wording" agreement?** | **Yes for email and SMS**, with the safety rails above (a business's tone matters, and the rails keep the essential parts); **WhatsApp stays fixed** (Meta). If no, 12.5 becomes part 1 + 4 + 5 only (one place to see every message, and test sends). |
 | B | **Test sends by SMS** | **Count towards the business's SMS credits** like any other SMS (email test sends are free). |
 | C | **Automatic replies to enquiries and chats** | Not today. **Add later** as an optional "We got your message" email — not in this sprint. |
+
+### Decisions (WURK, 31 Oct 2026)
+
+| # | Decision |
+|---|---|
+| A | **Yes** — owners may reword email and SMS customer messages, with the safety rails; **WhatsApp stays fixed** (Meta). This replaces the Sprint 8 "fixed wording" agreement for email and SMS. |
+| B | SMS test sends **count towards the business's SMS credits**; email test sends are free. |
+| C | **Include now**: an optional "We got your message" email for form replies and chat hand-offs (part 7). |
