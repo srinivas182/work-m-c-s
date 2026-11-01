@@ -159,7 +159,7 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | A | Store **only chats that reach a person**, with consent; otherwise anonymous button counts only |
 | B | **Every page when switched on** (off by default); the owner can hide it on chosen pages |
 | C | Reply times from the site's **confirmed hours**; otherwise "as soon as we can" |
-| 12.4 Chatbot | see PR | Decisions A–C as recommended. Found in testing: the page ETag ignored the chat's state; showing the chat depended on an asset address (empty in tests and before a build); the conversation lost its list meaning; focus left the chat after a hand-off. 1,172 backend tests on SQLite; chatbot on MySQL 8; 390 frontend; all browser tests incl. the full chat journey on a published demo site |
+| 12.4 Chatbot | #104 | Decisions A–C as recommended. Found in testing: the page ETag ignored the chat's state; showing the chat depended on an asset address (empty in tests and before a build); the conversation lost its list meaning; focus left the chat after a hand-off. 1,172 backend tests on SQLite; chatbot on MySQL 8; 390 frontend; all browser tests incl. the full chat journey on a published demo site |
 
 ## 7d. Sprint 12.5 in detail — message templates (approved 31 Oct 2026)
 
@@ -192,3 +192,4 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | A | **Yes** — owners may reword email and SMS customer messages, with the safety rails; **WhatsApp stays fixed** (Meta). This replaces the Sprint 8 "fixed wording" agreement for email and SMS. |
 | B | SMS test sends **count towards the business's SMS credits**; email test sends are free. |
 | C | **Include now**: an optional "We got your message" email for form replies and chat hand-offs (part 7). |
+| 12.5 Message templates | see PR | Decisions A (rewording with rails), B (SMS tests use credits), C (auto-reply now). Found: an architecture breach (Website using Messaging's mail class — now via the contract); a flaky phone accessibility scan traced by measurement to axe misjudging stacked toasts. 1,177 backend tests on SQLite; Messaging on MySQL 8; 390 frontend; all browser tests |
