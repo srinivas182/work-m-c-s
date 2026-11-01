@@ -34,7 +34,10 @@ final class MessagingServiceProvider extends ModuleServiceProvider
      */
     public function permissions(): array
     {
-        return [['key' => 'providers.manage', 'label' => 'Configure SMS, WhatsApp, email and payment providers', 'scope' => 'platform']];
+        return [
+            ['key' => 'providers.manage', 'label' => 'Configure SMS, WhatsApp, email and payment providers', 'scope' => 'platform'],
+            ['key' => 'messages.manage', 'label' => 'Word the messages customers receive, and send tests'],
+        ];
     }
 
     /**
@@ -42,11 +45,15 @@ final class MessagingServiceProvider extends ModuleServiceProvider
      */
     public function menu(): array
     {
-        return [['label' => 'Providers', 'route' => 'admin.providers', 'icon' => 'message-circle', 'section' => 'Settings', 'permission' => 'providers.manage', 'order' => 920]];
+        return [
+            ['label' => 'Providers', 'route' => 'admin.providers', 'icon' => 'message-circle', 'section' => 'Settings', 'permission' => 'providers.manage', 'order' => 920],
+            ['label' => 'Messages', 'route' => 'tenant.messages', 'icon' => 'message-circle', 'section' => 'Settings', 'permission' => 'messages.manage', 'order' => 835],
+        ];
     }
 
     protected function bootModule(): void
     {
+        $this->loadViewsFrom($this->modulePath('resources/views'), 'messaging');
         // Sign-in codes to mobile numbers go through the active WhatsApp / SMS provider.
         config(['wurk.identity.otp.channels.phone' => PhoneOtpChannel::class]);
 

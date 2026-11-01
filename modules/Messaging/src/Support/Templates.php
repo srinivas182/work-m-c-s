@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Wurk\Messaging\Support;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Messaging\Mail\CustomerMessageMail;
 use Wurk\Messaging\Models\MessageTemplate;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 /** The registry of customer messages (one per app) and each business's wording (its own database). */
 final class Templates implements MessageTemplates
@@ -106,10 +110,44 @@ final class Templates implements MessageTemplates
         MessageTemplate::query()->updateOrCreate(['key' => $key, 'channel' => $channel], ['subject' => $channel === 'email' ? $subject : null, 'text' => $text, 'updated_by' => $by]);
     }
 
+    /** @param  array<string, string>  $vars */
+    public function email(string $key, string $to, array $vars): void
+    {
+        Mail::to($to)->send(new CustomerMessageMail($this->subject($key, $vars), $this->text($key, 'email', $vars)));
+    }
+
     /** Back to the standard wording. */
     public function reset(string $key, string $channel): void
     {
         MessageTemplate::query()->where('key', $key)->where('channel', $channel)->delete();
+    }
+
+    public function enabled(string $key): bool
+    {
+        if (! ($this->definition($key)['optional'] ?? false)) {
+            return true;
+        }
+
+        return (bool) DB::connection(app(TenantContext::class)->connectionName())->table('message_switches')->where('key', $key)->value('enabled');
+    }
+
+    public function setEnabled(string $key, bool $on): void
+    {
+        $ctx = app(TenantContext::class);
+        DB::connection($ctx->connectionName())->table('message_switches')->updateOrInsert(['tenant_id' => $ctx->id(), 'key' => $key], ['enabled' => $on]);
+    }
+
+    /**
+     * Fill a message with its sample details (previews and test sends).
+     *
+     * @return array{subject: string|null, text: string}
+     */
+    public function sample(string $key, string $channel): array
+    {
+        $def = $this->definition($key);
+        $now = $this->current($key, $channel);
+
+        return ['subject' => $now['subject'] === null ? null : $this->fill($now['subject'], $def['sample']), 'text' => $this->fill($now['text'], $def['sample'])];
     }
 
     /** @return array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp?: bool, optional?: bool, channels?: list<string>} */

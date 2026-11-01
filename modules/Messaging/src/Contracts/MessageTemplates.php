@@ -28,4 +28,14 @@ interface MessageTemplates
      * @param  array<string, string>  $vars
      */
     public function text(string $key, string $channel, array $vars): string;
+
+    /** Whether an optional message is switched on for this business (non-optional messages always are). */
+    public function enabled(string $key): bool;
+
+    /**
+     * Send a message as a plain email in the business's wording (e.g. the auto-reply).
+     *
+     * @param  array<string, string>  $vars
+     */
+    public function email(string $key, string $to, array $vars): void;
 }

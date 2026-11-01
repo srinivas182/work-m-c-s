@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Wurk\Messaging\Http\Controllers\MessagesController;
 use Wurk\Messaging\Http\Controllers\ProvidersController;
 use Wurk\Messaging\Http\Webhooks\DeliveryWebhooks;
 
@@ -24,3 +25,14 @@ Route::domain((string) config('wurk.domains.app'))
         Route::get('/meta', [DeliveryWebhooks::class, 'metaVerify'])->name('webhooks.meta.verify');
         Route::post('/meta', [DeliveryWebhooks::class, 'meta'])->name('webhooks.meta');
     });
+
+// Settings → Messages: the business's customer messages (owners: messages.manage).
+Route::tenant(function (): void {
+    Route::middleware(['permission:messages.manage'])->prefix('settings/messages')->name('tenant.messages')->group(function (): void {
+        Route::get('/', [MessagesController::class, 'index']);
+        Route::put('/{key}/{channel}', [MessagesController::class, 'save'])->name('.save');
+        Route::delete('/{key}/{channel}', [MessagesController::class, 'reset'])->name('.reset');
+        Route::put('/{key}', [MessagesController::class, 'enabled'])->name('.enabled');
+        Route::post('/{key}/{channel}/test', [MessagesController::class, 'test'])->middleware('throttle:10,1,message-tests')->name('.test');
+    });
+});

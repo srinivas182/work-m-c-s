@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Website\Console\DemoSitesCommand;
@@ -26,6 +27,7 @@ use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Listeners\RerenderShopPages;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Support\Branding;
+use Wurk\Website\Support\ChatBot;
 use Wurk\Website\Support\EloquentSiteTemplates;
 use Wurk\Website\Support\NoProductCatalog;
 use Wurk\Website\Support\PageRenderer;
@@ -43,6 +45,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->callAfterResolving(MessageTemplates::class, fn (MessageTemplates $t) => $t->define('reply.received', ChatBot::AUTO_REPLY)); // Settings → Messages
         $this->app->bind(VirusScanner::class, ClamdScanner::class);
         $this->app->tag([StorageMeter::class], UsageMeter::TAG);
         $this->mergeConfigFrom($this->modulePath('config/website.php'), 'website');

@@ -17,6 +17,7 @@ use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Website\Mail\EnquiryMail;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Models\Site;
+use Wurk\Website\Support\ChatBot;
 use Wurk\Website\Support\Uploads\FormFiles;
 
 /**
@@ -94,6 +95,7 @@ final class QuoteFormController
                 ? app(LeadBook::class)->open($contact, $what, $kind === 'quote' && ($data['service'] ?? null) !== null ? 'quote' : 'form', null, null, $note === '' ? null : $note)
                 : null;
             $enquiry->update(['contact_id' => $contact, 'lead_id' => $lead]);
+            app(ChatBot::class)->autoReply($data['email'] ?? null, $data['name'], app(TenantContext::class)->current()->displayName()); // optional (Settings → Messages)
             foreach ($files as $f) {
                 app(FormFiles::class)->store($f, $enquiry->id); // encrypted; held until scanned clean
             }

@@ -22,10 +22,18 @@ return new class extends Migration
             $table->dateTime('updated_at')->nullable();
             $table->unique(['tenant_id', 'key', 'channel']);
         });
+        // Optional messages (e.g. the "We got your message" auto-reply): off until the business switches them on.
+        Schema::create('message_switches', function (Blueprint $table) {
+            $table->ulid('tenant_id');
+            $table->string('key', 60);
+            $table->boolean('enabled')->default(false);
+            $table->primary(['tenant_id', 'key']);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('message_switches');
         Schema::dropIfExists('message_templates');
     }
 };
