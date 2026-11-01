@@ -194,7 +194,7 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | C | **Include now**: an optional "We got your message" email for form replies and chat hand-offs (part 7). |
 | 12.5 Message templates | see PR | Decisions A (rewording with rails), B (SMS tests use credits), C (auto-reply now). Found: an architecture breach (Website using Messaging's mail class — now via the contract); a flaky phone accessibility scan traced by measurement to axe misjudging stacked toasts. 1,177 backend tests on SQLite; Messaging on MySQL 8; 390 frontend; all browser tests |
 
-## 7e. Sprint 12.6 in detail — product weights and parcel sizes (draft for WURK's approval, 31 Oct 2026)
+## 7e. Sprint 12.6 in detail — product weights and parcel sizes (approved 31 Oct 2026)
 
 Courier rates and shipments use **0.5 kg per item** today (Sprint 11.6) — wrong for anything light (jewellery) or heavy (furniture), so customers are over- or under-charged for delivery. This lets businesses give products their real weight.
 
@@ -217,10 +217,10 @@ Courier rates and shipments use **0.5 kg per item** today (Sprint 11.6) — wron
 | B | **Parcel size (length × width × height)?** Couriers also charge by size for bulky, light items. | **Not now** — weight only; add sizes later if businesses ship bulky items (Bob Go accepts them; the business would need to measure every product). |
 | C | **Default for items without a weight** | **0.5 kg, changeable per business** in Settings → Shipping. |
 
-### Decisions so far (WURK, 31 Oct 2026)
+### Decisions (WURK, 31 Oct 2026)
 
 | # | Decision |
 |---|---|
 | A | Weights in **kg** (decimals), stored in grams |
-| B | **Include parcel sizes now** — product sizes and the business's boxes (parts 5–7; the box design awaits WURK's confirmation) |
+| B | **Include parcel sizes now** — product sizes and the business's boxes (parts 5–7), **design confirmed** |
 | C | Default **0.5 kg**, changeable per business |
