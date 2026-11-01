@@ -217,16 +217,16 @@ jobs:
         run: vendor/bin/pest --group=clamav --fail-on-skipped --compact
 
   backend-tests-mysql:
-    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 3)
+    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 4)
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    # Split in three: each part has its own MySQL server, so the shared shard databases never collide.
+    # Split in four (part 1 reached its 10-minute limit in 12.5): each part has its own MySQL server, so the shared shard databases never collide.
     # (One job took ~15 min by Sprint 12.2 and grew every sprint.)
     strategy:
       fail-fast: false
       matrix:
-        part: [1, 2, 3]
+        part: [1, 2, 3, 4]
     timeout-minutes: 10
     services:
       mysql:

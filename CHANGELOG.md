@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 12.5 (message templates)
+- **Settings → Messages** (owners; `messages.manage`): every message customers receive — bookings (confirmed, reminder, moved, cancelled) and orders (placed and its updates) — with each channel's wording, a live preview, placeholder buttons and an SMS length/parts counter.
+- **Rewording email and SMS** (decision A; replaces the Sprint 8 fixed-wording agreement for these channels) within safety rails: known placeholders only, required ones (like the booking link) kept, plain text, SMS within two parts, a subject for emails; "Back to standard wording"; every change logged. Standard wording is unchanged until a business edits it.
+- **WhatsApp stays fixed** (Meta-approved templates) and is shown as such.
+- **Test sends** to the owner's own email (free) or phone (SMS credits, decision B).
+- **"We got your message"** — an optional auto-reply email (off by default, decision C) for form replies and chat hand-offs; email only.
+- Order emails: only the subject and opening line (placed) or sentence (updates) are worded; items, totals, payment details and links stay generated.
+- Tests: page accessibility scans leave out the toast area (axe misjudges stacked toasts); a single toast is still checked.
+
 ### Added — Sprint 12.4 (the website chat)
 - **A rule-based chat** on the business's website (off by default; every page when on; hidden on chosen pages). Ready-made answers from what the business published — prices, location and map, call, WhatsApp, and opening hours once confirmed — follow those details until the owner rewrites them.
 - **Website → Chat**: greeting, fallback, quick buttons (up to 8) and keyword answers with links (the site's own pages, call, WhatsApp, map, email), a preview, and the most-used buttons.

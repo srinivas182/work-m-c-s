@@ -1,4 +1,4 @@
-Thank you for your order with {{ $business }}.
+{{ $intro }}
 
 Order #{{ $number }}
 @foreach ($lines as $line)

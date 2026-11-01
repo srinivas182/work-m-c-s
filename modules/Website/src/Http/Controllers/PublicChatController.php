@@ -78,6 +78,7 @@ final class PublicChatController
                 ? app(LeadBook::class)->open($contact, 'Chat: '.$data['name'], 'chat', null, null, ($data['message'] ?? '') !== '' ? $data['message'] : null)
                 : null;
             $chat->update(['contact_id' => $contact, 'lead_id' => $lead]);
+            $bot->autoReply($data['email'] ?? null, $data['name'], app(TenantContext::class)->current()->displayName()); // optional
 
             return [Site::query()->first()?->settings['enquiry_email'] ?? null, $bot->replyTime()];
         });

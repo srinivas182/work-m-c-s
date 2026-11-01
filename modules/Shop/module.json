@@ -15,6 +15,7 @@
         "payments",
         "team",
         "shipping",
-        "crm"
+        "crm",
+        "messaging"
     ]
 }

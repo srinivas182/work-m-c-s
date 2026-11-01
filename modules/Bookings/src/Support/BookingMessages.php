@@ -17,6 +17,7 @@ use Wurk\Bookings\Models\Reservation;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\InsufficientCredits;
 use Wurk\Credits\Contracts\SpendingLimitReached;
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -49,7 +50,7 @@ final readonly class BookingMessages
             try {
                 $this->wallet->charge($channel, $charge, "Booking {$kind} ({$channel})");
                 $result = $channel === 'sms'
-                    ? $this->messenger->sms($phone, MessageWording::text($kind, $vars), 'booking')
+                    ? $this->messenger->sms($phone, app(MessageTemplates::class)->text('booking.'.$kind, 'sms', $vars), 'booking')
                     : $this->messenger->whatsappTemplate($phone, 'wurk_booking_'.$kind, MessageWording::whatsappParameters($kind, $vars), 'booking');
                 if ($result->ok) {
                     $outcome = ['channel' => $channel, 'status' => 'sent', 'detail' => null];
@@ -67,7 +68,7 @@ final readonly class BookingMessages
         if ($outcome['status'] !== 'sent') {
             if (filter_var($booking->customer_email, FILTER_VALIDATE_EMAIL) !== false) {
                 try {
-                    $text = MessageWording::text($kind, $vars);
+                    $text = app(MessageTemplates::class)->text('booking.'.$kind, 'email', $vars);
                     $join = match (true) {
                         $booking instanceof Booking && $booking->online => $booking->meeting_url,
                         $booking instanceof ClassAttendee && $booking->session()->location_type === 'online' => $booking->session()->meeting_url,
@@ -76,7 +77,7 @@ final readonly class BookingMessages
                     if ($join !== null && $kind !== 'cancelled') {
                         $text .= "\n\nJoin online: {$join}"; // email only — WhatsApp's approved templates can't carry it
                     }
-                    Mail::to((string) $booking->customer_email)->send(new BookingMessageMail(MessageWording::subject($kind, $vars), $text, $vars['link'] ?: null));
+                    Mail::to((string) $booking->customer_email)->send(new BookingMessageMail(app(MessageTemplates::class)->subject('booking.'.$kind, $vars), $text, $vars['link'] ?: null));
                     $outcome = ['channel' => 'email', 'status' => 'sent', 'detail' => $outcome['detail']];
                 } catch (Throwable) {
                     $outcome['detail'] = trim(($outcome['detail'] ?? '').' Email didn’t send.');

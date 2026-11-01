@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Website\Support;
 
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Website\Models\ChatAnswer;
 use Wurk\Website\Models\Site;
 
@@ -23,6 +24,23 @@ final readonly class ChatBot
     ];
 
     public function __construct(private SiteFacts $facts) {}
+
+    /** The optional "We got your message" email (decision C, Sprint 12.5): standard wording. */
+    public const AUTO_REPLY = [
+        'group' => 'Forms and chat', 'label' => '“We got your message” auto-reply', 'placeholders' => ['client', 'business', 'reply'], 'required' => [],
+        'subject' => 'We got your message — {business}', 'text' => 'Hi {client}, thanks for getting in touch with {business}. {reply}',
+        'sample' => ['client' => 'Thandi', 'business' => 'Glow Salon', 'reply' => 'We’ll get back to you as soon as we can.'], 'channels' => ['email'], 'optional' => true,
+    ];
+
+    /** Send the auto-reply if the business switched it on and the person gave an email (never SMS: credits unasked). */
+    public function autoReply(?string $email, string $name, string $business): void
+    {
+        $t = app(MessageTemplates::class);
+        if ($email === null || $email === '' || ! $t->enabled('reply.received')) {
+            return;
+        }
+        $t->email('reply.received', $email, ['client' => $name, 'business' => $business, 'reply' => $this->replyTime()]);
+    }
 
     /** @return array{enabled: bool, greeting: string, fallback: string, hidden: list<string>, leads: bool} */
     public function settings(): array

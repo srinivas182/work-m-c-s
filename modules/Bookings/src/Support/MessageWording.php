@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Bookings\Support;
 
 /**
- * Fixed message wording (owners choose channels, not words — agreed with WURK). WhatsApp uses
+ * The standard wording (Sprint 12.5: owners may reword email and SMS in Settings → Messages; WhatsApp uses
  * Meta-approved templates with the same wording; WURK registers them once (wurk_booking_<kind>),
  * with parameters in this order: client, service, business, when, link.
  */
@@ -26,6 +26,25 @@ final class MessageWording
         'moved' => 'Your booking has moved — {business}',
         'cancelled' => 'Booking cancelled — {business}',
     ];
+
+    /**
+     * The booking messages for Settings → Messages: today's wording is the standard.
+     *
+     * @return array<string, array{group: string, label: string, placeholders: list<string>, required: list<string>, subject: string, text: string, sample: array<string, string>, whatsapp: bool}>
+     */
+    public static function definitions(): array
+    {
+        $labels = ['confirmed' => 'Booking confirmed', 'reminder' => 'Booking reminder', 'moved' => 'Booking moved', 'cancelled' => 'Booking cancelled'];
+        $out = [];
+        foreach (self::KINDS as $kind) {
+            $out['booking.'.$kind] = ['group' => 'Bookings', 'label' => $labels[$kind], 'placeholders' => ['client', 'service', 'business', 'when', 'link'],
+                'required' => $kind === 'cancelled' ? [] : ['link'], 'subject' => self::SUBJECT[$kind], 'text' => self::TEXT[$kind],
+                'sample' => ['client' => 'Thandi', 'service' => 'Knotless braids', 'business' => 'Glow Salon', 'when' => 'Sat 3 May at 10:00', 'link' => 'https://glow-salon.wurk.co.za/b/abc123'],
+                'whatsapp' => true];
+        }
+
+        return $out;
+    }
 
     /** @param  array{client: string, service: string, business: string, when: string, link: string}  $vars */
     public static function text(string $kind, array $vars): string

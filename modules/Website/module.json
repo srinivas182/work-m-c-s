@@ -12,6 +12,7 @@
         "audit",
         "plans",
         "ai",
-        "crm"
+        "crm",
+        "messaging"
     ]
 }
