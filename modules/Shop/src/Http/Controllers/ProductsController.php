@@ -82,7 +82,10 @@ final class ProductsController
             'variants.*.stock_at.*' => ['integer', 'min:0', 'max:1000000'],
             'variants.*.prices' => ['nullable', 'array'],              // several branches: optional price per branch
             'variants.*.prices.*' => ['nullable', 'integer', 'min:0', 'max:100000000'],
-        ], ['variants.min' => 'Add at least one price (a variant).', 'options.*.distinct' => 'Each option needs a different name.']);
+        ], ['variants.min' => 'Add at least one price (a variant).', 'options.*.distinct' => 'Each option needs a different name.',
+            'length_cm.required_with' => 'Give all three sizes, or none.', 'width_cm.required_with' => 'Give all three sizes, or none.', 'height_cm.required_with' => 'Give all three sizes, or none.',
+            'variants.*.length_cm.required_with' => 'Give all three sizes, or none.', 'variants.*.width_cm.required_with' => 'Give all three sizes, or none.', 'variants.*.height_cm.required_with' => 'Give all three sizes, or none.',
+            'weight_kg.max' => 'That’s over 1,000 kg — check the weight (in kg).', 'variants.*.weight_kg.max' => 'That’s over 1,000 kg — check the weight (in kg).']);
 
         $options = array_values($data['options']);
         $seen = [];

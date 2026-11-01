@@ -192,12 +192,147 @@ function ProviderCard({ p, base, branch }: { p: Provider; base: string; branch: 
   );
 }
 
+interface Box {
+  name: string;
+  length_cm: number | null;
+  width_cm: number | null;
+  height_cm: number | null;
+  max_kg: number | null;
+}
+
+/** The default weight for items without one, and the boxes the business ships in (Sprint 12.6). */
+function Parcels({
+  initial,
+  base,
+}: {
+  initial: { default_kg: number; boxes: Box[] };
+  base: string;
+}) {
+  const form = useForm<{ default_kg: number | null; boxes: Box[] }>({
+    default_kg: initial.default_kg,
+    boxes: initial.boxes,
+  });
+  const errors = form.errors as Record<string, string | undefined>;
+  const num = (v: string) => (v === '' ? null : Number(v));
+  const setBox = (i: number, patch: Partial<Box>) =>
+    form.setData(
+      'boxes',
+      form.data.boxes.map((b, k) => (k === i ? { ...b, ...patch } : b)),
+    );
+  const cell = 'border-border bg-bg h-10 w-full rounded-md border px-2 text-sm';
+  return (
+    <section
+      aria-labelledby="parcels-title"
+      className="border-border grid gap-4 rounded-lg border p-4"
+    >
+      <h2 id="parcels-title" className="text-lg font-semibold">
+        Parcels
+      </h2>
+      <p className="text-fg-muted text-sm">
+        Courier prices depend on weight and size. Products without a weight use the default; each
+        order goes in the smallest of your boxes that fits.
+      </p>
+      <label className="grid max-w-xs gap-1 text-sm font-medium" htmlFor="default-kg">
+        Default weight per item (kg)
+        <input
+          id="default-kg"
+          className={cell}
+          type="number"
+          inputMode="decimal"
+          min="0.001"
+          step="0.001"
+          value={form.data.default_kg ?? ''}
+          onChange={(e) => form.setData('default_kg', num(e.target.value))}
+        />
+        {errors.default_kg && <span className="text-danger">{errors.default_kg}</span>}
+      </label>
+      <ol aria-label="Boxes" className="grid gap-3">
+        {form.data.boxes.map((b, i) => (
+          <li key={i} className="border-border grid gap-2 rounded-md border p-3 sm:grid-cols-6">
+            {(
+              [
+                ['name', 'Name', 'text'],
+                ['length_cm', 'Length (cm)', 'number'],
+                ['width_cm', 'Width (cm)', 'number'],
+                ['height_cm', 'Height (cm)', 'number'],
+                ['max_kg', 'Up to (kg)', 'number'],
+              ] as const
+            ).map(([key, label, type]) => (
+              <label
+                key={key}
+                className={`grid gap-1 text-sm ${key === 'name' ? 'sm:col-span-2' : ''}`}
+                htmlFor={`box-${i}-${key}`}
+              >
+                {label}
+                <input
+                  id={`box-${i}-${key}`}
+                  className={cell}
+                  type={type}
+                  inputMode={type === 'number' ? 'decimal' : undefined}
+                  min={type === 'number' ? '0' : undefined}
+                  step={type === 'number' ? '0.1' : undefined}
+                  maxLength={key === 'name' ? 40 : undefined}
+                  value={b[key] ?? ''}
+                  onChange={(e) =>
+                    setBox(i, {
+                      [key]: key === 'name' ? e.target.value : num(e.target.value),
+                    } as Partial<Box>)
+                  }
+                />
+                {errors[`boxes.${i}.${key}`] && (
+                  <span className="text-danger">{errors[`boxes.${i}.${key}`]}</span>
+                )}
+              </label>
+            ))}
+            <div className="flex flex-wrap gap-2 sm:col-span-6">
+              <Button
+                size="sm"
+                variant="ghost"
+                aria-label={`Remove ${b.name || 'box'}`}
+                onClick={() =>
+                  form.setData(
+                    'boxes',
+                    form.data.boxes.filter((_, k) => k !== i),
+                  )
+                }
+              >
+                Remove
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="secondary"
+          onClick={() =>
+            form.setData('boxes', [
+              ...form.data.boxes,
+              { name: '', length_cm: null, width_cm: null, height_cm: null, max_kg: null },
+            ])
+          }
+        >
+          Add a box
+        </Button>
+        <Button
+          loading={form.processing}
+          onClick={() => form.put(`${base}/parcels`, { preserveScroll: true })}
+        >
+          Save parcels
+        </Button>
+      </div>
+    </section>
+  );
+}
+
 export default function ShippingSettings({
   providers,
   branches,
+  parcels,
 }: {
   providers: Provider[];
   branches: { id: string; name: string }[];
+  parcels: { default_kg: number; boxes: Box[] };
 }) {
   const base = window.location.pathname.replace(/\/$/, '');
   const [branch, setBranch] = useState('');
@@ -236,6 +371,7 @@ export default function ShippingSettings({
         {providers.map((p) => (
           <ProviderCard key={`${p.provider}-${branch}`} p={p} base={base} branch={branch || null} />
         ))}
+        <Parcels initial={parcels} base={base} />
       </div>
     </AppShell>
   );

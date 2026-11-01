@@ -111,6 +111,8 @@ final class ShippingSettingsController
     /** The default item weight and the business's boxes (replaced as a list, in the order given). */
     public function parcels(Request $request): RedirectResponse
     {
+        // A row the owner added and left completely empty is simply ignored.
+        $request->merge(['boxes' => array_values(array_filter((array) $request->input('boxes', []), fn ($b) => is_array($b) && array_filter($b, fn ($v) => $v !== null && $v !== '') !== []))]);
         $d = $request->validate([
             'default_kg' => ['required', 'numeric', 'min:0.001', 'max:1000'],
             'boxes' => ['present', 'array', 'max:12'],
@@ -119,7 +121,15 @@ final class ShippingSettingsController
             'boxes.*.width_cm' => ['required', 'numeric', 'min:1', 'max:500'],
             'boxes.*.height_cm' => ['required', 'numeric', 'min:1', 'max:500'],
             'boxes.*.max_kg' => ['required', 'numeric', 'min:0.1', 'max:1000'],
-        ], ['boxes.*.name.distinct' => 'Give each box its own name.']);
+        ], [
+            'boxes.*.name.distinct' => 'Give each box its own name.',
+            'boxes.*.name.required' => 'Give the box a name.',
+            'boxes.*.length_cm.required' => 'Give the box’s inside length, width and height.',
+            'boxes.*.width_cm.required' => 'Give the box’s inside length, width and height.',
+            'boxes.*.height_cm.required' => 'Give the box’s inside length, width and height.',
+            'boxes.*.max_kg.required' => 'How much can the box carry?',
+            'default_kg.required' => 'Give a default weight per item.',
+        ]);
         $tenant = app(TenantContext::class)->id();
         $this->db()->transaction(function () use ($d, $tenant): void {
             $this->db()->table('shipping_preferences')->updateOrInsert(['tenant_id' => $tenant], ['default_item_g' => (int) round($d['default_kg'] * 1000)]);

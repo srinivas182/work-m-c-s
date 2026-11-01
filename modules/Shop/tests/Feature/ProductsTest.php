@@ -184,7 +184,7 @@ it('takes weights in kg and sizes in cm (a variantâ€™s own override the productâ
     ($this->subscribe)(['website', 'shop']);
     $tee = [...$this->tee, 'weight_kg' => 0.18, 'length_cm' => 30, 'width_cm' => 25, 'height_cm' => 2];
     $tee['variants'][1] += ['weight_kg' => 0.25];
-    $this->actingAs($this->owner)->post("{$this->base}/products", [...$tee, 'height_cm' => null])->assertSessionHasErrors('height_cm'); // all three or none
+    $this->actingAs($this->owner)->post("{$this->base}/products", [...$tee, 'height_cm' => null])->assertSessionHasErrors(['height_cm' => 'Give all three sizes, or none.']); // all three or none
     $this->actingAs($this->owner)->post("{$this->base}/products", $tee)->assertSessionHasNoErrors();
     ($this->in)(function () {
         $p = Product::query()->sole();
@@ -196,7 +196,10 @@ it('takes weights in kg and sizes in cm (a variantâ€™s own override the productâ
     $ship = $this->app('/kasi-threads/settings/shipping');
     $boxes = [['name' => 'Small', 'length_cm' => 20, 'width_cm' => 15, 'height_cm' => 10, 'max_kg' => 2], ['name' => 'Small', 'length_cm' => 40, 'width_cm' => 30, 'height_cm' => 20, 'max_kg' => 10]];
     $this->actingAs($this->owner)->put("{$ship}/parcels", ['default_kg' => 0.3, 'boxes' => $boxes])->assertSessionHasErrors(['boxes.1.name' => 'Give each box its own name.']);
+    $this->actingAs($this->owner)->put("{$ship}/parcels", ['default_kg' => 0.3, 'boxes' => [['name' => 'Tiny', 'length_cm' => 5, 'width_cm' => null, 'height_cm' => 5, 'max_kg' => 1]]])
+        ->assertSessionHasErrors(['boxes.0.width_cm' => 'Give the boxâ€™s inside length, width and height.']); // plain words, not field names
     $boxes[1]['name'] = 'Medium';
+    $boxes[] = ['name' => '', 'length_cm' => null, 'width_cm' => null, 'height_cm' => null, 'max_kg' => null]; // an empty row left behind: ignored
     $this->actingAs($this->owner)->put("{$ship}/parcels", ['default_kg' => 0.3, 'boxes' => $boxes])->assertSessionHas('status', 'Parcel settings saved.');
     $this->actingAs($this->owner)->get($ship)->assertInertia(fn ($p) => $p->where('parcels.default_kg', 0.3)->where('parcels.boxes.1.name', 'Medium'));
     // The planner uses them: one medium-sized tee (30 cm long) goes in Medium; another product with no weight uses 0.3 kg.
