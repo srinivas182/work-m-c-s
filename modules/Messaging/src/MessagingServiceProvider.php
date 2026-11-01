@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Messaging;
 
 use Wurk\Identity\Contracts\TextMessenger;
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Messaging\Otp\PhoneOtpChannel;
@@ -13,12 +14,15 @@ use Wurk\Messaging\Support\EloquentProviderCredentials;
 use Wurk\Messaging\Support\MailConfigurator;
 use Wurk\Messaging\Support\MessengerService;
 use Wurk\Messaging\Support\ProviderSettings;
+use Wurk\Messaging\Support\Templates;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
 final class MessagingServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(Templates::class);
+        $this->app->alias(Templates::class, MessageTemplates::class);
         $this->app->singleton(ProviderSettings::class);
         $this->app->singleton(Messenger::class, MessengerService::class);
         $this->app->singleton(TextMessenger::class, SmsTextMessenger::class);

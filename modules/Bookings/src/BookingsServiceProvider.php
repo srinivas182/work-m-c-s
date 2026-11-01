@@ -25,8 +25,10 @@ use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
+use Wurk\Bookings\Support\MessageWording;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
@@ -54,6 +56,11 @@ final class BookingsServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         parent::register();
+        $this->callAfterResolving(MessageTemplates::class, function (MessageTemplates $t): void {
+            foreach (MessageWording::definitions() as $key => $def) {
+                $t->define($key, $def); // Settings → Messages
+            }
+        });
         $this->app->bind(HealthPracticeStatus::class, HealthPractice::class);
     }
 
