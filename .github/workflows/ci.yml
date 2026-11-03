@@ -171,12 +171,63 @@ jobs:
       - name: Pest
         run: vendor/bin/pest --parallel --compact
 
-  backend-tests-mysql:
-    name: Backend · tests on MySQL 8 (real shards)
+  backend-clamav:
+    name: Backend · malware scanner (real ClamAV)
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 18 # ~8 min and growing with each sub-sprint
+    timeout-minutes: 10
+    services:
+      clamav:
+        image: clamav/clamav:1.4
+        ports:
+          - 3310:3310
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+      - name: Composer cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      # ClamAV loads its virus list before answering (usually 1–3 minutes).
+      - name: Wait for ClamAV
+        run: |
+          for i in $(seq 1 60); do
+            if printf 'zPING\0' | nc -w 3 127.0.0.1 3310 | grep -q PONG; then echo "ClamAV is ready"; exit 0; fi
+            sleep 5
+          done
+          echo "::error::ClamAV didn't start in 5 minutes"; exit 1
+      - name: Scan the antivirus test file and an ordinary file
+        env:
+          CLAMAV_LIVE: '1'
+          CLAMAV_HOST: 127.0.0.1
+        # --fail-on-skipped: if the test ever skips here, the job fails — so a pass means a real scan.
+        run: vendor/bin/pest --group=clamav --fail-on-skipped --compact
+
+  backend-tests-mysql:
+    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 4)
+    needs: [changes, backend-quick]
+    if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    # Split in four (part 1 reached its 10-minute limit in 12.5): each part has its own MySQL server, so the shared shard databases never collide.
+    # (One job took ~15 min by Sprint 12.2 and grew every sprint.)
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [1, 2, 3, 4]
+    timeout-minutes: 10
     services:
       mysql:
         image: mysql:8.4
@@ -217,8 +268,10 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
-      - name: Pest (MySQL, sequential — shards are shared databases)
-        run: vendor/bin/pest --compact
+      # Parts come from scripts/ci-test-part: two explicit module lists, and part 3 is everything else, so
+      # every test runs exactly once (Pest's --shard dropped about half the suite here, so it isn't used).
+      - name: Pest (MySQL, sequential within the part — shards are shared databases)
+        run: vendor/bin/pest --compact $(scripts/ci-test-part ${{ matrix.part }})
 
   frontend-tests:
     name: Frontend · tests & build
@@ -240,14 +293,19 @@ jobs:
         run: pnpm build
 
   e2e:
-    name: E2E · smoke & accessibility
+    name: E2E · ${{ matrix.part == 'performance' && 'performance gate' || format('smoke & accessibility ({0})', matrix.part) }}
     needs: [changes, backend-quick, frontend-quick]
     if: >-
       always() && !cancelled() && !contains(needs.*.result, 'failure')
       && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true')
       && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # 454 browser checks plus the 24-template performance gate (~13 min and growing)
+    # Three parts: the browser suite in two halves, and the 24-template performance gate on its own.
+    strategy:
+      fail-fast: false
+      matrix:
+        part: ['1/2', '2/2', 'performance']
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
@@ -281,12 +339,14 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
-      - name: Playwright
+      - name: Playwright (half ${{ matrix.part }})
+        if: matrix.part != 'performance'
         env:
           APP_ENV: e2e
-        run: pnpm test:e2e
+        run: pnpm test:e2e --shard=${{ matrix.part }}
       # Every template's public home page: mobile Lighthouse ≥ 90 and layout shift < 0.1 (Sprint 5 gate).
       - name: Performance gate (mobile Lighthouse on all 24 templates)
+        if: matrix.part == 'performance'
         env:
           APP_ENV: e2e
         run: |
@@ -301,7 +361,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
+          name: playwright-report-${{ strategy.job-index }}
           path: playwright-report
           retention-days: 7
 
@@ -395,7 +455,7 @@ jobs:
   ci:
     name: CI
     if: always()
-    needs: [changes, backend-quick, frontend-quick, backend-tests, backend-tests-mysql, frontend-tests, e2e, docker-dev, docker-prod]
+    needs: [changes, backend-quick, frontend-quick, backend-tests, backend-clamav, backend-tests-mysql, frontend-tests, e2e, docker-dev, docker-prod]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

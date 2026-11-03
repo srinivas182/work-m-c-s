@@ -48,4 +48,9 @@ final class EloquentTenantDirectory implements TenantDirectory
         return array_values(Tenant::query()->whereIn('id', $tenantIds)
             ->where('status', Tenant::STATUS_ACTIVE)->orderBy('name')->get()->all());
     }
+
+    public function activeIds(): array
+    {
+        return array_values(array_map('strval', Tenant::query()->where('status', Tenant::STATUS_ACTIVE)->orderBy('id')->pluck('id')->all()));
+    }
 }

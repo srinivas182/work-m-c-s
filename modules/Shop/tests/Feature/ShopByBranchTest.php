@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
@@ -136,4 +137,33 @@ it('shows the owner each month’s statement, with branch names, and settles it'
         ->where('pairs.0.from_name', $mainName)->where('pairs.0.to_name', 'Sandton')->where('pairs.0.total_cents', 27000)->where('canSettle', true));
     $this->actingAs($owner)->post("{$base}/settle", ['month' => now()->format('Y-m'), 'from' => $this->main, 'to' => $this->sandton])->assertSessionHas('status', 'Marked as settled.');
     $this->actingAs($owner)->get($base)->assertInertia(fn (Assert $p) => $p->where('pairs.0.settled', true));
+});
+
+it('makes one contact of someone who orders twice, however they write their number', function () {
+    ($this->in)(function () {
+        app(OrderPlacer::class)->place([['variant' => $this->tee->id, 'quantity' => 1]], ['name' => 'Sipho', 'phone' => '082 555 0101'], 'collection', 'offline', $this->main);
+        app(OrderPlacer::class)->place([['variant' => $this->tee->id, 'quantity' => 1]], ['name' => 'Sipho M', 'phone' => '+27 82 555 0101'], 'collection', 'offline', $this->sandton);
+        $db = DB::connection(app(TenantContext::class)->connectionName());
+        expect($db->table('contacts')->count())->toBe(1)->and($db->table('contacts')->value('phone'))->toBe('+27825550101')
+            ->and($db->table('contact_links')->where('source_type', 'order')->count())->toBe(2)
+            ->and($db->table('contact_links')->pluck('branch_id')->sort()->values()->all())->toBe(collect([$this->main, $this->sandton])->sort()->values()->all());
+    });
+});
+
+it('makes contacts of customers from before contacts existed, and running it again changes nothing', function () {
+    ($this->in)(function () {
+        Order::withoutEvents(function () { // as if placed before contacts existed
+            foreach ([['Sipho', '082 555 0101', 1], ['Sipho M', '+27825550101', 2], ['Lerato', '083 000 0000', 3]] as [$name, $phone, $n]) {
+                Order::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'number' => 900 + $n, 'branch_id' => $this->main, 'status' => 'done', 'payment_method' => 'offline', 'fulfilment' => 'collection',
+                    'customer_name' => $name, 'customer_phone' => $phone, 'subtotal_cents' => 1000, 'delivery_cents' => 0, 'total_cents' => 1000]);
+            }
+        });
+    });
+    $count = fn () => ($this->in)(fn () => [DB::connection(app(TenantContext::class)->connectionName())->table('contacts')->count(),
+        DB::connection(app(TenantContext::class)->connectionName())->table('contact_links')->count()]);
+    expect($count())->toBe([0, 0]);
+    $this->artisan('crm:link-existing')->assertSuccessful();
+    expect($count())->toBe([2, 3]); // Sipho (two orders) and Lerato
+    $this->artisan('crm:link-existing')->assertSuccessful();
+    expect($count())->toBe([2, 3]);
 });

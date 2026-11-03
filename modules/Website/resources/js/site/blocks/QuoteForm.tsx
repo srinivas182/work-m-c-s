@@ -8,7 +8,51 @@ export interface QuoteFormProps extends Record<string, unknown> {
   services: { name: string }[];
   detailsLabel: string;
   submitLabel: string;
+  /** 'yes': each reply opens a lead in the CRM. */
+  leads?: 'yes' | 'no';
+  /** 'yes': an optional, unticked “Send me news and offers”. */
+  askNews?: 'yes' | 'no';
+  /** The business's own questions. */
+  questions?: Question[];
 }
+
+export interface Question extends Record<string, unknown> {
+  label: string;
+  type: 'short' | 'long' | 'choice' | 'date' | 'yesno' | 'file';
+  choices: string;
+  required: 'yes' | 'no';
+}
+
+/** The business's own questions (shared by the Quote form and the general Form block). */
+export const QUESTIONS_FIELD = {
+  kind: 'list' as const,
+  label: 'Your own questions',
+  max: 10,
+  item: {
+    label: { kind: 'text' as const, label: 'Question', max: 120 },
+    type: {
+      kind: 'select' as const,
+      label: 'Answer as',
+      options: [
+        { value: 'short', label: 'Short text' },
+        { value: 'long', label: 'Long text' },
+        { value: 'choice', label: 'A choice' },
+        { value: 'date', label: 'A date' },
+        { value: 'yesno', label: 'Yes or no' },
+        { value: 'file', label: 'Attach a file (photos or PDFs)' },
+      ],
+    },
+    choices: { kind: 'text' as const, label: 'Choices (separated by commas)', max: 300 },
+    required: {
+      kind: 'select' as const,
+      label: 'Required',
+      options: [
+        { value: 'no', label: 'No' },
+        { value: 'yes', label: 'Yes' },
+      ],
+    },
+  },
+};
 
 const input =
   'w-full rounded-[var(--s-radius)] border border-[var(--s-border)] bg-[var(--s-bg)] px-4 py-3 text-base';
@@ -34,6 +78,23 @@ export const QuoteForm: BlockDefinition<QuoteFormProps> = {
     },
     detailsLabel: { kind: 'text', label: 'Question for details', max: 80 },
     submitLabel: { kind: 'text', inline: true, label: 'Button', max: 30 },
+    leads: {
+      kind: 'select',
+      label: 'Open a lead for each reply',
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No' },
+      ],
+    },
+    askNews: {
+      kind: 'select',
+      label: 'Ask if they’d like news and offers',
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No' },
+      ],
+    },
+    questions: QUESTIONS_FIELD,
   },
   defaults: {
     heading: 'Request a quote',
@@ -41,18 +102,26 @@ export const QuoteForm: BlockDefinition<QuoteFormProps> = {
     services: [],
     detailsLabel: 'Tell us about the job',
     submitLabel: 'Send request',
+    leads: 'yes',
+    askNews: 'yes',
+    questions: [],
   },
-  render: (p, site) => <QuoteFormView p={p} action={site.formAction} editing={site.editing} />,
+  render: (p, site) => (
+    <QuoteFormView p={p} action={site.formAction} editing={site.editing} kind="quote" />
+  ),
 };
 
-function QuoteFormView({
+export function QuoteFormView({
   p,
   action,
   editing,
+  kind,
 }: {
   p: QuoteFormProps;
   action?: string;
   editing: boolean;
+  /** 'quote', or a general form's purpose (enquiry, waiting_list, interest). */
+  kind: string;
 }) {
   const id = useId();
   const live = Boolean(action) && !editing;
@@ -61,6 +130,7 @@ function QuoteFormView({
       <Heading intro={p.intro}>{p.heading}</Heading>
       <form
         method="post"
+        encType="multipart/form-data"
         action={live ? action : undefined}
         className="mt-8 grid gap-5"
         onSubmit={live ? undefined : (e) => e.preventDefault()}
@@ -115,12 +185,85 @@ function QuoteFormView({
           <textarea
             id={`${id}-message`}
             name="message"
-            required
+            required={kind === 'quote'}
             rows={4}
             maxLength={2000}
             className={input}
           />
         </label>
+        {(p.questions ?? [])
+          .filter((q) => q.label.trim() !== '')
+          .map((q, i) => {
+            const qid = `${id}-q${i}`;
+            const req = q.required === 'yes';
+            const choices = q.choices
+              .split(',')
+              .map((c) => c.trim())
+              .filter(Boolean);
+            return (
+              <label key={qid} className="grid gap-1.5" htmlFor={qid}>
+                <span className="font-medium">
+                  {q.label}
+                  {!req && <span className="font-normal text-[var(--s-muted)]"> (optional)</span>}
+                </span>
+                {q.type !== 'file' && (
+                  <input type="hidden" name={`answers[${i}][q]`} value={q.label} />
+                )}
+                {q.type === 'file' ? (
+                  <>
+                    {/* Only these types: iPhones then send photos as JPEG. */}
+                    <input
+                      id={qid}
+                      name="files[]"
+                      type="file"
+                      multiple
+                      required={req}
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      aria-describedby={`${qid}-help`}
+                      className={input}
+                    />
+                    <span id={`${qid}-help`} className="text-sm text-[var(--s-muted)]">
+                      Photos (JPEG, PNG or WebP) or PDFs — up to 3 files, 5 MB each.
+                    </span>
+                  </>
+                ) : q.type === 'long' ? (
+                  <textarea
+                    id={qid}
+                    name={`answers[${i}][a]`}
+                    required={req}
+                    rows={3}
+                    maxLength={1000}
+                    className={input}
+                  />
+                ) : q.type === 'choice' || q.type === 'yesno' ? (
+                  <select
+                    id={qid}
+                    name={`answers[${i}][a]`}
+                    required={req}
+                    className={input}
+                    defaultValue=""
+                  >
+                    <option value="">Choose…</option>
+                    {(q.type === 'yesno' ? ['Yes', 'No'] : choices).map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    id={qid}
+                    name={`answers[${i}][a]`}
+                    type={q.type === 'date' ? 'date' : 'text'}
+                    required={req}
+                    maxLength={1000}
+                    className={input}
+                  />
+                )}
+              </label>
+            );
+          })}
+        <input type="hidden" name="form" value={kind} />
         {/* Bots fill every field; people never see this one. */}
         <div aria-hidden className="absolute -left-[9999px]">
           <label>
@@ -141,6 +284,19 @@ function QuoteFormView({
             this.
           </span>
         </label>
+        <input type="hidden" name="lead" value={p.leads === 'no' ? '0' : '1'} />
+        {p.askNews !== 'no' && (
+          <label className="flex items-start gap-3 text-sm" htmlFor={`${id}-news`}>
+            <input
+              id={`${id}-news`}
+              name="news"
+              type="checkbox"
+              value="1"
+              className="mt-1 size-5 accent-[var(--s-brand)]"
+            />
+            <span>Send me news and offers (optional). I can unsubscribe at any time.</span>
+          </label>
+        )}
         <div className="flex flex-wrap items-center gap-4">
           <button
             type="submit"

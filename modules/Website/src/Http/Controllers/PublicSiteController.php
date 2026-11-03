@@ -18,6 +18,7 @@ use Wurk\Website\Models\PageSlug;
 use Wurk\Website\Models\PageVersion;
 use Wurk\Website\Models\ProductRender;
 use Wurk\Website\Models\Site;
+use Wurk\Website\Support\ChatBot;
 use Wurk\Website\Support\FontPreloads;
 use Wurk\Website\Support\ProductPages;
 use Wurk\Website\Support\PublicAssets;
@@ -93,7 +94,10 @@ final class PublicSiteController
         // Revalidation: the tag changes with the render and with the build, so a new publish or a
         // deploy is never hidden behind a cached copy. Cache-Tag lets the CDN purge a whole site (Sprint 17).
         $assets = app(PublicAssets::class);
-        $etag = '"'.sha1($path.'|'.$renderedAt.'|'.$assets->stylesheet()).'"';
+        // The chat: on, and not hidden on this page (decision B). Part of the ETag, so switching it reaches visitors at once.
+        $chat = app(ChatBot::class)->settings();
+        $chatHere = $chat['enabled'] && ! in_array($canonical, $chat['hidden'], true);
+        $etag = '"'.sha1($path.'|'.$renderedAt.'|'.$assets->stylesheet().'|'.($chatHere ? 'chat' : '')).'"';
         $caching = ['ETag' => $etag, 'Cache-Control' => 'public, max-age=0, must-revalidate', 'Cache-Tag' => 'site-'.$tenant->tenantId()];
         if (request()->header('If-None-Match') === $etag) {
             return new Response('', 304, [...$caching, ...$this->securityHeaders()]);
@@ -109,6 +113,8 @@ final class PublicSiteController
             'preloads' => app(FontPreloads::class)->for(array_values(array_filter((array) ($stored['fonts'] ?? []), 'is_string'))),
             'stylesheet' => $assets->stylesheet(),
             'islands' => str_contains($body, 'data-island=') ? $assets->islands() : null,
+            'chat' => $chatHere, // decided here — never by whether an asset address exists
+            'chatScript' => $chatHere ? $assets->chat() : null,
             'body' => $body,
             'canonical' => request()->getSchemeAndHttpHost().$canonical,
             'image' => ($img = $stored['image'] ?? null) ? request()->getSchemeAndHttpHost().$img : null,

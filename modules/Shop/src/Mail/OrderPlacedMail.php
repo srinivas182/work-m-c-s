@@ -12,11 +12,11 @@ use Illuminate\Mail\Mailables\Envelope;
 final class OrderPlacedMail extends Mailable
 {
     /** @param  list<string>  $lines */
-    public function __construct(public readonly string $business, public readonly int $number, public readonly array $lines, public readonly string $total, public readonly ?string $howToPay, public readonly string $link) {}
+    public function __construct(public readonly string $business, public readonly string $subjectLine, public readonly string $intro, public readonly int $number, public readonly array $lines, public readonly string $total, public readonly ?string $howToPay, public readonly string $link) {}
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: "Your order #{$this->number} — {$this->business}");
+        return new Envelope(subject: $this->subjectLine);
     }
 
     public function content(): Content

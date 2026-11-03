@@ -63,6 +63,15 @@ services:
     volumes:
       - meilisearch:/meili_data
 
+  # Malware scanning for files visitors attach to forms (Sprint 12.3b). Loads its virus list on start (~1–2 min)
+  # and keeps it up to date itself; uses ~1.5 GB of memory.
+  clamav:
+    image: clamav/clamav:1.4
+    ports:
+      - "3310:3310"
+    volumes:
+      - clamav:/var/lib/clamav
+
   mailpit:
     image: axllent/mailpit:latest
     ports:
@@ -72,4 +81,5 @@ services:
 volumes:
   mysql:
   meilisearch:
+  clamav:
   node_modules:

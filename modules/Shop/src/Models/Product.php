@@ -18,6 +18,10 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property list<string>|null $photos
  * @property string $status
  * @property int $position
+ * @property int|null $weight_g
+ * @property int|null $length_mm
+ * @property int|null $width_mm
+ * @property int|null $height_mm
  */
 final class Product extends Model
 {

@@ -32,4 +32,6 @@ return [
         'webp_quality' => 80,
     ],
     'max_blocks' => 80,
+    // Files visitors attach to forms: removed this many months after their enquiry, once it's archived (POPIA: no longer than needed).
+    'form_files_months' => 12,
 ];

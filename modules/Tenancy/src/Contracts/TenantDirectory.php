@@ -27,4 +27,11 @@ interface TenantDirectory
      * @return list<CurrentTenant> active tenants only, sorted by name
      */
     public function activeAmong(array $tenantIds): array;
+
+    /**
+     * Every active business's id (for maintenance commands).
+     *
+     * @return list<string>
+     */
+    public function activeIds(): array;
 }

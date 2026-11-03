@@ -13,6 +13,7 @@ use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Shipping\Contracts\ParcelPlanner;
 use Wurk\Shop\Mail\NewOrderMail;
 use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Product;
@@ -22,6 +23,7 @@ use Wurk\Shop\Models\Variant;
 use Wurk\Shop\Support\OrderManager;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPlacer;
+use Wurk\Shop\Support\ShopParcels;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\MediaLibrary;
 
@@ -176,4 +178,34 @@ it('keeps the stock total when a single-branch shop saves a product with an empt
     $r = $this->actingAs($this->owner)->post("{$this->base}/products", $payload);
     $r->assertSessionHasNoErrors()->assertSessionHas('status', 'Product saved.');
     ($this->in)(fn () => expect(Variant::query()->sole()->stock)->toBe(5));
+});
+
+it('takes weights in kg and sizes in cm (a variant’s own override the product’s), and sets the default weight and boxes', function () {
+    ($this->subscribe)(['website', 'shop']);
+    $tee = [...$this->tee, 'weight_kg' => 0.18, 'length_cm' => 30, 'width_cm' => 25, 'height_cm' => 2];
+    $tee['variants'][1] += ['weight_kg' => 0.25];
+    $this->actingAs($this->owner)->post("{$this->base}/products", [...$tee, 'height_cm' => null])->assertSessionHasErrors(['height_cm' => 'Give all three sizes, or none.']); // all three or none
+    $this->actingAs($this->owner)->post("{$this->base}/products", $tee)->assertSessionHasNoErrors();
+    ($this->in)(function () {
+        $p = Product::query()->sole();
+        expect([$p->weight_g, $p->length_mm, $p->width_mm, $p->height_mm])->toBe([180, 300, 250, 20])
+            ->and(Variant::query()->pluck('weight_g', 'label')->all())->toEqual(['M / Red' => null, 'L / Red' => 250]); // only L has its own
+    });
+    $this->actingAs($this->owner)->get("{$this->base}/products")->assertInertia(fn ($p) => $p->where('products.0.weight_kg', 0.18)->where('products.0.length_cm', 30)->where('products.0.variants', fn ($vs) => collect($vs)->firstWhere('values.Size', 'L')['weight_kg'] === 0.25));
+
+    $ship = $this->app('/kasi-threads/settings/shipping');
+    $boxes = [['name' => 'Small', 'length_cm' => 20, 'width_cm' => 15, 'height_cm' => 10, 'max_kg' => 2], ['name' => 'Small', 'length_cm' => 40, 'width_cm' => 30, 'height_cm' => 20, 'max_kg' => 10]];
+    $this->actingAs($this->owner)->put("{$ship}/parcels", ['default_kg' => 0.3, 'boxes' => $boxes])->assertSessionHasErrors(['boxes.1.name' => 'Give each box its own name.']);
+    $this->actingAs($this->owner)->put("{$ship}/parcels", ['default_kg' => 0.3, 'boxes' => [['name' => 'Tiny', 'length_cm' => 5, 'width_cm' => null, 'height_cm' => 5, 'max_kg' => 1]]])
+        ->assertSessionHasErrors(['boxes.0.width_cm' => 'Give the box’s inside length, width and height.']); // plain words, not field names
+    $boxes[1]['name'] = 'Medium';
+    $boxes[] = ['name' => '', 'length_cm' => null, 'width_cm' => null, 'height_cm' => null, 'max_kg' => null]; // an empty row left behind: ignored
+    $this->actingAs($this->owner)->put("{$ship}/parcels", ['default_kg' => 0.3, 'boxes' => $boxes])->assertSessionHas('status', 'Parcel settings saved.');
+    $this->actingAs($this->owner)->get($ship)->assertInertia(fn ($p) => $p->where('parcels.default_kg', 0.3)->where('parcels.boxes.1.name', 'Medium'));
+    // The planner uses them: one medium-sized tee (30 cm long) goes in Medium; another product with no weight uses 0.3 kg.
+    ($this->in)(function () {
+        $v = Variant::query()->where('label', 'M / Red')->sole(); // uses the product's weight and size
+        expect(app(ShopParcels::class)->plan([$v->id => 1])['box'])->toBe('Medium')
+            ->and(app(ParcelPlanner::class)->plan([['weight_g' => null, 'size_mm' => null, 'quantity' => 2]])['weight_kg'])->toBe(0.6);
+    });
 });

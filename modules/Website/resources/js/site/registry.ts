@@ -20,6 +20,7 @@ import { RoomsRates } from './blocks/RoomsRates';
 import { Portfolio } from './blocks/Portfolio';
 import { Accreditations } from './blocks/Accreditations';
 import { ServiceAreas } from './blocks/ServiceAreas';
+import { Form } from './blocks/Form';
 import { QuoteForm } from './blocks/QuoteForm';
 import { BookOnline } from './blocks/BookOnline';
 import { ProductGrid } from './blocks/ProductGrid';
@@ -52,6 +53,7 @@ export const BLOCKS: Record<string, AnyBlock> = Object.fromEntries(
     Accreditations,
     ServiceAreas,
     QuoteForm,
+    Form,
     BookOnline,
     ProductGrid,
     PromotionBanner,

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Wurk\Shipping\Http\Controllers;
 
+use Illuminate\Database\Connection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,6 +17,7 @@ use Wurk\Shipping\Gateways\BobGo;
 use Wurk\Shipping\Gateways\Pargo;
 use Wurk\Shipping\Models\ShippingAccount;
 use Wurk\Tenancy\Contracts\BranchDirectory;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Settings → Shipping: the business's (or a branch's) own Bob Go and Pargo accounts. */
 final class ShippingSettingsController
@@ -37,6 +41,10 @@ final class ShippingSettingsController
                 'branches' => count($open) > 1 ? (object) collect($open)->mapWithKeys(fn (array $b) => [$b['id'] => $summary($all->first(fn (ShippingAccount $a) => $a->provider === $p && $a->branch_id === $b['id']))])->all() : (object) [],
             ], array_keys(self::NAMES)),
             'branches' => count($open) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name']], $open) : [],
+            // Parcels (Sprint 12.6): the weight for items without one, and the boxes the business ships in.
+            'parcels' => ['default_kg' => (int) ($this->db()->table('shipping_preferences')->value('default_item_g') ?? 500) / 1000,
+                'boxes' => $this->db()->table('shipping_boxes')->orderBy('position')->get()->map(fn ($b) => ['name' => (string) $b->name,
+                    'length_cm' => $b->length_mm / 10, 'width_cm' => $b->width_mm / 10, 'height_cm' => $b->height_mm / 10, 'max_kg' => $b->max_weight_g / 1000])->all()],
         ]);
     }
 
@@ -98,5 +106,47 @@ final class ShippingSettingsController
     private function find(string $provider, ?string $branch): ?ShippingAccount
     {
         return ShippingAccount::query()->where('provider', $provider)->when($branch === null, fn ($q) => $q->whereNull('branch_id'), fn ($q) => $q->where('branch_id', $branch))->first();
+    }
+
+    /** The default item weight and the business's boxes (replaced as a list, in the order given). */
+    public function parcels(Request $request): RedirectResponse
+    {
+        // A row the owner added and left completely empty is simply ignored.
+        $request->merge(['boxes' => array_values(array_filter((array) $request->input('boxes', []), fn ($b) => is_array($b) && array_filter($b, fn ($v) => $v !== null && $v !== '') !== []))]);
+        $d = $request->validate([
+            'default_kg' => ['required', 'numeric', 'min:0.001', 'max:1000'],
+            'boxes' => ['present', 'array', 'max:12'],
+            'boxes.*.name' => ['required', 'string', 'max:40', 'distinct'],
+            'boxes.*.length_cm' => ['required', 'numeric', 'min:1', 'max:500'],
+            'boxes.*.width_cm' => ['required', 'numeric', 'min:1', 'max:500'],
+            'boxes.*.height_cm' => ['required', 'numeric', 'min:1', 'max:500'],
+            'boxes.*.max_kg' => ['required', 'numeric', 'min:0.1', 'max:1000'],
+        ], [
+            'boxes.*.name.distinct' => 'Give each box its own name.',
+            'boxes.*.name.required' => 'Give the box a name.',
+            'boxes.*.length_cm.required' => 'Give the box’s inside length, width and height.',
+            'boxes.*.width_cm.required' => 'Give the box’s inside length, width and height.',
+            'boxes.*.height_cm.required' => 'Give the box’s inside length, width and height.',
+            'boxes.*.max_kg.required' => 'How much can the box carry?',
+            'default_kg.required' => 'Give a default weight per item.',
+        ]);
+        $tenant = app(TenantContext::class)->id();
+        $this->db()->transaction(function () use ($d, $tenant): void {
+            $this->db()->table('shipping_preferences')->updateOrInsert(['tenant_id' => $tenant], ['default_item_g' => (int) round($d['default_kg'] * 1000)]);
+            $this->db()->table('shipping_boxes')->delete();
+            foreach (array_values($d['boxes']) as $i => $b) {
+                $this->db()->table('shipping_boxes')->insert(['id' => (string) Str::ulid(), 'tenant_id' => $tenant, 'name' => trim($b['name']),
+                    'length_mm' => (int) round($b['length_cm'] * 10), 'width_mm' => (int) round($b['width_cm'] * 10), 'height_mm' => (int) round($b['height_cm'] * 10),
+                    'max_weight_g' => (int) round($b['max_kg'] * 1000), 'position' => $i]);
+            }
+        });
+        $this->audit->record('shipping.parcels', 'shipping', $tenant, ['default_kg' => (float) $d['default_kg'], 'boxes' => count($d['boxes'])]);
+
+        return back()->with('status', 'Parcel settings saved.');
+    }
+
+    private function db(): Connection
+    {
+        return DB::connection(app(TenantContext::class)->connectionName());
     }
 }

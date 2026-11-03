@@ -9,12 +9,17 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\ContactsBackfillRequested;
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Shipping\Contracts\ShipmentUpdated;
 use Wurk\Shop\Console\DemoShopCommand;
 use Wurk\Shop\Console\ExpireOrdersCommand;
 use Wurk\Shop\Listeners\MarkDeliveredOrders;
+use Wurk\Shop\Mail\OrderUpdateMail;
+use Wurk\Shop\Models\Order;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderStatusChanged;
@@ -26,6 +31,11 @@ final class ShopServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         parent::register();
+        $this->callAfterResolving(MessageTemplates::class, function (MessageTemplates $t): void {
+            foreach (OrderUpdateMail::definitions() as $key => $def) {
+                $t->define($key, $def); // Settings → Messages
+            }
+        });
         $this->app->bind(ProductCatalog::class, ShopCatalog::class); // the website's shop sections read this
     }
 
@@ -52,6 +62,14 @@ final class ShopServiceProvider extends ModuleServiceProvider
         Event::listen(BusinessPaymentReceived::class, [OrderPayments::class, 'handle']);
         Event::listen(OrderStatusChanged::class, [OrderMessages::class, 'handle']);
         Event::listen(ShipmentUpdated::class, [MarkDeliveredOrders::class, 'handle']); // a courier delivered it
+        Event::listen(ContactsBackfillRequested::class, function (): void { // existing customers → contacts
+            $book = app(ContactBook::class);
+            Order::query()->orderBy('id')->chunk(500, function ($rows) use ($book): void {
+                foreach ($rows as $o) {
+                    $book->remember($o->customer_name, $o->customer_phone, $o->customer_email, 'order', $o->id, $o->branch_id, "Order #{$o->number}");
+                }
+            });
+        });
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('shop:expire-orders')->everyFifteenMinutes()->onOneServer()->withoutOverlapping();
         });

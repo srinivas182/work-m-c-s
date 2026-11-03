@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Wurk\Access\Contracts\TeamDirectory;
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Shop\Mail\NewOrderMail;
 use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Order;
@@ -54,7 +55,9 @@ final readonly class OrderMessages
                 ? 'R'.number_format((int) DB::connection($this->context->connectionName())->table('shop_order_events')->where('order_id', $order->id)->where('event', 'refunded')->orderByDesc('id')->value('amount_cents') / 100, 2)
                 : '';
             $link = URL::signedRoute('shop.public.order', ['handle' => $tenant->handle(), 'order' => $order->id]);
-            Mail::to($order->customer_email)->send(new OrderUpdateMail($tenant->displayName(), $event->status, $order->number, $link, $amount));
+            $vars = ['business' => $tenant->displayName(), 'number' => (string) $order->number, 'amount' => $amount];
+            $t = app(MessageTemplates::class);
+            Mail::to($order->customer_email)->send(new OrderUpdateMail($tenant->displayName(), $t->subject('order.'.$event->status, $vars), $t->text('order.'.$event->status, 'email', $vars), $link));
         });
     }
 }

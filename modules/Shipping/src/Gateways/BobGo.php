@@ -24,14 +24,15 @@ final class BobGo
     /**
      * @param  array<string, string|null>  $from
      * @param  array<string, string|null>  $to
+     * @param  array{length: float, width: float, height: float}|null  $sizeCm  the parcel's box, when the business set boxes
      * @return list<array{service: string, name: string, cents: int, eta: string|null}>
      */
-    public static function rates(ShippingAccount $account, array $from, array $to, int $valueCents, float $weightKg): array
+    public static function rates(ShippingAccount $account, array $from, array $to, int $valueCents, float $weightKg, ?array $sizeCm = null): array
     {
         try {
             $r = self::http($account)->post($account->baseUrl().'/rates-at-checkout', [
                 'collection_address' => $from, 'delivery_address' => $to, 'declared_value' => $valueCents / 100,
-                'items' => [['description' => 'Order', 'quantity' => 1, 'price' => $valueCents / 100, 'weight' => $weightKg]],
+                'items' => [['description' => 'Order', 'quantity' => 1, 'price' => $valueCents / 100, 'weight' => $weightKg, ...self::size($sizeCm)]],
             ]);
         } catch (Throwable) {
             throw new ShippingProblem('We couldn’t reach the courier for rates. Please try again.');
@@ -62,7 +63,7 @@ final class BobGo
             $r = self::http($account)->post($account->baseUrl().'/shipments', [
                 'collection_address' => $from, 'delivery_address' => $details['to'] ?? [],
                 'delivery_contact' => ['name' => $details['name'], 'mobile_number' => $details['phone'], 'email' => $details['email'] ?? null],
-                'parcels' => [['weight' => $details['weight_kg']]], 'declared_value' => $details['value_cents'] / 100,
+                'parcels' => [['weight' => $details['weight_kg'], ...self::size($details['size_cm'] ?? null)]], 'declared_value' => $details['value_cents'] / 100,
                 'service_level_code' => $details['service'] ?? null, 'custom_order_number' => $reference,
             ]);
         } catch (Throwable) {
@@ -86,5 +87,16 @@ final class BobGo
         } catch (Throwable) {
             return false;
         }
+    }
+
+    /**
+     * The parcel's size for Bob Go, when the business set boxes (field names: confirm with the sandbox).
+     *
+     * @param  array{length: float, width: float, height: float}|null  $cm
+     * @return array<string, float>
+     */
+    private static function size(?array $cm): array
+    {
+        return $cm === null ? [] : ['length' => $cm['length'], 'width' => $cm['width'], 'height' => $cm['height']];
     }
 }

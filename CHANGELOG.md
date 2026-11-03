@@ -4,6 +4,67 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-11-03 — Sprint 12: CRM and messaging
+
+**Release steps** (docs/deployment/docker.md): run **ClamAV** next to WURK and set `CLAMAV_HOST`; after migrating, run `php artisan crm:link-existing` once.
+
+### Added — Sprint 12.6 (product weights and parcel sizes)
+- **Weights and sizes** on products, in kg and cm (a variant can have its own); stored in grams and millimetres.
+- **Settings → Shipping → Parcels**: the default weight for items without one (starts at 0.5 kg — nothing changes until a business adds weights) and the boxes the business ships in.
+- **One parcel per order**: the smallest box that fits by volume, the largest item and weight; if none fits, the courier's size-based weight (L×W×H ÷ 5,000) and a warning on the order. The same parcel for the checkout quote, the re-check when placing the order, and booking — Bob Go is sent the box size (field names to confirm with the sandbox).
+- **Products** shows how many products use the default weight, with a filter; the **order page** shows the box to pack it in.
+
+### Added — Sprint 12.5 (message templates)
+- **Settings → Messages** (owners; `messages.manage`): every message customers receive — bookings (confirmed, reminder, moved, cancelled) and orders (placed and its updates) — with each channel's wording, a live preview, placeholder buttons and an SMS length/parts counter.
+- **Rewording email and SMS** (decision A; replaces the Sprint 8 fixed-wording agreement for these channels) within safety rails: known placeholders only, required ones (like the booking link) kept, plain text, SMS within two parts, a subject for emails; "Back to standard wording"; every change logged. Standard wording is unchanged until a business edits it.
+- **WhatsApp stays fixed** (Meta-approved templates) and is shown as such.
+- **Test sends** to the owner's own email (free) or phone (SMS credits, decision B).
+- **"We got your message"** — an optional auto-reply email (off by default, decision C) for form replies and chat hand-offs; email only.
+- Order emails: only the subject and opening line (placed) or sentence (updates) are worded; items, totals, payment details and links stay generated.
+- Tests: page accessibility scans leave out the toast area (axe misjudges stacked toasts); a single toast is still checked.
+
+### Added — Sprint 12.4 (the website chat)
+- **A rule-based chat** on the business's website (off by default; every page when on; hidden on chosen pages). Ready-made answers from what the business published — prices, location and map, call, WhatsApp, and opening hours once confirmed — follow those details until the owner rewrites them.
+- **Website → Chat**: greeting, fallback, quick buttons (up to 8) and keyword answers with links (the site's own pages, call, WhatsApp, map, email), a preview, and the most-used buttons.
+- **Talk to someone**: a visitor's details and the conversation are stored only then, with consent (decision A) — a contact, a lead (a setting), and the owner emailed; reply times from confirmed hours (decision C). Spam field, per-visitor limit, daily cap per business. **Customers → Chats** lists them.
+- **Accessible and light**: a labelled dialog (focus kept inside, Escape closes it from anywhere, answers announced), full screen on phones; answers matched on the visitor's device; the panel's code loads only on first use; anonymous counts of button taps only.
+- Published pages' ETag includes the chat's state, so switching it reaches visitors at once.
+
+### Added — Sprint 12.3b (file uploads on public forms)
+- **"Attach a file"** questions on the Quote and Form blocks: JPEG, PNG, WebP or PDF, up to 3 files of 5 MB each.
+- **Checked on arrival**: the real type is read from the file's contents; images are re-saved (hidden content, metadata and location dropped); PDFs with scripts, launch actions or attachments are refused; one bad file refuses the whole reply.
+- **Malware scanning with ClamAV**: files are encrypted on a private disk and held ("Being checked") until scanned clean; infected files are deleted and logged; while the scanner is down files stay held and are retried.
+- **Owner-only downloads** from Enquiries — clean files only, always saved (never opened in the browser), sandboxed, not cached, logged.
+- Uploads count towards the package's storage; files of enquiries archived over 12 months are removed daily (logged; a setting).
+- **Deployment (v0.14.0):** run ClamAV next to WURK — see "Malware scanning (ClamAV)" in docs/deployment/docker.md. CI scans the standard antivirus test file with a real ClamAV.
+- HEIC is not accepted (it can't be re-saved safely here); iPhones send JPEG to these forms.
+
+### Added — Sprint 12.3 (forms)
+- **Form replies join the CRM**: every reply becomes (or joins) a contact; past enquiries via `crm:link-existing`. Quote forms open a lead per reply by default (a setting on the block), with the message and answers as its first note.
+- **Optional "Send me news and offers"** on forms — unticked; marketing consent recorded only when ticked, with where.
+- **Your own questions** on forms (short or long text, a choice, a date, yes/no; required or optional), stored with the enquiry and shown in the owner's email, the lead and Enquiries.
+- **A general Form block** for enquiries, waiting lists and registrations of interest, sharing the Quote form's view, spam protection and limits; the message is optional.
+- **Enquiries** show the form's kind, the answers, and links to the contact and lead (for those allowed to see them).
+- CI: the MySQL parts rebalanced (Billing and Tenancy moved to part 3); every test still runs exactly once.
+
+### Added — Sprint 12.2 (pipelines)
+- **Leads** (Customers → Leads; `leads.view` / `leads.manage`): every business starts with a Sales pipeline (New → Contacted → Quoted → Won / Lost) whose stages can be renamed, added, reordered and removed (not while they still hold leads; one open stage always remains). Leads carry a value, source, assignee, branch and follow-up date; a board (moved with a stage choice, so it works by keyboard) and a list, open leads by default with won and lost on request; a lead page with its full history; New lead from a contact's page.
+- **Follow-up reminders**: a daily email (07:00 South Africa) to the assignee — once per follow-up date, never for closed leads, with the contact's name only.
+- Branch managers handle their branches' leads and leads assigned to them.
+
+### Fixed
+- Follow-up times were stored two hours off (found while completing an interrupted session's work).
+- Removing a stage on the pipeline screen didn't remove it on the server.
+
+### Added — Sprint 12.1 (contacts)
+- **Contacts** (Customers → Contacts; new Crm module, `contacts.view` / `contacts.manage`): one contact per person per business, matched by exact phone or email (South African numbers written one way), built automatically from bookings, class places and orders, with their branch. Search by name, number or email; tags and notes; a contact's history; merge (nothing deleted) and split (exact undo); CSV export (audited, not cached). Branch managers see their branches' contacts.
+- Marketing consent is recorded only when given, with where; patient records stay out of the CRM.
+- **Release step (v0.14.0):** `php artisan crm:link-existing` once after migrating — makes contacts of existing customers (safe to run again). See docs/deployment/docker.md.
+
+## [0.5.0 – 0.13.0] — Sprints 4–11
+
+These releases' entries were not moved under their own version headings at the time; each version's exact contents are in its GitHub release (v0.5.0 … v0.13.0). Grouped here, newest first:
+
 ### Added — Sprint 11.6 (shipping)
 - **Shipping** (new module; Settings → Shipping): the business's own **Bob Go** (courier delivery at live rates) and **Pargo** (pickup points, flat rate) accounts, for the business or a branch, test or live; credentials checked with the courier before saving. WURK never pays couriers.
 - **Checkout**: "How should we deliver?" — the shop's own flat-fee delivery, a courier at live prices for the customer's address, or a Pargo pickup point near them; the courier's price is checked again when the order is placed.

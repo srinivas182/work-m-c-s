@@ -56,5 +56,8 @@ if [ ! -f bootstrap/site-render/site-render.js ]; then
   exit 1
 fi
 php artisan website:demo-sites --no-interaction > /dev/null
+# An owner for one demo site, so the chatbot test can switch the chat on and read hand-offs (Sprint 12.4).
+php artisan identities:create chat-owner@demo.co.za --first=Nomsa --last=Dube \
+  --password="sunny days in durban" --tenant=demo-salon-hair-braids
 php artisan bookings:demo --no-interaction > /dev/null   # the demo sites take bookings
 php artisan shop:demo --no-interaction > /dev/null           # the retail demos sell (product grids and pages)

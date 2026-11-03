@@ -17,5 +17,5 @@ return [
     'bobgo_signature_header' => 'X-Bobgo-Signature',
     'timeout' => 15,
     // Products don't have weights yet: each item counts as this many kilograms for courier rates.
-    'item_kg' => 0.5,
+    'item_kg' => 0.5, // superseded by each business's default weight (Settings → Shipping, Sprint 12.6); kept for reference
 ];

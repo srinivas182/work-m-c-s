@@ -29,6 +29,13 @@ interface OrderData {
     tracking_url: string | null;
     label_url: string | null;
     can_ship: boolean;
+    /** Courier orders: the box to pack it in, or none fits. */
+    parcel?: {
+      weight_kg: number;
+      size_cm: { length: number; width: number; height: number } | null;
+      box: string | null;
+      fits: boolean;
+    } | null;
   } | null;
 
   customer: { name: string; phone: string; email: string | null };
@@ -101,6 +108,22 @@ export default function Order({ order: o }: { order: OrderData }) {
                   ? ` · ${o.shipping.service}`
                   : ''}
             </p>
+            {o.shipping.parcel &&
+              (o.shipping.parcel.fits ? (
+                o.shipping.parcel.box &&
+                o.shipping.parcel.size_cm && (
+                  <p>
+                    Pack in: {o.shipping.parcel.box} ({o.shipping.parcel.size_cm.length} ×{' '}
+                    {o.shipping.parcel.size_cm.width} × {o.shipping.parcel.size_cm.height} cm) ·{' '}
+                    {o.shipping.parcel.weight_kg} kg
+                  </p>
+                )
+              ) : (
+                <p role="note" className="text-warning-11 font-medium">
+                  None of your boxes fits this order — it may need more than one parcel. Charged as{' '}
+                  {o.shipping.parcel.weight_kg} kg by size.
+                </p>
+              ))}
             {o.shipping.tracking_reference ? (
               <p className="flex flex-wrap gap-3">
                 <span>Tracking: {o.shipping.tracking_reference}</span>

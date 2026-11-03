@@ -162,16 +162,16 @@ final readonly class OrderPlacer
         }
         $variants = Variant::query()->whereIn('id', array_column($lines, 'variant'))->get()->keyBy('id');
         $value = 0;
-        $items = 0;
+        $quantities = [];
         foreach ($lines as $line) {
             if (($v = $variants[$line['variant']] ?? null) !== null) {
                 $value += app(BranchStock::class)->priceAt($v, $branch) * $line['quantity'];
-                $items += $line['quantity'];
+                $quantities[$v->id] = ($quantities[$v->id] ?? 0) + (int) $line['quantity'];
             }
         }
         try {
             $to = (array) $shipping['to'];
-            $rates = $couriers->rates($branch, ['street' => (string) ($to['street'] ?? ''), 'suburb' => isset($to['suburb']) ? (string) $to['suburb'] : null, 'city' => (string) ($to['city'] ?? ''), 'postal_code' => (string) ($to['postal_code'] ?? '')], $value, max(0.1, $items * (float) config('shipping.item_kg', 0.5)));
+            $rates = $couriers->rates($branch, ['street' => (string) ($to['street'] ?? ''), 'suburb' => isset($to['suburb']) ? (string) $to['suburb'] : null, 'city' => (string) ($to['city'] ?? ''), 'postal_code' => (string) ($to['postal_code'] ?? '')], $value, ($parcel = app(ShopParcels::class)->plan($quantities))['weight_kg'], $parcel['size_cm']);
         } catch (ShippingProblem $e) {
             throw new CheckoutProblem($e->getMessage());
         }

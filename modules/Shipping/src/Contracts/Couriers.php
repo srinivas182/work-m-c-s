@@ -18,9 +18,10 @@ interface Couriers
      * Live courier rates (Bob Go) from a branch to an address.
      *
      * @param  array{street: string, suburb?: string|null, city: string, postal_code: string}  $to
+     * @param  array{length: float, width: float, height: float}|null  $sizeCm  the parcel's box, when the business set boxes
      * @return list<array{service: string, name: string, cents: int, eta: string|null}>
      */
-    public function rates(?string $branchId, array $to, int $valueCents, float $weightKg): array;
+    public function rates(?string $branchId, array $to, int $valueCents, float $weightKg, ?array $sizeCm = null): array;
 
     /**
      * The nearest Pargo pickup points to an address.
@@ -32,7 +33,7 @@ interface Couriers
     /**
      * Create a shipment for an order; returns its tracking details.
      *
-     * @param  array{provider: string, service?: string|null, pickup_point?: string|null, to?: array<string, string|null>, name: string, phone: string, email?: string|null, value_cents: int, weight_kg: float}  $details
+     * @param  array{provider: string, service?: string|null, pickup_point?: string|null, to?: array<string, string|null>, name: string, phone: string, email?: string|null, value_cents: int, weight_kg: float, size_cm?: array{length: float, width: float, height: float}|null}  $details
      * @return array{tracking_reference: string|null, tracking_url: string|null, label_url: string|null}
      */
     public function ship(string $reference, ?string $branchId, array $details): array;
