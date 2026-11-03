@@ -18,7 +18,8 @@ final readonly class Parcels implements ParcelPlanner
     public function plan(array $items): array
     {
         $db = DB::connection($this->context->connectionName());
-        $default = (int) ($db->table('shipping_preferences')->value('default_item_g') ?? 500);
+        $tenant = $this->context->id(); // shards hold many businesses: always this business's settings
+        $default = (int) ($db->table('shipping_preferences')->where('tenant_id', $tenant)->value('default_item_g') ?? 500);
         $grams = 0;
         $volume = 0;            // mm³ of the items with sizes
         $largest = [0, 0, 0];   // the largest item, its sides sorted
@@ -36,7 +37,7 @@ final readonly class Parcels implements ParcelPlanner
             }
         }
         $weightKg = max(0.1, round($grams / 1000, 3));
-        $boxes = $db->table('shipping_boxes')->get();
+        $boxes = $db->table('shipping_boxes')->where('tenant_id', $tenant)->get();
         if ($boxes->isEmpty()) {
             return ['weight_kg' => $weightKg, 'size_cm' => null, 'box' => null, 'fits' => true]; // weight only, as before boxes
         }

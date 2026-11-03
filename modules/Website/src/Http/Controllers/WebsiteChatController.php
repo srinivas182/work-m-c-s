@@ -43,7 +43,7 @@ final class WebsiteChatController
             ])->all(),
             'pages' => array_map(fn (array $p) => ['path' => $p['path'], 'title' => $p['title']], $facts['pages']),
             'preview' => $this->bot->publicConfig(),
-            'taps' => DB::connection($this->context->connectionName())->table('chat_taps')->where('day', '>=', now()->subDays(30)->toDateString())
+            'taps' => DB::connection($this->context->connectionName())->table('chat_taps')->where('tenant_id', $this->context->id())->where('day', '>=', now()->subDays(30)->toDateString())
                 ->selectRaw('label, sum(taps) as taps')->groupBy('label')->orderByDesc('taps')->get()->map(fn ($r) => ['label' => (string) $r->label, 'taps' => (int) $r->taps])->all(),
         ]);
     }
