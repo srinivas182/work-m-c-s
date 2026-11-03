@@ -27,7 +27,7 @@ final class LinkExistingCommand extends Command
             }
             $context->run($tenant, function () use ($context, &$done): void {
                 event(new ContactsBackfillRequested($context->id()));
-                $done += (int) DB::connection($context->connectionName())->table('contacts')->count();
+                $done += (int) DB::connection($context->connectionName())->table('contacts')->where('tenant_id', $context->id())->count(); // this business's only (shards hold many)
             });
         }
         $this->info("Contacts now held across businesses: {$done}.");

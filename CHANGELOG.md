@@ -11,6 +11,7 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - **Courier prices** could use another business's boxes or default weight (same shard).
 - **The "We got your message" auto-reply** switch could switch on for other businesses on the same shard.
 - **Website → Chat**: "most used" counts included other businesses' taps.
+- **`crm:link-existing`** (the v0.14.0 release step) reported a contact count for the whole shard; it now counts each business's own. A full review of the other raw queries found them safe (looked up by records that belong to the business).
 - Cause: these tables were read and written with the query builder without filtering by business (Eloquent models filter automatically). New tests put two businesses on one shard and check each sees and changes only its own.
 
 ## [0.14.0] — 2026-11-03 — Sprint 12: CRM and messaging
