@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.14.2] — 2026-11-03 — Hotfix: branch settlements shared between businesses on a shard
+
+### Fixed
+- **Team → Settlement between branches** (Sprint 11.5, since v0.13.0): a business's monthly statement included the settlement entries — amounts, references and notes — of **every** business on the same database shard. It now shows only that business's. Found by a scan of every raw database query while adding an automatic check for this kind of mistake; a new test puts two businesses on one shard (and fails without the fix).
+
 ## [0.14.1] — 2026-11-03 — Hotfix: settings shared between businesses on a shard
 
 ### Fixed
