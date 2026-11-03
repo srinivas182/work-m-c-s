@@ -12,6 +12,8 @@ use Wurk\Messaging\Support\Templates;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Shipping\Contracts\ParcelPlanner;
+use Wurk\Team\Contracts\BranchLedger;
+use Wurk\Team\Support\Settlements;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 // Two businesses on ONE shard: each sees and changes only its own settings (v0.14.1 — tables read and written
@@ -69,4 +71,13 @@ it('saving parcels in Settings → Shipping replaces only that business’s boxe
     $save('b', 'kasi-threads', 'Kasi box'); // before v0.14.1 this deleted Glow's box too
     ($this->in)($this->a, fn () => expect(($this->db)()->table('shipping_boxes')->where('tenant_id', $this->ctx->id())->pluck('name')->all())->toBe(['Glow box']));
     $this->actingAs($owners['a'])->get($this->app('/glow-salon/settings/shipping'))->assertInertia(fn ($p) => $p->where('parcels.boxes', fn ($boxes) => collect($boxes)->pluck('name')->all() === ['Glow box']));
+});
+
+it('keeps each business’s branch settlements to its own monthly statement', function () {
+    foreach ([[$this->a, 'GLOW-1', 12000], [$this->b, 'KASI-1', 99000]] as [$t, $ref, $cents]) {
+        ($this->in)($t, fn () => app(BranchLedger::class)->record((string) Str::ulid(), (string) Str::ulid(), $cents, 'order', $ref, 'Order '.$ref));
+    }
+    $month = now()->format('Y-m');
+    $refs = fn ($t) => ($this->in)($t, fn () => collect(app(Settlements::class)->statement($month))->flatMap(fn ($p) => array_column($p['entries'], 'reference'))->all());
+    expect($refs($this->a))->toBe(['GLOW-1'])->and($refs($this->b))->toBe(['KASI-1']); // never the other business's
 });

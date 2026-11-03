@@ -36,6 +36,7 @@ final readonly class Settlements implements BranchLedger
     public function statement(string $month): array
     {
         $rows = DB::connection($this->context->connectionName())->table('branch_settlements')
+            ->where('tenant_id', $this->context->id()) // shards hold many businesses: only this business's settlements
             ->where('occurred_at', '>=', $month.'-01 00:00:00')->where('occurred_at', '<', date('Y-m-01', (int) strtotime($month.'-01 +1 month')).' 00:00:00')
             ->orderBy('occurred_at')->get();
         $out = [];
