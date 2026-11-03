@@ -192,7 +192,7 @@ A rule-based assistant on the business's website (decision B: no AI this sprint)
 | A | **Yes** — owners may reword email and SMS customer messages, with the safety rails; **WhatsApp stays fixed** (Meta). This replaces the Sprint 8 "fixed wording" agreement for email and SMS. |
 | B | SMS test sends **count towards the business's SMS credits**; email test sends are free. |
 | C | **Include now**: an optional "We got your message" email for form replies and chat hand-offs (part 7). |
-| 12.5 Message templates | see PR | Decisions A (rewording with rails), B (SMS tests use credits), C (auto-reply now). Found: an architecture breach (Website using Messaging's mail class — now via the contract); a flaky phone accessibility scan traced by measurement to axe misjudging stacked toasts. 1,177 backend tests on SQLite; Messaging on MySQL 8; 390 frontend; all browser tests |
+| 12.5 Message templates | #106 | Decisions A (rewording with rails), B (SMS tests use credits), C (auto-reply now). Found: an architecture breach (Website using Messaging's mail class — now via the contract); a flaky phone accessibility scan traced by measurement to axe misjudging stacked toasts. 1,177 backend tests on SQLite; Messaging on MySQL 8; 390 frontend; all browser tests |
 
 ## 7e. Sprint 12.6 in detail — product weights and parcel sizes (approved 31 Oct 2026)
 
@@ -224,3 +224,4 @@ Courier rates and shipments use **0.5 kg per item** today (Sprint 11.6) — wron
 | A | Weights in **kg** (decimals), stored in grams |
 | B | **Include parcel sizes now** — product sizes and the business's boxes (parts 5–7), **design confirmed** |
 | C | Default **0.5 kg**, changeable per business |
+| 12.6 Product weights and parcel sizes | see PR | Decisions A (kg), B (sizes and boxes, design confirmed), C (0.5 kg default per business). Found: a third place used the old estimate (the re-check when placing an order); raw field-name messages and blocking empty rows on the parcels form; a missing warning colour. 1,181 backend tests on SQLite; parcels on MySQL 8; 390 frontend; all 98 browser tests (a fifth part was nearly missed — now run by count) |
