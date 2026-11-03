@@ -128,7 +128,9 @@ final class Templates implements MessageTemplates
             return true;
         }
 
-        return (bool) DB::connection(app(TenantContext::class)->connectionName())->table('message_switches')->where('key', $key)->value('enabled');
+        $ctx = app(TenantContext::class); // shards hold many businesses: always this business's switch
+
+        return (bool) DB::connection($ctx->connectionName())->table('message_switches')->where('tenant_id', $ctx->id())->where('key', $key)->value('enabled');
     }
 
     public function setEnabled(string $key, bool $on): void

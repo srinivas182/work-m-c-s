@@ -42,8 +42,8 @@ final class ShippingSettingsController
             ], array_keys(self::NAMES)),
             'branches' => count($open) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name']], $open) : [],
             // Parcels (Sprint 12.6): the weight for items without one, and the boxes the business ships in.
-            'parcels' => ['default_kg' => (int) ($this->db()->table('shipping_preferences')->value('default_item_g') ?? 500) / 1000,
-                'boxes' => $this->db()->table('shipping_boxes')->orderBy('position')->get()->map(fn ($b) => ['name' => (string) $b->name,
+            'parcels' => ['default_kg' => (int) ($this->db()->table('shipping_preferences')->where('tenant_id', app(TenantContext::class)->id())->value('default_item_g') ?? 500) / 1000,
+                'boxes' => $this->db()->table('shipping_boxes')->where('tenant_id', app(TenantContext::class)->id())->orderBy('position')->get()->map(fn ($b) => ['name' => (string) $b->name,
                     'length_cm' => $b->length_mm / 10, 'width_cm' => $b->width_mm / 10, 'height_cm' => $b->height_mm / 10, 'max_kg' => $b->max_weight_g / 1000])->all()],
         ]);
     }
@@ -133,7 +133,7 @@ final class ShippingSettingsController
         $tenant = app(TenantContext::class)->id();
         $this->db()->transaction(function () use ($d, $tenant): void {
             $this->db()->table('shipping_preferences')->updateOrInsert(['tenant_id' => $tenant], ['default_item_g' => (int) round($d['default_kg'] * 1000)]);
-            $this->db()->table('shipping_boxes')->delete();
+            $this->db()->table('shipping_boxes')->where('tenant_id', $tenant)->delete(); // only this business's boxes
             foreach (array_values($d['boxes']) as $i => $b) {
                 $this->db()->table('shipping_boxes')->insert(['id' => (string) Str::ulid(), 'tenant_id' => $tenant, 'name' => trim($b['name']),
                     'length_mm' => (int) round($b['length_cm'] * 10), 'width_mm' => (int) round($b['width_cm'] * 10), 'height_mm' => (int) round($b['height_cm'] * 10),
