@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 12.6 (product weights and parcel sizes)
+- **Weights and sizes** on products, in kg and cm (a variant can have its own); stored in grams and millimetres.
+- **Settings → Shipping → Parcels**: the default weight for items without one (starts at 0.5 kg — nothing changes until a business adds weights) and the boxes the business ships in.
+- **One parcel per order**: the smallest box that fits by volume, the largest item and weight; if none fits, the courier's size-based weight (L×W×H ÷ 5,000) and a warning on the order. The same parcel for the checkout quote, the re-check when placing the order, and booking — Bob Go is sent the box size (field names to confirm with the sandbox).
+- **Products** shows how many products use the default weight, with a filter; the **order page** shows the box to pack it in.
+
 ### Added — Sprint 12.5 (message templates)
 - **Settings → Messages** (owners; `messages.manage`): every message customers receive — bookings (confirmed, reminder, moved, cancelled) and orders (placed and its updates) — with each channel's wording, a live preview, placeholder buttons and an SMS length/parts counter.
 - **Rewording email and SMS** (decision A; replaces the Sprint 8 fixed-wording agreement for these channels) within safety rails: known placeholders only, required ones (like the booking link) kept, plain text, SMS within two parts, a subject for emails; "Back to standard wording"; every change logged. Standard wording is unchanged until a business edits it.

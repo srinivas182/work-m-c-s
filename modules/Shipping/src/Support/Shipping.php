@@ -34,11 +34,11 @@ final readonly class Shipping implements Couriers
         return ['courier' => $this->account('bobgo', $branchId) !== null, 'pickup_points' => $pargo !== null, 'pickup_rate_cents' => $pargo?->flat_rate_cents];
     }
 
-    public function rates(?string $branchId, array $to, int $valueCents, float $weightKg): array
+    public function rates(?string $branchId, array $to, int $valueCents, float $weightKg, ?array $sizeCm = null): array
     {
         $account = $this->account('bobgo', $branchId) ?? throw new ShippingProblem('Courier delivery isn’t set up.');
 
-        return BobGo::rates($account, $this->from($branchId), $to, $valueCents, $weightKg);
+        return BobGo::rates($account, $this->from($branchId), $to, $valueCents, $weightKg, $sizeCm);
     }
 
     public function pickupPoints(?string $branchId, string $near): array

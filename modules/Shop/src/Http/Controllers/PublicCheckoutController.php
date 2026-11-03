@@ -25,6 +25,7 @@ use Wurk\Shop\Support\CheckoutProblem;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderPlacer;
+use Wurk\Shop\Support\ShopParcels;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -171,10 +172,10 @@ final class PublicCheckoutController
                 'near' => ['required_if:kind,points', 'nullable', 'string', 'max:200'],
             ]);
             $branch = app(BranchStock::class)->fulfilling('delivery', null);
-            [$value, $kg] = $this->parcel($data['lines'], $branch);
+            [$value, $parcel] = $this->parcel($data['lines'], $branch);
             try {
                 return new JsonResponse($data['kind'] === 'rates'
-                    ? ['rates' => app(Couriers::class)->rates($branch, ['street' => (string) $data['to']['street'], 'suburb' => $data['to']['suburb'] ?? null, 'city' => (string) $data['to']['city'], 'postal_code' => (string) $data['to']['postal_code']], $value, $kg)]
+                    ? ['rates' => app(Couriers::class)->rates($branch, ['street' => (string) $data['to']['street'], 'suburb' => $data['to']['suburb'] ?? null, 'city' => (string) $data['to']['city'], 'postal_code' => (string) $data['to']['postal_code']], $value, $parcel['weight_kg'], $parcel['size_cm'])]
                     : ['points' => app(Couriers::class)->pickupPoints($branch, (string) $data['near']), 'rate_cents' => app(Couriers::class)->options($branch)['pickup_rate_cents']]);
             } catch (ShippingProblem $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 422);
@@ -183,23 +184,23 @@ final class PublicCheckoutController
     }
 
     /**
-     * The parcel's value and weight (items count as config('shipping.item_kg') each until products have weights).
+     * The parcel's value, and the parcel itself (weights, sizes and the business's boxes — Sprint 12.6).
      *
      * @param  array<int, array{variant: string, quantity: int|string}>  $lines
-     * @return array{0: int, 1: float}
+     * @return array{0: int, 1: array{weight_kg: float, size_cm: array{length: float, width: float, height: float}|null, box: string|null, fits: bool}}
      */
     private function parcel(array $lines, string $branch): array
     {
         $variants = Variant::query()->whereIn('id', array_column($lines, 'variant'))->get()->keyBy('id');
         $value = 0;
-        $items = 0;
+        $quantities = [];
         foreach ($lines as $line) {
             if (($v = $variants[$line['variant']] ?? null) !== null) {
                 $value += app(BranchStock::class)->priceAt($v, $branch) * (int) $line['quantity'];
-                $items += (int) $line['quantity'];
+                $quantities[$v->id] = ($quantities[$v->id] ?? 0) + (int) $line['quantity'];
             }
         }
 
-        return [$value, max(0.1, $items * (float) config('shipping.item_kg', 0.5))];
+        return [$value, app(ShopParcels::class)->plan($quantities)];
     }
 }

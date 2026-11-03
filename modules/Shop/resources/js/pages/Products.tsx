@@ -25,6 +25,10 @@ interface VariantRow {
   compare_at_cents: number | null;
   stock: number | null;
   stock_at?: Record<string, number>; // several branches
+  weight_kg?: number | null;
+  length_cm?: number | null;
+  width_cm?: number | null;
+  height_cm?: number | null;
   prices?: Record<string, number | null>; // several branches: optional price there
 }
 interface ProductRow {
@@ -37,11 +41,17 @@ interface ProductRow {
   options: string[];
   photos: string[];
   variants: VariantRow[];
+  weight_kg: number | null;
+  length_cm: number | null;
+  width_cm: number | null;
+  height_cm: number | null;
 }
 interface Props {
   branches: { id: string; name: string }[];
   categories: { id: string; name: string }[];
   products: ProductRow[];
+  /** Courier delivery on: products using the default weight. */
+  missingWeights: number | null;
 }
 
 const base = () => window.location.pathname.replace(/\/products\/?$/, '');
@@ -54,6 +64,34 @@ const blankVariant = (options: string[]): VariantRow => ({
   compare_at_cents: null,
   stock: null,
 });
+
+/** A number in kg or cm; empty means “not set”. */
+function Measure({
+  label,
+  step,
+  value,
+  error,
+  onChange,
+}: {
+  label: string;
+  step: string;
+  value: number | null;
+  error?: string;
+  onChange: (n: number | null) => void;
+}) {
+  return (
+    <Field label={label} error={error}>
+      <Input
+        type="number"
+        inputMode="decimal"
+        min="0"
+        step={step}
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))}
+      />
+    </Field>
+  );
+}
 
 function Editor({
   product,
@@ -75,6 +113,10 @@ function Editor({
     options: product?.options ?? [],
     photos: product?.photos ?? [],
     variants: product?.variants.length ? product.variants : [blankVariant([])],
+    weight_kg: product?.weight_kg ?? null,
+    length_cm: product?.length_cm ?? null,
+    width_cm: product?.width_cm ?? null,
+    height_cm: product?.height_cm ?? null,
   });
   const errors = form.errors as Record<string, string | undefined>;
   const setOptions = (options: string[]) =>
@@ -168,6 +210,45 @@ function Editor({
               onChange={(e) => form.setData('description', e.target.value)}
             />
           </Field>
+          <fieldset className="grid gap-3">
+            <legend className="mb-1 text-sm font-medium">
+              Weight and size (for courier delivery)
+            </legend>
+            <p className="text-fg-muted text-sm">
+              Optional. Without a weight, delivery uses your default weight (Settings → Shipping);
+              sizes help choose the right box.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-4">
+              <Measure
+                label="Weight (kg)"
+                step="0.001"
+                value={form.data.weight_kg}
+                error={errors.weight_kg}
+                onChange={(n) => form.setData('weight_kg', n)}
+              />
+              <Measure
+                label="Length (cm)"
+                step="0.1"
+                value={form.data.length_cm}
+                error={errors.length_cm}
+                onChange={(n) => form.setData('length_cm', n)}
+              />
+              <Measure
+                label="Width (cm)"
+                step="0.1"
+                value={form.data.width_cm}
+                error={errors.width_cm}
+                onChange={(n) => form.setData('width_cm', n)}
+              />
+              <Measure
+                label="Height (cm)"
+                step="0.1"
+                value={form.data.height_cm}
+                error={errors.height_cm}
+                onChange={(n) => form.setData('height_cm', n)}
+              />
+            </div>
+          </fieldset>
           <fieldset className="grid gap-2">
             <legend className="mb-1 text-sm font-medium">Photos (the first is the main one)</legend>
             <PhotoPicker
@@ -275,6 +356,41 @@ function Editor({
                     onChange={(e) => setVariant(i, { sku: e.target.value })}
                   />
                 </Field>
+                {form.data.variants.length > 1 && (
+                  <fieldset className="grid gap-3 sm:col-span-2 sm:grid-cols-4">
+                    <legend className="text-sm font-medium">
+                      Own weight and size (optional — otherwise the product’s)
+                    </legend>
+                    <Measure
+                      label="Own weight (kg)"
+                      step="0.001"
+                      value={v.weight_kg ?? null}
+                      error={errors[`variants.${i}.weight_kg`]}
+                      onChange={(n) => setVariant(i, { weight_kg: n })}
+                    />
+                    <Measure
+                      label="Own length (cm)"
+                      step="0.1"
+                      value={v.length_cm ?? null}
+                      error={errors[`variants.${i}.length_cm`]}
+                      onChange={(n) => setVariant(i, { length_cm: n })}
+                    />
+                    <Measure
+                      label="Own width (cm)"
+                      step="0.1"
+                      value={v.width_cm ?? null}
+                      error={errors[`variants.${i}.width_cm`]}
+                      onChange={(n) => setVariant(i, { width_cm: n })}
+                    />
+                    <Measure
+                      label="Own height (cm)"
+                      step="0.1"
+                      value={v.height_cm ?? null}
+                      error={errors[`variants.${i}.height_cm`]}
+                      onChange={(n) => setVariant(i, { height_cm: n })}
+                    />
+                  </fieldset>
+                )}
                 {several ? (
                   <fieldset className="grid gap-2 sm:col-span-2">
                     <legend className="text-sm font-medium">Stock and price by branch</legend>
@@ -388,8 +504,12 @@ function Editor({
   );
 }
 
-export default function Products({ categories, products, branches }: Props) {
+export default function Products({ categories, products, branches, missingWeights }: Props) {
   const [editing, setEditing] = useState<ProductRow | 'new' | null>(null);
+  const [onlyMissing, setOnlyMissing] = useState(false);
+  const unweighed = (p: ProductRow) =>
+    p.weight_kg === null && p.variants.every((v) => (v.weight_kg ?? null) === null);
+  const shown = onlyMissing ? products.filter(unweighed) : products;
   const category = useForm({ name: '' });
   return (
     <AppShell title="Products">
@@ -410,6 +530,25 @@ export default function Products({ categories, products, branches }: Props) {
             onDone={() => setEditing(null)}
           />
         )}
+        {missingWeights !== null && missingWeights > 0 && !editing && (
+          <p className="border-border rounded-lg border p-3 text-sm" role="note">
+            {missingWeights === 1 ? '1 product uses' : `${missingWeights} products use`} your
+            default weight for courier delivery. Add real weights for accurate delivery prices — or
+            change the default in{' '}
+            <a className="underline" href={`${base().replace(/\/shop$/, '')}/settings/shipping`}>
+              Settings → Shipping
+            </a>
+            .{' '}
+            <button
+              type="button"
+              className="underline"
+              aria-pressed={onlyMissing}
+              onClick={() => setOnlyMissing(!onlyMissing)}
+            >
+              {onlyMissing ? 'Show all products' : 'Show them'}
+            </button>
+          </p>
+        )}
         {products.length === 0 && !editing ? (
           <EmptyState
             icon={Package}
@@ -418,7 +557,7 @@ export default function Products({ categories, products, branches }: Props) {
           />
         ) : (
           <ul className="grid gap-2" aria-label="Products">
-            {products.map((p) => {
+            {shown.map((p) => {
               const prices = p.variants.map((v) => v.price_cents);
               const tracked = p.variants.filter((v) => v.stock !== null);
               const stock = tracked.reduce((n, v) => n + (v.stock ?? 0), 0);

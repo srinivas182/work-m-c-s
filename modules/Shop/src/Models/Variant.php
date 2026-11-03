@@ -21,6 +21,10 @@ use Wurk\Tenancy\Contracts\TenantContext;
  * @property int|null $compare_at_cents
  * @property int|null $stock
  * @property int $position
+ * @property int|null $weight_g
+ * @property int|null $length_mm
+ * @property int|null $width_mm
+ * @property int|null $height_mm
  */
 final class Variant extends Model
 {

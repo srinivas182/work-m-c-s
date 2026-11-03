@@ -137,9 +137,10 @@ final readonly class OrderManager
         if ($order->shipping_provider === null || ! in_array($order->status, ['paid', 'packed'], true)) {
             throw new CheckoutProblem('Only a paid courier or pickup-point order can be shipped.');
         }
-        $kg = max(0.1, (int) OrderItem::query()->where('order_id', $order->id)->sum('quantity') * (float) config('shipping.item_kg', 0.5));
+        // The same parcel as at checkout (weights, sizes, the business's boxes).
+        $parcel = app(ShopParcels::class)->plan(OrderItem::query()->where('order_id', $order->id)->get()->groupBy('variant_id')->map(fn ($rows) => (int) $rows->sum('quantity'))->all());
         $details = ['provider' => $order->shipping_provider, 'service' => $order->shipping_service, 'pickup_point' => $order->pickup_point,
-            'name' => $order->customer_name, 'phone' => $order->customer_phone, 'email' => $order->customer_email, 'value_cents' => $order->subtotal_cents, 'weight_kg' => $kg];
+            'name' => $order->customer_name, 'phone' => $order->customer_phone, 'email' => $order->customer_email, 'value_cents' => $order->subtotal_cents, 'weight_kg' => $parcel['weight_kg'], 'size_cm' => $parcel['size_cm']];
         if ($order->shipping_provider === 'bobgo') {
             $details['to'] = $order->shipping_to ?? ['street' => (string) $order->delivery_address]; // the structured address given at checkout
         }

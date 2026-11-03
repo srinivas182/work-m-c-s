@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Shipping\Contracts\Couriers;
+use Wurk\Shipping\Contracts\ParcelPlanner;
+use Wurk\Shipping\Support\Parcels;
 use Wurk\Shipping\Support\Shipping;
 
 final class ShippingServiceProvider extends ModuleServiceProvider
@@ -16,6 +18,7 @@ final class ShippingServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         parent::register();
+        $this->app->bind(ParcelPlanner::class, Parcels::class);
         $this->mergeConfigFrom($this->modulePath('config/shipping.php'), 'shipping');
         $this->app->bind(Couriers::class, Shipping::class);
     }
