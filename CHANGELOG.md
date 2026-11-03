@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-11-03 — Sprint 12: CRM and messaging
+
+**Release steps** (docs/deployment/docker.md): run **ClamAV** next to WURK and set `CLAMAV_HOST`; after migrating, run `php artisan crm:link-existing` once.
+
 ### Added — Sprint 12.6 (product weights and parcel sizes)
 - **Weights and sizes** on products, in kg and cm (a variant can have its own); stored in grams and millimetres.
 - **Settings → Shipping → Parcels**: the default weight for items without one (starts at 0.5 kg — nothing changes until a business adds weights) and the boxes the business ships in.
@@ -56,6 +60,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - **Contacts** (Customers → Contacts; new Crm module, `contacts.view` / `contacts.manage`): one contact per person per business, matched by exact phone or email (South African numbers written one way), built automatically from bookings, class places and orders, with their branch. Search by name, number or email; tags and notes; a contact's history; merge (nothing deleted) and split (exact undo); CSV export (audited, not cached). Branch managers see their branches' contacts.
 - Marketing consent is recorded only when given, with where; patient records stay out of the CRM.
 - **Release step (v0.14.0):** `php artisan crm:link-existing` once after migrating — makes contacts of existing customers (safe to run again). See docs/deployment/docker.md.
+
+## [0.5.0 – 0.13.0] — Sprints 4–11
+
+These releases' entries were not moved under their own version headings at the time; each version's exact contents are in its GitHub release (v0.5.0 … v0.13.0). Grouped here, newest first:
 
 ### Added — Sprint 11.6 (shipping)
 - **Shipping** (new module; Settings → Shipping): the business's own **Bob Go** (courier delivery at live rates) and **Pargo** (pickup points, flat rate) accounts, for the business or a branch, test or live; credentials checked with the courier before saving. WURK never pays couriers.

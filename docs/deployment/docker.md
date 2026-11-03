@@ -44,6 +44,7 @@ Run these once, after `migrate`, when deploying the version shown (any other com
 
 | From version | Step | Why |
 |---|---|---|
+| v0.14.0 | Start ClamAV and set `CLAMAV_HOST` — see “Malware scanning (ClamAV)” below | **Before** the new version serves traffic: files visitors attach to forms are held until ClamAV scans them. |
 | v0.14.0 | `docker run --rm --env-file production.env wurk:<version> php artisan crm:link-existing` | Makes contacts of customers from before contacts existed (bookings, class places, orders). Safe to run again. |
 
 ## Required environment
