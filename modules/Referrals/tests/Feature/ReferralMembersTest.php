@@ -63,7 +63,6 @@ it('lists the business’s customers with their codes, links, referrer and how m
     });
     // Rewards on screen: Sipho buys R100 of items — Thandi's 5% shows as pending.
     ($this->in)($this->glow, function () {
-        $sipho = ReferralMember::query()->get()->first(fn ($m) => app(ContactBook::class)->names([$m->contact_id])[$m->contact_id] === 'Sipho');
         $order = (string) Str::ulid();
         app(ContactBook::class)->remember('Sipho', '082 000 0002', null, 'order', $order, null, 'Order');
         event(new PurchaseMade('order', $order, 10000, 10000, null));

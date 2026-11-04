@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 13.3 (commission)
+- **Rewards on purchases:** when a shop order is paid (card or EFT) or a booking or class deposit is paid online, the buyer earns their cashback and each referrer up the chain earns their level — on the items, not delivery; whole cents; within the package's current limits; once per purchase (resent payment notices can't pay twice).
+- **Pending, then available** after the return window (derived from dates). **Refunds reverse** in proportion — a full refund exactly — without editing anything (append-only ledger); a reversal reduces pending or available, matching the reward it cancels.
+- **Customers → Referrals** shows each customer's available and pending rewards. Shop and Bookings only announce purchases and refunds (CRM `PurchaseMade` / `PurchaseRefunded`); they know nothing about referrals.
+
 ### Added — Sprint 13.2 (referral links and attribution)
 - **Referral links** `{business}/r/CODE` (7-character codes, no look-alike characters): remember the referrer in a first-party cookie for the programme's link validity, and land on any page of the same site.
 - **Who referred whom:** when a referred visitor becomes a customer (booking, order, form, chat), the referrer is recorded — once (first referrer) or each time (last); self-referral, loops and other businesses' codes refused; logged. CRM now raises `ContactRemembered`.
