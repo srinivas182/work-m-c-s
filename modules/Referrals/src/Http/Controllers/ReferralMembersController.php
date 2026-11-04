@@ -9,6 +9,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
@@ -29,6 +30,10 @@ final class ReferralMembersController
         $names = $contacts->names(array_values(array_map('strval', [...$rows->pluck('contact_id')->all(), ...$referrers->pluck('contact_id')->all()])));
         $counts = ReferralMember::query()->whereIn('referrer_id', $rows->pluck('id'))->selectRaw('referrer_id, count(*) as n')->groupBy('referrer_id')->pluck('n', 'referrer_id');
         $handle = $context->current()->handle();
+        // Rewards per member on this page (one query): pending until their date, available after (net of reversals).
+        $sums = DB::connection($context->connectionName())->table('referral_ledger')->where('tenant_id', $context->id())->whereIn('member_id', $rows->pluck('id'))
+            ->selectRaw('member_id, sum(case when available_at > ? then cents else 0 end) as pending, sum(case when available_at <= ? then cents else 0 end) as available', [now(), now()])
+            ->groupBy('member_id')->get()->keyBy('member_id');
 
         return Inertia::render('Referrals::Members', [
             'enabled' => $rules->rules()['enabled'],
@@ -37,6 +42,7 @@ final class ReferralMembersController
                 'id' => $m->id, 'name' => $names[$m->contact_id] ?? 'Customer', 'code' => $m->code, 'link' => route('referrals.link', ['handle' => $handle, 'code' => $m->code]),
                 'referred_by' => $m->referrer_id === null ? null : ($names[$referrers[$m->referrer_id]->contact_id ?? ''] ?? 'Customer'),
                 'referred' => (int) ($counts[$m->id] ?? 0),
+                'pending_cents' => (int) ($sums[$m->id]->pending ?? 0), 'available_cents' => (int) ($sums[$m->id]->available ?? 0),
             ])->all(),
             'pages' => ['current' => $page->currentPage(), 'last' => $page->lastPage(), 'total' => $page->total()],
         ]);

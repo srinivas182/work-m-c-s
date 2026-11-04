@@ -14,6 +14,14 @@ final readonly class Contacts implements ContactBook
 {
     public function __construct(private TenantContext $context) {}
 
+    public function contactFor(string $sourceType, string $sourceId): ?string
+    {
+        $id = DB::connection($this->context->connectionName())->table('contact_links')
+            ->where('tenant_id', $this->context->id())->where('source_type', $sourceType)->where('source_id', $sourceId)->value('contact_id');
+
+        return $id === null ? null : (string) $id;
+    }
+
     /** @param  list<string>  $ids */
     public function names(array $ids): array
     {

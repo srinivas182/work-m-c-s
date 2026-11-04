@@ -8,6 +8,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
+use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -84,6 +85,7 @@ final readonly class CancellationPolicy
         $booking->update(['refunded_at' => Instant::db(now())]);
         $supplier = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id;
         app(BranchLedger::class)->record($this->payments->receivedBy($booking->payment_reference), $supplier, -$booking->deposit_cents, 'refund', $booking->payment_reference, 'Refund: '.$booking->customer_name);
+        event(new PurchaseRefunded($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $booking->deposit_cents)); // rewards on it are reversed
         $this->audit->record('bookings.deposit_refunded', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
 
         return true;

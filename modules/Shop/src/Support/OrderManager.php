@@ -7,6 +7,8 @@ namespace Wurk\Shop\Support;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Crm\Contracts\PurchaseMade;
+use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shipping\Contracts\ShippingProblem;
@@ -55,6 +57,7 @@ final readonly class OrderManager
         });
         if ($to === 'paid') {
             DB::table('shop_holds')->where('order_id', $order->id)->delete(); // the stock is theirs now
+            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents, $order->branch_id)); // rewards on the items, not delivery
             // Paid by EFT into the account whose details the customer was given (the branch's own, or the business's).
             app(BranchLedger::class)->record($this->payments->accountBranch('eft', $order->branch_id), $order->branch_id, $order->total_cents, 'order', 'shop-'.$order->id, "Order #{$order->number} (EFT)");
         }
@@ -78,6 +81,7 @@ final readonly class OrderManager
                 $order->update(['refunded_cents' => $order->total_cents]);
                 app(BranchLedger::class)->record($this->payments->receivedBy('shop-'.$order->id), $order->branch_id, -$order->total_cents, 'refund', 'shop-'.$order->id, "Order #{$order->number} cancelled");
                 $this->log($order, 'refunded', 'Payment provider', $order->total_cents);
+                event(new PurchaseRefunded('order', $order->id, $order->total_cents));
             }
         }
         event(new OrderStatusChanged($this->context->id(), $order->id, 'cancelled'));
@@ -117,6 +121,7 @@ final readonly class OrderManager
             $this->log($order, 'refunded', $by, $amount, $note ?? ($restock ? 'Stock returned' : null));
         });
         $this->audit->record('shop.order_refunded', 'order', $order->id, ['cents' => $amount, 'by' => $by]);
+        event(new PurchaseRefunded('order', $order->id, $amount));
         event(new OrderStatusChanged($this->context->id(), $order->id, 'refunded'));
     }
 
