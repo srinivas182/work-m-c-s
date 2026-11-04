@@ -10,6 +10,7 @@ use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -77,6 +78,12 @@ final readonly class CancellationPolicy
     /** Refund a paid deposit or class place; true if the payment provider accepted it. */
     public function refund(Booking|ClassAttendee $booking): bool
     {
+        $appointment = $booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at;
+        if (! app(RefundWindow::class)->open($appointment)) { // the return window, counted from the appointment
+            $this->audit->record('bookings.refund_window_closed', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, []);
+
+            return false;
+        }
         if ($booking->payment_reference === null || ! $this->payments->refund($booking->payment_reference)) {
             $this->audit->record('bookings.refund_failed', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, []);
 

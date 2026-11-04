@@ -5,16 +5,21 @@ declare(strict_types=1);
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Tests\Support\FakesYoco;
 use Tests\Support\InteractsWithShards;
+use Wurk\Audit\Models\AuditEvent;
 use Wurk\Bookings\Models\BookingHold;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
+use Wurk\Bookings\Support\CancellationPolicy;
 use Wurk\Bookings\Support\Deposits;
+use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
+use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 uses(InteractsWithShards::class, FakesYoco::class);
@@ -95,4 +100,32 @@ it('releases an unpaid hold after 15 minutes, and refunds a payment that arrives
     app(Deposits::class)->confirm($booking->payment_reference);
     ($this->in)(fn () => expect($booking->refresh()->status)->toBe('expired')->and($booking->refunded_at)->not->toBeNull());
     expect($this->yocoRefunds())->toBe(1);
+});
+
+it('counts the return window from the appointment: the deposit is final 14 days after it, and refunds close then', function () {
+    Event::fake([PurchaseMade::class]);
+    [$booking] = ($this->hold)();
+    event(new BusinessPaymentReceived($this->glow->id, $booking->payment_reference));
+    app(Deposits::class)->confirm($booking->payment_reference);
+    Event::assertDispatched(PurchaseMade::class, fn ($e) => $e->sourceType === 'booking' && $e->paidCents === 10000
+        && CarbonImmutable::instance($e->finalAt)->equalTo(CarbonImmutable::parse('2027-05-17 09:00', 'Africa/Johannesburg'))); // the appointment + 14 days
+
+    ($this->in)(function () use ($booking) {
+        $this->travelTo(CarbonImmutable::parse('2027-05-17 09:01', 'Africa/Johannesburg'));
+        expect(app(CancellationPolicy::class)->refund($booking->refresh()))->toBeFalse()
+            ->and($booking->refresh()->refunded_at)->toBeNull()
+            ->and(AuditEvent::query()->where('action', 'bookings.refund_window_closed')->count())->toBe(1);
+        $this->travelTo(CarbonImmutable::parse('2027-05-17 08:59', 'Africa/Johannesburg'));
+        expect(app(CancellationPolicy::class)->refund($booking->refresh()))->toBeTrue(); // still open
+    });
+});
+
+it('gives no deposit refunds when the business gives no refunds (0 days)', function () {
+    [$booking] = ($this->hold)();
+    event(new BusinessPaymentReceived($this->glow->id, $booking->payment_reference));
+    app(Deposits::class)->confirm($booking->payment_reference);
+    ($this->in)(function () use ($booking) {
+        app(ReturnWindow::class)->set(0);
+        expect(app(CancellationPolicy::class)->refund($booking->refresh()))->toBeFalse();
+    });
 });

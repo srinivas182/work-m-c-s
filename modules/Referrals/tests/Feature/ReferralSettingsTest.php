@@ -38,7 +38,7 @@ beforeEach(function () {
     };
     $this->glow = $this->createTenant('glow-salon');
     $this->kasi = $this->createTenant('kasi-threads');
-    $this->rules = ['enabled' => true, 'self_bp' => 200, 'level_bp' => [500, 200], 'attribution' => 'first', 'link_days' => 30, 'return_days' => 14];
+    $this->rules = ['enabled' => true, 'self_bp' => 200, 'level_bp' => [500, 200], 'attribution' => 'first', 'link_days' => 30];
 });
 
 it('is only there for packages with the referral programme', function () {
@@ -52,7 +52,7 @@ it('starts off, saves rules within the package’s guardrails (logged), and refu
     $o = ($this->owner)($this->glow);
     $url = $this->app('/glow-salon/settings/referrals');
     $this->actingAs($o)->get($url)->assertInertia(fn (Assert $p) => $p->component('Referrals::Settings')
-        ->where('rules', ['enabled' => false, 'self_bp' => 0, 'level_bp' => [], 'attribution' => 'first', 'link_days' => 30, 'return_days' => 14])
+        ->where('rules', ['enabled' => false, 'self_bp' => 0, 'level_bp' => [], 'attribution' => 'first', 'link_days' => 30])
         ->where('limits', ['max_levels' => 3, 'max_bp' => 1500]));
 
     $this->actingAs($o)->put($url, $this->rules)->assertSessionHas('status', 'Referral programme saved — it’s on.');

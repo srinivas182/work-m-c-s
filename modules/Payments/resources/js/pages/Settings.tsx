@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { Head } from '@inertiajs/react';
-import { PageHeader } from '@/design-system';
+import { Head, useForm } from '@inertiajs/react';
+import { Button, Field, Input, PageHeader } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { type Method, MethodCard } from '../components/MethodCard';
 
 export default function PaymentSettings({
   methods,
   branches,
+  refundDays,
 }: {
   methods: Method[];
   branches: { id: string; name: string }[];
+  refundDays: number;
 }) {
   const base = window.location.pathname.replace(/\/$/, '');
   const [branch, setBranch] = useState<string>('');
@@ -48,7 +50,52 @@ export default function PaymentSettings({
         {methods.map((m) => (
           <MethodCard key={`${m.provider}-${branch}`} m={m} base={base} branch={branch || null} />
         ))}
+        <RefundWindowCard days={refundDays} base={base} />
       </div>
     </AppShell>
+  );
+}
+
+/** Refunds and returns: WURK refuses refunds once this closes; referral rewards become available when it does. */
+function RefundWindowCard({ days, base }: { days: number; base: string }) {
+  const form = useForm<{ days: number | '' }>({ days });
+  return (
+    <section
+      aria-labelledby="refunds-title"
+      className="border-border grid gap-3 rounded-lg border p-4"
+    >
+      <h2 id="refunds-title" className="text-lg font-semibold">
+        Refunds and returns
+      </h2>
+      <p className="text-fg-muted text-sm">
+        How long after payment you accept refunds (for bookings: after the appointment). After this,
+        refunds can’t be made in WURK, and referral rewards become available to spend. Use 0 for no
+        refunds — rewards are then available straight away.
+      </p>
+      <form
+        aria-label="Refunds and returns"
+        className="flex flex-wrap items-end gap-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.put(`${base}/refunds`, { preserveScroll: true });
+        }}
+      >
+        <Field label="Refunds accepted for (days)" error={form.errors.days}>
+          <Input
+            type="number"
+            inputMode="numeric"
+            min="0"
+            max="365"
+            value={form.data.days}
+            onChange={(e) =>
+              form.setData('days', e.target.value === '' ? '' : Number(e.target.value))
+            }
+          />
+        </Field>
+        <Button type="submit" loading={form.processing}>
+          Save
+        </Button>
+      </form>
+    </section>
   );
 }

@@ -49,10 +49,19 @@
 | B | Customers sign in by **one-time code**, or — if the business chooses — with a **default password they must change** (as the PRD words it), with the safeguards in 13.6. |
 | C | Wallet spending at **shop checkout and online booking payments**, within the business's max % rule. |
 
+## Decisions for 13.4 (WURK, 4 Nov 2026)
+
+| # | Decision |
+|---|---|
+| D | **No refunds after the return window closes.** The window is the business's own ("Refunds and returns: N days", Settings → Payments; default 14; 0 = no refunds) and applies whether or not it runs referrals. Orders count from payment; bookings and class deposits from the appointment (refunds there follow the cancellation policy, before the appointment). Referral rewards become available when it closes — so a refund can never touch an available reward, wallets never go negative and nobody owes money back. A refund made directly in a payment provider's dashboard can't be stopped by WURK; rewards stay final. With 0 days, deposits aren't refunded on cancellation either. |
+| E | **Rewards on the full order**, including any part paid from the wallet. |
+| F | **Refunds of orders paid partly from the wallet:** the wallet part back to the wallet; the rest back to the card or account. |
+
 ## Progress
 
 | Part | PR | Notes |
 |---|---|---|
 | 13.1 Programme rules | #117 | New Referrals module. 1,240 backend tests on SQLite; Referrals on MySQL 8; 390 frontend. The browser test runs in CI only (no local test browser after the sandbox reset). |
 | 13.2 Links and attribution | #118 | Links are `{business}/r/CODE` (shorter for SMS/QR; can land on any page) rather than `?ref=` on any page. 1,244 backend tests on SQLite; Referrals and CRM on MySQL 8. Browser tests in CI only. |
-| 13.3 Commission | see PR | Found and fixed: a refund of a still-pending reward reduced *available* (and could go negative) — reversals now carry the cancelled reward's date. Open for 13.4/13.7: a refund after a reward was paid out or spent. 1,249 backend tests on SQLite; referrals and the end-to-end test on MySQL 8. Browser tests in CI only. |
+| 13.3 Commission | #119 | Found and fixed: a refund of a still-pending reward reduced *available* (and could go negative) — reversals now carry the cancelled reward's date. Open for 13.4/13.7: a refund after a reward was paid out or spent. 1,249 backend tests on SQLite; referrals and the end-to-end test on MySQL 8. Browser tests in CI only. |
+| 13.4a Return window | see PR | Decision D. The programme's own return-days setting moved to Payments (business-wide). 0 days also stops deposit refunds on cancellation (noted on the setting). |

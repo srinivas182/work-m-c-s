@@ -21,7 +21,7 @@ beforeEach(function () {
     $this->kasi = $this->createTenant('kasi-threads');
     $this->ctx = app(TenantContext::class);
     $this->in = fn ($t, callable $fn) => $this->ctx->run($t, $fn);
-    $this->on = fn ($t, string $attribution = 'first') => ($this->in)($t, fn () => ReferralProgramme::query()->updateOrCreate([], ['enabled' => true, 'self_bp' => 200, 'level_bp' => [500], 'attribution' => $attribution, 'link_days' => 30, 'return_days' => 14]));
+    $this->on = fn ($t, string $attribution = 'first') => ($this->in)($t, fn () => ReferralProgramme::query()->updateOrCreate([], ['enabled' => true, 'self_bp' => 200, 'level_bp' => [500], 'attribution' => $attribution, 'link_days' => 30]));
     // A customer remembered (as from a booking, order, form or chat), with an optional referral code in the request.
     $this->customer = fn ($t, string $name, string $phone, ?string $code = null) => ($this->in)($t, function () use ($name, $phone, $code) {
         $id = app(ContactBook::class)->remember($name, $phone, null, 'test', (string) Str::ulid(), null, 'Test');

@@ -10,6 +10,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Models\Order;
@@ -57,7 +58,7 @@ final readonly class OrderManager
         });
         if ($to === 'paid') {
             DB::table('shop_holds')->where('order_id', $order->id)->delete(); // the stock is theirs now
-            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents, $order->branch_id)); // rewards on the items, not delivery
+            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents, $order->branch_id, app(RefundWindow::class)->finalAt($order->paid_at ?? now()))); // rewards on the items, not delivery
             // Paid by EFT into the account whose details the customer was given (the branch's own, or the business's).
             app(BranchLedger::class)->record($this->payments->accountBranch('eft', $order->branch_id), $order->branch_id, $order->total_cents, 'order', 'shop-'.$order->id, "Order #{$order->number} (EFT)");
         }
@@ -68,6 +69,9 @@ final readonly class OrderManager
     /** Cancel before it leaves: the stock goes back, and a card payment is refunded in full. */
     public function cancel(Order $order, string $by, ?string $reason = null): bool
     {
+        if ($order->paid_at !== null) {
+            $this->refundsStillOpen($order); // cancelling a paid order refunds it
+        }
         if (! in_array($order->status, self::CANCELLABLE, true)) {
             throw new CheckoutProblem('This order has already left — refund it instead.');
         }
@@ -95,6 +99,7 @@ final readonly class OrderManager
      */
     public function refund(Order $order, ?int $cents, bool $restock, string $by, ?string $note = null): void
     {
+        $this->refundsStillOpen($order);
         if (in_array($order->status, ['awaiting_payment', 'expired'], true) || ($order->status === 'cancelled' && $order->refunded_cents >= $order->total_cents)) {
             throw new CheckoutProblem('Nothing has been paid to refund.');
         }
@@ -158,5 +163,16 @@ final readonly class OrderManager
         $this->advance($order->refresh(), 'out_for_delivery', $by);
 
         return $order->refresh();
+    }
+
+    /** The business's return window: no refunds in WURK once it has closed (counted from payment). */
+    private function refundsStillOpen(Order $order): void
+    {
+        $window = app(RefundWindow::class);
+        if ($order->paid_at !== null && ! $window->open($order->paid_at)) {
+            throw new CheckoutProblem($window->days() === 0
+                ? 'This business doesn’t give refunds.'
+                : 'Refunds for this order closed on '.$window->finalAt($order->paid_at)->setTimezone($this->context->current()->timezone())->format('j M Y').' ('.$window->days().' days after payment).');
+        }
     }
 }

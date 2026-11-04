@@ -155,10 +155,24 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   // Payment methods: what businesses may offer, and WURK's own accounts.
   await page.goto(`${admin}/payment-methods`);
   await expect(page.getByRole('heading', { level: 1, name: 'Payment methods' })).toBeVisible();
-  await page.getByLabel('Businesses may offer Ozow').click();
-  await expect(page.getByText('Ozow is switched off for every business.')).toBeVisible();
-  await page.getByLabel('Businesses may offer Ozow').click();
-  await expect(page.getByText('Ozow can be offered by businesses.')).toBeVisible();
+  // The switch is WURK-wide and the desktop and phone runs can overlap (fullyParallel): only one run flips it,
+  // starting from whatever state it's in, so neither undoes the other's click.
+  if (testInfo.project.name === 'desktop') {
+    const ozow = page.getByLabel('Businesses may offer Ozow');
+    const was = await ozow.isChecked();
+    await ozow.click();
+    await expect(
+      page.getByText(
+        was ? 'Ozow is switched off for every business.' : 'Ozow can be offered by businesses.',
+      ),
+    ).toBeVisible();
+    await ozow.click();
+    await expect(
+      page.getByText(
+        was ? 'Ozow can be offered by businesses.' : 'Ozow is switched off for every business.',
+      ),
+    ).toBeVisible();
+  }
   // WURK's settings are shared by the desktop and phone runs (central data): add or change, whichever applies.
   await page.getByRole('button', { name: /^(Add|Change) bank details$/ }).click();
   const eft = page.getByRole('form', { name: 'EFT / bank transfer live keys' });

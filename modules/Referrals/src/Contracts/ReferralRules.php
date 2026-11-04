@@ -8,7 +8,7 @@ namespace Wurk\Referrals\Contracts;
 interface ReferralRules
 {
     /**
-     * @return array{enabled: bool, self_bp: int, level_bp: list<int>, attribution: string, link_days: int, return_days: int}
+     * @return array{enabled: bool, self_bp: int, level_bp: list<int>, attribution: string, link_days: int}
      */
     public function rules(): array;
 

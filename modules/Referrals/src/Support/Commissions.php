@@ -22,7 +22,7 @@ final readonly class Commissions
 {
     public function __construct(private TenantContext $context, private ReferralRules $rules, private ContactBook $contacts, private Attribution $attribution, private AuditLog $audit) {}
 
-    public function purchase(string $sourceType, string $sourceId, int $paidCents, int $commissionableCents, ?string $branchId): void
+    public function purchase(string $sourceType, string $sourceId, int $paidCents, int $commissionableCents, ?string $branchId, \DateTimeInterface $finalAt): void
     {
         $rules = $this->rules->rules();
         $contact = $this->contacts->contactFor($sourceType, $sourceId);
@@ -31,7 +31,7 @@ final readonly class Commissions
         }
         $db = $this->db();
         $tenant = $this->context->id();
-        $db->transaction(function () use ($db, $tenant, $rules, $contact, $sourceType, $sourceId, $paidCents, $commissionableCents, $branchId): void {
+        $db->transaction(function () use ($db, $tenant, $rules, $contact, $sourceType, $sourceId, $paidCents, $commissionableCents, $branchId, $finalAt): void {
             if ($db->table('referral_purchases')->where('tenant_id', $tenant)->where('source_type', $sourceType)->where('source_id', $sourceId)->lockForUpdate()->exists()) {
                 return; // already rewarded (e.g. a resent payment notice)
             }
@@ -39,7 +39,7 @@ final readonly class Commissions
             $purchaseId = (string) Str::ulid();
             $db->table('referral_purchases')->insert(['tenant_id' => $tenant, 'source_type' => $sourceType, 'source_id' => $sourceId, 'id' => $purchaseId, 'member_id' => $buyer->id, 'paid_cents' => $paidCents,
                 'commissionable_cents' => $commissionableCents, 'branch_id' => $branchId, 'occurred_at' => now()]);
-            $available = now()->addDays($rules['return_days']);
+            $available = $finalAt; // the business's return window, counted by the seller (WURK's decision: no refunds after it)
             $limits = $this->rules->limits(); // today's package limits apply (a downgrade takes effect)
             $budget = $limits['max_bp'];
             $earners = [[0, $buyer, $rules['self_bp']]];
