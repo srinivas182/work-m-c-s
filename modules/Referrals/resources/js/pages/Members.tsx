@@ -11,7 +11,12 @@ interface Member {
   link: string;
   referred_by: string | null;
   referred: number;
+  pending_cents: number;
+  available_cents: number;
 }
+
+const rand = (cents: number) =>
+  `R${(cents / 100).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 interface Props {
   enabled: boolean;
   code: string;
@@ -85,6 +90,9 @@ export default function ReferralMembers({ enabled, code, members, pages }: Props
                     Code <span className="font-mono">{m.code}</span> ·{' '}
                     {m.referred === 1 ? '1 person referred' : `${m.referred} people referred`}
                     {m.referred_by ? ` · referred by ${m.referred_by}` : ''}
+                  </span>
+                  <span>
+                    Rewards: {rand(m.available_cents)} available · {rand(m.pending_cents)} pending
                   </span>
                   <span className="text-fg-muted break-all">{m.link}</span>
                 </div>

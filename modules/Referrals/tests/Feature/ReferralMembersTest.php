@@ -8,6 +8,7 @@ use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -60,7 +61,15 @@ it('lists the business’s customers with their codes, links, referrer and how m
             ->and($rows['Thandi']['referred'])->toBe(2)->and($rows['Sipho']['referred_by'])->toBe('Thandi')
             ->and($rows['Thandi']['link'])->toBe('http://glow-salon.'.config('wurk.domains.root').'/r/'.$thandi->code);
     });
-    $this->actingAs($this->owner)->get($this->url.'?code='.substr($thandi->code, 0, 4))->assertInertia(fn (Assert $p) => $p->where('members.0.name', 'Thandi'));
+    // Rewards on screen: Sipho buys R100 of items — Thandi's 5% shows as pending.
+    ($this->in)($this->glow, function () {
+        $sipho = ReferralMember::query()->get()->first(fn ($m) => app(ContactBook::class)->names([$m->contact_id])[$m->contact_id] === 'Sipho');
+        $order = (string) Str::ulid();
+        app(ContactBook::class)->remember('Sipho', '082 000 0002', null, 'order', $order, null, 'Order');
+        event(new PurchaseMade('order', $order, 10000, 10000, null));
+    });
+    $this->actingAs($this->owner)->get($this->url.'?code='.substr($thandi->code, 0, 4))->assertInertia(fn (Assert $p) => $p->where('members.0.name', 'Thandi')
+        ->where('members.0.pending_cents', 500)->where('members.0.available_cents', 0));
 
     $qr = $this->actingAs($this->owner)->get("{$this->url}/{$thandi->id}/qr.svg")->assertOk()->assertHeader('Content-Type', 'image/svg+xml');
     expect((string) $qr->getContent())->toStartWith('<?xml')->toContain('<svg');
