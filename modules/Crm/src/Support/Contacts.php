@@ -6,12 +6,19 @@ namespace Wurk\Crm\Support;
 
 use Illuminate\Support\Facades\DB;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\ContactRemembered;
 use Wurk\Crm\Models\Contact;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 final readonly class Contacts implements ContactBook
 {
     public function __construct(private TenantContext $context) {}
+
+    /** @param  list<string>  $ids */
+    public function names(array $ids): array
+    {
+        return Contact::query()->whereIn('id', $ids)->pluck('name', 'id')->map(fn ($n) => (string) $n)->all();
+    }
 
     public function remember(string $name, ?string $phone, ?string $email, string $sourceType, string $sourceId, ?string $branchId, string $summary, ?string $consentSource = null): string
     {
@@ -21,6 +28,7 @@ final readonly class Contacts implements ContactBook
 
         return $db->transaction(function () use ($db, $name, $phone, $email, $sourceType, $sourceId, $branchId, $summary, $consentSource): string {
             $contact = $this->match($phone, $email);
+            $created = $contact === null;
             if ($contact === null) {
                 $contact = Contact::query()->create(['name' => trim($name) ?: 'Customer', 'phone' => $phone, 'email' => $email]);
             } else { // fill in what was missing; a name, number or email already known is kept
@@ -35,6 +43,7 @@ final readonly class Contacts implements ContactBook
             $db->table('contact_links')->where($link)->exists()
                 ? $db->table('contact_links')->where($link)->update($row) // already linked: keep its contact and history
                 : $db->table('contact_links')->insert([...$link, ...$row, 'contact_id' => $contact->id, 'original_contact_id' => $contact->id, 'occurred_at' => now()]);
+            event(new ContactRemembered($contact->id, $created, $sourceType, $sourceId)); // e.g. referral attribution (Sprint 13.2)
 
             return $contact->id;
         });

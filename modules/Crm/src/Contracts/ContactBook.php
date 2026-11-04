@@ -12,4 +12,12 @@ interface ContactBook
      * (phones normalised), else a new contact. Returns the contact's id. Marketing consent is recorded only when given.
      */
     public function remember(string $name, ?string $phone, ?string $email, string $sourceType, string $sourceId, ?string $branchId, string $summary, ?string $consentSource = null): string;
+
+    /**
+     * Contacts' names, by id (for other modules' screens).
+     *
+     * @param  list<string>  $ids
+     * @return array<string, string>
+     */
+    public function names(array $ids): array;
 }

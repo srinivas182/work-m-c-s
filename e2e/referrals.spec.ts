@@ -37,4 +37,10 @@ test('an owner sets up the referral programme within the package’s limits', as
   await expect(page.getByLabel('Level 1 — someone they referred (%)')).toHaveValue('5');
   await expect(page.getByRole('checkbox', { name: 'Run a referral programme' })).toBeChecked();
   await expectAccessible(page);
+
+  // Customers → Referrals: nobody in the programme yet for this new business.
+  await page.goto(`/${handle}/referrals`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Referrals' })).toBeVisible();
+  await expect(page.getByRole('search', { name: 'Find a customer by code' })).toBeVisible();
+  await expectAccessible(page);
 });
