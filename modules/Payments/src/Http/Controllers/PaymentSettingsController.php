@@ -16,6 +16,7 @@ use Wurk\Payments\Gateways\Yoco;
 use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Support\KeyFields;
 use Wurk\Payments\Support\PlatformMethods;
+use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -34,6 +35,7 @@ final class PaymentSettingsController
         $branches = app(BranchDirectory::class)->open();
 
         return Inertia::render('Payments::Settings', [
+            'refundDays' => app(ReturnWindow::class)->days(),
             'methods' => array_map(fn (string $p) => [
                 'provider' => $p, 'name' => PlatformMethods::NAMES[$p], 'allowed' => $this->platform->available($p),
                 'account' => $summary($all->first(fn (PaymentAccount $a) => $a->provider === $p && $a->branch_id === null)),
@@ -122,5 +124,17 @@ final class PaymentSettingsController
     {
         return PaymentAccount::query()->where('provider', $provider)
             ->when($branch === null, fn ($q) => $q->whereNull('branch_id'), fn ($q) => $q->where('branch_id', $branch))->first();
+    }
+
+    /** Refunds and returns: N days (0 = no refunds). Also when referral rewards become available. */
+    public function refunds(Request $request): RedirectResponse
+    {
+        $days = (int) $request->validate(['days' => ['required', 'integer', 'min:0', 'max:365']], [
+            'days.max' => 'Up to a year (365 days).', 'days.min' => 'Use 0 for no refunds.',
+        ])['days'];
+        app(ReturnWindow::class)->set($days);
+        app(AuditLog::class)->record('payments.refund_window', 'payment_preferences', 'refund_days', ['days' => $days]);
+
+        return back()->with('status', $days === 0 ? 'Saved — no refunds.' : "Saved — refunds and returns within {$days} days.");
     }
 }

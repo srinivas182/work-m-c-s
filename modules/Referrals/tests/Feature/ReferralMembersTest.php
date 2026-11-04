@@ -33,7 +33,7 @@ beforeEach(function () {
             'referral_max_commission_bp' => 1500, 'managed_fee_cents' => null, 'modules' => ['website', 'referrals'],
         ], null);
         app(Catalog::class)->subscribe($t->id, $p->id, 'monthly', allowTrial: true);
-        ($this->in)($t, fn () => ReferralProgramme::query()->create(['enabled' => true, 'self_bp' => 200, 'level_bp' => [500], 'attribution' => 'first', 'link_days' => 30, 'return_days' => 14]));
+        ($this->in)($t, fn () => ReferralProgramme::query()->create(['enabled' => true, 'self_bp' => 200, 'level_bp' => [500], 'attribution' => 'first', 'link_days' => 30]));
     }
     app(Entitlements::class)->flush();
     $this->owner = $this->person();
@@ -65,7 +65,7 @@ it('lists the business’s customers with their codes, links, referrer and how m
     ($this->in)($this->glow, function () {
         $order = (string) Str::ulid();
         app(ContactBook::class)->remember('Sipho', '082 000 0002', null, 'order', $order, null, 'Order');
-        event(new PurchaseMade('order', $order, 10000, 10000, null));
+        event(new PurchaseMade('order', $order, 10000, 10000, null, now()->addDays(14)));
     });
     $this->actingAs($this->owner)->get($this->url.'?code='.substr($thandi->code, 0, 4))->assertInertia(fn (Assert $p) => $p->where('members.0.name', 'Thandi')
         ->where('members.0.pending_cents', 500)->where('members.0.available_cents', 0));

@@ -28,7 +28,7 @@ final class ReferralsServiceProvider extends ModuleServiceProvider
         // A customer remembered (booking, order, form, chat, sale): record who referred them, from the referral cookie.
         Event::listen(ContactRemembered::class, fn (ContactRemembered $e) => app(Attribution::class)->attach($e->contactId, app(Attribution::class)->codeFromRequest()));
         // A purchase confirmed (order, deposit, sale): rewards for the buyer and their referrers; a refund reverses them.
-        Event::listen(PurchaseMade::class, fn (PurchaseMade $e) => app(Commissions::class)->purchase($e->sourceType, $e->sourceId, $e->paidCents, $e->commissionableCents, $e->branchId));
+        Event::listen(PurchaseMade::class, fn (PurchaseMade $e) => app(Commissions::class)->purchase($e->sourceType, $e->sourceId, $e->paidCents, $e->commissionableCents, $e->branchId, $e->finalAt));
         Event::listen(PurchaseRefunded::class, fn (PurchaseRefunded $e) => app(Commissions::class)->refund($e->sourceType, $e->sourceId, $e->refundedCents));
     }
 

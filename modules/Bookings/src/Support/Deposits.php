@@ -14,6 +14,7 @@ use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -117,7 +118,8 @@ final readonly class Deposits
                 $booking instanceof ClassAttendee ? 'class' : 'deposit', $reference, $booking instanceof ClassAttendee ? 'Class place: '.$booking->session()->title : 'Booking deposit: '.$booking->customer_name);
             $this->audit->record('bookings.deposit_paid', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
             event($booking instanceof ClassAttendee ? new ClassJoined($this->context->id(), $booking->id) : new BookingConfirmed($this->context->id(), $booking->id));
-            event(new PurchaseMade($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $booking->deposit_cents, $booking->deposit_cents, $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id));
+            event(new PurchaseMade($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $booking->deposit_cents, $booking->deposit_cents, $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id,
+                app(RefundWindow::class)->finalAt($booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at))); // final: the appointment + the window
 
             return $booking->refresh();
         });

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Mail;
 use Tests\Support\InteractsWithShards;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -43,7 +44,7 @@ beforeEach(function () {
     [$this->tee, $this->thandi] = ($this->in)(function () {
         ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'collection_address' => '12 Vilakazi St, Soweto']);
         app(BusinessPayments::class)->setUpEft("FNB Kasi Threads\nAccount 6200 0000 000, branch 250655");
-        ReferralProgramme::query()->create(['enabled' => true, 'self_bp' => 200, 'level_bp' => [1000], 'attribution' => 'first', 'link_days' => 30, 'return_days' => 14]);
+        ReferralProgramme::query()->create(['enabled' => true, 'self_bp' => 200, 'level_bp' => [1000], 'attribution' => 'first', 'link_days' => 30]);
         $tee = Product::query()->create(['name' => 'Kasi T-shirt', 'slug' => 'kasi-t-shirt', 'status' => 'published', 'options' => []]);
         $thandi = app(ContactBook::class)->remember('Thandi', '082 000 0001', null, 'test', 'seed', null, 'Seed');
 
@@ -73,4 +74,14 @@ it('rewards the buyer and the person who referred them when a real order is paid
         app(OrderManager::class)->refund($order->refresh(), 25000, true, 'Thabo', 'One returned'); // half
         expect(app(Commissions::class)->balance($this->thandi->id)['pending'])->toBe(2500);
     });
+});
+
+it('makes rewards available when the business’s own return window ends', function () {
+    ($this->in)(fn () => app(ReturnWindow::class)->set(7));
+    $this->postJson("{$this->site}/cart/checkout", ['lines' => [['variant' => $this->tee->id, 'quantity' => 1]], 'name' => 'Thandi', 'phone' => '082 000 0001', 'fulfilment' => 'collection', 'consent' => '1'])->assertCreated();
+    ($this->in)(fn () => app(OrderManager::class)->advance(Order::query()->sole(), 'paid', 'Thabo'));
+    $this->travel(6)->days();
+    expect(($this->in)(fn () => app(Commissions::class)->balance($this->thandi->id)))->toBe(['pending' => 500, 'available' => 0]); // 2% of R250, still refundable
+    $this->travel(2)->days();
+    expect(($this->in)(fn () => app(Commissions::class)->balance($this->thandi->id)))->toBe(['pending' => 0, 'available' => 500]); // the window has closed
 });

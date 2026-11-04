@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\PlatformPayments;
+use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Support\Payments;
+use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Payments\Support\WurkPayments;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
@@ -18,6 +20,7 @@ final class PaymentsServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         parent::register();
+        $this->app->bind(RefundWindow::class, ReturnWindow::class);
         $this->mergeConfigFrom($this->modulePath('config/payments.php'), 'payments');
         $this->app->bind(BusinessPayments::class, Payments::class);
         $this->app->bind(PlatformPayments::class, WurkPayments::class);

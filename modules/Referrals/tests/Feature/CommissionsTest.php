@@ -37,7 +37,7 @@ beforeEach(function () {
         app(Entitlements::class)->flush();
     };
     ($this->package)($this->glow, 3, 1500);
-    ($this->in)($this->glow, fn () => ReferralProgramme::query()->create(['enabled' => true, 'self_bp' => 200, 'level_bp' => [500, 300, 100], 'attribution' => 'first', 'link_days' => 30, 'return_days' => 14]));
+    ($this->in)($this->glow, fn () => ReferralProgramme::query()->create(['enabled' => true, 'self_bp' => 200, 'level_bp' => [500, 300, 100], 'attribution' => 'first', 'link_days' => 30]));
     $this->customer = fn (string $name, string $phone, ?ReferralMember $by = null) => ($this->in)($this->glow, function () use ($name, $phone, $by) {
         $id = app(ContactBook::class)->remember($name, $phone, null, 'test', (string) Str::ulid(), null, 'Test');
         app(Attribution::class)->attach($id, $by?->code);
@@ -51,7 +51,7 @@ beforeEach(function () {
     $this->d = ($this->customer)('Dineo', '082 000 0004', $this->c);
     $this->orderId = (string) Str::ulid();
     ($this->in)($this->glow, fn () => app(ContactBook::class)->remember('Dineo', '082 000 0004', null, 'order', $this->orderId, null, 'Order'));
-    $this->buy = fn (int $paid = 109999, int $items = 99999) => ($this->in)($this->glow, fn () => event(new PurchaseMade('order', $this->orderId, $paid, $items, null)));
+    $this->buy = fn (int $paid = 109999, int $items = 99999) => ($this->in)($this->glow, fn () => event(new PurchaseMade('order', $this->orderId, $paid, $items, null, now()->addDays(14))));
     $this->balance = fn (ReferralMember $m) => ($this->in)($this->glow, fn () => app(Commissions::class)->balance($m->id));
 });
 
@@ -85,11 +85,11 @@ it('applies the package’s current limits, and does nothing when the programme 
         ->and(($this->balance)($this->b)['pending'])->toBe(0)      // nothing left in the budget
         ->and(($this->balance)($this->a)['pending'])->toBe(0);     // beyond 2 levels
 
-    ($this->in)($this->glow, fn () => event(new PurchaseMade('order', (string) Str::ulid(), 50000, 50000, null))); // not linked to a customer
+    ($this->in)($this->glow, fn () => event(new PurchaseMade('order', (string) Str::ulid(), 50000, 50000, null, now()->addDays(14)))); // not linked to a customer
     ($this->in)($this->glow, fn () => ReferralProgramme::query()->update(['enabled' => false]));
     $other = (string) Str::ulid();
     ($this->in)($this->glow, fn () => app(ContactBook::class)->remember('Dineo', '082 000 0004', null, 'order', $other, null, 'Order'));
-    ($this->in)($this->glow, fn () => event(new PurchaseMade('order', $other, 50000, 50000, null)));
+    ($this->in)($this->glow, fn () => event(new PurchaseMade('order', $other, 50000, 50000, null, now()->addDays(14))));
     expect(($this->balance)($this->d)['pending'])->toBe(1999); // unchanged
     expect(($this->in)($this->kasi, fn () => DB::connection($this->ctx->connectionName())->table('referral_ledger')->where('tenant_id', $this->ctx->id())->count()))->toBe(0);
 });

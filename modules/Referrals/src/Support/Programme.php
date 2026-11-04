@@ -19,7 +19,7 @@ final readonly class Programme implements ReferralRules
 
         return [
             'enabled' => $p !== null && $p->enabled, 'self_bp' => $p === null ? 0 : $p->self_bp, 'level_bp' => $p === null ? [] : array_values(array_map('intval', $p->level_bp)),
-            'attribution' => $p === null ? 'first' : $p->attribution, 'link_days' => $p === null ? 30 : $p->link_days, 'return_days' => $p === null ? 14 : $p->return_days,
+            'attribution' => $p === null ? 'first' : $p->attribution, 'link_days' => $p === null ? 30 : $p->link_days,
         ];
     }
 

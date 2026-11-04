@@ -19,18 +19,18 @@ interface Rules {
   level_bp: number[];
   attribution: 'first' | 'last';
   link_days: number;
-  return_days: number;
 }
 interface Props {
   rules: Rules;
   limits: { max_levels: number; max_bp: number };
+  returnDays: number;
 }
 
 /** Basis points ↔ a percentage people type (1% = 100 bp; two decimals, no rounding drift). */
 export const toPct = (bp: number) => String(Number((bp / 100).toFixed(2)));
 export const toBp = (pct: string) => (pct.trim() === '' ? 0 : Math.round(Number(pct) * 100));
 
-export default function ReferralSettings({ rules, limits }: Props) {
+export default function ReferralSettings({ rules, limits, returnDays }: Props) {
   const form = useForm<Rules>(rules);
   const errors = form.errors as Record<string, string | undefined>;
   const total = form.data.self_bp + form.data.level_bp.reduce((a, b) => a + b, 0);
@@ -192,19 +192,18 @@ export default function ReferralSettings({ rules, limits }: Props) {
                     onChange={(e) => form.setData('link_days', Number(e.target.value))}
                   />
                 </Field>
-                <Field label="Rewards become available after (days)" error={errors.return_days}>
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    min="0"
-                    max="90"
-                    value={form.data.return_days}
-                    onChange={(e) => form.setData('return_days', Number(e.target.value))}
-                  />
-                </Field>
               </div>
               <p className="text-fg-muted text-sm">
-                Rewards wait this long in case of a return or refund — a refund cancels them.
+                {returnDays === 0
+                  ? 'You don’t give refunds, so rewards are available straight away.'
+                  : `Rewards become available when your refunds and returns window ends — ${returnDays} ${returnDays === 1 ? 'day' : 'days'} after payment (for bookings, after the appointment). A refund within it cancels them.`}{' '}
+                <a
+                  className="underline"
+                  href={`${base.replace(/\/settings\/referrals$/, '')}/settings/payments`}
+                >
+                  Change it in Settings → Payments
+                </a>
+                .
               </p>
             </CardContent>
           </Card>

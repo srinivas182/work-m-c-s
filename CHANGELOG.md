@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 13.4a (the return window)
+- **Settings → Payments → Refunds and returns:** the business's return window (default 14 days; 0 = no refunds). **No refunds in WURK after it closes** — orders counted from payment (refunds and cancelling a paid order are refused, with the date it closed), bookings and class deposits from the appointment. Logged.
+- **Referral rewards become available when the window closes** (the referral programme's own "available after" setting is replaced by it), so a refund never touches an available reward.
+
 ### Added — Sprint 13.3 (commission)
 - **Rewards on purchases:** when a shop order is paid (card or EFT) or a booking or class deposit is paid online, the buyer earns their cashback and each referrer up the chain earns their level — on the items, not delivery; whole cents; within the package's current limits; once per purchase (resent payment notices can't pay twice).
 - **Pending, then available** after the return window (derived from dates). **Refunds reverse** in proportion — a full refund exactly — without editing anything (append-only ledger); a reversal reduces pending or available, matching the reward it cancels.

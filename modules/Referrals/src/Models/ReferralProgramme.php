@@ -15,7 +15,6 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property list<int> $level_bp
  * @property string $attribution
  * @property int $link_days
- * @property int $return_days
  */
 final class ReferralProgramme extends Model
 {
@@ -25,6 +24,6 @@ final class ReferralProgramme extends Model
 
     protected function casts(): array
     {
-        return ['enabled' => 'boolean', 'level_bp' => 'array', 'self_bp' => 'integer', 'link_days' => 'integer', 'return_days' => 'integer'];
+        return ['enabled' => 'boolean', 'level_bp' => 'array', 'self_bp' => 'integer', 'link_days' => 'integer'];
     }
 }
