@@ -1,0 +1,15 @@
+{
+    "name": "Referrals",
+    "key": "referrals",
+    "version": "0.1.0",
+    "description": "The business's customer referral programme: self-cashback and up to seven levels, commission (pending, then available), wallets, Record sale, the customer portal and payouts.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit",
+        "plans",
+        "crm"
+    ]
+}

@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 13.1 (referral programme rules)
+- **Settings → Referrals** (new Referrals module; owners, `referrals.manage`; packages with referrals): run a programme (off by default) with a percentage back on customers' own purchases and up to the package's levels (at most 7) — the total never above the package's cap, refused in plain words otherwise; first or last referrer; how long a link counts; how long before rewards become available (refunds cancel them). Logged.
+- **Architecture guard:** raw queries on business tables must filter by business or be on a reviewed list (catches the class of bug fixed in v0.14.1 and v0.14.2).
+
 ## [0.14.2] — 2026-11-03 — Hotfix: branch settlements shared between businesses on a shard
 
 ### Fixed
