@@ -20,4 +20,7 @@ interface ContactBook
      * @return array<string, string>
      */
     public function names(array $ids): array;
+
+    /** The contact a source record (an order, booking, class place, sale…) belongs to, if any. */
+    public function contactFor(string $sourceType, string $sourceId): ?string;
 }

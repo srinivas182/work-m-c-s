@@ -6,6 +6,7 @@ namespace Wurk\Shop\Support;
 
 use Illuminate\Support\Facades\DB;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Shop\Models\Order;
@@ -51,6 +52,7 @@ final readonly class OrderPayments
             app(OrderManager::class)->log($order, 'paid', 'Payment provider');
             app(BranchLedger::class)->record($this->payments->receivedBy($reference), $order->branch_id, $order->total_cents, 'order', $reference, "Order #{$order->number}");
             event(new OrderStatusChanged(app(TenantContext::class)->id(), $order->id, 'paid'));
+            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents, $order->branch_id)); // rewards on the items, not delivery
             DB::table('shop_holds')->where('order_id', $order->id)->delete();
             $this->audit->record('shop.order_paid', 'order', $order->id, ['cents' => $order->total_cents]);
         } elseif (in_array($order->status, ['expired', 'cancelled'], true)) {
