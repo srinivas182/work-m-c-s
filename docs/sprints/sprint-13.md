@@ -48,3 +48,9 @@
 | A | **Available to businesses when released** — no WURK-wide gate. Noted: this launches before the legal opinion the PRD's risk register calls for; each business's programme is **off by default**, and WURK's terms make each business responsible for running it lawfully. |
 | B | Customers sign in by **one-time code**, or — if the business chooses — with a **default password they must change** (as the PRD words it), with the safeguards in 13.6. |
 | C | Wallet spending at **shop checkout and online booking payments**, within the business's max % rule. |
+
+## Progress
+
+| Part | PR | Notes |
+|---|---|---|
+| 13.1 Programme rules | see PR | New Referrals module. 1,240 backend tests on SQLite; Referrals on MySQL 8; 390 frontend. The browser test runs in CI only (no local test browser after the sandbox reset). |
