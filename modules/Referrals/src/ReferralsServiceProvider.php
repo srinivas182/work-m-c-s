@@ -28,7 +28,10 @@ final class ReferralsServiceProvider extends ModuleServiceProvider
 
     public function menu(): array
     {
-        return [['label' => 'Referrals', 'route' => 'tenant.referrals.settings', 'icon' => 'gift', 'section' => 'Settings', 'permission' => 'referrals.manage', 'entitlement' => 'referrals', 'order' => 838]];
+        return [
+            ['label' => 'Referrals', 'route' => 'tenant.referrals', 'icon' => 'gift', 'section' => 'Customers', 'permission' => 'referrals.manage', 'entitlement' => 'referrals', 'order' => 330],
+            ['label' => 'Referrals', 'route' => 'tenant.referrals.settings', 'icon' => 'gift', 'section' => 'Settings', 'permission' => 'referrals.manage', 'entitlement' => 'referrals', 'order' => 838],
+        ];
     }
 
     public function permissions(): array
