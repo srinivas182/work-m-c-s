@@ -53,4 +53,5 @@
 
 | Part | PR | Notes |
 |---|---|---|
-| 13.1 Programme rules | see PR | New Referrals module. 1,240 backend tests on SQLite; Referrals on MySQL 8; 390 frontend. The browser test runs in CI only (no local test browser after the sandbox reset). |
+| 13.1 Programme rules | #117 | New Referrals module. 1,240 backend tests on SQLite; Referrals on MySQL 8; 390 frontend. The browser test runs in CI only (no local test browser after the sandbox reset). |
+| 13.2 Links and attribution | see PR | Links are `{business}/r/CODE` (shorter for SMS/QR; can land on any page) rather than `?ref=` on any page. 1,244 backend tests on SQLite; Referrals and CRM on MySQL 8. Browser tests in CI only. |
