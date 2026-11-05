@@ -13,6 +13,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Referrals\Models\ReferralProgramme;
 use Wurk\Referrals\Support\Programme;
+use Wurk\Referrals\Support\Wallets;
 
 /** Settings → Referrals: the programme's rules, within the package's guardrails. */
 final class ReferralSettingsController
@@ -21,7 +22,7 @@ final class ReferralSettingsController
 
     public function show(): Response
     {
-        return Inertia::render('Referrals::Settings', ['rules' => $this->programme->rules(), 'limits' => $this->programme->limits(), 'returnDays' => app(RefundWindow::class)->days()]);
+        return Inertia::render('Referrals::Settings', ['rules' => $this->programme->rules(), 'limits' => $this->programme->limits(), 'returnDays' => app(RefundWindow::class)->days(), 'wallet' => app(Wallets::class)->rules()]);
     }
 
     public function update(Request $request): RedirectResponse
@@ -56,5 +57,21 @@ final class ReferralSettingsController
     private static function pct(int $bp): string
     {
         return rtrim(rtrim(number_format($bp / 100, 2, '.', ''), '0'), '.').'%';
+    }
+
+    /** Wallet rules: payouts, the minimum payout, the most of an order a wallet may pay, expiry. */
+    public function wallet(Request $request): RedirectResponse
+    {
+        $d = $request->validate([
+            'payouts_allowed' => ['required', 'boolean'],
+            'min_payout_cents' => ['required', 'integer', 'min:0', 'max:100000000'],
+            'max_wallet_bp' => ['required', 'integer', 'min:0', 'max:10000'],
+            'expiry_months' => ['required', 'integer', 'min:0', 'max:60'],
+        ], ['max_wallet_bp.max' => 'A wallet can pay at most the whole order (100%).', 'expiry_months.max' => 'Up to 5 years (60 months); 0 means rewards never expire.']);
+        ReferralProgramme::query()->firstOrCreate([], ['level_bp' => []])->update(['payouts_allowed' => (bool) $d['payouts_allowed'], 'min_payout_cents' => (int) $d['min_payout_cents'],
+            'max_wallet_bp' => (int) $d['max_wallet_bp'], 'expiry_months' => (int) $d['expiry_months']]);
+        $this->audit->record('referrals.wallet_rules', 'referral_programme', 'wallet', $d);
+
+        return back()->with('status', 'Wallet rules saved.');
     }
 }

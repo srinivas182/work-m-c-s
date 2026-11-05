@@ -15,6 +15,7 @@ Route::tenant(function (): void {
     Route::middleware(['entitled:referrals', 'permission:referrals.manage'])->prefix('settings/referrals')->name('tenant.referrals.settings')->group(function (): void {
         Route::get('/', [ReferralSettingsController::class, 'show']);
         Route::put('/', [ReferralSettingsController::class, 'update'])->name('.update');
+        Route::put('/wallet', [ReferralSettingsController::class, 'wallet'])->name('.wallet');
     });
 });
 

@@ -24,13 +24,21 @@ interface Props {
   rules: Rules;
   limits: { max_levels: number; max_bp: number };
   returnDays: number;
+  wallet: Wallet;
+}
+
+interface Wallet {
+  payouts_allowed: boolean;
+  min_payout_cents: number;
+  max_wallet_bp: number;
+  expiry_months: number;
 }
 
 /** Basis points ↔ a percentage people type (1% = 100 bp; two decimals, no rounding drift). */
 export const toPct = (bp: number) => String(Number((bp / 100).toFixed(2)));
 export const toBp = (pct: string) => (pct.trim() === '' ? 0 : Math.round(Number(pct) * 100));
 
-export default function ReferralSettings({ rules, limits, returnDays }: Props) {
+export default function ReferralSettings({ rules, limits, returnDays, wallet }: Props) {
   const form = useForm<Rules>(rules);
   const errors = form.errors as Record<string, string | undefined>;
   const total = form.data.self_bp + form.data.level_bp.reduce((a, b) => a + b, 0);
@@ -212,7 +220,82 @@ export default function ReferralSettings({ rules, limits, returnDays }: Props) {
             Save
           </Button>
         </form>
+        <WalletRules wallet={wallet} base={base} />
       </div>
     </AppShell>
+  );
+}
+
+/** What customers can do with their rewards: spend (up to a share of an order), cash out (above a minimum), and when unused rewards expire. */
+function WalletRules({ wallet, base }: { wallet: Wallet; base: string }) {
+  const form = useForm<Wallet>(wallet);
+  const errors = form.errors as Record<string, string | undefined>;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Wallets</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form
+          aria-label="Wallet rules"
+          className="grid gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.put(`${base}/wallet`, { preserveScroll: true });
+          }}
+        >
+          <p className="text-fg-muted text-sm">
+            Customers spend their available rewards with you — and, if you allow it, ask you to pay
+            them out.
+          </p>
+          <Field label="The most of an order a wallet can pay (%)" error={errors.max_wallet_bp}>
+            <Input
+              type="number"
+              inputMode="decimal"
+              min="0"
+              max="100"
+              step="1"
+              value={toPct(form.data.max_wallet_bp)}
+              onChange={(e) => form.setData('max_wallet_bp', toBp(e.target.value))}
+            />
+          </Field>
+          <Field
+            label="Unused rewards expire after (months; 0 = never)"
+            error={errors.expiry_months}
+          >
+            <Input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              max="60"
+              value={form.data.expiry_months}
+              onChange={(e) => form.setData('expiry_months', Number(e.target.value))}
+            />
+          </Field>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={form.data.payouts_allowed}
+              onCheckedChange={(on) => form.setData('payouts_allowed', on === true)}
+            />
+            Customers can ask for their rewards to be paid out
+          </label>
+          {form.data.payouts_allowed && (
+            <Field label="Smallest payout (R)" error={errors.min_payout_cents}>
+              <Input
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.01"
+                value={String(form.data.min_payout_cents / 100)}
+                onChange={(e) => form.setData('min_payout_cents', toBp(e.target.value))}
+              />
+            </Field>
+          )}
+          <Button type="submit" className="justify-self-start" loading={form.processing}>
+            Save wallet rules
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
