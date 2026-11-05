@@ -108,3 +108,10 @@ it('refunds within the return window only, never more than was paid', function (
     $this->actingAs($this->people['owner'])->post("{$this->url}/{$late->id}/refund", ['amount' => '10'])->assertSessionHasErrors('sale');
     expect(($this->in)(fn () => $late->refresh()->refunded_cents))->toBe(0);
 });
+
+it('shows the till today’s sales and tells it what it may do', function () {
+    $this->actingAs($this->people['till'])->post($this->url, [...$this->sale, 'branch_id' => $this->main]);
+    $this->actingAs($this->people['till'])->get($this->url)->assertInertia(fn ($p) => $p->component('Sales::Record')
+        ->where('sales.0.customer', 'Sipho')->where('sales.0.amount_cents', 45000)->where('canApprove', false)->where('canManage', false));
+    $this->actingAs($this->people['owner'])->get($this->url)->assertInertia(fn ($p) => $p->where('canApprove', true)->where('canManage', true));
+});

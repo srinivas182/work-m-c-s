@@ -39,6 +39,7 @@ final class SalesController
             'methods' => Sales::METHODS,
             'threshold' => $this->sales->threshold(),
             'canApprove' => Gate::allows('sales.approve'),
+            'canManage' => Gate::allows('sales.manage'),
             'sales' => $rows->map(fn (Sale $s) => ['id' => $s->id, 'customer' => $names[$s->contact_id ?? ''] ?? 'Customer', 'amount_cents' => $s->amount_cents,
                 'method' => Sales::METHODS[$s->method] ?? $s->method, 'status' => $s->status, 'by' => $s->recorded_by_name, 'refunded_cents' => $s->refunded_cents,
                 'at' => $s->recorded_at->setTimezone($tz)->format('j M, H:i'), 'note' => $s->note])->all(),
