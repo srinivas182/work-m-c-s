@@ -12,6 +12,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { rand } from '@/lib/money';
 
 interface SaleRow {
   id: string;
@@ -32,9 +33,6 @@ interface Props {
   canManage: boolean;
   sales: SaleRow[];
 }
-
-const rand = (cents: number) =>
-  `R${(cents / 100).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function RecordSale({
   branches,

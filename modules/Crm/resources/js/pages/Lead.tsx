@@ -11,6 +11,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { rand } from '@/lib/money';
 
 interface Data {
   id: string;
@@ -64,7 +65,7 @@ export default function Lead({
       <div className="grid max-w-3xl gap-6">
         <PageHeader
           title={l.title}
-          description={`${SOURCE[l.source] ?? l.source}${l.value_cents != null ? ` · R${(l.value_cents / 100).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}` : ''}`}
+          description={`${SOURCE[l.source] ?? l.source}${l.value_cents != null ? ` · ${rand(l.value_cents)}` : ''}`}
           actions={l.closed ? <Badge tone="neutral">Closed</Badge> : undefined}
         />
         <p>

@@ -12,6 +12,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { rand } from '@/lib/money';
 
 type Stage = {
   id: string | null;
@@ -29,8 +30,6 @@ interface LeadRow {
   follow_up: string | null;
   overdue: boolean;
 }
-
-const rand = (c: number) => `R${(c / 100).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`;
 const selectClass = 'border-border bg-bg h-9 rounded-md border px-2 text-sm';
 
 function StagesEditor({ stages, base, done }: { stages: Stage[]; base: string; done: () => void }) {

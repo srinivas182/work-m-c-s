@@ -26,7 +26,7 @@ test('the owner records an in-store sale for a new customer, refunds part of it 
     .getByRole('list', { name: 'Recent sales' })
     .getByRole('listitem')
     .filter({ hasText: name });
-  await expect(mine).toContainText('R120.00');
+  await expect(mine).toContainText('R120'); // formatted like everywhere in WURK (lib/money)
   await mine.getByRole('button', { name: 'Refund…' }).click();
   const refund = mine.getByRole('form', { name: `Refund ${name}’s sale` });
   await refund.getByLabel('Refund (R)').fill('20');
@@ -36,7 +36,7 @@ test('the owner records an in-store sale for a new customer, refunds part of it 
       .getByRole('list', { name: 'Recent sales' })
       .getByRole('listitem')
       .filter({ hasText: name }),
-  ).toContainText('Refunded R20.00');
+  ).toContainText('Refunded R20');
 
   const limit = page.getByRole('form', { name: 'Approval limit' });
   await limit.getByLabel(/Sales over this amount need a manager/).fill('1000');

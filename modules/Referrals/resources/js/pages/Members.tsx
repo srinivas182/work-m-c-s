@@ -3,6 +3,7 @@ import { Gift } from 'lucide-react';
 import { useState } from 'react';
 import { Button, EmptyState, Input, PageHeader } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { rand } from '@/lib/money';
 
 interface Member {
   id: string;
@@ -14,9 +15,6 @@ interface Member {
   pending_cents: number;
   available_cents: number;
 }
-
-const rand = (cents: number) =>
-  `R${(cents / 100).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 interface Props {
   enabled: boolean;
   code: string;
