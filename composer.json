@@ -51,6 +51,7 @@
             "Wurk\\Records\\": "modules/Records/src/",
             "Wurk\\Referrals\\": "modules/Referrals/src/",
             "Wurk\\Regions\\": "modules/Regions/src/",
+            "Wurk\\Sales\\": "modules/Sales/src/",
             "Wurk\\Security\\": "modules/Security/src/",
             "Wurk\\Shop\\": "modules/Shop/src/",
             "Wurk\\Shipping\\": "modules/Shipping/src/",

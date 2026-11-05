@@ -57,6 +57,19 @@ final readonly class Contacts implements ContactBook
         });
     }
 
+    /** @param  list<string>  $ids */
+    public function emails(array $ids): array
+    {
+        return Contact::query()->whereIn('id', $ids)->whereNotNull('email')->pluck('email', 'id')->map(fn ($e) => (string) $e)->all();
+    }
+
+    public function find(?string $phone, ?string $email = null): ?array
+    {
+        $c = $this->match(Phone::normalise($phone), $email === null || trim($email) === '' ? null : mb_strtolower(trim($email)));
+
+        return $c === null ? null : ['id' => $c->id, 'name' => (string) $c->name, 'phone' => $c->phone, 'email' => $c->email];
+    }
+
     /** Exact phone or email (never fuzzy); merged contacts lead to the one they joined. */
     private function match(?string $phone, ?string $email): ?Contact
     {
