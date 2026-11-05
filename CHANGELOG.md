@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 13.4b (wallets)
+- **Wallets:** each customer's available rewards, less what's spent, paid out or expired (the same append-only ledger). Payments' **`StoreCredit`** contract lets Shop and Bookings use them without knowing about referrals (no credit by default).
+- **Spending** within the balance and the business's share of an order (refused in plain words above it; one spend at a time); a **refund gives the wallet part back** (never more than spent). Spending at checkout and online booking payments is switched on in 13.6, once customers sign in.
+- **Expiry** nightly (02:30): unused rewards expire oldest first, counting what's been spent; logged.
+- **Settings → Referrals → Wallets:** the share of an order a wallet can pay (default 50%), expiry (default 12 months; 0 = never), payouts on/off and the minimum payout. **Customers → Referrals** shows each customer's wallet.
+
 ### Added — Sprint 13.4a (the return window)
 - **Settings → Payments → Refunds and returns:** the business's return window (default 14 days; 0 = no refunds). **No refunds in WURK after it closes** — orders counted from payment (refunds and cancelling a paid order are refused, with the date it closed), bookings and class deposits from the appointment. Logged.
 - **Referral rewards become available when the window closes** (the referral programme's own "available after" setting is replaced by it), so a refund never touches an available reward.
