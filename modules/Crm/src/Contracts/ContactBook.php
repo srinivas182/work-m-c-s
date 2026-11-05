@@ -23,4 +23,19 @@ interface ContactBook
 
     /** The contact a source record (an order, booking, class place, sale…) belongs to, if any. */
     public function contactFor(string $sourceType, string $sourceId): ?string;
+
+    /**
+     * Find a customer by phone or email — normalised and matched exactly, like remember().
+     *
+     * @return array{id: string, name: string, phone: string|null, email: string|null}|null
+     */
+    public function find(?string $phone, ?string $email = null): ?array;
+
+    /**
+     * Contacts' emails, by id (only those that have one).
+     *
+     * @param  list<string>  $ids
+     * @return array<string, string>
+     */
+    public function emails(array $ids): array;
 }

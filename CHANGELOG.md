@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 13.5 (Record sale)
+- **Customers → Record sale** (new Sales module): an in-store sale (cash, card, EFT) linked to the customer — found by phone or email exactly as bookings and orders find them, or new — with branch and note; phone-first for the till.
+- **Approval** above an owner-set amount (`sales.manage`): staff (`sales.record`) can't approve; managers (`sales.approve`) approve, decline and refund — branch managers only their branches. A sale earns rewards only once recorded or approved.
+- A recorded sale is a **purchase** (rewards; final once the return window from the sale closes) with an **email receipt** (Settings → Messages; no SMS, which would spend credits on every sale). **Refunds** only within the window, capped at what was paid. Every action logged with who and which device.
+- Finding customers by scanning a QR arrives with the customer portal (13.6).
+
 ### Added — Sprint 13.4b (wallets)
 - **Wallets:** each customer's available rewards, less what's spent, paid out or expired (the same append-only ledger). Payments' **`StoreCredit`** contract lets Shop and Bookings use them without knowing about referrals (no credit by default).
 - **Spending** within the balance and the business's share of an order (refused in plain words above it; one spend at a time); a **refund gives the wallet part back** (never more than spent). Spending at checkout and online booking payments is switched on in 13.6, once customers sign in.

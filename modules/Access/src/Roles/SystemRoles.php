@@ -33,10 +33,10 @@ final class SystemRoles
         self::BRANCH_MANAGER => [
             'name' => 'Branch manager',
             'scope' => Permission::BUSINESS,
-            'permissions' => ['branches.view', 'team.view', 'bookings.view', 'bookings.manage', 'shop.orders', 'contacts.view', 'leads.view', 'leads.manage'], // limited to their branches by the branch scope
+            'permissions' => ['branches.view', 'team.view', 'bookings.view', 'bookings.manage', 'shop.orders', 'contacts.view', 'leads.view', 'leads.manage', 'sales.record', 'sales.approve'], // limited to their branches by the branch scope
             'branch_restricted' => true,
         ],
-        self::STAFF => ['name' => 'Staff', 'scope' => Permission::BUSINESS, 'permissions' => ['branches.view']],
+        self::STAFF => ['name' => 'Staff', 'scope' => Permission::BUSINESS, 'permissions' => ['branches.view', 'sales.record']], // record sales at the till
     ];
 
     public static function exists(string $key): bool
