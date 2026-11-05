@@ -92,7 +92,7 @@ export default function ReferralMembers({ enabled, code, members, pages }: Props
                     {m.referred_by ? ` · referred by ${m.referred_by}` : ''}
                   </span>
                   <span>
-                    Rewards: {rand(m.available_cents)} available · {rand(m.pending_cents)} pending
+                    Wallet: {rand(m.available_cents)} · {rand(m.pending_cents)} pending
                   </span>
                   <span className="text-fg-muted break-all">{m.link}</span>
                 </div>

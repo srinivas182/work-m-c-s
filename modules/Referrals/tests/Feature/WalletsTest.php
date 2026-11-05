@@ -85,3 +85,18 @@ it('lets the owner set the wallet rules, refusing nonsense in plain words', func
     $this->actingAs($owner)->get($url)->assertInertia(fn ($p) => $p->where('wallet', $rules));
     $this->actingAs($owner)->put("{$url}/wallet", [...$rules, 'max_wallet_bp' => 12000])->assertSessionHasErrors(['max_wallet_bp' => 'A wallet can pay at most the whole order (100%).']);
 });
+
+it('shows the wallet (rewards less spending) on Customers → Referrals', function () {
+    $owner = $this->person();
+    $this->member($owner, $this->glow);
+    ($this->in)($this->glow, fn () => app(Team::class)->add($owner->id, 'Owner', 'owner'));
+    // A 1-day return window here: travelling past the 14-day trial would (rightly) send the owner to billing.
+    ($this->in)($this->glow, function () {
+        $order = (string) Str::ulid();
+        app(ContactBook::class)->remember('Thandi', '082 000 0001', null, 'order', $order, null, 'Order');
+        event(new PurchaseMade('order', $order, 80000, 80000, null, now()->addDay()));
+    });
+    $this->travel(2)->days();
+    ($this->in)($this->glow, fn () => app(StoreCredit::class)->spend($this->thandi, 2500, 'order', '01JD000000000000000000OC01', 10000));
+    $this->actingAs($owner)->get($this->app('/glow-salon/referrals'))->assertInertia(fn ($p) => $p->where('members.0.available_cents', 5500)->where('members.0.pending_cents', 0));
+});

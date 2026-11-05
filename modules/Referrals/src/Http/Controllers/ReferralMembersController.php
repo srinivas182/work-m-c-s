@@ -30,7 +30,7 @@ final class ReferralMembersController
         $names = $contacts->names(array_values(array_map('strval', [...$rows->pluck('contact_id')->all(), ...$referrers->pluck('contact_id')->all()])));
         $counts = ReferralMember::query()->whereIn('referrer_id', $rows->pluck('id'))->selectRaw('referrer_id, count(*) as n')->groupBy('referrer_id')->pluck('n', 'referrer_id');
         $handle = $context->current()->handle();
-        // Rewards per member on this page (one query): pending until their date, available after (net of reversals).
+        // Per member on this page (one query): pending rewards, and the wallet — every line already available (rewards less spent, paid out, expired).
         $sums = DB::connection($context->connectionName())->table('referral_ledger')->where('tenant_id', $context->id())->whereIn('member_id', $rows->pluck('id'))
             ->selectRaw('member_id, sum(case when available_at > ? then cents else 0 end) as pending, sum(case when available_at <= ? then cents else 0 end) as available', [now(), now()])
             ->groupBy('member_id')->get()->keyBy('member_id');
