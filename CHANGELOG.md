@@ -9,6 +9,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Card payments ask for and check **only what's due**; ledgers record only cash received; paid wholly from the wallet is paid at once. **Rewards on the full amount** (decision E).
 - **Refunds** return the wallet part to the wallet and the rest to the card or account (decision F) — in proportion, exact on the last refund. Unpaid orders and holds that expire, or that can't be paid, give the wallet part back. A wallet problem can never stop a form working.
 
+### Added — Sprint 13.6d (identity QR for Record sale)
+- **"Show this at the till"** in the customer portal: a QR proving who the customer is — signed, for one business and customer, valid 5 minutes, refreshed every 4; only for the signed-in, consented customer.
+- **Record sale → Customer's code** (scanner, paste, or the camera where the browser reads QR codes): once proven, no name or phone needed; the sale is linked to exactly that customer (receipt and referral rewards as usual). Altered, other businesses' and expired codes are refused.
+
 ### Added — Sprint 13.6a (customer sign-in and portal)
 - **The customer portal** (new Portal module) at `{business}/account` on the business's own address, with its own host-only session (a new "portal" surface: 2 hours idle, 30 days, remember me). A session counts only for the business it was started at.
 - **Sign in with a code** to phone or email (the same rate limits as signup); new customers give their name (asked before the code is checked, so it isn't spent); linked to their customer record, found as bookings and orders find it. **POPIA consent** once, before the portal opens.
