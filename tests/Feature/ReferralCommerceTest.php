@@ -3,9 +3,12 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Tests\Support\InteractsWithShards;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
@@ -19,6 +22,7 @@ use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
 use Wurk\Shop\Support\OrderManager;
+use Wurk\Shop\Support\OrderPlacer;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /*
@@ -84,4 +88,56 @@ it('makes rewards available when the business’s own return window ends', funct
     expect(($this->in)(fn () => app(Commissions::class)->balance($this->thandi->id)))->toBe(['pending' => 500, 'available' => 0]); // 2% of R250, still refundable
     $this->travel(2)->days();
     expect(($this->in)(fn () => app(Commissions::class)->balance($this->thandi->id)))->toBe(['pending' => 0, 'available' => 500]); // the window has closed
+});
+
+describe('paying from the wallet', function () {
+    beforeEach(function () {
+        // Thandi has R50 available: an earlier R500 purchase at 10%, already past its return window.
+        ($this->in)(function () {
+            ReferralProgramme::query()->update(['self_bp' => 1000, 'max_wallet_bp' => 5000]);
+            $old = (string) Str::ulid();
+            app(ContactBook::class)->remember('Thandi', '082 000 0001', null, 'order', $old, null, 'Order');
+            event(new PurchaseMade('order', $old, 50000, 50000, null, now()->subDay()));
+        });
+        $this->pass = ($this->in)(fn () => app(StoreCredit::class)->passFor($this->thandi->contact_id));
+        $this->checkout = fn (array $wallet, int $qty = 1) => $this->postJson("{$this->site}/cart/checkout", ['lines' => [['variant' => $this->tee->id, 'quantity' => $qty]],
+            'name' => 'Thandi', 'phone' => '082 000 0001', 'fulfilment' => 'collection', 'consent' => '1', 'wallet' => $wallet]);
+        $this->wallet = fn () => ($this->in)(fn () => app(StoreCredit::class)->available($this->thandi->contact_id));
+    });
+
+    it('takes the wallet part off what’s due, still rewards the full order, and splits refunds exactly', function () {
+        ($this->checkout)(['pass' => $this->pass, 'cents' => 5000])->assertCreated();
+        expect(($this->wallet)())->toBe(0);
+        ($this->in)(function () {
+            $order = Order::query()->sole();
+            expect($order->wallet_cents)->toBe(5000)->and($order->dueCents())->toBe(20000);
+            app(OrderManager::class)->advance($order, 'paid', 'Thabo');
+            expect(app(Commissions::class)->balance($this->thandi->id)['pending'])->toBe(2500);        // 10% of the full R250 (decision E)
+            app(OrderManager::class)->refund($order->refresh(), 10000, false, 'Thabo');               // R100: R20 to the wallet, R80 cash
+            expect($order->refresh()->wallet_refunded_cents)->toBe(2000);
+            app(OrderManager::class)->refund($order->refresh(), null, false, 'Thabo');                // the rest: R30 wallet, R120 cash
+            expect($order->refresh()->wallet_refunded_cents)->toBe(5000)->and($order->refunded_cents)->toBe(25000);
+        });
+        expect(($this->wallet)())->toBe(5000); // all of it back
+    });
+
+    it('refuses more than the rules allow (stock returned) and forged passes; gives the wallet part back if the order expires unpaid', function () {
+        ($this->checkout)(['pass' => $this->pass, 'cents' => 6000])->assertStatus(409)->assertJson(['message' => 'Only R50.00 of the wallet can be used on this order.']);
+        ($this->checkout)(['pass' => $this->pass.'x', 'cents' => 1000])->assertStatus(409)->assertJson(['message' => 'Your wallet couldn’t be used — sign in to your account again and retry.']);
+        expect(($this->in)(fn () => Order::query()->where('status', 'cancelled')->count()))->toBe(2)
+            ->and(($this->in)(fn () => $this->tee->refresh()->stock))->toBe(5) // stock given back
+            ->and(($this->wallet)())->toBe(5000);
+
+        ($this->checkout)(['pass' => $this->pass, 'cents' => 3000])->assertCreated();
+        expect(($this->wallet)())->toBe(2000);
+        ($this->in)(fn () => app(OrderPlacer::class)->release(Order::query()->where('status', 'awaiting_payment')->sole(), 'expired', null));
+        expect(($this->wallet)())->toBe(5000);
+    });
+
+    it('pays the whole order from the wallet when the business allows it', function () {
+        ($this->in)(fn () => ReferralProgramme::query()->update(['max_wallet_bp' => 10000]));
+        ($this->in)(fn () => $this->tee->update(['price_cents' => 4000]));
+        ($this->checkout)(['pass' => $this->pass, 'cents' => 4000])->assertCreated()->assertJson(['due_cents' => 0]);
+        expect(($this->in)(fn () => Order::query()->sole()->status))->toBe('paid')->and(($this->wallet)())->toBe(1000);
+    });
 });

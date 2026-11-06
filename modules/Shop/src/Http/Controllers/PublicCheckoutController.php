@@ -85,6 +85,7 @@ final class PublicCheckoutController
                 'shipping.to' => ['nullable', 'array'], 'shipping.to.street' => ['nullable', 'string', 'max:200'], 'shipping.to.suburb' => ['nullable', 'string', 'max:120'],
                 'shipping.to.city' => ['nullable', 'string', 'max:120'], 'shipping.to.postal_code' => ['nullable', 'string', 'max:10'], 'address' => ['nullable', 'string', 'max:400'], 'notes' => ['nullable', 'string', 'max:1000'],
                 'payment' => ['nullable', 'in:card,offline'],
+                'wallet' => ['nullable', 'array'], 'wallet.pass' => ['required_with:wallet', 'string', 'max:600'], 'wallet.cents' => ['required_with:wallet', 'integer', 'min:1'],
                 'consent' => ['accepted'], 'website' => ['nullable', 'string'],
             ], ['consent.accepted' => 'Please agree to be contacted about your order.']);
             $fulfilling = app(BranchStock::class)->fulfilling($data['fulfilment'], $data['branch'] ?? null);
@@ -95,15 +96,19 @@ final class PublicCheckoutController
             try {
                 $order = $placer->place(array_values(array_map(fn ($l) => ['variant' => (string) $l['variant'], 'quantity' => (int) $l['quantity']], $data['lines'])),
                     ['name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'address' => $data['address'] ?? null, 'notes' => $data['notes'] ?? null],
-                    $data['fulfilment'], $method, $data['branch'] ?? null, $data['shipping'] ?? null);
+                    $data['fulfilment'], $method, $data['branch'] ?? null, $data['shipping'] ?? null,
+                    isset($data['wallet']) ? ['pass' => (string) $data['wallet']['pass'], 'cents' => (int) $data['wallet']['cents']] : null);
             } catch (CheckoutProblem $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
             }
 
             $url = URL::signedRoute('shop.public.order', ['handle' => $tenant->handle(), 'order' => $order->id]);
             app(OrderMessages::class)->newOrder($order); // the shop's managers are told straight away
+            if ($order->status === 'paid') { // the wallet paid for all of it
+                return new JsonResponse(['placed' => true, 'number' => $order->number, 'total_cents' => $order->total_cents, 'due_cents' => 0, 'order_url' => $url], 201);
+            }
             if ($method === 'card') {
-                $pay = app(BusinessPayments::class)->start('shop-'.$order->id, $order->total_cents, "Order #{$order->number}",
+                $pay = app(BusinessPayments::class)->start('shop-'.$order->id, $order->dueCents(), "Order #{$order->number}",
                     ['name' => $order->customer_name, 'email' => $order->customer_email], ['return' => $url, 'cancel' => $request->getSchemeAndHttpHost().'/cart'], branchId: $order->branch_id);
                 if ($pay === null) {
                     $placer->release($order, 'cancelled', null); // can't take payment right now: give the stock straight back
