@@ -15,6 +15,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string $code
  * @property string|null $referrer_id
  * @property Carbon|null $referred_at
+ * @property Carbon $created_at
  */
 final class ReferralMember extends Model
 {

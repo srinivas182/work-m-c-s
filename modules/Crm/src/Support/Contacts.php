@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Crm\Support;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactRemembered;
@@ -55,6 +56,13 @@ final readonly class Contacts implements ContactBook
 
             return $contact->id;
         });
+    }
+
+    public function history(string $contactId, array $types, int $limit = 50): array
+    {
+        return array_values(DB::connection($this->context->connectionName())->table('contact_links')->where('tenant_id', $this->context->id())->where('contact_id', $contactId)
+            ->whereIn('source_type', $types)->orderByDesc('occurred_at')->limit($limit)->get()
+            ->map(fn ($l) => ['type' => (string) $l->source_type, 'summary' => (string) $l->summary, 'at' => CarbonImmutable::parse((string) $l->occurred_at)])->all());
     }
 
     /** @param  list<string>  $ids */

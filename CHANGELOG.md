@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 13.6a (customer sign-in and portal)
+- **The customer portal** (new Portal module) at `{business}/account` on the business's own address, with its own host-only session (a new "portal" surface: 2 hours idle, 30 days, remember me). A session counts only for the business it was started at.
+- **Sign in with a code** to phone or email (the same rate limits as signup); new customers give their name (asked before the code is checked, so it isn't spent); linked to their customer record, found as bookings and orders find it. **POPIA consent** once, before the portal opens.
+- **The portal page:** wallet, pending rewards and expiry; their referral link (copy) and QR code; who they referred (first names only); their own history (orders, bookings, classes, in-store) — never internal entries. No back-office menu is ever sent to the portal.
+- Not yet: businesses on their own custom domain.
+
 ### Added — Sprint 13.5 (Record sale)
 - **Customers → Record sale** (new Sales module): an in-store sale (cash, card, EFT) linked to the customer — found by phone or email exactly as bookings and orders find them, or new — with branch and note; phone-first for the till.
 - **Approval** above an owner-set amount (`sales.manage`): staff (`sales.record`) can't approve; managers (`sales.approve`) approve, decline and refund — branch managers only their branches. A sale earns rewards only once recorded or approved.

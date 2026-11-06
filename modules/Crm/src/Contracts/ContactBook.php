@@ -38,4 +38,12 @@ interface ContactBook
      * @return array<string, string>
      */
     public function emails(array $ids): array;
+
+    /**
+     * A customer's history of the given kinds (e.g. order, booking, class, sale), newest first.
+     *
+     * @param  list<string>  $types
+     * @return list<array{type: string, summary: string, at: \DateTimeInterface}>
+     */
+    public function history(string $contactId, array $types, int $limit = 50): array;
 }

@@ -82,6 +82,7 @@ return [
         'sessions' => [
             'admin' => ['idle' => 30, 'absolute' => 480, 'remember' => false],
             'app' => ['idle' => 120, 'absolute' => 43200, 'remember' => true],
+            'portal' => ['idle' => 120, 'absolute' => 43200, 'remember' => true], // customers on a business's own site
         ],
         'default_country_code' => '27',
     ],

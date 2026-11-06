@@ -1,0 +1,15 @@
+{
+    "name": "Portal",
+    "key": "portal",
+    "version": "0.1.0",
+    "description": "The customer portal on a business's own site: sign in with a code (or a password), see referral link and QR, rewards and wallet, orders and bookings; POPIA consent and data requests.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "identity",
+        "crm",
+        "audit",
+        "referrals"
+    ]
+}
