@@ -25,4 +25,14 @@ final class NoStoreCredit implements StoreCredit
     }
 
     public function giveBack(string $sourceType, string $sourceId, int $cents): void {}
+
+    public function passFor(string $contactId): string
+    {
+        return '';
+    }
+
+    public function contactFromPass(string $pass): ?string
+    {
+        return null;
+    }
 }
