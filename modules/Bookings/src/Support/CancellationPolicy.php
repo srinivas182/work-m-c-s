@@ -11,6 +11,7 @@ use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\RefundWindow;
+use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -84,14 +85,18 @@ final readonly class CancellationPolicy
 
             return false;
         }
-        if ($booking->payment_reference === null || ! $this->payments->refund($booking->payment_reference)) {
+        $cash = $booking->deposit_cents - (int) $booking->wallet_cents;
+        if ($booking->payment_reference === null || ($cash > 0 && ! $this->payments->refund($booking->payment_reference))) {
             $this->audit->record('bookings.refund_failed', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, []);
 
             return false;
         }
         $booking->update(['refunded_at' => Instant::db(now())]);
+        app(StoreCredit::class)->giveBack($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, (int) $booking->wallet_cents); // decision F
         $supplier = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id;
-        app(BranchLedger::class)->record($this->payments->receivedBy($booking->payment_reference), $supplier, -$booking->deposit_cents, 'refund', $booking->payment_reference, 'Refund: '.$booking->customer_name);
+        if ($cash > 0) { // only the card part was cash; the wallet part went back to the wallet
+            app(BranchLedger::class)->record($this->payments->receivedBy($booking->payment_reference), $supplier, -$cash, 'refund', $booking->payment_reference, 'Refund: '.$booking->customer_name);
+        }
         event(new PurchaseRefunded($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $booking->deposit_cents)); // rewards on it are reversed
         $this->audit->record('bookings.deposit_refunded', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
 

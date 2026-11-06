@@ -15,6 +15,7 @@ use Wurk\Bookings\Models\ClassSession;
 use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\RefundWindow;
+use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -63,12 +64,31 @@ final readonly class Deposits
         return $session->price_cents;
     }
 
-    /** Start paying: the booking (pending_payment) holds its time; returns Paystack's checkout page. */
-    public function start(Booking|ClassAttendee $booking, int $amountCents, string $email, string $returnUrl): ?string
+    /**
+     * Start paying: the booking (pending_payment) holds its time; returns the provider's checkout page — or, when the
+     * customer's wallet pays the whole deposit (Sprint 13.6c), the confirmation page straight away.
+     *
+     * @param  array{pass: string, cents: int}|null  $wallet
+     *
+     * @throws \DomainException the wallet couldn't be used (a message for the customer)
+     */
+    public function start(Booking|ClassAttendee $booking, int $amountCents, string $email, string $returnUrl, ?array $wallet = null): ?string
     {
         $reference = 'dep_'.$this->context->id().'_'.$booking->id; // routes Paystack's webhook to the business
         $expires = now()->addMinutes(self::HOLD_MINUTES);
         $booking->update(['deposit_cents' => $amountCents, 'payment_reference' => $reference, 'hold_expires_at' => Instant::db($expires)]);
+        if ($wallet !== null && $wallet['cents'] > 0) {
+            $credit = app(StoreCredit::class);
+            $contact = $credit->contactFromPass($wallet['pass']) ?? throw new \DomainException('Your wallet couldn’t be used — sign in to your account again and retry.');
+            $credit->spend($contact, $wallet['cents'], self::source($booking), $booking->id, $amountCents);
+            $booking->update(['wallet_cents' => $wallet['cents']]);
+            if ($wallet['cents'] >= $amountCents) { // the wallet paid all of it
+                $this->settle($booking->refresh(), $reference);
+
+                return $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference);
+            }
+            $amountCents -= $wallet['cents']; // the card pays the rest
+        }
         BookingHold::query()->updateOrCreate(['reference' => $reference], ['tenant_id' => $this->context->id(), 'expires_at' => Instant::db($expires)]);
         $name = $booking->customer_name;
         $what = $booking instanceof ClassAttendee ? 'Class: '.$booking->session()->title : 'Booking deposit';
@@ -101,7 +121,7 @@ final readonly class Deposits
                 return $booking; // unknown, or already confirmed
             }
             $result = $this->payments->verify($reference);
-            if (! $result['paid'] || $result['amount_cents'] < $booking->deposit_cents) {
+            if (! $result['paid'] || $result['amount_cents'] < $booking->deposit_cents - (int) $booking->wallet_cents) { // what's due after the wallet
                 return $booking;
             }
             if ($booking->status !== 'pending_payment') { // the hold expired before payment arrived
@@ -111,18 +131,31 @@ final readonly class Deposits
 
                 return $booking->refresh();
             }
-            $booking->update(['status' => 'confirmed', 'paid_at' => Instant::db(now()), 'hold_expires_at' => null]);
-            BookingHold::query()->whereKey($reference)->delete();
-            $supplier = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id;
-            app(BranchLedger::class)->record($this->payments->receivedBy($reference), $supplier, $booking->deposit_cents,
-                $booking instanceof ClassAttendee ? 'class' : 'deposit', $reference, $booking instanceof ClassAttendee ? 'Class place: '.$booking->session()->title : 'Booking deposit: '.$booking->customer_name);
-            $this->audit->record('bookings.deposit_paid', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
-            event($booking instanceof ClassAttendee ? new ClassJoined($this->context->id(), $booking->id) : new BookingConfirmed($this->context->id(), $booking->id));
-            event(new PurchaseMade($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $booking->deposit_cents, $booking->deposit_cents, $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id,
-                app(RefundWindow::class)->finalAt($booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at))); // final: the appointment + the window
+            $this->settle($booking, $reference);
 
             return $booking->refresh();
         });
+    }
+
+    /** A paid deposit: confirmed, the cash recorded, rewards on the full deposit (decision E). */
+    private function settle(Booking|ClassAttendee $booking, string $reference): void
+    {
+
+        $booking->update(['status' => 'confirmed', 'paid_at' => Instant::db(now()), 'hold_expires_at' => null]);
+        BookingHold::query()->whereKey($reference)->delete();
+        $supplier = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id;
+        app(BranchLedger::class)->record($this->payments->receivedBy($reference), $supplier, $booking->deposit_cents - (int) $booking->wallet_cents,
+            $booking instanceof ClassAttendee ? 'class' : 'deposit', $reference, $booking instanceof ClassAttendee ? 'Class place: '.$booking->session()->title : 'Booking deposit: '.$booking->customer_name);
+        $this->audit->record('bookings.deposit_paid', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
+        event($booking instanceof ClassAttendee ? new ClassJoined($this->context->id(), $booking->id) : new BookingConfirmed($this->context->id(), $booking->id));
+        event(new PurchaseMade($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $booking->deposit_cents, $booking->deposit_cents, $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id,
+            app(RefundWindow::class)->finalAt($booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at))); // final: the appointment + the window
+
+    }
+
+    public static function source(Booking|ClassAttendee $booking): string
+    {
+        return $booking instanceof ClassAttendee ? 'class' : 'booking';
     }
 
     /** Release the times of bookings whose deposit wasn't paid in time (run every minute, across businesses). */
@@ -137,7 +170,11 @@ final readonly class Deposits
                     $n = 0;
                     foreach (Booking::query()->whereIn('payment_reference', $holds->pluck('reference'))->where('status', 'pending_payment')->get() as $booking) {
                         $this->booker->cancel($booking, null, 'expired');
+                        app(StoreCredit::class)->giveBack('booking', $booking->id, (int) $booking->wallet_cents); // never paid: the wallet part goes back
                         $n++;
+                    }
+                    foreach (ClassAttendee::query()->whereIn('payment_reference', $holds->pluck('reference'))->where('status', 'pending_payment')->where('wallet_cents', '>', 0)->get() as $place) {
+                        app(StoreCredit::class)->giveBack('class', $place->id, (int) $place->wallet_cents);
                     }
                     // Class places held while paying: released (no message — nothing was confirmed).
                     $n += ClassAttendee::query()->whereIn('payment_reference', $holds->pluck('reference'))->where('status', 'pending_payment')->update(['status' => 'expired']);
