@@ -23,7 +23,7 @@ use Wurk\Identity\Support\Destination;
 final readonly class OtpManager
 {
     /** Purposes whose codes go to any address, not only to existing WURK IDs. */
-    public const OPEN_PURPOSES = ['signup'];
+    public const OPEN_PURPOSES = ['signup', 'portal']; // portal: a business's customers, most without a WURK ID yet (the same rate limits apply)
 
     public const PURPOSE_LOGIN = 'login';
 
