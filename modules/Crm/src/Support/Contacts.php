@@ -15,6 +15,16 @@ final readonly class Contacts implements ContactBook
 {
     public function __construct(private TenantContext $context) {}
 
+    public function link(string $contactId, string $sourceType, string $sourceId, ?string $branchId, string $summary): void
+    {
+        $db = DB::connection($this->context->connectionName());
+        $db->transaction(function () use ($db, $contactId, $sourceType, $sourceId, $branchId, $summary): void {
+            $db->table('contact_links')->insert(['tenant_id' => $this->context->id(), 'contact_id' => $contactId, 'original_contact_id' => $contactId, // keyed by the source
+                'source_type' => $sourceType, 'source_id' => $sourceId, 'branch_id' => $branchId, 'summary' => mb_substr($summary, 0, 200), 'occurred_at' => now()]);
+            event(new ContactRemembered($contactId, false, $sourceType, $sourceId));
+        });
+    }
+
     public function contactFor(string $sourceType, string $sourceId): ?string
     {
         $id = DB::connection($this->context->connectionName())->table('contact_links')

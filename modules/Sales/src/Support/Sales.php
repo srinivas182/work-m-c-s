@@ -43,14 +43,20 @@ final readonly class Sales
         $this->audit->record('sales.threshold', 'sales_preferences', 'approval_above_cents', ['cents' => $cents]);
     }
 
-    /** @param array{name: string, phone: string|null, email: string|null, amount_cents: int, method: string, note: string|null, branch_id: string|null} $d */
+    /** @param array{name: string, phone: string|null, email: string|null, amount_cents: int, method: string, note: string|null, branch_id: string|null, contact_id?: string|null} $d */
     public function record(array $d, string $byId, string $byName, ?string $device, bool $canApprove): Sale
     {
         $needsApproval = ! $canApprove && $this->threshold() > 0 && $d['amount_cents'] > $this->threshold();
         $sale = DB::connection($this->context->connectionName())->transaction(function () use ($d, $byId, $byName, $device, $needsApproval) {
             $sale = Sale::query()->create(['amount_cents' => $d['amount_cents'], 'method' => $d['method'], 'note' => $d['note'], 'branch_id' => $d['branch_id'],
                 'status' => $needsApproval ? 'pending' : 'recorded', 'recorded_by' => $byId, 'recorded_by_name' => $byName, 'device' => $device, 'recorded_at' => now()]);
-            $contact = $this->contacts->remember($d['name'], $d['phone'], $d['email'], 'sale', $sale->id, $d['branch_id'], 'In-store sale: R'.number_format($d['amount_cents'] / 100, 2));
+            $summary = 'In-store sale: R'.number_format($d['amount_cents'] / 100, 2);
+            if (($d['contact_id'] ?? null) !== null) { // proven by their code: exactly this customer
+                $this->contacts->link($d['contact_id'], 'sale', $sale->id, $d['branch_id'], $summary);
+                $contact = $d['contact_id'];
+            } else {
+                $contact = $this->contacts->remember($d['name'], $d['phone'], $d['email'], 'sale', $sale->id, $d['branch_id'], $summary);
+            }
             $sale->update(['contact_id' => $contact]);
 
             return $sale;

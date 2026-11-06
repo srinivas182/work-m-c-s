@@ -8,9 +8,11 @@ use Illuminate\Console\Scheduling\Schedule;
 use Wurk\Crm\Console\FollowUpsCommand;
 use Wurk\Crm\Console\LinkExistingCommand;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\CustomerIdentity;
 use Wurk\Crm\Contracts\LeadBook;
 use Wurk\Crm\Support\Contacts;
 use Wurk\Crm\Support\Leads;
+use Wurk\Crm\Support\SignedCustomerIdentity;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
 final class CrmServiceProvider extends ModuleServiceProvider
@@ -18,6 +20,7 @@ final class CrmServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         parent::register();
+        $this->app->bind(CustomerIdentity::class, SignedCustomerIdentity::class);
         $this->app->bind(ContactBook::class, Contacts::class);
         $this->app->bind(LeadBook::class, Leads::class);
     }

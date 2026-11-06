@@ -7,6 +7,7 @@ use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\CustomerIdentity;
 use Wurk\Messaging\Mail\CustomerMessageMail;
 use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Plans\Actions\PackageCatalog;
@@ -114,4 +115,31 @@ it('shows the till today’s sales and tells it what it may do', function () {
     $this->actingAs($this->people['till'])->get($this->url)->assertInertia(fn ($p) => $p->component('Sales::Record')
         ->where('sales.0.customer', 'Sipho')->where('sales.0.amount_cents', 45000)->where('canApprove', false)->where('canManage', false));
     $this->actingAs($this->people['owner'])->get($this->url)->assertInertia(fn ($p) => $p->where('canApprove', true)->where('canManage', true));
+});
+
+it('records a sale for a customer proven by their portal code — no phone needed — and refuses altered, foreign or expired codes', function () {
+    $sipho = ($this->in)(fn () => app(ContactBook::class)->find('082 555 0101')['id']);
+    $code = ($this->in)(fn () => app(CustomerIdentity::class)->tokenFor($sipho));
+    expect($code)->toStartWith('WURK-ID:');
+
+    $this->actingAs($this->people['till'])->postJson("{$this->url}/identify", ['code' => $code])->assertOk()->assertJsonPath('customer.name', 'Sipho');
+    $this->actingAs($this->people['till'])->post($this->url, ['customer_code' => $code, 'amount' => '450', 'method' => 'card', 'branch_id' => $this->main])
+        ->assertSessionHas('status', 'Sale recorded.');
+    ($this->in)(function () use ($sipho) {
+        expect(Sale::query()->sole()->contact_id)->toBe($sipho)
+            ->and(app(ContactBook::class)->contactFor('sale', Sale::query()->sole()->id))->toBe($sipho)
+            ->and(app(Commissions::class)->balance($this->thandi->id)['pending'])->toBe(4500); // Sipho's referrer earns
+    });
+    Mail::assertSent(CustomerMessageMail::class, fn ($m) => $m->hasTo('sipho@example.com'));
+
+    $altered = substr($code, 0, -1).(str_ends_with($code, '0') ? '1' : '0');
+    $this->actingAs($this->people['till'])->postJson("{$this->url}/identify", ['code' => $altered])->assertStatus(422);
+    $this->actingAs($this->people['till'])->post($this->url, ['customer_code' => $altered, 'amount' => '10', 'method' => 'cash', 'branch_id' => $this->main])
+        ->assertSessionHasErrors(['customer_code' => 'That code isn’t valid or has expired — ask the customer to refresh it in their account.']);
+    $kasi = $this->createTenant('kasi-threads');
+    $foreign = $this->ctx->run($kasi, fn () => app(CustomerIdentity::class)->tokenFor($sipho));
+    $this->actingAs($this->people['till'])->postJson("{$this->url}/identify", ['code' => $foreign])->assertStatus(422);
+    $this->travel(6)->minutes();
+    $this->actingAs($this->people['till'])->postJson("{$this->url}/identify", ['code' => $code])->assertStatus(422);
+    expect(($this->in)(fn () => Sale::query()->count()))->toBe(1); // nothing else saved
 });
