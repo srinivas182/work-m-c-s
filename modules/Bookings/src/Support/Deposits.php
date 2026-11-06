@@ -80,14 +80,18 @@ final readonly class Deposits
         if ($wallet !== null && $wallet['cents'] > 0) {
             $credit = app(StoreCredit::class);
             $contact = $credit->contactFromPass($wallet['pass']) ?? throw new \DomainException('Your wallet couldn’t be used — sign in to your account again and retry.');
-            $credit->spend($contact, $wallet['cents'], self::source($booking), $booking->id, $amountCents);
-            $booking->update(['wallet_cents' => $wallet['cents']]);
-            if ($wallet['cents'] >= $amountCents) { // the wallet paid all of it
-                $this->settle($booking->refresh(), $reference);
+            // Up to what the business's share rule allows for this deposit (the booking form only knows the price).
+            $cents = min($wallet['cents'], $credit->usableFor($contact, $amountCents));
+            if ($cents > 0) {
+                $credit->spend($contact, $cents, self::source($booking), $booking->id, $amountCents);
+                $booking->update(['wallet_cents' => $cents]);
+                if ($cents >= $amountCents) { // the wallet paid all of it
+                    $this->settle($booking->refresh(), $reference);
 
-                return $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference);
+                    return $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference);
+                }
+                $amountCents -= $cents; // the card pays the rest
             }
-            $amountCents -= $wallet['cents']; // the card pays the rest
         }
         BookingHold::query()->updateOrCreate(['reference' => $reference], ['tenant_id' => $this->context->id(), 'expires_at' => Instant::db($expires)]);
         $name = $booking->customer_name;

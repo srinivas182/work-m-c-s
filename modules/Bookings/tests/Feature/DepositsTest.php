@@ -142,12 +142,14 @@ describe('paying a deposit partly or wholly from the wallet', function () {
 
             public function available(string $contactId): int
             {
-                return 8000;
+                return 20000;
             }
+
+            public int $share = 100; // the business's share rule, in percent
 
             public function usableFor(string $contactId, int $orderTotalCents): int
             {
-                return 8000;
+                return min(20000, intdiv($orderTotalCents * $this->share, 100));
             }
 
             public function spend(string $contactId, int $cents, string $sourceType, string $sourceId, int $orderTotalCents): void
@@ -193,6 +195,12 @@ describe('paying a deposit partly or wholly from the wallet', function () {
         Event::assertDispatched(PurchaseMade::class, fn ($e) => $e->paidCents === 10000); // decision E
         ($this->in)(fn () => expect(app(CancellationPolicy::class)->refund($booking->refresh()))->toBeTrue());
         expect($this->credit->back)->toBe([['booking', 3000]]);
+    });
+
+    it('uses only what the share rule allows for the actual deposit — the card pays the rest', function () {
+        $this->credit->share = 50;
+        [$booking] = ($this->book)(['pass' => 'good', 'cents' => 10000]); // the form offered "up to", based on the price
+        expect($booking->wallet_cents)->toBe(5000)->and(end($this->yocoAmounts))->toBe(5000)->and($booking->status)->toBe('pending_payment');
     });
 
     it('confirms at once when the wallet pays it all, refuses forged passes, and gives the wallet back when a hold expires', function () {
