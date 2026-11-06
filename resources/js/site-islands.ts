@@ -1089,6 +1089,32 @@ async function checkout(root: HTMLElement): Promise<void> {
   const trapWrap = el('div', { class: 'absolute -left-[9999px]' }, trap);
   trapWrap.setAttribute('aria-hidden', 'true');
   const place = el('button', { type: 'submit', class: button }, 'Place order');
+  // A customer signed in to this business's portal can use their wallet (Sprint 13.6c). The pass proves who they are;
+  // the usable amount is worked out on the items (delivery only adds to the total), so the server never refuses it as too much.
+  const useWallet = el('input', { type: 'checkbox' });
+  useWallet.id = id('use-wallet');
+  const walletLabel = el('label', { htmlFor: useWallet.id }, '');
+  const walletRow = el('div', { class: 'flex items-start gap-2' }, useWallet, walletLabel);
+  walletRow.hidden = true;
+  let wallet: { pass: string; cents: number } | null = null;
+  const itemsCents = (data?.lines ?? []).reduce((sum, l) => sum + l.unit_cents * l.quantity, 0);
+  void fetch(`/account/wallet-pass?total=${itemsCents}`, {
+    headers: { Accept: 'application/json' },
+    credentials: 'same-origin',
+  })
+    .then((r) =>
+      r.ok
+        ? (r.json() as Promise<{ signed_in: boolean; usable_cents?: number; pass?: string }>)
+        : null,
+    )
+    .then((w) => {
+      if (w?.signed_in && w.pass && (w.usable_cents ?? 0) > 0) {
+        wallet = { pass: w.pass, cents: w.usable_cents ?? 0 };
+        walletLabel.textContent = `Use ${randOf(wallet.cents)} from your wallet`;
+        walletRow.hidden = false;
+      }
+    })
+    .catch(() => undefined); // not signed in, or the portal isn't available: checkout as usual
 
   const payCard = el('input', { type: 'radio', name: `${uid}-pay`, value: 'card', checked: true });
   payCard.id = id('pay-card');
@@ -1238,6 +1264,7 @@ async function checkout(root: HTMLElement): Promise<void> {
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my order.'),
     ),
     trapWrap,
+    walletRow,
     place,
     status,
   );
@@ -1284,6 +1311,7 @@ async function checkout(root: HTMLElement): Promise<void> {
                 : null,
         notes: notes.value || null,
         payment: payment(),
+        wallet: useWallet.checked && wallet ? wallet : null,
         consent: consent.checked ? '1' : null,
         website: trap.value,
       }),

@@ -134,6 +134,14 @@ describe('paying from the wallet', function () {
         expect(($this->wallet)())->toBe(5000);
     });
 
+    it('tells the checkout how much of the wallet this order may use (the business’s share rule)', function () {
+        ($this->in)(function () {
+            $credit = app(StoreCredit::class);
+            expect($credit->usableFor($this->thandi->contact_id, 25000))->toBe(5000)   // balance R50 < 50% of R250
+                ->and($credit->usableFor($this->thandi->contact_id, 6000))->toBe(3000); // 50% of R60
+        });
+    });
+
     it('pays the whole order from the wallet when the business allows it', function () {
         ($this->in)(fn () => ReferralProgramme::query()->update(['max_wallet_bp' => 10000]));
         ($this->in)(fn () => $this->tee->update(['price_cents' => 4000]));

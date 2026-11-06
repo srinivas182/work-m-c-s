@@ -140,7 +140,10 @@ final class PortalController
             }
             $credit = app(StoreCredit::class);
 
-            return ['signed_in' => true, 'available_cents' => $credit->available($me['contact_id']), 'pass' => $credit->passFor($me['contact_id'])];
+            $total = max(0, min(100_000_000, (int) $request->query('total', '0')));
+
+            return ['signed_in' => true, 'available_cents' => $credit->available($me['contact_id']), 'usable_cents' => $total > 0 ? $credit->usableFor($me['contact_id'], $total) : 0,
+                'pass' => $credit->passFor($me['contact_id'])];
         });
 
         return (new JsonResponse($data))->header('Cache-Control', 'private, no-store');

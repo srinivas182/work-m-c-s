@@ -122,7 +122,7 @@ it('gives a signed-in customer a short-lived wallet pass that only identifies th
     $this->post("{$site}/verify", ['code' => $code, 'name' => 'Sipho Ndlovu']);
     $this->getJson("{$site}/wallet-pass")->assertJson(['signed_in' => false]);            // not yet consented
     $this->post("{$site}/consent", ['agree' => '1']);
-    $r = $this->getJson("{$site}/wallet-pass")->assertOk()->assertJson(['signed_in' => true, 'available_cents' => 0])->assertHeader('Cache-Control', 'no-store, private');
+    $r = $this->getJson("{$site}/wallet-pass?total=25000")->assertOk()->assertJson(['signed_in' => true, 'available_cents' => 0, 'usable_cents' => 0])->assertHeader('Cache-Control', 'no-store, private');
     $pass = (string) $r->json('pass');
     $sipho = ($this->in)($this->glow, fn () => app(ContactBook::class)->find(null, 'sipho@example.com')['id']);
 
