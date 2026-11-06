@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/design-system';
 import { rand } from '@/lib/money';
 import { PortalLayout } from '../components/PortalLayout';
@@ -27,12 +27,35 @@ const KIND: Record<string, string> = {
 
 export default function Home({ business, name, rewards, history }: Props) {
   const [copied, setCopied] = useState(false);
+  const [idVersion, setIdVersion] = useState(0);
+  useEffect(() => {
+    const t = window.setInterval(() => setIdVersion((v) => v + 1), 4 * 60 * 1000); // codes last 5 minutes
+    return () => window.clearInterval(t);
+  }, []);
   return (
     <PortalLayout
       business={business}
       title={name ? `Hi ${name.split(' ')[0]}` : 'Your account'}
       signedIn
     >
+      <Card>
+        <CardHeader>
+          <CardTitle>Show this at the till</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-2 text-sm">
+          <p>
+            So {business} can add your in-store purchases to your account. It changes every few
+            minutes.
+          </p>
+          <img
+            src={`/account/id-qr.svg?v=${idVersion}`}
+            alt="Your code for the till"
+            width={200}
+            height={200}
+            className="rounded-md bg-white p-2"
+          />
+        </CardContent>
+      </Card>
       {rewards && (
         <>
           <Card>
