@@ -9,6 +9,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +20,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Identity\Contracts\Accounts;
 use Wurk\Identity\Contracts\Verification;
+use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Portal\Support\CustomerSession;
 use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -126,6 +128,25 @@ final class PortalController
         });
 
         return response((string) $svg, 200, ['Content-Type' => 'image/svg+xml', 'Cache-Control' => 'private, no-store']);
+    }
+
+    /** For the site's checkout: the signed-in customer's usable wallet and a short-lived pass to spend it. */
+    public function walletPass(Request $request, string $handle): JsonResponse
+    {
+        $data = $this->in($handle, function () use ($request) {
+            $me = app(CustomerSession::class)->current($request);
+            if ($me === null || ! $me['consented']) {
+                return ['signed_in' => false];
+            }
+            $credit = app(StoreCredit::class);
+
+            $total = max(0, min(100_000_000, (int) $request->query('total', '0')));
+
+            return ['signed_in' => true, 'available_cents' => $credit->available($me['contact_id']), 'usable_cents' => $total > 0 ? $credit->usableFor($me['contact_id'], $total) : 0,
+                'pass' => $credit->passFor($me['contact_id'])];
+        });
+
+        return (new JsonResponse($data))->header('Cache-Control', 'private, no-store');
     }
 
     public function signOut(Request $request, string $handle): RedirectResponse

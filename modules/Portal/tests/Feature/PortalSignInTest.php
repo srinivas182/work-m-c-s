@@ -9,6 +9,7 @@ use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\PurchaseMade;
+use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -112,4 +113,26 @@ it('shows the signed-in customer their wallet, link and QR, who they referred (f
     $this->post("{$kasi}/verify", ['code' => ($this->code)($kasi, 'sipho@example.com'), 'name' => 'Sipho Ndlovu']); // Kasi Threads hasn't met him: it asks
     $this->post("{$kasi}/consent", ['agree' => '1']);
     $this->get($kasi)->assertInertia(fn (Assert $p) => $p->component('Portal::Home')->where('rewards', null));
+});
+
+it('gives a signed-in customer a short-lived wallet pass that only identifies them, at this business, unaltered', function () {
+    $site = ($this->site)('glow-salon');
+    $this->getJson("{$site}/wallet-pass")->assertOk()->assertJson(['signed_in' => false]); // not signed in: no pass
+    $code = ($this->code)($site, 'sipho@example.com');
+    $this->post("{$site}/verify", ['code' => $code, 'name' => 'Sipho Ndlovu']);
+    $this->getJson("{$site}/wallet-pass")->assertJson(['signed_in' => false]);            // not yet consented
+    $this->post("{$site}/consent", ['agree' => '1']);
+    $r = $this->getJson("{$site}/wallet-pass?total=25000")->assertOk()->assertJson(['signed_in' => true, 'available_cents' => 0, 'usable_cents' => 0])->assertHeader('Cache-Control', 'no-store, private');
+    $pass = (string) $r->json('pass');
+    $sipho = ($this->in)($this->glow, fn () => app(ContactBook::class)->find(null, 'sipho@example.com')['id']);
+
+    ($this->in)($this->glow, function () use ($pass, $sipho) {
+        $credit = app(StoreCredit::class);
+        expect($credit->contactFromPass($pass))->toBe($sipho)
+            ->and($credit->contactFromPass('x'.$pass))->toBeNull()                       // altered
+            ->and($credit->contactFromPass(substr($pass, 0, -1).(str_ends_with($pass, '0') ? '1' : '0')))->toBeNull(); // signature altered (always a different character)
+    });
+    expect(($this->in)($this->kasi, fn () => app(StoreCredit::class)->contactFromPass($pass)))->toBeNull(); // another business
+    $this->travel(16)->minutes();
+    expect(($this->in)($this->glow, fn () => app(StoreCredit::class)->contactFromPass($pass)))->toBeNull(); // expired
 });

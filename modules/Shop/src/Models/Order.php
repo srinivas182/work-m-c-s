@@ -26,6 +26,8 @@ use Wurk\Tenancy\Contracts\BranchDirectory;
  * @property int $subtotal_cents
  * @property int $delivery_cents
  * @property int $total_cents
+ * @property int $wallet_cents
+ * @property int $wallet_refunded_cents
  * @property Carbon|null $hold_expires_at
  * @property int $refunded_cents
  * @property Carbon|null $paid_at
@@ -55,7 +57,7 @@ final class Order extends Model
 
     protected function casts(): array
     {
-        return ['shipping_to' => 'array', 'number' => 'integer', 'subtotal_cents' => 'integer', 'delivery_cents' => 'integer', 'total_cents' => 'integer', 'hold_expires_at' => 'datetime', 'refunded_cents' => 'integer', 'paid_at' => 'datetime'];
+        return ['shipping_to' => 'array', 'number' => 'integer', 'subtotal_cents' => 'integer', 'wallet_cents' => 'integer', 'wallet_refunded_cents' => 'integer', 'delivery_cents' => 'integer', 'total_cents' => 'integer', 'hold_expires_at' => 'datetime', 'refunded_cents' => 'integer', 'paid_at' => 'datetime'];
     }
 
     /** Anything created without a branch belongs to the business's main branch. */
@@ -68,5 +70,11 @@ final class Order extends Model
         self::created(function (self $o): void {
             app(ContactBook::class)->remember($o->customer_name, $o->customer_phone, $o->customer_email, 'order', $o->id, $o->branch_id, "Order #{$o->number}");
         });
+    }
+
+    /** What the customer still pays by card or EFT: the total less what their wallet paid. */
+    public function dueCents(): int
+    {
+        return max(0, $this->total_cents - (int) $this->wallet_cents);
     }
 }

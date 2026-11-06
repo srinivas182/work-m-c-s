@@ -20,6 +20,7 @@ use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\ManageLink;
 use Wurk\Bookings\Support\SlotTaken;
+use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\CurrentTenant;
@@ -88,6 +89,7 @@ final class PublicBookingController
                 'online' => ['nullable', 'boolean'],
                 'health_consent' => ['nullable', 'boolean'],
                 'consent' => ['accepted'],
+                'wallet' => ['nullable', 'array'], 'wallet.pass' => ['required_with:wallet', 'string', 'max:600'], 'wallet.cents' => ['required_with:wallet', 'integer', 'min:1'],
                 'website' => ['nullable', 'string'], // hidden from people: only bots fill it in
             ], ['consent.accepted' => 'Please agree to be contacted about your booking.']);
             if (($data['website'] ?? '') !== '') {
@@ -117,9 +119,16 @@ final class PublicBookingController
             }
             if ($deposit > 0) {
                 $returnUrl = $request->getSchemeAndHttpHost().'/book/return';
-                $payUrl = $deposits->start($booking, $deposit, (string) $data['email'], $returnUrl);
+                try {
+                    $payUrl = $deposits->start($booking, $deposit, (string) $data['email'], $returnUrl, self::wallet($data));
+                } catch (\DomainException $e) {
+                    $booker->cancel($booking, null, 'expired'); // the wallet couldn't be used: don't hold the time
+
+                    return new JsonResponse(['message' => $e->getMessage()], 409);
+                }
                 if ($payUrl === null) {
                     $booker->cancel($booking, null, 'expired'); // payments unavailable: don't hold the time
+                    app(StoreCredit::class)->giveBack('booking', $booking->id, (int) $booking->refresh()->wallet_cents); // and the wallet part back
 
                     return new JsonResponse(['message' => 'Online payment isn’t available right now. Please call or message us to book.'], 503);
                 }
@@ -158,5 +167,16 @@ final class PublicBookingController
         }
 
         return $this->context->run($tenant, fn () => $fn($tenant));
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{pass: string, cents: int}|null
+     */
+    public static function wallet(array $data): ?array
+    {
+        $w = $data['wallet'] ?? null;
+
+        return is_array($w) ? ['pass' => (string) ($w['pass'] ?? ''), 'cents' => (int) ($w['cents'] ?? 0)] : null;
     }
 }

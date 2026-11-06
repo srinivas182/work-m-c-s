@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 13.6c (spending the wallet)
+- **Wallet at shop checkout and on booking and class deposits**, for customers signed in to the business's portal: "Use R… from your wallet" (bookings: "up to", as the form knows the price, not the deposit). The site's checkout has no session, so the portal issues a **signed wallet pass** (bound to the business and customer; 15 minutes) that the server checks before spending.
+- Card payments ask for and check **only what's due**; ledgers record only cash received; paid wholly from the wallet is paid at once. **Rewards on the full amount** (decision E).
+- **Refunds** return the wallet part to the wallet and the rest to the card or account (decision F) — in proportion, exact on the last refund. Unpaid orders and holds that expire, or that can't be paid, give the wallet part back. A wallet problem can never stop a form working.
+
 ### Added — Sprint 13.6a (customer sign-in and portal)
 - **The customer portal** (new Portal module) at `{business}/account` on the business's own address, with its own host-only session (a new "portal" surface: 2 hours idle, 30 days, remember me). A session counts only for the business it was started at.
 - **Sign in with a code** to phone or email (the same rate limits as signup); new customers give their name (asked before the code is checked, so it isn't spent); linked to their customer record, found as bookings and orders find it. **POPIA consent** once, before the portal opens.

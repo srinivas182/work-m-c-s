@@ -21,4 +21,13 @@ interface StoreCredit
 
     /** A refund of an order paid partly with credit: this much goes back to the customer's credit. */
     public function giveBack(string $sourceType, string $sourceId, int $cents): void;
+
+    /**
+     * A short-lived signed pass proving the bearer is this customer, for checkouts that have no session (the site's
+     * checkout). Issued only to a customer signed in to the portal.
+     */
+    public function passFor(string $contactId): string;
+
+    /** The customer a pass was issued to — null if it's forged, expired, or for another business. */
+    public function contactFromPass(string $pass): ?string;
 }

@@ -18,6 +18,7 @@ use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\ManageLink;
+use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -50,7 +51,7 @@ final class PublicClassController
         return $this->within($handle, function (CurrentTenant $tenant) use ($request, $session, $booker, $deposits): JsonResponse {
             $data = $request->validate([
                 'name' => ['required', 'string', 'max:120'], 'phone' => ['required', 'string', 'max:40'], 'email' => ['nullable', 'email', 'max:160'],
-                'consent' => ['accepted'], 'health_consent' => ['nullable', 'boolean'], 'website' => ['nullable', 'string'],
+                'consent' => ['accepted'], 'wallet' => ['nullable', 'array'], 'wallet.pass' => ['required_with:wallet', 'string', 'max:600'], 'wallet.cents' => ['required_with:wallet', 'integer', 'min:1'], 'health_consent' => ['nullable', 'boolean'], 'website' => ['nullable', 'string'],
             ], ['consent.accepted' => 'Please agree to be contacted about your class.']);
             if (($data['website'] ?? '') !== '') {
                 return new JsonResponse(['booked' => true], 201);
@@ -73,9 +74,16 @@ final class PublicClassController
                 $a->update(['consent_version' => HealthPractice::CONSENT_VERSION, 'consent_at' => now()]);
             }
             if ($price > 0) {
-                $payUrl = $deposits->start($a, $price, (string) $data['email'], $request->getSchemeAndHttpHost().'/book/return');
+                try {
+                    $payUrl = $deposits->start($a, $price, (string) $data['email'], $request->getSchemeAndHttpHost().'/book/return', PublicBookingController::wallet($data));
+                } catch (\DomainException $e) {
+                    $a->update(['status' => 'expired']); // the wallet couldn't be used: don't hold the place
+
+                    return new JsonResponse(['message' => $e->getMessage()], 409);
+                }
                 if ($payUrl === null) {
                     $a->update(['status' => 'expired']); // payments unavailable: don't hold the place
+                    app(StoreCredit::class)->giveBack('class', $a->id, (int) $a->refresh()->wallet_cents); // and the wallet part back
 
                     return new JsonResponse(['message' => 'Online payment isn’t available right now. Please call or message us to book.'], 503);
                 }

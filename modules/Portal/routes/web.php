@@ -13,4 +13,5 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->middleware('web')->prefi
     Route::post('/consent', [PortalController::class, 'consent'])->name('.consent');
     Route::post('/sign-out', [PortalController::class, 'signOut'])->name('.sign-out');
     Route::get('/referral-qr.svg', [PortalController::class, 'qr'])->name('.qr');
+    Route::get('/wallet-pass', [PortalController::class, 'walletPass'])->middleware('throttle:30,1,wallet-pass')->name('.wallet-pass');
 });

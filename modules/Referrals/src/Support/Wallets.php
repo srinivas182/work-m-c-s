@@ -110,6 +110,28 @@ final readonly class Wallets implements StoreCredit
         return $total;
     }
 
+    /** Signed with the app key; bound to this business and customer; valid 15 minutes. */
+    public function passFor(string $contactId): string
+    {
+        $body = rtrim(strtr(base64_encode((string) json_encode(['t' => $this->context->id(), 'c' => $contactId, 'e' => now()->addMinutes(15)->getTimestamp()])), '+/', '-_'), '=');
+
+        return $body.'.'.hash_hmac('sha256', $body, 'wallet-pass|'.(string) config('app.key'));
+    }
+
+    public function contactFromPass(string $pass): ?string
+    {
+        [$body, $sig] = array_pad(explode('.', $pass, 2), 2, '');
+        if ($body === '' || ! hash_equals(hash_hmac('sha256', $body, 'wallet-pass|'.(string) config('app.key')), $sig)) {
+            return null; // forged or altered
+        }
+        $d = json_decode((string) base64_decode(strtr($body, '-_', '+/')), true);
+        if (! is_array($d) || ($d['t'] ?? null) !== $this->context->id() || (int) ($d['e'] ?? 0) < now()->getTimestamp()) {
+            return null; // another business's, or expired
+        }
+
+        return is_string($d['c'] ?? null) ? $d['c'] : null;
+    }
+
     private function line(string $memberId, string $kind, int $cents, ?string $sourceType, ?string $sourceId): void
     {
         $this->db()->table('referral_ledger')->insert(['id' => (string) Str::ulid(), 'tenant_id' => $this->context->id(), 'member_id' => $memberId, 'purchase_id' => null,

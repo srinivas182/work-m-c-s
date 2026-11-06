@@ -143,6 +143,7 @@ describe('booking island', () => {
 
   it('books: service → time → details → confirmation (focused)', async () => {
     const fetchMock = vi.fn((url: string, init?: RequestInit) => {
+      if (url.startsWith('/account/wallet-pass')) return respond(200, { signed_in: false });
       if (url === '/book/services') return respond(200, services);
       if (url.startsWith('/book/times')) return respond(200, times);
       return respond(201, {
@@ -184,6 +185,50 @@ describe('booking island', () => {
     });
     expect(document.querySelector('h3')!.textContent).toBe('You’re booked');
     expect(document.activeElement?.textContent).toContain('Monday 3 May, 09:00');
+    vi.unstubAllGlobals();
+  });
+
+  it('offers a signed-in customer their wallet, and sends it with the booking when ticked', async () => {
+    const fetchMock = vi.fn((url: string, init?: RequestInit) => {
+      if (url.startsWith('/account/wallet-pass'))
+        return respond(200, { signed_in: true, usable_cents: 3000, pass: 'p1' });
+      if (url === '/book/services') return respond(200, services);
+      if (url.startsWith('/book/times')) return respond(200, times);
+      return respond(201, {
+        booked: true,
+        service: 'Knotless braids',
+        when: 'Monday 3 May, 09:00',
+        sent: JSON.parse(String(init?.body)),
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    mount();
+    await settle();
+    await settle();
+    const group = document.querySelector('[role="group"][aria-label="Free times"]')!;
+    (group.querySelector('button') as HTMLButtonElement).click();
+    const label = [...document.querySelectorAll('label')].find(
+      (l) => l.textContent === 'Use up to R30.00 from your wallet',
+    );
+    expect(label).toBeDefined();
+    const byLabel = (text: string) =>
+      document.getElementById(
+        [...document.querySelectorAll('label')].find((l) => l.textContent === text)!.htmlFor,
+      ) as HTMLInputElement;
+    byLabel('Your name').value = 'Sipho';
+    byLabel('Phone').value = '082 555 0101';
+    byLabel('I agree to be contacted about my booking.').checked = true;
+    byLabel('Use up to R30.00 from your wallet').checked = true;
+    document.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    await settle();
+    const sent = JSON.parse(
+      String(
+        fetchMock.mock.calls
+          .filter((c) => (c[1] as RequestInit | undefined)?.method === 'POST')
+          .at(-1)![1]!.body,
+      ),
+    );
+    expect(sent.wallet).toEqual({ pass: 'p1', cents: 3000 });
     vi.unstubAllGlobals();
   });
 
@@ -541,7 +586,10 @@ describe('booking widget with several branches', () => {
     select('Branch').dispatchEvent(new Event('change'));
     await settle();
     expect(options()).toEqual(['Braids (60 min, R500)']); // Colour isn't offered in Sandton
-    expect(String(fetchMock.mock.calls.at(-1)![0])).toContain('branch=b-sandton');
+    // The latest times request carries the branch (changing branch also refreshes the wallet option).
+    expect(
+      String(fetchMock.mock.calls.filter((c) => String(c[0]).startsWith('/book/times')).at(-1)![0]),
+    ).toContain('branch=b-sandton');
     vi.unstubAllGlobals();
   });
 });
