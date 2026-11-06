@@ -58,25 +58,31 @@ final class PortalController
         return $this->redirect($handle, function () use ($request) {
             $d = $request->validate(['code' => ['required', 'string', 'max:10'], 'name' => ['nullable', 'string', 'max:80']], ['code.required' => 'Enter the code we sent you.']);
             $contact = (string) $request->session()->get(self::PENDING, '');
-            if ($contact === '' || ! app(Verification::class)->confirm($contact, trim($d['code']), 'portal')) {
+            if ($contact === '') {
                 throw ValidationException::withMessages(['code' => 'That code isn’t right, or it has expired. Ask for a new one.']);
             }
             $book = app(ContactBook::class);
             $isEmail = str_contains($contact, '@');
             $known = $book->find($isEmail ? null : $contact, $isEmail ? $contact : null);
             $name = trim((string) ($d['name'] ?? '')) ?: ($known['name'] ?? '');
+            // Ask for the name BEFORE checking the code: checking uses it up, so asking afterwards would spend it.
             if ($name === '') {
                 $request->session()->put('portal.need_name', true);
                 throw ValidationException::withMessages(['name' => 'Tell us your name to finish signing in.']);
             }
+            if (! app(Verification::class)->confirm($contact, trim($d['code']), 'portal')) {
+                throw ValidationException::withMessages(['code' => 'That code isn’t right, or it has expired. Ask for a new one.']);
+            }
             [$first, $last] = array_pad(explode(' ', $name, 2), 2, '');
             $identity = app(Accounts::class)->forVerifiedContact($contact, $first, $last);
             $contactId = $known['id'] ?? $book->remember($name, $isEmail ? null : $contact, $isEmail ? $contact : null, 'portal', $identity, null, 'Signed in to the portal');
+            // Sign in first: it starts a fresh session (against session fixation), so this business is marked after it.
+            $redirect = app(Accounts::class)->signIn($request, $identity, '/account');
             app(CustomerSession::class)->start($request, $identity, $contactId);
             $request->session()->forget([self::PENDING, 'portal.masked', 'portal.need_name']);
             app(AuditLog::class)->record('portal.signed_in', 'portal_customer', $identity, []);
 
-            return app(Accounts::class)->signIn($request, $identity, '/account');
+            return $redirect;
         });
     }
 
