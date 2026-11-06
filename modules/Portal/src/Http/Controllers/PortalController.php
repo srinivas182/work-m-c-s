@@ -18,6 +18,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\CustomerIdentity;
 use Wurk\Identity\Contracts\Accounts;
 use Wurk\Identity\Contracts\Verification;
 use Wurk\Payments\Contracts\StoreCredit;
@@ -147,6 +148,20 @@ final class PortalController
         });
 
         return (new JsonResponse($data))->header('Cache-Control', 'private, no-store');
+    }
+
+    /** "Show this at the till": a QR proving who the signed-in customer is, for a few minutes (Sprint 13.6d). */
+    public function idQr(Request $request, string $handle): \Symfony\Component\HttpFoundation\Response
+    {
+        $svg = $this->in($handle, function () use ($request) {
+            $me = app(CustomerSession::class)->current($request);
+            abort_if($me === null || ! $me['consented'], 404);
+
+            return (new Writer(new ImageRenderer(new RendererStyle(320, 2), new SvgImageBackEnd)))
+                ->writeString(app(CustomerIdentity::class)->tokenFor($me['contact_id']));
+        });
+
+        return response((string) $svg, 200, ['Content-Type' => 'image/svg+xml', 'Cache-Control' => 'private, no-store']);
     }
 
     public function signOut(Request $request, string $handle): RedirectResponse

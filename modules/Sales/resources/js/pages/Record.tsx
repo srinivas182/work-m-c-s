@@ -1,5 +1,5 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Badge,
   Button,
@@ -52,7 +52,60 @@ export default function RecordSale({
     method: 'cash',
     note: '',
     branch_id: branches[0]?.id ?? '',
+    customer_code: '',
   });
+  const [proven, setProven] = useState<{ name: string; email: boolean } | null>(null);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const video = useRef<HTMLVideoElement>(null);
+  const canScan =
+    typeof window !== 'undefined' &&
+    'BarcodeDetector' in window &&
+    !!navigator.mediaDevices?.getUserMedia;
+  const identify = async (code: string) => {
+    const token =
+      (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content ?? '';
+    const r = await fetch(`${base}/identify`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token,
+      },
+      body: JSON.stringify({ code }),
+    });
+    const body = (await r.json().catch(() => ({}))) as {
+      customer?: { name: string; email: boolean };
+      message?: string;
+    };
+    setProven(r.ok && body.customer ? body.customer : null);
+    setCodeError(r.ok ? null : (body.message ?? 'That code couldn’t be checked.'));
+  };
+  type Detector = { detect: (v: HTMLVideoElement) => Promise<{ rawValue: string }[]> };
+  const scan = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' },
+    });
+    if (!video.current) return;
+    video.current.srcObject = stream;
+    await video.current.play();
+    const Ctor = (
+      window as unknown as { BarcodeDetector: new (o: { formats: string[] }) => Detector }
+    ).BarcodeDetector;
+    const detector = new Ctor({ formats: ['qr_code'] });
+    const stop = () => stream.getTracks().forEach((t) => t.stop());
+    for (let i = 0; i < 300; i++) {
+      // about 30 seconds
+      const found = (await detector.detect(video.current).catch(() => []))[0]?.rawValue;
+      if (found) {
+        stop();
+        form.setData('customer_code', found);
+        await identify(found);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    stop();
+  };
   const [found, setFound] = useState<{ name: string; email: boolean } | null | 'new'>(null);
   const [refund, setRefund] = useState<{ id: string; amount: string } | null>(null);
   const find = async () => {
@@ -93,11 +146,51 @@ export default function RecordSale({
                   onSuccess: () => {
                     form.reset();
                     setFound(null);
+                    setProven(null);
                   },
                 });
               }}
             >
               <div className="flex flex-wrap items-end gap-2">
+                <Field
+                  label="Customer’s code (from their account)"
+                  error={codeError ?? form.errors.customer_code}
+                >
+                  <Input
+                    autoComplete="off"
+                    value={form.data.customer_code}
+                    onChange={(e) => {
+                      form.setData('customer_code', e.target.value);
+                      setProven(null);
+                      setCodeError(null);
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value.trim()) void identify(e.target.value.trim());
+                    }}
+                  />
+                </Field>
+                {canScan && (
+                  <Button type="button" variant="secondary" onClick={() => void scan()}>
+                    Scan with camera
+                  </Button>
+                )}
+              </div>
+              {canScan && (
+                <video
+                  ref={video}
+                  className="max-w-xs rounded-md"
+                  muted
+                  playsInline
+                  aria-hidden="true"
+                />
+              )}
+              {proven && (
+                <p role="status" className="text-sm font-medium">
+                  Customer: {proven.name}
+                  {proven.email ? ' (receipt by email)' : ''}
+                </p>
+              )}
+              <div className="flex flex-wrap items-end gap-2" hidden={!!proven}>
                 <Field label="Customer’s phone" error={form.errors.phone}>
                   <Input
                     type="tel"

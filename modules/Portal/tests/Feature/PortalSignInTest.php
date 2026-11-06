@@ -136,3 +136,13 @@ it('gives a signed-in customer a short-lived wallet pass that only identifies th
     $this->travel(16)->minutes();
     expect(($this->in)($this->glow, fn () => app(StoreCredit::class)->contactFromPass($pass)))->toBeNull(); // expired
 });
+
+it('shows the signed-in customer a QR proving who they are — and nobody else', function () {
+    $site = ($this->site)('glow-salon');
+    $this->get("{$site}/id-qr.svg")->assertNotFound();
+    $this->post("{$site}/verify", ['code' => ($this->code)($site, 'sipho@example.com'), 'name' => 'Sipho Ndlovu']);
+    $this->get("{$site}/id-qr.svg")->assertNotFound(); // not until they've agreed
+    $this->post("{$site}/consent", ['agree' => '1']);
+    $qr = $this->get("{$site}/id-qr.svg")->assertOk()->assertHeader('Content-Type', 'image/svg+xml')->assertHeader('Cache-Control', 'no-store, private');
+    expect((string) $qr->getContent())->toContain('<svg');
+});

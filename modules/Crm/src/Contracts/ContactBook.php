@@ -46,4 +46,10 @@ interface ContactBook
      * @return list<array{type: string, summary: string, at: \DateTimeInterface}>
      */
     public function history(string $contactId, array $types, int $limit = 50): array;
+
+    /**
+     * Link a record (e.g. an in-store sale) to a customer already known by id — as remember() does for a name and
+     * phone; raises ContactRemembered the same way.
+     */
+    public function link(string $contactId, string $sourceType, string $sourceId, ?string $branchId, string $summary): void;
 }

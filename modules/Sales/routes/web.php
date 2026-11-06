@@ -10,6 +10,7 @@ Route::tenant(function (): void {
         Route::middleware('permission:sales.record')->prefix('sales')->name('tenant.sales')->group(function (): void {
             Route::get('/', [SalesController::class, 'index']);
             Route::get('/find', [SalesController::class, 'find'])->middleware('throttle:60,1,sales-find')->name('.find');
+            Route::post('/identify', [SalesController::class, 'identify'])->middleware('throttle:60,1,sales-identify')->name('.identify');
             Route::post('/', [SalesController::class, 'store'])->name('.store');
         });
         Route::middleware('permission:sales.approve')->prefix('sales/{sale}')->name('tenant.sales')->group(function (): void {

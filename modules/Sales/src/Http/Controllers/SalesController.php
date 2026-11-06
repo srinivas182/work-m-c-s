@@ -14,6 +14,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Access\Contracts\BranchRestriction;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\CustomerIdentity;
 use Wurk\Sales\Models\Sale;
 use Wurk\Sales\Support\SaleProblem;
 use Wurk\Sales\Support\Sales;
@@ -54,14 +55,31 @@ final class SalesController
         return new JsonResponse(['customer' => $c === null ? null : ['name' => $c['name'], 'email' => $c['email'] !== null]]);
     }
 
+    /** Staff scanned (or typed) the customer's code: who it proves — or why not. */
+    public function identify(Request $request): JsonResponse
+    {
+        $contact = app(CustomerIdentity::class)->contactFromToken((string) $request->validate(['code' => ['required', 'string', 'max:600']])['code']);
+        if ($contact === null) {
+            return new JsonResponse(['message' => 'That code isn’t valid or has expired — ask the customer to refresh it in their account.'], 422);
+        }
+        $names = $this->contacts->names([$contact]);
+
+        return new JsonResponse(['customer' => ['name' => $names[$contact] ?? 'Customer', 'email' => isset($this->contacts->emails([$contact])[$contact])]]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
+        $proven = $request->filled('customer_code') ? app(CustomerIdentity::class)->contactFromToken((string) $request->input('customer_code')) : null;
+        if ($request->filled('customer_code') && $proven === null) {
+            throw ValidationException::withMessages(['customer_code' => 'That code isn’t valid or has expired — ask the customer to refresh it in their account.']);
+        }
         $limit = $this->limit($request);
         $open = array_column($this->branches->open(), 'id');
         $d = $request->validate([
-            'name' => ['required', 'string', 'max:80'],
-            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[+0-9 ()-]{6,20}$/', 'required_without:email'],
-            'email' => ['nullable', 'email', 'max:120', 'required_without:phone'],
+            'name' => [$proven === null ? 'required' : 'nullable', 'string', 'max:80'],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[+0-9 ()-]{6,20}$/', ...($proven === null ? ['required_without:email'] : [])],
+            'email' => ['nullable', 'email', 'max:120', ...($proven === null ? ['required_without:phone'] : [])],
+            'customer_code' => ['nullable', 'string', 'max:600'],
             'amount' => ['required', 'numeric', 'min:0.01', 'max:1000000'],
             'method' => ['required', Rule::in(array_keys(Sales::METHODS))],
             'note' => ['nullable', 'string', 'max:200'],
@@ -73,8 +91,8 @@ final class SalesController
             throw ValidationException::withMessages(['branch_id' => 'Choose the branch the sale was made at.']);
         }
         $user = $request->user();
-        $sale = $this->sales->record(['name' => $d['name'], 'phone' => $d['phone'] ?? null, 'email' => $d['email'] ?? null, 'amount_cents' => (int) round((float) $d['amount'] * 100),
-            'method' => $d['method'], 'note' => $d['note'] ?? null, 'branch_id' => $branch],
+        $sale = $this->sales->record(['name' => (string) ($d['name'] ?? ''), 'phone' => $d['phone'] ?? null, 'email' => $d['email'] ?? null, 'amount_cents' => (int) round((float) $d['amount'] * 100),
+            'method' => $d['method'], 'note' => $d['note'] ?? null, 'branch_id' => $branch, 'contact_id' => $proven],
             (string) $user?->getAuthIdentifier(), $this->who($request), mb_substr((string) $request->userAgent(), 0, 120), Gate::allows('sales.approve'));
 
         return back()->with('status', $sale->status === 'pending' ? 'Sale saved — it needs a manager’s approval (over R'.number_format($this->sales->threshold() / 100, 2).').' : 'Sale recorded.');
