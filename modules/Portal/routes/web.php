@@ -12,4 +12,5 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->middleware('web')->prefi
     Route::post('/verify', [PortalController::class, 'verify'])->middleware('throttle:10,1,portal-verify')->name('.verify');
     Route::post('/consent', [PortalController::class, 'consent'])->name('.consent');
     Route::post('/sign-out', [PortalController::class, 'signOut'])->name('.sign-out');
+    Route::get('/referral-qr.svg', [PortalController::class, 'qr'])->name('.qr');
 });

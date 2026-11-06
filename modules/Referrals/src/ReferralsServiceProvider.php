@@ -12,9 +12,11 @@ use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Referrals\Console\ExpireWalletsCommand;
+use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Referrals\Contracts\ReferralRules;
 use Wurk\Referrals\Support\Attribution;
 use Wurk\Referrals\Support\Commissions;
+use Wurk\Referrals\Support\PortalRewards;
 use Wurk\Referrals\Support\Programme;
 use Wurk\Referrals\Support\Wallets;
 
@@ -25,6 +27,7 @@ final class ReferralsServiceProvider extends ModuleServiceProvider
         parent::register();
         $this->app->bind(ReferralRules::class, Programme::class);
         $this->app->bind(StoreCredit::class, Wallets::class); // the wallet is the business's store credit
+        $this->app->bind(CustomerRewards::class, PortalRewards::class);
     }
 
     public function boot(): void

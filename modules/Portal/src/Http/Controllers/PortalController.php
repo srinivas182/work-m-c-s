@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Wurk\Portal\Http\Controllers;
 
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +20,7 @@ use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Identity\Contracts\Accounts;
 use Wurk\Identity\Contracts\Verification;
 use Wurk\Portal\Support\CustomerSession;
+use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -37,7 +43,18 @@ final class PortalController
                 return Inertia::render('Portal::Consent', ['business' => $business]);
             }
 
-            return Inertia::render('Portal::Home', ['business' => $business, 'name' => app(ContactBook::class)->names([$me['contact_id']])[$me['contact_id']] ?? '']);
+            $tz = $this->context->current()->timezone();
+            $rewards = app(CustomerRewards::class)->forContact($me['contact_id']);
+
+            return Inertia::render('Portal::Home', [
+                'business' => $business,
+                'name' => app(ContactBook::class)->names([$me['contact_id']])[$me['contact_id']] ?? '',
+                'rewards' => $rewards === null ? null : [...$rewards, 'referred' => array_map(fn (array $r) => ['name' => $r['name'],
+                    'since' => CarbonImmutable::instance($r['since'])->setTimezone($tz)->format('j M Y')], $rewards['referred'])],
+                // Their own purchases and visits — never internal entries (forms, chats).
+                'history' => array_map(fn (array $h) => ['type' => $h['type'], 'summary' => $h['summary'], 'at' => CarbonImmutable::instance($h['at'])->setTimezone($tz)->format('j M Y')],
+                    app(ContactBook::class)->history($me['contact_id'], ['order', 'booking', 'class', 'sale'])),
+            ]);
         });
     }
 
@@ -96,6 +113,19 @@ final class PortalController
 
             return redirect('/account');
         });
+    }
+
+    /** The signed-in customer's own referral link as a QR code (SVG) — to show at the counter or share. */
+    public function qr(Request $request, string $handle): \Symfony\Component\HttpFoundation\Response
+    {
+        $svg = $this->in($handle, function () use ($request) {
+            $me = app(CustomerSession::class)->current($request) ?? abort(404);
+            $rewards = app(CustomerRewards::class)->forContact($me['contact_id']) ?? abort(404);
+
+            return (new Writer(new ImageRenderer(new RendererStyle(320, 2), new SvgImageBackEnd)))->writeString($rewards['link']);
+        });
+
+        return response((string) $svg, 200, ['Content-Type' => 'image/svg+xml', 'Cache-Control' => 'private, no-store']);
     }
 
     public function signOut(Request $request, string $handle): RedirectResponse

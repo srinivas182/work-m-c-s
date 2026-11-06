@@ -9,6 +9,7 @@
         "tenancy",
         "identity",
         "crm",
-        "audit"
+        "audit",
+        "referrals"
     ]
 }

@@ -8,6 +8,12 @@ use Tests\Support\FakeOtpChannel;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\PurchaseMade;
+use Wurk\Plans\Actions\PackageCatalog;
+use Wurk\Plans\Contracts\Catalog;
+use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Referrals\Models\ReferralProgramme;
+use Wurk\Referrals\Support\Attribution;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 uses(InteractsWithIdentity::class, InteractsWithShards::class);
@@ -64,4 +70,46 @@ it('counts a portal session only for the business it was started at, and signs o
     $this->get(($this->site)('kasi-threads'))->assertInertia(fn (Assert $p) => $p->component('Portal::SignIn')->where('business', 'Kasi Threads')); // same session, other business
     $this->post("{$glow}/sign-out")->assertRedirect('/account');
     $this->get($glow)->assertInertia(fn (Assert $p) => $p->component('Portal::SignIn'));
+});
+
+it('shows the signed-in customer their wallet, link and QR, who they referred (first names) and their own history', function () {
+    // A package with referrals (without one, the package's cap is 0% and rewards are — rightly — nothing).
+    $p = app(PackageCatalog::class)->create([
+        'key' => 'growth', 'name' => 'Growth', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 1,
+        'monthly_price_cents' => 59900, 'yearly_price_cents' => 599000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 5,
+        'multi_branch' => false, 'max_branches' => 1, 'custom_domain' => false, 'monthly_credits' => 0, 'referral_max_levels' => 7,
+        'referral_max_commission_bp' => 3000, 'managed_fee_cents' => null, 'modules' => ['website', 'referrals'],
+    ], null);
+    app(Catalog::class)->subscribe($this->glow->id, $p->id, 'monthly', allowTrial: true);
+    app(Entitlements::class)->flush();
+    ($this->in)($this->glow, function () {
+        ReferralProgramme::query()->create(['enabled' => true, 'self_bp' => 1000, 'level_bp' => [], 'attribution' => 'first', 'link_days' => 30]);
+        $book = app(ContactBook::class);
+        $sipho = $book->remember('Sipho Ndlovu', null, 'sipho@example.com', 'order', '01JD00000000000000000ORD01', null, 'Order #1001 · R500');
+        $book->remember('Sipho Ndlovu', null, 'sipho@example.com', 'form', '01JD00000000000000000FRM01', null, 'Website enquiry');       // internal: not shown
+        $book->remember('Sipho Ndlovu', null, 'sipho@example.com', 'sale', '01JD00000000000000000SAL01', null, 'In-store sale: R120.00');
+        event(new PurchaseMade('order', '01JD00000000000000000ORD01', 50000, 50000, null, now()->subDay())); // already final: R50 available
+        $lerato = $book->remember('Lerato Dube', '082 000 0009', null, 'test', 'seed', null, 'Seed');
+        app(Attribution::class)->attach($lerato, app(Attribution::class)->member($sipho)->code);
+    });
+    $site = ($this->site)('glow-salon');
+    $code = ($this->code)($site, 'sipho@example.com');
+    $this->post("{$site}/verify", ['code' => $code]);
+    $this->post("{$site}/consent", ['agree' => '1']);
+
+    $this->get($site)->assertInertia(fn (Assert $p) => $p->component('Portal::Home')
+        ->where('rewards.wallet_cents', 5000)->where('rewards.pending_cents', 0)->where('rewards.expiry_months', 12)
+        ->where('rewards.referred.0.name', 'Lerato') // first name only
+        ->where('history', fn ($h) => collect($h)->pluck('type')->sort()->values()->all() === ['order', 'sale']));
+    $qr = $this->get("{$site}/referral-qr.svg")->assertOk()->assertHeader('Content-Type', 'image/svg+xml');
+    expect((string) $qr->getContent())->toContain('<svg');
+    $this->post("{$site}/sign-out");
+    $this->get("{$site}/referral-qr.svg")->assertNotFound();
+
+    // A business without a programme: no rewards section. (Wait out the resend limit: codes to the same address are spaced.)
+    $this->travel(2)->minutes();
+    $kasi = ($this->site)('kasi-threads');
+    $this->post("{$kasi}/verify", ['code' => ($this->code)($kasi, 'sipho@example.com'), 'name' => 'Sipho Ndlovu']); // Kasi Threads hasn't met him: it asks
+    $this->post("{$kasi}/consent", ['agree' => '1']);
+    $this->get($kasi)->assertInertia(fn (Assert $p) => $p->component('Portal::Home')->where('rewards', null));
 });
