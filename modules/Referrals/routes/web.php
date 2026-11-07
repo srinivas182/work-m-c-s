@@ -3,11 +3,17 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Wurk\Referrals\Http\Controllers\PayoutsController;
 use Wurk\Referrals\Http\Controllers\ReferralLinkController;
 use Wurk\Referrals\Http\Controllers\ReferralMembersController;
 use Wurk\Referrals\Http\Controllers\ReferralSettingsController;
 
 Route::tenant(function (): void {
+    Route::middleware(['entitled:referrals', 'permission:referrals.manage'])->prefix('payouts')->name('tenant.payouts')->group(function (): void {
+        Route::get('/', [PayoutsController::class, 'index']);
+        Route::post('/{payout}/paid', [PayoutsController::class, 'paid'])->name('.paid');
+        Route::post('/{payout}/decline', [PayoutsController::class, 'decline'])->name('.decline');
+    });
     Route::middleware(['entitled:referrals', 'permission:referrals.manage'])->prefix('referrals')->name('tenant.referrals')->group(function (): void {
         Route::get('/', [ReferralMembersController::class, 'index']);
         Route::get('/{member}/qr.svg', [ReferralMembersController::class, 'qr'])->name('.qr');

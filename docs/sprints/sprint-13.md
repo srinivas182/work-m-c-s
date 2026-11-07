@@ -69,6 +69,14 @@
 | H | Every step is in the audit log (WURK) — request, wallet settled, approved/declined, who and when — **without** the personal details being deleted (record ids, amounts and who acted only). |
 | I | Pending rewards are forfeited on deletion (recommended with G; not yet earned). |
 
+## 13.7 Payouts — specification (6 Nov 2026)
+
+**Customer (portal → Payouts),** only when the business allows payouts (wallet rules): an amount between the business's minimum and their wallet, and bank details (account holder, bank, account number, branch code). The amount is **reserved at once** — it can't also be spent at checkout while the request waits. One open request at a time.
+
+**Business (Customers → Payouts; `referrals.manage`):** requests oldest first, with the bank details to pay into. The business pays from its own bank, then **marks it paid with a reference** — or **declines with a reason**, which returns the amount to the wallet. The customer is emailed either way (wording in Settings → Messages).
+
+**Bank details (POPIA — financial information):** stored encrypted; only the last four digits shown once the payout is paid or declined, when the full account number is deleted. Every step is logged, never with the account number. The ledger records the reservation as a payout (−), and a decline returns it (+), so wallets, statements and the deletion flow stay consistent.
+
 ## Progress
 
 | Part | PR | Notes |
@@ -82,4 +90,6 @@
 | 13.6a Sign-in and portal | #123 | 13.6 split into a–e. Found and fixed: a new customer's code was spent before their name was asked (the same code then failed). Custom domains not yet. 1,373 backend tests on SQLite; Portal, CRM, Identity on MySQL 8. Browser tests in CI only. Open for 13.6b: when new customers get their default password. |
 | 13.6c Spending the wallet | see PR | Built before 13.6b (waiting on when default passwords are sent). Caught: a paid order's cancellation also releases it — returning the wallet on every release would have paid it back twice; the refund ledger recorded the whole deposit as cash; a wallet hiccup could stop the booking form loading. 1,381 backend tests on SQLite; wallet money paths on MySQL 8; 391 frontend. Browser tests in CI only. |
 | 13.6d Identity QR | #126 | CRM `CustomerIdentity` + `link()`. Camera scanning depends on the device and browser (not automated); the code field and its checks are tested. 1,383 backend tests on SQLite; Sales, Portal, CRM on MySQL 8. Browser tests in CI only. |
-| 13.6e Data requests | see PR | Decisions G–I. Found and fixed: the audit log stored the customer's name for every portal action (a sealed chain can't be edited later) — now "Customer" + WURK ID; my first audit test checked a view that hides most fields, strengthened and proven to catch it. 1,386 backend tests on SQLite; Portal, CRM, Referrals on MySQL 8. Browser tests in CI only. |
+| 13.6e Data requests | #127 | Decisions G–I. Found and fixed: the audit log stored the customer's name for every portal action (a sealed chain can't be edited later) — now "Customer" + WURK ID; my first audit test checked a view that hides most fields, strengthened and proven to catch it. 1,386 backend tests on SQLite; Portal, CRM, Referrals on MySQL 8. Browser tests in CI only. |
+| CI | #128 | Browser install: skipped on a cache hit, browser only on a miss (~5 min → 6–11 s); develop's cache warmed after merges. |
+| 13.7 Payouts | see PR | Closed a gap with 13.6e: a deletion now waits for an outstanding payout. Fixed a flaky audit check (a 3-digit fragment of a phone number can occur by chance in ids and hashes — 1 run in 6 on MySQL); now the phone's real digits. 1,389 backend tests on SQLite; Referrals and Portal on MySQL 8. Browser tests in CI only. |

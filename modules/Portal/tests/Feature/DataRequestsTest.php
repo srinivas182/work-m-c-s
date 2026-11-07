@@ -94,7 +94,7 @@ it('settles the wallet first, tells the customer, then erases them everywhere it
 
     $log = ($this->in)(fn () => AuditEvent::query()->where('action', 'like', 'portal.deletion%')->orWhere('action', 'like', 'referrals.%')->get()->map(fn ($e) => $e->getAttributes()));
     expect($log->pluck('action')->all())->toContain('portal.deletion_requested', 'portal.deletion_wallet_settled', 'portal.deletion_completed', 'referrals.paid_out', 'referrals.closed')
-        ->and(json_encode($log->all()))->not->toContain('Sipho')->not->toContain('sipho@example.com')->not->toContain('999'); // decision H
+        ->and(json_encode($log->all()))->not->toContain('Sipho')->not->toContain('sipho@example.com')->not->toContain('829991234'); // decision H (the phone's digits: short fragments can occur by chance in ids and hashes)
 });
 
 it('declines with a reason the customer is told, and shows it in their portal', function () {
@@ -105,4 +105,12 @@ it('declines with a reason the customer is told, and shows it in their portal', 
     $sipho = Identity::query()->findOrFail(($this->in)(fn () => DB::connection($this->ctx->connectionName())->table('data_requests')->where('tenant_id', $this->ctx->id())->value('identity_id')));
     $this->actingAs($sipho)->get($this->site)->assertInertia(fn (Assert $p) => $p->where('deletion.status', 'declined')->where('deletion.reason', 'you have a booking next week.'));
     $this->actingAs($this->owner)->post("{$this->url}/{$this->req}/approve")->assertSessionHasErrors(['request' => 'This request has already been handled.']);
+});
+
+it('waits for a payout that is still being paid before deleting', function () {
+    ($this->in)(fn () => ReferralProgramme::query()->update(['payouts_allowed' => true, 'min_payout_cents' => 1000]));
+    $sipho = Identity::query()->findOrFail(($this->in)(fn () => DB::connection($this->ctx->connectionName())->table('data_requests')->where('tenant_id', $this->ctx->id())->value('identity_id')));
+    $this->actingAs($sipho)->post("{$this->site}/payout", ['amount' => '50', 'holder' => 'Sipho Ndlovu', 'bank' => 'Capitec', 'account' => '1234567890'])->assertSessionHasNoErrors();
+    $this->actingAs($this->owner)->post("{$this->url}/{$this->req}/approve")
+        ->assertSessionHasErrors(['request' => 'They have a payout waiting — pay or decline it first (Customers → Payouts).']);
 });

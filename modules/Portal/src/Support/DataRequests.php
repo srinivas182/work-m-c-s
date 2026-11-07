@@ -57,6 +57,9 @@ final readonly class DataRequests
     public function approve(DataRequest $request, string $by): void
     {
         $this->open($request);
+        if ((app(CustomerRewards::class)->payouts($request->contact_id)['latest']['status'] ?? null) === 'requested') {
+            throw new \DomainException('They have a payout waiting — pay or decline it first (Customers → Payouts).');
+        }
         $left = app(StoreCredit::class)->available($request->contact_id);
         if ($left > 0) {
             throw new \DomainException('Pay out or refund their wallet first (R'.number_format($left / 100, 2).').');

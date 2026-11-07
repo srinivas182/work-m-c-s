@@ -180,6 +180,6 @@ it('gives the signed-in customer a full copy of their information, and records a
         $events = AuditEvent::query()->where('action', 'like', 'portal.%')->get()->map(fn ($e) => $e->getAttributes());
         expect($events->pluck('action')->sort()->values()->all())->toBe(['portal.consented', 'portal.data_copy', 'portal.deletion_requested', 'portal.signed_in'])
             ->and($events->pluck('actor_name')->unique()->values()->all())->toBe(['Customer'])
-            ->and(json_encode($events->all()))->not->toContain('Sipho')->not->toContain('sipho@example.com')->not->toContain('555'); // decision H
+            ->and(json_encode($events->all()))->not->toContain('Sipho')->not->toContain('sipho@example.com')->not->toContain('825550101'); // decision H (the phone's digits: short fragments can occur by chance in ids and hashes)
     });
 });

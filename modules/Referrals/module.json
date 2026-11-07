@@ -11,6 +11,7 @@
         "audit",
         "plans",
         "crm",
-        "payments"
+        "payments",
+        "messaging"
     ]
 }
