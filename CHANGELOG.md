@@ -9,6 +9,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Card payments ask for and check **only what's due**; ledgers record only cash received; paid wholly from the wallet is paid at once. **Rewards on the full amount** (decision E).
 - **Refunds** return the wallet part to the wallet and the rest to the card or account (decision F) — in proportion, exact on the last refund. Unpaid orders and holds that expire, or that can't be paid, give the wallet part back. A wallet problem can never stop a form working.
 
+### Added — Sprint 13.6e (POPIA data requests)
+- **Portal → Your information:** download a full copy (details, all history including their own enquiries and chats, notes the business keeps about them, every reward and wallet movement, consent date); ask for deletion (explained first, confirmed; one open request; status shown).
+- **Customers → Data requests** (`contacts.manage`): the wallet is settled first (EFT or cash, recorded as a payout); approving emails the customer, then erases their details (and every record merged into them; enquiry and chat summaries blanked; orders and sales kept as the law requires), ends portal access, retires their referral link and forfeits pending rewards; declining needs a reason they're told. Both emails editable in Settings → Messages.
+- **Audit:** customers' own portal actions are logged as "Customer" with their WURK ID only; deletion steps carry ids and amounts only — the log is a sealed chain, so it must never hold details a deletion would need to remove.
+
 ### Added — Sprint 13.6d (identity QR for Record sale)
 - **"Show this at the till"** in the customer portal: a QR proving who the customer is — signed, for one business and customer, valid 5 minutes, refreshed every 4; only for the signed-in, consented customer.
 - **Record sale → Customer's code** (scanner, paste, or the camera where the browser reads QR codes): once proven, no name or phone needed; the sale is linked to exactly that customer (receipt and referral rewards as usual). Altered, other businesses' and expired codes are refused.
