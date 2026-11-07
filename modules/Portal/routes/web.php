@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Wurk\Portal\Http\Controllers\CustomerAccountsController;
 use Wurk\Portal\Http\Controllers\DataRequestsController;
 use Wurk\Portal\Http\Controllers\PortalController;
 
@@ -12,6 +13,8 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->middleware('web')->prefi
     Route::post('/code', [PortalController::class, 'code'])->middleware('throttle:10,1,portal-code')->name('.code');
     Route::post('/verify', [PortalController::class, 'verify'])->middleware('throttle:10,1,portal-verify')->name('.verify');
     Route::post('/consent', [PortalController::class, 'consent'])->name('.consent');
+    Route::post('/password', [PortalController::class, 'password'])->middleware('throttle:10,1,portal-password')->name('.password');
+    Route::post('/set-password', [PortalController::class, 'setPassword'])->middleware('throttle:10,1,portal-set-password')->name('.set-password');
     Route::post('/sign-out', [PortalController::class, 'signOut'])->name('.sign-out');
     Route::get('/referral-qr.svg', [PortalController::class, 'qr'])->name('.qr');
     Route::get('/id-qr.svg', [PortalController::class, 'idQr'])->middleware('throttle:30,1,id-qr')->name('.id-qr');
@@ -23,6 +26,11 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->middleware('web')->prefi
 
 // The business: Customers → Data requests (POPIA).
 Route::tenant(function (): void {
+    Route::middleware('permission:contacts.manage')->prefix('settings/customer-accounts')->name('tenant.customer-accounts')->group(function (): void {
+        Route::get('/', [CustomerAccountsController::class, 'show']);
+        Route::put('/', [CustomerAccountsController::class, 'update'])->name('.update');
+        Route::post('/send', [CustomerAccountsController::class, 'send'])->middleware('throttle:20,1,portal-send')->name('.send');
+    });
     Route::middleware('permission:contacts.manage')->prefix('data-requests')->name('tenant.data-requests')->group(function (): void {
         Route::get('/', [DataRequestsController::class, 'index']);
         Route::post('/{id}/settle', [DataRequestsController::class, 'settle'])->name('.settle');

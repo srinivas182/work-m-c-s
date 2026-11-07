@@ -69,6 +69,14 @@
 | H | Every step is in the audit log (WURK) — request, wallet settled, approved/declined, who and when — **without** the personal details being deleted (record ids, amounts and who acted only). |
 | I | Pending rewards are forfeited on deletion (recommended with G; not yet earned). |
 
+## 13.6b Passwords — decision J (WURK, 7 Nov 2026)
+
+| # | Decision |
+|---|---|
+| J | When a business allows passwords, a **new customer who gives an email receives a default password by email automatically** (free); the **owner can send one by SMS on request** (uses the business's SMS credits). |
+
+As built: the business chooses code only (default) or code-or-password (Settings → Customer accounts). Default passwords are kept per business — hashed, single-use, valid 7 days — never on the WURK ID and never issued to someone whose WURK ID already has a password (they use their own). The first sign-in with one goes straight to "Set your own password" (WURK's password rules).
+
 ## 13.7 Payouts — specification (6 Nov 2026)
 
 **Customer (portal → Payouts),** only when the business allows payouts (wallet rules): an amount between the business's minimum and their wallet, and bank details (account holder, bank, account number, branch code). The amount is **reserved at once** — it can't also be spent at checkout while the request waits. One open request at a time.
@@ -92,4 +100,5 @@
 | 13.6d Identity QR | #126 | CRM `CustomerIdentity` + `link()`. Camera scanning depends on the device and browser (not automated); the code field and its checks are tested. 1,383 backend tests on SQLite; Sales, Portal, CRM on MySQL 8. Browser tests in CI only. |
 | 13.6e Data requests | #127 | Decisions G–I. Found and fixed: the audit log stored the customer's name for every portal action (a sealed chain can't be edited later) — now "Customer" + WURK ID; my first audit test checked a view that hides most fields, strengthened and proven to catch it. 1,386 backend tests on SQLite; Portal, CRM, Referrals on MySQL 8. Browser tests in CI only. |
 | CI | #128 | Browser install: skipped on a cache hit, browser only on a miss (~5 min → 6–11 s); develop's cache warmed after merges. |
-| 13.7 Payouts | see PR | Closed a gap with 13.6e: a deletion now waits for an outstanding payout. Fixed a flaky audit check (a 3-digit fragment of a phone number can occur by chance in ids and hashes — 1 run in 6 on MySQL); now the phone's real digits. 1,389 backend tests on SQLite; Referrals and Portal on MySQL 8. Browser tests in CI only. |
+| 13.7 Payouts | #129 | Closed a gap with 13.6e: a deletion now waits for an outstanding payout. Fixed a flaky audit check (a 3-digit fragment of a phone number can occur by chance in ids and hashes — 1 run in 6 on MySQL); now the phone's real digits. 1,389 backend tests on SQLite; Referrals and Portal on MySQL 8. Browser tests in CI only. |
+| 13.6b Passwords | see PR | Decision J. A throttling test was in my plan but missing from my first tests — added before committing. 1,393 backend tests on SQLite; Portal and Identity on MySQL 8. Browser tests in CI only. |

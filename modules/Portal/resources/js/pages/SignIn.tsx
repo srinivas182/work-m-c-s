@@ -1,8 +1,19 @@
 import { useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button, Field, Input } from '@/design-system';
 import { PortalLayout } from '../components/PortalLayout';
 
-export default function SignIn({ business, sent }: { business: string; sent: string | null }) {
+export default function SignIn({
+  business,
+  sent,
+  passwords,
+}: {
+  business: string;
+  sent: string | null;
+  passwords: boolean;
+}) {
+  const [withPassword, setWithPassword] = useState(false);
+  const pwd = useForm({ identifier: '', password: '' });
   const errors = (usePage().props.errors ?? {}) as Record<string, string | undefined>;
   const ask = useForm({ contact: '' });
   const verify = useForm({ code: '', name: '' });
@@ -61,6 +72,48 @@ export default function SignIn({ business, sent }: { business: string; sent: str
             Sign in
           </Button>
         </form>
+      )}
+      {passwords && !sent && (
+        <>
+          {!withPassword ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="justify-self-start"
+              onClick={() => setWithPassword(true)}
+            >
+              Sign in with a password instead
+            </Button>
+          ) : (
+            <form
+              aria-label="Sign in with a password"
+              className="grid gap-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                pwd.post('/account/password');
+              }}
+            >
+              <Field label="Phone number or email" error={pwd.errors.identifier}>
+                <Input
+                  autoComplete="username"
+                  value={pwd.data.identifier}
+                  onChange={(e) => pwd.setData('identifier', e.target.value)}
+                />
+              </Field>
+              <Field label="Password" error={pwd.errors.password}>
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  value={pwd.data.password}
+                  onChange={(e) => pwd.setData('password', e.target.value)}
+                />
+              </Field>
+              <Button type="submit" className="justify-self-start" loading={pwd.processing}>
+                Sign in
+              </Button>
+            </form>
+          )}
+        </>
       )}
     </PortalLayout>
   );
