@@ -1,5 +1,6 @@
+import { useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@/design-system';
+import { Button, Card, CardContent, CardHeader, CardTitle, Checkbox } from '@/design-system';
 import { rand } from '@/lib/money';
 import { PortalLayout } from '../components/PortalLayout';
 
@@ -12,6 +13,11 @@ interface Rewards {
   expiry_months: number;
 }
 interface Props {
+  deletion: {
+    status: 'open' | 'completed' | 'declined';
+    reason: string | null;
+    asked: string;
+  } | null;
   business: string;
   name: string;
   rewards: Rewards | null;
@@ -25,7 +31,7 @@ const KIND: Record<string, string> = {
   sale: 'In-store',
 };
 
-export default function Home({ business, name, rewards, history }: Props) {
+export default function Home({ business, name, rewards, history, deletion }: Props) {
   const [copied, setCopied] = useState(false);
   const [idVersion, setIdVersion] = useState(0);
   useEffect(() => {
@@ -141,6 +147,93 @@ export default function Home({ business, name, rewards, history }: Props) {
           )}
         </CardContent>
       </Card>
+      <YourInformation business={business} deletion={deletion} />
     </PortalLayout>
+  );
+}
+
+/** POPIA: a copy of what the business holds, and asking for it to be deleted (Sprint 13.6e). */
+function YourInformation({
+  business,
+  deletion,
+}: {
+  business: string;
+  deletion: Props['deletion'];
+}) {
+  const [asking, setAsking] = useState(false);
+  const form = useForm({ confirm: false });
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Your information</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-3 text-sm">
+        <a className="underline" href="/account/my-information.json" download>
+          Download a copy of your information
+        </a>
+        {deletion?.status === 'open' ? (
+          <p role="status">
+            You asked {business} to delete your information on {deletion.asked}. We’ll email you
+            when it’s done.
+          </p>
+        ) : deletion?.status === 'declined' && !asking ? (
+          <p>
+            {business} couldn’t delete your information: {deletion.reason}
+          </p>
+        ) : !asking ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="justify-self-start"
+            onClick={() => setAsking(true)}
+          >
+            Ask {business} to delete my information
+          </Button>
+        ) : (
+          <form
+            aria-label="Ask for my information to be deleted"
+            className="grid gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.post('/account/delete-request', { preserveScroll: true });
+            }}
+          >
+            <p>If {business} approves it:</p>
+            <ul className="grid list-disc gap-1 pl-5">
+              <li>any money in your wallet is paid out or refunded to you first;</li>
+              <li>rewards that aren’t available yet are cancelled;</li>
+              <li>
+                your name and contact details are removed, and this account and your referral link
+                stop working;
+              </li>
+              <li>
+                records the law requires them to keep (such as invoices and patient records) are
+                kept for as long as required.
+              </li>
+            </ul>
+            <label className="flex items-start gap-2">
+              <Checkbox
+                checked={form.data.confirm}
+                onCheckedChange={(on) => form.setData('confirm', on === true)}
+              />
+              I understand — please delete my information.
+            </label>
+            {form.errors.confirm && (
+              <p role="alert" className="text-danger">
+                {form.errors.confirm}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <Button size="sm" type="submit" loading={form.processing}>
+                Send my request
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setAsking(false)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        )}
+      </CardContent>
+    </Card>
   );
 }

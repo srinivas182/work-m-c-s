@@ -25,6 +25,22 @@ final readonly class Contacts implements ContactBook
         });
     }
 
+    public function erase(string $contactId): void
+    {
+        $db = DB::connection($this->context->connectionName());
+        $db->transaction(function () use ($db, $contactId): void {
+            $ids = [$contactId];
+            for ($round = 0, $next = [$contactId]; $next !== [] && $round < 5; $round++) { // records merged into them (and into those)
+                $next = Contact::query()->whereIn('merged_into', $next)->pluck('id')->map(fn ($id) => (string) $id)->all();
+                $ids = [...$ids, ...$next];
+            }
+            Contact::query()->whereIn('id', $ids)->update(['name' => 'Deleted customer', 'phone' => null, 'email' => null, 'tags' => null, 'notes' => null,
+                'marketing_consent_at' => null, 'marketing_consent_source' => null]);
+            $db->table('contact_links')->where('tenant_id', $this->context->id())->whereIn('contact_id', $ids)->whereIn('source_type', ['form', 'chat'])
+                ->update(['summary' => 'Removed at the customer’s request']); // what they wrote to the business
+        });
+    }
+
     public function contactFor(string $sourceType, string $sourceId): ?string
     {
         $id = DB::connection($this->context->connectionName())->table('contact_links')
@@ -68,10 +84,18 @@ final readonly class Contacts implements ContactBook
         });
     }
 
+    public function profile(string $contactId): ?array
+    {
+        $c = Contact::query()->find($contactId);
+
+        return $c === null ? null : ['name' => (string) $c->name, 'phone' => $c->phone, 'email' => $c->email, 'tags' => array_values($c->tags ?? []), 'notes' => $c->notes,
+            'marketing_consent_at' => $c->marketing_consent_at, 'marketing_consent_source' => $c->marketing_consent_source, 'since' => $c->created_at];
+    }
+
     public function history(string $contactId, array $types, int $limit = 50): array
     {
         return array_values(DB::connection($this->context->connectionName())->table('contact_links')->where('tenant_id', $this->context->id())->where('contact_id', $contactId)
-            ->whereIn('source_type', $types)->orderByDesc('occurred_at')->limit($limit)->get()
+            ->when($types !== [], fn ($q) => $q->whereIn('source_type', $types))->orderByDesc('occurred_at')->limit($limit)->get()
             ->map(fn ($l) => ['type' => (string) $l->source_type, 'summary' => (string) $l->summary, 'at' => CarbonImmutable::parse((string) $l->occurred_at)])->all());
     }
 

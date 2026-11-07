@@ -13,6 +13,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -49,8 +51,13 @@ final class PortalController
             $tz = $this->context->current()->timezone();
             $rewards = app(CustomerRewards::class)->forContact($me['contact_id']);
 
+            $request_ = DB::connection($this->context->connectionName())->table('data_requests')->where('tenant_id', $this->context->id())
+                ->where('contact_id', $me['contact_id'])->orderByDesc('created_at')->first();
+
             return Inertia::render('Portal::Home', [
                 'business' => $business,
+                'deletion' => $request_ === null ? null : ['status' => (string) $request_->status, 'reason' => $request_->reason,
+                    'asked' => CarbonImmutable::parse((string) $request_->created_at)->setTimezone($tz)->format('j M Y')],
                 'name' => app(ContactBook::class)->names([$me['contact_id']])[$me['contact_id']] ?? '',
                 'rewards' => $rewards === null ? null : [...$rewards, 'referred' => array_map(fn (array $r) => ['name' => $r['name'],
                     'since' => CarbonImmutable::instance($r['since'])->setTimezone($tz)->format('j M Y')], $rewards['referred'])],
@@ -100,7 +107,7 @@ final class PortalController
             $redirect = app(Accounts::class)->signIn($request, $identity, '/account');
             app(CustomerSession::class)->start($request, $identity, $contactId);
             $request->session()->forget([self::PENDING, 'portal.masked', 'portal.need_name']);
-            app(AuditLog::class)->record('portal.signed_in', 'portal_customer', $identity, []);
+            self::audit('portal.signed_in', 'portal_customer', $identity, []);
 
             return $redirect;
         });
@@ -112,7 +119,7 @@ final class PortalController
             $me = app(CustomerSession::class)->current($request) ?? abort(403);
             $request->validate(['agree' => ['accepted']], ['agree.accepted' => 'Please agree to continue.']);
             app(CustomerSession::class)->consent($me['id']);
-            app(AuditLog::class)->record('portal.consented', 'portal_customer', $me['id'], []);
+            self::audit('portal.consented', 'portal_customer', $me['id'], []);
 
             return redirect('/account');
         });
@@ -164,6 +171,59 @@ final class PortalController
         return response((string) $svg, 200, ['Content-Type' => 'image/svg+xml', 'Cache-Control' => 'private, no-store']);
     }
 
+    /** A copy of everything the business holds about the signed-in customer (POPIA right of access). */
+    public function myData(Request $request, string $handle): \Symfony\Component\HttpFoundation\Response
+    {
+        [$data, $file] = $this->in($handle, function () use ($request) {
+            $me = app(CustomerSession::class)->current($request);
+            abort_if($me === null || ! $me['consented'], 404);
+            $book = app(ContactBook::class);
+            $tenant = $this->context->current();
+            $tz = $tenant->timezone();
+            $at = fn (?\DateTimeInterface $d) => $d === null ? null : CarbonImmutable::instance($d)->setTimezone($tz)->toIso8601String();
+            $rewards = app(CustomerRewards::class)->forContact($me['contact_id']);
+            $profile = $book->profile($me['contact_id']) ?? [];
+            $portal = DB::connection($this->context->connectionName())->table('portal_customers')->where('tenant_id', $this->context->id())->where('id', $me['id'])->first();
+            self::audit('portal.data_copy', 'portal_customer', $me['id'], []);
+
+            return [[
+                'business' => $tenant->displayName(),
+                'generated_at' => $at(now()),
+                'you' => ['name' => $profile['name'] ?? null, 'phone' => $profile['phone'] ?? null, 'email' => $profile['email'] ?? null, 'customer_since' => $at($profile['since'] ?? null),
+                    'marketing_consent' => ($profile['marketing_consent_at'] ?? null) === null ? null : ['given_at' => $at($profile['marketing_consent_at']), 'how' => $profile['marketing_consent_source'] ?? null]],
+                'notes_the_business_keeps_about_you' => ['tags' => $profile['tags'] ?? [], 'notes' => $profile['notes'] ?? null],
+                'history' => array_map(fn (array $h) => ['type' => $h['type'], 'summary' => $h['summary'], 'at' => $at($h['at'])], $book->history($me['contact_id'], [], 5000)),
+                'referrals' => $rewards === null ? null : ['your_code' => $rewards['code'], 'people_you_referred' => array_map(fn (array $r) => ['first_name' => $r['name'], 'since' => $at($r['since'])], $rewards['referred']),
+                    'wallet_cents' => $rewards['wallet_cents'], 'pending_cents' => $rewards['pending_cents'],
+                    'movements' => array_map(fn (array $l) => ['at' => $at($l['at']), 'kind' => $l['kind'], 'cents' => $l['cents'], 'available_at' => $at($l['available_at'])], app(CustomerRewards::class)->statement($me['contact_id']))],
+                'account' => ['consented_at' => $at($portal?->consented_at === null ? null : CarbonImmutable::parse((string) $portal->consented_at))],
+            ], 'my-information-'.$tenant->handle().'.json'];
+        });
+
+        return response((string) json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 200, [
+            'Content-Type' => 'application/json; charset=utf-8', 'Content-Disposition' => 'attachment; filename="'.$file.'"', 'Cache-Control' => 'private, no-store']);
+    }
+
+    /** Ask the business to delete my information (one open request at a time). */
+    public function requestDeletion(Request $request, string $handle): RedirectResponse
+    {
+        return $this->redirect($handle, function () use ($request) {
+            $me = app(CustomerSession::class)->current($request);
+            abort_if($me === null || ! $me['consented'], 403);
+            $request->validate(['confirm' => ['accepted']], ['confirm.accepted' => 'Please confirm you understand what deletion means.']);
+            $db = DB::connection($this->context->connectionName());
+            $open = $db->table('data_requests')->where('tenant_id', $this->context->id())->where('contact_id', $me['contact_id'])->where('status', 'open')->exists();
+            if (! $open) {
+                $id = (string) Str::ulid();
+                $db->table('data_requests')->insert(['id' => $id, 'tenant_id' => $this->context->id(), 'contact_id' => $me['contact_id'], 'identity_id' => $me['identity_id'],
+                    'kind' => 'deletion', 'status' => 'open', 'created_at' => now()]);
+                self::audit('portal.deletion_requested', 'data_request', $id, []); // no personal details (decision H)
+            }
+
+            return redirect('/account')->with('status', 'Your request has been sent to the business. We’ll email you when it’s done.');
+        });
+    }
+
     public function signOut(Request $request, string $handle): RedirectResponse
     {
         Auth::guard('web')->logout();
@@ -196,5 +256,16 @@ final class PortalController
         assert($r instanceof RedirectResponse);
 
         return $r;
+    }
+
+    /**
+     * Customers' own actions are logged as "Customer" with their WURK ID number — never their name (decision H): the
+     * log is a sealed chain that can't be edited later, so a deletion couldn't remove a name from it.
+     *
+     * @param  array<string, mixed>  $changes
+     */
+    private static function audit(string $action, string $subjectType, string $subjectId, array $changes): void
+    {
+        app(AuditLog::class)->record($action, $subjectType, $subjectId, $changes, ['actor_id' => Auth::id() === null ? null : (string) Auth::id(), 'actor_name' => 'Customer']);
     }
 }

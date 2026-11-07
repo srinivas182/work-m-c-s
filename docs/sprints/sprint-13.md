@@ -57,6 +57,18 @@
 | E | **Rewards on the full order**, including any part paid from the wallet. |
 | F | **Refunds of orders paid partly from the wallet:** the wallet part back to the wallet; the rest back to the card or account. |
 
+## 13.6e Data requests (POPIA) — specification and decisions (WURK, 6 Nov 2026)
+
+**Customers (portal → Your information):** *Download a copy* — instantly, everything the business holds about them: details, full history (orders, bookings, classes, in-store sales, their own form enquiries and chats), referral code, people referred (first names), every reward and wallet movement, consent date. *Ask for deletion* — records a request; the customer sees its status.
+
+**Businesses (Customers → Data requests; `contacts.manage`):** every request, its age and actions. Approving, in order: (1) the **wallet balance is settled first** — paid out or refunded and recorded (until 13.7, the owner records how: EFT with a reference, or cash; the same "paid out" ledger entry 13.7 uses); (2) the customer record is **anonymised** (name, phone, email removed; marketing consent cleared); (3) portal access ends and the referral link stops working; (4) **pending rewards are forfeited** (not yet earned and still refundable — waiting would delay deletion by weeks; the customer is told before confirming); (5) orders, sales, bookings and patient records are **kept as the law requires** (tax 5 years, patient records 6) and the reply says so; (6) the customer is emailed the outcome while their address is still known. Declining needs a reason, emailed to the customer.
+
+| # | Decision |
+|---|---|
+| G | Approving a deletion pays out or refunds the wallet balance first (WURK, option 2). |
+| H | Every step is in the audit log (WURK) — request, wallet settled, approved/declined, who and when — **without** the personal details being deleted (record ids, amounts and who acted only). |
+| I | Pending rewards are forfeited on deletion (recommended with G; not yet earned). |
+
 ## Progress
 
 | Part | PR | Notes |
@@ -69,4 +81,5 @@
 | 13.5 Record sale | #122 | New Sales module. QR scanning moves to 13.6 (the referral QR is a public code, not proof of identity); receipts by email only (SMS would spend credits on every sale). 1,315 backend tests on SQLite; Sales, CRM and the end-to-end test on MySQL 8. Browser tests in CI only. |
 | 13.6a Sign-in and portal | #123 | 13.6 split into a–e. Found and fixed: a new customer's code was spent before their name was asked (the same code then failed). Custom domains not yet. 1,373 backend tests on SQLite; Portal, CRM, Identity on MySQL 8. Browser tests in CI only. Open for 13.6b: when new customers get their default password. |
 | 13.6c Spending the wallet | see PR | Built before 13.6b (waiting on when default passwords are sent). Caught: a paid order's cancellation also releases it — returning the wallet on every release would have paid it back twice; the refund ledger recorded the whole deposit as cash; a wallet hiccup could stop the booking form loading. 1,381 backend tests on SQLite; wallet money paths on MySQL 8; 391 frontend. Browser tests in CI only. |
-| 13.6d Identity QR | see PR | CRM `CustomerIdentity` + `link()`. Camera scanning depends on the device and browser (not automated); the code field and its checks are tested. 1,383 backend tests on SQLite; Sales, Portal, CRM on MySQL 8. Browser tests in CI only. |
+| 13.6d Identity QR | #126 | CRM `CustomerIdentity` + `link()`. Camera scanning depends on the device and browser (not automated); the code field and its checks are tested. 1,383 backend tests on SQLite; Sales, Portal, CRM on MySQL 8. Browser tests in CI only. |
+| 13.6e Data requests | see PR | Decisions G–I. Found and fixed: the audit log stored the customer's name for every portal action (a sealed chain can't be edited later) — now "Customer" + WURK ID; my first audit test checked a view that hides most fields, strengthened and proven to catch it. 1,386 backend tests on SQLite; Portal, CRM, Referrals on MySQL 8. Browser tests in CI only. |

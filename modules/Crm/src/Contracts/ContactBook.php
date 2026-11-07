@@ -40,7 +40,7 @@ interface ContactBook
     public function emails(array $ids): array;
 
     /**
-     * A customer's history of the given kinds (e.g. order, booking, class, sale), newest first.
+     * A customer's history of the given kinds (e.g. order, booking, class, sale), newest first; no kinds = everything.
      *
      * @param  list<string>  $types
      * @return list<array{type: string, summary: string, at: \DateTimeInterface}>
@@ -52,4 +52,18 @@ interface ContactBook
      * phone; raises ContactRemembered the same way.
      */
     public function link(string $contactId, string $sourceType, string $sourceId, ?string $branchId, string $summary): void;
+
+    /**
+     * What the business holds about a customer, for a copy of their data (POPIA, Sprint 13.6e).
+     *
+     * @return array{name: string, phone: string|null, email: string|null, tags: list<string>, notes: string|null, marketing_consent_at: \DateTimeInterface|null, marketing_consent_source: string|null, since: \DateTimeInterface|null}|null
+     */
+    public function profile(string $contactId): ?array;
+
+    /**
+     * Erase a customer's personal details (an approved POPIA deletion): them and every record merged into them —
+     * name becomes "Deleted customer"; phone, email, tags, notes and marketing consent cleared; enquiry and chat
+     * summaries blanked. Orders, bookings and sales stay (records the law requires).
+     */
+    public function erase(string $contactId): void;
 }
