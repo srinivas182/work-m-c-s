@@ -337,8 +337,12 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      # Cached: nothing to install. Not cached: the browser only — GitHub's Ubuntu runners already have Chrome's system
+      # libraries, and the package mirrors were what stalled (one install took 9m19s). Capped so a stall fails fast.
       - name: Install Playwright browser
-        run: pnpm exec playwright install --with-deps chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 4
+        run: pnpm exec playwright install chromium
       - name: Playwright (half ${{ matrix.part }})
         if: matrix.part != 'performance'
         env:

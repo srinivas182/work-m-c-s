@@ -1,0 +1,37 @@
+# After each merge to develop, save the Playwright browser in develop's cache scope. Pull requests can only reuse
+# caches from their own branch or their base branch, and CI doesn't run on develop (to save minutes) — so without this,
+# every new pull request downloaded the browser fresh.
+name: Warm caches
+
+on:
+  push:
+    branches: [develop]
+    paths: ['pnpm-lock.yaml', '.github/workflows/**']
+  workflow_dispatch:
+
+concurrency:
+  group: warm-caches
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Playwright browser cache
+        id: pw-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Playwright browser
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
+        run: pnpm exec playwright install chromium
