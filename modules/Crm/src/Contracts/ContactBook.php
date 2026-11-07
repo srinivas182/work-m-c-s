@@ -59,4 +59,11 @@ interface ContactBook
      * @return array{name: string, phone: string|null, email: string|null, tags: list<string>, notes: string|null, marketing_consent_at: \DateTimeInterface|null, marketing_consent_source: string|null, since: \DateTimeInterface|null}|null
      */
     public function profile(string $contactId): ?array;
+
+    /**
+     * Erase a customer's personal details (an approved POPIA deletion): them and every record merged into them —
+     * name becomes "Deleted customer"; phone, email, tags, notes and marketing consent cleared; enquiry and chat
+     * summaries blanked. Orders, bookings and sales stay (records the law requires).
+     */
+    public function erase(string $contactId): void;
 }

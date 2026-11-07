@@ -11,6 +11,8 @@
         "crm",
         "audit",
         "referrals",
-        "payments"
+        "payments",
+        "messaging",
+        "access"
     ]
 }

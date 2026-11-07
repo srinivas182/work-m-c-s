@@ -25,6 +25,22 @@ final readonly class Contacts implements ContactBook
         });
     }
 
+    public function erase(string $contactId): void
+    {
+        $db = DB::connection($this->context->connectionName());
+        $db->transaction(function () use ($db, $contactId): void {
+            $ids = [$contactId];
+            for ($round = 0, $next = [$contactId]; $next !== [] && $round < 5; $round++) { // records merged into them (and into those)
+                $next = Contact::query()->whereIn('merged_into', $next)->pluck('id')->map(fn ($id) => (string) $id)->all();
+                $ids = [...$ids, ...$next];
+            }
+            Contact::query()->whereIn('id', $ids)->update(['name' => 'Deleted customer', 'phone' => null, 'email' => null, 'tags' => null, 'notes' => null,
+                'marketing_consent_at' => null, 'marketing_consent_source' => null]);
+            $db->table('contact_links')->where('tenant_id', $this->context->id())->whereIn('contact_id', $ids)->whereIn('source_type', ['form', 'chat'])
+                ->update(['summary' => 'Removed at the customer’s request']); // what they wrote to the business
+        });
+    }
+
     public function contactFor(string $sourceType, string $sourceId): ?string
     {
         $id = DB::connection($this->context->connectionName())->table('contact_links')
