@@ -19,7 +19,7 @@ final class NoStoreCredit implements StoreCredit
         return 0;
     }
 
-    public function spend(string $contactId, int $cents, string $sourceType, string $sourceId, int $orderTotalCents): void
+    public function spend(string $contactId, int $cents, string $sourceType, string $sourceId, int $orderTotalCents, ?string $branchId = null): void
     {
         throw new \DomainException('There’s no credit to use here.');
     }

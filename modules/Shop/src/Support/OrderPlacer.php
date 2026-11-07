@@ -203,7 +203,7 @@ final readonly class OrderPlacer
             if ($contact === null) {
                 throw new \DomainException('Your wallet couldn’t be used — sign in to your account again and retry.');
             }
-            $credit->spend($contact, $cents, 'order', $order->id, $order->total_cents);
+            $credit->spend($contact, $cents, 'order', $order->id, $order->total_cents, $order->branch_id);
         } catch (\DomainException $e) {
             $this->release($order, 'cancelled', null);
 

@@ -12,6 +12,7 @@
         "plans",
         "crm",
         "payments",
-        "messaging"
+        "messaging",
+        "team"
     ]
 }

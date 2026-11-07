@@ -152,8 +152,11 @@ describe('paying a deposit partly or wholly from the wallet', function () {
                 return min(20000, intdiv($orderTotalCents * $this->share, 100));
             }
 
-            public function spend(string $contactId, int $cents, string $sourceType, string $sourceId, int $orderTotalCents): void
+            public array $branches = [];
+
+            public function spend(string $contactId, int $cents, string $sourceType, string $sourceId, int $orderTotalCents, ?string $branchId = null): void
             {
+                $this->branches[] = $branchId;
                 if ($cents > 20000) {
                     throw new DomainException('Only R200.00 of the wallet can be used on this order.');
                 }
@@ -189,6 +192,7 @@ describe('paying a deposit partly or wholly from the wallet', function () {
         Event::fake([PurchaseMade::class]);
         [$booking, $url] = ($this->book)(['pass' => 'good', 'cents' => 3000]);
         expect($booking->wallet_cents)->toBe(3000)->and($url)->toContain('yoco')->and($this->credit->spent)->toBe([['booking', 3000]]);
+        expect($this->credit->branches)->toBe([$booking->branch_id]); // where it was spent (13.9b)
         expect(end($this->yocoAmounts))->toBe(7000);                                       // the card was asked only for what's left
         $this->yoco['paid'] = true;
         expect(app(Deposits::class)->confirm($booking->payment_reference)?->status)->toBe('confirmed');
