@@ -56,6 +56,11 @@ final class PortalController
 
             return Inertia::render('Portal::Home', [
                 'business' => $business,
+                'payouts' => (function () use ($me, $tz) {
+                    $p = app(CustomerRewards::class)->payouts($me['contact_id']);
+
+                    return [...$p, 'latest' => $p['latest'] === null ? null : [...$p['latest'], 'asked' => CarbonImmutable::instance($p['latest']['asked'])->setTimezone($tz)->format('j M Y')]];
+                })(),
                 'deletion' => $request_ === null ? null : ['status' => (string) $request_->status, 'reason' => $request_->reason,
                     'asked' => CarbonImmutable::parse((string) $request_->created_at)->setTimezone($tz)->format('j M Y')],
                 'name' => app(ContactBook::class)->names([$me['contact_id']])[$me['contact_id']] ?? '',
@@ -221,6 +226,26 @@ final class PortalController
             }
 
             return redirect('/account')->with('status', 'Your request has been sent to the business. We’ll email you when it’s done.');
+        });
+    }
+
+    /** Ask the business to pay out my wallet (Sprint 13.7). */
+    public function requestPayout(Request $request, string $handle): RedirectResponse
+    {
+        return $this->redirect($handle, function () use ($request) {
+            $me = app(CustomerSession::class)->current($request);
+            abort_if($me === null || ! $me['consented'], 403);
+            $d = $request->validate(['amount' => ['required', 'numeric', 'min:0.01'], 'holder' => ['required', 'string', 'max:120'], 'bank' => ['required', 'string', 'max:80'],
+                'account' => ['required', 'string', 'regex:/^[0-9 ]{6,20}$/'], 'branch' => ['nullable', 'string', 'max:12']],
+                ['account.regex' => 'Enter the account number (digits only).', 'holder.required' => 'Whose account is it?', 'bank.required' => 'Which bank?']);
+            try {
+                app(CustomerRewards::class)->requestPayout($me['contact_id'], (int) round((float) $d['amount'] * 100),
+                    ['holder' => $d['holder'], 'bank' => $d['bank'], 'account' => $d['account'], 'branch' => $d['branch'] ?? null]);
+            } catch (\DomainException $e) {
+                throw ValidationException::withMessages(['amount' => $e->getMessage()]);
+            }
+
+            return redirect('/account')->with('status', 'Payout requested — the business will pay it into your account.');
         });
     }
 

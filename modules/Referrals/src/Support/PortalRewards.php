@@ -12,6 +12,7 @@ use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Referrals\Contracts\ReferralRules;
 use Wurk\Referrals\Models\ReferralMember;
+use Wurk\Referrals\Models\ReferralPayout;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 final readonly class PortalRewards implements CustomerRewards
@@ -89,5 +90,20 @@ final readonly class PortalRewards implements CustomerRewards
             $member->update(['code' => '-'.strtoupper(Str::random(10))]);
         });
         app(AuditLog::class)->record('referrals.closed', 'referral_member', $member->id, []);
+    }
+
+    public function payouts(string $contactId): array
+    {
+        $rules = $this->wallets->rules();
+        $member = ReferralMember::query()->where('contact_id', $contactId)->first();
+        $p = $member === null ? null : ReferralPayout::query()->where('member_id', $member->id)->latest('created_at')->first();
+
+        return ['allowed' => $rules['payouts_allowed'], 'min_cents' => $rules['min_payout_cents'], 'wallet_cents' => $member === null ? 0 : $this->wallets->balance($member->id),
+            'latest' => $p === null ? null : ['cents' => $p->cents, 'status' => $p->status, 'last4' => $p->account_last4, 'reason' => $p->reason, 'asked' => $p->created_at]];
+    }
+
+    public function requestPayout(string $contactId, int $cents, array $bank): void
+    {
+        app(Payouts::class)->request($contactId, $cents, $bank);
     }
 }

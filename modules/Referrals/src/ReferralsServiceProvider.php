@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Event;
 use Wurk\Crm\Contracts\ContactRemembered;
 use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Crm\Contracts\PurchaseRefunded;
+use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Referrals\Console\ExpireWalletsCommand;
 use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Referrals\Contracts\ReferralRules;
+use Wurk\Referrals\Http\Controllers\PayoutsController;
 use Wurk\Referrals\Support\Attribution;
 use Wurk\Referrals\Support\Commissions;
 use Wurk\Referrals\Support\PortalRewards;
@@ -28,6 +30,10 @@ final class ReferralsServiceProvider extends ModuleServiceProvider
         $this->app->bind(ReferralRules::class, Programme::class);
         $this->app->bind(StoreCredit::class, Wallets::class); // the wallet is the business's store credit
         $this->app->bind(CustomerRewards::class, PortalRewards::class);
+        $this->callAfterResolving(MessageTemplates::class, function (MessageTemplates $t): void { // Settings → Messages
+            $t->define('referrals.payout_paid', PayoutsController::PAID);
+            $t->define('referrals.payout_declined', PayoutsController::DECLINED);
+        });
     }
 
     public function boot(): void
@@ -48,6 +54,7 @@ final class ReferralsServiceProvider extends ModuleServiceProvider
     {
         return [
             ['label' => 'Referrals', 'route' => 'tenant.referrals', 'icon' => 'gift', 'section' => 'Customers', 'permission' => 'referrals.manage', 'entitlement' => 'referrals', 'order' => 330],
+            ['label' => 'Payouts', 'route' => 'tenant.payouts', 'icon' => 'gift', 'section' => 'Customers', 'permission' => 'referrals.manage', 'entitlement' => 'referrals', 'order' => 331],
             ['label' => 'Referrals', 'route' => 'tenant.referrals.settings', 'icon' => 'gift', 'section' => 'Settings', 'permission' => 'referrals.manage', 'entitlement' => 'referrals', 'order' => 838],
         ];
     }

@@ -26,4 +26,20 @@ interface CustomerRewards
 
     /** Close the customer's part in the programme (a deletion): pending rewards forfeited; their referral link stops working. */
     public function close(string $contactId): void;
+
+    /**
+     * What the customer may do about payouts, and their latest request.
+     *
+     * @return array{allowed: bool, min_cents: int, wallet_cents: int, latest: array{cents: int, status: string, last4: string, reason: string|null, asked: \DateTimeInterface}|null}
+     */
+    public function payouts(string $contactId): array;
+
+    /**
+     * Ask for a payout (reserved at once).
+     *
+     * @param  array{holder: string, bank: string, account: string, branch: string|null}  $bank
+     *
+     * @throws \DomainException a message for the customer
+     */
+    public function requestPayout(string $contactId, int $cents, array $bank): void;
 }

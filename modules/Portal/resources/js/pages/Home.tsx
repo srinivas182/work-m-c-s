@@ -1,6 +1,15 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle, Checkbox } from '@/design-system';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Checkbox,
+  Field,
+  Input,
+} from '@/design-system';
 import { rand } from '@/lib/money';
 import { PortalLayout } from '../components/PortalLayout';
 
@@ -13,6 +22,18 @@ interface Rewards {
   expiry_months: number;
 }
 interface Props {
+  payouts: {
+    allowed: boolean;
+    min_cents: number;
+    wallet_cents: number;
+    latest: {
+      cents: number;
+      status: 'requested' | 'paid' | 'declined';
+      last4: string;
+      reason: string | null;
+      asked: string;
+    } | null;
+  };
   deletion: {
     status: 'open' | 'completed' | 'declined';
     reason: string | null;
@@ -31,7 +52,7 @@ const KIND: Record<string, string> = {
   sale: 'In-store',
 };
 
-export default function Home({ business, name, rewards, history, deletion }: Props) {
+export default function Home({ business, name, rewards, history, deletion, payouts }: Props) {
   const [copied, setCopied] = useState(false);
   const [idVersion, setIdVersion] = useState(0);
   useEffect(() => {
@@ -147,6 +168,7 @@ export default function Home({ business, name, rewards, history, deletion }: Pro
           )}
         </CardContent>
       </Card>
+      {rewards && payouts.allowed && <PayoutCard business={business} payouts={payouts} />}
       <YourInformation business={business} deletion={deletion} />
     </PortalLayout>
   );
@@ -233,6 +255,104 @@ function YourInformation({
             </div>
           </form>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Ask the business to pay out the wallet (Sprint 13.7). */
+function PayoutCard({ business, payouts }: { business: string; payouts: Props['payouts'] }) {
+  const form = useForm({
+    amount: String(payouts.wallet_cents / 100),
+    holder: '',
+    bank: '',
+    account: '',
+    branch: '',
+  });
+  const waiting = payouts.latest?.status === 'requested';
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Payouts</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-3 text-sm">
+        {payouts.latest && (
+          <p role="status">
+            {payouts.latest.status === 'requested' &&
+              `You asked for ${rand(payouts.latest.cents)} on ${payouts.latest.asked} — ${business} will pay it into the account ending ${payouts.latest.last4}.`}
+            {payouts.latest.status === 'paid' &&
+              `${rand(payouts.latest.cents)} was paid into the account ending ${payouts.latest.last4}.`}
+            {payouts.latest.status === 'declined' &&
+              `${business} couldn’t pay out ${rand(payouts.latest.cents)}: ${payouts.latest.reason} It’s back in your wallet.`}
+          </p>
+        )}
+        {!waiting &&
+          (payouts.wallet_cents < payouts.min_cents ? (
+            <p className="text-fg-muted">Payouts start at {rand(payouts.min_cents)}.</p>
+          ) : (
+            <form
+              aria-label="Ask for a payout"
+              className="grid gap-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                form.post('/account/payout', { preserveScroll: true });
+              }}
+            >
+              <Field
+                label={`Amount (R; from ${rand(payouts.min_cents)} to ${rand(payouts.wallet_cents)})`}
+                error={form.errors.amount}
+              >
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  min="0.01"
+                  step="0.01"
+                  value={form.data.amount}
+                  onChange={(e) => form.setData('amount', e.target.value)}
+                />
+              </Field>
+              <Field label="Account holder" error={form.errors.holder}>
+                <Input
+                  autoComplete="name"
+                  value={form.data.holder}
+                  onChange={(e) => form.setData('holder', e.target.value)}
+                />
+              </Field>
+              <Field label="Bank" error={form.errors.bank}>
+                <Input
+                  value={form.data.bank}
+                  onChange={(e) => form.setData('bank', e.target.value)}
+                />
+              </Field>
+              <Field label="Account number" error={form.errors.account}>
+                <Input
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={form.data.account}
+                  onChange={(e) => form.setData('account', e.target.value)}
+                />
+              </Field>
+              <Field label="Branch code (optional)" error={form.errors.branch}>
+                <Input
+                  inputMode="numeric"
+                  value={form.data.branch}
+                  onChange={(e) => form.setData('branch', e.target.value)}
+                />
+              </Field>
+              <p className="text-fg-muted">
+                The amount is set aside straight away. Your account number is kept encrypted and
+                deleted once the payout is done.
+              </p>
+              <Button
+                size="sm"
+                type="submit"
+                className="justify-self-start"
+                loading={form.processing}
+              >
+                Ask for a payout
+              </Button>
+            </form>
+          ))}
       </CardContent>
     </Card>
   );

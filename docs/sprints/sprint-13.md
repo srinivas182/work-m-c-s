@@ -69,6 +69,14 @@
 | H | Every step is in the audit log (WURK) — request, wallet settled, approved/declined, who and when — **without** the personal details being deleted (record ids, amounts and who acted only). |
 | I | Pending rewards are forfeited on deletion (recommended with G; not yet earned). |
 
+## 13.7 Payouts — specification (6 Nov 2026)
+
+**Customer (portal → Payouts),** only when the business allows payouts (wallet rules): an amount between the business's minimum and their wallet, and bank details (account holder, bank, account number, branch code). The amount is **reserved at once** — it can't also be spent at checkout while the request waits. One open request at a time.
+
+**Business (Customers → Payouts; `referrals.manage`):** requests oldest first, with the bank details to pay into. The business pays from its own bank, then **marks it paid with a reference** — or **declines with a reason**, which returns the amount to the wallet. The customer is emailed either way (wording in Settings → Messages).
+
+**Bank details (POPIA — financial information):** stored encrypted; only the last four digits shown once the payout is paid or declined, when the full account number is deleted. Every step is logged, never with the account number. The ledger records the reservation as a payout (−), and a decline returns it (+), so wallets, statements and the deletion flow stay consistent.
+
 ## Progress
 
 | Part | PR | Notes |
