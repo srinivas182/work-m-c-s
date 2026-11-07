@@ -68,10 +68,18 @@ final readonly class Contacts implements ContactBook
         });
     }
 
+    public function profile(string $contactId): ?array
+    {
+        $c = Contact::query()->find($contactId);
+
+        return $c === null ? null : ['name' => (string) $c->name, 'phone' => $c->phone, 'email' => $c->email, 'tags' => array_values($c->tags ?? []), 'notes' => $c->notes,
+            'marketing_consent_at' => $c->marketing_consent_at, 'marketing_consent_source' => $c->marketing_consent_source, 'since' => $c->created_at];
+    }
+
     public function history(string $contactId, array $types, int $limit = 50): array
     {
         return array_values(DB::connection($this->context->connectionName())->table('contact_links')->where('tenant_id', $this->context->id())->where('contact_id', $contactId)
-            ->whereIn('source_type', $types)->orderByDesc('occurred_at')->limit($limit)->get()
+            ->when($types !== [], fn ($q) => $q->whereIn('source_type', $types))->orderByDesc('occurred_at')->limit($limit)->get()
             ->map(fn ($l) => ['type' => (string) $l->source_type, 'summary' => (string) $l->summary, 'at' => CarbonImmutable::parse((string) $l->occurred_at)])->all());
     }
 

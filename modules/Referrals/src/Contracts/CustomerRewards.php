@@ -13,4 +13,11 @@ interface CustomerRewards
      * @return array{code: string, link: string, referred: list<array{name: string, since: \DateTimeInterface}>, pending_cents: int, wallet_cents: int, expiry_months: int}|null
      */
     public function forContact(string $contactId): ?array;
+
+    /**
+     * Every reward and wallet movement for a customer (oldest first), for a copy of their data.
+     *
+     * @return list<array{at: \DateTimeInterface, kind: string, cents: int, available_at: \DateTimeInterface}>
+     */
+    public function statement(string $contactId): array;
 }

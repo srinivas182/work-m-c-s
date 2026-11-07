@@ -7,8 +7,10 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\FakeOtpChannel;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
+use Wurk\Audit\Models\AuditEvent;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\PurchaseMade;
+use Wurk\Crm\Models\Contact;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
@@ -145,4 +147,39 @@ it('shows the signed-in customer a QR proving who they are — and nobody else',
     $this->post("{$site}/consent", ['agree' => '1']);
     $qr = $this->get("{$site}/id-qr.svg")->assertOk()->assertHeader('Content-Type', 'image/svg+xml')->assertHeader('Cache-Control', 'no-store, private');
     expect((string) $qr->getContent())->toContain('<svg');
+});
+
+it('gives the signed-in customer a full copy of their information, and records a deletion request once — audit without personal details', function () {
+    ($this->in)($this->glow, function () {
+        $book = app(ContactBook::class);
+        $id = $book->remember('Sipho Ndlovu', '082 555 0101', 'sipho@example.com', 'order', '01JD00000000000000000ORD01', null, 'Order #1001 · R500');
+        $book->remember('Sipho Ndlovu', null, 'sipho@example.com', 'form', '01JD00000000000000000FRM01', null, 'Website enquiry');
+        Contact::query()->whereKey($id)->update(['notes' => 'Prefers Saturdays']);
+    });
+    $site = ($this->site)('glow-salon');
+    $this->get("{$site}/my-information.json")->assertNotFound(); // signed out
+    $this->post("{$site}/verify", ['code' => ($this->code)($site, 'sipho@example.com')]);
+    $this->post("{$site}/consent", ['agree' => '1']);
+
+    $copy = $this->get("{$site}/my-information.json")->assertOk()->assertHeader('Content-Disposition', 'attachment; filename="my-information-glow-salon.json"');
+    $data = json_decode((string) $copy->getContent(), true);
+    expect($data['business'])->toBe('Glow Salon')
+        ->and($data['you'])->toMatchArray(['name' => 'Sipho Ndlovu', 'email' => 'sipho@example.com'])
+        ->and(collect($data['history'])->pluck('type')->sort()->values()->all())->toContain('form', 'order') // their own enquiries too
+        ->and($data['notes_the_business_keeps_about_you']['notes'])->toBe('Prefers Saturdays')
+        ->and($data['account']['consented_at'])->not->toBeNull();
+
+    $this->post("{$site}/delete-request", [])->assertSessionHasErrors(['confirm' => 'Please confirm you understand what deletion means.']);
+    $this->post("{$site}/delete-request", ['confirm' => '1'])->assertRedirect('/account');
+    $this->post("{$site}/delete-request", ['confirm' => '1']);
+    $this->get($site)->assertInertia(fn (Assert $p) => $p->where('deletion.status', 'open'));
+    ($this->in)($this->glow, function () {
+        $db = DB::connection($this->ctx->connectionName());
+        expect($db->table('data_requests')->where('tenant_id', $this->ctx->id())->where('status', 'open')->count())->toBe(1);
+        // Every stored field of every portal entry (sign-in and consent too) — the model's array form hides most of them.
+        $events = AuditEvent::query()->where('action', 'like', 'portal.%')->get()->map(fn ($e) => $e->getAttributes());
+        expect($events->pluck('action')->sort()->values()->all())->toBe(['portal.consented', 'portal.data_copy', 'portal.deletion_requested', 'portal.signed_in'])
+            ->and($events->pluck('actor_name')->unique()->values()->all())->toBe(['Customer'])
+            ->and(json_encode($events->all()))->not->toContain('Sipho')->not->toContain('sipho@example.com')->not->toContain('555'); // decision H
+    });
 });

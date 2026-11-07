@@ -20,6 +20,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string|null $marketing_consent_source
  * @property string|null $merged_into
  * @property Carbon|null $last_seen_at
+ * @property Carbon|null $created_at
  */
 final class Contact extends Model
 {

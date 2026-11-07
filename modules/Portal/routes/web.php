@@ -14,5 +14,7 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->middleware('web')->prefi
     Route::post('/sign-out', [PortalController::class, 'signOut'])->name('.sign-out');
     Route::get('/referral-qr.svg', [PortalController::class, 'qr'])->name('.qr');
     Route::get('/id-qr.svg', [PortalController::class, 'idQr'])->middleware('throttle:30,1,id-qr')->name('.id-qr');
+    Route::get('/my-information.json', [PortalController::class, 'myData'])->middleware('throttle:10,1,my-data')->name('.my-data');
+    Route::post('/delete-request', [PortalController::class, 'requestDeletion'])->middleware('throttle:5,1,delete-request')->name('.delete-request');
     Route::get('/wallet-pass', [PortalController::class, 'walletPass'])->middleware('throttle:30,1,wallet-pass')->name('.wallet-pass');
 });

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Wurk\Referrals\Support;
 
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Referrals\Contracts\ReferralRules;
@@ -33,5 +35,18 @@ final readonly class PortalRewards implements CustomerRewards
             'wallet_cents' => $this->wallets->balance($me->id),
             'expiry_months' => $this->wallets->rules()['expiry_months'],
         ];
+    }
+
+    public function statement(string $contactId): array
+    {
+        $member = ReferralMember::query()->where('contact_id', $contactId)->first();
+        if ($member === null) {
+            return [];
+        }
+
+        return array_values(DB::connection($this->context->connectionName())->table('referral_ledger')->where('tenant_id', $this->context->id())
+            ->where('member_id', $member->id)->orderBy('created_at')->get()
+            ->map(fn ($l) => ['at' => CarbonImmutable::parse((string) $l->created_at), 'kind' => (string) $l->kind, 'cents' => (int) $l->cents,
+                'available_at' => CarbonImmutable::parse((string) $l->available_at)])->all());
     }
 }
