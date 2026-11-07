@@ -69,6 +69,14 @@
 | H | Every step is in the audit log (WURK) — request, wallet settled, approved/declined, who and when — **without** the personal details being deleted (record ids, amounts and who acted only). |
 | I | Pending rewards are forfeited on deletion (recommended with G; not yet earned). |
 
+## 13.6b Passwords — decision J (WURK, 7 Nov 2026)
+
+| # | Decision |
+|---|---|
+| J | When a business allows passwords, a **new customer who gives an email receives a default password by email automatically** (free); the **owner can send one by SMS on request** (uses the business's SMS credits). |
+
+As built: the business chooses code only (default) or code-or-password (Settings → Customer accounts). Default passwords are kept per business — hashed, single-use, valid 7 days — never on the WURK ID and never issued to someone whose WURK ID already has a password (they use their own). The first sign-in with one goes straight to "Set your own password" (WURK's password rules).
+
 ## 13.7 Payouts — specification (6 Nov 2026)
 
 **Customer (portal → Payouts),** only when the business allows payouts (wallet rules): an amount between the business's minimum and their wallet, and bank details (account holder, bank, account number, branch code). The amount is **reserved at once** — it can't also be spent at checkout while the request waits. One open request at a time.

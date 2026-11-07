@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -25,6 +26,7 @@ use Wurk\Identity\Contracts\Accounts;
 use Wurk\Identity\Contracts\Verification;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Portal\Support\CustomerSession;
+use Wurk\Portal\Support\DefaultPasswords;
 use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -42,7 +44,10 @@ final class PortalController
             $me = app(CustomerSession::class)->current($request);
             $business = $this->context->current()->displayName();
             if ($me === null) {
-                return Inertia::render('Portal::SignIn', ['business' => $business, 'sent' => $request->session()->get('portal.masked')]);
+                return Inertia::render('Portal::SignIn', ['business' => $business, 'sent' => $request->session()->get('portal.masked'), 'passwords' => app(DefaultPasswords::class)->allowed()]);
+            }
+            if ($request->session()->get('portal.must_set_password') === true) {
+                return Inertia::render('Portal::SetPassword', ['business' => $business]);
             }
             if (! $me['consented']) {
                 return Inertia::render('Portal::Consent', ['business' => $business]);
@@ -115,6 +120,61 @@ final class PortalController
             self::audit('portal.signed_in', 'portal_customer', $identity, []);
 
             return $redirect;
+        });
+    }
+
+    /** Sign in with a password (when the business allows it): the WURK ID's own, or this business's default password. */
+    public function password(Request $request, string $handle): RedirectResponse
+    {
+        return $this->redirect($handle, function () use ($request) {
+            $d = $request->validate(['identifier' => ['required', 'string', 'max:160'], 'password' => ['required', 'string', 'max:128']]);
+            $defaults = app(DefaultPasswords::class);
+            abort_unless($defaults->allowed(), 404);
+            $nope = fn () => ValidationException::withMessages(['password' => 'That email/number and password don’t match.']);
+            $book = app(ContactBook::class);
+            $isEmail = str_contains($d['identifier'], '@');
+            $known = $book->find($isEmail ? null : $d['identifier'], $isEmail ? $d['identifier'] : null);
+            $accounts = app(Accounts::class);
+            if ($accounts->hasPassword($d['identifier'])) { // their own WURK ID password
+                $identity = $accounts->checkPassword($d['identifier'], $d['password'], $request->ip()) ?? throw $nope();
+                $known ?? throw ValidationException::withMessages(['password' => 'First time with '.$this->context->current()->displayName().'? Sign in with a code.']);
+                $mustSet = false;
+            } else { // this business's default password: throttled like WURK ID passwords
+                $key = 'portal-pwd:'.$this->context->id().'|'.mb_strtolower($d['identifier']).'|'.$request->ip();
+                if (RateLimiter::tooManyAttempts($key, 5)) {
+                    throw ValidationException::withMessages(['password' => 'Too many attempts. Try again later, or sign in with a code.']);
+                }
+                if ($known === null || ! $defaults->redeem($known['id'], $d['password'])) {
+                    RateLimiter::hit($key, 900);
+                    throw $nope();
+                }
+                RateLimiter::clear($key);
+                [$first, $last] = array_pad(explode(' ', $known['name'], 2), 2, '');
+                $identity = $accounts->forVerifiedContact($d['identifier'], $first, $last); // receiving it proved the address
+                $mustSet = true;
+            }
+            $redirect = $accounts->signIn($request, $identity, '/account');
+            app(CustomerSession::class)->start($request, $identity, $known['id']);
+            $request->session()->put('portal.must_set_password', $mustSet);
+            self::audit('portal.signed_in', 'portal_customer', $identity, ['with' => $mustSet ? 'default_password' : 'password']);
+
+            return $redirect;
+        });
+    }
+
+    /** After a default password: choose your own (WURK's password rules). */
+    public function setPassword(Request $request, string $handle): RedirectResponse
+    {
+        return $this->redirect($handle, function () use ($request) {
+            $me = app(CustomerSession::class)->current($request);
+            abort_if($me === null, 403);
+            $accounts = app(Accounts::class);
+            $d = $request->validate(['password' => [...$accounts->passwordRules(), 'confirmed']]);
+            $accounts->setPassword($me['identity_id'], (string) $d['password']);
+            $request->session()->forget('portal.must_set_password');
+            self::audit('portal.password_set', 'portal_customer', $me['id'], []);
+
+            return redirect('/account')->with('status', 'Your password is set.');
         });
     }
 
