@@ -93,6 +93,17 @@ As built: the business chooses code only (default) or code-or-password (Settings
 
 **Open:** goes to that business's portal already signed in, through a **one-time pass** (signed, for that business and person, valid 60 seconds, usable once). Their POPIA consent with that business still applies as usual. **Remove from My WURK** hides a card; deleting information is still asked of the business (13.6e).
 
+## 13.9 Reports — specification (7 Nov 2026)
+
+**13.9a — Customers → Referral reports** (`referrals.manage`; packages with referrals), for a chosen period (this month, last 30 days, this year, all time):
+- **Referral sales vs commission cost:** sales by referred customers (purchases where the buyer has a referrer), rewards earned in the period (net of reversals) split into own-purchase cashback and referral levels, and the cost as a share of those sales — by month.
+- **Top referrers:** the ten customers whose referrals earned them the most (level 1+), with how many people they brought in the period.
+- **Wallet liability (now):** available in wallets (owed if spent or paid out), on its way (pending), payouts waiting to be paid, and what expires in the next 30 days.
+- **Payouts:** paid and declined in the period.
+- **Dashboard tiles** on the business home: *Referral sales (this month)* and *Wallet liability* — through a new platform contract any module can use to add tiles (permission- and package-aware).
+
+**13.9b — inter-branch settlement for wallets:** when a reward earned at one branch is spent at another, the 11.5 branch ledger records what the earning branch owes the spending branch; spends are matched to the branches where the rewards were earned, oldest first.
+
 ## Progress
 
 | Part | PR | Notes |
