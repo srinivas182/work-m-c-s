@@ -9,6 +9,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Card payments ask for and check **only what's due**; ledgers record only cash received; paid wholly from the wallet is paid at once. **Rewards on the full amount** (decision E).
 - **Refunds** return the wallet part to the wallet and the rest to the card or account (decision F) — in proportion, exact on the last refund. Unpaid orders and holds that expire, or that can't be paid, give the wallet part back. A wallet problem can never stop a form working.
 
+### Added — Sprint 13.9a (referral reports and home tiles)
+- **Customers → Referral reports** (`referrals.manage`; packages with referrals), for this month, the last 30 days, this year or all time: referral sales vs commission cost by month (own-purchase vs referral rewards, cost as a share of sales), top referrers, wallet liability now (in wallets, on its way, payouts waiting, expiring in 30 days), payouts paid and declined.
+- **Business home tiles** through a new Platform `DashboardTiles` contract (any module can add tiles): *Referral sales (this month)* and *Wallet liability*, for people who manage referrals at businesses whose package has them.
+- **Fixed during the build:** report periods are in the time zone WURK stores times in (converting to UTC dropped the last two hours and shifted month boundaries).
+
 ### Added — Sprint 13.8 (My WURK)
 - **`my.wurk.co.za`** (`WURK_MY_DOMAIN`; its own surface and session policy): customers sign in with their WURK ID (code or their own password — never creates one) and see one card per business they have an account with — wallet, rewards on the way, latest visit — each built from that business alone.
 - **Open** goes to that business's portal already signed in (a one-time pass: signed, one business and person, 60 seconds, once). **Remove from My WURK** hides a card.

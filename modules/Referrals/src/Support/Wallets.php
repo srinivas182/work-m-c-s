@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Referrals\Support;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -78,6 +79,25 @@ final readonly class Wallets implements StoreCredit
         }
         $this->line((string) $first->member_id, 'returned', $back, $sourceType, $sourceId);
         $this->audit->record('referrals.wallet_returned', $sourceType, $sourceId, ['cents' => $back]);
+    }
+
+    /** What the nightly expiry would expire by this date (same rule, nothing written) — for reports. */
+    public function expiringBy(\DateTimeInterface $by): int
+    {
+        $months = $this->rules()['expiry_months'];
+        if ($months === 0) {
+            return 0;
+        }
+        $cutoff = CarbonImmutable::instance($by)->subMonths($months);
+        $total = 0;
+        $lines = $this->db()->table('referral_ledger')->where('tenant_id', $this->context->id())->where('available_at', '<=', $by)->get()->groupBy('member_id');
+        foreach ($lines as $memberLines) {
+            $old = (int) $memberLines->filter(fn ($l) => $l->cents > 0 && $cutoff->gte($l->available_at))->sum('cents');
+            $debits = -(int) $memberLines->filter(fn ($l) => $l->cents < 0)->sum('cents');
+            $total += max(0, $old - $debits);
+        }
+
+        return $total;
     }
 
     /**

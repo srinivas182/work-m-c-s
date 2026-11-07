@@ -93,6 +93,17 @@ As built: the business chooses code only (default) or code-or-password (Settings
 
 **Open:** goes to that business's portal already signed in, through a **one-time pass** (signed, for that business and person, valid 60 seconds, usable once). Their POPIA consent with that business still applies as usual. **Remove from My WURK** hides a card; deleting information is still asked of the business (13.6e).
 
+## 13.9 Reports — specification (7 Nov 2026)
+
+**13.9a — Customers → Referral reports** (`referrals.manage`; packages with referrals), for a chosen period (this month, last 30 days, this year, all time):
+- **Referral sales vs commission cost:** sales by referred customers (purchases where the buyer has a referrer), rewards earned in the period (net of reversals) split into own-purchase cashback and referral levels, and the cost as a share of those sales — by month.
+- **Top referrers:** the ten customers whose referrals earned them the most (level 1+), with how many people they brought in the period.
+- **Wallet liability (now):** available in wallets (owed if spent or paid out), on its way (pending), payouts waiting to be paid, and what expires in the next 30 days.
+- **Payouts:** paid and declined in the period.
+- **Dashboard tiles** on the business home: *Referral sales (this month)* and *Wallet liability* — through a new platform contract any module can use to add tiles (permission- and package-aware).
+
+**13.9b — inter-branch settlement for wallets:** when a reward earned at one branch is spent at another, the 11.5 branch ledger records what the earning branch owes the spending branch; spends are matched to the branches where the rewards were earned, oldest first.
+
 ## Progress
 
 | Part | PR | Notes |
@@ -110,4 +121,5 @@ As built: the business chooses code only (default) or code-or-password (Settings
 | CI | #128 | Browser install: skipped on a cache hit, browser only on a miss (~5 min → 6–11 s); develop's cache warmed after merges. |
 | 13.7 Payouts | #129 | Closed a gap with 13.6e: a deletion now waits for an outstanding payout. Fixed a flaky audit check (a 3-digit fragment of a phone number can occur by chance in ids and hashes — 1 run in 6 on MySQL); now the phone's real digits. 1,389 backend tests on SQLite; Referrals and Portal on MySQL 8. Browser tests in CI only. |
 | 13.6b Passwords | #130 | Decision J. A throttling test was in my plan but missing from my first tests — added before committing. 1,393 backend tests on SQLite; Portal and Identity on MySQL 8. Browser tests in CI only. |
-| 13.8 My WURK | see PR | Found and fixed: `{handle}` routes didn't refuse reserved handles (my.{root} was a "business site") — now a global route pattern. One unexplained MySQL error in a combined run that was cut off by a time limit; two full repeats clean. 1,397 backend tests on SQLite; Portal and Tenancy on MySQL 8. Browser tests in CI only. Release: DNS for my.wurk.co.za; `portal:index-memberships` once. |
+| 13.8 My WURK | #131 | Found and fixed: `{handle}` routes didn't refuse reserved handles (my.{root} was a "business site") — now a global route pattern. One unexplained MySQL error in a combined run that was cut off by a time limit; two full repeats clean. 1,397 backend tests on SQLite; Portal and Tenancy on MySQL 8. Browser tests in CI only. Release: DNS for my.wurk.co.za; `portal:index-memberships` once. |
+| 13.9a Reports and tiles | see PR | Found and fixed: report ranges were converted to UTC while times are stored in the app's time zone. My first draft of the test had wrong expected figures; reworked by hand. 1,399 backend tests on SQLite; Referrals and Platform on MySQL 8. Browser tests in CI only. |

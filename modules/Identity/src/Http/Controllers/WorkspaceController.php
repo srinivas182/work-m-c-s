@@ -6,6 +6,7 @@ namespace Wurk\Identity\Http\Controllers;
 
 use Inertia\Inertia;
 use Inertia\Response;
+use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Placeholder business home until the tenant dashboard is built. */
@@ -17,6 +18,7 @@ final class WorkspaceController
 
         return Inertia::render('Identity::Workspace', [
             'business' => ['name' => $tenant->displayName(), 'handle' => $tenant->handle()],
+            'tiles' => app(DashboardTiles::class)->visible(), // modules' tiles this person may see
         ]);
     }
 }

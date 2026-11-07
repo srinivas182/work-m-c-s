@@ -7,8 +7,10 @@ use Wurk\Referrals\Http\Controllers\PayoutsController;
 use Wurk\Referrals\Http\Controllers\ReferralLinkController;
 use Wurk\Referrals\Http\Controllers\ReferralMembersController;
 use Wurk\Referrals\Http\Controllers\ReferralSettingsController;
+use Wurk\Referrals\Http\Controllers\ReportsController;
 
 Route::tenant(function (): void {
+    Route::get('/referral-reports', ReportsController::class)->middleware(['entitled:referrals', 'permission:referrals.manage'])->name('tenant.referral-reports');
     Route::middleware(['entitled:referrals', 'permission:referrals.manage'])->prefix('payouts')->name('tenant.payouts')->group(function (): void {
         Route::get('/', [PayoutsController::class, 'index']);
         Route::post('/{payout}/paid', [PayoutsController::class, 'paid'])->name('.paid');
