@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Wurk\Portal\Http\Controllers\CustomerAccountsController;
 use Wurk\Portal\Http\Controllers\DataRequestsController;
+use Wurk\Portal\Http\Controllers\MyWurkController;
 use Wurk\Portal\Http\Controllers\PortalController;
 
 // The customer portal on a business's own address: {handle}.{root}/account (its own host-only session).
@@ -13,6 +14,7 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->middleware('web')->prefi
     Route::post('/code', [PortalController::class, 'code'])->middleware('throttle:10,1,portal-code')->name('.code');
     Route::post('/verify', [PortalController::class, 'verify'])->middleware('throttle:10,1,portal-verify')->name('.verify');
     Route::post('/consent', [PortalController::class, 'consent'])->name('.consent');
+    Route::get('/handoff', [PortalController::class, 'handoff'])->middleware('throttle:30,1,handoff')->name('.handoff');
     Route::post('/password', [PortalController::class, 'password'])->middleware('throttle:10,1,portal-password')->name('.password');
     Route::post('/set-password', [PortalController::class, 'setPassword'])->middleware('throttle:10,1,portal-set-password')->name('.set-password');
     Route::post('/sign-out', [PortalController::class, 'signOut'])->name('.sign-out');
@@ -36,5 +38,18 @@ Route::tenant(function (): void {
         Route::post('/{id}/settle', [DataRequestsController::class, 'settle'])->name('.settle');
         Route::post('/{id}/approve', [DataRequestsController::class, 'approve'])->name('.approve');
         Route::post('/{id}/decline', [DataRequestsController::class, 'decline'])->name('.decline');
+    });
+});
+
+// My WURK: a customer's businesses in one place (Sprint 13.8).
+Route::domain((string) config('wurk.domains.my'))->middleware('web')->name('my')->group(function (): void {
+    Route::get('/', [MyWurkController::class, 'show']);
+    Route::post('/code', [MyWurkController::class, 'code'])->middleware('throttle:10,1,my-code')->name('.code');
+    Route::post('/verify', [MyWurkController::class, 'verify'])->middleware('throttle:10,1,my-verify')->name('.verify');
+    Route::post('/password', [MyWurkController::class, 'password'])->middleware('throttle:10,1,my-password')->name('.password');
+    Route::middleware('auth')->group(function (): void {
+        Route::get('/open/{handle}', [MyWurkController::class, 'open'])->middleware('throttle:30,1,my-open')->name('.open');
+        Route::post('/hide/{handle}', [MyWurkController::class, 'hide'])->name('.hide');
+        Route::post('/sign-out', [MyWurkController::class, 'signOut'])->name('.sign-out');
     });
 });

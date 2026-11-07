@@ -16,6 +16,9 @@ final class Surface
     /** A business's customer portal on its own address (Sprint 13.6). */
     public const PORTAL = 'portal';
 
+    /** My WURK: a customer's businesses in one place (Sprint 13.8). */
+    public const MY = 'my';
+
     public static function of(Request $request): string
     {
         $host = strtolower($request->getHost());
@@ -23,6 +26,7 @@ final class Surface
         return match (true) {
             $host === strtolower((string) config('wurk.domains.admin')) => self::ADMIN,
             $host === strtolower((string) config('wurk.domains.app')) => self::APP,
+            $host === strtolower((string) config('wurk.domains.my')) => self::MY,
             // A business's WURK address ({handle}.{root}); sessions are host-only (SESSION_DOMAIN=null).
             // TODO(13.6): businesses on their own custom domain.
             str_ends_with($host, '.'.strtolower((string) config('wurk.domains.root'))) => self::PORTAL,

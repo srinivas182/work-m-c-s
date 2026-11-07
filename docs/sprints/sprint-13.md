@@ -85,6 +85,14 @@ As built: the business chooses code only (default) or code-or-password (Settings
 
 **Bank details (POPIA — financial information):** stored encrypted; only the last four digits shown once the payout is paid or declined, when the full account number is deleted. Every step is logged, never with the account number. The ledger records the reservation as a payout (−), and a decline returns it (+), so wallets, statements and the deletion flow stay consistent.
 
+## 13.8 My WURK — specification (7 Nov 2026)
+
+**`my.wurk.co.za`** (configurable; its own surface and session policy; `my` is a reserved handle). Customers sign in with their **WURK ID** — code, or their own password — and see **one card per business** where they have a portal account: business name, wallet, rewards on the way, latest order or booking.
+
+**Isolation:** each card is built inside that business's own context and data; nothing from one business is shown with, mixed into or totalled across another. A small **central index** records only *this WURK ID has an account at this business* (and whether they've hidden it) — no balances or details. It's added when they sign in to a business's portal, removed when a deletion is approved, and a one-off command indexes existing accounts.
+
+**Open:** goes to that business's portal already signed in, through a **one-time pass** (signed, for that business and person, valid 60 seconds, usable once). Their POPIA consent with that business still applies as usual. **Remove from My WURK** hides a card; deleting information is still asked of the business (13.6e).
+
 ## Progress
 
 | Part | PR | Notes |
@@ -101,4 +109,5 @@ As built: the business chooses code only (default) or code-or-password (Settings
 | 13.6e Data requests | #127 | Decisions G–I. Found and fixed: the audit log stored the customer's name for every portal action (a sealed chain can't be edited later) — now "Customer" + WURK ID; my first audit test checked a view that hides most fields, strengthened and proven to catch it. 1,386 backend tests on SQLite; Portal, CRM, Referrals on MySQL 8. Browser tests in CI only. |
 | CI | #128 | Browser install: skipped on a cache hit, browser only on a miss (~5 min → 6–11 s); develop's cache warmed after merges. |
 | 13.7 Payouts | #129 | Closed a gap with 13.6e: a deletion now waits for an outstanding payout. Fixed a flaky audit check (a 3-digit fragment of a phone number can occur by chance in ids and hashes — 1 run in 6 on MySQL); now the phone's real digits. 1,389 backend tests on SQLite; Referrals and Portal on MySQL 8. Browser tests in CI only. |
-| 13.6b Passwords | see PR | Decision J. A throttling test was in my plan but missing from my first tests — added before committing. 1,393 backend tests on SQLite; Portal and Identity on MySQL 8. Browser tests in CI only. |
+| 13.6b Passwords | #130 | Decision J. A throttling test was in my plan but missing from my first tests — added before committing. 1,393 backend tests on SQLite; Portal and Identity on MySQL 8. Browser tests in CI only. |
+| 13.8 My WURK | see PR | Found and fixed: `{handle}` routes didn't refuse reserved handles (my.{root} was a "business site") — now a global route pattern. One unexplained MySQL error in a combined run that was cut off by a time limit; two full repeats clean. 1,397 backend tests on SQLite; Portal and Tenancy on MySQL 8. Browser tests in CI only. Release: DNS for my.wurk.co.za; `portal:index-memberships` once. |

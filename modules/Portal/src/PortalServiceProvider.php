@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Event;
 use Wurk\Crm\Contracts\ContactRemembered;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Portal\Console\IndexMembershipsCommand;
 use Wurk\Portal\Support\DataRequests;
 use Wurk\Portal\Support\DefaultPasswords;
 
@@ -26,6 +27,9 @@ final class PortalServiceProvider extends ModuleServiceProvider
     public function boot(): void
     {
         parent::boot();
+        if ($this->app->runningInConsole()) {
+            $this->commands([IndexMembershipsCommand::class]);
+        }
         // A new customer with an email at a business that allows passwords gets a default password (decision J).
         Event::listen(ContactRemembered::class, function (ContactRemembered $e): void {
             if ($e->created && $e->sourceType !== 'portal' && app(DefaultPasswords::class)->allowed()) {

@@ -43,6 +43,7 @@ final readonly class CustomerSession
                 'last_seen_at' => now(), 'created_at' => now(), 'updated_at' => now()])
             : $this->db()->table('portal_customers')->where('tenant_id', $tenant)->where('id', $row->id)->update(['last_seen_at' => now(), 'updated_at' => now()]);
         $request->session()->put(self::KEY, $tenant);
+        app(Memberships::class)->add($identityId, $tenant); // My WURK's index (Sprint 13.8)
     }
 
     public function consent(string $portalId): void

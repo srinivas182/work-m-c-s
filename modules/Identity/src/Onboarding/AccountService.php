@@ -86,4 +86,12 @@ final readonly class AccountService implements Accounts
     {
         return array_values(PasswordPolicy::rules());
     }
+
+    public function identityFor(string $identifier): ?string
+    {
+        $d = Destination::parse($identifier);
+        $i = Identity::query()->where($d->column(), $d->value)->first();
+
+        return $i !== null && $i->isActive() ? $i->id : null;
+    }
 }
