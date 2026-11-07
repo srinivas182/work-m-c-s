@@ -9,6 +9,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Card payments ask for and check **only what's due**; ledgers record only cash received; paid wholly from the wallet is paid at once. **Rewards on the full amount** (decision E).
 - **Refunds** return the wallet part to the wallet and the rest to the card or account (decision F) — in proportion, exact on the last refund. Unpaid orders and holds that expire, or that can't be paid, give the wallet part back. A wallet problem can never stop a form working.
 
+### Added — Sprint 13.7 (payouts)
+- **Portal → Payouts** (when the business allows them): ask for an amount between the business's minimum and the wallet, with bank details; the amount is reserved at once (can't also be spent at checkout); one open request.
+- **Customers → Payouts** (`referrals.manage`): the business pays from its own bank and marks it paid with a reference, or declines with a reason (the amount returns to the wallet); the customer is emailed (wording in Settings → Messages).
+- **Bank details:** account numbers encrypted at rest and deleted once the payout is decided (last four kept); never in logs. A deletion request waits for an outstanding payout.
+
 ### Added — Sprint 13.6e (POPIA data requests)
 - **Portal → Your information:** download a full copy (details, all history including their own enquiries and chats, notes the business keeps about them, every reward and wallet movement, consent date); ask for deletion (explained first, confirmed; one open request; status shown).
 - **Customers → Data requests** (`contacts.manage`): the wallet is settled first (EFT or cash, recorded as a payout); approving emails the customer, then erases their details (and every record merged into them; enquiry and chat summaries blanked; orders and sales kept as the law requires), ends portal access, retires their referral link and forfeits pending rewards; declining needs a reason they're told. Both emails editable in Settings → Messages.

@@ -94,7 +94,7 @@ it('settles the wallet first, tells the customer, then erases them everywhere it
 
     $log = ($this->in)(fn () => AuditEvent::query()->where('action', 'like', 'portal.deletion%')->orWhere('action', 'like', 'referrals.%')->get()->map(fn ($e) => $e->getAttributes()));
     expect($log->pluck('action')->all())->toContain('portal.deletion_requested', 'portal.deletion_wallet_settled', 'portal.deletion_completed', 'referrals.paid_out', 'referrals.closed')
-        ->and(json_encode($log->all()))->not->toContain('Sipho')->not->toContain('sipho@example.com')->not->toContain('999'); // decision H
+        ->and(json_encode($log->all()))->not->toContain('Sipho')->not->toContain('sipho@example.com')->not->toContain('829991234'); // decision H (the phone's digits: short fragments can occur by chance in ids and hashes)
 });
 
 it('declines with a reason the customer is told, and shows it in their portal', function () {
