@@ -67,6 +67,9 @@ final readonly class DataRequests
         $this->tell($request, 'portal.deletion_done', []);                       // while their address is still known
         app(CustomerRewards::class)->close($request->contact_id);               // pending forfeited (decision I); link stops working
         $this->contacts->erase($request->contact_id);                           // and everything merged into them
+        foreach ($this->db()->table('portal_customers')->where('tenant_id', $this->context->id())->where('contact_id', $request->contact_id)->pluck('identity_id') as $identity) {
+            app(Memberships::class)->remove((string) $identity, $this->context->id()); // gone from My WURK too
+        }
         $this->db()->table('portal_customers')->where('tenant_id', $this->context->id())->where('contact_id', $request->contact_id)->delete(); // portal access ends
         $this->decide($request, 'completed', $by, null);
         $this->audit->record('portal.deletion_completed', 'data_request', $request->id, []); // ids only (decision H)

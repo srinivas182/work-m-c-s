@@ -42,6 +42,9 @@ final class TenancyServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        // Every {handle} route (business sites, shop, bookings, referral links, the portal) refuses reserved handles —
+        // e.g. my.{root} is My WURK, never a business's site. Global patterns apply when routes are created, so here.
+        $this->app->make(Router::class)->pattern('handle', HandleRules::routePattern());
         $this->app->bind(BranchDirectory::class, Branches::class);
         $this->app->singleton(TenantProvisioner::class, TenantProvisioning::class);
         $this->app->singleton(TenantContext::class, TenantContextManager::class);

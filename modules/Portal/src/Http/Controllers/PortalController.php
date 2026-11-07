@@ -27,6 +27,7 @@ use Wurk\Identity\Contracts\Verification;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Portal\Support\CustomerSession;
 use Wurk\Portal\Support\DefaultPasswords;
+use Wurk\Portal\Support\Handoff;
 use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -306,6 +307,24 @@ final class PortalController
             }
 
             return redirect('/account')->with('status', 'Payout requested — the business will pay it into your account.');
+        });
+    }
+
+    /** Arriving from My WURK's "Open": a one-time pass for this business, for someone with an account here (Sprint 13.8). */
+    public function handoff(Request $request, string $handle): RedirectResponse
+    {
+        return $this->redirect($handle, function () use ($request) {
+            $identity = app(Handoff::class)->redeem((string) $request->query('pass', ''), $this->context->id());
+            $contact = $identity === null ? null : DB::connection($this->context->connectionName())->table('portal_customers')
+                ->where('tenant_id', $this->context->id())->where('identity_id', $identity)->value('contact_id');
+            if ($identity === null || $contact === null) {
+                return redirect('/account'); // expired, used or not theirs: sign in as usual
+            }
+            $redirect = app(Accounts::class)->signIn($request, $identity, '/account');
+            app(CustomerSession::class)->start($request, $identity, (string) $contact);
+            self::audit('portal.signed_in', 'portal_customer', $identity, ['with' => 'my_wurk']);
+
+            return $redirect;
         });
     }
 

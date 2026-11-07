@@ -85,6 +85,14 @@ As built: the business chooses code only (default) or code-or-password (Settings
 
 **Bank details (POPIA — financial information):** stored encrypted; only the last four digits shown once the payout is paid or declined, when the full account number is deleted. Every step is logged, never with the account number. The ledger records the reservation as a payout (−), and a decline returns it (+), so wallets, statements and the deletion flow stay consistent.
 
+## 13.8 My WURK — specification (7 Nov 2026)
+
+**`my.wurk.co.za`** (configurable; its own surface and session policy; `my` is a reserved handle). Customers sign in with their **WURK ID** — code, or their own password — and see **one card per business** where they have a portal account: business name, wallet, rewards on the way, latest order or booking.
+
+**Isolation:** each card is built inside that business's own context and data; nothing from one business is shown with, mixed into or totalled across another. A small **central index** records only *this WURK ID has an account at this business* (and whether they've hidden it) — no balances or details. It's added when they sign in to a business's portal, removed when a deletion is approved, and a one-off command indexes existing accounts.
+
+**Open:** goes to that business's portal already signed in, through a **one-time pass** (signed, for that business and person, valid 60 seconds, usable once). Their POPIA consent with that business still applies as usual. **Remove from My WURK** hides a card; deleting information is still asked of the business (13.6e).
+
 ## Progress
 
 | Part | PR | Notes |

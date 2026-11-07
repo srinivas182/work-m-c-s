@@ -33,4 +33,7 @@ interface Accounts
 
     /** @return list<mixed> WURK's password rules (for validating a new password). */
     public function passwordRules(): array;
+
+    /** The active WURK ID with this email or number, if any — never creates one. */
+    public function identityFor(string $identifier): ?string;
 }
