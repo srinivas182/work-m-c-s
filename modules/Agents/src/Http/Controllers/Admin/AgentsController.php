@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace Wurk\Agents\Http\Controllers\Admin;
 
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -27,13 +32,15 @@ final class AgentsController
         $names = $this->people->names(array_values(array_map('strval', $agents->pluck('identity_id')->all())));
         $byId = $agents->keyBy('id');
         $team = $agents->countBy('sponsor_id');
+        $businesses = DB::table('agent_businesses')->selectRaw('agent_id, count(*) as n')->groupBy('agent_id')->pluck('n', 'agent_id');
 
         return Inertia::render('Agents::Admin/Agents', [
             'canManage' => Gate::allows('agents.manage'),
             'agents' => $agents->map(fn (Agent $a) => [
                 'id' => $a->id, 'name' => $names[$a->identity_id] ?? 'Agent', 'code' => $a->code, 'status' => $a->status, 'months' => $a->commission_months,
                 'sponsor_id' => $a->sponsor_id, 'sponsor' => $a->sponsor_id === null ? null : ($names[$byId[$a->sponsor_id]->identity_id ?? ''] ?? 'Agent'),
-                'direct' => (int) ($team[$a->id] ?? 0), 'team' => count($this->roster->downline($a->id)),
+                'direct' => (int) ($team[$a->id] ?? 0), 'team' => count($this->roster->downline($a->id)), 'businesses' => (int) ($businesses[$a->id] ?? 0),
+                'link' => route('agents.link', ['code' => $a->code]),
             ])->all(),
         ]);
     }
@@ -64,6 +71,17 @@ final class AgentsController
             }
             $this->roster->update($a->refresh(), $d['status'], isset($d['months']) ? (int) $d['months'] : null);
         }, 'Saved.');
+    }
+
+    /** The agent's link as a QR code (SVG), for their marketing. */
+    public function qr(string $agent): \Symfony\Component\HttpFoundation\Response
+    {
+        Gate::authorize('agents.view');
+        $a = Agent::query()->findOrFail($agent);
+        $svg = (new Writer(new ImageRenderer(new RendererStyle(320, 2), new SvgImageBackEnd)))
+            ->writeString(route('agents.link', ['code' => $a->code]));
+
+        return response($svg, 200, ['Content-Type' => 'image/svg+xml', 'Content-Disposition' => 'attachment; filename="agent-'.$a->code.'.svg"']);
     }
 
     private function act(\Closure $fn, string $done): RedirectResponse

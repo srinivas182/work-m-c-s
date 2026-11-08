@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
         ]);
         // The referral cookie holds only a public code, and is read on routes with and without the web stack (Sprint 13.2).
-        $middleware->encryptCookies(except: ['wurk_ref']);
+        $middleware->encryptCookies(except: ['wurk_ref', 'wurk_agent']); // public codes only (Sprints 13.2, 14.2)
         $middleware->redirectGuestsTo(fn () => route('identity.sign-in'));
         $middleware->redirectUsersTo(fn (Request $request) => SignInFlow::home(Surface::of($request)));
     })
