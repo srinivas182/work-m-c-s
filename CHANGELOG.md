@@ -9,6 +9,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 - Card payments ask for and check **only what's due**; ledgers record only cash received; paid wholly from the wallet is paid at once. **Rewards on the full amount** (decision E).
 - **Refunds** return the wallet part to the wallet and the rest to the card or account (decision F) — in proportion, exact on the last refund. Unpaid orders and holds that expire, or that can't be paid, give the wallet part back. A wallet problem can never stop a form working.
 
+### Added — Sprint 13.9b (inter-branch settlement for wallets)
+- When a customer spends rewards at a different branch from where they were earned, the branch ledger (11.5) records what the earning branch owes the spending branch. Spends use the oldest rewards first; same-branch parts (and single-branch businesses) record nothing; give-backs reverse in proportion, the last exactly.
+- `StoreCredit::spend()` takes the branch the money is spent at (Shop: the order's; Bookings: the booking's or class session's).
+
 ### Added — Sprint 13.9a (referral reports and home tiles)
 - **Customers → Referral reports** (`referrals.manage`; packages with referrals), for this month, the last 30 days, this year or all time: referral sales vs commission cost by month (own-purchase vs referral rewards, cost as a share of sales), top referrers, wallet liability now (in wallets, on its way, payouts waiting, expiring in 30 days), payouts paid and declined.
 - **Business home tiles** through a new Platform `DashboardTiles` contract (any module can add tiles): *Referral sales (this month)* and *Wallet liability*, for people who manage referrals at businesses whose package has them.
