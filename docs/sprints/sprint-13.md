@@ -123,4 +123,6 @@ As built: the business chooses code only (default) or code-or-password (Settings
 | 13.6b Passwords | #130 | Decision J. A throttling test was in my plan but missing from my first tests — added before committing. 1,393 backend tests on SQLite; Portal and Identity on MySQL 8. Browser tests in CI only. |
 | 13.8 My WURK | #131 | Found and fixed: `{handle}` routes didn't refuse reserved handles (my.{root} was a "business site") — now a global route pattern. One unexplained MySQL error in a combined run that was cut off by a time limit; two full repeats clean. 1,397 backend tests on SQLite; Portal and Tenancy on MySQL 8. Browser tests in CI only. Release: DNS for my.wurk.co.za; `portal:index-memberships` once. |
 | 13.9a Reports and tiles | #132 | Found and fixed: report ranges were converted to UTC while times are stored in the app's time zone. My first draft of the test had wrong expected figures; reworked by hand. 1,399 backend tests on SQLite; Referrals and Platform on MySQL 8. Browser tests in CI only. |
-| 13.9b Wallet branch settlement | see PR | 1,401 backend tests on SQLite; Referrals, Team and the end-to-end test on MySQL 8. No frontend changes. |
+| 13.9b Wallet branch settlement | #133 | 1,401 backend tests on SQLite; Referrals, Team and the end-to-end test on MySQL 8. No frontend changes. |
+| CI | #134 | MySQL parts rebalanced again (part 3 reached 9m41s): Payments and Credits to part 1. |
+| Close | — | Released as **v0.15.0**. |

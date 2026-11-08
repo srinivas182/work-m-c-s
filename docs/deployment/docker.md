@@ -46,6 +46,11 @@ Run these once, after `migrate`, when deploying the version shown (any other com
 |---|---|---|
 | v0.14.0 | Start ClamAV and set `CLAMAV_HOST` — see “Malware scanning (ClamAV)” below | **Before** the new version serves traffic: files visitors attach to forms are held until ClamAV scans them. |
 | v0.14.0 | `docker run --rm --env-file production.env wurk:<version> php artisan crm:link-existing` | Makes contacts of customers from before contacts existed (bookings, class places, orders). Safe to run again. |
+| v0.15.0 | DNS: point `my.wurk.co.za` at the app (as `app.` and `admin.`); set `WURK_MY_DOMAIN` if it differs | **My WURK** — customers' businesses in one place. `my` is a reserved handle, so no business can take it. |
+| v0.15.0 | `docker run --rm --env-file production.env wurk:<version> php artisan portal:index-memberships` | Adds customers who already have portal accounts to My WURK. Safe to run again. |
+| v0.15.0 | **Never change `APP_KEY`** (check it's the same value as before) | Customers' bank account numbers for payouts are **encrypted with it**, and wallet, identity and handoff passes are signed with it — a new key makes waiting payouts' account numbers unreadable. |
+| v0.15.0 | Confirm the scheduler runs (as already required) | Unused rewards expire nightly at 02:30 (`referrals:expire-wallets`). |
+| every deploy | `docker run --rm --env-file production.env wurk:<version> php artisan permissions:sync` | Checks built-in roles and removes permissions modules no longer declare from custom roles (built-in roles update by themselves — v0.15.0 gives staff *Record sale* and branch managers *approve sales*). |
 
 ## Required environment
 

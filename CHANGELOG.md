@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.15.0] — 2026-11-08 — Sprint 13: Referral engine
+
+Referral programme rules, links and QR codes, commission (pending then available after the business's return window), wallets, Record sale, the customer portal (sign-in by code or password, POPIA consent, data copies and deletion), payouts, My WURK, referral reports and branch settlements for wallets. Release steps: see *Version-specific release steps* in docs/deployment/docker.md (v0.15.0 rows).
+
 ### Added — Sprint 13.6c (spending the wallet)
 - **Wallet at shop checkout and on booking and class deposits**, for customers signed in to the business's portal: "Use R… from your wallet" (bookings: "up to", as the form knows the price, not the deposit). The site's checkout has no session, so the portal issues a **signed wallet pass** (bound to the business and customer; 15 minutes) that the server checks before spending.
 - Card payments ask for and check **only what's due**; ledgers record only cash received; paid wholly from the wallet is paid at once. **Rewards on the full amount** (decision E).
