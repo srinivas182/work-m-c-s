@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Agents;
 
 use Illuminate\Support\Facades\Event;
+use Wurk\Agents\Console\CreateAgentCommand;
 use Wurk\Agents\Support\AgentAttribution;
 use Wurk\Agents\Support\AgentCommission;
 use Wurk\Billing\Events\CreditNoteIssued;
@@ -17,6 +18,9 @@ final class AgentsServiceProvider extends ModuleServiceProvider
 {
     protected function bootModule(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([CreateAgentCommand::class]);
+        }
         // A paid WURK subscription: commission for the business's agent and the sponsors above (Sprint 14.3).
         Event::listen(PaymentSucceeded::class, fn (PaymentSucceeded $e) => app(AgentCommission::class)->onPayment($e->paymentId));
         // Refunds within WURK's window, and chargebacks, reverse it (Sprint 14.4).

@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.7 (agent banking details; the agent area begins)
+- **Agent area** at `app.wurk.co.za/agent` (agents only; `agent` is now a reserved handle): their link and commission; the full dashboard follows in 14.6.
+- **Banking details**: a change is confirmed with a code to the agent's phone (email if none) before it's saved, and held encrypted in the session meanwhile; account numbers encrypted at rest, shown masked, never logged; the change date is kept so a payout can be held after a recent change (14.5).
+- `php artisan agents:create <contact>` makes someone an agent (as Admin → Agents does) — used by the test setup.
+
 ### Added — Sprint 14.4 (WURK's refund window and clawback)
 - **Admin → Billing settings: refund window** (default 30 days; 0 = no refunds). Credit notes are refused once a payment's window has closed; agent commission on a payment becomes payable when it closes (at once with 0).
 - **Refunds within the window** reverse agent commission in proportion — cumulatively, so a full refund lands exactly on zero (before anything is paid).
