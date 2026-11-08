@@ -290,6 +290,27 @@ export default function BusinessBilling({
                     >
                       {p.status}
                     </Badge>
+                    {canManage && p.status === 'succeeded' && p.gateway === 'paystack' && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              'Record that the bank took this card payment back? Any agent commission on it is reversed.',
+                            )
+                          ) {
+                            router.post(
+                              `/billing/payments/${p.id}/chargeback`,
+                              {},
+                              { preserveScroll: true },
+                            );
+                          }
+                        }}
+                      >
+                        Record a chargeback
+                      </Button>
+                    )}
                   </span>
                 </li>
               ))}

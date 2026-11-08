@@ -17,14 +17,16 @@ interface Props {
   issuer: { name: string; address: string; vat_number: string; registration: string };
   placeholder: boolean;
   dunning: { retry_days: number[]; restrict_from_day: number; suspend_on_day: number };
+  refundDays: number;
 }
 
-export default function InvoiceSettings({ issuer, placeholder, dunning }: Props) {
+export default function InvoiceSettings({ issuer, placeholder, dunning, refundDays }: Props) {
   const form = useForm({
     ...issuer,
     retry_days: dunning.retry_days.join(', '),
     restrict_from_day: dunning.restrict_from_day,
     suspend_on_day: dunning.suspend_on_day,
+    refund_days: refundDays,
   });
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -124,6 +126,22 @@ export default function InvoiceSettings({ issuer, placeholder, dunning }: Props)
                 onChange={(e) => form.setData('suspend_on_day', Number(e.target.value))}
               />
             </Field>
+            <Field
+              label="Refund window (days after payment; 0 = no refunds)"
+              error={(errors as Record<string, string | undefined>).refund_days}
+            >
+              <Input
+                type="number"
+                min="0"
+                max="365"
+                value={form.data.refund_days}
+                onChange={(e) => form.setData('refund_days', Number(e.target.value))}
+              />
+            </Field>
+            <p className="text-fg-muted text-sm">
+              No credit notes once a payment’s window has closed. Agents’ commission on a payment
+              becomes payable when it closes.
+            </p>
           </CardContent>
         </Card>
         <Button type="submit" size="lg" className="w-fit" loading={form.processing}>
