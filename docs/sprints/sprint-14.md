@@ -40,4 +40,5 @@ Each part: route tests, isolation tests (agents see only their own and their dow
 
 | Part | PR | Notes |
 |---|---|---|
-| 14.1 Agents and hierarchy | see PR | 1,459 backend tests on SQLite; Agents and Access on MySQL 8. Browser tests in CI only. |
+| 14.1 Agents and hierarchy | #139 | 1,459 backend tests on SQLite; Agents and Access on MySQL 8. Browser tests in CI only. |
+| 14.2 Attribution | see PR | 1,463 backend tests on SQLite; Agents and Onboarding on MySQL 8. Browser tests in CI only. |

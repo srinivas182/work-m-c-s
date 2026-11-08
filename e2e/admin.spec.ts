@@ -79,6 +79,13 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('link', { name: 'Glow Salon' })).toBeVisible();
   await expectAccessible(page);
 
+  // Who brought this business (Sprint 14.2): the business page links to its agent.
+  await page.getByRole('link', { name: 'Glow Salon' }).first().click();
+  await page.getByRole('link', { name: 'Agent', exact: true }).click(); // not the menu's "Agents"
+  await expect(page.getByRole('heading', { level: 1, name: 'Agent' })).toBeVisible();
+  await expect(page.getByLabel('Agent', { exact: true })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/staff`);
   await expect(page.getByRole('heading', { level: 1, name: 'WURK staff' })).toBeVisible();
   await expectAccessible(page);
