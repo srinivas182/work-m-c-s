@@ -190,7 +190,7 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expectAccessible(page);
 
   // Agents (Sprint 14.1): add one — unique per run, since desktop and phone share WURK's central data.
-  await page.goto('/agents');
+  await page.goto(`${admin}/agents`); // the admin's address (the default address is the business app's)
   await expect(page.getByRole('heading', { level: 1, name: 'Agents' })).toBeVisible();
   await expectAccessible(page);
   const agent = page.getByRole('form', { name: 'Add an agent' });
