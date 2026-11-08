@@ -47,6 +47,12 @@ for project in desktop mobile; do
     --password="sunny days in durban" --staff --mfa-secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP
 done
 
+# An agent per Playwright project for the agent area (Sprint 14.7).
+for project in desktop mobile; do
+  php artisan identities:create "agent-${project}@wurk.co.za" --first=Dineo --last=Agent --password="sunny days in durban"
+  php artisan agents:create "agent-${project}@wurk.co.za" --first=Dineo --last=Agent > /dev/null
+done
+
 # Example packages for the pricing page and signup.
 php artisan packages:seed-placeholders
 
