@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.5a (agent payout batches)
+- **Admin → Agent payouts** (`agents.pay` — Finance and the super admin): a minimum payout (none until set); a **preview** of who's included, **held** (banking details changed in the last 7 days) and skipped, with reasons (no banking details, below the minimum, suspended, owes WURK).
+- **Making a batch** reserves each amount in the agent's ledger at once, so nothing is batched or paid twice; reference `WURK-AG-YYYYMMDD-NNN`.
+- **EFT CSV** (holder, bank, branch code, account type, account number, amount, reference): account numbers decrypted only for the file; refused if an agent's banking details changed after the batch was made; spreadsheet-formula safe; not cached; every download logged. **Cancel** an unpaid batch to release the reservations.
+
 ### Added — Sprint 14.7 (agent banking details; the agent area begins)
 - **Agent area** at `app.wurk.co.za/agent` (agents only; `agent` is now a reserved handle): their link and commission; the full dashboard follows in 14.6.
 - **Banking details**: a change is confirmed with a code to the agent's phone (email if none) before it's saved, and held encrypted in the session meanwhile; account numbers encrypted at rest, shown masked, never logged; the change date is kept so a payout can be held after a recent change (14.5).
