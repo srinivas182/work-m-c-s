@@ -4,6 +4,9 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.1 (agents and the sponsor hierarchy)
+- **Admin → Agents** (new Agents module; `agents.view` / `agents.manage` — finance and support can view): add agents (their WURK ID, a 7-character referral code), place and move them under a sponsor (loops refused), suspend them, and set commission for life or N months from each business's start; direct and whole-team counts. Every change in the platform audit log.
+
 ## [0.15.0] — 2026-11-08 — Sprint 13: Referral engine
 
 Referral programme rules, links and QR codes, commission (pending then available after the business's return window), wallets, Record sale, the customer portal (sign-in by code or password, POPIA consent, data copies and deletion), payouts, My WURK, referral reports and branch settlements for wallets. Release steps: see *Version-specific release steps* in docs/deployment/docker.md (v0.15.0 rows).

@@ -1,0 +1,14 @@
+{
+    "name": "Agents",
+    "key": "agents",
+    "version": "0.1.0",
+    "description": "WURK's agents: the sponsor hierarchy, attribution of businesses, commission on subscription payments, EFT batch payouts, the agent area and demo sites.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "identity",
+        "access",
+        "audit"
+    ]
+}
