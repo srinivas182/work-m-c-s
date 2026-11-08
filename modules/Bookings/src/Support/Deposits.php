@@ -83,7 +83,7 @@ final readonly class Deposits
             // Up to what the business's share rule allows for this deposit (the booking form only knows the price).
             $cents = min($wallet['cents'], $credit->usableFor($contact, $amountCents));
             if ($cents > 0) {
-                $credit->spend($contact, $cents, self::source($booking), $booking->id, $amountCents);
+                $credit->spend($contact, $cents, self::source($booking), $booking->id, $amountCents, $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id);
                 $booking->update(['wallet_cents' => $cents]);
                 if ($cents >= $amountCents) { // the wallet paid all of it
                     $this->settle($booking->refresh(), $reference);

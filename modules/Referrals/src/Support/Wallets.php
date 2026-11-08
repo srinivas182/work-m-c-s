@@ -12,6 +12,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Referrals\Models\ReferralMember;
 use Wurk\Referrals\Models\ReferralProgramme;
+use Wurk\Team\Contracts\BranchLedger;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -50,19 +51,20 @@ final readonly class Wallets implements StoreCredit
         return min($this->available($contactId), intdiv(max(0, $orderTotalCents) * $this->rules()['max_wallet_bp'], 10000));
     }
 
-    public function spend(string $contactId, int $cents, string $sourceType, string $sourceId, int $orderTotalCents): void
+    public function spend(string $contactId, int $cents, string $sourceType, string $sourceId, int $orderTotalCents, ?string $branchId = null): void
     {
         $member = ReferralMember::query()->where('contact_id', $contactId)->first();
         if ($cents <= 0 || $member === null) {
             throw new \DomainException('There’s no credit to use here.');
         }
-        $this->db()->transaction(function () use ($member, $cents, $sourceType, $sourceId, $orderTotalCents): void {
+        $this->db()->transaction(function () use ($member, $cents, $sourceType, $sourceId, $orderTotalCents, $branchId): void {
             $this->db()->table('referral_members')->where('tenant_id', $this->context->id())->where('id', $member->id)->lockForUpdate()->first(); // one spend at a time
             $usable = min($this->balance($member->id), intdiv($orderTotalCents * $this->rules()['max_wallet_bp'], 10000));
             if ($cents > $usable) {
                 throw new \DomainException('Only R'.number_format($usable / 100, 2).' of the wallet can be used on this order.');
             }
             $this->line($member->id, 'spent', -$cents, $sourceType, $sourceId);
+            $this->settleBranches($member->id, $cents, $sourceType, $sourceId, $branchId);
         });
         $this->audit->record('referrals.wallet_spent', $sourceType, $sourceId, ['cents' => $cents]);
     }
@@ -78,6 +80,7 @@ final readonly class Wallets implements StoreCredit
             return;
         }
         $this->line((string) $first->member_id, 'returned', $back, $sourceType, $sourceId);
+        $this->reverseBranches($sourceType, $sourceId, $back, $owed);
         $this->audit->record('referrals.wallet_returned', $sourceType, $sourceId, ['cents' => $back]);
     }
 
@@ -150,6 +153,55 @@ final readonly class Wallets implements StoreCredit
         }
 
         return is_string($d['c'] ?? null) ? $d['c'] : null;
+    }
+
+    /**
+     * Inter-branch settlement (Sprint 13.9b): the spend uses up rewards oldest first (as expiry does); each part earned at
+     * another branch is recorded in the branch ledger — the earning branch received the original money, the spending
+     * branch now supplies the goods. Same-branch parts record nothing.
+     */
+    private function settleBranches(string $memberId, int $cents, string $sourceType, string $sourceId, ?string $spentBranch): void
+    {
+        $t = $this->context->id();
+        $lines = $this->db()->table('referral_ledger')->where('tenant_id', $t)->where('member_id', $memberId)->where('available_at', '<=', now())
+            ->orderBy('available_at')->orderBy('created_at')->get(['id', 'cents', 'purchase_id', 'kind', 'source_type', 'source_id']);
+        $branches = $this->db()->table('referral_purchases')->where('tenant_id', $t)->whereIn('id', $lines->pluck('purchase_id')->filter()->unique()->values())->pluck('branch_id', 'id');
+        // Earlier money out (excluding this spend) uses the oldest rewards first.
+        $used = -(int) $lines->filter(fn ($l) => $l->cents < 0 && ! ($l->kind === 'spent' && $l->source_type === $sourceType && $l->source_id === $sourceId))->sum('cents');
+        $parts = [];
+        foreach ($lines->filter(fn ($l) => $l->cents > 0) as $credit) {
+            $left = (int) $credit->cents - min($used, (int) $credit->cents);
+            $used = max(0, $used - (int) $credit->cents);
+            $take = min($left, $cents);
+            if ($take > 0) {
+                $earned = $credit->purchase_id === null ? null : ($branches[$credit->purchase_id] ?? null);
+                $parts[(string) $earned] = ($parts[(string) $earned] ?? 0) + $take;
+                $cents -= $take;
+            }
+            if ($cents === 0) {
+                break;
+            }
+        }
+        foreach ($parts as $earned => $amount) {
+            $earned = $earned === '' ? null : (string) $earned;
+            $this->db()->table('referral_spend_branches')->insert(['id' => (string) Str::ulid(), 'tenant_id' => $t, 'source_type' => $sourceType, 'source_id' => $sourceId,
+                'earned_branch_id' => $earned, 'spent_branch_id' => $spentBranch, 'cents' => $amount, 'created_at' => now()]);
+            app(BranchLedger::class)->record($earned, $spentBranch, $amount, 'wallet', $sourceType.'-'.$sourceId, 'Rewards earned here, spent at another branch');
+        }
+    }
+
+    /** A give-back reverses the settlement in proportion; the last give-back reverses exactly what's left. */
+    private function reverseBranches(string $sourceType, string $sourceId, int $back, int $owedBefore): void
+    {
+        $t = $this->context->id();
+        $rows = $this->db()->table('referral_spend_branches')->where('tenant_id', $t)->where('source_type', $sourceType)->where('source_id', $sourceId)->get();
+        foreach ($rows as $r) {
+            $part = $back >= $owedBefore ? (int) $r->cents : intdiv((int) $r->cents * $back, max(1, $owedBefore));
+            if ($part > 0) {
+                $this->db()->table('referral_spend_branches')->where('tenant_id', $t)->where('id', $r->id)->update(['cents' => (int) $r->cents - $part]);
+                app(BranchLedger::class)->record($r->earned_branch_id, $r->spent_branch_id, -$part, 'wallet', $sourceType.'-'.$sourceId, 'Wallet part given back');
+            }
+        }
     }
 
     private function line(string $memberId, string $kind, int $cents, ?string $sourceType, ?string $sourceId): void
