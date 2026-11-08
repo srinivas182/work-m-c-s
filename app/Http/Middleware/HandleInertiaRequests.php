@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Symfony\Component\HttpFoundation\Response;
 use Wurk\Identity\Models\Identity;
+use Wurk\Identity\Support\Surface;
 use Wurk\Platform\Navigation\NavigationBuilder;
 
 final class HandleInertiaRequests extends Middleware
@@ -45,7 +46,8 @@ final class HandleInertiaRequests extends Middleware
                 'name' => config('app.name'),
                 'environment' => app()->environment(),
             ],
-            'navigation' => fn () => app(NavigationBuilder::class)->build($request),
+            // No back-office menu on a business's customer portal (the person may also be staff somewhere).
+            'navigation' => fn () => Surface::of($request) === Surface::PORTAL ? [] : app(NavigationBuilder::class)->build($request),
             'auth' => fn () => [
                 'user' => ($user = $request->user()) instanceof Identity ? [
                     'name' => $user->fullName(),

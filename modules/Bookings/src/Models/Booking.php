@@ -25,6 +25,7 @@ use Wurk\Tenancy\Contracts\BranchDirectory;
  * @property string|null $notes
  * @property string $source
  * @property int $deposit_cents
+ * @property int $wallet_cents
  * @property bool $online
  * @property string|null $meeting_provider
  * @property string|null $meeting_id

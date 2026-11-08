@@ -4,14 +4,56 @@ declare(strict_types=1);
 
 namespace Wurk\Crm\Support;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\ContactRemembered;
 use Wurk\Crm\Models\Contact;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 final readonly class Contacts implements ContactBook
 {
     public function __construct(private TenantContext $context) {}
+
+    public function link(string $contactId, string $sourceType, string $sourceId, ?string $branchId, string $summary): void
+    {
+        $db = DB::connection($this->context->connectionName());
+        $db->transaction(function () use ($db, $contactId, $sourceType, $sourceId, $branchId, $summary): void {
+            $db->table('contact_links')->insert(['tenant_id' => $this->context->id(), 'contact_id' => $contactId, 'original_contact_id' => $contactId, // keyed by the source
+                'source_type' => $sourceType, 'source_id' => $sourceId, 'branch_id' => $branchId, 'summary' => mb_substr($summary, 0, 200), 'occurred_at' => now()]);
+            event(new ContactRemembered($contactId, false, $sourceType, $sourceId));
+        });
+    }
+
+    public function erase(string $contactId): void
+    {
+        $db = DB::connection($this->context->connectionName());
+        $db->transaction(function () use ($db, $contactId): void {
+            $ids = [$contactId];
+            for ($round = 0, $next = [$contactId]; $next !== [] && $round < 5; $round++) { // records merged into them (and into those)
+                $next = Contact::query()->whereIn('merged_into', $next)->pluck('id')->map(fn ($id) => (string) $id)->all();
+                $ids = [...$ids, ...$next];
+            }
+            Contact::query()->whereIn('id', $ids)->update(['name' => 'Deleted customer', 'phone' => null, 'email' => null, 'tags' => null, 'notes' => null,
+                'marketing_consent_at' => null, 'marketing_consent_source' => null]);
+            $db->table('contact_links')->where('tenant_id', $this->context->id())->whereIn('contact_id', $ids)->whereIn('source_type', ['form', 'chat'])
+                ->update(['summary' => 'Removed at the customer’s request']); // what they wrote to the business
+        });
+    }
+
+    public function contactFor(string $sourceType, string $sourceId): ?string
+    {
+        $id = DB::connection($this->context->connectionName())->table('contact_links')
+            ->where('tenant_id', $this->context->id())->where('source_type', $sourceType)->where('source_id', $sourceId)->value('contact_id');
+
+        return $id === null ? null : (string) $id;
+    }
+
+    /** @param  list<string>  $ids */
+    public function names(array $ids): array
+    {
+        return Contact::query()->whereIn('id', $ids)->pluck('name', 'id')->map(fn ($n) => (string) $n)->all();
+    }
 
     public function remember(string $name, ?string $phone, ?string $email, string $sourceType, string $sourceId, ?string $branchId, string $summary, ?string $consentSource = null): string
     {
@@ -21,6 +63,7 @@ final readonly class Contacts implements ContactBook
 
         return $db->transaction(function () use ($db, $name, $phone, $email, $sourceType, $sourceId, $branchId, $summary, $consentSource): string {
             $contact = $this->match($phone, $email);
+            $created = $contact === null;
             if ($contact === null) {
                 $contact = Contact::query()->create(['name' => trim($name) ?: 'Customer', 'phone' => $phone, 'email' => $email]);
             } else { // fill in what was missing; a name, number or email already known is kept
@@ -35,9 +78,38 @@ final readonly class Contacts implements ContactBook
             $db->table('contact_links')->where($link)->exists()
                 ? $db->table('contact_links')->where($link)->update($row) // already linked: keep its contact and history
                 : $db->table('contact_links')->insert([...$link, ...$row, 'contact_id' => $contact->id, 'original_contact_id' => $contact->id, 'occurred_at' => now()]);
+            event(new ContactRemembered($contact->id, $created, $sourceType, $sourceId)); // e.g. referral attribution (Sprint 13.2)
 
             return $contact->id;
         });
+    }
+
+    public function profile(string $contactId): ?array
+    {
+        $c = Contact::query()->find($contactId);
+
+        return $c === null ? null : ['name' => (string) $c->name, 'phone' => $c->phone, 'email' => $c->email, 'tags' => array_values($c->tags ?? []), 'notes' => $c->notes,
+            'marketing_consent_at' => $c->marketing_consent_at, 'marketing_consent_source' => $c->marketing_consent_source, 'since' => $c->created_at];
+    }
+
+    public function history(string $contactId, array $types, int $limit = 50): array
+    {
+        return array_values(DB::connection($this->context->connectionName())->table('contact_links')->where('tenant_id', $this->context->id())->where('contact_id', $contactId)
+            ->when($types !== [], fn ($q) => $q->whereIn('source_type', $types))->orderByDesc('occurred_at')->limit($limit)->get()
+            ->map(fn ($l) => ['type' => (string) $l->source_type, 'summary' => (string) $l->summary, 'at' => CarbonImmutable::parse((string) $l->occurred_at)])->all());
+    }
+
+    /** @param  list<string>  $ids */
+    public function emails(array $ids): array
+    {
+        return Contact::query()->whereIn('id', $ids)->whereNotNull('email')->pluck('email', 'id')->map(fn ($e) => (string) $e)->all();
+    }
+
+    public function find(?string $phone, ?string $email = null): ?array
+    {
+        $c = $this->match(Phone::normalise($phone), $email === null || trim($email) === '' ? null : mb_strtolower(trim($email)));
+
+        return $c === null ? null : ['id' => $c->id, 'name' => (string) $c->name, 'phone' => $c->phone, 'email' => $c->email];
     }
 
     /** Exact phone or email (never fuzzy); merged contacts lead to the one they joined. */

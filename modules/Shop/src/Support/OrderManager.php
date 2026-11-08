@@ -7,7 +7,11 @@ namespace Wurk\Shop\Support;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Crm\Contracts\PurchaseMade;
+use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\RefundWindow;
+use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Models\Order;
@@ -55,8 +59,9 @@ final readonly class OrderManager
         });
         if ($to === 'paid') {
             DB::table('shop_holds')->where('order_id', $order->id)->delete(); // the stock is theirs now
+            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents, $order->branch_id, app(RefundWindow::class)->finalAt($order->paid_at ?? now()))); // rewards on the items, not delivery
             // Paid by EFT into the account whose details the customer was given (the branch's own, or the business's).
-            app(BranchLedger::class)->record($this->payments->accountBranch('eft', $order->branch_id), $order->branch_id, $order->total_cents, 'order', 'shop-'.$order->id, "Order #{$order->number} (EFT)");
+            app(BranchLedger::class)->record($this->payments->accountBranch('eft', $order->branch_id), $order->branch_id, $order->dueCents(), 'order', 'shop-'.$order->id, "Order #{$order->number} (EFT)");
         }
         $this->audit->record('shop.order_'.$to, 'order', $order->id, ['by' => $by]);
         event(new OrderStatusChanged($this->context->id(), $order->id, $to));
@@ -65,6 +70,9 @@ final readonly class OrderManager
     /** Cancel before it leaves: the stock goes back, and a card payment is refunded in full. */
     public function cancel(Order $order, string $by, ?string $reason = null): bool
     {
+        if ($order->paid_at !== null) {
+            $this->refundsStillOpen($order); // cancelling a paid order refunds it
+        }
         if (! in_array($order->status, self::CANCELLABLE, true)) {
             throw new CheckoutProblem('This order has already left — refund it instead.');
         }
@@ -72,12 +80,22 @@ final readonly class OrderManager
         $this->placer->release($order, 'cancelled', $by);
         $this->log($order, 'cancelled', $by, null, $reason);
         $refunded = false;
-        if ($wasPaid && $order->payment_method === 'card') {
+        if ($wasPaid) {
+            $back = $this->toWallet($order, (int) $order->wallet_cents - (int) $order->wallet_refunded_cents); // the wallet part, back to the wallet
+            if ($back > 0) {
+                $order->update(['refunded_cents' => $order->refunded_cents + $back]);
+                $this->log($order, 'refunded', $by, $back, 'Back to the customer’s wallet');
+                event(new PurchaseRefunded('order', $order->id, $back));
+            }
+        }
+        if ($wasPaid && $order->payment_method === 'card' && $order->dueCents() > 0) {
             $refunded = $this->payments->refund('shop-'.$order->id);
             if ($refunded) {
+                $cash = $order->total_cents - $order->refunded_cents;
                 $order->update(['refunded_cents' => $order->total_cents]);
-                app(BranchLedger::class)->record($this->payments->receivedBy('shop-'.$order->id), $order->branch_id, -$order->total_cents, 'refund', 'shop-'.$order->id, "Order #{$order->number} cancelled");
-                $this->log($order, 'refunded', 'Payment provider', $order->total_cents);
+                app(BranchLedger::class)->record($this->payments->receivedBy('shop-'.$order->id), $order->branch_id, -$cash, 'refund', 'shop-'.$order->id, "Order #{$order->number} cancelled");
+                $this->log($order, 'refunded', 'Payment provider', $cash);
+                event(new PurchaseRefunded('order', $order->id, $cash));
             }
         }
         event(new OrderStatusChanged($this->context->id(), $order->id, 'cancelled'));
@@ -91,6 +109,7 @@ final readonly class OrderManager
      */
     public function refund(Order $order, ?int $cents, bool $restock, string $by, ?string $note = null): void
     {
+        $this->refundsStillOpen($order);
         if (in_array($order->status, ['awaiting_payment', 'expired'], true) || ($order->status === 'cancelled' && $order->refunded_cents >= $order->total_cents)) {
             throw new CheckoutProblem('Nothing has been paid to refund.');
         }
@@ -99,10 +118,16 @@ final readonly class OrderManager
         if ($amount < 1 || $amount > $left) {
             throw new CheckoutProblem('Refund up to R'.number_format($left / 100, 2).' (what’s left of this order).');
         }
-        if ($order->payment_method === 'card' && ! $this->payments->refund('shop-'.$order->id, $amount)) {
+        // Decision F: the wallet part back to the wallet, the rest back to the card or account — in proportion to how
+        // the order was paid; the last refund returns exactly what's left of each part.
+        $walletOwed = (int) $order->wallet_cents - (int) $order->wallet_refunded_cents;
+        $toWallet = $amount === $left ? $walletOwed : min($walletOwed, intdiv($amount * (int) $order->wallet_cents, max(1, $order->total_cents)));
+        $toWallet = max($toWallet, $amount - ($left - $walletOwed)); // never more cash than was paid in cash
+        $cash = $amount - $toWallet;
+        if ($cash > 0 && $order->payment_method === 'card' && ! $this->payments->refund('shop-'.$order->id, $cash)) {
             throw new CheckoutProblem('The payment provider didn’t accept the refund. Refund it in your Yoco or PayFast dashboard, then record it here as an EFT refund.');
         }
-        DB::connection($this->context->connectionName())->transaction(function () use ($order, $amount, $restock, $by, $note): void {
+        DB::connection($this->context->connectionName())->transaction(function () use ($order, $amount, $cash, $toWallet, $restock, $by, $note): void {
             if ($restock) {
                 foreach (OrderItem::query()->where('order_id', $order->id)->where('stock_tracked', true)->get() as $item) {
                     $variant = Variant::query()->whereKey($item->variant_id)->lockForUpdate()->first();
@@ -113,10 +138,14 @@ final readonly class OrderManager
             }
             $order->update(['refunded_cents' => $order->refunded_cents + $amount]);
             $received = $order->payment_method === 'card' ? $this->payments->receivedBy('shop-'.$order->id) : $this->payments->accountBranch('eft', $order->branch_id);
-            app(BranchLedger::class)->record($received, $order->branch_id, -$amount, 'refund', 'shop-'.$order->id, "Order #{$order->number} refund");
+            if ($cash > 0) {
+                app(BranchLedger::class)->record($received, $order->branch_id, -$cash, 'refund', 'shop-'.$order->id, "Order #{$order->number} refund");
+            }
+            $this->toWallet($order, $toWallet);
             $this->log($order, 'refunded', $by, $amount, $note ?? ($restock ? 'Stock returned' : null));
         });
         $this->audit->record('shop.order_refunded', 'order', $order->id, ['cents' => $amount, 'by' => $by]);
+        event(new PurchaseRefunded('order', $order->id, $amount));
         event(new OrderStatusChanged($this->context->id(), $order->id, 'refunded'));
     }
 
@@ -153,5 +182,29 @@ final readonly class OrderManager
         $this->advance($order->refresh(), 'out_for_delivery', $by);
 
         return $order->refresh();
+    }
+
+    /** The business's return window: no refunds in WURK once it has closed (counted from payment). */
+    private function refundsStillOpen(Order $order): void
+    {
+        $window = app(RefundWindow::class);
+        if ($order->paid_at !== null && ! $window->open($order->paid_at)) {
+            throw new CheckoutProblem($window->days() === 0
+                ? 'This business doesn’t give refunds.'
+                : 'Refunds for this order closed on '.$window->finalAt($order->paid_at)->setTimezone($this->context->current()->timezone())->format('j M Y').' ('.$window->days().' days after payment).');
+        }
+    }
+
+    /** Give part of an order's wallet payment back to the customer's wallet (never more than it paid). */
+    public function toWallet(Order $order, int $cents): int
+    {
+        $cents = min($cents, (int) $order->wallet_cents - (int) $order->wallet_refunded_cents); // (null until a fresh order is reloaded)
+        if ($cents <= 0) {
+            return 0;
+        }
+        app(StoreCredit::class)->giveBack('order', $order->id, $cents);
+        $order->update(['wallet_refunded_cents' => (int) $order->wallet_refunded_cents + $cents]);
+
+        return $cents;
     }
 }

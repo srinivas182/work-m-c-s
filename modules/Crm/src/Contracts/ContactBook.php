@@ -12,4 +12,58 @@ interface ContactBook
      * (phones normalised), else a new contact. Returns the contact's id. Marketing consent is recorded only when given.
      */
     public function remember(string $name, ?string $phone, ?string $email, string $sourceType, string $sourceId, ?string $branchId, string $summary, ?string $consentSource = null): string;
+
+    /**
+     * Contacts' names, by id (for other modules' screens).
+     *
+     * @param  list<string>  $ids
+     * @return array<string, string>
+     */
+    public function names(array $ids): array;
+
+    /** The contact a source record (an order, booking, class place, sale…) belongs to, if any. */
+    public function contactFor(string $sourceType, string $sourceId): ?string;
+
+    /**
+     * Find a customer by phone or email — normalised and matched exactly, like remember().
+     *
+     * @return array{id: string, name: string, phone: string|null, email: string|null}|null
+     */
+    public function find(?string $phone, ?string $email = null): ?array;
+
+    /**
+     * Contacts' emails, by id (only those that have one).
+     *
+     * @param  list<string>  $ids
+     * @return array<string, string>
+     */
+    public function emails(array $ids): array;
+
+    /**
+     * A customer's history of the given kinds (e.g. order, booking, class, sale), newest first; no kinds = everything.
+     *
+     * @param  list<string>  $types
+     * @return list<array{type: string, summary: string, at: \DateTimeInterface}>
+     */
+    public function history(string $contactId, array $types, int $limit = 50): array;
+
+    /**
+     * Link a record (e.g. an in-store sale) to a customer already known by id — as remember() does for a name and
+     * phone; raises ContactRemembered the same way.
+     */
+    public function link(string $contactId, string $sourceType, string $sourceId, ?string $branchId, string $summary): void;
+
+    /**
+     * What the business holds about a customer, for a copy of their data (POPIA, Sprint 13.6e).
+     *
+     * @return array{name: string, phone: string|null, email: string|null, tags: list<string>, notes: string|null, marketing_consent_at: \DateTimeInterface|null, marketing_consent_source: string|null, since: \DateTimeInterface|null}|null
+     */
+    public function profile(string $contactId): ?array;
+
+    /**
+     * Erase a customer's personal details (an approved POPIA deletion): them and every record merged into them —
+     * name becomes "Deleted customer"; phone, email, tags, notes and marketing consent cleared; enquiry and chat
+     * summaries blanked. Orders, bookings and sales stay (records the law requires).
+     */
+    public function erase(string $contactId): void;
 }

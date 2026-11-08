@@ -170,6 +170,16 @@ async function booking(root: HTMLElement): Promise<void> {
     if ([...serviceSelect.options].some((o) => o.value === keep)) serviceSelect.value = keep;
   };
   fillServices();
+  const bookWallet = walletOption(
+    `${api.replace(/\W/g, '')}-use-wallet`,
+    (c) => `Use up to ${randOf(c)} from your wallet`,
+  );
+  const priceNow = () => {
+    const s = services.find((x) => x.id === serviceSelect.value);
+    const here = branches.length ? s?.at?.find((a) => a.branch === branchSelect.value) : undefined;
+    return here?.price_cents ?? s?.price_cents ?? 0;
+  };
+  bookWallet.update(priceNow());
   const memberSelect = el('select', { class: field });
   const today = new Date();
   const iso = (d: Date) =>
@@ -312,6 +322,7 @@ async function booking(root: HTMLElement): Promise<void> {
       consent,
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my booking.'),
     ),
+    bookWallet.row,
     trapWrap,
     submit,
     status,
@@ -337,6 +348,7 @@ async function booking(root: HTMLElement): Promise<void> {
         phone: phone.value,
         email: email.value || null,
         consent: consent.checked ? '1' : null,
+        wallet: bookWallet.payload(),
         website: trap.value,
       }),
     }).catch(() => null);
@@ -381,6 +393,7 @@ async function booking(root: HTMLElement): Promise<void> {
     if (r?.status === 409) void refreshTimes(); // taken a moment ago: show what's still free
   });
 
+  serviceSelect.addEventListener('change', () => bookWallet.update(priceNow()));
   serviceSelect.addEventListener('change', () => {
     refreshWhere();
     refreshHealth();
@@ -389,6 +402,7 @@ async function booking(root: HTMLElement): Promise<void> {
   });
   memberSelect.addEventListener('change', () => void refreshTimes());
   dateInput.addEventListener('change', () => void refreshTimes());
+  branchSelect.addEventListener('change', () => bookWallet.update(priceNow()));
   branchSelect.addEventListener('change', () => {
     fillServices();
     refreshWhere();
@@ -567,6 +581,10 @@ async function tables(root: HTMLElement): Promise<void> {
 
 /* Classes: upcoming class → details → confirmation. Same safeguards as booking. */
 async function classes(root: HTMLElement): Promise<void> {
+  const classWallet = walletOption(
+    `${(root.dataset.api ?? '/classes').replace(/\W/g, '')}-class-wallet`,
+    (c) => `Use ${randOf(c)} from your wallet`,
+  );
   const api = `${root.dataset.api ?? '/book'}/classes`;
   const first = await fetch(api, { headers: { Accept: 'application/json' } }).catch(() => null);
   if (!first?.ok) return; // keep the "call or message us" fallback
@@ -631,6 +649,7 @@ async function classes(root: HTMLElement): Promise<void> {
       b.setAttribute('aria-pressed', String(chosen === c.id));
       b.addEventListener('click', () => {
         chosen = c.id;
+        classWallet.update(c.price_cents); // the class's price is what's paid
         picker.querySelectorAll('button').forEach((x) => {
           x.setAttribute('aria-pressed', String(x === b));
           x.classList.toggle('bg-[var(--s-brand-soft)]', x === b);
@@ -674,6 +693,7 @@ async function classes(root: HTMLElement): Promise<void> {
       consent,
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my class.'),
     ),
+    classWallet.row,
     trapWrap,
     submit,
     status,
@@ -694,6 +714,7 @@ async function classes(root: HTMLElement): Promise<void> {
         email: email.value || null,
         consent: consent.checked ? '1' : null,
         health_consent: healthBox.hidden ? null : healthConsent.checked,
+        wallet: classWallet.payload(),
         website: trap.value,
       }),
     }).catch(() => null);
@@ -759,6 +780,48 @@ const writeCart = (lines: CartLine[]) => {
   }
 };
 const randOf = (c: number) => `R${(c / 100).toFixed(2)}`;
+
+/**
+ * "Use up to R… from your wallet" for a customer signed in to this business's portal (Sprint 13.6c). update() asks for
+ * the usable amount on a total; a newer update discards an older, slower answer.
+ */
+function walletOption(fieldId: string, wording: (cents: number) => string) {
+  const box = el('input', { type: 'checkbox' });
+  box.id = fieldId;
+  const label = el('label', { htmlFor: box.id }, '');
+  const row = el('div', { class: 'flex items-start gap-2' }, box, label);
+  row.hidden = true;
+  let pass: { pass: string; cents: number } | null = null;
+  let asked = 0;
+  const update = (totalCents: number) => {
+    const mine = ++asked;
+    pass = null;
+    row.hidden = true;
+    box.checked = false;
+    if (totalCents <= 0) return;
+    // Started inside a promise, so nothing about the wallet can ever stop the form from working.
+    void Promise.resolve()
+      .then(() =>
+        fetch(`/account/wallet-pass?total=${totalCents}`, {
+          headers: { Accept: 'application/json' },
+          credentials: 'same-origin',
+        }),
+      )
+      .then((r) =>
+        r.ok
+          ? (r.json() as Promise<{ signed_in: boolean; usable_cents?: number; pass?: string }>)
+          : null,
+      )
+      .then((w) => {
+        if (mine !== asked || !w?.signed_in || !w.pass || (w.usable_cents ?? 0) <= 0) return;
+        pass = { pass: w.pass, cents: w.usable_cents ?? 0 };
+        label.textContent = wording(pass.cents);
+        row.hidden = false;
+      })
+      .catch(() => undefined); // not signed in, or the portal isn't available: book as usual
+  };
+  return { row, update, payload: () => (box.checked && pass ? pass : null) };
+}
 
 /* Add to cart (product pages). */
 function addToCart(root: HTMLElement): void {
@@ -1089,6 +1152,32 @@ async function checkout(root: HTMLElement): Promise<void> {
   const trapWrap = el('div', { class: 'absolute -left-[9999px]' }, trap);
   trapWrap.setAttribute('aria-hidden', 'true');
   const place = el('button', { type: 'submit', class: button }, 'Place order');
+  // A customer signed in to this business's portal can use their wallet (Sprint 13.6c). The pass proves who they are;
+  // the usable amount is worked out on the items (delivery only adds to the total), so the server never refuses it as too much.
+  const useWallet = el('input', { type: 'checkbox' });
+  useWallet.id = id('use-wallet');
+  const walletLabel = el('label', { htmlFor: useWallet.id }, '');
+  const walletRow = el('div', { class: 'flex items-start gap-2' }, useWallet, walletLabel);
+  walletRow.hidden = true;
+  let wallet: { pass: string; cents: number } | null = null;
+  const itemsCents = (data?.lines ?? []).reduce((sum, l) => sum + l.unit_cents * l.quantity, 0);
+  void fetch(`/account/wallet-pass?total=${itemsCents}`, {
+    headers: { Accept: 'application/json' },
+    credentials: 'same-origin',
+  })
+    .then((r) =>
+      r.ok
+        ? (r.json() as Promise<{ signed_in: boolean; usable_cents?: number; pass?: string }>)
+        : null,
+    )
+    .then((w) => {
+      if (w?.signed_in && w.pass && (w.usable_cents ?? 0) > 0) {
+        wallet = { pass: w.pass, cents: w.usable_cents ?? 0 };
+        walletLabel.textContent = `Use ${randOf(wallet.cents)} from your wallet`;
+        walletRow.hidden = false;
+      }
+    })
+    .catch(() => undefined); // not signed in, or the portal isn't available: checkout as usual
 
   const payCard = el('input', { type: 'radio', name: `${uid}-pay`, value: 'card', checked: true });
   payCard.id = id('pay-card');
@@ -1238,6 +1327,7 @@ async function checkout(root: HTMLElement): Promise<void> {
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my order.'),
     ),
     trapWrap,
+    walletRow,
     place,
     status,
   );
@@ -1284,6 +1374,7 @@ async function checkout(root: HTMLElement): Promise<void> {
                 : null,
         notes: notes.value || null,
         payment: payment(),
+        wallet: useWallet.checked && wallet ? wallet : null,
         consent: consent.checked ? '1' : null,
         website: trap.value,
       }),

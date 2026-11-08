@@ -4,9 +4,9 @@
 # is always tested (it lands in part 3), and no test can be left out of every part.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-PART1=(Website Records Health Admin Regions)
-PART2=(Identity Messaging Audit Team)
-PART3=(Bookings Access Payments Credits Ai Plans Features Security Marketing)
+PART1=(Website Records Health Admin Regions Payments Credits) # Payments, Credits from part 3: it reached 9m41s (13.9b)
+PART2=(Identity Messaging Audit Team Referrals Sales Portal) # Sprint 13 modules: part 4 reached 9m54s of its 10 minutes
+PART3=(Bookings Access Ai Plans Features Security Marketing)
 in_list() { local x="$1"; shift; for y in "$@"; do [[ "$x" == "$y" ]] && return 0; done; return 1; }
 case "${1:-}" in
   1) for m in "${PART1[@]}"; do [[ -d "modules/$m/tests" ]] && echo "modules/$m/tests"; done ;;

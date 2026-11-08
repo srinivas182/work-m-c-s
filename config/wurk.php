@@ -38,6 +38,7 @@ return [
         'root' => $root,
         'admin' => env('WURK_ADMIN_DOMAIN', 'admin.'.$root),
         'app' => env('WURK_APP_DOMAIN', 'app.'.$root),
+        'my' => env('WURK_MY_DOMAIN', 'my.'.$root), // My WURK: customers' businesses in one place (Sprint 13.8)
     ],
 
     'tenancy' => [
@@ -82,6 +83,8 @@ return [
         'sessions' => [
             'admin' => ['idle' => 30, 'absolute' => 480, 'remember' => false],
             'app' => ['idle' => 120, 'absolute' => 43200, 'remember' => true],
+            'portal' => ['idle' => 120, 'absolute' => 43200, 'remember' => true], // customers on a business's own site
+            'my' => ['idle' => 120, 'absolute' => 43200, 'remember' => true], // My WURK
         ],
         'default_country_code' => '27',
     ],

@@ -6,7 +6,10 @@ namespace Wurk\Shop\Support;
 
 use Illuminate\Support\Facades\DB;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\RefundWindow;
+use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Models\Order;
@@ -35,8 +38,9 @@ final readonly class OrderPlacer
      * @param  list<array{variant: string, quantity: int}>  $lines
      * @param  array{name: string, phone: string, email?: string|null, address?: string|null, notes?: string|null}  $customer
      * @param  array{provider: string, service?: string|null, pickup_point?: string|null, pickup_point_name?: string|null, to?: array{street: string, suburb?: string|null, city: string, postal_code: string}}|null  $shipping  courier delivery (Bob Go) or a Pargo pickup point
+     * @param  array{pass: string, cents: int}|null  $wallet  part paid from the customer's wallet (Sprint 13.6c)
      */
-    public function place(array $lines, array $customer, string $fulfilment, string $method, ?string $branch = null, ?array $shipping = null): Order
+    public function place(array $lines, array $customer, string $fulfilment, string $method, ?string $branch = null, ?array $shipping = null, ?array $wallet = null): Order
     {
         $branch = app(BranchStock::class)->fulfilling($fulfilment, $branch); // the branch that fulfils this order
         $courier = $fulfilment === 'delivery' && $shipping !== null ? $this->courierFee($lines, $branch, $shipping) : null; // asked before any locks are taken
@@ -114,6 +118,9 @@ final readonly class OrderPlacer
         DB::table('shop_holds')->insert(['order_id' => $order->id, 'tenant_id' => $this->context->id(), 'expires_at' => $order->hold_expires_at]);
         $this->audit->record('shop.order_placed', 'order', $order->id, ['number' => $order->number, 'total_cents' => $order->total_cents]);
         app(OrderManager::class)->log($order, 'placed', 'Customer');
+        if ($wallet !== null && $wallet['cents'] > 0) {
+            $this->payFromWallet($order, $wallet['pass'], $wallet['cents']);
+        }
 
         return $order;
     }
@@ -134,6 +141,9 @@ final readonly class OrderPlacer
             $order->update(['status' => $status, 'hold_expires_at' => null]);
         });
         DB::table('shop_holds')->where('order_id', $order->id)->delete();
+        if ($order->paid_at === null) {
+            app(OrderManager::class)->toWallet($order, (int) $order->wallet_cents); // never paid: the wallet part goes straight back (0 if none)
+        }
         $this->audit->record('shop.order_'.$status, 'order', $order->id, ['by' => $by]);
         if ($status === 'expired') {
             app(OrderManager::class)->log($order, 'expired', null, null, 'Payment didn’t arrive in time; stock returned');
@@ -178,5 +188,35 @@ final readonly class OrderPlacer
         $chosen = collect($rates)->firstWhere('service', $shipping['service']);
 
         return $chosen === null ? throw new CheckoutProblem('That delivery option is no longer available — please choose again.') : $chosen['cents'];
+    }
+
+    /**
+     * Pay part (or all) of a just-placed order from the customer's wallet (Sprint 13.6c). The pass proves who they
+     * are (the checkout has no session). If spending fails, the order is released (stock back) with a plain message.
+     * If the wallet covers everything, the order is paid now.
+     */
+    private function payFromWallet(Order $order, string $pass, int $cents): void
+    {
+        $credit = app(StoreCredit::class);
+        $contact = $credit->contactFromPass($pass);
+        try {
+            if ($contact === null) {
+                throw new \DomainException('Your wallet couldn’t be used — sign in to your account again and retry.');
+            }
+            $credit->spend($contact, $cents, 'order', $order->id, $order->total_cents, $order->branch_id);
+        } catch (\DomainException $e) {
+            $this->release($order, 'cancelled', null);
+
+            throw new CheckoutProblem($e->getMessage());
+        }
+        $order->update(['wallet_cents' => $cents]);
+        app(OrderManager::class)->log($order, 'wallet', 'Customer', $cents, 'Paid from their wallet');
+        if ($order->dueCents() === 0) { // nothing left to pay
+            $order->update(['status' => 'paid', 'hold_expires_at' => null, 'paid_at' => now()]);
+            DB::table('shop_holds')->where('order_id', $order->id)->delete();
+            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents, $order->branch_id, app(RefundWindow::class)->finalAt(now())));
+            event(new OrderStatusChanged($this->context->id(), $order->id, 'paid'));
+            $this->audit->record('shop.order_paid', 'order', $order->id, ['cents' => 0, 'wallet_cents' => $cents]);
+        }
     }
 }

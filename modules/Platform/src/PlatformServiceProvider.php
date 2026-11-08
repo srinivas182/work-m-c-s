@@ -6,8 +6,10 @@ namespace Wurk\Platform;
 
 use Wurk\Platform\Console\ListModulesCommand;
 use Wurk\Platform\Console\MakeModuleCommand;
+use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Modules\ModuleRegistry;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Support\TileRegistry;
 
 /**
  * Registered in bootstrap/providers.php. Boots the Platform module itself and then
@@ -17,6 +19,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(DashboardTiles::class, TileRegistry::class);
 
         $this->app->singleton(
             ModuleRegistry::class,

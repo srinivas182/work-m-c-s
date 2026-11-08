@@ -19,6 +19,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string|null $customer_email
  * @property string $source
  * @property int $deposit_cents
+ * @property int $wallet_cents
  * @property string|null $payment_reference
  * @property Carbon|null $hold_expires_at
  * @property Carbon|null $paid_at
