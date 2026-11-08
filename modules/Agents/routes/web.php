@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Wurk\Agents\Http\Controllers\Admin\AgentsController;
 use Wurk\Agents\Http\Controllers\Admin\BusinessAgentController;
 use Wurk\Agents\Http\Controllers\Admin\CommissionController;
+use Wurk\Agents\Http\Controllers\AgentAreaController;
 use Wurk\Agents\Http\Controllers\AgentLinkController;
 
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])->name('admin.')->group(function (): void {
@@ -22,3 +23,11 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
 // An agent's link (Sprint 14.2): wurk.co.za/a/CODE.
 Route::domain((string) config('wurk.domains.root'))->middleware('throttle:60,1,agent-links')
     ->get('/a/{code}', AgentLinkController::class)->where('code', '[A-Za-z0-9]{7}')->name('agents.link');
+
+// The agent area (Sprint 14.7; completed in 14.6): app.wurk.co.za/agent — agents only.
+Route::domain((string) config('wurk.domains.app'))->middleware(['web', 'auth'])->prefix('agent')->name('agent.')->group(function (): void {
+    Route::get('/', [AgentAreaController::class, 'home'])->name('home');
+    Route::get('/bank', [AgentAreaController::class, 'bank'])->name('bank');
+    Route::post('/bank', [AgentAreaController::class, 'request'])->middleware('throttle:5,10,agent-bank')->name('bank.request');
+    Route::post('/bank/confirm', [AgentAreaController::class, 'confirm'])->middleware('throttle:10,10,agent-bank-confirm')->name('bank.confirm');
+});

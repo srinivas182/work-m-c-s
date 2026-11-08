@@ -45,7 +45,7 @@ return [
         // Business handles that can never be claimed (they collide with platform hosts or routes).
         'reserved_handles' => [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
-            'help', 'login', 'logout', 'mail', 'my', 'partners', 'register', 'signup', 'static',
+            'help', 'login', 'logout', 'mail', 'my', 'agent', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
             'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'templates', 'forms', 'settings', 'webhooks', 'signup', 'oauth',
             'pay',
