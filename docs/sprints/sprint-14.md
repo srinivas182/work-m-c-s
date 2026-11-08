@@ -1,6 +1,6 @@
 # Sprint 14 — Agents (specification)
 
-**Status:** approved by WURK (7 Nov 2026), with commission percentages (A) still to be supplied.
+**Status:** approved by WURK (7 Nov 2026); all decisions made (8 Nov 2026).
 **Plan:** Sprint 14 — sponsor hierarchy; package commissions and clawback; EFT payouts; agent dashboard; demo sites (docs/sprint-plan.md).
 **PRD:** §4.6 (super admin), §5.2 (attribution at signup), §10 (agent area), acceptance criterion 9.
 
@@ -23,7 +23,7 @@ Agents sell WURK packages to businesses and earn commission on what those busine
 
 | # | Decision | Status |
 |---|---|---|
-| A | **Commission percentages** per level (the PRD fixes the structure, not the numbers). | **Still needed from WURK.** Built with **every level at 0% until the super admin sets them** in Admin — no invented numbers; no commission accrues at 0%. |
+| A | **Commission percentages** per level are **set — and changed at any time — by WURK's super admin in the back office** (Admin), for self and each level; every level starts at 0% until set (no commission accrues at 0%). | **Decided (WURK, 8 Nov 2026).** |
 | B | **Hold period** = **WURK's refund window**, set by the super admin, **default 30 days**. | **Decided (WURK, 7 Nov 2026).** |
 | C | **No refunds after the window** (WURK billing refuses them), so commission is only paid once refunds have closed and a refund can't reach paid commission; **0 days = commission credited at once**. Card **chargebacks** after payout (outside WURK's control): recovered from future commission; agents negative 90+ days flagged. | **Decided (WURK, 7 Nov 2026).** |
 | D | **EFT batch file**: standard CSV (name, bank, branch code, account, amount, reference); WURK's bank's exact format if named later. | **Decided (WURK, 7 Nov 2026).** |

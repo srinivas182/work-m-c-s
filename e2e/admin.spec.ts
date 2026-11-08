@@ -188,4 +188,24 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   }
   await expect(accepts).toBeChecked();
   await expectAccessible(page);
+
+  // Agents (Sprint 14.1): add one — unique per run, since desktop and phone share WURK's central data.
+  await page.goto('/agents');
+  await expect(page.getByRole('heading', { level: 1, name: 'Agents' })).toBeVisible();
+  await expectAccessible(page);
+  const agent = page.getByRole('form', { name: 'Add an agent' });
+  const first = `Agent${testInfo.project.name}${Date.now().toString(36)}`;
+  await agent.getByLabel('First name').fill(first);
+  await agent.getByLabel('Last name').fill('Test');
+  await agent
+    .getByLabel('Phone number or email (they sign in with it)')
+    .fill(`${first.toLowerCase()}@example.com`);
+  await agent.getByRole('button', { name: 'Add agent' }).click();
+  await expect(page.getByText('Agent added.')).toBeVisible();
+  await expect(
+    page
+      .getByRole('list', { name: 'Agents' })
+      .getByRole('listitem')
+      .filter({ hasText: `${first} Test` }),
+  ).toBeVisible();
 });
