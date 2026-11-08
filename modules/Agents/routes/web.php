@@ -6,12 +6,18 @@ use Illuminate\Support\Facades\Route;
 use Wurk\Agents\Http\Controllers\Admin\AgentsController;
 use Wurk\Agents\Http\Controllers\Admin\BusinessAgentController;
 use Wurk\Agents\Http\Controllers\Admin\CommissionController;
+use Wurk\Agents\Http\Controllers\Admin\PayoutsController;
 use Wurk\Agents\Http\Controllers\AgentAreaController;
 use Wurk\Agents\Http\Controllers\AgentLinkController;
 
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])->name('admin.')->group(function (): void {
     Route::get('/agents/commission', [CommissionController::class, 'show'])->name('agents.commission');
     Route::put('/agents/commission', [CommissionController::class, 'update'])->name('agents.commission.update');
+    Route::get('/agents/payouts', [PayoutsController::class, 'index'])->name('agents.payouts');
+    Route::put('/agents/payouts/minimum', [PayoutsController::class, 'minimum'])->name('agents.payouts.minimum');
+    Route::post('/agents/payouts', [PayoutsController::class, 'store'])->name('agents.payouts.store');
+    Route::get('/agents/payouts/{batch}/csv', [PayoutsController::class, 'csv'])->name('agents.payouts.csv');
+    Route::post('/agents/payouts/{batch}/cancel', [PayoutsController::class, 'cancel'])->name('agents.payouts.cancel');
     Route::get('/agents', [AgentsController::class, 'index'])->name('agents.index');
     Route::post('/agents', [AgentsController::class, 'store'])->name('agents.store');
     Route::put('/agents/{agent}', [AgentsController::class, 'update'])->name('agents.update');

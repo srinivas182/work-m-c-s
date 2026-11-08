@@ -30,6 +30,17 @@ Agents sell WURK packages to businesses and earn commission on what those busine
 | E | **Agents sign in at `app.wurk.co.za/agent`** (the back-office surface, MFA, sessions; its own menu). | **Decided (WURK, 7 Nov 2026).** |
 | F | **Tax statements**: an annual earnings statement (PDF) per agent; WURK's accountant to confirm any IRP5/IT3(a) needs. | **Decided (WURK, 7 Nov 2026).** |
 
+## 14.5 Payouts — detailed specification (8 Nov 2026)
+
+**14.5a — building the batch** (Admin → Agent payouts; new permission `agents.pay` for Finance and the super admin):
+- **Minimum payout** — WURK finance's setting; no minimum until set.
+- **Preview first** (recommended addition): *included* (agent, amount, bank, last four), *held* (banking details changed in the last 7 days — fraud control), *skipped* with the reason (no banking details, below the minimum, suspended, owes WURK).
+- **Create** reserves each included amount at once as a `paid_out` line in the agent's ledger (reference `batch:<id>`), so it can't be batched or paid twice; banking details are copied onto the batch (masked).
+- **Download the EFT CSV** (decision D: holder, bank, branch code, account type, account number, amount, reference) — account numbers decrypted only for the download; every download logged (recommended addition).
+- **Cancel** an unpaid batch: reservations released.
+
+**14.5b — settling it:** **mark paid** (locked; each agent gets a **remittance advice** — amount, reference, the businesses it covers — recommended addition); **mark one payment bounced** (the money returns to that agent's balance and they're asked to check their banking details — recommended addition).
+
 ## Out of scope
 Agent-to-agent transfers; commission on WURK Credits or managed fees; automated bank payouts (needs a bank API — later).
 
@@ -44,4 +55,5 @@ Each part: route tests, isolation tests (agents see only their own and their dow
 | 14.2 Attribution | #140 | 1,463 backend tests on SQLite; Agents and Onboarding on MySQL 8. Browser tests in CI only. |
 | 14.3 Commission | see PR | 1,467 backend tests on SQLite; Agents and Billing on MySQL 8. Browser tests in CI only. |
 | 14.4 Refund window and clawback | #142 | Caught: widening the ledger's once-only rule to allow several reversals let NULL references slip past MySQL's unique check — earned lines now carry a reference. The refund-days field is optional on save (unchanged when not sent). 1,471 backend tests on SQLite; Agents and Billing on MySQL 8. Browser tests in CI only. |
-| 14.7 Banking details | see PR | Built before 14.5 (payouts need banking details); starts the agent area. 1,473 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |
+| 14.7 Banking details | #143 | Built before 14.5 (payouts need banking details); starts the agent area. 1,473 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |
+| 14.5a Payout batches | see PR | Recommended additions included (preview with reasons, logged downloads). Caught: saving the minimum before any percentages existed failed. MySQL caught `payout_returned` (15) overflowing the ledger's 12-character `kind` (SQLite doesn't enforce lengths) — widened to 20; the referral ledger's kinds all fit. 1,476 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |

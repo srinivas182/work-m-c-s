@@ -232,4 +232,16 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
       page.getByText('Commission percentages saved. They apply to payments from now on.'),
     ).toBeVisible();
   }
+
+  // Agent payouts (Sprint 14.5a): the preview, and (desktop only — WURK-wide) a minimum payout.
+  await page.goto(`${admin}/agents/payouts`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Agent payouts' })).toBeVisible();
+  await expect(page.getByText(/^Next batch:/)).toBeVisible();
+  await expectAccessible(page);
+  if (testInfo.project.name === 'desktop') {
+    const minimum = page.getByRole('form', { name: 'Minimum payout' });
+    await minimum.getByLabel('Minimum payout (R)').fill('100');
+    await minimum.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByText('Minimum payout saved.')).toBeVisible();
+  }
 });

@@ -116,7 +116,9 @@ final readonly class AgentCommission
         $now = now();
         $pending = (int) $rows->filter(fn ($r) => $now->lt($r->available_at))->sum('cents');
 
-        return ['pending' => $pending, 'available' => (int) $rows->sum('cents') - $pending, 'paid_out' => -(int) $rows->where('kind', 'paid_out')->sum('cents')];
+        // A cancelled or bounced payout comes back as payout_returned: it isn't "paid out" any more.
+        return ['pending' => $pending, 'available' => (int) $rows->sum('cents') - $pending,
+            'paid_out' => -(int) $rows->where('kind', 'paid_out')->sum('cents') - (int) $rows->where('kind', 'payout_returned')->sum('cents')];
     }
 
     /** When an agent's balance went negative through a chargeback (decision C: recovered from future commission; flagged after 90 days). */
