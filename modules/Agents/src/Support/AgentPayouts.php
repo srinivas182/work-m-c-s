@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace Wurk\Agents\Support;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Wurk\Agents\Mail\AgentPayoutBouncedMail;
+use Wurk\Agents\Mail\AgentRemittanceMail;
 use Wurk\Agents\Models\Agent;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Identity\Contracts\PeopleDirectory;
+use Wurk\Tenancy\Contracts\TenantDirectory;
 
 /**
  * EFT payout batches (Sprint 14.5a). A preview shows who's included, held (banking details changed in the last 7 days)
@@ -135,5 +139,73 @@ final readonly class AgentPayouts
             DB::table('agent_payout_batches')->where('id', $batchId)->update(['status' => 'cancelled', 'updated_at' => now()]);
             $this->audit->record('agents.batch_cancelled', 'agent_payout_batch', $batchId, ['reference' => $batch->reference]);
         });
+    }
+
+    /** Paid through the bank (Sprint 14.5b): locked; each agent gets a remittance advice. @throws \DomainException */
+    public function markPaid(string $batchId): void
+    {
+        /** @var object{reference: string, total_cents: int, created_at: string} $batch */
+        $batch = DB::transaction(function () use ($batchId): object {
+            $batch = DB::table('agent_payout_batches')->where('id', $batchId)->lockForUpdate()->first();
+            if ($batch === null || $batch->status !== 'ready') {
+                throw new \DomainException('Only a batch waiting to be paid can be marked paid.');
+            }
+            DB::table('agent_payout_batches')->where('id', $batchId)->update(['status' => 'paid', 'paid_at' => now(), 'updated_at' => now()]);
+            DB::table('agent_payout_items')->where('batch_id', $batchId)->update(['status' => 'paid', 'updated_at' => now()]);
+            $this->audit->record('agents.batch_paid', 'agent_payout_batch', $batchId, ['reference' => $batch->reference, 'total' => $batch->total_cents / 100]);
+
+            return $batch;
+        });
+        foreach (DB::table('agent_payout_items')->where('batch_id', $batchId)->get() as $item) {
+            $agent = Agent::query()->where('id', (string) $item->agent_id)->first();
+            $person = $agent === null ? null : ($this->people->contacts([$agent->identity_id])[$agent->identity_id] ?? null);
+            if ($agent !== null && ($person['email'] ?? null) !== null) {
+                Mail::to((string) $person['email'])->send(new AgentRemittanceMail((string) $person['name'], (int) $item->cents, (string) $batch->reference,
+                    $item->bank.' ·· '.$item->account_last4, $this->covers($agent->id, (string) $batch->created_at)));
+            }
+        }
+    }
+
+    /** The bank returned one payment (Sprint 14.5b): the money goes back to the agent's balance; they're asked to check their banking details. @throws \DomainException */
+    public function markBounced(string $batchId, string $itemId): void
+    {
+        /** @var array{agent_id: string, cents: int, reference: string} $item */
+        $item = DB::transaction(function () use ($batchId, $itemId): array {
+            $batch = DB::table('agent_payout_batches')->where('id', $batchId)->first();
+            $item = DB::table('agent_payout_items')->where('batch_id', $batchId)->where('id', $itemId)->lockForUpdate()->first();
+            if ($batch === null || $batch->status !== 'paid' || $item === null || $item->status !== 'paid') {
+                throw new \DomainException('Only a payment in a paid batch can be marked bounced, once.');
+            }
+            DB::table('agent_payout_items')->where('id', $itemId)->update(['status' => 'bounced', 'updated_at' => now()]);
+            DB::table('agent_ledger')->insert(['id' => (string) Str::ulid(), 'agent_id' => $item->agent_id, 'tenant_id' => null, 'payment_id' => null, 'level' => null,
+                'kind' => 'payout_returned', 'cents' => (int) $item->cents, 'bp' => null, 'available_at' => now(), 'reference' => 'batch:'.$batchId.':bounced:'.$itemId, 'created_at' => now()]);
+            $this->audit->record('agents.payout_bounced', 'agent_payout_batch', $batchId, ['agent' => $item->agent_id, 'cents' => (int) $item->cents]);
+
+            return ['agent_id' => (string) $item->agent_id, 'cents' => (int) $item->cents, 'reference' => (string) $batch->reference];
+        });
+        $agent = Agent::query()->where('id', $item['agent_id'])->first();
+        $person = $agent === null ? null : ($this->people->contacts([$agent->identity_id])[$agent->identity_id] ?? null);
+        if (($person['email'] ?? null) !== null) {
+            Mail::to((string) $person['email'])->send(new AgentPayoutBouncedMail((string) $person['name'], $item['cents'], $item['reference'], route('agent.bank')));
+        }
+    }
+
+    /** @return list<array{business: string, cents: int}> commission by business since the agent's previous paid batch, up to this one */
+    private function covers(string $agentId, string $upTo): array
+    {
+        $from = DB::table('agent_payout_items')->join('agent_payout_batches', 'agent_payout_batches.id', '=', 'agent_payout_items.batch_id')
+            ->where('agent_payout_items.agent_id', $agentId)->where('agent_payout_batches.status', 'paid')->where('agent_payout_batches.created_at', '<', $upTo)
+            ->max('agent_payout_batches.created_at');
+        $rows = DB::table('agent_ledger')->where('agent_id', $agentId)->whereIn('kind', ['earned', 'reversed'])->whereNotNull('tenant_id')
+            ->where('created_at', '<=', $upTo)->when($from !== null, fn ($q) => $q->where('created_at', '>', $from))
+            ->selectRaw('tenant_id, sum(cents) as cents')->groupBy('tenant_id')->get();
+        $out = [];
+        foreach ($rows as $r) {
+            if ((int) $r->cents > 0) {
+                $out[] = ['business' => app(TenantDirectory::class)->find((string) $r->tenant_id)?->displayName() ?? 'A business', 'cents' => (int) $r->cents];
+            }
+        }
+
+        return $out;
     }
 }

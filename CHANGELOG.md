@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.5b (settling agent payout batches)
+- **Mark paid** (once the bank has paid; locks the batch): each agent is emailed a **remittance advice** — amount, bank reference, the account it went into (masked), and the businesses it covers since their previous payout.
+- **Mark bounced** on one payment (in a paid batch, once): the money returns to the agent's balance and they're emailed a link to check their banking details. Both actions logged.
+
 ### Added — Sprint 14.5a (agent payout batches)
 - **Admin → Agent payouts** (`agents.pay` — Finance and the super admin): a minimum payout (none until set); a **preview** of who's included, **held** (banking details changed in the last 7 days) and skipped, with reasons (no banking details, below the minimum, suspended, owes WURK).
 - **Making a batch** reserves each amount in the agent's ledger at once, so nothing is batched or paid twice; reference `WURK-AG-YYYYMMDD-NNN`.

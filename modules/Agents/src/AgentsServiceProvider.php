@@ -18,6 +18,7 @@ final class AgentsServiceProvider extends ModuleServiceProvider
 {
     protected function bootModule(): void
     {
+        $this->loadViewsFrom($this->modulePath('resources/views'), 'agents'); // agents' emails
         if ($this->app->runningInConsole()) {
             $this->commands([CreateAgentCommand::class]);
         }

@@ -28,6 +28,7 @@ interface Batch {
   count: number;
   total_cents: number;
   created: string;
+  items: { id: string; holder: string; bank: string; cents: number; status: 'paid' | 'bounced' }[];
 }
 interface Props {
   minimum: number;
@@ -133,6 +134,24 @@ export default function Payouts({ minimum, preview, batches }: Props) {
                         </a>
                         <Button
                           size="sm"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Mark ${b.reference} paid? Only once your bank has paid it — each agent gets a remittance advice.`,
+                              )
+                            ) {
+                              router.post(
+                                `/agents/payouts/${b.id}/paid`,
+                                {},
+                                { preserveScroll: true },
+                              );
+                            }
+                          }}
+                        >
+                          Mark paid
+                        </Button>
+                        <Button
+                          size="sm"
                           variant="ghost"
                           onClick={() => {
                             if (
@@ -151,6 +170,41 @@ export default function Payouts({ minimum, preview, batches }: Props) {
                           Cancel
                         </Button>
                       </>
+                    )}
+                    {b.items.length > 0 && (
+                      <ul
+                        aria-label={`Payments in ${b.reference}`}
+                        className="grid w-full gap-1 pl-4"
+                      >
+                        {b.items.map((i) => (
+                          <li key={i.id} className="flex flex-wrap items-center gap-2">
+                            {i.holder} · {i.bank} · {rand(i.cents)}
+                            {i.status === 'bounced' ? (
+                              <Badge tone="danger">Bounced</Badge>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      `Mark ${i.holder}’s payment bounced? The money goes back to their balance.`,
+                                    )
+                                  ) {
+                                    router.post(
+                                      `/agents/payouts/${b.id}/items/${i.id}/bounced`,
+                                      {},
+                                      { preserveScroll: true },
+                                    );
+                                  }
+                                }}
+                              >
+                                Mark bounced
+                              </Button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </li>
                 ))}

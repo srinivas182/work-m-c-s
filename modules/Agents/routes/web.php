@@ -18,6 +18,8 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
     Route::post('/agents/payouts', [PayoutsController::class, 'store'])->name('agents.payouts.store');
     Route::get('/agents/payouts/{batch}/csv', [PayoutsController::class, 'csv'])->name('agents.payouts.csv');
     Route::post('/agents/payouts/{batch}/cancel', [PayoutsController::class, 'cancel'])->name('agents.payouts.cancel');
+    Route::post('/agents/payouts/{batch}/paid', [PayoutsController::class, 'paid'])->name('agents.payouts.paid');
+    Route::post('/agents/payouts/{batch}/items/{item}/bounced', [PayoutsController::class, 'bounced'])->name('agents.payouts.bounced');
     Route::get('/agents', [AgentsController::class, 'index'])->name('agents.index');
     Route::post('/agents', [AgentsController::class, 'store'])->name('agents.store');
     Route::put('/agents/{agent}', [AgentsController::class, 'update'])->name('agents.update');
