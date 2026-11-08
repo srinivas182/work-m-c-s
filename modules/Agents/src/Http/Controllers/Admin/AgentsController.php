@@ -42,6 +42,7 @@ final class AgentsController
                 'sponsor_id' => $a->sponsor_id, 'sponsor' => $a->sponsor_id === null ? null : ($names[$byId[$a->sponsor_id]->identity_id ?? ''] ?? 'Agent'),
                 'direct' => (int) ($team[$a->id] ?? 0), 'team' => count($this->roster->downline($a->id)), 'businesses' => (int) ($businesses[$a->id] ?? 0),
                 'link' => route('agents.link', ['code' => $a->code]), 'commission' => app(AgentCommission::class)->balance($a->id),
+                'owes_since' => app(AgentCommission::class)->owesSince($a->id)?->toDateString(), 'owes_flag' => (app(AgentCommission::class)->owesSince($a->id)?->lt(now()->subDays(90)) ?? false),
             ])->all(),
         ]);
     }

@@ -29,6 +29,8 @@ interface Agent {
   businesses: number;
   link: string;
   commission: { pending: number; available: number; paid_out: number };
+  owes_since: string | null;
+  owes_flag: boolean;
 }
 
 /** Admin → Agents: the sponsor hierarchy. */
@@ -170,6 +172,13 @@ function AgentRow({ a, agents, canManage }: { a: Agent; agents: Agent[]; canMana
         <strong>{a.name}</strong>
         <span className="font-mono">{a.code}</span>
         {a.status === 'suspended' && <Badge tone="warning">Suspended</Badge>}
+        {a.owes_since && (
+          <Badge tone={a.owes_flag ? 'danger' : 'warning'}>
+            {a.owes_flag
+              ? `Owes WURK for 90+ days (since ${a.owes_since})`
+              : `Owes WURK since ${a.owes_since}`}
+          </Badge>
+        )}
       </div>
       <p className="text-fg-muted">
         {a.sponsor ? `Sponsor: ${a.sponsor}` : 'No sponsor'} · {a.direct} direct · {a.team} in their

@@ -130,6 +130,10 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await page.goto(`${admin}/billing/settings`);
   await expect(page.getByRole('heading', { level: 1, name: 'Invoice settings' })).toBeVisible();
   await expect(page.getByText('These are placeholder company details.')).toBeVisible();
+  // WURK's refund window (Sprint 14.4): 30 days unless the super admin changes it.
+  await expect(page.getByLabel('Refund window (days after payment; 0 = no refunds)')).toHaveValue(
+    '30',
+  );
   await expectAccessible(page);
 
   await page.goto(`${admin}/billing/failed`);

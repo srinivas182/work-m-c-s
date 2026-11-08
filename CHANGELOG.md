@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.4 (WURK's refund window and clawback)
+- **Admin → Billing settings: refund window** (default 30 days; 0 = no refunds). Credit notes are refused once a payment's window has closed; agent commission on a payment becomes payable when it closes (at once with 0).
+- **Refunds within the window** reverse agent commission in proportion — cumulatively, so a full refund lands exactly on zero (before anything is paid).
+- **Record a chargeback** (Admin → business billing, paid card payments; WURK has no dispute feed): reverses that payment's commission in full; if it was already paid out, the agent owes WURK — shown on Admin → Agents and flagged after 90 days, recovered from future commission (decision C).
+
 ### Added — Sprint 14.3 (agent commission)
 - **Commission** on each paid WURK subscription (excluding VAT; not credits): the business's agent earns "self", each sponsor up earns their level — at the percentages WURK's super admin sets in **Admin → Agent commission** (self plus up to 7 levels; 0% until set; logged; finance can view). Each agent earns only within their own commission period; suspended agents are skipped without shifting levels. Append-only ledger, once per payment; pending until refunds close (30 days — a setting in 14.4). **Admin → Agents** shows each agent's available, pending and paid-out commission. Billing gains a `SubscriptionPayments` contract.
 

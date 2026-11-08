@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Billing\Support;
 
+use Wurk\Billing\Contracts\WurkRefundWindow;
 use Wurk\Security\Contracts\PlatformSettings;
 
 /**
@@ -11,7 +12,7 @@ use Wurk\Security\Contracts\PlatformSettings;
  * staff. The issuer defaults are placeholders: issued tax invoices are
  * immutable, so set the real legal details before invoicing real customers.
  */
-final readonly class BillingSettings
+final readonly class BillingSettings implements WurkRefundWindow
 {
     public const DEFAULT_ISSUER = [
         'name' => 'WURK (Pty) Ltd',
@@ -19,6 +20,8 @@ final readonly class BillingSettings
         'vat_number' => '4000000000',
         'registration' => '2026/000000/07',
     ];
+
+    public const DEFAULT_REFUND_DAYS = 30;
 
     public const DEFAULT_DUNNING = ['retry_days' => [3, 5, 7], 'restrict_from_day' => 8, 'suspend_on_day' => 15];
 
@@ -55,5 +58,15 @@ final readonly class BillingSettings
     public function setDunning(array $dunning, ?string $by): void
     {
         $this->settings->set('dunning', $dunning, $by);
+    }
+
+    public function refundDays(): int
+    {
+        return (int) $this->settings->get('refund_days', self::DEFAULT_REFUND_DAYS);
+    }
+
+    public function setRefundDays(int $days, ?string $by): void
+    {
+        $this->settings->set('refund_days', $days, $by);
     }
 }
