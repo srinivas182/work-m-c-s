@@ -14,6 +14,7 @@ use Wurk\Billing\Console\DunningCommand;
 use Wurk\Billing\Console\RenewSubscriptionsCommand;
 use Wurk\Billing\Contracts\ServiceStatus;
 use Wurk\Billing\Contracts\SplitPayments;
+use Wurk\Billing\Contracts\SubscriptionPayments;
 use Wurk\Billing\Events\PaymentFailed;
 use Wurk\Billing\Events\PaymentSucceeded;
 use Wurk\Billing\Gateways\DebitOrderProvider;
@@ -27,6 +28,7 @@ use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\DunningServiceStatus;
 use Wurk\Billing\Support\Invoices;
 use Wurk\Billing\Support\PackCreditPricing;
+use Wurk\Billing\Support\PaidSubscriptions;
 use Wurk\Billing\Support\Payments;
 use Wurk\Payments\Contracts\PlatformPaymentReceived;
 use Wurk\Plans\Contracts\CreditPricing;
@@ -36,6 +38,7 @@ final class BillingServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(SubscriptionPayments::class, PaidSubscriptions::class);
         $this->app->singleton(CreditPricing::class, PackCreditPricing::class);
         $this->app->singleton(SplitPayments::class, PaystackSplitPayments::class);
         // First gateway (Sprint 3 decision 1); others implement the same contract.

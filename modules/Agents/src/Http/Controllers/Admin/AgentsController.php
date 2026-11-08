@@ -17,6 +17,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Agents\Models\Agent;
+use Wurk\Agents\Support\AgentCommission;
 use Wurk\Agents\Support\AgentRoster;
 use Wurk\Identity\Contracts\PeopleDirectory;
 
@@ -40,7 +41,7 @@ final class AgentsController
                 'id' => $a->id, 'name' => $names[$a->identity_id] ?? 'Agent', 'code' => $a->code, 'status' => $a->status, 'months' => $a->commission_months,
                 'sponsor_id' => $a->sponsor_id, 'sponsor' => $a->sponsor_id === null ? null : ($names[$byId[$a->sponsor_id]->identity_id ?? ''] ?? 'Agent'),
                 'direct' => (int) ($team[$a->id] ?? 0), 'team' => count($this->roster->downline($a->id)), 'businesses' => (int) ($businesses[$a->id] ?? 0),
-                'link' => route('agents.link', ['code' => $a->code]),
+                'link' => route('agents.link', ['code' => $a->code]), 'commission' => app(AgentCommission::class)->balance($a->id),
             ])->all(),
         ]);
     }
