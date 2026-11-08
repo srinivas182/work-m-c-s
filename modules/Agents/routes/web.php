@@ -5,9 +5,12 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Wurk\Agents\Http\Controllers\Admin\AgentsController;
 use Wurk\Agents\Http\Controllers\Admin\BusinessAgentController;
+use Wurk\Agents\Http\Controllers\Admin\CommissionController;
 use Wurk\Agents\Http\Controllers\AgentLinkController;
 
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])->name('admin.')->group(function (): void {
+    Route::get('/agents/commission', [CommissionController::class, 'show'])->name('agents.commission');
+    Route::put('/agents/commission', [CommissionController::class, 'update'])->name('agents.commission.update');
     Route::get('/agents', [AgentsController::class, 'index'])->name('agents.index');
     Route::post('/agents', [AgentsController::class, 'store'])->name('agents.store');
     Route::put('/agents/{agent}', [AgentsController::class, 'update'])->name('agents.update');

@@ -6,6 +6,8 @@ namespace Wurk\Agents;
 
 use Illuminate\Support\Facades\Event;
 use Wurk\Agents\Support\AgentAttribution;
+use Wurk\Agents\Support\AgentCommission;
+use Wurk\Billing\Events\PaymentSucceeded;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Tenancy\Events\TenantProvisioned;
 
@@ -13,6 +15,8 @@ final class AgentsServiceProvider extends ModuleServiceProvider
 {
     protected function bootModule(): void
     {
+        // A paid WURK subscription: commission for the business's agent and the sponsors above (Sprint 14.3).
+        Event::listen(PaymentSucceeded::class, fn (PaymentSucceeded $e) => app(AgentCommission::class)->onPayment($e->paymentId));
         // A business created during signup is credited to the agent whose link the visitor followed (Sprint 14.2).
         Event::listen(TenantProvisioned::class, function (TenantProvisioned $e): void {
             if (app()->bound('request')) {
@@ -23,7 +27,10 @@ final class AgentsServiceProvider extends ModuleServiceProvider
 
     public function menu(): array
     {
-        return [['label' => 'Agents', 'route' => 'admin.agents.index', 'icon' => 'users', 'section' => 'Platform', 'permission' => 'agents.view', 'order' => 40]];
+        return [
+            ['label' => 'Agents', 'route' => 'admin.agents.index', 'icon' => 'users', 'section' => 'Platform', 'permission' => 'agents.view', 'order' => 40],
+            ['label' => 'Agent commission', 'route' => 'admin.agents.commission', 'icon' => 'users', 'section' => 'Platform', 'permission' => 'agents.view', 'order' => 41],
+        ];
     }
 
     public function permissions(): array

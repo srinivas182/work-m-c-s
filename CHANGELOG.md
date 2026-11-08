@@ -4,6 +4,9 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.3 (agent commission)
+- **Commission** on each paid WURK subscription (excluding VAT; not credits): the business's agent earns "self", each sponsor up earns their level — at the percentages WURK's super admin sets in **Admin → Agent commission** (self plus up to 7 levels; 0% until set; logged; finance can view). Each agent earns only within their own commission period; suspended agents are skipped without shifting levels. Append-only ledger, once per payment; pending until refunds close (30 days — a setting in 14.4). **Admin → Agents** shows each agent's available, pending and paid-out commission. Billing gains a `SubscriptionPayments` contract.
+
 ### Added — Sprint 14.2 (agent attribution)
 - **Agent links** `wurk.co.za/a/CODE` (and QR codes in Admin → Agents): remember an active agent for 90 days across wurk.co.za and its sub-addresses (a cookie holding only the public code); first link wins; suspended agents' links do nothing.
 - A business **created during signup** is credited to that agent — never businesses created by staff in Admin.

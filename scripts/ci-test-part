@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 PART1=(Website Records Health Admin Regions Payments Credits) # Payments, Credits from part 3: it reached 9m41s (13.9b)
-PART2=(Identity Messaging Audit Team Referrals Sales Portal) # Sprint 13 modules: part 4 reached 9m54s of its 10 minutes
+PART2=(Identity Messaging Audit Team Referrals Sales Portal Agents) # Sprint 13 modules; Agents (14): part 4 hit its 10-minute limit
 PART3=(Bookings Access Ai Plans Features Security Marketing)
 in_list() { local x="$1"; shift; for y in "$@"; do [[ "$x" == "$y" ]] && return 0; done; return 1; }
 case "${1:-}" in

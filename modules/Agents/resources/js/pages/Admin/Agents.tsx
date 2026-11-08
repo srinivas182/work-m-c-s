@@ -14,6 +14,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { rand } from '@/lib/money';
 
 interface Agent {
   id: string;
@@ -27,6 +28,7 @@ interface Agent {
   team: number;
   businesses: number;
   link: string;
+  commission: { pending: number; available: number; paid_out: number };
 }
 
 /** Admin → Agents: the sponsor hierarchy. */
@@ -173,6 +175,10 @@ function AgentRow({ a, agents, canManage }: { a: Agent; agents: Agent[]; canMana
         {a.sponsor ? `Sponsor: ${a.sponsor}` : 'No sponsor'} · {a.direct} direct · {a.team} in their
         team · {a.businesses === 1 ? '1 business' : `${a.businesses} businesses`} · commission{' '}
         {a.months === null ? 'for life' : `for ${a.months} months`}
+      </p>
+      <p>
+        Commission: {rand(a.commission.available)} available · {rand(a.commission.pending)} pending
+        · {rand(a.commission.paid_out)} paid out
       </p>
       <p className="break-all">
         <span className="font-mono">{a.link}</span> ·{' '}

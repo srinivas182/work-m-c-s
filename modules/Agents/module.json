@@ -9,6 +9,7 @@
         "tenancy",
         "identity",
         "access",
-        "audit"
+        "audit",
+        "billing"
     ]
 }

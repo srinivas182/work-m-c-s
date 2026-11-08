@@ -215,4 +215,17 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
       .getByRole('listitem')
       .filter({ hasText: `${first} Test` }),
   ).toBeVisible();
+
+  // Agent commission (Sprint 14.3): WURK-wide, so only the desktop run changes it (desktop and phone runs overlap).
+  await page.goto(`${admin}/agents/commission`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Agent commission' })).toBeVisible();
+  await expectAccessible(page);
+  if (testInfo.project.name === 'desktop') {
+    const rates = page.getByRole('form', { name: 'Commission percentages' });
+    await rates.getByLabel('The business’s own agent (%)').fill('10');
+    await rates.getByRole('button', { name: 'Save' }).click();
+    await expect(
+      page.getByText('Commission percentages saved. They apply to payments from now on.'),
+    ).toBeVisible();
+  }
 });
