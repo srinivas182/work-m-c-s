@@ -30,6 +30,17 @@ Agents sell WURK packages to businesses and earn commission on what those busine
 | E | **Agents sign in at `app.wurk.co.za/agent`** (the back-office surface, MFA, sessions; its own menu). | **Decided (WURK, 7 Nov 2026).** |
 | F | **Tax statements**: an annual earnings statement (PDF) per agent; WURK's accountant to confirm any IRP5/IT3(a) needs. | **Decided (WURK, 7 Nov 2026).** |
 
+## 14.5 Payouts — detailed specification (8 Nov 2026)
+
+**14.5a — building the batch** (Admin → Agent payouts; new permission `agents.pay` for Finance and the super admin):
+- **Minimum payout** — WURK finance's setting; no minimum until set.
+- **Preview first** (recommended addition): *included* (agent, amount, bank, last four), *held* (banking details changed in the last 7 days — fraud control), *skipped* with the reason (no banking details, below the minimum, suspended, owes WURK).
+- **Create** reserves each included amount at once as a `paid_out` line in the agent's ledger (reference `batch:<id>`), so it can't be batched or paid twice; banking details are copied onto the batch (masked).
+- **Download the EFT CSV** (decision D: holder, bank, branch code, account type, account number, amount, reference) — account numbers decrypted only for the download; every download logged (recommended addition).
+- **Cancel** an unpaid batch: reservations released.
+
+**14.5b — settling it:** **mark paid** (locked; each agent gets a **remittance advice** — amount, reference, the businesses it covers — recommended addition); **mark one payment bounced** (the money returns to that agent's balance and they're asked to check their banking details — recommended addition).
+
 ## Out of scope
 Agent-to-agent transfers; commission on WURK Credits or managed fees; automated bank payouts (needs a bank API — later).
 

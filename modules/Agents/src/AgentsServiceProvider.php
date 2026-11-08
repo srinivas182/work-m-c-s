@@ -39,6 +39,7 @@ final class AgentsServiceProvider extends ModuleServiceProvider
         return [
             ['label' => 'Agents', 'route' => 'admin.agents.index', 'icon' => 'users', 'section' => 'Platform', 'permission' => 'agents.view', 'order' => 40],
             ['label' => 'Agent commission', 'route' => 'admin.agents.commission', 'icon' => 'users', 'section' => 'Platform', 'permission' => 'agents.view', 'order' => 41],
+            ['label' => 'Agent payouts', 'route' => 'admin.agents.payouts', 'icon' => 'wallet', 'section' => 'Platform', 'permission' => 'agents.pay', 'order' => 42],
         ];
     }
 
@@ -47,6 +48,7 @@ final class AgentsServiceProvider extends ModuleServiceProvider
         return [
             ['key' => 'agents.view', 'label' => 'See agents and their teams', 'scope' => 'platform'],
             ['key' => 'agents.manage', 'label' => 'Create, move and suspend agents', 'scope' => 'platform'],
+            ['key' => 'agents.pay', 'label' => 'Make and download agent payout batches', 'scope' => 'platform'],
         ];
     }
 }
