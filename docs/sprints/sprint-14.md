@@ -1,6 +1,6 @@
-# Sprint 14 — Agents (specification, draft for approval)
+# Sprint 14 — Agents (specification)
 
-**Status:** draft for WURK's approval (7 Nov 2026). Nothing is built until approved.
+**Status:** approved by WURK (7 Nov 2026), with commission percentages (A) still to be supplied.
 **Plan:** Sprint 14 — sponsor hierarchy; package commissions and clawback; EFT payouts; agent dashboard; demo sites (docs/sprint-plan.md).
 **PRD:** §4.6 (super admin), §5.2 (attribution at signup), §10 (agent area), acceptance criterion 9.
 
@@ -23,12 +23,12 @@ Agents sell WURK packages to businesses and earn commission on what those busine
 
 | # | Decision | Status |
 |---|---|---|
-| A | **Commission percentages** per level (the PRD fixes the structure, not the numbers). | **Needed from WURK.** The super admin can change them later. |
+| A | **Commission percentages** per level (the PRD fixes the structure, not the numbers). | **Still needed from WURK.** Built with **every level at 0% until the super admin sets them** in Admin — no invented numbers; no commission accrues at 0%. |
 | B | **Hold period** = **WURK's refund window**, set by the super admin, **default 30 days**. | **Decided (WURK, 7 Nov 2026).** |
-| C | **No refunds after the window** (WURK billing refuses them), so commission is only paid once refunds have closed and a refund can't reach paid commission; **0 days = commission credited at once**. | **Decided (WURK, 7 Nov 2026).** Open point: card **chargebacks** after payout (outside WURK's control) — recommended: recovered from future commission; flag agents negative 90+ days. |
-| D | **EFT batch file format.** | Recommended: **standard CSV** (name, bank, branch code, account, amount, reference); or WURK's bank's exact format if named. |
+| C | **No refunds after the window** (WURK billing refuses them), so commission is only paid once refunds have closed and a refund can't reach paid commission; **0 days = commission credited at once**. Card **chargebacks** after payout (outside WURK's control): recovered from future commission; agents negative 90+ days flagged. | **Decided (WURK, 7 Nov 2026).** |
+| D | **EFT batch file**: standard CSV (name, bank, branch code, account, amount, reference); WURK's bank's exact format if named later. | **Decided (WURK, 7 Nov 2026).** |
 | E | **Agents sign in at `app.wurk.co.za/agent`** (the back-office surface, MFA, sessions; its own menu). | **Decided (WURK, 7 Nov 2026).** |
-| F | **Tax statements.** | Recommended: an annual earnings statement (PDF) per agent; WURK's accountant to confirm any IRP5/IT3(a) needs. |
+| F | **Tax statements**: an annual earnings statement (PDF) per agent; WURK's accountant to confirm any IRP5/IT3(a) needs. | **Decided (WURK, 7 Nov 2026).** |
 
 ## Out of scope
 Agent-to-agent transfers; commission on WURK Credits or managed fees; automated bank payouts (needs a bank API — later).
