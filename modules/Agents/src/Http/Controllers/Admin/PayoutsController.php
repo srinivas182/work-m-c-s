@@ -26,7 +26,9 @@ final class PayoutsController
         return Inertia::render('Agents::Admin/Payouts', [
             'minimum' => $this->payouts->minimum(), 'preview' => $this->payouts->preview(),
             'batches' => DB::table('agent_payout_batches')->orderByDesc('created_at')->limit(50)->get(['id', 'reference', 'status', 'count', 'total_cents', 'created_at', 'paid_at'])
-                ->map(fn ($b) => ['id' => $b->id, 'reference' => $b->reference, 'status' => $b->status, 'count' => (int) $b->count, 'total_cents' => (int) $b->total_cents, 'created' => substr((string) $b->created_at, 0, 10)])->all(),
+                ->map(fn ($b) => ['id' => $b->id, 'reference' => $b->reference, 'status' => $b->status, 'count' => (int) $b->count, 'total_cents' => (int) $b->total_cents, 'created' => substr((string) $b->created_at, 0, 10),
+                    'items' => $b->status === 'paid' ? DB::table('agent_payout_items')->where('batch_id', $b->id)->orderBy('created_at')->get(['id', 'holder', 'bank', 'account_last4', 'cents', 'status'])
+                        ->map(fn ($i) => ['id' => $i->id, 'holder' => $i->holder, 'bank' => $i->bank.' ·· '.$i->account_last4, 'cents' => (int) $i->cents, 'status' => $i->status])->all() : []])->all(),
         ]);
     }
 
@@ -74,5 +76,29 @@ final class PayoutsController
         }
 
         return back()->with('status', 'Batch cancelled. The amounts are back in the agents’ balances.');
+    }
+
+    public function paid(string $batch): RedirectResponse
+    {
+        Gate::authorize('agents.pay');
+        try {
+            $this->payouts->markPaid($batch);
+        } catch (\DomainException $e) {
+            throw ValidationException::withMessages(['batch' => $e->getMessage()]);
+        }
+
+        return back()->with('status', 'Batch marked paid. Each agent has been sent a remittance advice.');
+    }
+
+    public function bounced(string $batch, string $item): RedirectResponse
+    {
+        Gate::authorize('agents.pay');
+        try {
+            $this->payouts->markBounced($batch, $item);
+        } catch (\DomainException $e) {
+            throw ValidationException::withMessages(['batch' => $e->getMessage()]);
+        }
+
+        return back()->with('status', 'Marked bounced. The amount is back in the agent’s balance, and they’ve been asked to check their banking details.');
     }
 }
