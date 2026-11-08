@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::table('agent_commission_settings', function (Blueprint $table) {
             $table->unsignedInteger('min_payout_cents')->default(0);
         });
+        // Room for 'payout_returned' (a cancelled or bounced payout) — 12 characters was too few.
+        Schema::table('agent_ledger', function (Blueprint $table) {
+            $table->string('kind', 20)->change();
+        });
         // EFT payout batches (Sprint 14.5).
         Schema::create('agent_payout_batches', function (Blueprint $table) {
             $table->ulid('id')->primary();
@@ -45,5 +49,6 @@ return new class extends Migration
         Schema::dropIfExists('agent_payout_items');
         Schema::dropIfExists('agent_payout_batches');
         Schema::table('agent_commission_settings', fn (Blueprint $table) => $table->dropColumn('min_payout_cents'));
+        Schema::table('agent_ledger', fn (Blueprint $table) => $table->string('kind', 12)->change());
     }
 };
