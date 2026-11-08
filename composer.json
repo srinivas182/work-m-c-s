@@ -33,6 +33,7 @@
             "Database\\Seeders\\": "database/seeders/",
             "Wurk\\Access\\": "modules/Access/src/",
             "Wurk\\Admin\\": "modules/Admin/src/",
+            "Wurk\\Agents\\": "modules/Agents/src/",
             "Wurk\\Ai\\": "modules/Ai/src/",
             "Wurk\\Audit\\": "modules/Audit/src/",
             "Wurk\\Billing\\": "modules/Billing/src/",
