@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.2 (agent attribution)
+- **Agent links** `wurk.co.za/a/CODE` (and QR codes in Admin → Agents): remember an active agent for 90 days across wurk.co.za and its sub-addresses (a cookie holding only the public code); first link wins; suspended agents' links do nothing.
+- A business **created during signup** is credited to that agent — never businesses created by staff in Admin.
+- **Admin → Business → Agent**: see and correct who brought a business (logged; finance can look). Admin → Agents shows each agent's link, QR and business count.
+
 ### Added — Sprint 14.1 (agents and the sponsor hierarchy)
 - **Admin → Agents** (new Agents module; `agents.view` / `agents.manage` — finance and support can view): add agents (their WURK ID, a 7-character referral code), place and move them under a sponsor (loops refused), suspend them, and set commission for life or N months from each business's start; direct and whole-team counts. Every change in the platform audit log.
 

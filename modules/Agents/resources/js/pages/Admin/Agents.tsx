@@ -25,6 +25,8 @@ interface Agent {
   sponsor: string | null;
   direct: number;
   team: number;
+  businesses: number;
+  link: string;
 }
 
 /** Admin → Agents: the sponsor hierarchy. */
@@ -169,7 +171,14 @@ function AgentRow({ a, agents, canManage }: { a: Agent; agents: Agent[]; canMana
       </div>
       <p className="text-fg-muted">
         {a.sponsor ? `Sponsor: ${a.sponsor}` : 'No sponsor'} · {a.direct} direct · {a.team} in their
-        team · commission {a.months === null ? 'for life' : `for ${a.months} months`}
+        team · {a.businesses === 1 ? '1 business' : `${a.businesses} businesses`} · commission{' '}
+        {a.months === null ? 'for life' : `for ${a.months} months`}
+      </p>
+      <p className="break-all">
+        <span className="font-mono">{a.link}</span> ·{' '}
+        <a className="underline" href={`/agents/${a.id}/qr.svg`} download>
+          QR code
+        </a>
       </p>
       {canManage &&
         (editing ? (

@@ -7,6 +7,7 @@ import {
   ExternalLink,
   Package,
   ShieldCheck,
+  Users,
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import {
@@ -165,6 +166,11 @@ export default function Business({ business, canManage, auditUrl }: Props) {
           <Button variant="secondary" asChild>
             <Link href={`/businesses/${business.id}/credits`}>
               <Coins /> WURK Credits
+            </Link>
+          </Button>
+          <Button variant="secondary" asChild>
+            <Link href={`/businesses/${business.id}/agent`}>
+              <Users /> Agent
             </Link>
           </Button>
           <Button variant="secondary" asChild>
