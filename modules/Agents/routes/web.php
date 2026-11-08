@@ -35,6 +35,7 @@ Route::domain((string) config('wurk.domains.root'))->middleware('throttle:60,1,a
 // The agent area (Sprint 14.7; completed in 14.6): app.wurk.co.za/agent — agents only.
 Route::domain((string) config('wurk.domains.app'))->middleware(['web', 'auth'])->prefix('agent')->name('agent.')->group(function (): void {
     Route::get('/', [AgentAreaController::class, 'home'])->name('home');
+    Route::get('/businesses', [AgentAreaController::class, 'businesses'])->name('businesses');
     Route::get('/bank', [AgentAreaController::class, 'bank'])->name('bank');
     Route::post('/bank', [AgentAreaController::class, 'request'])->middleware('throttle:5,10,agent-bank')->name('bank.request');
     Route::post('/bank/confirm', [AgentAreaController::class, 'confirm'])->middleware('throttle:10,10,agent-bank-confirm')->name('bank.confirm');
