@@ -35,3 +35,9 @@ Agent-to-agent transfers; commission on WURK Credits or managed fees; automated 
 
 ## Verification
 Each part: route tests, isolation tests (agents see only their own and their downline's data), MySQL, browser tests with accessibility scans, full CI before merge. Release as **v0.16.0**.
+
+## Progress
+
+| Part | PR | Notes |
+|---|---|---|
+| 14.1 Agents and hierarchy | see PR | 1,459 backend tests on SQLite; Agents and Access on MySQL 8. Browser tests in CI only. |
