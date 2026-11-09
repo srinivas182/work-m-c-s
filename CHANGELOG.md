@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.16.0] — 2026-11-09 — Sprint 14: Agents
+
+WURK's agents: the sponsor hierarchy, referral links and attribution, commission on subscription payments (up to 7 levels, percentages set by the super admin), WURK's refund window and clawback, EFT payout batches with remittance advice, banking details, the agent area (dashboard, businesses, earnings, team, payouts, marketing kit), and demo sites with "Make it yours". CI: MySQL tests in five parts. Release steps: docs/deployment/docker.md (v0.16.0 rows).
+
 ### Added — Sprint 14.8b ("Make it yours")
 - **Claim link** for an agent's demo (signed; works until the demo expires): on the demo's banner and the agent's Demo page (copy, **send on WhatsApp**).
 - **Signup for that demo**: name and address filled in, no design step; the prospect may keep the demo's address or choose another.

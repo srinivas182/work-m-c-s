@@ -22,7 +22,7 @@
 | 11 | 29 Mar – 09 Apr | Multi-branch & shipping | Branch managers; per-branch merchant accounts, prices, stock; inter-branch settlement; courier integrations | ✅ v0.13.0 (#89–#94) |
 | 12 | 12 – 23 Apr | CRM & messaging | Leads & pipelines; forms & custom fields (incl. quote requests); rule-based chatbot; event template engine (email/SMS/WhatsApp) | ✅ v0.14.0 (hotfixes v0.14.1, v0.14.2) |
 | 13 | 26 Apr – 07 May | Referral engine | Self + 7 levels; pending/available; wallet rules; attribution; customer payouts; My WURK | ✅ v0.15.0 |
-| 14 | 10 – 21 May | Agents | Sponsor hierarchy; package commissions & clawback; EFT payouts; agent dashboard; demo sites | |
+| 14 | 10 – 21 May | Agents | Sponsor hierarchy; package commissions & clawback; EFT payouts; agent dashboard; demo sites | ✅ v0.16.0 |
 | 15 | 24 May – 04 Jun | Reports & campaigns | Tenant reports; SaaS metrics; **profit per package, pricing simulator, provider reconciliation, margin alerts**; analytics; campaigns & offers with credit estimates; monthly usage summary; auto top-up | |
 | 16 | 07 – 18 Jun | Self-service & support | AI assistant; help centre & short videos per category; consent-based impersonation; tickets; tenant health; backup/restore & export | |
 | 17 | 21 Jun – 02 Jul | **Cloud, domains & production infrastructure** *(moved)* | Chosen cloud (AWS or Azure, South African region); custom domains & SSL (Cloudflare for SaaS); wurk.co.za DNS; infrastructure as code; staging & production; monitoring & alerts; backups | |
