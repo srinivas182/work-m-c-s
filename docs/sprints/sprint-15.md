@@ -41,6 +41,17 @@
 - **Visits that became orders or bookings**: when checkout or a booking remembers the customer (CRM's `ContactRemembered`, already raised), the same day's hash finds that visitor's source — no change to the shop or bookings.
 - **Reports → Website**: visitors, page views, top pages, sources, and orders/bookings by source, compared with the period before; highlights.
 
+## 15.3 Campaigns and offers — detailed design (9 Nov 2026)
+
+**15.3a — sending campaigns** (new Campaigns module; `campaigns.manage` for owners):
+- **Audiences from CRM, only customers who agreed to marketing**: everyone; seen in the last 30 days; not seen in 60+ days (win-back); one branch; top referrers (when the referral programme is on). Live counts.
+- **Email or SMS** (WhatsApp once Meta approves the marketing templates). **Credit estimate before sending** ("312 SMS ≈ 312 credits; you have 540") — refused if the credits won't cover it. **Test send to yourself**; **send now or schedule**.
+- **Opt-out on every message** (a link; one click withdraws consent in CRM, logged) — POPIA.
+- **Results**: sent, failed, **clicks** (links tracked through WURK), **opens** for email (indicative — decision C).
+- **Ready-made campaigns**: win-back ("We miss you…") for customers not seen in 60 days, and thank-you for first-time customers this month, with suggested wording.
+
+**15.3b — coupons**: codes for the shop and booking deposits (amount or %, expiry, how many times), optionally attached to a campaign so its results show redemptions and the sales they made.
+
 ## Order and size
 
 15.1 → 15.2 → 15.3 → 15.4 → 15.5, each in small parts with one full CI run per part. Release as **v0.17.0**.
@@ -55,4 +66,5 @@ Paid advertising integrations (Meta/Google ads); AI-written campaign copy (Sprin
 |---|---|---|
 | 15.1a Reports: sales, bookings, customers | #153 | Caught: the formatter turned the "nothing before?" check strict, which would divide by zero for 0.00 — made safe. Lifetime value counts paid amounts only (unpaid bookings have none). 1,551 backend tests on SQLite; Reports and CRM on MySQL 8. Browser tests in CI only. |
 | 15.1b Takings/VAT, leads, stock; export; summaries | #154 | VAT only for businesses that say they're registered (most small businesses aren't). Scheduled summaries run with no one signed in, so report periods can be marked "for owners". Caught: business routes drop `{tenant}`, so a `$tenant` argument shifted the export's parameters (a crash) — removed. 1,555 backend tests on SQLite; Reports and CRM on MySQL 8. Browser tests in CI only. |
-| 15.2 Website analytics | see PR | Counting happens in the public page response (also on 304s). Caught in my test: Laravel's withHeaders() carries headers into later requests — cleared per visit. 1,557 backend tests on SQLite; analytics and Reports on MySQL 8. Browser tests in CI only. |
+| 15.2 Website analytics | #155 | Counting happens in the public page response (also on 304s). Caught in my test: Laravel's withHeaders() carries headers into later requests — cleared per visit. 1,557 backend tests on SQLite; analytics and Reports on MySQL 8. Browser tests in CI only. |
+| 15.3a Campaigns | see PR | Caught: the estimate compared against the spending-limit headroom (null = no limit) instead of the balance; the subject wasn't personalised; rescheduling a sent campaign silently did nothing; four status updates lacked the business filter (raw-query guard). Top-referrers audience moves to 15.3b (needs a Referrals contract). Browser test: the e2e business has no package with campaigns, so the three pages are render-tested in Vitest instead. 1,620 backend tests on SQLite; Campaigns and CRM on MySQL 8. |

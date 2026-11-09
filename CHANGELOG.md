@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.3a (campaigns)
+- **Customers → Campaigns** (`campaigns.manage`; packages with *Campaigns & offers*): **email** (free) or **SMS** (credits) to customers **who agreed to marketing** — everyone, seen in the last 30 days, not seen in 60+ days, or one branch.
+- **Credit estimate before sending** (the balance, capped by any spending limit); refused when it won't cover it. **Test send** to yourself; **send now or schedule**. `{first_name}` in the subject and message.
+- **Opt-out on every message** (one click; consent withdrawn in CRM, logged); email `List-Unsubscribe`. **Results**: sent, failed, opened (email, indicative), clicked — links tracked through the business's site and signed (no open redirect).
+- **Ready-made**: "We miss you" (60+ days) and "Thank you" (recent), with suggested wording.
+- CRM: `Audiences` contract.
+
 ### Added — Sprint 15.2 (website analytics)
 - **Reports → Website**: visitors, page views, top pages, where visitors came from (Google, Facebook, Instagram, WhatsApp, a campaign's `utm_source`, or Direct), and the orders and bookings each source brought.
 - **No cookies, no script, no consent banner**: counted on WURK's servers (pages revalidate, so revisits count too); visitors are a one-way hash with a random daily secret kept two days — no IP stored, not traceable across days; bots, link previews and prefetches skipped.

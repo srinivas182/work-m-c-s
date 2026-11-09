@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Wurk\Crm\Console\FollowUpsCommand;
 use Wurk\Crm\Console\LinkExistingCommand;
+use Wurk\Crm\Contracts\Audiences;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\CustomerIdentity;
 use Wurk\Crm\Contracts\LeadBook;
@@ -19,6 +20,7 @@ use Wurk\Crm\Reports\CustomersSection;
 use Wurk\Crm\Reports\LeadsSection;
 use Wurk\Crm\Support\Contacts;
 use Wurk\Crm\Support\Leads;
+use Wurk\Crm\Support\MarketingAudiences;
 use Wurk\Crm\Support\SignedCustomerIdentity;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -30,6 +32,7 @@ final class CrmServiceProvider extends ModuleServiceProvider
     {
         parent::register();
         $this->app->bind(Takings::class, CustomersSection::class);
+        $this->app->bind(Audiences::class, MarketingAudiences::class);
         $this->app->bind(CustomerIdentity::class, SignedCustomerIdentity::class);
         $this->app->bind(ContactBook::class, Contacts::class);
         $this->app->bind(LeadBook::class, Leads::class);
