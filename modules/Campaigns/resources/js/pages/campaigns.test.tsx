@@ -56,9 +56,7 @@ describe('Campaigns pages', () => {
     );
     expect(screen.getByRole('heading', { name: 'Campaigns' })).toBeTruthy();
     expect(
-      screen.getByText(
-        /12 sent · 1 failed · 5 opened · 2 clicked\s*· 3 redeemed · R450 in sales/,
-      ),
+      screen.getByText(/12 sent · 1 failed · 5 opened · 2 clicked\s*· 3 redeemed · R450 in sales/),
     ).toBeTruthy();
     expect(screen.getByText('We miss you')).toBeTruthy();
   });
