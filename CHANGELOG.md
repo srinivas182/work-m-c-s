@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.1a (business reports)
+- **Reports → Overview** (`reports.view` — owners and branch managers; managers see only their branches): this month, last 7/30 days, this quarter or year, **compared with the period before**, per branch or combined, with **plain-language highlights** at the top.
+- **Shop sales**: after refunds, orders, average order, by day, best sellers, payment methods.
+- **Bookings**: bookings, value (from service prices), no-show rate, busiest times, outcomes.
+- **Customers**: seen, new vs returning, repeat rate, average lifetime value, and customers not seen in 60 days.
+- Each module supplies its own section through Platform's `BusinessReports` contract; CRM records what each purchase was paid (from the purchase notices) for lifetime value.
+
 ## [0.16.0] — 2026-11-09 — Sprint 14: Agents
 
 WURK's agents: the sponsor hierarchy, referral links and attribution, commission on subscription payments (up to 7 levels, percentages set by the super admin), WURK's refund window and clawback, EFT payout batches with remittance advice, banking details, the agent area (dashboard, businesses, earnings, team, payouts, marketing kit), and demo sites with "Make it yours". CI: MySQL tests in five parts. Release steps: docs/deployment/docker.md (v0.16.0 rows).

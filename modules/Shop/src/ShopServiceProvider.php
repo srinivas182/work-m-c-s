@@ -8,22 +8,28 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
+use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Shipping\Contracts\ShipmentUpdated;
 use Wurk\Shop\Console\DemoShopCommand;
 use Wurk\Shop\Console\ExpireOrdersCommand;
 use Wurk\Shop\Listeners\MarkDeliveredOrders;
 use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Order;
+use Wurk\Shop\Reports\SalesSection;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderStatusChanged;
 use Wurk\Shop\Support\ShopCatalog;
+use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\ProductCatalog;
 
 final class ShopServiceProvider extends ModuleServiceProvider
@@ -58,6 +64,12 @@ final class ShopServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Reports → Shop sales (Sprint 15.1a): for people who see reports, at businesses whose package has the shop.
+        $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
+            $r->register('shop.sales', 100, fn (ReportPeriod $p) => Gate::allows('reports.view')
+                && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'shop')
+                ? app(SalesSection::class)->build($p) : null);
+        });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'shop');
         Event::listen(BusinessPaymentReceived::class, [OrderPayments::class, 'handle']);
         Event::listen(OrderStatusChanged::class, [OrderMessages::class, 'handle']);

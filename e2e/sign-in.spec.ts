@@ -59,6 +59,12 @@ test('an owner signs in and lands in their business, then reviews security and s
   ).toBeVisible();
   await expectNoSeriousA11yIssues(page);
 
+  // Reports (Sprint 15.1a): the owner's overview.
+  await page.goto('/glow-salon/reports');
+  await expect(page.getByRole('heading', { level: 1, name: 'Reports' })).toBeVisible();
+  await expect(page.getByLabel('Period')).toBeVisible();
+  await expectNoSeriousA11yIssues(page);
+
   await page.goto('/account/security');
   await expect(page.getByRole('heading', { level: 1, name: 'Account & security' })).toBeVisible();
   await expect(page.getByText('This device')).toBeVisible();
