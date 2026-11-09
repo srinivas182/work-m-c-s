@@ -60,6 +60,11 @@ test('an agent signs in, sees their link and asks to change their banking detail
   await demo.getByRole('button', { name: 'Make the demo' }).click();
   await expect(page.getByText(/^Your demo is live\./)).toBeVisible();
   await expect(page.getByRole('link', { name: 'Edit it in the back office' })).toBeVisible();
+  // Make it yours (Sprint 14.8b): the prospect's claim link, and sending it on WhatsApp.
+  await expect(page.getByText(/Their “Make it yours” link:/)).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Send “Make it yours” on WhatsApp' }),
+  ).toHaveAttribute('href', /^https:\/\/wa\.me\/\?text=.*signup%2Fclaim%2F/);
   await expectAccessible(page);
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Delete demo' }).click();
