@@ -16,6 +16,7 @@ use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Plans\Http\Middleware\EnsureEntitled;
+use Wurk\Plans\Metrics\MovementSection;
 use Wurk\Plans\Metrics\SubscriptionsSection;
 use Wurk\Plans\Models\Package;
 use Wurk\Plans\Support\EloquentCatalog;
@@ -68,6 +69,10 @@ final class PlansServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
             $m->register('subscriptions', 100, fn (ReportPeriod $p) => Gate::allows('metrics.view')
                 ? app(SubscriptionsSection::class)->build($p) : null);
+        });
+        $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
+            $m->register('movement', 150, fn (ReportPeriod $p) => Gate::allows('metrics.view')
+                ? app(MovementSection::class)->build($p) : null);
         });
         if ($this->app->runningInConsole()) {
             $this->commands([SeedPlaceholderPackagesCommand::class]);

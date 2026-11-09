@@ -90,6 +90,10 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await page.goto(`${admin}/metrics`);
   await expect(page.getByRole('heading', { level: 1, name: 'Metrics' })).toBeVisible();
   await expect(page.getByLabel('Period')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download CSV' })).toHaveAttribute(
+    'href',
+    /\/metrics\/export\.csv\?period=/,
+  );
   await expectAccessible(page);
 
   await page.goto(`${admin}/staff`);
