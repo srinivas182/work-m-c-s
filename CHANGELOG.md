@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.1b (more reports, export, summaries)
+- **Takings and VAT** (first section): everything taken — shop, bookings, in-store sales — after refunds; **VAT** (included in prices, at the country's rate) **only once the business says it's VAT-registered** (**Settings → VAT registration**, owners).
+- **Leads**: new leads by source, won of those closed, median first response. **Stock**: out of stock, lowest stock, didn't sell in the period (shown as "right now").
+- **Download** any report as **CSV** or **PDF**.
+- **Owners' summary email**: weekly (Mondays) by default, monthly (the 1st) or off — from 07:00 in the business's time, once per period (`reports:send-summaries`, hourly). By email until the WhatsApp template is approved (decision D).
+
 ### Added — Sprint 15.1a (business reports)
 - **Reports → Overview** (`reports.view` — owners and branch managers; managers see only their branches): this month, last 7/30 days, this quarter or year, **compared with the period before**, per branch or combined, with **plain-language highlights** at the top.
 - **Shop sales**: after refunds, orders, average order, by day, best sellers, payment methods.
