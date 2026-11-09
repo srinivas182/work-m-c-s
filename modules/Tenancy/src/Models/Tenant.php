@@ -111,6 +111,11 @@ final class Tenant extends Model implements CentralModel, CurrentTenant
         return $this->status === self::STATUS_ACTIVE;
     }
 
+    public function isDemo(): bool
+    {
+        return (bool) $this->getAttribute('is_demo');
+    }
+
     public function createdAt(): ?\DateTimeInterface
     {
         return $this->created_at;

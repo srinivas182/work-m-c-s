@@ -27,13 +27,15 @@ final class BusinessesController
         Gate::authorize('viewAny', Tenant::class);
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:80'],
-            'status' => ['nullable', 'in:active,suspended,provisioning'],
+            'status' => ['nullable', 'in:active,suspended,provisioning,deleted'],
+            'kind' => ['nullable', 'in:demo,live'], // agents' demo sites (Sprint 14.8)
             'shard' => ['nullable', 'string', 'max:30'],
         ]);
 
         $page = Tenant::query()->with(['shard', 'domains'])
             ->when($filters['search'] ?? null, fn ($q, $s) => $q->where(fn ($q) => $q->where('name', 'like', "%{$s}%")->orWhere('handle', 'like', "%{$s}%")))
-            ->when($filters['status'] ?? null, fn ($q, $s) => $q->where('status', $s))
+            ->when($filters['status'] ?? null, fn ($q, $s) => $q->where('status', $s), fn ($q) => $q->where('status', '!=', Tenant::STATUS_DELETED)) // archived demos hidden unless asked for
+            ->when($filters['kind'] ?? null, fn ($q, $k) => $q->where('is_demo', $k === 'demo'))
             ->when($filters['shard'] ?? null, fn ($q, $s) => $q->whereHas('shard', fn ($q) => $q->where('name', $s)))
             ->orderByDesc('created_at')->paginate(25)->withQueryString();
 
@@ -134,6 +136,7 @@ final class BusinessesController
             'name' => $t->name,
             'handle' => $t->handle,
             'status' => $t->status,
+            'demo' => $t->isDemo(),
             'shard' => $t->shard?->name,
             'domain' => $primary instanceof TenantDomain ? $primary->host : null,
             'created' => $t->created_at?->toIso8601String(),

@@ -20,6 +20,9 @@ interface CurrentTenant
 
     public function isActive(): bool;
 
+    /** An agent's demo site (Sprint 14.8): not indexed; payments and outgoing messages switched off. */
+    public function isDemo(): bool;
+
     /** ISO country code (e.g. "ZA"): currency, VAT and messaging rates follow it. */
     public function countryCode(): string;
 

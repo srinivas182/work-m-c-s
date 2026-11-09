@@ -108,6 +108,7 @@ final class PublicSiteController
         $stored = (array) json_decode((string) Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($path), true);
         $body = (string) ($stored['body'] ?? '');
         $html = view('website::public.page', [
+            'demo' => $tenant->isDemo(), // an agent's demo (Sprint 14.8): banner and noindex
             'title' => (string) ($stored['title'] ?? $tenant->displayName()),
             'description' => $stored['description'] ?? null,
             'preloads' => app(FontPreloads::class)->for(array_values(array_filter((array) ($stored['fonts'] ?? []), 'is_string'))),
@@ -126,7 +127,7 @@ final class PublicSiteController
             'jsonLd' => $home ? json_encode(app(SiteSeo::class)->localBusiness($facts, request()->getSchemeAndHttpHost()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
         ])->render();
 
-        return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...$this->securityHeaders()]);
+        return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...($tenant->isDemo() ? ['X-Robots-Tag' => 'noindex, nofollow'] : []), ...$this->securityHeaders()]);
     }
 
     /** @param  array<string, string>  $headers */

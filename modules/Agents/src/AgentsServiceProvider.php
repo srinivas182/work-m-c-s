@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Wurk\Agents;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Wurk\Agents\Console\CreateAgentCommand;
+use Wurk\Agents\Console\SweepDemosCommand;
 use Wurk\Agents\Support\AgentAttribution;
 use Wurk\Agents\Support\AgentCommission;
 use Wurk\Billing\Events\CreditNoteIssued;
@@ -19,8 +21,9 @@ final class AgentsServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'agents'); // agents' emails
+        $this->callAfterResolving(Schedule::class, fn (Schedule $s) => $s->command('agents:sweep-demos')->dailyAt('03:15')->onOneServer()->withoutOverlapping()); // demo reminders and expiry
         if ($this->app->runningInConsole()) {
-            $this->commands([CreateAgentCommand::class]);
+            $this->commands([CreateAgentCommand::class, SweepDemosCommand::class]);
         }
         // A paid WURK subscription: commission for the business's agent and the sponsors above (Sprint 14.3).
         Event::listen(PaymentSucceeded::class, fn (PaymentSucceeded $e) => app(AgentCommission::class)->onPayment($e->paymentId));

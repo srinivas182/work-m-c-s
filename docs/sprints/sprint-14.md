@@ -60,6 +60,8 @@ At `app.wurk.co.za/agent` (agents only; started in 14.7). Every figure is the ag
 
 ## 14.8 Demo sites — detailed specification (9 Nov 2026)
 
+**Approved by WURK (9 Nov 2026)**, including the recommended additions and archiving now with a permanent purge in Sprint 18.
+
 A demo is a **real WURK business marked as a demo** (so the site, templates and editor are the real ones), with restrictions.
 
 **14.8a — making, showing, restricting and expiring demos**

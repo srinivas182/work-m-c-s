@@ -27,6 +27,7 @@ export interface BusinessSummary {
   name: string;
   handle: string;
   status: string;
+  demo?: boolean;
   shard: string | null;
   domain: string | null;
   created: string | null;
@@ -36,7 +37,7 @@ export const statusTone = (s: string) =>
   s === 'active' ? 'success' : s === 'suspended' ? 'danger' : 'warning';
 
 interface Props {
-  filters: { search?: string; status?: string; shard?: string };
+  filters: { search?: string; status?: string; shard?: string; kind?: string };
   shards: string[];
   canCreate: boolean;
   businesses: { data: BusinessSummary[]; total: number; next: string | null; prev: string | null };
@@ -47,6 +48,7 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
     search: filters.search ?? '',
     status: filters.status ?? 'any',
     shard: filters.shard ?? 'any',
+    kind: filters.kind ?? 'any',
   });
   const apply = (e: FormEvent) => {
     e.preventDefault();
@@ -96,6 +98,21 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="suspended">Suspended</SelectItem>
                   <SelectItem value="provisioning">Provisioning</SelectItem>
+                  <SelectItem value="deleted">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </Field>
+          <Field label="Kind">
+            {(control) => (
+              <Select value={form.kind} onValueChange={(v) => setForm((f) => ({ ...f, kind: v }))}>
+                <SelectTrigger {...control}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Live and demos</SelectItem>
+                  <SelectItem value="live">Live businesses</SelectItem>
+                  <SelectItem value="demo">Agents’ demos</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -155,6 +172,11 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
                       <Link href={`/businesses/${b.id}`} className="font-medium hover:underline">
                         {b.name}
                       </Link>
+                      {b.demo && (
+                        <Badge tone="neutral" className="ml-2">
+                          Demo
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-fg-muted">{b.domain}</TableCell>
                     <TableCell>
