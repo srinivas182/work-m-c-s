@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\CouponCustomer;
+use Wurk\Payments\Contracts\Coupons;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Shipping\Contracts\Couriers;
@@ -40,7 +42,7 @@ final readonly class OrderPlacer
      * @param  array{provider: string, service?: string|null, pickup_point?: string|null, pickup_point_name?: string|null, to?: array{street: string, suburb?: string|null, city: string, postal_code: string}}|null  $shipping  courier delivery (Bob Go) or a Pargo pickup point
      * @param  array{pass: string, cents: int}|null  $wallet  part paid from the customer's wallet (Sprint 13.6c)
      */
-    public function place(array $lines, array $customer, string $fulfilment, string $method, ?string $branch = null, ?array $shipping = null, ?array $wallet = null): Order
+    public function place(array $lines, array $customer, string $fulfilment, string $method, ?string $branch = null, ?array $shipping = null, ?array $wallet = null, ?string $coupon = null): Order
     {
         $branch = app(BranchStock::class)->fulfilling($fulfilment, $branch); // the branch that fulfils this order
         $courier = $fulfilment === 'delivery' && $shipping !== null ? $this->courierFee($lines, $branch, $shipping) : null; // asked before any locks are taken
@@ -65,7 +67,7 @@ final readonly class OrderPlacer
             throw new CheckoutProblem('Your cart is empty.');
         }
 
-        $order = DB::connection($this->context->connectionName())->transaction(function () use ($wanted, $customer, $fulfilment, $method, $branch, $courier, $shipping): Order {
+        $order = DB::connection($this->context->connectionName())->transaction(function () use ($wanted, $customer, $fulfilment, $method, $branch, $courier, $shipping, $coupon): Order {
             $stock = app(BranchStock::class);
             $settings = ShopSettings::query()->lockForUpdate()->find($this->context->id())
                 ?? ShopSettings::query()->create(['tenant_id' => $this->context->id()])->refresh(); // shops that never saved settings: re-read for the defaults (order numbers start at 1001)
@@ -94,6 +96,13 @@ final readonly class OrderPlacer
                 throw new CheckoutProblem('Something in your cart isn’t available any more. Please check your cart.');
             }
             $delivery = $fulfilment === 'delivery' ? ($courier ?? $settings->delivery_fee_cents) : 0;
+            // A coupon (15.3b) comes off the goods, never delivery; a bad code stops checkout with a plain message.
+            $customerKey = CouponCustomer::key($customer['phone'] ?? null);
+            $quote = $coupon === null || trim($coupon) === '' ? null : app(Coupons::class)->quote($coupon, $subtotal, 'shop', $customerKey);
+            if ($quote !== null && ! $quote['ok']) {
+                throw new CheckoutProblem((string) $quote['message']);
+            }
+            $discount = $quote['discount_cents'] ?? 0;
             $order = Order::query()->create([
                 'number' => $settings->next_order_number, 'branch_id' => $branch, 'status' => 'awaiting_payment', 'payment_method' => $method, 'fulfilment' => $fulfilment,
                 'customer_name' => $customer['name'], 'customer_phone' => $customer['phone'], 'customer_email' => $customer['email'] ?? null,
@@ -105,9 +114,13 @@ final readonly class OrderPlacer
                 'shipping_provider' => $fulfilment === 'delivery' ? ($shipping['provider'] ?? null) : null, 'shipping_service' => $shipping['service'] ?? null,
                 'pickup_point' => $shipping['pickup_point'] ?? null, 'pickup_point_name' => $shipping['pickup_point_name'] ?? null,
                 'shipping_to' => ($shipping['provider'] ?? null) === 'bobgo' ? ($shipping['to'] ?? null) : null,
-                'subtotal_cents' => $subtotal, 'delivery_cents' => $delivery, 'total_cents' => $subtotal + $delivery,
+                'subtotal_cents' => $subtotal, 'delivery_cents' => $delivery, 'total_cents' => $subtotal + $delivery - $discount,
+                'discount_cents' => $discount, 'coupon_code' => $quote === null ? null : strtoupper(trim((string) $coupon)),
                 'hold_expires_at' => $method === 'card' ? now()->addMinutes(self::CARD_HOLD_MINUTES) : now()->addHours($settings->offline_hold_hours),
             ]);
+            if ($quote !== null) {
+                app(Coupons::class)->redeem((string) $quote['coupon_id'], 'order', $order->id, $discount, $customerKey);
+            }
             foreach ($items as $item) {
                 OrderItem::query()->create(['order_id' => $order->id, ...$item]);
             }
@@ -141,6 +154,7 @@ final readonly class OrderPlacer
             $order->update(['status' => $status, 'hold_expires_at' => null]);
         });
         DB::table('shop_holds')->where('order_id', $order->id)->delete();
+        app(Coupons::class)->release('order', $order->id); // the order didn't stand: the coupon use is given back
         if ($order->paid_at === null) {
             app(OrderManager::class)->toWallet($order, (int) $order->wallet_cents); // never paid: the wallet part goes straight back (0 if none)
         }
@@ -214,7 +228,7 @@ final readonly class OrderPlacer
         if ($order->dueCents() === 0) { // nothing left to pay
             $order->update(['status' => 'paid', 'hold_expires_at' => null, 'paid_at' => now()]);
             DB::table('shop_holds')->where('order_id', $order->id)->delete();
-            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents, $order->branch_id, app(RefundWindow::class)->finalAt(now())));
+            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents - (int) $order->discount_cents, $order->branch_id, app(RefundWindow::class)->finalAt(now())));
             event(new OrderStatusChanged($this->context->id(), $order->id, 'paid'));
             $this->audit->record('shop.order_paid', 'order', $order->id, ['cents' => 0, 'wallet_cents' => $cents]);
         }

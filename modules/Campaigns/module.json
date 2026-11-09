@@ -12,6 +12,7 @@
         "crm",
         "messaging",
         "credits",
-        "plans"
+        "plans",
+        "payments"
     ]
 }

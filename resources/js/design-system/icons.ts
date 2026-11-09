@@ -1,4 +1,5 @@
 import {
+  Tag,
   Clock,
   Image,
   Sparkles,
@@ -72,6 +73,7 @@ export const icons: Record<string, LucideIcon> = {
   megaphone: Megaphone,
   package: Package,
   'message-circle': MessageCircle,
+  tag: Tag,
   palette: Palette,
   settings: Settings,
   'shield-check': ShieldCheck,

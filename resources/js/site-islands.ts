@@ -1160,6 +1160,20 @@ async function checkout(root: HTMLElement): Promise<void> {
   const walletRow = el('div', { class: 'flex items-start gap-2' }, useWallet, walletLabel);
   walletRow.hidden = true;
   let wallet: { pass: string; cents: number } | null = null;
+  // A coupon code (Sprint 15.3b): quoted by the same pricing the server uses; it comes off the goods, never delivery.
+  const couponInput = el('input', { type: 'text', class: field, autocomplete: 'off' });
+  couponInput.id = id('coupon');
+  const couponApply = el('button', { type: 'button', class: 'underline' }, 'Apply');
+  const couponMsg = el('p', { class: 'text-sm' });
+  couponMsg.setAttribute('aria-live', 'polite'); // announced, without a second status region in the form
+  const couponRow = el(
+    'div',
+    { class: 'grid gap-1' },
+    el('label', { htmlFor: couponInput.id }, 'Coupon code (optional)'),
+    el('div', { class: 'flex items-center gap-2' }, couponInput, couponApply),
+    couponMsg,
+  );
+  let coupon: { code: string; cents: number } | null = null;
   const itemsCents = (data?.lines ?? []).reduce((sum, l) => sum + l.unit_cents * l.quantity, 0);
   void fetch(`/account/wallet-pass?total=${itemsCents}`, {
     headers: { Accept: 'application/json' },
@@ -1271,7 +1285,8 @@ async function checkout(root: HTMLElement): Promise<void> {
     addressRow.hidden = !delivering() || mode !== 'flat';
     courierRow.hidden = !delivering() || mode !== 'courier';
     pickupRow.hidden = !delivering() || mode !== 'pickup';
-    totals.textContent = `Total ${randOf(subtotal + fee)} (incl. VAT${fee ? `, delivery ${randOf(fee)}` : ''})`;
+    const off = coupon ? Math.min(coupon.cents, subtotal) : 0;
+    totals.textContent = `Total ${randOf(subtotal + fee - off)} (incl. VAT${fee ? `, delivery ${randOf(fee)}` : ''}${off ? `, coupon −${randOf(off)}` : ''})`;
   };
   // Several branches: customers choose where to collect from; stock and prices follow the branch.
   const branchPick = el('select', { class: field });
@@ -1327,10 +1342,45 @@ async function checkout(root: HTMLElement): Promise<void> {
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my order.'),
     ),
     trapWrap,
+    couponRow,
     walletRow,
     place,
     status,
   );
+  couponApply.addEventListener('click', async () => {
+    const code = couponInput.value.trim();
+    coupon = null;
+    couponMsg.textContent = '';
+    if (code !== '') {
+      const r = await fetch('/cart/price', {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lines: readCart(),
+          branch: picked.branch,
+          fulfilment: picked.fulfilment,
+          coupon: code,
+          phone: phone.value || null,
+        }),
+      }).catch(() => null);
+      const q =
+        r && r.ok
+          ? (
+              (await r.json()) as {
+                coupon: { ok: boolean; discount_cents: number; message: string | null } | null;
+              }
+            ).coupon
+          : null;
+      if (q && q.ok) {
+        coupon = { code, cents: q.discount_cents };
+        couponMsg.textContent = `Coupon applied: −${randOf(q.discount_cents)}`;
+      } else {
+        couponMsg.textContent =
+          q?.message ?? 'We couldn’t check that code just now. Please try again.';
+      }
+    }
+    redraw();
+  });
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const mode = ways.length ? way.value : 'flat';
@@ -1375,6 +1425,7 @@ async function checkout(root: HTMLElement): Promise<void> {
         notes: notes.value || null,
         payment: payment(),
         wallet: useWallet.checked && wallet ? wallet : null,
+        coupon: coupon?.code ?? null,
         consent: consent.checked ? '1' : null,
         website: trap.value,
       }),
