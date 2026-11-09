@@ -58,6 +58,20 @@ At `app.wurk.co.za/agent` (agents only; started in 14.7). Every figure is the ag
 - **Payouts:** batches they were paid in, with the remittance details (and bounced ones).
 - **Marketing kit:** link, QR download, **WhatsApp share** with a ready message *(recommended addition)*.
 
+## 14.8 Demo sites — detailed specification (9 Nov 2026)
+
+A demo is a **real WURK business marked as a demo** (so the site, templates and editor are the real ones), with restrictions.
+
+**14.8a — making, showing, restricting and expiring demos**
+- **Make a demo** (agent area → Demo site): business name and an **industry template** from the 24 *(recommended addition — the agent pitches a site that already looks like the prospect's trade)*; published at once on its own address. **One active demo per agent**; they can delete it and make another.
+- **On the demo site**: a **"Demo" banner** (made by the agent, for the business) and **not indexed by search engines** (`noindex` header and meta). **Payments and outgoing messages are switched off** — online checkout, booking deposits, SMS, WhatsApp and emails to customers are refused with a plain reason.
+- **The agent can edit it** in the normal back office (they're its owner while it's a demo) *(recommended addition)*, and **share a QR code** to open it on a prospect's phone *(recommended addition)*.
+- **Expiry**: 14 days; the agent is emailed on **day 10 and day 13**; on day 14 it's **archived** — site offline, address freed, hidden everywhere. *Deviation from "auto-deleted": WURK can't yet delete a business's data safely; archived demos' data is **purged permanently in Sprint 18** (hardening) after proper testing. Demo content is the agent's sample material, not a customer's data.*
+- **Admin → Businesses** marks demos and can filter them.
+
+**14.8b — "Make it yours"**
+- The demo's banner and the agent area offer a **claim link** for the prospect (signed, valid until the demo expires). The prospect signs up with **the demo's name and address already filled in**, chooses a package and pays; the demo **becomes their live business** — content kept, restrictions lifted, the prospect its owner (the agent's access ends) and **credited to the agent** (14.2).
+
 ## Out of scope
 Agent-to-agent transfers; commission on WURK Credits or managed fees; automated bank payouts (needs a bank API — later).
 
