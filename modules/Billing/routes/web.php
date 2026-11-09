@@ -37,6 +37,7 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
     Route::post('/credits/packs/{pack}/toggle', [CreditPacksController::class, 'toggle'])->name('admin.credits.packs.toggle');
     Route::get('/billing/settings', [BillingAdminController::class, 'settings'])->name('admin.billing.settings');
     Route::put('/billing/settings', [BillingAdminController::class, 'saveSettings'])->name('admin.billing.settings.save');
+    Route::post('/billing/payments/{payment}/chargeback', [BillingAdminController::class, 'chargeback'])->name('admin.billing.chargeback');
     Route::get('/billing/failed', [BillingAdminController::class, 'queue'])->name('admin.billing.failed');
     Route::get('/businesses/{tenant}/billing', [BillingAdminController::class, 'business'])->name('admin.businesses.billing');
     Route::post('/businesses/{tenant}/billing/retry', [BillingAdminController::class, 'retry'])->middleware('throttle:10,1,admin-billing-retry')->name('admin.businesses.billing.retry');

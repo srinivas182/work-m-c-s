@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Website\Support;
 
 use Wurk\Website\Contracts\SiteTemplates;
+use Wurk\Website\Models\Page;
 
 final readonly class EloquentSiteTemplates implements SiteTemplates
 {
@@ -29,5 +30,12 @@ final readonly class EloquentSiteTemplates implements SiteTemplates
     public function apply(string $templateKey): void
     {
         $this->builder->apply($templateKey);
+    }
+
+    public function publishAll(string $note): void
+    {
+        foreach (Page::query()->get() as $page) {
+            app(Pages::class)->publish($page, $note, null);
+        }
     }
 }

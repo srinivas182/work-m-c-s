@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en-ZA">
 <head>
+@if (!empty($demo))
+<meta name="robots" content="noindex, nofollow">
+@endif
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ $title }}</title>
@@ -37,6 +40,9 @@
 @endif
 </head>
 <body style="margin:0">
+@if (!empty($demo))
+<div role="note" style="background:#111827;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:8px 16px;text-align:center">Demo site made by a WURK agent for {{ $siteName }} — not a live business. Payments and messages are switched off.@if (!empty($claim)) <a href="{{ $claim }}" style="color:#fff;font-weight:600;text-decoration:underline;margin-left:8px">Make it yours</a>@endif</div>
+@endif
 {!! $body !!}
 @if ($whatsapp)
 {{-- WhatsApp's darker green: white on it meets the 3:1 contrast graphics need (the bright green doesn't). --}}

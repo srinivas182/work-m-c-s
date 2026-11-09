@@ -8,8 +8,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Billing\Events\PaymentChargedBack;
 use Wurk\Billing\Models\CreditNote;
 use Wurk\Billing\Models\Invoice;
 use Wurk\Billing\Models\Payment;
@@ -30,7 +33,7 @@ final class BillingAdminController
     {
         Gate::authorize('invoices.manage');
 
-        return Inertia::render('Billing::Admin/InvoiceSettings', ['issuer' => $this->settings->issuer(), 'placeholder' => $this->settings->issuerIsPlaceholder(), 'dunning' => $this->settings->dunning()]);
+        return Inertia::render('Billing::Admin/InvoiceSettings', ['issuer' => $this->settings->issuer(), 'placeholder' => $this->settings->issuerIsPlaceholder(), 'refundDays' => $this->settings->refundDays(), 'dunning' => $this->settings->dunning()]);
     }
 
     public function saveSettings(Request $request): RedirectResponse
@@ -45,6 +48,7 @@ final class BillingAdminController
             'retry_days.*' => ['integer', 'between:1,30'],
             'restrict_from_day' => ['required', 'integer', 'between:1,30'],
             'suspend_on_day' => ['required', 'integer', 'between:2,60', 'gt:restrict_from_day'],
+            'refund_days' => ['sometimes', 'integer', 'between:0,365'], // unchanged when not sent
         ], ['vat_number.regex' => 'South African VAT numbers have 10 digits and start with 4.']);
         $by = (string) $request->user()?->getAuthIdentifier();
 
@@ -52,6 +56,9 @@ final class BillingAdminController
         $days = array_values(array_unique(array_map('intval', $data['retry_days'])));
         sort($days);
         $this->settings->setDunning(['retry_days' => $days, 'restrict_from_day' => (int) $data['restrict_from_day'], 'suspend_on_day' => (int) $data['suspend_on_day']], $by);
+        if (array_key_exists('refund_days', $data)) {
+            $this->settings->setRefundDays((int) $data['refund_days'], $by); // WURK's refund window (14.4)
+        }
 
         return back()->with('status', 'Invoice and dunning settings saved. Invoices already issued keep their original details.');
     }
@@ -134,5 +141,20 @@ final class BillingAdminController
         $model = Invoice::query()->where('tenant_id', $tenant)->findOrFail($invoice);
 
         return new HttpResponse($invoices->pdf($model), 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="'.$model->number.'.pdf"']);
+    }
+
+    /** A card payment disputed with the bank and taken back: recorded by WURK staff (there's no dispute feed) — Sprint 14.4. */
+    public function chargeback(Request $request, string $payment): RedirectResponse
+    {
+        Gate::authorize('invoices.manage');
+        $p = Payment::query()->findOrFail($payment);
+        if ($p->status !== 'succeeded') {
+            throw ValidationException::withMessages(['payment' => 'Only a paid payment can be charged back.']);
+        }
+        $p->update(['status' => 'charged_back']);
+        app(AuditLog::class)->record('payment.charged_back', 'payment', $p->id, ['tenant_id' => $p->tenant_id, 'total' => $p->total_cents / 100], ['platform' => true]);
+        event(new PaymentChargedBack($p->id));
+
+        return back()->with('status', 'Chargeback recorded. Any agent commission on it has been reversed.');
     }
 }

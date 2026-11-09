@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Website\Http\Controllers;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Vite;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
+use Wurk\Tenancy\Contracts\TenantProvisioner;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageRender;
 use Wurk\Website\Models\PageSlug;
@@ -108,6 +110,8 @@ final class PublicSiteController
         $stored = (array) json_decode((string) Storage::disk((string) config('wurk.site_pages_disk', 'local'))->get($path), true);
         $body = (string) ($stored['body'] ?? '');
         $html = view('website::public.page', [
+            'demo' => $tenant->isDemo(), // an agent's demo (Sprint 14.8): banner and noindex
+            'claim' => $tenant->isDemo() ? route('signup.claim', ['token' => app(TenantProvisioner::class)->claimToken($tenant->tenantId(), CarbonImmutable::instance($tenant->createdAt() ?? now())->addDays((int) config('wurk.demo_days', 14)))]) : null, // Make it yours (14.8b)
             'title' => (string) ($stored['title'] ?? $tenant->displayName()),
             'description' => $stored['description'] ?? null,
             'preloads' => app(FontPreloads::class)->for(array_values(array_filter((array) ($stored['fonts'] ?? []), 'is_string'))),
@@ -126,7 +130,7 @@ final class PublicSiteController
             'jsonLd' => $home ? json_encode(app(SiteSeo::class)->localBusiness($facts, request()->getSchemeAndHttpHost()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
         ])->render();
 
-        return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...$this->securityHeaders()]);
+        return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...($tenant->isDemo() ? ['X-Robots-Tag' => 'noindex, nofollow'] : []), ...$this->securityHeaders()]);
     }
 
     /** @param  array<string, string>  $headers */

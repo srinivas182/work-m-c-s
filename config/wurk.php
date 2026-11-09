@@ -45,7 +45,7 @@ return [
         // Business handles that can never be claimed (they collide with platform hosts or routes).
         'reserved_handles' => [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
-            'help', 'login', 'logout', 'mail', 'my', 'partners', 'register', 'signup', 'static',
+            'help', 'login', 'logout', 'mail', 'my', 'agent', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
             'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'templates', 'forms', 'settings', 'webhooks', 'signup', 'oauth',
             'pay',
@@ -136,4 +136,6 @@ return [
     'site_pages_disk' => env('WURK_SITE_PAGES_DISK', 'local'),
 
     'site_assets_disk' => env('WURK_SITE_ASSETS_DISK', 'public'),
+    // Agents' demo sites (Sprint 14.8): how long a demo stays up, and how long its claim link works.
+    'demo_days' => 14,
 ];

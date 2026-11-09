@@ -14,4 +14,7 @@ interface SiteTemplates
 
     /** Builds the current business's site from the template (run inside its tenant context). */
     public function apply(string $templateKey): void;
+
+    /** Publishes every page of the current business's site at once (an agent's demo — Sprint 14.8). */
+    public function publishAll(string $note): void;
 }

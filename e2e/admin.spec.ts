@@ -79,6 +79,13 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('link', { name: 'Glow Salon' })).toBeVisible();
   await expectAccessible(page);
 
+  // Who brought this business (Sprint 14.2): the business page links to its agent.
+  await page.getByRole('link', { name: 'Glow Salon' }).first().click();
+  await page.getByRole('link', { name: 'Agent', exact: true }).click(); // not the menu's "Agents"
+  await expect(page.getByRole('heading', { level: 1, name: 'Agent' })).toBeVisible();
+  await expect(page.getByLabel('Agent', { exact: true })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/staff`);
   await expect(page.getByRole('heading', { level: 1, name: 'WURK staff' })).toBeVisible();
   await expectAccessible(page);
@@ -123,6 +130,10 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await page.goto(`${admin}/billing/settings`);
   await expect(page.getByRole('heading', { level: 1, name: 'Invoice settings' })).toBeVisible();
   await expect(page.getByText('These are placeholder company details.')).toBeVisible();
+  // WURK's refund window (Sprint 14.4): 30 days unless the super admin changes it.
+  await expect(page.getByLabel('Refund window (days after payment; 0 = no refunds)')).toHaveValue(
+    '30',
+  );
   await expectAccessible(page);
 
   await page.goto(`${admin}/billing/failed`);
@@ -188,4 +199,49 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   }
   await expect(accepts).toBeChecked();
   await expectAccessible(page);
+
+  // Agents (Sprint 14.1): add one — unique per run, since desktop and phone share WURK's central data.
+  await page.goto(`${admin}/agents`); // the admin's address (the default address is the business app's)
+  await expect(page.getByRole('heading', { level: 1, name: 'Agents' })).toBeVisible();
+  await expectAccessible(page);
+  const agent = page.getByRole('form', { name: 'Add an agent' });
+  const first = `Agent${testInfo.project.name}${Date.now().toString(36)}`;
+  await agent.getByLabel('First name').fill(first);
+  await agent.getByLabel('Last name').fill('Test');
+  await agent
+    .getByLabel('Phone number or email (they sign in with it)')
+    .fill(`${first.toLowerCase()}@example.com`);
+  await agent.getByRole('button', { name: 'Add agent' }).click();
+  await expect(page.getByText('Agent added.')).toBeVisible();
+  await expect(
+    page
+      .getByRole('list', { name: 'Agents' })
+      .getByRole('listitem')
+      .filter({ hasText: `${first} Test` }),
+  ).toBeVisible();
+
+  // Agent commission (Sprint 14.3): WURK-wide, so only the desktop run changes it (desktop and phone runs overlap).
+  await page.goto(`${admin}/agents/commission`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Agent commission' })).toBeVisible();
+  await expectAccessible(page);
+  if (testInfo.project.name === 'desktop') {
+    const rates = page.getByRole('form', { name: 'Commission percentages' });
+    await rates.getByLabel('The business’s own agent (%)').fill('10');
+    await rates.getByRole('button', { name: 'Save' }).click();
+    await expect(
+      page.getByText('Commission percentages saved. They apply to payments from now on.'),
+    ).toBeVisible();
+  }
+
+  // Agent payouts (Sprint 14.5a): the preview, and (desktop only — WURK-wide) a minimum payout.
+  await page.goto(`${admin}/agents/payouts`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Agent payouts' })).toBeVisible();
+  await expect(page.getByText(/^Next batch:/)).toBeVisible();
+  await expectAccessible(page);
+  if (testInfo.project.name === 'desktop') {
+    const minimum = page.getByRole('form', { name: 'Minimum payout' });
+    await minimum.getByLabel('Minimum payout (R)').fill('100');
+    await minimum.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByText('Minimum payout saved.')).toBeVisible();
+  }
 });

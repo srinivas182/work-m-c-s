@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Wurk\Billing\Support;
 
+use Carbon\CarbonImmutable;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Billing\Events\CreditNoteIssued;
 use Wurk\Billing\Gateways\PaymentGateway;
 use Wurk\Billing\Mail\CreditNoteMail;
 use Wurk\Billing\Mail\InvoiceMail;
@@ -71,6 +73,15 @@ final readonly class Invoices
     /** A credit note against an invoice (full when $exclCents is null); refunds the card where possible. */
     public function credit(Invoice $invoice, ?int $exclCents, string $reason, ?string $by): CreditNote
     {
+        // WURK's refund window (Sprint 14.4): no refunds on a payment once it has closed.
+        $paid = $invoice->payment_id === null ? null : Payment::query()->find($invoice->payment_id);
+        if ($paid !== null) {
+            $days = app(BillingSettings::class)->refundDays();
+            $closes = CarbonImmutable::parse((string) ($paid->getAttribute('paid_at') ?? $paid->created_at))->addDays($days);
+            if ($days === 0 || now()->gte($closes)) {
+                throw ValidationException::withMessages(['amount' => $days === 0 ? 'WURK doesn’t give refunds.' : 'Refunds for this invoice closed on '.$closes->format('j M Y').' ('.$days.' days after payment).']);
+            }
+        }
         $note = DB::transaction(function () use ($invoice, $exclCents, $reason, $by): CreditNote {
             $locked = Invoice::query()->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
             $remainingTotal = $locked->total_cents - $locked->credited_cents;
@@ -105,6 +116,9 @@ final readonly class Invoices
         }
         if ($invoice->customer['email'] !== '') {
             Mail::to($invoice->customer['email'])->send(new CreditNoteMail($note, $this->creditNotePdf($note, $invoice)));
+        }
+        if ($invoice->payment_id !== null) { // agent commission is reversed in proportion (Sprint 14.4)
+            event(new CreditNoteIssued($invoice->payment_id, (int) $invoice->refresh()->credited_cents, (int) $invoice->total_cents));
         }
         $this->audit->record('invoice.credited', 'invoice', $invoice->id, ['credit_note' => $note->number, 'total' => $note->total_cents / 100, 'refund' => $note->refund, 'reason' => $reason], ['platform' => true]);
 

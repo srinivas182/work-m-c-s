@@ -4,6 +4,63 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.16.0] — 2026-11-09 — Sprint 14: Agents
+
+WURK's agents: the sponsor hierarchy, referral links and attribution, commission on subscription payments (up to 7 levels, percentages set by the super admin), WURK's refund window and clawback, EFT payout batches with remittance advice, banking details, the agent area (dashboard, businesses, earnings, team, payouts, marketing kit), and demo sites with "Make it yours". CI: MySQL tests in five parts. Release steps: docs/deployment/docker.md (v0.16.0 rows).
+
+### Added — Sprint 14.8b ("Make it yours")
+- **Claim link** for an agent's demo (signed; works until the demo expires): on the demo's banner and the agent's Demo page (copy, **send on WhatsApp**).
+- **Signup for that demo**: name and address filled in, no design step; the prospect may keep the demo's address or choose another.
+- **Completing it turns the same business into theirs** — pages kept, demo restrictions lifted, they become the owner — then the agent's access ends and the business is credited to them (source `demo`). Damaged or expired links get the normal signup with a plain message.
+
+### Added — Sprint 14.8a (agents' demo sites)
+- **Agent area → Demo site**: a real business marked as a demo, built from one of the industry templates and published at once, with the agent as owner; one active per agent; edit it in the back office, show a QR code, delete and remake.
+- **On a demo**: a "Demo site made by a WURK agent" banner; `noindex` (header and meta); **payments** (methods, checkout, deposits, EFT details) and **outgoing messages** (SMS, WhatsApp, customer emails) switched off with a plain reason.
+- **Expiry**: reminders to the agent on days 10 and 13; archived on day 14 (`agents:sweep-demos`, daily 03:15) — offline, address freed, hidden. Archived demos' data is purged permanently in Sprint 18.
+- **Admin → Businesses**: demos labelled and filterable; archived businesses hidden unless "Archived" is chosen.
+- **Release note:** demos need the industry templates installed (`website:install-templates`), as production setup already does.
+
+### Added — Sprint 14.6b (agent area: earnings, team, payouts, marketing kit)
+- **Earnings**: every commission line (date, business, level, amount, payable date; refunds shown) for a period, and as CSV for the agent's records.
+- **Team**: the downline by level (up to 7) — names, businesses onboarded, suspended — counts only, never others' earnings.
+- **Payouts**: the agent's payouts with bank reference, masked account and status (being paid · paid · bounced); cancelled batches hidden.
+- **Marketing kit**: link (copy), QR download, a ready message with **Share on WhatsApp** and copy.
+- CI: Agents' tests moved to MySQL part 4 (part 2 reached 8m15s).
+
+### Added — Sprint 14.6a (agent dashboard and My businesses)
+- **Agent dashboard** (`app.wurk.co.za/agent`): businesses onboarded (total, this month); active, at risk (payment overdue) and churned; commission available, pending and paid out; earned this month; **next payout** — in the next batch or why not, by finance's own rules; what becomes payable in the next 30 days; 12 months of earnings (bars, with a table for screen readers).
+- **My businesses**: package, status (trial · new — first payment due · active · at risk · churned), monthly subscription and the commission earned from it; at-risk first. Agents see only their own.
+
+### Added — Sprint 14.5b (settling agent payout batches)
+- **Mark paid** (once the bank has paid; locks the batch): each agent is emailed a **remittance advice** — amount, bank reference, the account it went into (masked), and the businesses it covers since their previous payout.
+- **Mark bounced** on one payment (in a paid batch, once): the money returns to the agent's balance and they're emailed a link to check their banking details. Both actions logged.
+
+### Added — Sprint 14.5a (agent payout batches)
+- **Admin → Agent payouts** (`agents.pay` — Finance and the super admin): a minimum payout (none until set); a **preview** of who's included, **held** (banking details changed in the last 7 days) and skipped, with reasons (no banking details, below the minimum, suspended, owes WURK).
+- **Making a batch** reserves each amount in the agent's ledger at once, so nothing is batched or paid twice; reference `WURK-AG-YYYYMMDD-NNN`.
+- **EFT CSV** (holder, bank, branch code, account type, account number, amount, reference): account numbers decrypted only for the file; refused if an agent's banking details changed after the batch was made; spreadsheet-formula safe; not cached; every download logged. **Cancel** an unpaid batch to release the reservations.
+
+### Added — Sprint 14.7 (agent banking details; the agent area begins)
+- **Agent area** at `app.wurk.co.za/agent` (agents only; `agent` is now a reserved handle): their link and commission; the full dashboard follows in 14.6.
+- **Banking details**: a change is confirmed with a code to the agent's phone (email if none) before it's saved, and held encrypted in the session meanwhile; account numbers encrypted at rest, shown masked, never logged; the change date is kept so a payout can be held after a recent change (14.5).
+- `php artisan agents:create <contact>` makes someone an agent (as Admin → Agents does) — used by the test setup.
+
+### Added — Sprint 14.4 (WURK's refund window and clawback)
+- **Admin → Billing settings: refund window** (default 30 days; 0 = no refunds). Credit notes are refused once a payment's window has closed; agent commission on a payment becomes payable when it closes (at once with 0).
+- **Refunds within the window** reverse agent commission in proportion — cumulatively, so a full refund lands exactly on zero (before anything is paid).
+- **Record a chargeback** (Admin → business billing, paid card payments; WURK has no dispute feed): reverses that payment's commission in full; if it was already paid out, the agent owes WURK — shown on Admin → Agents and flagged after 90 days, recovered from future commission (decision C).
+
+### Added — Sprint 14.3 (agent commission)
+- **Commission** on each paid WURK subscription (excluding VAT; not credits): the business's agent earns "self", each sponsor up earns their level — at the percentages WURK's super admin sets in **Admin → Agent commission** (self plus up to 7 levels; 0% until set; logged; finance can view). Each agent earns only within their own commission period; suspended agents are skipped without shifting levels. Append-only ledger, once per payment; pending until refunds close (30 days — a setting in 14.4). **Admin → Agents** shows each agent's available, pending and paid-out commission. Billing gains a `SubscriptionPayments` contract.
+
+### Added — Sprint 14.2 (agent attribution)
+- **Agent links** `wurk.co.za/a/CODE` (and QR codes in Admin → Agents): remember an active agent for 90 days across wurk.co.za and its sub-addresses (a cookie holding only the public code); first link wins; suspended agents' links do nothing.
+- A business **created during signup** is credited to that agent — never businesses created by staff in Admin.
+- **Admin → Business → Agent**: see and correct who brought a business (logged; finance can look). Admin → Agents shows each agent's link, QR and business count.
+
+### Added — Sprint 14.1 (agents and the sponsor hierarchy)
+- **Admin → Agents** (new Agents module; `agents.view` / `agents.manage` — finance and support can view): add agents (their WURK ID, a 7-character referral code), place and move them under a sponsor (loops refused), suspend them, and set commission for life or N months from each business's start; direct and whole-team counts. Every change in the platform audit log.
+
 ## [0.15.0] — 2026-11-08 — Sprint 13: Referral engine
 
 Referral programme rules, links and QR codes, commission (pending then available after the business's return window), wallets, Record sale, the customer portal (sign-in by code or password, POPIA consent, data copies and deletion), payouts, My WURK, referral reports and branch settlements for wallets. Release steps: see *Version-specific release steps* in docs/deployment/docker.md (v0.15.0 rows).
