@@ -49,6 +49,22 @@ test('an agent signs in, sees their link and asks to change their banking detail
   await expect(page.getByRole('link', { name: 'Download QR code' })).toBeVisible();
   await expectAccessible(page);
 
+  // Demo site (Sprint 14.8a): make one from a real template, then delete it (so re-runs start clean).
+  await nav.getByRole('link', { name: 'Demo site' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Demo site' })).toBeVisible();
+  await expectAccessible(page);
+  const demo = page.getByRole('form', { name: 'Make a demo site' });
+  await demo.getByLabel('Business name').fill(`Test Braids ${testInfo.project.name}`);
+  await demo.getByLabel('Industry').selectOption({ index: 1 });
+  await demo.getByLabel('Template').selectOption({ index: 1 });
+  await demo.getByRole('button', { name: 'Make the demo' }).click();
+  await expect(page.getByText(/^Your demo is live\./)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Edit it in the back office' })).toBeVisible();
+  await expectAccessible(page);
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'Delete demo' }).click();
+  await expect(page.getByText('Demo deleted. You can make another.')).toBeVisible();
+
   await page
     .getByRole('navigation', { name: 'Agent area' })
     .getByRole('link', { name: 'Banking details' })

@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.8a (agents' demo sites)
+- **Agent area → Demo site**: a real business marked as a demo, built from one of the industry templates and published at once, with the agent as owner; one active per agent; edit it in the back office, show a QR code, delete and remake.
+- **On a demo**: a "Demo site made by a WURK agent" banner; `noindex` (header and meta); **payments** (methods, checkout, deposits, EFT details) and **outgoing messages** (SMS, WhatsApp, customer emails) switched off with a plain reason.
+- **Expiry**: reminders to the agent on days 10 and 13; archived on day 14 (`agents:sweep-demos`, daily 03:15) — offline, address freed, hidden. Archived demos' data is purged permanently in Sprint 18.
+- **Admin → Businesses**: demos labelled and filterable; archived businesses hidden unless "Archived" is chosen.
+- **Release note:** demos need the industry templates installed (`website:install-templates`), as production setup already does.
+
 ### Added — Sprint 14.6b (agent area: earnings, team, payouts, marketing kit)
 - **Earnings**: every commission line (date, business, level, amount, payable date; refunds shown) for a period, and as CSV for the agent's records.
 - **Team**: the downline by level (up to 7) — names, businesses onboarded, suspended — counts only, never others' earnings.
