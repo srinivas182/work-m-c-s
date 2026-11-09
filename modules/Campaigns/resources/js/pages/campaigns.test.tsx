@@ -41,6 +41,8 @@ describe('Campaigns pages', () => {
             failed: 1,
             opened: 5,
             clicked: 2,
+            redeemed: 3,
+            sales_cents: 45000,
           },
         ]}
         readyMade={{
@@ -53,7 +55,11 @@ describe('Campaigns pages', () => {
       />,
     );
     expect(screen.getByRole('heading', { name: 'Campaigns' })).toBeTruthy();
-    expect(screen.getByText('12 sent · 1 failed · 5 opened · 2 clicked')).toBeTruthy();
+    expect(
+      screen.getByText(
+        /12 sent · 1 failed · 5 opened · 2 clicked\s*· 3 redeemed · R450 in sales/,
+      ),
+    ).toBeTruthy();
     expect(screen.getByText('We miss you')).toBeTruthy();
   });
 

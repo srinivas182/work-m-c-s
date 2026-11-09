@@ -12,6 +12,7 @@ use Wurk\Campaigns\Mail\CampaignMail;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Crm\Contracts\Audiences;
 use Wurk\Messaging\Contracts\Messenger;
+use Wurk\Platform\Contracts\AudienceSegments;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -26,7 +27,11 @@ final readonly class CampaignSender
     /** @return list<array{id: string, name: string, email: string|null, phone: string|null}> */
     public function recipients(string $channel, string $segment, ?string $branchId): array
     {
-        return array_values(array_filter($this->audiences->audience($segment, $branchId), fn ($c) => $channel === 'sms' ? $c['phone'] !== null : $c['email'] !== null));
+        $builtIn = in_array($segment, ['all', 'recent', 'inactive', 'branch'], true);
+        $extra = $builtIn ? null : app(AudienceSegments::class)->contacts($segment); // e.g. top referrers (15.3b)
+        $people = $builtIn ? $this->audiences->audience($segment, $branchId) : ($extra === null ? [] : $this->audiences->audience('contacts', null, $extra)); // CRM keeps only those who agreed
+
+        return array_values(array_filter($people, fn ($c) => $channel === 'sms' ? $c['phone'] !== null : $c['email'] !== null));
     }
 
     /** @return array{recipients: int, credits: int, spendable: int|null, enough: bool} credits in whole credits */

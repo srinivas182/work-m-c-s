@@ -17,7 +17,9 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Campaigns\Support\CampaignSender;
 use Wurk\Campaigns\Support\ReadyMade;
+use Wurk\Crm\Contracts\Takings;
 use Wurk\Identity\Contracts\PeopleDirectory;
+use Wurk\Platform\Contracts\AudienceSegments;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -35,8 +37,14 @@ final class CampaignsController
         $stats = $db->table('campaign_messages')->where('tenant_id', $t)->selectRaw("campaign_id, count(*) as total, sum(case when status = 'sent' then 1 else 0 end) as sent, count(opened_at) as opened, count(clicked_at) as clicked")
             ->groupBy('campaign_id')->get()->keyBy('campaign_id');
 
+        $redeemed = $db->table('coupon_redemptions')->join('coupons', 'coupons.id', '=', 'coupon_redemptions.coupon_id')->where('coupon_redemptions.tenant_id', $t)->where('coupons.tenant_id', $t)
+            ->whereNotNull('coupons.campaign_id')->whereNull('coupon_redemptions.released_at')->get(['coupons.campaign_id', 'coupon_redemptions.source_type', 'coupon_redemptions.source_id'])->groupBy('campaign_id');
+        $takings = app(Takings::class);
+
         return Inertia::render('Campaigns::Index', [
             'campaigns' => $db->table('campaigns')->where('tenant_id', $t)->orderByDesc('created_at')->limit(50)->get()->map(fn ($c) => [
+                'redeemed' => isset($redeemed[$c->id]) ? $redeemed[$c->id]->count() : 0,
+                'sales_cents' => isset($redeemed[$c->id]) ? $takings->paidFor(array_values($redeemed[$c->id]->map(fn ($r) => [(string) $r->source_type, (string) $r->source_id])->all())) : 0,
                 'id' => $c->id, 'name' => $c->name, 'channel' => $c->channel, 'status' => $c->status, 'scheduled_at' => $c->scheduled_at, 'sent_at' => $c->sent_at,
                 'sent' => (int) ($stats[$c->id]->sent ?? 0), 'failed' => (int) ($stats[$c->id]->total ?? 0) - (int) ($stats[$c->id]->sent ?? 0),
                 'opened' => (int) ($stats[$c->id]->opened ?? 0), 'clicked' => (int) ($stats[$c->id]->clicked ?? 0),
@@ -49,7 +57,7 @@ final class CampaignsController
     {
         $ready = ReadyMade::all()[(string) $request->query('ready', '')] ?? null;
 
-        return Inertia::render('Campaigns::Compose', ['segments' => self::SEGMENTS, 'branches' => $branches->several() ? array_map(fn ($b) => ['id' => $b['id'], 'name' => $b['name']], $branches->all()) : [],
+        return Inertia::render('Campaigns::Compose', ['segments' => $this->segments(), 'branches' => $branches->several() ? array_map(fn ($b) => ['id' => $b['id'], 'name' => $b['name']], $branches->all()) : [],
             'draft' => $ready]);
     }
 
@@ -78,7 +86,7 @@ final class CampaignsController
     {
         $c = $this->find($campaign);
 
-        return Inertia::render('Campaigns::Show', ['campaign' => (array) $c, 'segment' => self::SEGMENTS[$c->segment] ?? $c->segment,
+        return Inertia::render('Campaigns::Show', ['campaign' => (array) $c, 'segment' => $this->segments()[$c->segment] ?? $c->segment,
             'estimate' => in_array($c->status, ['draft', 'scheduled'], true) ? $this->sender->estimate((string) $c->channel, (string) $c->segment, $c->branch_id) : null]);
     }
 
@@ -120,8 +128,14 @@ final class CampaignsController
     private function validateAudience(Request $request): array
     {
         /** @var array{channel: string, segment: string, branch_id?: string|null} */
-        return $request->validate(['channel' => ['required', Rule::in(['email', 'sms'])], 'segment' => ['required', Rule::in(array_keys(self::SEGMENTS))],
+        return $request->validate(['channel' => ['required', Rule::in(['email', 'sms'])], 'segment' => ['required', Rule::in(array_keys($this->segments()))],
             'branch_id' => ['nullable', 'required_if:segment,branch', 'string', 'max:26']]);
+    }
+
+    /** @return array<string, string> built-in audiences, then those other modules offer here (e.g. top referrers) */
+    private function segments(): array
+    {
+        return [...self::SEGMENTS, ...app(AudienceSegments::class)->available()];
     }
 
     private function find(string $id): \stdClass

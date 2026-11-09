@@ -180,6 +180,10 @@ async function booking(root: HTMLElement): Promise<void> {
     return here?.price_cents ?? s?.price_cents ?? 0;
   };
   bookWallet.update(priceNow());
+  const bookCoupon = couponField(
+    `${api.replace(/\W/g, '')}-coupon`,
+    'Coupon code (for bookings with a deposit)',
+  );
   const memberSelect = el('select', { class: field });
   const today = new Date();
   const iso = (d: Date) =>
@@ -322,6 +326,7 @@ async function booking(root: HTMLElement): Promise<void> {
       consent,
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my booking.'),
     ),
+    bookCoupon.row,
     bookWallet.row,
     trapWrap,
     submit,
@@ -349,6 +354,7 @@ async function booking(root: HTMLElement): Promise<void> {
         email: email.value || null,
         consent: consent.checked ? '1' : null,
         wallet: bookWallet.payload(),
+        coupon: bookCoupon.value(),
         website: trap.value,
       }),
     }).catch(() => null);
@@ -581,6 +587,10 @@ async function tables(root: HTMLElement): Promise<void> {
 
 /* Classes: upcoming class → details → confirmation. Same safeguards as booking. */
 async function classes(root: HTMLElement): Promise<void> {
+  const classCoupon = couponField(
+    `${(root.dataset.api ?? '/classes').replace(/\W/g, '')}-class-coupon`,
+    'Coupon code (optional)',
+  );
   const classWallet = walletOption(
     `${(root.dataset.api ?? '/classes').replace(/\W/g, '')}-class-wallet`,
     (c) => `Use ${randOf(c)} from your wallet`,
@@ -693,6 +703,7 @@ async function classes(root: HTMLElement): Promise<void> {
       consent,
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my class.'),
     ),
+    classCoupon.row,
     classWallet.row,
     trapWrap,
     submit,
@@ -715,6 +726,7 @@ async function classes(root: HTMLElement): Promise<void> {
         consent: consent.checked ? '1' : null,
         health_consent: healthBox.hidden ? null : healthConsent.checked,
         wallet: classWallet.payload(),
+        coupon: classCoupon.value(),
         website: trap.value,
       }),
     }).catch(() => null);
@@ -780,6 +792,23 @@ const writeCart = (lines: CartLine[]) => {
   }
 };
 const randOf = (c: number) => `R${(c / 100).toFixed(2)}`;
+
+/** An optional coupon code on a booking or class form (Sprint 15.3b); the server applies it to what's paid online. */
+function couponField(fieldId: string, wording: string) {
+  const input = el('input', {
+    type: 'text',
+    class: field,
+    autocomplete: 'off',
+  });
+  input.id = fieldId;
+  const row = el(
+    'div',
+    { class: 'grid gap-1' },
+    el('label', { htmlFor: input.id }, wording),
+    input,
+  );
+  return { row, value: () => (input.value.trim() === '' ? null : input.value.trim()) };
+}
 
 /**
  * "Use up to R… from your wallet" for a customer signed in to this business's portal (Sprint 13.6c). update() asks for
