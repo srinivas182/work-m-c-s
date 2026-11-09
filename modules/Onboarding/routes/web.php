@@ -10,6 +10,7 @@ Route::domain((string) config('wurk.domains.app'))
     ->prefix('signup')->name('signup.')
     ->group(function (): void {
         Route::get('/', [SignupController::class, 'show'])->name('show');
+        Route::get('/claim/{token}', [SignupController::class, 'claim'])->where('token', '[A-Za-z0-9_.\-]{1,300}')->name('claim'); // Make it yours (14.8b)
         Route::post('/details', [SignupController::class, 'details'])->middleware('throttle:signup-start')->name('details');
         Route::post('/verify', [SignupController::class, 'verify'])->name('verify');
         Route::post('/resend', [SignupController::class, 'resend'])->name('resend');

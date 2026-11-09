@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Wurk\Agents\Support;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Agents\Mail\AgentDemoExpiringMail;
 use Wurk\Agents\Models\Agent;
 use Wurk\Audit\Contracts\AuditLog;
@@ -24,7 +26,7 @@ use Wurk\Website\Contracts\SiteTemplates;
  */
 final readonly class AgentDemos
 {
-    public const DAYS = 14;
+    public const DAYS = 14; // = config('wurk.demo_days') — Website's banner uses the config
 
     public function __construct(private TenantProvisioner $provisioner, private TenantDirectory $tenants, private TenantContext $context,
         private SiteTemplates $templates, private Accounts $accounts, private PeopleDirectory $people, private AuditLog $audit) {}
@@ -122,5 +124,37 @@ final readonly class AgentDemos
         $this->provisioner->archive((string) $demo->tenant_id);
         DB::table('agent_demos')->where('id', $demoId)->update(['archived_at' => now(), 'updated_at' => now()]);
         $this->audit->record('agents.demo_archived', 'tenant', (string) $demo->tenant_id, ['agent' => $demo->agent_id, 'why' => $why]);
+    }
+
+    /** The "Make it yours" link for the agent's active demo (Sprint 14.8b) — works until the demo expires. */
+    public function claimLink(Agent $agent): ?string
+    {
+        $demo = DB::table('agent_demos')->where('agent_id', $agent->id)->whereNull('archived_at')->whereNull('claimed_at')->first();
+
+        return $demo === null ? null : route('signup.claim', ['token' => $this->provisioner->claimToken((string) $demo->tenant_id, CarbonImmutable::parse((string) $demo->expires_at))]);
+    }
+
+    /** The prospect claimed the demo and is now its owner: the agent's access ends, the business is credited to them. */
+    public function claimed(string $tenantId, string $ownerIdentityId): void
+    {
+        $demo = DB::table('agent_demos')->where('tenant_id', $tenantId)->whereNull('claimed_at')->first();
+        $agent = $demo === null ? null : Agent::query()->where('id', (string) $demo->agent_id)->first();
+        $tenant = $this->tenants->find($tenantId);
+        if ($demo === null || $agent === null || $tenant === null) {
+            return;
+        }
+        DB::table('agent_demos')->where('id', $demo->id)->update(['claimed_at' => now(), 'updated_at' => now()]);
+        app(AgentAttribution::class)->set($tenantId, $agent->id, 'demo');
+        if ($agent->identity_id !== $ownerIdentityId) {
+            $this->context->run($tenant, function () use ($agent): void {
+                $team = app(TeamDirectory::class);
+                foreach ($team->roster() as $m) {
+                    if ($m['identity_id'] === $agent->identity_id && $m['active']) {
+                        $team->deactivate($m['id']); // the agent's access ends; their past work stays on record
+                    }
+                }
+            });
+        }
+        $this->audit->record('agents.demo_claimed', 'tenant', $tenantId, ['agent' => $agent->id]);
     }
 }

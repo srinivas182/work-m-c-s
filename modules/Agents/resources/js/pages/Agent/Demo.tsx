@@ -13,6 +13,7 @@ interface Demo {
   backOffice: string;
   expires_at: string;
   days_left: number;
+  claim: string | null;
 }
 
 /** The agent's demo site: make one from an industry template, share it, delete it. */
@@ -45,6 +46,12 @@ export default function AgentDemo({
                 {demo.site}
               </a>
             </p>
+            {demo.claim && (
+              <p>
+                Their “Make it yours” link:{' '}
+                <span className="font-mono break-all">{demo.claim}</span>
+              </p>
+            )}
             <p>
               Closes on {demo.expires_at} (
               {demo.days_left === 1 ? '1 day left' : `${demo.days_left} days left`}). Payments and
@@ -59,6 +66,17 @@ export default function AgentDemo({
                   QR code for their phone
                 </a>
               </Button>
+              {demo.claim && (
+                <Button size="sm" variant="secondary" asChild>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(`Here’s the website I made for ${demo.business}. Make it yours — sign up here and it’s live straight away: ${demo.claim}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Send “Make it yours” on WhatsApp
+                  </a>
+                </Button>
+              )}
               <Button
                 size="sm"
                 variant="ghost"

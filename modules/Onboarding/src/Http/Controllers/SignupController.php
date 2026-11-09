@@ -17,8 +17,11 @@ use Wurk\Identity\Contracts\Verification;
 use Wurk\Onboarding\Models\Signup;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Regions\Contracts\Countries;
+use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Tenancy\Contracts\TenantProvisioner;
+use Wurk\Tenancy\Events\TenantClaimed;
 use Wurk\Website\Contracts\SiteTemplates;
 
 /**
@@ -29,12 +32,27 @@ final class SignupController
 {
     private const SESSION = 'signup.id';
 
+    private const CLAIM = 'signup.claim'; // the demo being claimed (14.8b)
+
     public function __construct(
         private readonly Verification $verification,
         private readonly Catalog $catalog,
         private readonly TenantProvisioner $tenants,
         private readonly AuditLog $audit,
     ) {}
+
+    /** "Make it yours" (Sprint 14.8b): signup for an agent's demo — its name and address filled in, the design step skipped. */
+    public function claim(Request $request, string $token): RedirectResponse
+    {
+        $demo = $this->tenants->claimable($token);
+        if ($demo === null) {
+            return redirect('/signup')->with('status', 'That demo link has expired. You can still sign up below.');
+        }
+        $request->session()->forget(self::SESSION);
+        $request->session()->put(self::CLAIM, $demo->tenantId());
+
+        return redirect('/signup');
+    }
 
     public function show(Request $request, Countries $countries): Response
     {
@@ -46,20 +64,22 @@ final class SignupController
 
         $packages = $this->catalog->onSale();
         $data = $signup->data ?? [];
+        $demo = $this->claimedDemo($request, $data);
 
         return Inertia::render('Onboarding::Signup', [
             'step' => $signup->step ?? 'details',
-            'steps' => $this->offersTemplates() ? Signup::STEPS_WITH_TEMPLATES : Signup::STEPS,
+            'steps' => $this->offersTemplates() && $demo === null ? Signup::STEPS_WITH_TEMPLATES : Signup::STEPS,
+            'claim' => $demo === null ? null : ['business' => $demo->displayName(), 'site' => $request->getScheme().'://'.$demo->handle().'.'.config('wurk.domains.root')],
             'catalogue' => $this->offersTemplates() ? $this->templates()?->catalogue() : [],
             'data' => [
-                'business_name' => $data['business_name'] ?? '',
+                'business_name' => $data['business_name'] ?? $demo?->displayName() ?? '',
                 'first_name' => $data['first_name'] ?? '',
                 'last_name' => $data['last_name'] ?? '',
                 'contact' => $data['contact'] ?? '',
                 'country' => $data['country'] ?? 'ZA',
                 'package_id' => $data['package_id'] ?? $this->packageFromQuery($request, $packages),
                 'period' => $data['period'] ?? ($request->query('period') === 'yearly' ? 'yearly' : 'monthly'),
-                'handle' => $data['handle'] ?? '',
+                'handle' => $data['handle'] ?? ($demo === null ? '' : (string) preg_replace('/-demo-[a-z0-9]{4}$/', '', $demo->handle())),
                 'category' => $data['category'] ?? '',
                 'template' => $data['template'] ?? '',
             ],
@@ -95,6 +115,9 @@ final class SignupController
         $signup = Signup::query()->where('fingerprint', $fingerprint)->whereNull('completed_at')->where('created_at', '>', now()->subDays(7))->latest()->first()
             ?? $this->current($request);
         $merged = [...($signup->data ?? []), ...$data, 'contact' => $sent['value'], 'masked' => $sent['masked']];
+        if (is_string($claim = $request->session()->get(self::CLAIM))) {
+            $merged['claim_tenant_id'] = $claim;
+        }
 
         if ($signup === null || $signup->completed_at !== null) {
             $signup = Signup::query()->create(['fingerprint' => $fingerprint, 'step' => 'verify', 'data' => $merged, 'ip' => $request->ip()]);
@@ -182,7 +205,8 @@ final class SignupController
         $signup = $this->require($request, 'address', 'finish');
         $handle = strtolower(trim((string) $request->validate(['handle' => ['required', 'string', 'max:40']])['handle']));
 
-        if (($problem = $this->tenants->handleProblem($handle)) !== null) {
+        $demo = isset($signup->data['claim_tenant_id']) ? app(TenantDirectory::class)->find((string) $signup->data['claim_tenant_id']) : null;
+        if ($handle !== $demo?->handle() && ($problem = $this->tenants->handleProblem($handle)) !== null) { // a claimed demo may keep its own address
             throw ValidationException::withMessages(['handle' => $problem]);
         }
         $signup->update(['step' => 'finish', 'data' => [...$signup->data, 'handle' => $handle]]);
@@ -216,10 +240,20 @@ final class SignupController
                 return ['handle' => (string) $locked->data['handle'], 'identity' => (string) $locked->data['identity_id']];
             }
 
-            $tenant = $this->tenants->provision((string) $d['business_name'], (string) $d['handle'], (string) $d['country']);
+            $claiming = isset($d['claim_tenant_id']);
+            try {
+                $tenant = $claiming
+                    ? $this->tenants->claim((string) $d['claim_tenant_id'], (string) $d['business_name'], (string) $d['handle']) // the demo becomes theirs
+                    : $this->tenants->provision((string) $d['business_name'], (string) $d['handle'], (string) $d['country']);
+            } catch (\DomainException $e) {
+                throw ValidationException::withMessages(['signup' => $e->getMessage()]);
+            }
             $identityId = $accounts->forVerifiedContact((string) $d['contact'], (string) $d['first_name'], (string) $d['last_name']);
             $accounts->makeOwner($identityId, $tenant->tenantId(), trim($d['first_name'].' '.$d['last_name']));
             $subscription = $this->catalog->subscribe($tenant->tenantId(), (string) $d['package_id'], (string) $d['period'], allowTrial: $trial);
+            if ($claiming) {
+                event(new TenantClaimed($tenant->tenantId(), $identityId)); // now theirs: the agent's access ends, the agent is credited
+            }
 
             if ($subscription['status'] === 'trial') {
                 DB::table('trial_claims')->insert(['fingerprint' => $locked->fingerprint, 'tenant_id' => $tenant->tenantId(), 'claimed_at' => now()]);
@@ -230,11 +264,11 @@ final class SignupController
             return ['handle' => $tenant->handle(), 'identity' => $identityId, 'tenant' => $tenant];
         });
 
-        $request->session()->forget(self::SESSION);
+        $request->session()->forget([self::SESSION, self::CLAIM]);
 
         // The chosen template becomes the website. Outside the signup transaction, and never
         // fatal: if it fails the business still exists and gets the starter layout instead.
-        if (! empty($d['template']) && isset($result['tenant']) && ($templates = $this->templates()) !== null) {
+        if (! empty($d['template']) && empty($d['claim_tenant_id']) && isset($result['tenant']) && ($templates = $this->templates()) !== null) {
             try {
                 app(TenantContext::class)->run($result['tenant'], fn () => $templates->apply((string) $d['template']));
             } catch (\Throwable $e) {
@@ -261,7 +295,7 @@ final class SignupController
      */
     private function nextAfterPackage(array $data): string
     {
-        if ($this->offersTemplates() && empty($data['template'])) {
+        if ($this->offersTemplates() && empty($data['template']) && empty($data['claim_tenant_id'])) { // a claimed demo already has its site
             return empty($data['category']) ? 'category' : 'template';
         }
 
@@ -305,5 +339,14 @@ final class SignupController
         }
 
         return $packages[0]['id'] ?? '';
+    }
+
+    /** @param array<string, mixed> $data */
+    private function claimedDemo(Request $request, array $data): ?CurrentTenant
+    {
+        $id = $data['claim_tenant_id'] ?? $request->session()->get(self::CLAIM);
+        $demo = is_string($id) ? app(TenantDirectory::class)->find($id) : null;
+
+        return $demo !== null && $demo->isDemo() && $demo->isActive() ? $demo : null;
     }
 }

@@ -69,6 +69,7 @@ interface Props {
   countries: { code: string; name: string; vat: number }[];
   trialAvailable: boolean;
   rootDomain: string;
+  claim?: { business: string; site: string } | null; // Make it yours (14.8b)
 }
 
 const LABELS: Record<string, string> = {
@@ -692,6 +693,20 @@ export default function Signup(props: Props) {
 
   return (
     <Shell step={step} steps={props.steps} title={titles[step] ?? ''}>
+      {props.claim && (
+        <p role="note" className="mb-6 rounded-xl bg-white px-4 py-3 text-[15px] shadow-sm">
+          You’re making{' '}
+          <a
+            className="font-semibold underline"
+            href={props.claim.site}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {props.claim.business}
+          </a>{' '}
+          yours — its site stays exactly as it is.
+        </p>
+      )}
       {step === 'details' && <Details data={props.data} countries={props.countries} />}
       {step === 'verify' && (
         <Verify maskedContact={props.maskedContact} onEdit={() => setEditing(true)} />
