@@ -12,6 +12,7 @@ export function AgentLayout({ title, children }: { title: string; children: Reac
         <span className="font-semibold">WURK agents</span>
         <nav aria-label="Agent area" className="flex flex-wrap items-center gap-3 text-sm">
           <Link href="/agent">Home</Link>
+          <Link href="/agent/businesses">My businesses</Link>
           <Link href="/agent/bank">Banking details</Link>
           <Button size="sm" variant="ghost" onClick={() => router.post('/sign-out')}>
             Sign out

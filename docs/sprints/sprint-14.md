@@ -41,6 +41,23 @@ Agents sell WURK packages to businesses and earn commission on what those busine
 
 **14.5b — settling it:** **mark paid** (locked; each agent gets a **remittance advice** — amount, reference, the businesses it covers — recommended addition); **mark one payment bounced** (the money returns to that agent's balance and they're asked to check their banking details — recommended addition).
 
+## 14.6 Agent area — detailed specification (8 Nov 2026)
+
+At `app.wurk.co.za/agent` (agents only; started in 14.7). Every figure is the agent's own — and, for the team view, their downline's counts only (never another agent's earnings or their businesses' details).
+
+**14.6a — dashboard and My businesses**
+- **Dashboard:** businesses onboarded (total, this month); **active**, **at risk** (payment overdue) and **churned** (cancelled or suspended); commission available, pending and paid out; earned this month.
+- **Next payout** *(recommended addition)*: whether they'll be in the next batch, and if not, why — the same rules finance sees (no banking details, below the minimum, banking details changed in the last 7 days, suspended, owes WURK).
+- **Coming available** *(recommended addition)*: pending commission by the date it becomes payable, next 30 days.
+- **Earnings by month** *(recommended addition)*: the last 12 months, as bars with a table for screen readers.
+- **My businesses:** name, joined, package, status (trial · active · **at risk** · churned), monthly subscription, and the commission they've earned from it. **At-risk businesses first** *(recommended addition — the agent can help keep them, and their commission)*.
+
+**14.6b — earnings, team, payouts, marketing kit**
+- **Earnings:** each line (business, level, amount, pending/available date) for a period; **download as CSV** for their own records *(recommended addition)*.
+- **Team:** their downline by level — names, businesses onboarded, active/suspended; no earnings of others.
+- **Payouts:** batches they were paid in, with the remittance details (and bounced ones).
+- **Marketing kit:** link, QR download, **WhatsApp share** with a ready message *(recommended addition)*.
+
 ## Out of scope
 Agent-to-agent transfers; commission on WURK Credits or managed fees; automated bank payouts (needs a bank API — later).
 
@@ -57,4 +74,5 @@ Each part: route tests, isolation tests (agents see only their own and their dow
 | 14.4 Refund window and clawback | #142 | Caught: widening the ledger's once-only rule to allow several reversals let NULL references slip past MySQL's unique check — earned lines now carry a reference. The refund-days field is optional on save (unchanged when not sent). 1,471 backend tests on SQLite; Agents and Billing on MySQL 8. Browser tests in CI only. |
 | 14.7 Banking details | #143 | Built before 14.5 (payouts need banking details); starts the agent area. 1,473 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |
 | 14.5a Payout batches | #144 | Recommended additions included (preview with reasons, logged downloads). Caught: saving the minimum before any percentages existed failed. MySQL caught `payout_returned` (15) overflowing the ledger's 12-character `kind` (SQLite doesn't enforce lengths) — widened to 20; the referral ledger's kinds all fit. 1,476 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |
-| 14.5b Settling batches | see PR | Agents' emails follow Billing's pattern (WURK's own mail, not business-editable templates); both rendered in tests. Browser coverage gap: Mark paid / Mark bounced appear only once a batch exists, and the e2e data has no commission — the page itself is scanned (14.5a); the actions are covered by backend tests. 1,479 backend tests on SQLite; Agents on MySQL 8. CI: MySQL part 4 timed out on the first full run (tests 9m30s; it had swung 6.5–10 min, timing out on 14.7's first run too) — Tenancy, its heaviest module, moved to part 2 in this PR. |
+| 14.5b Settling batches | #145 | Agents' emails follow Billing's pattern (WURK's own mail, not business-editable templates); both rendered in tests. Browser coverage gap: Mark paid / Mark bounced appear only once a batch exists, and the e2e data has no commission — the page itself is scanned (14.5a); the actions are covered by backend tests. 1,479 backend tests on SQLite; Agents on MySQL 8. CI: MySQL part 4 timed out on the first full run (tests 9m30s; it had swung 6.5–10 min, timing out on 14.7's first run too) — Tenancy, its heaviest module, moved to part 2 in this PR. |
+| 14.6a Dashboard and My businesses | see PR | Caught: my status mapping missed Plans' `pending_payment` (signed up, first payment due) and detected trials wrongly — now read from Plans' actual statuses. To watch: "next payout" runs finance's whole preview to find one agent — fine now; look at one agent directly before agents number in the thousands (Sprint 18). 1,481 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |

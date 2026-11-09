@@ -14,6 +14,18 @@ test('an agent signs in, sees their link and asks to change their banking detail
   await page.goto('/agent');
   await expect(page.getByRole('heading', { level: 1, name: 'Your agent area' })).toBeVisible();
   await expect(page.getByText(/Your link:/)).toBeVisible();
+  // The dashboard (Sprint 14.6a).
+  await expect(page.getByRole('list', { name: 'At a glance' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Next payout' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Earnings by month' })).toBeVisible();
+  await expectAccessible(page);
+
+  await page
+    .getByRole('navigation', { name: 'Agent area' })
+    .getByRole('link', { name: 'My businesses' })
+    .click();
+  await expect(page.getByRole('heading', { level: 1, name: 'My businesses' })).toBeVisible();
+  await expect(page.getByText('No businesses yet')).toBeVisible();
   await expectAccessible(page);
 
   await page

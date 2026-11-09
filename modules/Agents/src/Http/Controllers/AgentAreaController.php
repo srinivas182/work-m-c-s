@@ -13,7 +13,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Agents\Models\Agent;
 use Wurk\Agents\Support\AgentBanking;
-use Wurk\Agents\Support\AgentCommission;
+use Wurk\Agents\Support\AgentDashboard;
 
 /** The agent area at app.wurk.co.za/agent (Sprint 14.7 starts it; 14.6 completes it). Agents only. */
 final class AgentAreaController
@@ -27,7 +27,12 @@ final class AgentAreaController
         $agent = $this->agent();
 
         return Inertia::render('Agents::Agent/Home', ['code' => $agent->code, 'link' => route('agents.link', ['code' => $agent->code]),
-            'status' => $agent->status, 'commission' => app(AgentCommission::class)->balance($agent->id), 'hasBank' => $this->banking->current($agent) !== null]);
+            'status' => $agent->status, 'hasBank' => $this->banking->current($agent) !== null, ...app(AgentDashboard::class)->summary($agent)]);
+    }
+
+    public function businesses(): Response
+    {
+        return Inertia::render('Agents::Agent/Businesses', ['businesses' => app(AgentDashboard::class)->businesses($this->agent())]);
     }
 
     public function bank(Request $request): Response
