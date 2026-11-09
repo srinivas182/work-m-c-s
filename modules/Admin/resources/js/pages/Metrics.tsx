@@ -42,6 +42,12 @@ export default function Metrics(p: Props) {
             ))}
           </select>
         </label>
+        <a
+          className="justify-self-start text-sm underline"
+          href={`${window.location.pathname}/export.csv?period=${p.period}`}
+        >
+          Download CSV
+        </a>
         {p.highlights.length > 0 && (
           <Card>
             <CardHeader>

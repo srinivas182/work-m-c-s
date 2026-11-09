@@ -9,6 +9,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Billing\Console\DunningCommand;
 use Wurk\Billing\Console\RenewSubscriptionsCommand;
@@ -25,6 +26,7 @@ use Wurk\Billing\Gateways\PaystackGateway;
 use Wurk\Billing\Gateways\PaystackSplitPayments;
 use Wurk\Billing\Http\Middleware\RequirePayment;
 use Wurk\Billing\Listeners\DunningNotices;
+use Wurk\Billing\Metrics\RevenueSection;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\BillingSettings;
 use Wurk\Billing\Support\DunningServiceStatus;
@@ -34,7 +36,9 @@ use Wurk\Billing\Support\PaidSubscriptions;
 use Wurk\Billing\Support\Payments;
 use Wurk\Payments\Contracts\PlatformPaymentReceived;
 use Wurk\Plans\Contracts\CreditPricing;
+use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Support\ReportPeriod;
 
 final class BillingServiceProvider extends ModuleServiceProvider
 {
@@ -79,6 +83,10 @@ final class BillingServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Admin → Metrics → Revenue (Sprint 15.4b).
+        $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
+            $m->register('revenue', 50, fn (ReportPeriod $p) => Gate::allows('metrics.view') ? app(RevenueSection::class)->build($p) : null);
+        });
         Event::listen(PlatformPaymentReceived::class, fn (PlatformPaymentReceived $e) => Payment::query()->where('reference', $e->reference)->exists() ? $this->app->make(Payments::class)->confirm($e->reference) : null);
         $this->loadViewsFrom($this->modulePath('resources/views'), 'billing');
 

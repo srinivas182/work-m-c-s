@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.4b (WURK's SaaS metrics, continued)
+- **Admin → Metrics** also shows **Revenue** (received excl. VAT — including payments later refunded or charged back — less credit notes and chargebacks = net; VAT collected; failed payments; by purpose), **Agent commission** (earned, reversed, paid out; payable and pending now), **Credits used** by channel, **MRR movement** (opening + new + expansion + reactivation − contraction − churn = closing) and **cohort retention** (six months).
+- **Download CSV** of the metrics.
+- **Credit usage roll-up**: `credits:rollup-usage` nightly (01:30) into a central table; `--since` backfills from each business's ledger history (run once after deploying).
+
 ### Added — Sprint 15.4a (WURK's SaaS metrics)
 - **Admin → Metrics** (`metrics.view`: super admin, finance): **Subscriptions** — MRR and ARR (excl. VAT), paying, on trial, new, lost, in grace, suspended, average revenue per business, churn, trial conversion and estimated lifetime value, by package and country; compared with the period before; highlights.
 - **Daily subscription snapshots** (`plans:snapshot-mrr`, 23:50): each business's subscription and MRR. **History starts on deploy** — comparisons, new, lost and churn fill in from then (the page says so).
