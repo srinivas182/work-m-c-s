@@ -4,22 +4,27 @@ declare(strict_types=1);
 
 namespace Wurk\Plans;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Wurk\Access\Contracts\SeatPolicy;
 use Wurk\Plans\Console\SeedPlaceholderPackagesCommand;
+use Wurk\Plans\Console\SnapshotMrrCommand;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Plans\Http\Middleware\EnsureEntitled;
+use Wurk\Plans\Metrics\SubscriptionsSection;
 use Wurk\Plans\Models\Package;
 use Wurk\Plans\Support\EloquentCatalog;
 use Wurk\Plans\Support\EntitlementService;
 use Wurk\Plans\Support\PackageSeatPolicy;
 use Wurk\Plans\Support\StaffMeter;
+use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 final class PlansServiceProvider extends ModuleServiceProvider
@@ -55,6 +60,15 @@ final class PlansServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // WURK's SaaS metrics (Sprint 15.4a): the daily subscription snapshot, and Admin → Metrics → Subscriptions.
+        if ($this->app->runningInConsole()) {
+            $this->commands([SnapshotMrrCommand::class]);
+        }
+        $this->callAfterResolving(Schedule::class, fn (Schedule $s) => $s->command('plans:snapshot-mrr')->dailyAt('23:50')->onOneServer()->withoutOverlapping());
+        $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
+            $m->register('subscriptions', 100, fn (ReportPeriod $p) => Gate::allows('metrics.view')
+                ? app(SubscriptionsSection::class)->build($p) : null);
+        });
         if ($this->app->runningInConsole()) {
             $this->commands([SeedPlaceholderPackagesCommand::class]);
         }

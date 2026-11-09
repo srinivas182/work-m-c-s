@@ -9,9 +9,11 @@ use Wurk\Platform\Console\MakeModuleCommand;
 use Wurk\Platform\Contracts\AudienceSegments;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DashboardTiles;
+use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Modules\ModuleRegistry;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\AudienceRegistry;
+use Wurk\Platform\Support\MetricsRegistry;
 use Wurk\Platform\Support\ReportRegistry;
 use Wurk\Platform\Support\TileRegistry;
 
@@ -25,6 +27,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
     {
         $this->app->singleton(DashboardTiles::class, TileRegistry::class);
         $this->app->singleton(BusinessReports::class, ReportRegistry::class);
+        $this->app->singleton(PlatformMetrics::class, MetricsRegistry::class);
         $this->app->singleton(AudienceSegments::class, AudienceRegistry::class);
 
         $this->app->singleton(
