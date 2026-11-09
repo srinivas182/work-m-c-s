@@ -86,6 +86,12 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByLabel('Agent', { exact: true })).toBeVisible();
   await expectAccessible(page);
 
+  // WURK's SaaS metrics (Sprint 15.4a).
+  await page.goto(`${admin}/metrics`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Metrics' })).toBeVisible();
+  await expect(page.getByLabel('Period')).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/staff`);
   await expect(page.getByRole('heading', { level: 1, name: 'WURK staff' })).toBeVisible();
   await expectAccessible(page);

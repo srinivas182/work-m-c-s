@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.4a (WURK's SaaS metrics)
+- **Admin → Metrics** (`metrics.view`: super admin, finance): **Subscriptions** — MRR and ARR (excl. VAT), paying, on trial, new, lost, in grace, suspended, average revenue per business, churn, trial conversion and estimated lifetime value, by package and country; compared with the period before; highlights.
+- **Daily subscription snapshots** (`plans:snapshot-mrr`, 23:50): each business's subscription and MRR. **History starts on deploy** — comparisons, new, lost and churn fill in from then (the page says so).
+- Report section cards are shared between business reports and Admin → Metrics.
+
 ### Added — Sprint 15.3b (coupons)
 - **Customers → Coupons**: amount or % off, for the shop and/or booking deposits; minimum spend, last day, total uses, once per customer (by a one-way key from their phone), optionally for a campaign; switch off.
 - **At the shop**: a coupon field in the cart, quoted by the same pricing checkout uses; off the goods, never delivery; **commission on what was charged**; given back when an order is cancelled or never paid.
