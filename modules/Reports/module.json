@@ -2,11 +2,14 @@
     "name": "Reports",
     "key": "reports",
     "version": "0.1.0",
-    "description": "A business's reports: sections supplied by each module (sales, bookings, customers, …) for a period, compared with the previous one, per branch or combined, with plain-language highlights.",
+    "description": "A business's reports: sections supplied by each module (sales, bookings, customers, \u2026) for a period, compared with the previous one, per branch or combined, with plain-language highlights.",
     "core": false,
     "depends_on": [
         "platform",
         "tenancy",
-        "access"
+        "access",
+        "crm",
+        "regions",
+        "audit"
     ]
 }

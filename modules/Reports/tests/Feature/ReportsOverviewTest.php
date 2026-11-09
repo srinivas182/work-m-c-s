@@ -64,19 +64,19 @@ beforeEach(function () {
 
 it('shows the owner shop sales after refunds, compared with the period before, with highlights', function () {
     $this->actingAs($this->owner)->get($this->app('/glow-salon/reports'))->assertInertia(fn (Assert $p) => $p->component('Reports::Overview')
-        ->where('sections.0.key', 'shop.sales')
-        ->where('sections.0.metrics.0', ['label' => 'Sales (after refunds)', 'value' => 55000, 'previous' => 20000, 'format' => 'money'])
-        ->where('sections.0.metrics.1.value', 3)->where('sections.0.metrics.2.value', 18333)
-        ->where('sections.0.rows.data.0', ['Braids', '2', 'R500.00'])
+        ->where('sections.1.key', 'shop.sales')
+        ->where('sections.1.metrics.0', ['label' => 'Sales (after refunds)', 'value' => 55000, 'previous' => 20000, 'format' => 'money'])
+        ->where('sections.1.metrics.1.value', 3)->where('sections.1.metrics.2.value', 18333)
+        ->where('sections.1.rows.data.0', ['Braids', '2', 'R500.00'])
         ->where('highlights', fn ($h) => collect($h)->contains('Shop sales were up 175% on the previous period.') && collect($h)->contains('Your best seller was Braids (2 sold).'))
         ->where('allBranches', true)->has('branches', 2));
-    $this->actingAs($this->owner)->get($this->app('/glow-salon/reports?branch='.$this->rosebank))->assertInertia(fn (Assert $p) => $p->where('sections.0.metrics.0.value', 10000));
+    $this->actingAs($this->owner)->get($this->app('/glow-salon/reports?branch='.$this->rosebank))->assertInertia(fn (Assert $p) => $p->where('sections.1.metrics.0.value', 10000));
 });
 
 it('limits a branch manager to their branches, refuses staff, and leaves out sections the package lacks', function () {
-    $this->actingAs($this->manager)->get($this->app('/glow-salon/reports'))->assertInertia(fn (Assert $p) => $p->where('sections.0.metrics.0.value', 10000)
+    $this->actingAs($this->manager)->get($this->app('/glow-salon/reports'))->assertInertia(fn (Assert $p) => $p->where('sections.1.metrics.0.value', 10000)
         ->where('allBranches', false)->where('branches', [['id' => $this->rosebank, 'name' => 'Rosebank']]));
-    $this->actingAs($this->manager)->get($this->app('/glow-salon/reports?branch='.$this->main))->assertInertia(fn (Assert $p) => $p->where('sections.0.metrics.0.value', 10000)); // not theirs: ignored
+    $this->actingAs($this->manager)->get($this->app('/glow-salon/reports?branch='.$this->main))->assertInertia(fn (Assert $p) => $p->where('sections.1.metrics.0.value', 10000)); // not theirs: ignored
     $this->actingAs($this->staff)->get($this->app('/glow-salon/reports'))->assertForbidden();
     $basic = app(PackageCatalog::class)->create([ // a package without the shop
         'key' => 'basic', 'name' => 'Basic', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 2,

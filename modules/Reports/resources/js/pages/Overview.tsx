@@ -9,6 +9,7 @@ interface Metric {
   value: number;
   previous: number;
   format: 'money' | 'count' | 'percent';
+  snapshot?: boolean; // a figure for right now, not the period (e.g. stock)
 }
 interface Table {
   columns: string[];
@@ -21,6 +22,7 @@ interface Section {
   chart?: { label: string; points: { label: string; value: number }[] } | null;
   rows?: Table | null;
   extra?: Table | null;
+  note?: string;
 }
 interface Props {
   period: string;
@@ -125,6 +127,7 @@ function SectionCard({ s }: { s: Section }) {
         <CardTitle>{s.title}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 text-sm">
+        {s.note && <p className="text-fg-muted">{s.note}</p>}
         <ul aria-label={`${s.title} figures`} className="grid gap-3 sm:grid-cols-3">
           {s.metrics.map((m) => {
             const c = change(m.value, m.previous);
@@ -133,9 +136,11 @@ function SectionCard({ s }: { s: Section }) {
                 <span className="text-fg-muted">{m.label}</span>
                 <span className="text-xl font-semibold">{show(m.value, m.format)}</span>
                 <span className="text-fg-muted">
-                  {c === null
-                    ? 'Nothing to compare with'
-                    : `${c >= 0 ? '▲' : '▼'} ${Math.abs(c)}% (was ${show(m.previous, m.format)})`}
+                  {m.snapshot
+                    ? 'Right now'
+                    : c === null
+                      ? 'Nothing to compare with'
+                      : `${c >= 0 ? '▲' : '▼'} ${Math.abs(c)}% (was ${show(m.previous, m.format)})`}
                 </span>
               </li>
             );
