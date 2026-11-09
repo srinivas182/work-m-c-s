@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.6a (agent dashboard and My businesses)
+- **Agent dashboard** (`app.wurk.co.za/agent`): businesses onboarded (total, this month); active, at risk (payment overdue) and churned; commission available, pending and paid out; earned this month; **next payout** — in the next batch or why not, by finance's own rules; what becomes payable in the next 30 days; 12 months of earnings (bars, with a table for screen readers).
+- **My businesses**: package, status (trial · new — first payment due · active · at risk · churned), monthly subscription and the commission earned from it; at-risk first. Agents see only their own.
+
 ### Added — Sprint 14.5b (settling agent payout batches)
 - **Mark paid** (once the bank has paid; locks the batch): each agent is emailed a **remittance advice** — amount, bank reference, the account it went into (masked), and the businesses it covers since their previous payout.
 - **Mark bounced** on one payment (in a paid batch, once): the money returns to the agent's balance and they're emailed a link to check their banking details. Both actions logged.
