@@ -40,3 +40,9 @@
 ## Out of scope
 
 Paid advertising integrations (Meta/Google ads); AI-written campaign copy (Sprint 16's AI assistant can add it); SMS two-way replies.
+
+## Progress
+
+| Part | PR | Notes |
+|---|---|---|
+| 15.1a Reports: sales, bookings, customers | see PR | Caught: the formatter turned the "nothing before?" check strict, which would divide by zero for 0.00 — made safe. Lifetime value counts paid amounts only (unpaid bookings have none). 1,551 backend tests on SQLite; Reports and CRM on MySQL 8. Browser tests in CI only. |
