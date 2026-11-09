@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.3b (coupons)
+- **Customers → Coupons**: amount or % off, for the shop and/or booking deposits; minimum spend, last day, total uses, once per customer (by a one-way key from their phone), optionally for a campaign; switch off.
+- **At the shop**: a coupon field in the cart, quoted by the same pricing checkout uses; off the goods, never delivery; **commission on what was charged**; given back when an order is cancelled or never paid.
+- **On booking deposits and classes**: the stored deposit is what's due; a code covering it all confirms the booking at once; given back on cancellation, expiry, or if payment can't start.
+- **Campaign results** show coupon redemptions and the sales they brought. New audience **"Your top referrers"** while the referral programme is on (Platform `AudienceSegments`; Referrals registers it).
+
 ### Added — Sprint 15.3a (campaigns)
 - **Customers → Campaigns** (`campaigns.manage`; packages with *Campaigns & offers*): **email** (free) or **SMS** (credits) to customers **who agreed to marketing** — everyone, seen in the last 30 days, not seen in 60+ days, or one branch.
 - **Credit estimate before sending** (the balance, capped by any spending limit); refused when it won't cover it. **Test send** to yourself; **send now or schedule**. `{first_name}` in the subject and message.
