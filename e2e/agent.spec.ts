@@ -28,6 +28,27 @@ test('an agent signs in, sees their link and asks to change their banking detail
   await expect(page.getByText('No businesses yet')).toBeVisible();
   await expectAccessible(page);
 
+  // Earnings, team, payouts and the marketing kit (Sprint 14.6b).
+  const nav = page.getByRole('navigation', { name: 'Agent area' });
+  for (const [link, heading, shows] of [
+    ['Earnings', 'Earnings', 'No earnings in this period'],
+    ['Team', 'Your team', 'No team yet'],
+    ['Payouts', 'Payouts', 'No payouts yet'],
+  ] as const) {
+    await nav.getByRole('link', { name: link, exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+    await expect(page.getByText(shows)).toBeVisible();
+    await expectAccessible(page);
+  }
+  await nav.getByRole('link', { name: 'Marketing kit' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Marketing kit' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Share on WhatsApp' })).toHaveAttribute(
+    'href',
+    /^https:\/\/wa\.me\/\?text=/,
+  );
+  await expect(page.getByRole('link', { name: 'Download QR code' })).toBeVisible();
+  await expectAccessible(page);
+
   await page
     .getByRole('navigation', { name: 'Agent area' })
     .getByRole('link', { name: 'Banking details' })
