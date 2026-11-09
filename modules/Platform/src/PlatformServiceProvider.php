@@ -6,9 +6,11 @@ namespace Wurk\Platform;
 
 use Wurk\Platform\Console\ListModulesCommand;
 use Wurk\Platform\Console\MakeModuleCommand;
+use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Modules\ModuleRegistry;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Support\ReportRegistry;
 use Wurk\Platform\Support\TileRegistry;
 
 /**
@@ -20,6 +22,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         $this->app->singleton(DashboardTiles::class, TileRegistry::class);
+        $this->app->singleton(BusinessReports::class, ReportRegistry::class);
 
         $this->app->singleton(
             ModuleRegistry::class,
