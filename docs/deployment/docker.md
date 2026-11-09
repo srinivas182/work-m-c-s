@@ -50,6 +50,11 @@ Run these once, after `migrate`, when deploying the version shown (any other com
 | v0.15.0 | `docker run --rm --env-file production.env wurk:<version> php artisan portal:index-memberships` | Adds customers who already have portal accounts to My WURK. Safe to run again. |
 | v0.15.0 | **Never change `APP_KEY`** (check it's the same value as before) | Customers' bank account numbers for payouts are **encrypted with it**, and wallet, identity and handoff passes are signed with it — a new key makes waiting payouts' account numbers unreadable. |
 | v0.15.0 | Confirm the scheduler runs (as already required) | Unused rewards expire nightly at 02:30 (`referrals:expire-wallets`). |
+| v0.16.0 | **Never change `APP_KEY`** (as for v0.15.0) | Agents' **bank account numbers** are encrypted with it, and demo **"Make it yours" links** are signed with it. |
+| v0.16.0 | Confirm the industry templates are installed: `docker run --rm --env-file production.env wurk:<version> php artisan website:install-templates` (safe to run again) | Agents make **demo sites** from them — with none installed, the template list is empty and no demo can be made. |
+| v0.16.0 | Confirm the scheduler runs (as already required) | Demo sites: reminders on days 10 and 13, archived on day 14 (`agents:sweep-demos`, daily 03:15). |
+| v0.16.0 | Super admin, in Admin: **Agent commission** (percentages per level — **0% until set**, so no commission accrues before); **Billing settings → refund window** (default 30 days); **Agent payouts → minimum payout** (none until set) | Agents earn nothing until percentages are set; commission becomes payable when a payment's refund window closes. |
+| v0.16.0 | Add agents in **Admin → Agents** (or `php artisan agents:create <phone or email>`) | Each gets a referral link, a QR code and access to `app.wurk.co.za/agent`. Finance can see agents and run payouts; support can see agents. |
 | every deploy | `docker run --rm --env-file production.env wurk:<version> php artisan permissions:sync` | Checks built-in roles and removes permissions modules no longer declare from custom roles (built-in roles update by themselves — v0.15.0 gives staff *Record sale* and branch managers *approve sales*). |
 
 ## Required environment
