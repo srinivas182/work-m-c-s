@@ -6,15 +6,19 @@ namespace Wurk\Agents;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Wurk\Agents\Console\CreateAgentCommand;
 use Wurk\Agents\Console\SweepDemosCommand;
+use Wurk\Agents\Metrics\CommissionSection;
 use Wurk\Agents\Support\AgentAttribution;
 use Wurk\Agents\Support\AgentCommission;
 use Wurk\Agents\Support\AgentDemos;
 use Wurk\Billing\Events\CreditNoteIssued;
 use Wurk\Billing\Events\PaymentChargedBack;
 use Wurk\Billing\Events\PaymentSucceeded;
+use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Events\TenantClaimed;
 use Wurk\Tenancy\Events\TenantProvisioned;
 
@@ -22,6 +26,10 @@ final class AgentsServiceProvider extends ModuleServiceProvider
 {
     protected function bootModule(): void
     {
+        // Admin → Metrics → Agent commission (Sprint 15.4b).
+        $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
+            $m->register('agents', 300, fn (ReportPeriod $p) => Gate::allows('metrics.view') ? app(CommissionSection::class)->build($p) : null);
+        });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'agents'); // agents' emails
         $this->callAfterResolving(Schedule::class, fn (Schedule $s) => $s->command('agents:sweep-demos')->dailyAt('03:15')->onOneServer()->withoutOverlapping()); // demo reminders and expiry
         if ($this->app->runningInConsole()) {
