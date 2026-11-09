@@ -18,6 +18,7 @@ use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\ManageLink;
+use Wurk\Payments\Contracts\Coupons;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\CurrentTenant;
@@ -52,6 +53,7 @@ final class PublicClassController
             $data = $request->validate([
                 'name' => ['required', 'string', 'max:120'], 'phone' => ['required', 'string', 'max:40'], 'email' => ['nullable', 'email', 'max:160'],
                 'consent' => ['accepted'], 'wallet' => ['nullable', 'array'], 'wallet.pass' => ['required_with:wallet', 'string', 'max:600'], 'wallet.cents' => ['required_with:wallet', 'integer', 'min:1'], 'health_consent' => ['nullable', 'boolean'], 'website' => ['nullable', 'string'],
+                'coupon' => ['nullable', 'string', 'max:40'],
             ], ['consent.accepted' => 'Please agree to be contacted about your class.']);
             if (($data['website'] ?? '') !== '') {
                 return new JsonResponse(['booked' => true], 201);
@@ -75,7 +77,7 @@ final class PublicClassController
             }
             if ($price > 0) {
                 try {
-                    $payUrl = $deposits->start($a, $price, (string) $data['email'], $request->getSchemeAndHttpHost().'/book/return', PublicBookingController::wallet($data));
+                    $payUrl = $deposits->start($a, $price, (string) $data['email'], $request->getSchemeAndHttpHost().'/book/return', PublicBookingController::wallet($data), $data['coupon'] ?? null);
                 } catch (\DomainException $e) {
                     $a->update(['status' => 'expired']); // the wallet couldn't be used: don't hold the place
 
@@ -84,6 +86,7 @@ final class PublicClassController
                 if ($payUrl === null) {
                     $a->update(['status' => 'expired']); // payments unavailable: don't hold the place
                     app(StoreCredit::class)->giveBack('class', $a->id, (int) $a->refresh()->wallet_cents); // and the wallet part back
+                    app(Coupons::class)->release('class', $a->id); // and any coupon use
 
                     return new JsonResponse(['message' => 'Online payment isn’t available right now. Please call or message us to book.'], 503);
                 }

@@ -180,6 +180,10 @@ async function booking(root: HTMLElement): Promise<void> {
     return here?.price_cents ?? s?.price_cents ?? 0;
   };
   bookWallet.update(priceNow());
+  const bookCoupon = couponField(
+    `${api.replace(/\W/g, '')}-coupon`,
+    'Coupon code (for bookings with a deposit)',
+  );
   const memberSelect = el('select', { class: field });
   const today = new Date();
   const iso = (d: Date) =>
@@ -322,6 +326,7 @@ async function booking(root: HTMLElement): Promise<void> {
       consent,
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my booking.'),
     ),
+    bookCoupon.row,
     bookWallet.row,
     trapWrap,
     submit,
@@ -349,6 +354,7 @@ async function booking(root: HTMLElement): Promise<void> {
         email: email.value || null,
         consent: consent.checked ? '1' : null,
         wallet: bookWallet.payload(),
+        coupon: bookCoupon.value(),
         website: trap.value,
       }),
     }).catch(() => null);
@@ -581,6 +587,10 @@ async function tables(root: HTMLElement): Promise<void> {
 
 /* Classes: upcoming class → details → confirmation. Same safeguards as booking. */
 async function classes(root: HTMLElement): Promise<void> {
+  const classCoupon = couponField(
+    `${(root.dataset.api ?? '/classes').replace(/\W/g, '')}-class-coupon`,
+    'Coupon code (optional)',
+  );
   const classWallet = walletOption(
     `${(root.dataset.api ?? '/classes').replace(/\W/g, '')}-class-wallet`,
     (c) => `Use ${randOf(c)} from your wallet`,
@@ -693,6 +703,7 @@ async function classes(root: HTMLElement): Promise<void> {
       consent,
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my class.'),
     ),
+    classCoupon.row,
     classWallet.row,
     trapWrap,
     submit,
@@ -715,6 +726,7 @@ async function classes(root: HTMLElement): Promise<void> {
         consent: consent.checked ? '1' : null,
         health_consent: healthBox.hidden ? null : healthConsent.checked,
         wallet: classWallet.payload(),
+        coupon: classCoupon.value(),
         website: trap.value,
       }),
     }).catch(() => null);
@@ -780,6 +792,23 @@ const writeCart = (lines: CartLine[]) => {
   }
 };
 const randOf = (c: number) => `R${(c / 100).toFixed(2)}`;
+
+/** An optional coupon code on a booking or class form (Sprint 15.3b); the server applies it to what's paid online. */
+function couponField(fieldId: string, wording: string) {
+  const input = el('input', {
+    type: 'text',
+    class: field,
+    autocomplete: 'off',
+  });
+  input.id = fieldId;
+  const row = el(
+    'div',
+    { class: 'grid gap-1' },
+    el('label', { htmlFor: input.id }, wording),
+    input,
+  );
+  return { row, value: () => (input.value.trim() === '' ? null : input.value.trim()) };
+}
 
 /**
  * "Use up to R… from your wallet" for a customer signed in to this business's portal (Sprint 13.6c). update() asks for
@@ -1160,6 +1189,20 @@ async function checkout(root: HTMLElement): Promise<void> {
   const walletRow = el('div', { class: 'flex items-start gap-2' }, useWallet, walletLabel);
   walletRow.hidden = true;
   let wallet: { pass: string; cents: number } | null = null;
+  // A coupon code (Sprint 15.3b): quoted by the same pricing the server uses; it comes off the goods, never delivery.
+  const couponInput = el('input', { type: 'text', class: field, autocomplete: 'off' });
+  couponInput.id = id('coupon');
+  const couponApply = el('button', { type: 'button', class: 'underline' }, 'Apply');
+  const couponMsg = el('p', { class: 'text-sm' });
+  couponMsg.setAttribute('aria-live', 'polite'); // announced, without a second status region in the form
+  const couponRow = el(
+    'div',
+    { class: 'grid gap-1' },
+    el('label', { htmlFor: couponInput.id }, 'Coupon code (optional)'),
+    el('div', { class: 'flex items-center gap-2' }, couponInput, couponApply),
+    couponMsg,
+  );
+  let coupon: { code: string; cents: number } | null = null;
   const itemsCents = (data?.lines ?? []).reduce((sum, l) => sum + l.unit_cents * l.quantity, 0);
   void fetch(`/account/wallet-pass?total=${itemsCents}`, {
     headers: { Accept: 'application/json' },
@@ -1271,7 +1314,8 @@ async function checkout(root: HTMLElement): Promise<void> {
     addressRow.hidden = !delivering() || mode !== 'flat';
     courierRow.hidden = !delivering() || mode !== 'courier';
     pickupRow.hidden = !delivering() || mode !== 'pickup';
-    totals.textContent = `Total ${randOf(subtotal + fee)} (incl. VAT${fee ? `, delivery ${randOf(fee)}` : ''})`;
+    const off = coupon ? Math.min(coupon.cents, subtotal) : 0;
+    totals.textContent = `Total ${randOf(subtotal + fee - off)} (incl. VAT${fee ? `, delivery ${randOf(fee)}` : ''}${off ? `, coupon −${randOf(off)}` : ''})`;
   };
   // Several branches: customers choose where to collect from; stock and prices follow the branch.
   const branchPick = el('select', { class: field });
@@ -1327,10 +1371,45 @@ async function checkout(root: HTMLElement): Promise<void> {
       el('label', { htmlFor: consent.id }, 'I agree to be contacted about my order.'),
     ),
     trapWrap,
+    couponRow,
     walletRow,
     place,
     status,
   );
+  couponApply.addEventListener('click', async () => {
+    const code = couponInput.value.trim();
+    coupon = null;
+    couponMsg.textContent = '';
+    if (code !== '') {
+      const r = await fetch('/cart/price', {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lines: readCart(),
+          branch: picked.branch,
+          fulfilment: picked.fulfilment,
+          coupon: code,
+          phone: phone.value || null,
+        }),
+      }).catch(() => null);
+      const q =
+        r && r.ok
+          ? (
+              (await r.json()) as {
+                coupon: { ok: boolean; discount_cents: number; message: string | null } | null;
+              }
+            ).coupon
+          : null;
+      if (q && q.ok) {
+        coupon = { code, cents: q.discount_cents };
+        couponMsg.textContent = `Coupon applied: −${randOf(q.discount_cents)}`;
+      } else {
+        couponMsg.textContent =
+          q?.message ?? 'We couldn’t check that code just now. Please try again.';
+      }
+    }
+    redraw();
+  });
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const mode = ways.length ? way.value : 'flat';
@@ -1375,6 +1454,7 @@ async function checkout(root: HTMLElement): Promise<void> {
         notes: notes.value || null,
         payment: payment(),
         wallet: useWallet.checked && wallet ? wallet : null,
+        coupon: coupon?.code ?? null,
         consent: consent.checked ? '1' : null,
         website: trap.value,
       }),

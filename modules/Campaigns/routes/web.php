@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Campaigns\Http\Controllers\CampaignsController;
+use Wurk\Campaigns\Http\Controllers\CouponsController;
 use Wurk\Campaigns\Http\Controllers\TrackingController;
 
 Route::tenant(function (): void {
@@ -15,6 +16,11 @@ Route::tenant(function (): void {
         Route::get('/{campaign}', [CampaignsController::class, 'show'])->name('.show');
         Route::post('/{campaign}/test', [CampaignsController::class, 'test'])->middleware('throttle:10,10,campaign-test')->name('.test');
         Route::post('/{campaign}/send', [CampaignsController::class, 'send'])->middleware('throttle:10,10,campaign-send')->name('.send');
+    });
+    Route::middleware(['entitled:marketing', 'permission:campaigns.manage'])->prefix('coupons')->name('tenant.coupons')->group(function (): void {
+        Route::get('/', [CouponsController::class, 'index']);
+        Route::post('/', [CouponsController::class, 'store'])->name('.store');
+        Route::post('/{coupon}/off', [CouponsController::class, 'switchOff'])->name('.off');
     });
 });
 

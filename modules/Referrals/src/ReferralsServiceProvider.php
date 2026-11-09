@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Referrals;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Wurk\Crm\Contracts\ContactRemembered;
@@ -13,6 +14,7 @@ use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Platform\Contracts\AudienceSegments;
 use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Referrals\Console\ExpireWalletsCommand;
@@ -45,6 +47,20 @@ final class ReferralsServiceProvider extends ModuleServiceProvider
     public function boot(): void
     {
         parent::boot();
+        // Campaigns → "Your top referrers" (Sprint 15.3b): the 50 members who referred the most, while the programme is on.
+        $this->callAfterResolving(AudienceSegments::class, function (AudienceSegments $a): void {
+            $a->register('referrers', 'Your top referrers', function (): ?array {
+                $ctx = app(TenantContext::class);
+                if (! $ctx->has() || ! app(Entitlements::class)->entitled($ctx->id(), 'referrals')) {
+                    return null;
+                }
+                $db = DB::connection($ctx->connectionName());
+                $top = $db->table('referral_members')->where('tenant_id', $ctx->id())->whereNotNull('referrer_id')
+                    ->selectRaw('referrer_id, count(*) as referred')->groupBy('referrer_id')->orderByDesc('referred')->limit(50)->pluck('referrer_id');
+
+                return array_values(array_map('strval', $db->table('referral_members')->where('tenant_id', $ctx->id())->whereIn('id', $top)->pluck('contact_id')->all()));
+            });
+        });
         // Business home tiles (Sprint 13.9a): only for people who manage referrals, at businesses whose package has them.
         $this->callAfterResolving(DashboardTiles::class, function (DashboardTiles $tiles): void {
             $allowed = fn (): bool => app(TenantContext::class)->has() && Gate::allows('referrals.manage')

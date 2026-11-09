@@ -11,6 +11,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { rand } from '@/lib/money';
 
 interface Campaign {
   id: string;
@@ -23,6 +24,8 @@ interface Campaign {
   failed: number;
   opened: number;
   clicked: number;
+  redeemed: number;
+  sales_cents: number;
 }
 interface Ready {
   name: string;
@@ -108,6 +111,9 @@ export default function Index({
                   <span className="text-fg-muted">
                     {c.sent} sent{c.failed > 0 ? ` · ${c.failed} failed` : ''}
                     {c.channel === 'email' ? ` · ${c.opened} opened` : ''} · {c.clicked} clicked
+                    {c.redeemed > 0
+                      ? ` · ${c.redeemed} redeemed · ${rand(c.sales_cents)} in sales`
+                      : ''}
                   </span>
                 )}
               </li>

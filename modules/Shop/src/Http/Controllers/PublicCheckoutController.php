@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\CouponCustomer;
+use Wurk\Payments\Contracts\Coupons;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shipping\Contracts\ShippingProblem;
@@ -40,7 +42,7 @@ final class PublicCheckoutController
     public function price(Request $request, string $handle): JsonResponse
     {
         return $this->within($handle, function () use ($request): JsonResponse {
-            $data = $request->validate(['branch' => ['nullable', 'string'], 'fulfilment' => ['nullable', 'in:collection,delivery'], 'lines' => ['present', 'array', 'max:30'], 'lines.*.variant' => ['required', 'string'], 'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:'.OrderPlacer::MAX_QUANTITY]]);
+            $data = $request->validate(['coupon' => ['nullable', 'string', 'max:40'], 'phone' => ['nullable', 'string', 'max:30'], 'branch' => ['nullable', 'string'], 'fulfilment' => ['nullable', 'in:collection,delivery'], 'lines' => ['present', 'array', 'max:30'], 'lines.*.variant' => ['required', 'string'], 'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:'.OrderPlacer::MAX_QUANTITY]]);
             $stock = app(BranchStock::class);
             $branch = $stock->fulfilling((string) ($data['fulfilment'] ?? 'collection'), $data['branch'] ?? null);
             $couriers = app(Couriers::class)->options($stock->fulfilling('delivery', null));
@@ -58,18 +60,23 @@ final class PublicCheckoutController
                     'unit_cents' => $stock->priceAt($v, $branch), 'quantity' => (int) $line['quantity'], 'available' => $at === null ? OrderPlacer::MAX_QUANTITY : max(0, $at)];
             }
             $s = ShopSettings::query()->find($this->context->id());
+            $subtotal = array_sum(array_map(fn ($l) => $l['unit_cents'] * $l['quantity'], $lines));
+            // A coupon (15.3b): quoted the same way checkout applies it — nothing reserved until the order is placed.
+            $coupon = trim((string) ($data['coupon'] ?? '')) === '' ? null
+                : app(Coupons::class)->quote((string) $data['coupon'], $subtotal, 'shop', CouponCustomer::key($data['phone'] ?? null));
 
-            return new JsonResponse(['lines' => $lines, 'subtotal_cents' => array_sum(array_map(fn ($l) => $l['unit_cents'] * $l['quantity'], $lines)), 'checkout' => [
-                'available' => app(BusinessPayments::class)->eftInstructions($branch) !== null || app(BusinessPayments::class)->available($branch) !== [],
-                'card' => app(BusinessPayments::class)->available($branch) !== [], 'offline' => app(BusinessPayments::class)->eftInstructions($branch) !== null,
-                'collection' => $s === null || $s->collection_enabled, 'collection_address' => $s?->collection_address,
-                // Several branches: customers choose where to collect from.
-                'branches' => count(app(BranchDirectory::class)->open()) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name'], 'address' => $b['address']], app(BranchDirectory::class)->open()) : [],
-                'branch' => $branch,
-                'delivery' => (bool) $s?->delivery_enabled || $couriers['courier'] || $couriers['pickup_points'], 'flat_delivery' => (bool) $s?->delivery_enabled,
-                'delivery_fee_cents' => (int) $s?->delivery_fee_cents, 'delivery_note' => $s?->delivery_note,
-                'couriers' => $couriers, // Bob Go (live rates) and Pargo (pickup points) from the ships-from branch
-            ]]);
+            return new JsonResponse(['lines' => $lines, 'subtotal_cents' => $subtotal,
+                'coupon' => $coupon === null ? null : ['ok' => $coupon['ok'], 'discount_cents' => $coupon['discount_cents'], 'message' => $coupon['message']], 'checkout' => [
+                    'available' => app(BusinessPayments::class)->eftInstructions($branch) !== null || app(BusinessPayments::class)->available($branch) !== [],
+                    'card' => app(BusinessPayments::class)->available($branch) !== [], 'offline' => app(BusinessPayments::class)->eftInstructions($branch) !== null,
+                    'collection' => $s === null || $s->collection_enabled, 'collection_address' => $s?->collection_address,
+                    // Several branches: customers choose where to collect from.
+                    'branches' => count(app(BranchDirectory::class)->open()) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name'], 'address' => $b['address']], app(BranchDirectory::class)->open()) : [],
+                    'branch' => $branch,
+                    'delivery' => (bool) $s?->delivery_enabled || $couriers['courier'] || $couriers['pickup_points'], 'flat_delivery' => (bool) $s?->delivery_enabled,
+                    'delivery_fee_cents' => (int) $s?->delivery_fee_cents, 'delivery_note' => $s?->delivery_note,
+                    'couriers' => $couriers, // Bob Go (live rates) and Pargo (pickup points) from the ships-from branch
+                ]]);
         });
     }
 
@@ -86,6 +93,7 @@ final class PublicCheckoutController
                 'shipping.to.city' => ['nullable', 'string', 'max:120'], 'shipping.to.postal_code' => ['nullable', 'string', 'max:10'], 'address' => ['nullable', 'string', 'max:400'], 'notes' => ['nullable', 'string', 'max:1000'],
                 'payment' => ['nullable', 'in:card,offline'],
                 'wallet' => ['nullable', 'array'], 'wallet.pass' => ['required_with:wallet', 'string', 'max:600'], 'wallet.cents' => ['required_with:wallet', 'integer', 'min:1'],
+                'coupon' => ['nullable', 'string', 'max:40'],
                 'consent' => ['accepted'], 'website' => ['nullable', 'string'],
             ], ['consent.accepted' => 'Please agree to be contacted about your order.']);
             $fulfilling = app(BranchStock::class)->fulfilling($data['fulfilment'], $data['branch'] ?? null);
@@ -97,7 +105,7 @@ final class PublicCheckoutController
                 $order = $placer->place(array_values(array_map(fn ($l) => ['variant' => (string) $l['variant'], 'quantity' => (int) $l['quantity']], $data['lines'])),
                     ['name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'address' => $data['address'] ?? null, 'notes' => $data['notes'] ?? null],
                     $data['fulfilment'], $method, $data['branch'] ?? null, $data['shipping'] ?? null,
-                    isset($data['wallet']) ? ['pass' => (string) $data['wallet']['pass'], 'cents' => (int) $data['wallet']['cents']] : null);
+                    isset($data['wallet']) ? ['pass' => (string) $data['wallet']['pass'], 'cents' => (int) $data['wallet']['cents']] : null, $data['coupon'] ?? null);
             } catch (CheckoutProblem $e) {
                 return new JsonResponse(['message' => $e->getMessage()], 409);
             }

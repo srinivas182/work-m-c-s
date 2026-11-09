@@ -90,6 +90,7 @@ final class PublicBookingController
                 'health_consent' => ['nullable', 'boolean'],
                 'consent' => ['accepted'],
                 'wallet' => ['nullable', 'array'], 'wallet.pass' => ['required_with:wallet', 'string', 'max:600'], 'wallet.cents' => ['required_with:wallet', 'integer', 'min:1'],
+                'coupon' => ['nullable', 'string', 'max:40'],
                 'website' => ['nullable', 'string'], // hidden from people: only bots fill it in
             ], ['consent.accepted' => 'Please agree to be contacted about your booking.']);
             if (($data['website'] ?? '') !== '') {
@@ -120,7 +121,7 @@ final class PublicBookingController
             if ($deposit > 0) {
                 $returnUrl = $request->getSchemeAndHttpHost().'/book/return';
                 try {
-                    $payUrl = $deposits->start($booking, $deposit, (string) $data['email'], $returnUrl, self::wallet($data));
+                    $payUrl = $deposits->start($booking, $deposit, (string) $data['email'], $returnUrl, self::wallet($data), $data['coupon'] ?? null);
                 } catch (\DomainException $e) {
                     $booker->cancel($booking, null, 'expired'); // the wallet couldn't be used: don't hold the time
 

@@ -37,6 +37,21 @@ final readonly class CustomersSection implements Takings
             ->selectRaw('coalesce(sum(paid_cents - refunded_cents), 0) as net')->value('net');
     }
 
+    public function paidFor(array $sources): int
+    {
+        if ($sources === []) {
+            return 0;
+        }
+        $q = DB::connection($this->context->connectionName())->table('contact_purchases')->where('tenant_id', $this->context->id())
+            ->where(function ($q) use ($sources) {
+                foreach ($sources as [$type, $id]) {
+                    $q->orWhere(fn ($w) => $w->where('source_type', $type)->where('source_id', $id));
+                }
+            });
+
+        return (int) $q->selectRaw('coalesce(sum(paid_cents - refunded_cents), 0) as net')->value('net');
+    }
+
     /** @return array<string, mixed> */
     public function build(ReportPeriod $p): array
     {

@@ -13,6 +13,7 @@ use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Events\BookingMoved;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Payments\Contracts\Coupons;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -120,6 +121,7 @@ final readonly class Booker
     /** Cancelling frees the time straight away. */
     public function cancel(Booking $booking, ?string $by, string $status = 'cancelled'): void
     {
+        app(Coupons::class)->release('booking', $booking->id); // the booking won't stand: any coupon use goes back (15.3b)
         DB::connection($this->context->connectionName())->transaction(function () use ($booking, $status): void {
             $booking->update(['status' => $status]);
             DB::connection($this->context->connectionName())->table('booking_slots')->where('booking_id', $booking->id)->delete();

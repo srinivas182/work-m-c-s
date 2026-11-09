@@ -24,6 +24,8 @@ use Wurk\Tenancy\Contracts\BranchDirectory;
  * @property string|null $delivery_address
  * @property string|null $notes
  * @property int $subtotal_cents
+ * @property int $discount_cents
+ * @property string|null $coupon_code
  * @property int $delivery_cents
  * @property int $total_cents
  * @property int $wallet_cents

@@ -59,7 +59,7 @@ final readonly class OrderManager
         });
         if ($to === 'paid') {
             DB::table('shop_holds')->where('order_id', $order->id)->delete(); // the stock is theirs now
-            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents, $order->branch_id, app(RefundWindow::class)->finalAt($order->paid_at ?? now()))); // rewards on the items, not delivery
+            event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents - (int) $order->discount_cents, $order->branch_id, app(RefundWindow::class)->finalAt($order->paid_at ?? now()))); // rewards on the items, not delivery
             // Paid by EFT into the account whose details the customer was given (the branch's own, or the business's).
             app(BranchLedger::class)->record($this->payments->accountBranch('eft', $order->branch_id), $order->branch_id, $order->dueCents(), 'order', 'shop-'.$order->id, "Order #{$order->number} (EFT)");
         }
