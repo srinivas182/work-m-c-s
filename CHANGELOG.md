@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.6b (agent area: earnings, team, payouts, marketing kit)
+- **Earnings**: every commission line (date, business, level, amount, payable date; refunds shown) for a period, and as CSV for the agent's records.
+- **Team**: the downline by level (up to 7) — names, businesses onboarded, suspended — counts only, never others' earnings.
+- **Payouts**: the agent's payouts with bank reference, masked account and status (being paid · paid · bounced); cancelled batches hidden.
+- **Marketing kit**: link (copy), QR download, a ready message with **Share on WhatsApp** and copy.
+- CI: Agents' tests moved to MySQL part 4 (part 2 reached 8m15s).
+
 ### Added — Sprint 14.6a (agent dashboard and My businesses)
 - **Agent dashboard** (`app.wurk.co.za/agent`): businesses onboarded (total, this month); active, at risk (payment overdue) and churned; commission available, pending and paid out; earned this month; **next payout** — in the next batch or why not, by finance's own rules; what becomes payable in the next 30 days; 12 months of earnings (bars, with a table for screen readers).
 - **My businesses**: package, status (trial · new — first payment due · active · at risk · churned), monthly subscription and the commission earned from it; at-risk first. Agents see only their own.
