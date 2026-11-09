@@ -217,7 +217,7 @@ jobs:
         run: vendor/bin/pest --group=clamav --fail-on-skipped --compact
 
   backend-tests-mysql:
-    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 4)
+    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 5)
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
@@ -226,7 +226,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        part: [1, 2, 3, 4]
+        part: [1, 2, 3, 4, 5]
     timeout-minutes: 10
     services:
       mysql:
@@ -268,7 +268,7 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
-      # Parts come from scripts/ci-test-part: two explicit module lists, and part 3 is everything else, so
+      # Parts come from scripts/ci-test-part: four explicit module lists, and part 5 is everything else, so
       # every test runs exactly once (Pest's --shard dropped about half the suite here, so it isn't used).
       - name: Pest (MySQL, sequential within the part — shards are shared databases)
         run: vendor/bin/pest --compact $(scripts/ci-test-part ${{ matrix.part }})
