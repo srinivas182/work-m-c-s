@@ -126,7 +126,12 @@ export default function Profitability(p: Props) {
               Change a monthly price to see MRR if today’s paying businesses stayed (yearly plans
               scale with it). Nothing is changed.
             </p>
-            <div className="overflow-x-auto">
+            <div
+              className="overflow-x-auto"
+              tabIndex={0}
+              role="region"
+              aria-label="Pricing what if"
+            >
               <table className="w-full text-left">
                 <thead>
                   <tr>
