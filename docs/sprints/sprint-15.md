@@ -1,6 +1,6 @@
-# Sprint 15 — Reports & campaigns (specification, draft for approval)
+# Sprint 15 — Reports & campaigns (specification)
 
-**Status:** draft for WURK's approval (9 Nov 2026). Nothing is built until approved.
+**Status:** approved by WURK (9 Nov 2026), with the recommended additions; decision A (running cost) still to be supplied.
 **Plan:** tenant reports; SaaS metrics; profit per package, pricing simulator, provider reconciliation, margin alerts; analytics; campaigns & offers with credit estimates; monthly usage summary; auto top-up (docs/sprint-plan.md).
 **PRD:** §4.1 (super admin KPIs), §7.7 (marketing), §7.11 (reports), credits (§ top-ups).
 
@@ -24,14 +24,14 @@
 | **MRR movement** (new, expansion, contraction, churn, reactivation) and a **cohort retention** table | 15.4 | The two views WURK's investors and finance will ask for (ChartMogul, Baremetrics) |
 | **Auto top-up safety**: a monthly cap and an email every time it tops up | 15.5 | No surprise card charges |
 
-## Decisions needed
+## Decisions
 
-| # | Decision | Recommendation |
+| # | Decision | Status |
 |---|---|---|
-| A | **WURK's running cost per business** for profit per package (hosting, storage, support) | WURK supplies a monthly figure per package (or one figure for all); editable in Admin. |
-| B | **Provider statements** to reconcile first | The SMS and WhatsApp providers WURK signs up with (still pending) — built as a CSV upload with column mapping, so any provider's statement works. |
-| C | **Email opens** (tracking pixel) | Count opens only for customers who've consented to marketing, and treat them as indicative (Apple Mail inflates them); clicks and redemptions are the reliable results. |
-| D | **Weekly WhatsApp summary** to owners | Uses WhatsApp **credits** like other messages (≈1 per week), and owners can switch it off; needs a Meta-approved template (pending with the other templates). |
+| A | **WURK's running cost per business** for profit per package (hosting, storage, support) — a monthly figure per package (or one for all), editable in Admin. | **Still needed from WURK.** Until set it's **R0** and the profit report says so plainly — no invented figure. |
+| B | **Provider statements** come in as a **CSV upload with column mapping**, so any provider's statement works. | **Decided (WURK, 9 Nov 2026).** |
+| C | **Email opens** counted only for customers who've consented to marketing, and shown as **indicative** (Apple Mail inflates them); clicks and redemptions are the reliable results. | **Decided (WURK, 9 Nov 2026).** |
+| D | **Weekly WhatsApp summary** uses WhatsApp **credits** like other messages (≈1 a week); owners can switch it off; needs a Meta-approved template (pending with the others) — until then it goes by email. | **Decided (WURK, 9 Nov 2026).** |
 
 ## Order and size
 
