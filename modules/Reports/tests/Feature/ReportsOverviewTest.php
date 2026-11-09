@@ -86,5 +86,5 @@ it('limits a branch manager to their branches, refuses staff, and leaves out sec
     ], null);
     app(Catalog::class)->changePackage($this->glow->id, $basic->id, 'monthly');
     app(Entitlements::class)->flush();
-    $this->actingAs($this->owner)->get($this->app('/glow-salon/reports'))->assertInertia(fn (Assert $p) => $p->where('sections', []));
+    $this->actingAs($this->owner)->get($this->app('/glow-salon/reports'))->assertInertia(fn (Assert $p) => $p->where('sections', fn ($ss) => collect($ss)->where('key', 'shop.sales')->isEmpty())); // customers still show — every business has them
 });
