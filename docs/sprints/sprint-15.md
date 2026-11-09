@@ -33,6 +33,14 @@
 | C | **Email opens** counted only for customers who've consented to marketing, and shown as **indicative** (Apple Mail inflates them); clicks and redemptions are the reliable results. | **Decided (WURK, 9 Nov 2026).** |
 | D | **Weekly WhatsApp summary** uses WhatsApp **credits** like other messages (≈1 a week); owners can switch it off; needs a Meta-approved template (pending with the others) — until then it goes by email. | **Decided (WURK, 9 Nov 2026).** |
 
+## 15.2 Website analytics — detailed design (9 Nov 2026)
+
+- **Counted on WURK's servers, no script and no cookie**: public pages are served `max-age=0, must-revalidate` with an ETag, so every view reaches WURK (a full page or a "not modified"). Bots, crawlers, link previews and browser prefetches are skipped.
+- **Unique visitors without cookies** (as Plausible): a one-way hash of a **random daily secret**, the business, the IP address and the browser. The secret is discarded after two days, so a visitor can't be followed across days or identified; no IP address is stored.
+- **Where visitors came from**: the referring site (Google, Facebook, …) or a campaign's `utm_source`; otherwise "Direct".
+- **Visits that became orders or bookings**: when checkout or a booking remembers the customer (CRM's `ContactRemembered`, already raised), the same day's hash finds that visitor's source — no change to the shop or bookings.
+- **Reports → Website**: visitors, page views, top pages, sources, and orders/bookings by source, compared with the period before; highlights.
+
 ## Order and size
 
 15.1 → 15.2 → 15.3 → 15.4 → 15.5, each in small parts with one full CI run per part. Release as **v0.17.0**.
@@ -46,4 +54,5 @@ Paid advertising integrations (Meta/Google ads); AI-written campaign copy (Sprin
 | Part | PR | Notes |
 |---|---|---|
 | 15.1a Reports: sales, bookings, customers | #153 | Caught: the formatter turned the "nothing before?" check strict, which would divide by zero for 0.00 — made safe. Lifetime value counts paid amounts only (unpaid bookings have none). 1,551 backend tests on SQLite; Reports and CRM on MySQL 8. Browser tests in CI only. |
-| 15.1b Takings/VAT, leads, stock; export; summaries | see PR | VAT only for businesses that say they're registered (most small businesses aren't). Scheduled summaries run with no one signed in, so report periods can be marked "for owners". Caught: business routes drop `{tenant}`, so a `$tenant` argument shifted the export's parameters (a crash) — removed. 1,555 backend tests on SQLite; Reports and CRM on MySQL 8. Browser tests in CI only. |
+| 15.1b Takings/VAT, leads, stock; export; summaries | #154 | VAT only for businesses that say they're registered (most small businesses aren't). Scheduled summaries run with no one signed in, so report periods can be marked "for owners". Caught: business routes drop `{tenant}`, so a `$tenant` argument shifted the export's parameters (a crash) — removed. 1,555 backend tests on SQLite; Reports and CRM on MySQL 8. Browser tests in CI only. |
+| 15.2 Website analytics | see PR | Counting happens in the public page response (also on 304s). Caught in my test: Laravel's withHeaders() carries headers into later requests — cleared per visit. 1,557 backend tests on SQLite; analytics and Reports on MySQL 8. Browser tests in CI only. |

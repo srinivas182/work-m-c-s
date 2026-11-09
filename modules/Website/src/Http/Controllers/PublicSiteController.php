@@ -14,6 +14,7 @@ use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Tenancy\Contracts\TenantProvisioner;
+use Wurk\Website\Analytics\SiteVisits;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\PageRender;
 use Wurk\Website\Models\PageSlug;
@@ -93,6 +94,7 @@ final class PublicSiteController
     /** The page shell around stored content (pages and product pages share it): caching, assets, headers. */
     private function respond(CurrentTenant $tenant, string $path, ?int $renderedAt, string $canonical, bool $home): Response
     {
+        app(SiteVisits::class)->record(request(), $canonical); // website analytics (15.2) — also for "not modified"
         // Revalidation: the tag changes with the render and with the build, so a new publish or a
         // deploy is never hidden behind a cached copy. Cache-Tag lets the CDN purge a whole site (Sprint 17).
         $assets = app(PublicAssets::class);

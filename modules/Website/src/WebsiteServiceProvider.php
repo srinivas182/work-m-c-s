@@ -8,12 +8,20 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\ContactRemembered;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Contracts\UsageMeter;
+use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Support\ReportPeriod;
+use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Analytics\SiteVisits;
+use Wurk\Website\Analytics\WebsiteSection;
 use Wurk\Website\Console\DemoSitesCommand;
 use Wurk\Website\Console\ExpireFormFilesCommand;
 use Wurk\Website\Console\InstallTemplatesCommand;
@@ -92,6 +100,19 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Website analytics (Sprint 15.2): an order or booking made on the public site is credited to where the visitor came from.
+        Event::listen(ContactRemembered::class, function (ContactRemembered $e): void {
+            $host = strtolower(request()->getHost());
+            $root = strtolower((string) config('wurk.domains.root'));
+            if (str_ends_with($host, '.'.$root) && ! in_array($host, [strtolower((string) config('wurk.domains.app')), strtolower((string) config('wurk.domains.admin'))], true)) {
+                app(SiteVisits::class)->convert(request(), $e->sourceType, $e->sourceId);
+            }
+        });
+        $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
+            $r->register('website', 500, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
+                && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'website')
+                ? app(WebsiteSection::class)->build($p) : null);
+        });
         $this->app->bindIf(ProductCatalog::class, NoProductCatalog::class); // Shop provides the real one
         $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);
         $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);

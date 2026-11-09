@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.2 (website analytics)
+- **Reports → Website**: visitors, page views, top pages, where visitors came from (Google, Facebook, Instagram, WhatsApp, a campaign's `utm_source`, or Direct), and the orders and bookings each source brought.
+- **No cookies, no script, no consent banner**: counted on WURK's servers (pages revalidate, so revisits count too); visitors are a one-way hash with a random daily secret kept two days — no IP stored, not traceable across days; bots, link previews and prefetches skipped.
+- Only orders and bookings made on the public site are credited to a source.
+
 ### Added — Sprint 15.1b (more reports, export, summaries)
 - **Takings and VAT** (first section): everything taken — shop, bookings, in-store sales — after refunds; **VAT** (included in prices, at the country's rate) **only once the business says it's VAT-registered** (**Settings → VAT registration**, owners).
 - **Leads**: new leads by source, won of those closed, median first response. **Stock**: out of stock, lowest stock, didn't sell in the period (shown as "right now").
