@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 14.8b ("Make it yours")
+- **Claim link** for an agent's demo (signed; works until the demo expires): on the demo's banner and the agent's Demo page (copy, **send on WhatsApp**).
+- **Signup for that demo**: name and address filled in, no design step; the prospect may keep the demo's address or choose another.
+- **Completing it turns the same business into theirs** — pages kept, demo restrictions lifted, they become the owner — then the agent's access ends and the business is credited to them (source `demo`). Damaged or expired links get the normal signup with a plain message.
+
 ### Added — Sprint 14.8a (agents' demo sites)
 - **Agent area → Demo site**: a real business marked as a demo, built from one of the industry templates and published at once, with the agent as owner; one active per agent; edit it in the back office, show a QR code, delete and remake.
 - **On a demo**: a "Demo site made by a WURK agent" banner; `noindex` (header and meta); **payments** (methods, checkout, deposits, EFT details) and **outgoing messages** (SMS, WhatsApp, customer emails) switched off with a plain reason.

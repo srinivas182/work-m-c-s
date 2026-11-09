@@ -41,7 +41,7 @@
 </head>
 <body style="margin:0">
 @if (!empty($demo))
-<div role="note" style="background:#111827;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:8px 16px;text-align:center">Demo site made by a WURK agent for {{ $siteName }} — not a live business. Payments and messages are switched off.</div>
+<div role="note" style="background:#111827;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:8px 16px;text-align:center">Demo site made by a WURK agent for {{ $siteName }} — not a live business. Payments and messages are switched off.@if (!empty($claim)) <a href="{{ $claim }}" style="color:#fff;font-weight:600;text-decoration:underline;margin-left:8px">Make it yours</a>@endif</div>
 @endif
 {!! $body !!}
 @if ($whatsapp)

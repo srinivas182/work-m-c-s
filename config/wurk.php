@@ -136,4 +136,6 @@ return [
     'site_pages_disk' => env('WURK_SITE_PAGES_DISK', 'local'),
 
     'site_assets_disk' => env('WURK_SITE_ASSETS_DISK', 'public'),
+    // Agents' demo sites (Sprint 14.8): how long a demo stays up, and how long its claim link works.
+    'demo_days' => 14,
 ];

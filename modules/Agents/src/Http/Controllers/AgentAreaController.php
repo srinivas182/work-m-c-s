@@ -102,7 +102,8 @@ final class AgentAreaController
         $demo = app(AgentDemos::class)->active($agent);
 
         return Inertia::render('Agents::Agent/Demo', [
-            'demo' => $demo === null ? null : $demo + ['site' => request()->getScheme().'://'.$demo['handle'].'.'.config('wurk.domains.root'), 'backOffice' => '/'.$demo['handle']],
+            'demo' => $demo === null ? null : $demo + ['site' => request()->getScheme().'://'.$demo['handle'].'.'.config('wurk.domains.root'), 'backOffice' => '/'.$demo['handle'],
+                'claim' => app(AgentDemos::class)->claimLink($agent)],
             'catalogue' => app(SiteTemplates::class)->catalogue(), 'days' => AgentDemos::DAYS,
         ]);
     }

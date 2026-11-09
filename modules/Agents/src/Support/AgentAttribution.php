@@ -48,14 +48,14 @@ final readonly class AgentAttribution
         $this->audit->record('agents.attributed', 'tenant', $tenantId, ['agent' => $agent->id, 'source' => 'link']);
     }
 
-    /** A staff correction (null = no agent). */
-    public function set(string $tenantId, ?string $agentId): void
+    /** A staff correction, or a claimed demo (null = no agent). */
+    public function set(string $tenantId, ?string $agentId, string $source = 'staff'): void
     {
         $before = DB::table('agent_businesses')->where('tenant_id', $tenantId)->value('agent_id');
         if ($agentId === null) {
             DB::table('agent_businesses')->where('tenant_id', $tenantId)->delete();
         } else {
-            DB::table('agent_businesses')->updateOrInsert(['tenant_id' => $tenantId], ['agent_id' => $agentId, 'source' => 'staff', 'attributed_at' => now(), 'updated_at' => now(), 'created_at' => now()]);
+            DB::table('agent_businesses')->updateOrInsert(['tenant_id' => $tenantId], ['agent_id' => $agentId, 'source' => $source, 'attributed_at' => now(), 'updated_at' => now(), 'created_at' => now()]);
         }
         $this->audit->record('agents.attribution_changed', 'tenant', $tenantId, ['from' => $before, 'to' => $agentId]);
     }
