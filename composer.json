@@ -38,6 +38,7 @@
             "Wurk\\Audit\\": "modules/Audit/src/",
             "Wurk\\Billing\\": "modules/Billing/src/",
             "Wurk\\Bookings\\": "modules/Bookings/src/",
+            "Wurk\\Campaigns\\": "modules/Campaigns/src/",
             "Wurk\\Credits\\": "modules/Credits/src/",
             "Wurk\\Crm\\": "modules/Crm/src/",
             "Wurk\\Features\\": "modules/Features/src/",

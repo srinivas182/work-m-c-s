@@ -41,6 +41,17 @@
 - **Visits that became orders or bookings**: when checkout or a booking remembers the customer (CRM's `ContactRemembered`, already raised), the same day's hash finds that visitor's source — no change to the shop or bookings.
 - **Reports → Website**: visitors, page views, top pages, sources, and orders/bookings by source, compared with the period before; highlights.
 
+## 15.3 Campaigns and offers — detailed design (9 Nov 2026)
+
+**15.3a — sending campaigns** (new Campaigns module; `campaigns.manage` for owners):
+- **Audiences from CRM, only customers who agreed to marketing**: everyone; seen in the last 30 days; not seen in 60+ days (win-back); one branch; top referrers (when the referral programme is on). Live counts.
+- **Email or SMS** (WhatsApp once Meta approves the marketing templates). **Credit estimate before sending** ("312 SMS ≈ 312 credits; you have 540") — refused if the credits won't cover it. **Test send to yourself**; **send now or schedule**.
+- **Opt-out on every message** (a link; one click withdraws consent in CRM, logged) — POPIA.
+- **Results**: sent, failed, **clicks** (links tracked through WURK), **opens** for email (indicative — decision C).
+- **Ready-made campaigns**: win-back ("We miss you…") for customers not seen in 60 days, and thank-you for first-time customers this month, with suggested wording.
+
+**15.3b — coupons**: codes for the shop and booking deposits (amount or %, expiry, how many times), optionally attached to a campaign so its results show redemptions and the sales they made.
+
 ## Order and size
 
 15.1 → 15.2 → 15.3 → 15.4 → 15.5, each in small parts with one full CI run per part. Release as **v0.17.0**.
