@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Wurk\Agents\Support;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Wurk\Agents\Models\Agent;
+use Wurk\Identity\Contracts\PeopleDirectory;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -85,5 +87,49 @@ final readonly class AgentDashboard
             'upcoming' => array_map(fn ($d, $c) => ['date' => $d, 'cents' => $c], array_keys($upcoming), array_values($upcoming)),
             'months' => array_map(fn ($m, $c) => ['month' => $m, 'cents' => $c], array_keys($months), array_values($months)),
         ];
+    }
+
+    /** @return list<array{at: string, business: string, level: int, kind: string, cents: int, payable: string, pending: bool}> newest first */
+    public function earnings(Agent $agent, CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        $lines = DB::table('agent_ledger')->where('agent_id', $agent->id)->whereIn('kind', ['earned', 'reversed'])->whereBetween('created_at', [$from, $to])
+            ->orderByDesc('created_at')->get(['tenant_id', 'level', 'kind', 'cents', 'available_at', 'created_at']);
+        $names = [];
+        foreach ($lines->pluck('tenant_id')->filter()->unique() as $t) {
+            $names[(string) $t] = $this->tenants->find((string) $t)?->displayName() ?? 'A business';
+        }
+
+        return array_values($lines->map(fn ($l) => ['at' => substr((string) $l->created_at, 0, 10), 'business' => $names[(string) $l->tenant_id] ?? 'A business',
+            'level' => (int) $l->level, 'kind' => (string) $l->kind, 'cents' => (int) $l->cents, 'payable' => substr((string) $l->available_at, 0, 10),
+            'pending' => now()->lt($l->available_at)])->all());
+    }
+
+    /** @return list<array{level: int, name: string, code: string, status: string, businesses: int}> the downline by level — counts only, never their earnings */
+    public function team(Agent $agent): array
+    {
+        $out = [];
+        $level = [$agent->id];
+        for ($depth = 1; $depth <= AgentCommission::MAX_LEVELS && $level !== []; $depth++) {
+            $members = Agent::query()->whereIn('sponsor_id', $level)->orderBy('created_at')->get();
+            $names = app(PeopleDirectory::class)->names(array_values(array_map('strval', $members->pluck('identity_id')->all())));
+            $counts = DB::table('agent_businesses')->whereIn('agent_id', $members->pluck('id'))->selectRaw('agent_id, count(*) as n')->groupBy('agent_id')->pluck('n', 'agent_id');
+            foreach ($members as $m) {
+                $out[] = ['level' => $depth, 'name' => $names[$m->identity_id] ?? 'Agent', 'code' => $m->code, 'status' => $m->status, 'businesses' => (int) ($counts[$m->id] ?? 0)];
+            }
+            $level = array_values(array_map('strval', $members->pluck('id')->all()));
+        }
+
+        return $out;
+    }
+
+    /** @return list<array{reference: string, date: string, cents: int, bank: string, status: string}> newest first */
+    public function payouts(Agent $agent): array
+    {
+        return array_values(DB::table('agent_payout_items')->join('agent_payout_batches', 'agent_payout_batches.id', '=', 'agent_payout_items.batch_id')
+            ->where('agent_payout_items.agent_id', $agent->id)->where('agent_payout_batches.status', '!=', 'cancelled')->orderByDesc('agent_payout_batches.created_at')
+            ->get(['agent_payout_batches.reference', 'agent_payout_batches.paid_at', 'agent_payout_batches.created_at', 'agent_payout_items.cents', 'agent_payout_items.bank',
+                'agent_payout_items.account_last4', 'agent_payout_items.status'])
+            ->map(fn ($r) => ['reference' => (string) $r->reference, 'date' => substr((string) ($r->paid_at ?? $r->created_at), 0, 10), 'cents' => (int) $r->cents,
+                'bank' => $r->bank.' ·· '.$r->account_last4, 'status' => $r->status === 'ready' ? 'being_paid' : (string) $r->status])->all());
     }
 }

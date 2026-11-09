@@ -36,6 +36,11 @@ Route::domain((string) config('wurk.domains.root'))->middleware('throttle:60,1,a
 Route::domain((string) config('wurk.domains.app'))->middleware(['web', 'auth'])->prefix('agent')->name('agent.')->group(function (): void {
     Route::get('/', [AgentAreaController::class, 'home'])->name('home');
     Route::get('/businesses', [AgentAreaController::class, 'businesses'])->name('businesses');
+    Route::get('/earnings', [AgentAreaController::class, 'earnings'])->name('earnings');
+    Route::get('/team', [AgentAreaController::class, 'team'])->name('team');
+    Route::get('/payouts', [AgentAreaController::class, 'payouts'])->name('payouts');
+    Route::get('/kit', [AgentAreaController::class, 'kit'])->name('kit');
+    Route::get('/qr.svg', [AgentAreaController::class, 'qr'])->name('qr');
     Route::get('/bank', [AgentAreaController::class, 'bank'])->name('bank');
     Route::post('/bank', [AgentAreaController::class, 'request'])->middleware('throttle:5,10,agent-bank')->name('bank.request');
     Route::post('/bank/confirm', [AgentAreaController::class, 'confirm'])->middleware('throttle:10,10,agent-bank-confirm')->name('bank.confirm');

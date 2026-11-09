@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Wurk\Agents\Http\Controllers;
 
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +38,60 @@ final class AgentAreaController
     public function businesses(): Response
     {
         return Inertia::render('Agents::Agent/Businesses', ['businesses' => app(AgentDashboard::class)->businesses($this->agent())]);
+    }
+
+    public const PERIODS = ['month' => 'This month', '30d' => 'Last 30 days', 'year' => 'This year', 'all' => 'All time'];
+
+    public function earnings(Request $request): Response|\Symfony\Component\HttpFoundation\Response
+    {
+        $agent = $this->agent();
+        $period = array_key_exists((string) $request->query('period'), self::PERIODS) ? (string) $request->query('period') : 'month';
+        $now = CarbonImmutable::now();
+        $from = match ($period) {
+            '30d' => $now->subDays(30), 'year' => $now->startOfYear(), 'all' => CarbonImmutable::parse('2000-01-01'), default => $now->startOfMonth()
+        };
+        $lines = app(AgentDashboard::class)->earnings($agent, $from, $now);
+        if ($request->query('format') === 'csv') { // for the agent's own records
+            $out = fopen('php://temp', 'r+') ?: throw new \RuntimeException('Could not build the file.');
+            fputcsv($out, ['Date', 'Business', 'Level', 'Type', 'Amount', 'Payable from']);
+            foreach ($lines as $l) {
+                fputcsv($out, [$l['at'], preg_match('/^[=+\-@]/', $l['business']) === 1 ? "'".$l['business'] : $l['business'], $l['level'] === 0 ? 'Own' : 'Level '.$l['level'],
+                    $l['kind'] === 'earned' ? 'Earned' : 'Reversed', number_format($l['cents'] / 100, 2, '.', ''), $l['payable']]);
+            }
+            rewind($out);
+
+            return response((string) stream_get_contents($out), 200, ['Content-Type' => 'text/csv; charset=UTF-8', 'Content-Disposition' => 'attachment; filename="wurk-earnings-'.$period.'.csv"']);
+        }
+
+        return Inertia::render('Agents::Agent/Earnings', ['period' => $period, 'periods' => self::PERIODS, 'lines' => $lines]);
+    }
+
+    public function team(): Response
+    {
+        return Inertia::render('Agents::Agent/Team', ['team' => app(AgentDashboard::class)->team($this->agent())]);
+    }
+
+    public function payouts(): Response
+    {
+        return Inertia::render('Agents::Agent/Payouts', ['payouts' => app(AgentDashboard::class)->payouts($this->agent())]);
+    }
+
+    public function kit(): Response
+    {
+        $agent = $this->agent();
+        $link = route('agents.link', ['code' => $agent->code]);
+        $message = "I use WURK to run my business online — website, bookings, a shop and more, in one place. Have a look: {$link}";
+
+        return Inertia::render('Agents::Agent/Kit', ['link' => $link, 'code' => $agent->code, 'message' => $message, 'whatsapp' => 'https://wa.me/?text='.rawurlencode($message)]);
+    }
+
+    public function qr(): \Symfony\Component\HttpFoundation\Response
+    {
+        $agent = $this->agent();
+        $svg = (new Writer(new ImageRenderer(new RendererStyle(480, 2), new SvgImageBackEnd)))
+            ->writeString(route('agents.link', ['code' => $agent->code]));
+
+        return response($svg, 200, ['Content-Type' => 'image/svg+xml', 'Content-Disposition' => 'attachment; filename="wurk-'.$agent->code.'.svg"']);
     }
 
     public function bank(Request $request): Response
