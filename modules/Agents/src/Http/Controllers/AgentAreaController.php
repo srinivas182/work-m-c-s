@@ -19,6 +19,8 @@ use Inertia\Response;
 use Wurk\Agents\Models\Agent;
 use Wurk\Agents\Support\AgentBanking;
 use Wurk\Agents\Support\AgentDashboard;
+use Wurk\Agents\Support\AgentDemos;
+use Wurk\Website\Contracts\SiteTemplates;
 
 /** The agent area at app.wurk.co.za/agent (Sprint 14.7 starts it; 14.6 completes it). Agents only. */
 final class AgentAreaController
@@ -92,6 +94,50 @@ final class AgentAreaController
             ->writeString(route('agents.link', ['code' => $agent->code]));
 
         return response($svg, 200, ['Content-Type' => 'image/svg+xml', 'Content-Disposition' => 'attachment; filename="wurk-'.$agent->code.'.svg"']);
+    }
+
+    public function demo(): Response
+    {
+        $agent = $this->agent();
+        $demo = app(AgentDemos::class)->active($agent);
+
+        return Inertia::render('Agents::Agent/Demo', [
+            'demo' => $demo === null ? null : $demo + ['site' => request()->getScheme().'://'.$demo['handle'].'.'.config('wurk.domains.root'), 'backOffice' => '/'.$demo['handle']],
+            'catalogue' => app(SiteTemplates::class)->catalogue(), 'days' => AgentDemos::DAYS,
+        ]);
+    }
+
+    public function createDemo(Request $request): RedirectResponse
+    {
+        $d = $request->validate(['business' => ['required', 'string', 'max:80'], 'category' => ['required', 'string', 'max:60'], 'template' => ['required', 'string', 'max:60']],
+            ['business.required' => 'The business’s name.', 'template.required' => 'Choose a template.']);
+        try {
+            app(AgentDemos::class)->create($this->agent(), $d['business'], $d['category'], $d['template']);
+        } catch (\DomainException $e) {
+            throw ValidationException::withMessages(['template' => $e->getMessage()]);
+        }
+
+        return redirect('/agent/demo')->with('status', 'Your demo is live. It closes in '.AgentDemos::DAYS.' days.');
+    }
+
+    public function deleteDemo(): RedirectResponse
+    {
+        try {
+            app(AgentDemos::class)->delete($this->agent());
+        } catch (\DomainException $e) {
+            throw ValidationException::withMessages(['template' => $e->getMessage()]);
+        }
+
+        return redirect('/agent/demo')->with('status', 'Demo deleted. You can make another.');
+    }
+
+    public function demoQr(): \Symfony\Component\HttpFoundation\Response
+    {
+        $demo = app(AgentDemos::class)->active($this->agent()) ?? abort(404);
+        $svg = (new Writer(new ImageRenderer(new RendererStyle(480, 2), new SvgImageBackEnd)))
+            ->writeString(request()->getScheme().'://'.$demo['handle'].'.'.config('wurk.domains.root'));
+
+        return response($svg, 200, ['Content-Type' => 'image/svg+xml', 'Content-Disposition' => 'inline; filename="demo.svg"']);
     }
 
     public function bank(Request $request): Response

@@ -40,6 +40,10 @@ Route::domain((string) config('wurk.domains.app'))->middleware(['web', 'auth'])-
     Route::get('/team', [AgentAreaController::class, 'team'])->name('team');
     Route::get('/payouts', [AgentAreaController::class, 'payouts'])->name('payouts');
     Route::get('/kit', [AgentAreaController::class, 'kit'])->name('kit');
+    Route::get('/demo', [AgentAreaController::class, 'demo'])->name('demo');
+    Route::post('/demo', [AgentAreaController::class, 'createDemo'])->middleware('throttle:5,10,agent-demo')->name('demo.create');
+    Route::post('/demo/delete', [AgentAreaController::class, 'deleteDemo'])->name('demo.delete');
+    Route::get('/demo/qr.svg', [AgentAreaController::class, 'demoQr'])->name('demo.qr');
     Route::get('/qr.svg', [AgentAreaController::class, 'qr'])->name('qr');
     Route::get('/bank', [AgentAreaController::class, 'bank'])->name('bank');
     Route::post('/bank', [AgentAreaController::class, 'request'])->middleware('throttle:5,10,agent-bank')->name('bank.request');

@@ -17,6 +17,7 @@ export function AgentLayout({ title, children }: { title: string; children: Reac
           <Link href="/agent/team">Team</Link>
           <Link href="/agent/payouts">Payouts</Link>
           <Link href="/agent/kit">Marketing kit</Link>
+          <Link href="/agent/demo">Demo site</Link>
           <Link href="/agent/bank">Banking details</Link>
           <Button size="sm" variant="ghost" onClick={() => router.post('/sign-out')}>
             Sign out

@@ -49,11 +49,18 @@ final readonly class Payments implements BusinessPayments
 
     public function available(?string $branchId = null): array
     {
+        if ($this->isDemo()) {
+            return []; // an agent's demo site takes no money (Sprint 14.8)
+        }
+
         return array_values(array_filter(PlatformMethods::ONLINE, fn (string $p) => $this->accountFor($p, $branchId) !== null));
     }
 
     public function start(string $reference, int $amountCents, string $description, array $customer, array $urls, ?string $provider = null, ?string $branchId = null): ?string
     {
+        if ($this->isDemo()) {
+            return null; // an agent's demo site takes no money (Sprint 14.8)
+        }
         $provider ??= $this->available($branchId)[0] ?? null;
         $account = $provider === null ? null : $this->accountFor($provider, $branchId);
         if ($account === null || $amountCents < 100) {
@@ -111,6 +118,9 @@ final readonly class Payments implements BusinessPayments
 
     public function eftInstructions(?string $branchId = null): ?string
     {
+        if ($this->isDemo()) {
+            return null; // an agent's demo site takes no money (Sprint 14.8)
+        }
         $eft = $this->accountFor('eft', $branchId);
 
         return $eft === null ? null : ((string) ($eft->credentials['instructions'] ?? '') ?: null);
@@ -129,5 +139,12 @@ final readonly class Payments implements BusinessPayments
     public function accountBranch(string $provider, ?string $branchId): ?string
     {
         return $this->accountFor($provider, $branchId)?->branch_id;
+    }
+
+    private function isDemo(): bool
+    {
+        $context = app(TenantContext::class);
+
+        return $context->has() && $context->current()->isDemo();
     }
 }

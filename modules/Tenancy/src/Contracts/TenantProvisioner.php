@@ -11,4 +11,10 @@ interface TenantProvisioner
     public function handleProblem(string $handle): ?string;
 
     public function provision(string $name, string $handle, string $country): CurrentTenant;
+
+    /** Mark or unmark a business as an agent's demo (Sprint 14.8). */
+    public function markDemo(string $tenantId, bool $demo): void;
+
+    /** Archive a business: site offline, address freed (handle and subdomain become archived-<id>), status deleted. */
+    public function archive(string $tenantId): void;
 }

@@ -27,6 +27,10 @@ final readonly class MessengerService implements Messenger
 
     public function sms(string $to, string $text, string $purpose): SendResult
     {
+        if ($this->isDemo()) {
+            return SendResult::failed('This is a demo site — messages are switched off.'); // Sprint 14.8
+        }
+
         return $this->charged('sms', $purpose, fn () => $this->sendSms($to, $text, $purpose));
     }
 
@@ -48,6 +52,10 @@ final readonly class MessengerService implements Messenger
 
     public function whatsappTemplate(string $to, string $template, array $parameters, string $purpose, string $language = 'en'): SendResult
     {
+        if ($this->isDemo()) {
+            return SendResult::failed('This is a demo site — messages are switched off.'); // Sprint 14.8
+        }
+
         return $this->charged('whatsapp', $purpose, fn () => $this->sendWhatsApp($to, $template, $parameters, $purpose, $language));
     }
 
@@ -134,5 +142,12 @@ final readonly class MessengerService implements Messenger
     private static function mask(string $to): string
     {
         return strlen($to) > 7 ? substr($to, 0, 3).' ••• ••• '.substr($to, -4) : '•••';
+    }
+
+    private function isDemo(): bool
+    {
+        $context = app(TenantContext::class);
+
+        return $context->has() && $context->current()->isDemo();
     }
 }

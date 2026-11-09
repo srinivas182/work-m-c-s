@@ -113,6 +113,11 @@ final class Templates implements MessageTemplates
     /** @param  array<string, string>  $vars */
     public function email(string $key, string $to, array $vars): void
     {
+        $context = app(TenantContext::class);
+        if ($context->has() && $context->current()->isDemo()) {
+            return; // an agent's demo site sends no emails to customers (Sprint 14.8)
+        }
+
         Mail::to($to)->send(new CustomerMessageMail($this->subject($key, $vars), $this->text($key, 'email', $vars)));
     }
 

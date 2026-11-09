@@ -58,6 +58,22 @@ At `app.wurk.co.za/agent` (agents only; started in 14.7). Every figure is the ag
 - **Payouts:** batches they were paid in, with the remittance details (and bounced ones).
 - **Marketing kit:** link, QR download, **WhatsApp share** with a ready message *(recommended addition)*.
 
+## 14.8 Demo sites — detailed specification (9 Nov 2026)
+
+**Approved by WURK (9 Nov 2026)**, including the recommended additions and archiving now with a permanent purge in Sprint 18.
+
+A demo is a **real WURK business marked as a demo** (so the site, templates and editor are the real ones), with restrictions.
+
+**14.8a — making, showing, restricting and expiring demos**
+- **Make a demo** (agent area → Demo site): business name and an **industry template** from the 24 *(recommended addition — the agent pitches a site that already looks like the prospect's trade)*; published at once on its own address. **One active demo per agent**; they can delete it and make another.
+- **On the demo site**: a **"Demo" banner** (made by the agent, for the business) and **not indexed by search engines** (`noindex` header and meta). **Payments and outgoing messages are switched off** — online checkout, booking deposits, SMS, WhatsApp and emails to customers are refused with a plain reason.
+- **The agent can edit it** in the normal back office (they're its owner while it's a demo) *(recommended addition)*, and **share a QR code** to open it on a prospect's phone *(recommended addition)*.
+- **Expiry**: 14 days; the agent is emailed on **day 10 and day 13**; on day 14 it's **archived** — site offline, address freed, hidden everywhere. *Deviation from "auto-deleted": WURK can't yet delete a business's data safely; archived demos' data is **purged permanently in Sprint 18** (hardening) after proper testing. Demo content is the agent's sample material, not a customer's data.*
+- **Admin → Businesses** marks demos and can filter them.
+
+**14.8b — "Make it yours"**
+- The demo's banner and the agent area offer a **claim link** for the prospect (signed, valid until the demo expires). The prospect signs up with **the demo's name and address already filled in**, chooses a package and pays; the demo **becomes their live business** — content kept, restrictions lifted, the prospect its owner (the agent's access ends) and **credited to the agent** (14.2).
+
 ## Out of scope
 Agent-to-agent transfers; commission on WURK Credits or managed fees; automated bank payouts (needs a bank API — later).
 
@@ -76,4 +92,5 @@ Each part: route tests, isolation tests (agents see only their own and their dow
 | 14.5a Payout batches | #144 | Recommended additions included (preview with reasons, logged downloads). Caught: saving the minimum before any percentages existed failed. MySQL caught `payout_returned` (15) overflowing the ledger's 12-character `kind` (SQLite doesn't enforce lengths) — widened to 20; the referral ledger's kinds all fit. 1,476 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |
 | 14.5b Settling batches | #145 | Agents' emails follow Billing's pattern (WURK's own mail, not business-editable templates); both rendered in tests. Browser coverage gap: Mark paid / Mark bounced appear only once a batch exists, and the e2e data has no commission — the page itself is scanned (14.5a); the actions are covered by backend tests. 1,479 backend tests on SQLite; Agents on MySQL 8. CI: MySQL part 4 timed out on the first full run (tests 9m30s; it had swung 6.5–10 min, timing out on 14.7's first run too) — Tenancy, its heaviest module, moved to part 2 in this PR. |
 | 14.6a Dashboard and My businesses | #146 | Caught: my status mapping missed Plans' `pending_payment` (signed up, first payment due) and detected trials wrongly — now read from Plans' actual statuses. To watch: "next payout" runs finance's whole preview to find one agent — fine now; look at one agent directly before agents number in the thousands (Sprint 18). 1,481 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |
-| 14.6b Earnings, team, payouts, kit | see PR | Also moved Agents' tests to MySQL part 4. 1,484 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |
+| 14.6b Earnings, team, payouts, kit | #147 | Also moved Agents' tests to MySQL part 4. 1,484 backend tests on SQLite; Agents on MySQL 8. Browser tests in CI only. |
+| 14.8a Demo sites | see PR | Caught: first version logged the archive from Tenancy (a module cycle — Audit depends on Tenancy) — the agents module logs it. CI: the first full run was cancelled — part 1 reached 10 min (tests 9m10s) with no new tests in it, and parts 2 and 4 slowed ~3 min too (a slow runner; the demo tests take 17 s on MySQL). The third such timeout, so the MySQL tests now run in **five** parts. 1,488 backend tests on SQLite; demo tests and Tenancy on MySQL 8. Browser tests in CI only. |
