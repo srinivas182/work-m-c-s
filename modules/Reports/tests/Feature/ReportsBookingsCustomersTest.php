@@ -64,12 +64,12 @@ beforeEach(function () {
 
 it('reports bookings — value, no-shows and busiest time — and customers — new, returning, repeat, lifetime value, lapsed', function () {
     $this->actingAs($this->owner)->get($this->app('/glow-salon/reports'))->assertInertia(fn (Assert $p) => $p->component('Reports::Overview')
-        ->where('sections.0.key', 'bookings')
-        ->where('sections.0.metrics.0', ['label' => 'Bookings', 'value' => 3, 'previous' => 1, 'format' => 'count'])   // cancellations excluded
-        ->where('sections.0.metrics.1.value', 60000)->where('sections.0.metrics.2.value', 33.3)
-        ->where('sections.1.key', 'customers')
-        ->where('sections.1.metrics.0.value', 2)->where('sections.1.metrics.1.value', 1)->where('sections.1.metrics.2.value', 100)
-        ->where('sections.1.metrics.3.value', 25000)                                                                    // (R400 + R100) / 2
+        ->where('sections.1.key', 'bookings')
+        ->where('sections.1.metrics.0', ['label' => 'Bookings', 'value' => 3, 'previous' => 1, 'format' => 'count'])   // cancellations excluded
+        ->where('sections.1.metrics.1.value', 60000)->where('sections.1.metrics.2.value', 33.3)
+        ->where('sections.2.key', 'customers')
+        ->where('sections.2.metrics.0.value', 2)->where('sections.2.metrics.1.value', 1)->where('sections.2.metrics.2.value', 100)
+        ->where('sections.2.metrics.3.value', 25000)                                                                    // (R400 + R100) / 2
         ->where('highlights', fn ($h) => collect($h)->contains('33.3% of booked customers didn’t show — a reminder or a deposit could help.')
             && collect($h)->contains('1 new customer, and 1 came back.')
             && collect($h)->contains('1 customer hasn’t been back in 60 days — a win-back message could bring them in.')

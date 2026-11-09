@@ -6,6 +6,7 @@ namespace Wurk\Crm\Reports;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Wurk\Crm\Contracts\Takings;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -13,20 +14,27 @@ use Wurk\Tenancy\Contracts\TenantContext;
  * Reports → Customers (Sprint 15.1a): from CRM's own records — new vs returning, repeat rate, lifetime value — and the
  * customers who haven't been back in 60 days (for a win-back campaign, 15.3).
  */
-final readonly class CustomersSection
+final readonly class CustomersSection implements Takings
 {
     public function __construct(private TenantContext $context) {}
 
-    public function recordPurchase(string $type, string $id, int $paidCents): void
+    public function recordPurchase(string $type, string $id, int $paidCents, ?string $branchId = null): void
     {
         DB::connection($this->context->connectionName())->table('contact_purchases')->updateOrInsert(
-            ['source_type' => $type, 'source_id' => $id], ['tenant_id' => $this->context->id(), 'paid_cents' => max(0, $paidCents), 'created_at' => now()]);
+            ['source_type' => $type, 'source_id' => $id], ['tenant_id' => $this->context->id(), 'paid_cents' => max(0, $paidCents), 'branch_id' => $branchId, 'created_at' => now()]);
     }
 
     public function recordRefund(string $type, string $id, int $refundedCents): void
     {
         DB::connection($this->context->connectionName())->table('contact_purchases')->where('tenant_id', $this->context->id())
             ->where('source_type', $type)->where('source_id', $id)->update(['refunded_cents' => max(0, $refundedCents)]);
+    }
+
+    public function net(\DateTimeInterface $from, \DateTimeInterface $to, ?array $branchIds): int
+    {
+        return (int) DB::connection($this->context->connectionName())->table('contact_purchases')->where('tenant_id', $this->context->id())
+            ->whereBetween('created_at', [$from, $to])->when($branchIds !== null, fn ($q) => $q->whereIn('branch_id', $branchIds))
+            ->selectRaw('coalesce(sum(paid_cents - refunded_cents), 0) as net')->value('net');
     }
 
     /** @return array<string, mixed> */

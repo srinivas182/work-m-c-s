@@ -9,6 +9,7 @@ interface Metric {
   value: number;
   previous: number;
   format: 'money' | 'count' | 'percent';
+  snapshot?: boolean; // a figure for right now, not the period (e.g. stock)
 }
 interface Table {
   columns: string[];
@@ -21,6 +22,7 @@ interface Section {
   chart?: { label: string; points: { label: string; value: number }[] } | null;
   rows?: Table | null;
   extra?: Table | null;
+  note?: string;
 }
 interface Props {
   period: string;
@@ -31,6 +33,7 @@ interface Props {
   range: { from: string; to: string };
   highlights: string[];
   sections: Section[];
+  summary: 'weekly' | 'monthly' | 'off' | null; // owners only
 }
 
 const show = (v: number, f: Metric['format']) =>
@@ -88,6 +91,41 @@ export default function Overview(p: Props) {
           )}
         </div>
 
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <a
+            className="underline"
+            href={`${window.location.pathname}/export/csv?period=${p.period}&branch=${p.branch}`}
+          >
+            Download CSV
+          </a>
+          <a
+            className="underline"
+            href={`${window.location.pathname}/export/pdf?period=${p.period}&branch=${p.branch}`}
+          >
+            Download PDF
+          </a>
+          {p.summary !== null && (
+            <label className="flex items-center gap-2">
+              Email me a summary
+              <select
+                className="border-border bg-bg h-10 rounded-md border px-3"
+                value={p.summary}
+                onChange={(e) =>
+                  router.put(
+                    `${window.location.pathname}/summary`,
+                    { summary: e.target.value },
+                    { preserveScroll: true },
+                  )
+                }
+              >
+                <option value="weekly">Weekly (Mondays)</option>
+                <option value="monthly">Monthly (the 1st)</option>
+                <option value="off">Off</option>
+              </select>
+            </label>
+          )}
+        </div>
+
         {p.highlights.length > 0 && (
           <Card>
             <CardHeader>
@@ -125,6 +163,7 @@ function SectionCard({ s }: { s: Section }) {
         <CardTitle>{s.title}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 text-sm">
+        {s.note && <p className="text-fg-muted">{s.note}</p>}
         <ul aria-label={`${s.title} figures`} className="grid gap-3 sm:grid-cols-3">
           {s.metrics.map((m) => {
             const c = change(m.value, m.previous);
@@ -133,9 +172,11 @@ function SectionCard({ s }: { s: Section }) {
                 <span className="text-fg-muted">{m.label}</span>
                 <span className="text-xl font-semibold">{show(m.value, m.format)}</span>
                 <span className="text-fg-muted">
-                  {c === null
-                    ? 'Nothing to compare with'
-                    : `${c >= 0 ? '▲' : '▼'} ${Math.abs(c)}% (was ${show(m.previous, m.format)})`}
+                  {m.snapshot
+                    ? 'Right now'
+                    : c === null
+                      ? 'Nothing to compare with'
+                      : `${c >= 0 ? '▲' : '▼'} ${Math.abs(c)}% (was ${show(m.previous, m.format)})`}
                 </span>
               </li>
             );

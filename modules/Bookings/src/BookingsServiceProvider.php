@@ -74,7 +74,7 @@ final class BookingsServiceProvider extends ModuleServiceProvider
     {
         // Reports → Bookings (Sprint 15.1a).
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
-            $r->register('bookings', 200, fn (ReportPeriod $p) => Gate::allows('reports.view')
+            $r->register('bookings', 200, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
                 && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'bookings')
                 ? app(BookingsSection::class)->build($p) : null);
         });

@@ -25,6 +25,7 @@ use Wurk\Shop\Listeners\MarkDeliveredOrders;
 use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Reports\SalesSection;
+use Wurk\Shop\Reports\StockSection;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderStatusChanged;
@@ -64,9 +65,15 @@ final class ShopServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Reports → Stock (Sprint 15.1b).
+        $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
+            $r->register('shop.stock', 150, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
+                && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'shop')
+                ? app(StockSection::class)->build($p) : null);
+        });
         // Reports → Shop sales (Sprint 15.1a): for people who see reports, at businesses whose package has the shop.
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
-            $r->register('shop.sales', 100, fn (ReportPeriod $p) => Gate::allows('reports.view')
+            $r->register('shop.sales', 100, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
                 && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'shop')
                 ? app(SalesSection::class)->build($p) : null);
         });

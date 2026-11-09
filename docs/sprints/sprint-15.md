@@ -45,4 +45,5 @@ Paid advertising integrations (Meta/Google ads); AI-written campaign copy (Sprin
 
 | Part | PR | Notes |
 |---|---|---|
-| 15.1a Reports: sales, bookings, customers | see PR | Caught: the formatter turned the "nothing before?" check strict, which would divide by zero for 0.00 — made safe. Lifetime value counts paid amounts only (unpaid bookings have none). 1,551 backend tests on SQLite; Reports and CRM on MySQL 8. Browser tests in CI only. |
+| 15.1a Reports: sales, bookings, customers | #153 | Caught: the formatter turned the "nothing before?" check strict, which would divide by zero for 0.00 — made safe. Lifetime value counts paid amounts only (unpaid bookings have none). 1,551 backend tests on SQLite; Reports and CRM on MySQL 8. Browser tests in CI only. |
+| 15.1b Takings/VAT, leads, stock; export; summaries | see PR | VAT only for businesses that say they're registered (most small businesses aren't). Scheduled summaries run with no one signed in, so report periods can be marked "for owners". Caught: business routes drop `{tenant}`, so a `$tenant` argument shifted the export's parameters (a crash) — removed. 1,555 backend tests on SQLite; Reports and CRM on MySQL 8. Browser tests in CI only. |

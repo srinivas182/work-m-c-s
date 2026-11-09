@@ -12,8 +12,11 @@ use Carbon\CarbonImmutable;
  */
 final readonly class ReportPeriod
 {
-    /** @param list<string>|null $branchIds  null = every branch */
-    public function __construct(public CarbonImmutable $from, public CarbonImmutable $to, public ?array $branchIds = null) {}
+    /**
+     * @param  list<string>|null  $branchIds  null = every branch
+     * @param  bool  $forOwners  the owners' scheduled summary (no one signed in; every section the package has)
+     */
+    public function __construct(public CarbonImmutable $from, public CarbonImmutable $to, public ?array $branchIds = null, public bool $forOwners = false) {}
 
     /** @param list<string>|null $branchIds */
     public static function named(string $name, string $businessTz, ?array $branchIds = null): self
