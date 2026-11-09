@@ -67,13 +67,13 @@ final class ShopServiceProvider extends ModuleServiceProvider
     {
         // Reports → Stock (Sprint 15.1b).
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
-            $r->register('shop.stock', 150, fn (ReportPeriod $p) => Gate::allows('reports.view')
+            $r->register('shop.stock', 150, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
                 && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'shop')
                 ? app(StockSection::class)->build($p) : null);
         });
         // Reports → Shop sales (Sprint 15.1a): for people who see reports, at businesses whose package has the shop.
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
-            $r->register('shop.sales', 100, fn (ReportPeriod $p) => Gate::allows('reports.view')
+            $r->register('shop.sales', 100, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
                 && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'shop')
                 ? app(SalesSection::class)->build($p) : null);
         });

@@ -33,6 +33,7 @@ interface Props {
   range: { from: string; to: string };
   highlights: string[];
   sections: Section[];
+  summary: 'weekly' | 'monthly' | 'off' | null; // owners only
 }
 
 const show = (v: number, f: Metric['format']) =>
@@ -85,6 +86,41 @@ export default function Overview(p: Props) {
                     {b.name}
                   </option>
                 ))}
+              </select>
+            </label>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <a
+            className="underline"
+            href={`${window.location.pathname}/export/csv?period=${p.period}&branch=${p.branch}`}
+          >
+            Download CSV
+          </a>
+          <a
+            className="underline"
+            href={`${window.location.pathname}/export/pdf?period=${p.period}&branch=${p.branch}`}
+          >
+            Download PDF
+          </a>
+          {p.summary !== null && (
+            <label className="flex items-center gap-2">
+              Email me a summary
+              <select
+                className="border-border bg-bg h-10 rounded-md border px-3"
+                value={p.summary}
+                onChange={(e) =>
+                  router.put(
+                    `${window.location.pathname}/summary`,
+                    { summary: e.target.value },
+                    { preserveScroll: true },
+                  )
+                }
+              >
+                <option value="weekly">Weekly (Mondays)</option>
+                <option value="monthly">Monthly (the 1st)</option>
+                <option value="off">Off</option>
               </select>
             </label>
           )}

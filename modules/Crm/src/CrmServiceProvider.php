@@ -40,12 +40,12 @@ final class CrmServiceProvider extends ModuleServiceProvider
         parent::boot();
         // Reports → Leads (Sprint 15.1b).
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
-            $r->register('leads', 400, fn (ReportPeriod $p) => Gate::allows('reports.view')
+            $r->register('leads', 400, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
                 ? app(LeadsSection::class)->build($p) : null);
         });
         // Reports → Customers (Sprint 15.1a), with what each purchase was paid (for lifetime value).
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
-            $r->register('customers', 300, fn (ReportPeriod $p) => Gate::allows('reports.view')
+            $r->register('customers', 300, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
                 ? app(CustomersSection::class)->build($p) : null);
         });
         Event::listen(PurchaseMade::class, fn (PurchaseMade $e) => app(CustomersSection::class)->recordPurchase($e->sourceType, $e->sourceId, $e->paidCents, $e->branchId));
