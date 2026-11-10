@@ -12,10 +12,12 @@ use Wurk\Credits\Console\GrantAllowancesCommand;
 use Wurk\Credits\Console\RollupUsageCommand;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\RateCard;
+use Wurk\Credits\Contracts\UsageHistory;
 use Wurk\Credits\Events\LowCreditBalance;
 use Wurk\Credits\Listeners\GrantFirstAllowance;
 use Wurk\Credits\Metrics\UsageSection;
 use Wurk\Credits\Support\EloquentRateCard;
+use Wurk\Credits\Support\RolledUpUsage;
 use Wurk\Credits\Support\Wallet;
 use Wurk\Plans\Events\SubscriptionChanged;
 use Wurk\Platform\Contracts\PlatformMetrics;
@@ -26,6 +28,7 @@ final class CreditsServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(UsageHistory::class, RolledUpUsage::class);
         $this->app->singleton(RateCard::class, EloquentRateCard::class);
         $this->app->singleton(CreditWallet::class, Wallet::class);
     }

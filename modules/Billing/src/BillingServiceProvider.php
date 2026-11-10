@@ -26,6 +26,7 @@ use Wurk\Billing\Gateways\PaystackGateway;
 use Wurk\Billing\Gateways\PaystackSplitPayments;
 use Wurk\Billing\Http\Middleware\RequirePayment;
 use Wurk\Billing\Listeners\DunningNotices;
+use Wurk\Billing\Metrics\ProfitSection;
 use Wurk\Billing\Metrics\RevenueSection;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\BillingSettings;
@@ -63,6 +64,7 @@ final class BillingServiceProvider extends ModuleServiceProvider
         return [
             ['key' => 'billing.manage', 'label' => 'Manage billing, payments and credit purchases'],
             ['key' => 'payments.record-cash', 'label' => 'Record cash payments at a WURK office', 'scope' => 'platform'],
+            ['key' => 'costs.manage', 'label' => 'Set what things cost WURK (profitability)', 'scope' => 'platform'],
             ['key' => 'invoices.view', 'label' => 'See invoices, payments and failed payments', 'scope' => 'platform'],
             ['key' => 'invoices.manage', 'label' => 'Issue credit notes, retry payments, set invoice details and dunning', 'scope' => 'platform'],
         ];
@@ -75,6 +77,7 @@ final class BillingServiceProvider extends ModuleServiceProvider
     {
         return [
             ['label' => 'Billing', 'route' => 'tenant.billing', 'icon' => 'credit-card', 'section' => 'Settings', 'permission' => 'billing.manage', 'order' => 770],
+            ['label' => 'Profitability', 'route' => 'admin.profitability', 'icon' => 'bar-chart', 'section' => 'Platform', 'permission' => 'metrics.view', 'order' => 16],
             ['label' => 'Failed payments', 'route' => 'admin.billing.failed', 'icon' => 'triangle-alert', 'section' => 'Platform', 'permission' => 'invoices.view', 'order' => 35],
             ['label' => 'Invoice settings', 'route' => 'admin.billing.settings', 'icon' => 'receipt', 'section' => 'Settings', 'permission' => 'invoices.manage', 'order' => 936],
             ['label' => 'Credit packs', 'route' => 'admin.credits.packs', 'icon' => 'coins', 'section' => 'Settings', 'permission' => 'credits.manage', 'order' => 935],
@@ -83,6 +86,10 @@ final class BillingServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Admin → Metrics → Profit (Sprint 15.5a).
+        $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
+            $m->register('profit', 70, fn (ReportPeriod $p) => Gate::allows('metrics.view') ? app(ProfitSection::class)->build($p) : null);
+        });
         // Admin → Metrics → Revenue (Sprint 15.4b).
         $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
             $m->register('revenue', 50, fn (ReportPeriod $p) => Gate::allows('metrics.view') ? app(RevenueSection::class)->build($p) : null);

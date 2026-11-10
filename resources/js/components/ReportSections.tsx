@@ -83,7 +83,14 @@ export function SectionCard({ s }: { s: Section }) {
         )}
         {[s.rows, s.extra].map((t, i) =>
           t && t.data.length > 0 ? (
-            <div key={i} className="overflow-x-auto">
+            // Scrolls sideways on narrow screens: focusable so keyboard users can scroll it, and labelled.
+            <div
+              key={i}
+              className="overflow-x-auto"
+              tabIndex={0}
+              role="region"
+              aria-label={`${s.title}: ${t.columns[0]}`}
+            >
               <table className="w-full text-left">
                 <thead>
                   <tr>

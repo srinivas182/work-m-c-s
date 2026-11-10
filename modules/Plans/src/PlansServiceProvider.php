@@ -14,6 +14,7 @@ use Wurk\Plans\Console\SeedPlaceholderPackagesCommand;
 use Wurk\Plans\Console\SnapshotMrrCommand;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Plans\Contracts\SubscriptionHistory;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Plans\Http\Middleware\EnsureEntitled;
 use Wurk\Plans\Metrics\MovementSection;
@@ -21,6 +22,7 @@ use Wurk\Plans\Metrics\SubscriptionsSection;
 use Wurk\Plans\Models\Package;
 use Wurk\Plans\Support\EloquentCatalog;
 use Wurk\Plans\Support\EntitlementService;
+use Wurk\Plans\Support\MrrSnapshots;
 use Wurk\Plans\Support\PackageSeatPolicy;
 use Wurk\Plans\Support\StaffMeter;
 use Wurk\Platform\Contracts\PlatformMetrics;
@@ -32,6 +34,7 @@ final class PlansServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(SubscriptionHistory::class, MrrSnapshots::class);
         $this->app->tag([StaffMeter::class], UsageMeter::TAG);
         $this->app->singleton(SeatPolicy::class, PackageSeatPolicy::class); // replaces Access's default (no limit)
         $this->app->singleton(Entitlements::class, EntitlementService::class);

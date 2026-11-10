@@ -32,9 +32,9 @@ final class RollupUsageCommand extends Command
             $rows += (int) $context->run($tenant, function () use ($context, $from): int {
                 $used = DB::connection($context->connectionName())->table('credit_ledger')->where('tenant_id', $context->id())->where('type', 'debit')
                     ->where('created_at', '>=', $from)->whereNotNull('channel')
-                    ->selectRaw('date(created_at) as day, channel, sum(-amount_milli) as used')->groupBy('day', 'channel')->get();
+                    ->selectRaw('date(created_at) as day, channel, sum(-amount_milli) as used, count(*) as messages')->groupBy('day', 'channel')->get();
                 foreach ($used as $u) {
-                    DB::table('credit_usage_daily')->updateOrInsert(['day' => (string) $u->day, 'tenant_id' => $context->id(), 'channel' => (string) $u->channel], ['used_milli' => max(0, (int) $u->used)]);
+                    DB::table('credit_usage_daily')->updateOrInsert(['day' => (string) $u->day, 'tenant_id' => $context->id(), 'channel' => (string) $u->channel], ['used_milli' => max(0, (int) $u->used), 'messages' => (int) $u->messages]);
                 }
 
                 return $used->count();

@@ -6,6 +6,8 @@ namespace Wurk\Plans\Support;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Wurk\Plans\Contracts\SubscriptionHistory;
+use Wurk\Plans\Models\Package;
 use Wurk\Plans\Models\PackageVersion;
 use Wurk\Plans\Models\TenantSubscription;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -14,7 +16,7 @@ use Wurk\Tenancy\Contracts\TenantDirectory;
  * Each business's subscription as it stood each day (Sprint 15.4). MRR is the package price excl. VAT — monthly, or a
  * twelfth of yearly — for businesses that are paying (active, or past due within grace); trials and suspended are 0.
  */
-final readonly class MrrSnapshots
+final readonly class MrrSnapshots implements SubscriptionHistory
 {
     public const PAYING = ['active', 'past_due'];
 
@@ -57,6 +59,11 @@ final readonly class MrrSnapshots
 
         return $last === null ? [] : array_values(DB::table('subscription_snapshots')->where('day', $last)->get(['tenant_id', 'status', 'package_id', 'period', 'mrr_cents', 'country'])
             ->map(fn ($r) => ['tenant_id' => (string) $r->tenant_id, 'status' => (string) $r->status, 'package_id' => $r->package_id, 'period' => $r->period, 'mrr_cents' => (int) $r->mrr_cents, 'country' => (string) $r->country])->all());
+    }
+
+    public function packageNames(): array
+    {
+        return array_map('strval', Package::query()->pluck('name', 'id')->all());
     }
 
     /** The first day a snapshot was saved (history starts there). */

@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.5a (profitability)
+- **Admin → Profitability** (`costs.manage`: super admin, finance): what each SMS, WhatsApp and email costs WURK (per 1 000 messages) and WURK's **running cost per business per month** (decision A — default or per package); empty means **not set, never guessed**. A **pricing "what if"**: MRR at a new monthly price if today's paying businesses stayed.
+- **Admin → Metrics → Profit**: per package — businesses, revenue, provider costs, running costs, profit, margin — and **margin alerts** (businesses whose messages cost more than they paid). Costs that aren't set are named.
+- The credit usage roll-up also counts messages (providers bill per message).
+
 ### Added — Sprint 15.4b (WURK's SaaS metrics, continued)
 - **Admin → Metrics** also shows **Revenue** (received excl. VAT — including payments later refunded or charged back — less credit notes and chargebacks = net; VAT collected; failed payments; by purpose), **Agent commission** (earned, reversed, paid out; payable and pending now), **Credits used** by channel, **MRR movement** (opening + new + expansion + reactivation − contraction − churn = closing) and **cohort retention** (six months).
 - **Download CSV** of the metrics.
