@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Billing\Console\DunningCommand;
 use Wurk\Billing\Console\RenewSubscriptionsCommand;
+use Wurk\Billing\Console\UsageSummariesCommand;
 use Wurk\Billing\Contracts\ServiceStatus;
 use Wurk\Billing\Contracts\SplitPayments;
 use Wurk\Billing\Contracts\SubscriptionPayments;
@@ -25,6 +26,7 @@ use Wurk\Billing\Gateways\PaymentGateway;
 use Wurk\Billing\Gateways\PaystackGateway;
 use Wurk\Billing\Gateways\PaystackSplitPayments;
 use Wurk\Billing\Http\Middleware\RequirePayment;
+use Wurk\Billing\Jobs\AutoTopUpJob;
 use Wurk\Billing\Listeners\DunningNotices;
 use Wurk\Billing\Metrics\ProfitSection;
 use Wurk\Billing\Metrics\RevenueSection;
@@ -35,6 +37,7 @@ use Wurk\Billing\Support\Invoices;
 use Wurk\Billing\Support\PackCreditPricing;
 use Wurk\Billing\Support\PaidSubscriptions;
 use Wurk\Billing\Support\Payments;
+use Wurk\Credits\Events\LowCreditBalance;
 use Wurk\Payments\Contracts\PlatformPaymentReceived;
 use Wurk\Plans\Contracts\CreditPricing;
 use Wurk\Platform\Contracts\PlatformMetrics;
@@ -86,6 +89,9 @@ final class BillingServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->callAfterResolving(Schedule::class, fn (Schedule $sch) => $sch->command('billing:usage-summaries')->hourly()->onOneServer()->withoutOverlapping()); // 15.5b
+        // Auto top-up (Sprint 15.5b): queued after the work that ran credits low, so a card charge never slows a send.
+        Event::listen(LowCreditBalance::class, fn (LowCreditBalance $e) => AutoTopUpJob::dispatch($e->tenantId)->afterCommit());
         // Admin → Metrics → Profit (Sprint 15.5a).
         $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
             $m->register('profit', 70, fn (ReportPeriod $p) => Gate::allows('metrics.view') ? app(ProfitSection::class)->build($p) : null);
@@ -112,7 +118,7 @@ final class BillingServiceProvider extends ModuleServiceProvider
         });
 
         if ($this->app->runningInConsole()) {
-            $this->commands([RenewSubscriptionsCommand::class, DunningCommand::class]);
+            $this->commands([UsageSummariesCommand::class, RenewSubscriptionsCommand::class, DunningCommand::class]);
         }
     }
 }
