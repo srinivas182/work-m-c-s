@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.5c (provider reconciliation)
+- **Admin → Reconciliation** (`costs.manage`): upload any provider's statement CSV (decision B), map its columns, and match it against WURK's delivery log — by the provider's message ID, or by number (hashed as WURK keeps it) and South African day; repeats counted. Shows matched, **on the statement only** (billed, not sent), **in WURK only** (sent, not billed — including sends with no provider ID), unreadable lines, and the statement total against the expected cost. Unmatched lines download as CSV.
+- **The statement is never stored**: held encrypted in the cache for 30 minutes at most, clearable at once; the run is logged with counts only.
+- Messaging: `DeliveryLog` contract.
+
 ### Added — Sprint 15.5b (auto top-up, usage summary)
 - **Auto top-up** (Billing page → Credits): when credits run low, buy the chosen pack with the saved card (the usual saved-card path), within an optional monthly limit (excl. VAT). Queued, so it never slows a send; never retried; **every outcome emailed** (topped up, declined, limit reached, no saved card) and logged.
 - **Monthly usage summary** email on the 1st (from 08:00 in the business's time, once a month): credits used by channel, what's left, automatic top-ups. On by default; can be switched off. `billing:usage-summaries` runs hourly.
