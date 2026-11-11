@@ -31,6 +31,28 @@ final readonly class ReportPeriod
         return new self($from->setTimezone($stored), $now->setTimezone($stored), $branchIds);
     }
 
+    /**
+     * Chosen first and last days (Sprint 15.6), whole days in the given time zone; null if they don't make a range of at
+     * most two years.
+     *
+     * @param  list<string>|null  $branchIds
+     */
+    public static function between(string $first, string $last, string $tz, ?array $branchIds = null): ?self
+    {
+        try {
+            $from = CarbonImmutable::createFromFormat('!Y-m-d', $first, $tz);
+            $to = CarbonImmutable::createFromFormat('!Y-m-d', $last, $tz);
+        } catch (\Throwable) {
+            return null;
+        }
+        if (! $from instanceof CarbonImmutable || ! $to instanceof CarbonImmutable || $to->lt($from) || $from->diffInDays($to) > 731) {
+            return null;
+        }
+        $stored = (string) config('app.timezone');
+
+        return new self($from->setTimezone($stored), $to->addDay()->setTimezone($stored), $branchIds);
+    }
+
     public function previousFrom(): CarbonImmutable
     {
         return $this->from->sub($this->from->diff($this->to));

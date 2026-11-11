@@ -28,6 +28,7 @@ use Wurk\Billing\Gateways\PaystackSplitPayments;
 use Wurk\Billing\Http\Middleware\RequirePayment;
 use Wurk\Billing\Jobs\AutoTopUpJob;
 use Wurk\Billing\Listeners\DunningNotices;
+use Wurk\Billing\Metrics\HealthSection;
 use Wurk\Billing\Metrics\ProfitSection;
 use Wurk\Billing\Metrics\RevenueSection;
 use Wurk\Billing\Models\Payment;
@@ -93,6 +94,10 @@ final class BillingServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(Schedule::class, fn (Schedule $sch) => $sch->command('billing:usage-summaries')->hourly()->onOneServer()->withoutOverlapping()); // 15.5b
         // Auto top-up (Sprint 15.5b): queued after the work that ran credits low, so a card charge never slows a send.
         Event::listen(LowCreditBalance::class, fn (LowCreditBalance $e) => AutoTopUpJob::dispatch($e->tenantId)->afterCommit());
+        // Admin → Metrics → At risk (Sprint 15.6).
+        $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
+            $m->register('health', 120, fn (ReportPeriod $p) => Gate::allows('metrics.view') ? app(HealthSection::class)->build($p) : null);
+        });
         // Admin → Metrics → Profit (Sprint 15.5a).
         $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
             $m->register('profit', 70, fn (ReportPeriod $p) => Gate::allows('metrics.view') ? app(ProfitSection::class)->build($p) : null);

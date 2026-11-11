@@ -15,8 +15,10 @@ use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\AudienceSegments;
+use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Referrals\Console\ExpireWalletsCommand;
 use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Referrals\Contracts\ReferralRules;
@@ -47,6 +49,30 @@ final class ReferralsServiceProvider extends ModuleServiceProvider
     public function boot(): void
     {
         parent::boot();
+        // Reports → Referrals (Sprint 15.6): the programme's key figures, linking to the full referral reports (13.9a).
+        $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
+            $r->register('referrals', 450, function (ReportPeriod $p): ?array {
+                $ctx = app(TenantContext::class);
+                if (! ($p->forOwners || Gate::allows('reports.view')) || ! app(Entitlements::class)->entitled($ctx->id(), 'referrals')) {
+                    return null;
+                }
+                $reports = app(ReferralReports::class);
+                [$now, $before] = [$reports->cost($p->from, $p->to), $reports->cost($p->previousFrom(), $p->previousTo())];
+                $owed = $reports->liability();
+
+                return [
+                    'title' => 'Referrals',
+                    'metrics' => [
+                        ['label' => 'Sales from referred customers', 'value' => $now['sales_cents'], 'previous' => $before['sales_cents'], 'format' => 'money'],
+                        ['label' => 'Rewards cost', 'value' => $now['cashback_cents'] + $now['referral_cents'], 'previous' => $before['cashback_cents'] + $before['referral_cents'], 'format' => 'money'],
+                        ['label' => 'Owed in wallets', 'value' => $owed['wallets_cents'] + $owed['pending_cents'], 'previous' => 0, 'format' => 'money', 'snapshot' => true],
+                    ],
+                    'chart' => null, 'rows' => null, 'extra' => null, 'highlights' => [],
+                    'note' => 'Business-wide (the referral programme isn’t per branch).',
+                    'link' => ['label' => 'Full referral reports', 'href' => '/'.$ctx->current()->handle().'/referral-reports'],
+                ];
+            });
+        });
         // Campaigns → "Your top referrers" (Sprint 15.3b): the 50 members who referred the most, while the programme is on.
         $this->callAfterResolving(AudienceSegments::class, function (AudienceSegments $a): void {
             $a->register('referrers', 'Your top referrers', function (): ?array {

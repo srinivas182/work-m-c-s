@@ -21,6 +21,7 @@ export interface Section {
   chart?: { label: string; points: { label: string; value: number }[] } | null;
   rows?: Table | null;
   extra?: Table | null;
+  link?: { label: string; href: string } | null;
   note?: string;
 }
 const show = (v: number, f: Metric['format']) =>
@@ -113,6 +114,11 @@ export function SectionCard({ s }: { s: Section }) {
               </table>
             </div>
           ) : null,
+        )}
+        {s.link && (
+          <a className="justify-self-start underline" href={s.link.href}>
+            {s.link.label}
+          </a>
         )}
       </CardContent>
     </Card>

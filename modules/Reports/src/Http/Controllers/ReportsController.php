@@ -21,7 +21,7 @@ use Wurk\Tenancy\Contracts\TenantContext;
 /** Reports → Overview (Sprint 15.1): every module's section for a period, compared with the previous one. */
 final class ReportsController
 {
-    public const PERIODS = ['month' => 'This month', '7d' => 'Last 7 days', '30d' => 'Last 30 days', 'quarter' => 'This quarter', 'year' => 'This year'];
+    public const PERIODS = ['month' => 'This month', '7d' => 'Last 7 days', '30d' => 'Last 30 days', 'quarter' => 'This quarter', 'year' => 'This year', 'custom' => 'Choose dates'];
 
     /** @return array{0: ReportPeriod, 1: list<array<string, mixed>>} the period and sections this person may see */
     private function report(Request $request, TenantContext $context, BranchDirectory $branches, TeamDirectory $team, BusinessReports $reports): array
@@ -32,7 +32,8 @@ final class ReportsController
         $branch = (string) $request->query('branch', '');
         $chosen = $branch !== '' && in_array($branch, array_column($visible, 'id'), true) ? [$branch] : $mine;
         $name = array_key_exists((string) $request->query('period'), self::PERIODS) ? (string) $request->query('period') : 'month';
-        $period = ReportPeriod::named($name, $context->current()->timezone(), $chosen);
+        $period = ($name === 'custom' ? ReportPeriod::between((string) $request->query('from'), (string) $request->query('to'), $context->current()->timezone(), $chosen) : null)
+            ?? ReportPeriod::named($name === 'custom' ? 'month' : $name, $context->current()->timezone(), $chosen); // a bad range falls back to this month
 
         return [$period, $reports->sections($period)];
     }
@@ -69,14 +70,15 @@ final class ReportsController
         $branch = (string) $request->query('branch', '');
         $chosen = $branch !== '' && in_array($branch, array_column($visible, 'id'), true) ? [$branch] : $mine;
         $name = array_key_exists((string) $request->query('period'), self::PERIODS) ? (string) $request->query('period') : 'month';
-        $period = ReportPeriod::named($name, $context->current()->timezone(), $chosen);
+        $period = ($name === 'custom' ? ReportPeriod::between((string) $request->query('from'), (string) $request->query('to'), $context->current()->timezone(), $chosen) : null)
+            ?? ReportPeriod::named($name === 'custom' ? 'month' : $name, $context->current()->timezone(), $chosen); // a bad range falls back to this month
         $sections = $reports->sections($period);
 
         return Inertia::render('Reports::Overview', [
             'period' => $name, 'periods' => self::PERIODS, 'branch' => $chosen !== null && count($chosen) === 1 && $branch !== '' ? $branch : '',
             'branches' => $branches->several() ? array_map(fn ($b) => ['id' => $b['id'], 'name' => $b['name']], $visible) : [],
             'allBranches' => $mine === null,
-            'range' => ['from' => $period->from->toDateString(), 'to' => $period->to->toDateString()],
+            'range' => ['from' => $period->from->setTimezone($context->current()->timezone())->toDateString(), 'to' => $period->to->subSecond()->setTimezone($context->current()->timezone())->toDateString()],
             'highlights' => array_values(array_merge(...array_map(fn ($s) => (array) ($s['highlights'] ?? []), $sections ?: [[]]))),
             'sections' => $sections,
             'summary' => Gate::allows('billing.manage') ? app(ReportSummaries::class)->setting() : null,

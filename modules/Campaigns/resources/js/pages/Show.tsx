@@ -41,6 +41,7 @@ export default function Show({ campaign: c, segment, estimate }: Props) {
             {errors.send}
           </p>
         )}
+        <PhonePreview channel={c.channel} subject={c.subject} body={c.body} />
         <Card>
           <CardContent className="grid gap-2 pt-6 text-sm">
             {c.subject && (
@@ -106,5 +107,41 @@ export default function Show({ campaign: c, segment, estimate }: Props) {
         )}
       </div>
     </AppShell>
+  );
+}
+
+/** How a customer will see it (Sprint 15.6 — the agreed "phone preview"): {first_name} filled in, with the opt-out. */
+function PhonePreview({
+  channel,
+  subject,
+  body,
+}: {
+  channel: 'email' | 'sms';
+  subject: string | null;
+  body: string;
+}) {
+  const fill = (t: string) => t.replaceAll('{first_name}', 'Thandi');
+  return (
+    <figure
+      aria-label="Phone preview"
+      className="mx-auto w-full max-w-[18rem] rounded-[2rem] border-8 border-neutral-800 bg-white p-3 text-sm text-neutral-900 shadow-sm"
+    >
+      {channel === 'sms' ? (
+        <p className="w-fit max-w-[90%] rounded-2xl rounded-bl-sm bg-neutral-100 px-3 py-2 whitespace-pre-wrap">
+          {fill(body)} Stop: https://…/c/…/stop
+        </p>
+      ) : (
+        <div className="grid gap-2">
+          <p className="font-semibold">{fill(subject ?? '')}</p>
+          <p className="whitespace-pre-wrap">{fill(body)}</p>
+          <p className="text-xs text-neutral-500">
+            You’re getting this because you agreed to hear from us. Stop these messages.
+          </p>
+        </div>
+      )}
+      <figcaption className="mt-2 text-center text-xs text-neutral-500">
+        Preview, with a sample first name
+      </figcaption>
+    </figure>
   );
 }

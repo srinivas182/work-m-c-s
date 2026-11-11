@@ -51,6 +51,7 @@ final readonly class BookingsSection
                 ['label' => 'Bookings', 'value' => $kept($now)->count(), 'previous' => $kept($before)->count(), 'format' => 'count'],
                 ['label' => 'Booking value', 'value' => $value($now), 'previous' => $value($before), 'format' => 'money'],
                 ['label' => 'No-show rate', 'value' => $noShowRate($now), 'previous' => $noShowRate($before), 'format' => 'percent'],
+                ...(($u = $this->utilisation($p, $p->from, $p->to)) === null ? [] : [['label' => 'Utilisation (booked ÷ working time)', 'value' => $u, 'previous' => $this->utilisation($p, $p->previousFrom(), $p->previousTo()) ?? 0, 'format' => 'percent']]),
             ],
             'chart' => ['label' => 'Bookings by day', 'points' => array_map(fn ($d, $c) => ['label' => $d, 'value' => $c], array_keys($days), array_values($days))],
             'rows' => ['columns' => ['Busiest times', 'Bookings'], 'data' => array_map(fn ($s, $c) => [$s, (string) $c], array_slice(array_keys($slots), 0, 5), array_slice(array_values($slots), 0, 5))],
@@ -60,6 +61,44 @@ final readonly class BookingsSection
             ]],
             'highlights' => $highlights,
         ];
+    }
+
+    /**
+     * Booked time ÷ working time (Sprint 15.6): each person's hours on each day of the period, less time off (theirs or
+     * the whole business's); bookings that weren't cancelled (a no-show still blocked the time). Null when no hours are set.
+     */
+    private function utilisation(ReportPeriod $p, CarbonImmutable $from, CarbonImmutable $to): ?float
+    {
+        $db = DB::connection($this->context->connectionName());
+        $t = $this->context->id();
+        $tz = $this->context->current()->timezone();
+        $hours = $db->table('booking_hours')->where('tenant_id', $t)->when($p->branchIds !== null, fn ($q) => $q->whereIn('branch_id', $p->branchIds))
+            ->get(['member_id', 'weekday', 'starts', 'ends']);
+        if ($hours->isEmpty()) {
+            return null;
+        }
+        $off = $db->table('booking_time_off')->where('tenant_id', $t)->where('starts_at', '<', $to)->where('ends_at', '>', $from)->get(['member_id', 'starts_at', 'ends_at'])
+            ->map(fn ($o) => [$o->member_id, CarbonImmutable::parse((string) $o->starts_at), CarbonImmutable::parse((string) $o->ends_at)]);
+        $available = 0;
+        for ($day = $from->setTimezone($tz)->startOfDay(); $day->lt($to); $day = $day->addDay()) {
+            foreach ($hours->where('weekday', $day->dayOfWeekIso - 1) as $h) {
+                $s = $day->setTimeFromTimeString((string) $h->starts)->max($from);
+                $e = $day->setTimeFromTimeString((string) $h->ends)->min($to);
+                if ($e->lte($s)) {
+                    continue;
+                }
+                $mins = $s->diffInMinutes($e);
+                foreach ($off->filter(fn ($o) => $o[0] === null || $o[0] === $h->member_id) as [, $os, $oe]) {
+                    $mins -= max(0, $s->max($os)->diffInMinutes($e->min($oe), false));
+                }
+                $available += max(0, $mins);
+            }
+        }
+        $booked = $db->table('bookings')->where('tenant_id', $t)->where('status', '!=', 'cancelled')->whereBetween('starts_at', [$from, $to])
+            ->when($p->branchIds !== null, fn ($q) => $q->whereIn('branch_id', $p->branchIds))->get(['starts_at', 'ends_at'])
+            ->sum(fn ($b) => CarbonImmutable::parse((string) $b->starts_at)->diffInMinutes(CarbonImmutable::parse((string) $b->ends_at)));
+
+        return $available <= 0 ? null : round(min(100, $booked / $available * 100), 1);
     }
 
     /** @return Collection<int, \stdClass> */
