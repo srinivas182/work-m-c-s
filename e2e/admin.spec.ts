@@ -103,6 +103,12 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('columnheader', { name: 'MRR at that price' })).toBeVisible();
   await expectAccessible(page);
 
+  // Reconciliation (Sprint 15.5c): upload a provider's statement.
+  await page.goto(`${admin}/reconciliation`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Reconciliation' })).toBeVisible();
+  await expect(page.getByRole('form', { name: 'Upload a statement' })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/staff`);
   await expect(page.getByRole('heading', { level: 1, name: 'WURK staff' })).toBeVisible();
   await expectAccessible(page);
