@@ -8,6 +8,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
@@ -23,6 +24,7 @@ use Wurk\Bookings\Events\ReservationConfirmed;
 use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\ClassAttendee;
+use Wurk\Bookings\Reports\BookingsSection;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\MessageWording;
@@ -30,7 +32,11 @@ use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
+use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Support\ReportPeriod;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 final class BookingsServiceProvider extends ModuleServiceProvider
 {
@@ -66,6 +72,12 @@ final class BookingsServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Reports → Bookings (Sprint 15.1a).
+        $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
+            $r->register('bookings', 200, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
+                && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'bookings')
+                ? app(BookingsSection::class)->build($p) : null);
+        });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'bookings');
         // Public limits per business AND visitor: the route's domain pattern is the same for every business,
         // so keying by it alone made all of WURK share one allowance per IP (carrier NAT puts many

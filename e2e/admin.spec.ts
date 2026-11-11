@@ -86,6 +86,29 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByLabel('Agent', { exact: true })).toBeVisible();
   await expectAccessible(page);
 
+  // WURK's SaaS metrics (Sprint 15.4a).
+  await page.goto(`${admin}/metrics`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Metrics' })).toBeVisible();
+  await expect(page.getByLabel('Period')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download CSV' })).toHaveAttribute(
+    'href',
+    /\/metrics\/export\.csv\?period=/,
+  );
+  await expectAccessible(page);
+
+  // Profitability (Sprint 15.5a): costs and a pricing "what if".
+  await page.goto(`${admin}/profitability`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Profitability' })).toBeVisible();
+  await expect(page.getByRole('form', { name: 'Costs' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'MRR at that price' })).toBeVisible();
+  await expectAccessible(page);
+
+  // Reconciliation (Sprint 15.5c): upload a provider's statement.
+  await page.goto(`${admin}/reconciliation`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Reconciliation' })).toBeVisible();
+  await expect(page.getByRole('form', { name: 'Upload a statement' })).toBeVisible();
+  await expectAccessible(page);
+
   await page.goto(`${admin}/staff`);
   await expect(page.getByRole('heading', { level: 1, name: 'WURK staff' })).toBeVisible();
   await expectAccessible(page);

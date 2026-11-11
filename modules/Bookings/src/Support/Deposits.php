@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Bookings\Support;
 
+use Carbon\CarbonInterface;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Events\ClassJoined;
@@ -14,6 +15,8 @@ use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\ClassSession;
 use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\CouponCustomer;
+use Wurk\Payments\Contracts\Coupons;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Team\Contracts\BranchLedger;
@@ -72,11 +75,39 @@ final readonly class Deposits
      *
      * @throws \DomainException the wallet couldn't be used (a message for the customer)
      */
-    public function start(Booking|ClassAttendee $booking, int $amountCents, string $email, string $returnUrl, ?array $wallet = null): ?string
+    public function start(Booking|ClassAttendee $booking, int $amountCents, string $email, string $returnUrl, ?array $wallet = null, ?string $coupon = null): ?string
     {
         $reference = 'dep_'.$this->context->id().'_'.$booking->id; // routes Paystack's webhook to the business
         $expires = now()->addMinutes(self::HOLD_MINUTES);
+        // A coupon (15.3b) comes off the deposit; the stored deposit is what's due, so payment checks match.
+        $coupons = app(Coupons::class);
+        $key = CouponCustomer::key($booking->customer_phone);
+        $quote = $coupon === null || trim($coupon) === '' ? null : $coupons->quote($coupon, $amountCents, 'bookings', $key);
+        if ($quote !== null && ! $quote['ok']) {
+            throw new \DomainException((string) $quote['message']);
+        }
+        $amountCents -= $quote['discount_cents'] ?? 0;
         $booking->update(['deposit_cents' => $amountCents, 'payment_reference' => $reference, 'hold_expires_at' => Instant::db($expires)]);
+        if ($quote !== null) {
+            $coupons->redeem((string) $quote['coupon_id'], self::source($booking), $booking->id, (int) $quote['discount_cents'], $key);
+            if ($amountCents <= 0) { // the coupon covers it all
+                $this->settle($booking->refresh(), $reference);
+
+                return $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference);
+            }
+        }
+        try {
+            return $this->charge($booking, $amountCents, $email, $returnUrl, $wallet, $reference, $expires);
+        } catch (\Throwable $e) {
+            $coupons->release(self::source($booking), $booking->id); // the booking won't stand: the use goes back
+
+            throw $e;
+        }
+    }
+
+    /** @param array{pass: string, cents: int}|null $wallet */
+    private function charge(Booking|ClassAttendee $booking, int $amountCents, string $email, string $returnUrl, ?array $wallet, string $reference, CarbonInterface $expires): ?string
+    {
         if ($wallet !== null && $wallet['cents'] > 0) {
             $credit = app(StoreCredit::class);
             $contact = $credit->contactFromPass($wallet['pass']) ?? throw new \DomainException('Your wallet couldn’t be used — sign in to your account again and retry.');
@@ -176,6 +207,9 @@ final readonly class Deposits
                         $this->booker->cancel($booking, null, 'expired');
                         app(StoreCredit::class)->giveBack('booking', $booking->id, (int) $booking->wallet_cents); // never paid: the wallet part goes back
                         $n++;
+                    }
+                    foreach (ClassAttendee::query()->whereIn('payment_reference', $holds->pluck('reference'))->where('status', 'pending_payment')->pluck('id') as $placeId) {
+                        app(Coupons::class)->release('class', (string) $placeId); // never paid: the coupon use goes back
                     }
                     foreach (ClassAttendee::query()->whereIn('payment_reference', $holds->pluck('reference'))->where('status', 'pending_payment')->where('wallet_cents', '>', 0)->get() as $place) {
                         app(StoreCredit::class)->giveBack('class', $place->id, (int) $place->wallet_cents);

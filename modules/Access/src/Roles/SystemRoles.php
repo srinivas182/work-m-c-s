@@ -24,7 +24,7 @@ final class SystemRoles
     public const DEFINITIONS = [
         // Platform (WURK staff)
         self::SUPER_ADMIN => ['name' => 'Super admin', 'scope' => Permission::PLATFORM, 'permissions' => ['*']],
-        'finance' => ['name' => 'Finance', 'scope' => Permission::PLATFORM, 'permissions' => ['tenants.view', 'packages.view', 'credits.view', 'payments.record-cash', 'invoices.view', 'invoices.manage', 'agents.view', 'agents.pay']],
+        'finance' => ['name' => 'Finance', 'scope' => Permission::PLATFORM, 'permissions' => ['tenants.view', 'packages.view', 'credits.view', 'payments.record-cash', 'invoices.view', 'invoices.manage', 'agents.view', 'agents.pay', 'metrics.view', 'costs.manage']],
         'support' => ['name' => 'Support', 'scope' => Permission::PLATFORM, 'permissions' => ['tenants.view', 'platform-audit.view', 'packages.view', 'credits.view', 'invoices.view', 'agents.view']],
         'managed-services' => ['name' => 'Managed services', 'scope' => Permission::PLATFORM, 'permissions' => ['tenants.view']],
 
@@ -33,7 +33,7 @@ final class SystemRoles
         self::BRANCH_MANAGER => [
             'name' => 'Branch manager',
             'scope' => Permission::BUSINESS,
-            'permissions' => ['branches.view', 'team.view', 'bookings.view', 'bookings.manage', 'shop.orders', 'contacts.view', 'leads.view', 'leads.manage', 'sales.record', 'sales.approve'], // limited to their branches by the branch scope
+            'permissions' => ['branches.view', 'team.view', 'bookings.view', 'bookings.manage', 'shop.orders', 'contacts.view', 'leads.view', 'leads.manage', 'sales.record', 'sales.approve', 'reports.view'], // limited to their branches by the branch scope
             'branch_restricted' => true,
         ],
         self::STAFF => ['name' => 'Staff', 'scope' => Permission::BUSINESS, 'permissions' => ['branches.view', 'sales.record']], // record sales at the till

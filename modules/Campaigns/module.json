@@ -1,0 +1,18 @@
+{
+    "name": "Campaigns",
+    "key": "campaigns",
+    "version": "0.1.0",
+    "description": "Email and SMS campaigns to customers who agreed to marketing: audiences, credit estimates, test sends, scheduling, opt-out, results (sent, opened, clicked) and ready-made win-back and thank-you campaigns.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit",
+        "crm",
+        "messaging",
+        "credits",
+        "plans",
+        "payments"
+    ]
+}

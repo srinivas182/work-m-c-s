@@ -17,6 +17,7 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property string|null $tenant_id
  * @property string $channel
  * @property string $driver
+ * @property string $to_hash
  * @property string $to_masked
  * @property string $purpose
  * @property string $status

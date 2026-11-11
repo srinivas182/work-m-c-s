@@ -5,8 +5,8 @@
 # Five parts (14.8a): each ran 5-6.5 min normally, so a slow runner (+3 min) pushed one past 10 three times.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-PART1=(Website Records Health Admin Regions)
-PART2=(Identity Messaging Audit Team Referrals Sales Portal Tenancy) # Sprint 13 modules; Tenancy from part 4 (it timed out twice: 14.7, 14.5b); Agents now in part 4 (part 2 reached 8m15s: 14.6a)
+PART1=(Website Records Health Regions) # Admin to part 2: part 1 reached 10m17s (15.5c)
+PART2=(Admin Identity Messaging Audit Team Referrals Sales Portal) # Tenancy now in part 5 ("everything else"): part 2 timed out at 9m10s (15.1b)
 PART3=(Bookings Access Ai Plans Features Security Marketing)
 PART4=(Payments Credits Billing Shop) # money
 in_list() { local x="$1"; shift; for y in "$@"; do [[ "$x" == "$y" ]] && return 0; done; return 1; }

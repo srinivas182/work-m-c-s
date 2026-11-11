@@ -17,6 +17,11 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property string|null $default_method_id
  * @property string $collection_method
  * @property string|null $default_mandate_id
+ * @property bool $auto_top_up
+ * @property string|null $auto_top_up_pack_id
+ * @property int|null $auto_top_up_cap_cents
+ * @property bool $usage_summary
+ * @property string|null $usage_summary_for
  */
 final class BillingAccount extends Model implements CentralModel
 {
@@ -27,4 +32,9 @@ final class BillingAccount extends Model implements CentralModel
     protected $keyType = 'string';
 
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return ['auto_top_up' => 'boolean', 'auto_top_up_cap_cents' => 'integer', 'usage_summary' => 'boolean'];
+    }
 }

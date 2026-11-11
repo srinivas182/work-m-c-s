@@ -4,6 +4,73 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.17.0] — 2026-11-11 — Sprint 15: Reports and campaigns
+
+Business reports (sales, bookings with utilisation, customers, leads, stock, takings and VAT, referrals; any dates; per branch; highlights; CSV/PDF; owners' summary email), website analytics without cookies, email and SMS campaigns with coupons, WURK's SaaS metrics (MRR, ARR, churn, cohorts, movement, revenue, agents, credits, at-risk businesses), profitability (costs, profit per package, margin alerts, pricing what-if, provider reconciliation), auto top-up and the monthly usage summary. Waiting on Meta-approved templates: WhatsApp campaigns and the weekly WhatsApp summary (email until then). CI: MySQL tests in five parts, 12 minutes each. Release steps: docs/deployment/docker.md (v0.17.0 rows).
+
+### Added — Sprint 15.6 (closing the spec gaps)
+- **Bookings utilisation**: booked time ÷ working time (each person's hours less time off; no-shows count as booked).
+- **Any dates**: "Choose dates" on Reports and Admin → Metrics (exports too); up to two years.
+- **Reports → Referrals**: sales from referred customers, rewards cost, owed in wallets, and a link to the full referral reports.
+- **Admin → Metrics → At risk**: paying businesses no one has signed in to for 30+ days, with their MRR.
+- **Net revenue by package and country** in Admin → Metrics → Revenue.
+- **Campaign phone preview**, filled in with a sample first name and the opt-out.
+
+### Added — Sprint 15.5c (provider reconciliation)
+- **Admin → Reconciliation** (`costs.manage`): upload any provider's statement CSV (decision B), map its columns, and match it against WURK's delivery log — by the provider's message ID, or by number (hashed as WURK keeps it) and South African day; repeats counted. Shows matched, **on the statement only** (billed, not sent), **in WURK only** (sent, not billed — including sends with no provider ID), unreadable lines, and the statement total against the expected cost. Unmatched lines download as CSV.
+- **The statement is never stored**: held encrypted in the cache for 30 minutes at most, clearable at once; the run is logged with counts only.
+- Messaging: `DeliveryLog` contract.
+
+### Added — Sprint 15.5b (auto top-up, usage summary)
+- **Auto top-up** (Billing page → Credits): when credits run low, buy the chosen pack with the saved card (the usual saved-card path), within an optional monthly limit (excl. VAT). Queued, so it never slows a send; never retried; **every outcome emailed** (topped up, declined, limit reached, no saved card) and logged.
+- **Monthly usage summary** email on the 1st (from 08:00 in the business's time, once a month): credits used by channel, what's left, automatic top-ups. On by default; can be switched off. `billing:usage-summaries` runs hourly.
+
+### Added — Sprint 15.5a (profitability)
+- **Admin → Profitability** (`costs.manage`: super admin, finance): what each SMS, WhatsApp and email costs WURK (per 1 000 messages) and WURK's **running cost per business per month** (decision A — default or per package); empty means **not set, never guessed**. A **pricing "what if"**: MRR at a new monthly price if today's paying businesses stayed.
+- **Admin → Metrics → Profit**: per package — businesses, revenue, provider costs, running costs, profit, margin — and **margin alerts** (businesses whose messages cost more than they paid). Costs that aren't set are named.
+- The credit usage roll-up also counts messages (providers bill per message).
+
+### Added — Sprint 15.4b (WURK's SaaS metrics, continued)
+- **Admin → Metrics** also shows **Revenue** (received excl. VAT — including payments later refunded or charged back — less credit notes and chargebacks = net; VAT collected; failed payments; by purpose), **Agent commission** (earned, reversed, paid out; payable and pending now), **Credits used** by channel, **MRR movement** (opening + new + expansion + reactivation − contraction − churn = closing) and **cohort retention** (six months).
+- **Download CSV** of the metrics.
+- **Credit usage roll-up**: `credits:rollup-usage` nightly (01:30) into a central table; `--since` backfills from each business's ledger history (run once after deploying).
+
+### Added — Sprint 15.4a (WURK's SaaS metrics)
+- **Admin → Metrics** (`metrics.view`: super admin, finance): **Subscriptions** — MRR and ARR (excl. VAT), paying, on trial, new, lost, in grace, suspended, average revenue per business, churn, trial conversion and estimated lifetime value, by package and country; compared with the period before; highlights.
+- **Daily subscription snapshots** (`plans:snapshot-mrr`, 23:50): each business's subscription and MRR. **History starts on deploy** — comparisons, new, lost and churn fill in from then (the page says so).
+- Report section cards are shared between business reports and Admin → Metrics.
+
+### Added — Sprint 15.3b (coupons)
+- **Customers → Coupons**: amount or % off, for the shop and/or booking deposits; minimum spend, last day, total uses, once per customer (by a one-way key from their phone), optionally for a campaign; switch off.
+- **At the shop**: a coupon field in the cart, quoted by the same pricing checkout uses; off the goods, never delivery; **commission on what was charged**; given back when an order is cancelled or never paid.
+- **On booking deposits and classes**: the stored deposit is what's due; a code covering it all confirms the booking at once; given back on cancellation, expiry, or if payment can't start.
+- **Campaign results** show coupon redemptions and the sales they brought. New audience **"Your top referrers"** while the referral programme is on (Platform `AudienceSegments`; Referrals registers it).
+
+### Added — Sprint 15.3a (campaigns)
+- **Customers → Campaigns** (`campaigns.manage`; packages with *Campaigns & offers*): **email** (free) or **SMS** (credits) to customers **who agreed to marketing** — everyone, seen in the last 30 days, not seen in 60+ days, or one branch.
+- **Credit estimate before sending** (the balance, capped by any spending limit); refused when it won't cover it. **Test send** to yourself; **send now or schedule**. `{first_name}` in the subject and message.
+- **Opt-out on every message** (one click; consent withdrawn in CRM, logged); email `List-Unsubscribe`. **Results**: sent, failed, opened (email, indicative), clicked — links tracked through the business's site and signed (no open redirect).
+- **Ready-made**: "We miss you" (60+ days) and "Thank you" (recent), with suggested wording.
+- CRM: `Audiences` contract.
+
+### Added — Sprint 15.2 (website analytics)
+- **Reports → Website**: visitors, page views, top pages, where visitors came from (Google, Facebook, Instagram, WhatsApp, a campaign's `utm_source`, or Direct), and the orders and bookings each source brought.
+- **No cookies, no script, no consent banner**: counted on WURK's servers (pages revalidate, so revisits count too); visitors are a one-way hash with a random daily secret kept two days — no IP stored, not traceable across days; bots, link previews and prefetches skipped.
+- Only orders and bookings made on the public site are credited to a source.
+
+### Added — Sprint 15.1b (more reports, export, summaries)
+- **Takings and VAT** (first section): everything taken — shop, bookings, in-store sales — after refunds; **VAT** (included in prices, at the country's rate) **only once the business says it's VAT-registered** (**Settings → VAT registration**, owners).
+- **Leads**: new leads by source, won of those closed, median first response. **Stock**: out of stock, lowest stock, didn't sell in the period (shown as "right now").
+- **Download** any report as **CSV** or **PDF**.
+- **Owners' summary email**: weekly (Mondays) by default, monthly (the 1st) or off — from 07:00 in the business's time, once per period (`reports:send-summaries`, hourly). By email until the WhatsApp template is approved (decision D).
+
+### Added — Sprint 15.1a (business reports)
+- **Reports → Overview** (`reports.view` — owners and branch managers; managers see only their branches): this month, last 7/30 days, this quarter or year, **compared with the period before**, per branch or combined, with **plain-language highlights** at the top.
+- **Shop sales**: after refunds, orders, average order, by day, best sellers, payment methods.
+- **Bookings**: bookings, value (from service prices), no-show rate, busiest times, outcomes.
+- **Customers**: seen, new vs returning, repeat rate, average lifetime value, and customers not seen in 60 days.
+- Each module supplies its own section through Platform's `BusinessReports` contract; CRM records what each purchase was paid (from the purchase notices) for lifetime value.
+
 ## [0.16.0] — 2026-11-09 — Sprint 14: Agents
 
 WURK's agents: the sponsor hierarchy, referral links and attribution, commission on subscription payments (up to 7 levels, percentages set by the super admin), WURK's refund window and clawback, EFT payout batches with remittance advice, banking details, the agent area (dashboard, businesses, earnings, team, payouts, marketing kit), and demo sites with "Make it yours". CI: MySQL tests in five parts. Release steps: docs/deployment/docker.md (v0.16.0 rows).

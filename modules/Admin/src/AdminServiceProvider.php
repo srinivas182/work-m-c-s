@@ -20,6 +20,12 @@ final class AdminServiceProvider extends ModuleServiceProvider
     {
         return [
             ['label' => 'Dashboard', 'route' => 'admin.home', 'icon' => 'layout-dashboard', 'section' => 'Platform', 'order' => 10],
+            ['label' => 'Metrics', 'route' => 'admin.metrics', 'icon' => 'bar-chart', 'section' => 'Platform', 'permission' => 'metrics.view', 'order' => 15],
         ];
+    }
+
+    public function permissions(): array
+    {
+        return [['key' => 'metrics.view', 'label' => 'See WURK’s SaaS metrics (MRR, churn, revenue)', 'scope' => 'platform']];
     }
 }

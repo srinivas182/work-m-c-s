@@ -120,5 +120,10 @@ test('a new owner signs up from the pricing page and lands in their back office'
   await page.getByRole('button', { name: 'Set up a debit order' }).click();
   await expect(page.getByLabel(/^Account holder’s ID number/)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Change package' })).toBeVisible();
+  // Credits (Sprint 15.5b): the monthly usage summary is on by default.
+  await expect(page.getByRole('form', { name: 'Credit settings' })).toBeVisible();
+  await expect(
+    page.getByRole('checkbox', { name: 'Email me a monthly summary of the credits we used' }),
+  ).toBeChecked();
   await expectAccessible(page);
 });

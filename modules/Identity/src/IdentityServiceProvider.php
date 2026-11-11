@@ -10,6 +10,7 @@ use Wurk\Identity\Console\CreateIdentityCommand;
 use Wurk\Identity\Contracts\Accounts;
 use Wurk\Identity\Contracts\Invitations;
 use Wurk\Identity\Contracts\PeopleDirectory;
+use Wurk\Identity\Contracts\TeamActivity;
 use Wurk\Identity\Contracts\TextMessenger;
 use Wurk\Identity\Contracts\Verification;
 use Wurk\Identity\Http\Middleware\EnsurePlatformStaff;
@@ -19,6 +20,7 @@ use Wurk\Identity\Onboarding\AccountService;
 use Wurk\Identity\Onboarding\VerificationService;
 use Wurk\Identity\Otp\LogTextMessenger;
 use Wurk\Identity\People\EloquentPeopleDirectory;
+use Wurk\Identity\People\EloquentTeamActivity;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Tenancy\Events\OwnerInvitationRequested;
 
@@ -26,6 +28,7 @@ final class IdentityServiceProvider extends ModuleServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(TeamActivity::class, EloquentTeamActivity::class); // 15.6
         $this->app->singleton(Invitations::class, InvitationService::class);
         $this->app->singleton(PeopleDirectory::class, EloquentPeopleDirectory::class);
         $this->app->singletonIf(TextMessenger::class, LogTextMessenger::class);

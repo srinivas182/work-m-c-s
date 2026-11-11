@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
+use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Billing\Gateways\DebitOrderProvider;
 use Wurk\Billing\Gateways\FakeDebitOrderProvider;
 use Wurk\Billing\Models\BillingAccount;
@@ -18,6 +19,7 @@ use Wurk\Billing\Models\CreditPack;
 use Wurk\Billing\Models\Invoice;
 use Wurk\Billing\Models\Mandate;
 use Wurk\Billing\Models\Payment;
+use Wurk\Billing\Support\AutoTopUp;
 use Wurk\Billing\Support\BillingStatus;
 use Wurk\Billing\Support\Dunning;
 use Wurk\Billing\Support\Payments;
@@ -62,6 +64,12 @@ final class BillingController
             ],
             'card' => $method === null ? null : ['brand' => $method->brand, 'last4' => $method->last4, 'expires' => $method->expires],
             'creditPacksAllowed' => $this->packsAllowed(),
+            'credits' => (function () use ($tenantId) { // auto top-up and the usage summary (15.5b)
+                $a = BillingAccount::query()->find($tenantId);
+
+                return ['auto_top_up' => (bool) ($a->auto_top_up ?? false), 'pack_id' => $a?->auto_top_up_pack_id, 'cap_cents' => $a?->auto_top_up_cap_cents,
+                    'usage_summary' => (bool) ($a->usage_summary ?? true), 'spent_cents' => app(AutoTopUp::class)->spentThisMonth($tenantId)];
+            })(),
             'packs' => ! $this->packsAllowed() ? [] : CreditPack::query()->where('active', true)->orderBy('display_order')->orderBy('credits')->get()
                 ->map(fn (CreditPack $p) => ['id' => $p->id, 'name' => $p->name, 'credits' => $p->credits, 'total_cents' => $withVat($p->price_cents)])->all(),
             'payments' => Payment::query()->where('tenant_id', $tenantId)->latest()->limit(20)->get()
@@ -165,5 +173,21 @@ final class BillingController
         return $result['url'] === null
             ? back()->with('warning', 'Card payments aren’t available right now. Please try again shortly.')
             : Inertia::location($result['url']);
+    }
+
+    /** Auto top-up and the monthly usage summary (Sprint 15.5b). */
+    public function saveCreditSettings(Request $request, AuditLog $audit): RedirectResponse
+    {
+        $d = $request->validate(['auto_top_up' => ['required', 'boolean'], 'pack_id' => ['nullable', 'required_if:auto_top_up,true', 'exists:credit_packs,id'],
+            'cap' => ['nullable', 'numeric', 'min:1', 'max:100000'], 'usage_summary' => ['required', 'boolean']], ['pack_id.required_if' => 'Choose the pack to buy.']);
+        if ($d['auto_top_up'] && ! $this->packsAllowed()) {
+            throw ValidationException::withMessages(['pack_id' => 'Your package doesn’t include buying credit packs.']);
+        }
+        $account = BillingAccount::query()->findOrFail($this->context->id());
+        $account->update(['auto_top_up' => (bool) $d['auto_top_up'], 'auto_top_up_pack_id' => $d['auto_top_up'] ? $d['pack_id'] : null,
+            'auto_top_up_cap_cents' => isset($d['cap']) ? (int) round((float) $d['cap'] * 100) : null, 'usage_summary' => (bool) $d['usage_summary']]);
+        $audit->record('billing.credit_settings', 'billing_account', $this->context->id(), ['auto_top_up' => (bool) $d['auto_top_up'], 'usage_summary' => (bool) $d['usage_summary']]);
+
+        return back()->with('status', 'Saved.');
     }
 }
