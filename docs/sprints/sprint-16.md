@@ -1,6 +1,6 @@
-# Sprint 16 — Self-service & support (specification, draft for approval)
+# Sprint 16 — Self-service & support (specification)
 
-**Status:** draft for WURK's approval (11 Nov 2026). Nothing is built until approved.
+**Status:** approved by WURK (11 Nov 2026), including the market-review recommendations.
 **Plan:** AI assistant; help centre & short videos per category; consent-based impersonation; tickets; tenant health; backup/restore & export (docs/sprint-plan.md).
 **PRD:** §13 (self-service & support: assistant that answers **and acts**, tooltips and 30-second videos on every screen, searchable help centre, plain-language errors, self-service backup/restore/export, tickets from the dashboard), §4.8 (ticket system, help centre CMS, tenant health: uptime, SSL, DNS, inactivity, failed payments).
 **Builds on:** the `Ai` module (providers with fallback, cost logging, quoted credit-charged actions), `Audit` (already records an impersonator), Reports (15.1), Metrics "At risk" (15.6).
@@ -28,14 +28,14 @@
 | **16.5 Tenant health** | Admin → Health: a score per business with **plain reasons and a suggested action** — no sign-in (15.6), failed payments/grace, credits run out, site not published, errors, and (Sprint 17) SSL/DNS for custom domains. Filters, sort by MRR at risk, export. Weekly digest to WURK's success team. |
 | **16.6 Export & "Recently deleted"** | **Settings → Your data**: one click builds a **full export** (CSVs per area + uploaded files, ZIP) in the background; emailed link valid 24 hours; logged. **Recently deleted** (30 days): customers, products, services, bookings, pages, campaigns — restore with one click; purged after 30 days. Full-business restores stay with WURK (backups), requested through a ticket. |
 
-## Decisions needed
+## Decisions
 
-| # | Decision | Recommendation |
+| # | Decision | Status |
 |---|---|---|
-| A | **Assistant allowance** | 50 questions a month free per business; then **1 credit per question**; actions themselves free (they're the business's own work); a monthly cap like auto top-up. |
-| B | **Support targets** (first reply, business hours) | Starter 24 h, Growth 8 h, Pro 4 h; managed packages 2 h. Shown to the business; breaches flagged in the inbox. |
-| C | **Restore scope** | "Recently deleted" (30 days) + full export, self-service; full-business restore by WURK via a ticket — rather than self-service "restore everything to yesterday" (too easy to lose a day's orders). |
-| D | **Support access** | View-only by default; full access only when the owner chooses, up to 2 hours; sensitive actions always blocked. |
+| A | **Assistant allowance**: 50 questions a month free per business, then **1 credit per question**; actions free; a monthly cap. Both numbers are **super-admin settings** in Admin. | **Accepted (WURK, 11 Nov 2026)** — no other numbers given. |
+| B | **Support targets** (first reply, business hours): Starter 24 h, Growth 8 h, Pro 4 h, managed 2 h; shown to the business; breaches flagged in the inbox. | **Decided (WURK, 11 Nov 2026).** |
+| C | **Restore scope**: "Recently deleted" (30 days) + full export, self-service; full-business restore by WURK via a ticket. | **Decided (WURK, 11 Nov 2026).** |
+| D | **Support access**: view-only by default; full only when the owner chooses, up to 2 hours; sensitive actions always blocked. | **Decided (WURK, 11 Nov 2026).** |
 
 ## Order
 
