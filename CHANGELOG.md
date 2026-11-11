@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.6 (closing the spec gaps)
+- **Bookings utilisation**: booked time ÷ working time (each person's hours less time off; no-shows count as booked).
+- **Any dates**: "Choose dates" on Reports and Admin → Metrics (exports too); up to two years.
+- **Reports → Referrals**: sales from referred customers, rewards cost, owed in wallets, and a link to the full referral reports.
+- **Admin → Metrics → At risk**: paying businesses no one has signed in to for 30+ days, with their MRR.
+- **Net revenue by package and country** in Admin → Metrics → Revenue.
+- **Campaign phone preview**, filled in with a sample first name and the opt-out.
+
 ### Added — Sprint 15.5c (provider reconciliation)
 - **Admin → Reconciliation** (`costs.manage`): upload any provider's statement CSV (decision B), map its columns, and match it against WURK's delivery log — by the provider's message ID, or by number (hashed as WURK keeps it) and South African day; repeats counted. Shows matched, **on the statement only** (billed, not sent), **in WURK only** (sent, not billed — including sends with no provider ID), unreadable lines, and the statement total against the expected cost. Unmatched lines download as CSV.
 - **The statement is never stored**: held encrypted in the cache for 30 minutes at most, clearable at once; the run is logged with counts only.
