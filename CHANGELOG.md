@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.17.0] — 2026-11-11 — Sprint 15: Reports and campaigns
+
+Business reports (sales, bookings with utilisation, customers, leads, stock, takings and VAT, referrals; any dates; per branch; highlights; CSV/PDF; owners' summary email), website analytics without cookies, email and SMS campaigns with coupons, WURK's SaaS metrics (MRR, ARR, churn, cohorts, movement, revenue, agents, credits, at-risk businesses), profitability (costs, profit per package, margin alerts, pricing what-if, provider reconciliation), auto top-up and the monthly usage summary. Waiting on Meta-approved templates: WhatsApp campaigns and the weekly WhatsApp summary (email until then). CI: MySQL tests in five parts, 12 minutes each. Release steps: docs/deployment/docker.md (v0.17.0 rows).
+
 ### Added — Sprint 15.6 (closing the spec gaps)
 - **Bookings utilisation**: booked time ÷ working time (each person's hours less time off; no-shows count as booked).
 - **Any dates**: "Choose dates" on Reports and Admin → Metrics (exports too); up to two years.

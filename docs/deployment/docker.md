@@ -55,6 +55,12 @@ Run these once, after `migrate`, when deploying the version shown (any other com
 | v0.16.0 | Confirm the scheduler runs (as already required) | Demo sites: reminders on days 10 and 13, archived on day 14 (`agents:sweep-demos`, daily 03:15). |
 | v0.16.0 | Super admin, in Admin: **Agent commission** (percentages per level — **0% until set**, so no commission accrues before); **Billing settings → refund window** (default 30 days); **Agent payouts → minimum payout** (none until set) | Agents earn nothing until percentages are set; commission becomes payable when a payment's refund window closes. |
 | v0.16.0 | Add agents in **Admin → Agents** (or `php artisan agents:create <phone or email>`) | Each gets a referral link, a QR code and access to `app.wurk.co.za/agent`. Finance can see agents and run payouts; support can see agents. |
+| v0.17.0 | **Never change `APP_KEY`** (as before) | Campaign links, demo links and encrypted data depend on it. |
+| v0.17.0 | Once, after migrating: `docker run --rm --env-file production.env wurk:<version> php artisan credits:rollup-usage --since=2026-01-01` | Fills Admin → Metrics with past credit use from each business's own records (credit history doesn't start empty). Safe to run again. |
+| v0.17.0 | Once, after migrating: `… php artisan plans:snapshot-mrr` | Records today's subscriptions; MRR movement, churn and cohorts build from here (they need history, which starts on deploy). |
+| v0.17.0 | Confirm the scheduler runs (as already required) | New jobs: `plans:snapshot-mrr` (23:50), `credits:rollup-usage` (01:30), `campaigns:send-due` (every 5 min), `reports:send-summaries` and `billing:usage-summaries` (hourly), and the queue worker for auto top-ups. |
+| v0.17.0 | In **Admin → Profitability**: provider cost per 1 000 SMS / WhatsApp / email, and the running cost per business per month (decision A) | Until set, profit reports say what's missing — they never guess. |
+| v0.17.0 | Finance and super admins see **Admin → Metrics**, **Profitability** and **Reconciliation** (`metrics.view`, `costs.manage`); `permissions:sync` as on every deploy | New platform permissions. |
 | every deploy | `docker run --rm --env-file production.env wurk:<version> php artisan permissions:sync` | Checks built-in roles and removes permissions modules no longer declare from custom roles (built-in roles update by themselves — v0.15.0 gives staff *Record sale* and branch managers *approve sales*). |
 
 ## Required environment
