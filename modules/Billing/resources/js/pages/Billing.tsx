@@ -9,6 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Checkbox,
   EmptyState,
   Field,
   Input,
@@ -29,6 +30,13 @@ import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 
 interface Props {
+  credits: {
+    auto_top_up: boolean;
+    pack_id: string | null;
+    cap_cents: number | null;
+    usage_summary: boolean;
+    spent_cents: number;
+  };
   subscription: {
     package_id: string;
     pending: { package: string; period: string } | null;
@@ -561,6 +569,7 @@ export default function Billing({
   account,
   card,
   packs,
+  credits,
   creditPacksAllowed,
   payments,
   gatewayReady,
@@ -746,6 +755,8 @@ export default function Billing({
           </Card>
         )}
 
+        <CreditSettings credits={credits} packs={packs} />
+
         {packs.length > 0 && (
           <Card>
             <CardHeader>
@@ -820,5 +831,88 @@ export default function Billing({
         )}
       </div>
     </AppShell>
+  );
+}
+
+/** Auto top-up and the monthly usage summary (Sprint 15.5b). */
+function CreditSettings({ credits, packs }: { credits: Props['credits']; packs: Props['packs'] }) {
+  const form = useForm({
+    auto_top_up: credits.auto_top_up,
+    pack_id: credits.pack_id ?? '',
+    cap: credits.cap_cents === null ? '' : (credits.cap_cents / 100).toFixed(2),
+    usage_summary: credits.usage_summary,
+  });
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Credits</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form
+          aria-label="Credit settings"
+          className="grid gap-3 text-sm"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.put(`${window.location.pathname.replace(/\/$/, '')}/credit-settings`, {
+              preserveScroll: true,
+            });
+          }}
+        >
+          {packs.length > 0 && (
+            <>
+              <label className="flex items-center gap-2">
+                <Checkbox
+                  checked={form.data.auto_top_up}
+                  onCheckedChange={(on) => form.setData('auto_top_up', on === true)}
+                />
+                Top up automatically with my saved card when credits run low
+              </label>
+              {form.data.auto_top_up && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Field label="Pack to buy" error={form.errors.pack_id}>
+                    <select
+                      className="border-border bg-bg h-10 w-full rounded-md border px-3"
+                      value={form.data.pack_id}
+                      onChange={(e) => form.setData('pack_id', e.target.value)}
+                    >
+                      <option value="">Choose a pack</option>
+                      {packs.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} — {p.credits} credits
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field
+                    label="Most to spend a month, excl. VAT (R, optional)"
+                    error={form.errors.cap}
+                  >
+                    <Input
+                      inputMode="decimal"
+                      value={form.data.cap}
+                      onChange={(e) => form.setData('cap', e.target.value)}
+                    />
+                  </Field>
+                  <p className="text-fg-muted sm:col-span-2">
+                    We email you every time we top up. Topped up this month:{' '}
+                    {rand(credits.spent_cents)} excl. VAT.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+          <label className="flex items-center gap-2">
+            <Checkbox
+              checked={form.data.usage_summary}
+              onCheckedChange={(on) => form.setData('usage_summary', on === true)}
+            />
+            Email me a monthly summary of the credits we used
+          </label>
+          <Button type="submit" className="justify-self-start" loading={form.processing}>
+            Save
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

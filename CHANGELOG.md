@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 15.5b (auto top-up, usage summary)
+- **Auto top-up** (Billing page → Credits): when credits run low, buy the chosen pack with the saved card (the usual saved-card path), within an optional monthly limit (excl. VAT). Queued, so it never slows a send; never retried; **every outcome emailed** (topped up, declined, limit reached, no saved card) and logged.
+- **Monthly usage summary** email on the 1st (from 08:00 in the business's time, once a month): credits used by channel, what's left, automatic top-ups. On by default; can be switched off. `billing:usage-summaries` runs hourly.
+
 ### Added — Sprint 15.5a (profitability)
 - **Admin → Profitability** (`costs.manage`: super admin, finance): what each SMS, WhatsApp and email costs WURK (per 1 000 messages) and WURK's **running cost per business per month** (decision A — default or per package); empty means **not set, never guessed**. A **pricing "what if"**: MRR at a new monthly price if today's paying businesses stayed.
 - **Admin → Metrics → Profit**: per package — businesses, revenue, provider costs, running costs, profit, margin — and **margin alerts** (businesses whose messages cost more than they paid). Costs that aren't set are named.

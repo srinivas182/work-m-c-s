@@ -19,6 +19,7 @@ Route::tenant(function (): void {
         Route::put('/account', [BillingController::class, 'saveAccount'])->name('.account');
         Route::post('/pay', [BillingController::class, 'pay'])->middleware('throttle:10,1,.pay')->name('.pay');
         Route::post('/credits', [BillingController::class, 'buyCredits'])->middleware('throttle:10,1,.credits')->name('.credits');
+        Route::put('/credit-settings', [BillingController::class, 'saveCreditSettings'])->name('.credit-settings'); // 15.5b
         Route::post('/card', [BillingController::class, 'updateCard'])->middleware('throttle:10,1,.card')->name('.card');
         Route::get('/return', [BillingController::class, 'returned'])->name('.return');
         Route::post('/debit-order', [DebitOrderController::class, 'store'])->middleware('throttle:5,10,.debit-order')->name('.debit-order');
