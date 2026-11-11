@@ -103,6 +103,9 @@ describe('Campaigns pages', () => {
       />,
     );
     expect(screen.getByText(/not enough credits/)).toBeTruthy();
+    expect(screen.getByRole('figure', { name: 'Phone preview' }).textContent).toContain(
+      'Hi Thandi Stop:',
+    ); // filled in, with the opt-out
     expect(screen.getByRole('button', { name: 'Send now' }).hasAttribute('disabled')).toBe(true);
     expect(screen.getByRole('button', { name: 'Send me a test' })).toBeTruthy();
   });

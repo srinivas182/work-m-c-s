@@ -16,7 +16,7 @@ use Wurk\Platform\Support\ReportPeriod;
 /** Admin → Metrics (Sprint 15.4): WURK's own SaaS metrics, compared with the period before. */
 final class MetricsController
 {
-    public const PERIODS = ['month' => 'This month', '30d' => 'Last 30 days', 'quarter' => 'This quarter', 'year' => 'This year', 'last-month' => 'Last month'];
+    public const PERIODS = ['month' => 'This month', '30d' => 'Last 30 days', 'quarter' => 'This quarter', 'year' => 'This year', 'last-month' => 'Last month', 'custom' => 'Choose dates'];
 
     /** CSV of the same metrics (Sprint 15.4b). */
     public function export(Request $request, PlatformMetrics $metrics): \Symfony\Component\HttpFoundation\Response
@@ -39,7 +39,7 @@ final class MetricsController
 
         return Inertia::render('Admin::Metrics', [
             'period' => $name, 'periods' => self::PERIODS,
-            'range' => ['from' => $period->from->setTimezone($tz)->toDateString(), 'to' => $period->to->setTimezone($tz)->toDateString()],
+            'range' => ['from' => $period->from->setTimezone($tz)->toDateString(), 'to' => $period->to->subSecond()->setTimezone($tz)->toDateString()],
             'highlights' => array_values(array_merge(...array_map(fn ($s) => (array) ($s['highlights'] ?? []), $sections ?: [[]]))),
             'sections' => $sections,
         ]);
@@ -56,8 +56,12 @@ final class MetricsController
     {
         $stored = (string) config('app.timezone');
 
+        if ($this->name($request) === 'custom' && ($custom = ReportPeriod::between((string) $request->query('from'), (string) $request->query('to'), self::TZ)) !== null) {
+            return $custom;
+        }
+
         return $this->name($request) === 'last-month'
             ? new ReportPeriod(CarbonImmutable::now(self::TZ)->subMonthNoOverflow()->startOfMonth()->setTimezone($stored), CarbonImmutable::now(self::TZ)->startOfMonth()->setTimezone($stored))
-            : ReportPeriod::named($this->name($request), self::TZ);
+            : ReportPeriod::named($this->name($request) === 'custom' ? 'month' : $this->name($request), self::TZ);
     }
 }
