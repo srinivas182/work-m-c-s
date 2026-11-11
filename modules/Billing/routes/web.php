@@ -7,6 +7,7 @@ use Wurk\Billing\Http\Controllers\Admin\BillingAdminController;
 use Wurk\Billing\Http\Controllers\Admin\CashPaymentsController;
 use Wurk\Billing\Http\Controllers\Admin\CreditPacksController;
 use Wurk\Billing\Http\Controllers\Admin\ProfitabilityController;
+use Wurk\Billing\Http\Controllers\Admin\ReconciliationController;
 use Wurk\Billing\Http\Controllers\BillingController;
 use Wurk\Billing\Http\Controllers\DebitOrderController;
 use Wurk\Billing\Http\Controllers\InvoiceDownloadController;
@@ -35,6 +36,11 @@ Route::tenant(function (): void {
 
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])->group(function (): void {
     Route::get('/profitability', [ProfitabilityController::class, 'show'])->name('admin.profitability');
+    Route::get('/reconciliation', [ReconciliationController::class, 'show'])->name('admin.reconciliation');
+    Route::post('/reconciliation', [ReconciliationController::class, 'store'])->middleware('throttle:10,1,reconciliation')->name('admin.reconciliation.upload');
+    Route::post('/reconciliation/run', [ReconciliationController::class, 'run'])->middleware('throttle:20,1,reconciliation-run')->name('admin.reconciliation.run');
+    Route::get('/reconciliation/export.csv', [ReconciliationController::class, 'export'])->name('admin.reconciliation.export');
+    Route::post('/reconciliation/clear', [ReconciliationController::class, 'clear'])->name('admin.reconciliation.clear');
     Route::put('/profitability/costs', [ProfitabilityController::class, 'update'])->name('admin.profitability.costs');
     Route::get('/credits/packs', [CreditPacksController::class, 'index'])->name('admin.credits.packs');
     Route::post('/credits/packs', [CreditPacksController::class, 'store'])->name('admin.credits.packs.store');
