@@ -31,7 +31,7 @@ final readonly class AutoTopUp
     public function spentThisMonth(string $tenantId): int
     {
         return (int) DB::table('payments')->where('tenant_id', $tenantId)->where('purpose', 'credits')->where('status', 'succeeded')
-            ->where('paid_at', '>=', now()->startOfMonth())->where('details', 'like', '%"auto":true%')->sum('amount_excl_cents');
+            ->where('paid_at', '>=', now()->startOfMonth())->where('details->auto', true)->sum('amount_excl_cents');
     }
 
     private function attempt(string $tenantId): string

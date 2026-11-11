@@ -42,7 +42,7 @@ final class UsageSummariesCommand extends Command
             $used = $usage->between($from, $month->subDay())[$account->tenant_id] ?? [];
             $balance = (int) $context->run($tenant, fn () => app(CreditWallet::class)->balance()['balance_milli']);
             $topUps = DB::table('payments')->where('tenant_id', $account->tenant_id)->where('purpose', 'credits')->where('status', 'succeeded')
-                ->whereBetween('paid_at', [$from->setTimezone((string) config('app.timezone')), $month->setTimezone((string) config('app.timezone'))])->where('details', 'like', '%"auto":true%')
+                ->whereBetween('paid_at', [$from->setTimezone((string) config('app.timezone')), $month->setTimezone((string) config('app.timezone'))])->where('details->auto', true)
                 ->selectRaw('count(*) as n, coalesce(sum(amount_excl_cents), 0) as cents')->first();
             $names = ['sms' => 'SMS', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'ai' => 'AI assistant'];
             $lines = ['Your credits for '.$from->format('F Y').':', ''];
