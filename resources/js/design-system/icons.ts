@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   Tag,
   Clock,
   Image,
@@ -73,6 +74,7 @@ export const icons: Record<string, LucideIcon> = {
   megaphone: Megaphone,
   package: Package,
   'message-circle': MessageCircle,
+  'book-open': BookOpen,
   tag: Tag,
   palette: Palette,
   settings: Settings,

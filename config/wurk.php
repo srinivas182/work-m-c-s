@@ -39,6 +39,7 @@ return [
         'admin' => env('WURK_ADMIN_DOMAIN', 'admin.'.$root),
         'app' => env('WURK_APP_DOMAIN', 'app.'.$root),
         'my' => env('WURK_MY_DOMAIN', 'my.'.$root), // My WURK: customers' businesses in one place (Sprint 13.8)
+        'help' => env('WURK_HELP_DOMAIN', 'help.'.$root), // the public help centre (Sprint 16.1)
     ],
 
     'tenancy' => [
