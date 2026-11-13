@@ -56,3 +56,15 @@ it('takes a 30-second video, refuses unknown screens, and is for staff who may w
     ($this->article)(['title' => 'Other', 'screens' => ['not a screen']])->assertSessionHasErrors(['screens.0' => 'Choose screens from the list.']);
     $this->actingAs($this->staffWithRole('support', 'support@wurk.co.za'))->get($this->admin('/help'))->assertForbidden(); // the admin site refuses; business back offices hide
 });
+
+it('gives the "?" panel this screen’s help — or a search — to signed-in people only', function () {
+    ($this->article)(['status' => 'published']);
+    $owner = $this->person(['phone' => '+27831000000', 'email' => 'owner@glow.co.za']);
+    $panel = $this->actingAs($owner)->getJson('http://'.config('wurk.domains.app').'/_help?screen=Payments::Settings')->assertOk()->json('articles');
+    expect(array_column($panel, 'title'))->toBe(['Turn on card payments'])->and($panel[0]['html'])->toContain('<h2>Steps</h2>')->not->toContain('<script>');
+    expect(array_column($this->actingAs($owner)->getJson('http://'.config('wurk.domains.app').'/_help?q=card')->json('articles'), 'slug'))->toBe(['turn-on-card-payments'])
+        ->and($this->actingAs($owner)->getJson('http://'.config('wurk.domains.app').'/_help?screen=Shop::Products')->json('articles'))->toBe([]);
+    auth()->logout();
+    $this->getJson('http://'.config('wurk.domains.app').'/_help?screen=Payments::Settings')->assertUnauthorized();
+});
+

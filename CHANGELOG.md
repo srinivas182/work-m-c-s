@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 16.1 (help centre)
+- **help.wurk.co.za**: categories, articles and **30-second videos** (on WURK's own storage — no third-party players or cookies), search, "Was this helpful?". Server-rendered; text rendered safely.
+- **Admin → Help centre** (`help.manage`): write in Markdown, add images and a video, link each article to the screens it helps with; see views, helpfulness and **searches that found nothing** (words only).
+- **"?" on every back-office screen** opens that screen's help in a side panel, with search. **"What's this?"** on key fields (auto top-up, VAT registration, campaign audiences, coupon limits, running cost).
+
 ## [0.17.0] — 2026-11-11 — Sprint 15: Reports and campaigns
 
 Business reports (sales, bookings with utilisation, customers, leads, stock, takings and VAT, referrals; any dates; per branch; highlights; CSV/PDF; owners' summary email), website analytics without cookies, email and SMS campaigns with coupons, WURK's SaaS metrics (MRR, ARR, churn, cohorts, movement, revenue, agents, credits, at-risk businesses), profitability (costs, profit per package, margin alerts, pricing what-if, provider reconciliation), auto top-up and the monthly usage summary. Waiting on Meta-approved templates: WhatsApp campaigns and the weekly WhatsApp summary (email until then). CI: MySQL tests in five parts, 12 minutes each. Release steps: docs/deployment/docker.md (v0.17.0 rows).

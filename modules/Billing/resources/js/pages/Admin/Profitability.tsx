@@ -10,6 +10,7 @@ import {
   Input,
   PageHeader,
 } from '@/design-system';
+import { HelpTip } from '@/components/HelpTip';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 
@@ -83,6 +84,13 @@ export default function Profitability(p: Props) {
                   />
                 </Field>
               ))}
+              <p className="text-fg-muted flex items-center gap-1 sm:col-span-2">
+                Running cost{' '}
+                <HelpTip>
+                  Your monthly cost per business: hosting, storage, backups and support time,
+                  divided by how many businesses you serve. Trials count too.
+                </HelpTip>
+              </p>
               <Field
                 label="Running cost per business per month (R) — hosting, storage, support"
                 error={form.errors.running}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Help\Http\Controllers\Admin\HelpAdminController;
+use Wurk\Help\Http\Controllers\HelpPanelController;
 use Wurk\Help\Http\Controllers\PublicHelpController;
 
 // help.wurk.co.za — public.
@@ -25,3 +26,9 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
     Route::post('/{article}', [HelpAdminController::class, 'update'])->name('.update');
     Route::post('/{article}/image', [HelpAdminController::class, 'image'])->middleware('throttle:30,1,help-image')->name('.image');
 });
+
+// The "?" panel on every back-office screen (16.1b) — businesses' back offices and WURK's admin.
+foreach (['app', 'admin'] as $site) {
+    Route::domain((string) config('wurk.domains.'.$site))->middleware(['auth', 'throttle:60,1,help-panel'])
+        ->get('/_help', HelpPanelController::class)->name('help.panel.'.$site);
+}

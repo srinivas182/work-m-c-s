@@ -6,6 +6,9 @@
 
 **Revision 2 — 23 October 2026.** Agreed with the client: 12 categories and 21 premium templates; category sections (food menu, rooms & rates, quote form, service areas, portfolio, before & after, class timetable, packages & specials, accreditations, promotion banner); online consultations (Google Meet / Zoom) for every category; patient documents for health practices; hotel template starts with enquiries or an embedded booking engine; the cloud provider is chosen near the end. **Goal for every template: a non-technical owner launches a premium site themselves in one hour or less.** Three sprints are added (two for new scope, one because cloud infrastructure moves from Sprint 0 to just before hardening).
 
+> **Order (WURK, 12 Nov 2026):** after Sprint 16, **Sprint 18 (hardening)** comes next, then **Sprint 17 (cloud and going live)**.
+
+
 | Sprint | Dates | Focus | Deliverables | Status |
 |---|---|---|---|---|
 | 0 | | Foundations | PRD & architecture; design system; CI/CD | ✅ v0.1.0 |
