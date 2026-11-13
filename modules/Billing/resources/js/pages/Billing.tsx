@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/design-system';
+import { HelpTip } from '@/components/HelpTip';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 
@@ -865,7 +866,12 @@ function CreditSettings({ credits, packs }: { credits: Props['credits']; packs: 
                   checked={form.data.auto_top_up}
                   onCheckedChange={(on) => form.setData('auto_top_up', on === true)}
                 />
-                Top up automatically with my saved card when credits run low
+                Top up automatically with my saved card when credits run low{' '}
+                <HelpTip>
+                  When your credits drop below your low-balance warning, we buy the pack you choose
+                  with your saved card — never more than your monthly limit — and email you each
+                  time.
+                </HelpTip>
               </label>
               {form.data.auto_top_up && (
                 <div className="grid gap-3 sm:grid-cols-2">

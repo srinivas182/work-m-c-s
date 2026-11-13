@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Button, Card, CardContent, Checkbox, Field, Input, PageHeader } from '@/design-system';
+import { HelpTip } from '@/components/HelpTip';
 import AppShell from '@/layouts/AppShell';
 
 /** Settings → VAT registration: reports show VAT only for a VAT-registered business. */
@@ -36,7 +37,11 @@ export default function Vat({
                   checked={form.data.vat_registered}
                   onCheckedChange={(on) => form.setData('vat_registered', on === true)}
                 />
-                We’re registered for VAT
+                We’re registered for VAT{' '}
+                <HelpTip>
+                  Only VAT-registered businesses charge VAT. Most small businesses aren’t until
+                  their sales pass R1 million a year — ask your accountant if you’re unsure.
+                </HelpTip>
               </label>
               {form.data.vat_registered && (
                 <Field label="VAT number" error={form.errors.vat_number}>

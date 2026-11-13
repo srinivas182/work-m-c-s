@@ -40,3 +40,9 @@
 ## Order
 
 16.1 → 16.2 → 16.3 → 16.4 → 16.5 → 16.6, small parts, one full CI run each. Release as **v0.18.0**. Before closing: every spec item and agreed addition verified against code and tests (as in 15.6).
+
+## Progress
+
+| Part | PR | Notes |
+|---|---|---|
+| 16.1 Help centre | see PR | Central Help module; screens keyed by Inertia page name; videos uploaded, not embedded (no third-party tracking). Caught by lint: the panel set state inside an effect — now loads on click. Sprint order changed by WURK: 16 → 18 (hardening) → 17. 1,708 backend tests on SQLite (in groups); Help on MySQL 8. |

@@ -43,6 +43,7 @@
             "Wurk\\Crm\\": "modules/Crm/src/",
             "Wurk\\Features\\": "modules/Features/src/",
             "Wurk\\Health\\": "modules/Health/src/",
+            "Wurk\\Help\\": "modules/Help/src/",
             "Wurk\\Identity\\": "modules/Identity/src/",
             "Wurk\\Marketing\\": "modules/Marketing/src/",
             "Wurk\\Messaging\\": "modules/Messaging/src/",

@@ -95,6 +95,12 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
     /\/metrics\/export\.csv\?period=/,
   );
   await expectAccessible(page);
+  // "?" help (Sprint 16.1b): opens a panel for this page, with search.
+  await page.getByRole('button', { name: 'Help for this page' }).click();
+  await expect(page.getByRole('dialog', { name: 'Help' })).toBeVisible();
+  await expect(page.getByLabel('Search help')).toBeVisible();
+  await expectAccessible(page);
+  await page.keyboard.press('Escape');
 
   // Profitability (Sprint 15.5a): costs and a pricing "what if".
   await page.goto(`${admin}/profitability`);
