@@ -67,4 +67,3 @@ it('gives the "?" panel this screen’s help — or a search — to signed-in pe
     auth()->logout();
     $this->getJson('http://'.config('wurk.domains.app').'/_help?screen=Payments::Settings')->assertUnauthorized();
 });
-
