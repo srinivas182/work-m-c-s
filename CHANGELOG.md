@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Performance — Sprint 18.3b (load testing)
+- **`php artisan wurk:seed-load`**: load-test businesses spread over the shards — an owner who can sign in, customers, a bookable service with hours, bookings over the next 14 days, products — and `storage/app/load-test.json` for the scripts. Safe to re-run; refused in production.
+- **k6 scripts** (`load/k6/journeys.js`): public site, booking times, back office (signed in) and sign-in, mixed as real traffic. Profiles: `smoke` (any machine; checks the journeys work) and `target` (1,000 requests a second for 15 minutes; 95% within 300 ms; < 0.1% errors) for staging in Sprint 17. CI runs the smoke profile with the performance gate.
+- **`WURK_LOAD_TEST_TOKEN`** (staging only, refused in production): test machines can play many separate visitors, so per-visitor rate limits behave as for real people.
+- `docs/performance/load-testing.md`: targets, journeys, how to run on staging, what to do when a journey misses.
+
 ### Performance — Sprint 18.3a (fair queues, no N+1)
 - **Three queues, in priority order** — `critical` (booking messages), `default`, `bulk` (campaigns, exports, Watchtower's AI). Workers run `queue:work --queue=critical,default,bulk`: a customer's booking confirmation never waits behind another business's campaign.
 - **Campaigns are sent in the background, in batches of 200** — no longer inside the owner's request ("Send now" with 50,000 customers would have timed out) or one business at a time in the scheduler. Each campaign has at most **one job waiting** at a time, so businesses' campaigns take turns. The campaign list shows progress ("120 of 1,000 done"). Customers who withdraw consent after a campaign starts are skipped (POPIA).

@@ -79,6 +79,7 @@ Run these once, after `migrate`, when deploying the version shown (any other com
 | v0.19.0 | In the GitHub repository settings (owner): turn on **Dependabot security updates** and **secret scanning push protection** | `.github/dependabot.yml` covers routine updates; security updates and push protection are repository settings. |
 | v0.19.0 | Nothing to do: the image now starts FrankenPHP with `docker/production/Caddyfile` (Octane's own plus security headers on static files) | When upgrading Octane, compare the file with Octane's `stubs/Caddyfile`. |
 | v0.19.0 | **Queue workers must take the three queues**: the image's `worker` command already runs `queue:work --queue=critical,default,bulk`; a custom worker command must too | Booking messages are now on `critical` and campaigns on `bulk` — a worker on `default` alone would never send them. Run at least two workers so a long campaign batch never blocks booking messages. |
+| v0.19.0 | Staging only: set `WURK_LOAD_TEST_TOKEN` before a load test, and unset it after (never in production — it's refused there) | Lets the k6 machines play many separate visitors; see docs/performance/load-testing.md. |
 | every deploy | `docker run --rm --env-file production.env wurk:<version> php artisan permissions:sync` | Checks built-in roles and removes permissions modules no longer declare from custom roles (built-in roles update by themselves — v0.15.0 gives staff *Record sale* and branch managers *approve sales*). |
 
 ## Required environment

@@ -100,3 +100,17 @@ it('keeps the session cookie away from scripts (HttpOnly, SameSite) — only the
         ->and($session?->getSameSite())->toBe('lax')
         ->and($cookies['XSRF-TOKEN']?->isHttpOnly())->toBeFalse(); // the page reads it to send the CSRF header
 });
+
+it('lets staging load tests play many visitors — only with the secret, never in production', function () {
+    Route::get('/__sec/who', fn (Request $r) => $r->ip());
+    $as = fn (array $headers) => $this->withHeaders($headers)->get('/__sec/who')->getContent();
+    $load = ['X-Wurk-Load-Test' => 'staging-secret-123', 'X-Wurk-Load-Visitor' => '196.21.4.7'];
+
+    expect($as($load))->toBe('127.0.0.1');                       // no token configured: ignored
+    config(['wurk.load_test.token' => 'staging-secret-123']);
+    expect($as($load))->toBe('196.21.4.7')
+        ->and($as([...$load, 'X-Wurk-Load-Test' => 'wrong']))->toBe('127.0.0.1')
+        ->and($as([...$load, 'X-Wurk-Load-Visitor' => 'not-an-ip']))->toBe('127.0.0.1');
+    app()->detectEnvironment(fn () => 'production');
+    expect($as($load))->toBe('127.0.0.1');
+});

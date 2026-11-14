@@ -83,6 +83,7 @@ jobs:
               - '.prettierrc.json'
               - 'e2e/**'
               - 'playwright.config.ts'
+              - 'load/**'
             docker:
               - *shared
               - 'docker/**'
@@ -393,6 +394,17 @@ jobs:
           php artisan serve --host=127.0.0.1 --port=8124 > /dev/null 2>&1 &
           for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:8124/ && break; sleep 1; done
           CHROME_PATH="$(node -e "console.log(require('@playwright/test').chromium.executablePath())")" node scripts/performance-gate.mjs --port=8124
+      # Sprint 18.3b: the load-test journeys still work (k6 smoke: a few visitors for 30 s; timings are judged on staging).
+      - name: Load-test scripts (k6 smoke)
+        if: matrix.part == 'performance'
+        timeout-minutes: 3
+        env:
+          APP_ENV: e2e
+        run: |
+          echo "WURK_LOAD_TEST_TOKEN=ci-load-test" >> .env.e2e
+          php artisan wurk:seed-load --businesses=5 --customers=50 --bookings=20 --products=5
+          curl -sSfL https://github.com/grafana/k6/releases/download/v0.57.0/k6-v0.57.0-linux-amd64.tar.gz | tar xz --strip-components=1 k6-v0.57.0-linux-amd64/k6
+          ./k6 run --quiet -e TARGET=http://127.0.0.1:8124 -e LOAD_TOKEN=ci-load-test load/k6/journeys.js
       # Sprint 18.1b: OWASP ZAP's passive baseline against the running back office (same server as the gate).
       # Rules in .zap/rules.tsv: missing security headers or cookie flags fail; anything else is reported.
       - name: OWASP ZAP baseline (passive scan)
