@@ -13,6 +13,7 @@ Route::tenant(function (): void {
         Route::get('/search', [ContactsController::class, 'search'])->name('.search');
         Route::get('/{contact}', [ContactsController::class, 'show'])->name('.show');
         Route::put('/{contact}', [ContactsController::class, 'update'])->name('.update');
+        Route::delete('/{contact}', [ContactsController::class, 'destroy'])->name('.destroy');
         Route::post('/{contact}/merge', [ContactsController::class, 'merge'])->name('.merge');
         Route::post('/{contact}/split/{merged}', [ContactsController::class, 'split'])->name('.split');
     });

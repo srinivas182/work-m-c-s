@@ -19,7 +19,7 @@ final readonly class MarketingAudiences implements Audiences
     {
         $db = DB::connection($this->context->connectionName());
         $t = $this->context->id();
-        $q = $db->table('contacts')->where('contacts.tenant_id', $t)->whereNotNull('contacts.marketing_consent_at') // consented only
+        $q = $db->table('contacts')->where('contacts.tenant_id', $t)->whereNull('contacts.deleted_at')->whereNotNull('contacts.marketing_consent_at') // consented, not deleted
             ->where(fn ($q) => $q->whereNotNull('contacts.email')->orWhereNotNull('contacts.phone'));
         $lastSeen = fn () => $db->table('contact_links')->where('tenant_id', $t)->selectRaw('contact_id, max(occurred_at) as last_at')->groupBy('contact_id');
         match ($segment) {

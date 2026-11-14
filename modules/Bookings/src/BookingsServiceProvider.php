@@ -30,6 +30,7 @@ use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Reports\BookingsSection;
+use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\MessageWording;
@@ -100,6 +101,25 @@ final class BookingsServiceProvider extends ModuleServiceProvider
 
                 return (int) BookingService::onlyTrashed()->whereIn('id', $ids)->forceDelete();
             },
+        ));
+        // Recently deleted (16.6c): cancelled bookings still ahead can be put back while their time is free. Nothing to purge —
+        // a cancelled booking stays in the history; it just leaves this list after 30 days.
+        $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('bookings', 'Cancelled bookings', 'bookings.manage',
+            function (\DateTimeInterface $since): array {
+                $tz = $this->app->make(TenantContext::class)->current()->timezone();
+                $bookings = Booking::query()->where('status', 'cancelled')->where('cancelled_at', '>', $since)->where('starts_at', '>', now())->orderByDesc('cancelled_at')->limit(200)->get();
+                $names = BookingService::withTrashed()->whereIn('id', $bookings->pluck('service_id')->unique())->pluck('name', 'id');
+
+                return $bookings->map(fn (Booking $b) => ['id' => $b->id, 'deleted_at' => $b->cancelled_at ?? now(),
+                    'name' => ($names[$b->service_id] ?? 'Booking').' — '.$b->customer_name.', '.$b->starts_at->setTimezone($tz)->format('D j M H:i')])->all();
+            },
+            function (string $id): string {
+                $b = Booking::query()->whereKey($id)->first() ?? throw new CannotRestore('That booking isn’t there any more.');
+                $this->app->make(Booker::class)->restore($b, auth()->id() === null ? null : (string) auth()->id());
+
+                return "{$b->customer_name}’s booking is back on, and they’ve been told.";
+            },
+            fn (\DateTimeInterface $before) => 0,
         ));
         // Your data (16.6): what this module keeps, for the full export.
         $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
