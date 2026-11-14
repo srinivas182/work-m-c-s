@@ -23,6 +23,66 @@ Sprint 17 builds the production and staging environments. Some hardening only me
 | Accessibility | **GOV.UK** (accessibility statements), Shopify Polaris, Atlassian | Automated + manual checks, published statement | **axe on every screen in CI**, WCAG 2.2-specific checks (target size, focus not hidden), and accessible output from the **24 templates** businesses publish — most site builders leave that to the owner |
 | UAT | Most SaaS: internal QA only | — | A **written acceptance script for criteria 1–12** run with WURK, every result recorded |
 
+## 18.0 Watchtower — platform monitoring with AI incident reports (added by WURK, 14 Nov 2026, before 18.1)
+
+**Ask:** one AI agent that watches the whole platform — bugs, crashes, downtime — and emails a report to the address HQ sets in Admin (default `srinivas@mayuraconsultancy.com`), written so it can be pasted straight to the engineering team (Claude) to fix.
+
+### What the market leaders do
+
+| Tool | What it does well | Gap for WURK |
+|---|---|---|
+| **Sentry** (+ "Seer" AI fixes) | Groups errors into issues, release tracking, regressions, AI root-cause | Error data (often with personal data) leaves South Africa — POPIA; per-event pricing at scale; knows nothing about businesses, packages or shards |
+| **Laravel Nightwatch**, Flare | Laravel-native: requests, jobs, queries, scheduled tasks; Flare suggests fixes | Same data-residency question; no business context |
+| **Better Stack**, UptimeRobot | External uptime checks from many locations, status pages, on-call | Only up/down — no idea *why* |
+| Datadog / New Relic | Everything, with anomaly detection | Expensive; heavy for this stage |
+
+**Design:** build Watchtower **inside WURK** (data stays in SA, knows which businesses and packages are affected, uses the existing `Ai` module), **plus one external uptime checker** — a platform that is down cannot report its own downtime.
+
+### What it watches
+
+| Signal | How |
+|---|---|
+| **Crashes / bugs** | Every reported exception (web, queue, console, scheduler) → **fingerprinted** (exception class + file:line + normalised message) into an **incident**; counts, first/last seen, release, businesses affected, URL/route, surface. |
+| **Front-end crashes** | React errors and unhandled promise rejections reported from the browser (rate-limited endpoint), grouped the same way. |
+| **Failed jobs** | Queue job failures, retries exhausted. |
+| **Scheduler & queues** | Heartbeat: each scheduled command records its last run; **missed runs** alerted. Queue **backlog/age** per queue above a threshold. |
+| **Infrastructure** | Each shard + central DB, Redis, storage, mail and SMS providers, checked every minute (extends the Health module's checks). |
+| **Slowness** | Requests over 2 s and endpoints whose p95 crosses 300 ms (PRD budget), sampled. |
+| **Downtime** | **External checker** hits `/health/ready` and the public site every minute from outside; emails directly when WURK can't. Watchtower records **uptime %** from its results (webhook) and shows it. |
+
+### The AI agent
+
+For each **new** incident (and each **regression** — an incident back after it was marked fixed, or reappearing in a new release), the agent:
+1. Reads the stack trace, the code around the failing lines (from the deployed release), recent similar incidents and the release notes.
+2. Writes a **plain summary** (what broke, who is affected, how often since when), **likely cause**, **severity** (critical / high / normal — by spread, money paths, sign-in, data), and a **suggested fix**.
+3. Produces a **"Fix request" block** — a self-contained Markdown report (incident ID, release/commit, route, trace, the relevant code lines, frequency, affected packages, reproduction hints) **with personal data removed** (emails, phones, names, IDs masked) — ready to paste here for a fix.
+
+Uses the `Ai` module (WURK's own key, not businesses' credits); a daily cap; if AI is unavailable the report still goes, without the analysis.
+
+### Alerts
+
+- **Email to the address set in Admin → Settings → Watchtower** (one or more; default `srinivas@mayuraconsultancy.com`). Critical: immediately. High: immediately, grouped (one email per incident, not per error). Normal: in a **daily digest** (08:00 SAST).
+- **No floods:** one alert per incident; re-alert only on regression, a 10× spike, or a severity rise. Quiet incidents auto-resolve after 7 days.
+- **Downtime/recovery** emails from the external checker; Watchtower adds a post-incident summary when the platform is back (what failed, for how long).
+- Optional later: WhatsApp/SMS for critical (credits), Slack.
+
+### Admin → Watchtower
+
+Incidents list (status: new / acknowledged / fixed in release X / ignored; severity; count; businesses affected), incident page (summary, AI analysis, trace, timeline, **Copy fix request** button), uptime, failed jobs, scheduler heartbeats, slow endpoints. Marking **"Fixed in v0.x"** makes a reappearance a regression. Permission `watchtower.view` / `watchtower.manage` (super-admin + a new `engineering` role).
+
+### Decisions
+
+| # | Decision | Recommendation |
+|---|---|---|
+| F | Build in-house vs Sentry/Nightwatch | **In-house** (POPIA: data stays in SA; business context; no per-event bill). Revisit if WURK later wants Sentry for depth. |
+| G | External uptime checker | **Better Stack** (free tier: 10 monitors, 3-min checks, email; paid for 30-s checks + status page) or **UptimeRobot** (free: 50 monitors, 5-min). Recommend **Better Stack**; WURK creates the account when the cloud is live (Sprint 17) — Watchtower is wired for its webhook now. |
+| H | Auto-create GitHub issues | **Not now** — email + "Copy fix request" first. Later: a GitHub issue per critical incident (needs a GitHub token in production). |
+
+### Split
+
+- **18.0a** Incident capture: fingerprinting, incidents table (central), back-end + front-end errors, failed jobs, scheduler heartbeats, queue backlog, infra checks; Admin → Watchtower list/detail; settings (emails); immediate + digest emails with anti-flood rules; personal-data masking.
+- **18.0b** AI analysis & fix request: the agent (code context from the release, severity, cause, fix), regressions by release, slow endpoints, external-checker webhook + uptime, post-downtime summary.
+
 ## Parts
 
 | Part | What |
@@ -55,7 +115,7 @@ Sprint 17 builds the production and staging environments. Some hardening only me
 
 ## Order
 
-18.1 → 18.2 → 18.3 → 18.4 → 18.5 → 18.6, small parts, one full CI run each. Release as **v0.19.0**. Before closing: every spec item and agreed addition verified against code and tests. Then **Sprint 17** (cloud & going live), which runs the external pen test, the full-scale load test and the timed DR drill on staging using this sprint's tooling.
+**18.0a → 18.0b** (Watchtower) → 18.1 → 18.2 → 18.3 → 18.4 → 18.5 → 18.6, small parts, one full CI run each. Release as **v0.19.0**. Before closing: every spec item and agreed addition verified against code and tests. Then **Sprint 17** (cloud & going live), which runs the external pen test, the full-scale load test and the timed DR drill on staging using this sprint's tooling.
 
 ## Progress
 
