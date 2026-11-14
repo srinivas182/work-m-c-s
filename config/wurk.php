@@ -153,6 +153,9 @@ return [
         'trusted_proxies' => env('TRUSTED_PROXIES', ''),
     ],
 
+    // Load tests on staging (Sprint 18.3b): the secret that lets test machines play many visitors. Never in production.
+    'load_test' => ['token' => env('WURK_LOAD_TEST_TOKEN', '')],
+
     // The running release (Sprint 18.0): set at build time; otherwise the VERSION file at the root.
     'release' => env('WURK_RELEASE') ?: (is_file(base_path('VERSION')) ? trim((string) file_get_contents(base_path('VERSION'))) : 'dev'),
     'commit' => env('WURK_COMMIT'),
