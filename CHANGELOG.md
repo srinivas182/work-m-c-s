@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 16.6a (your data: full export)
+- **Settings → Your data** (`data.export`; owners): **Export everything** builds one ZIP in the background — a CSV per area (customers and their history, products and stock, orders and items, services, bookings, campaigns, coupons, website pages, patients and their documents' list) and the files (website photos at full size; patient documents, decrypted) — and emails a **signed link valid for 24 hours** (only for signed-in people allowed to export). Deleted after 24 hours.
+- Only what the person may see: health records only with `records.view`; each document read for the export is logged like any other access. Secret-looking columns (tokens, hashes, keys, passwords) never leave; cells that spreadsheets would run as formulas are kept as text; a README lists what's inside.
+- One export at a time, three a day; requested, ready and downloaded are audited.
+- WURK support can never export a business's data, whatever access the owner gives.
+- Platform: `DataExports` registry — each module offers its own tables and files.
+
 ### Added — Sprint 16.5 (business health)
 - **Admin → Business health** (`health.view`; Support and Finance roles): every business scored **nightly** (0–100: healthy 80+, watch 50–79, at risk below 50) from what each part of WURK sees, each with **a plain reason and a suggested next step** — e.g. "No one has signed in for 34 days → Call the owner". Signals: no sign-ins (or never), failed payment / suspended / trial ending, website not published a week in, out of credits while using them, support tickets waiting past target / rated "not good" / many this month, and server errors.
 - **MRR at risk** by grade; "needs attention" first, sorted by MRR, lowest score, biggest drop or name; filter by grade, package or name; **CSV export**; the score's trend since the last run.

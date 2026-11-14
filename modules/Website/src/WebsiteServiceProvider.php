@@ -7,9 +7,12 @@ namespace Wurk\Website;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactRemembered;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
@@ -17,6 +20,7 @@ use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
@@ -35,6 +39,7 @@ use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Listeners\RerenderShopPages;
 use Wurk\Website\Models\Enquiry;
+use Wurk\Website\Models\SiteAsset;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\ChatBot;
 use Wurk\Website\Support\EloquentSiteTemplates;
@@ -102,6 +107,21 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Your data (16.6): what this module keeps, for the full export.
+        $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
+            $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)
+                ->where('tenant_id', app(TenantContext::class)->id())->orderBy($order)->lazy(500)->map(fn ($r) => (array) $r);
+            $x->table('pages', 'Website pages', 'website.edit', $rows('pages', 'position'));
+            // Photos, at their largest size.
+            $x->files('photos', 'Website photos', 'website.edit', fn () => SiteAsset::query()->orderBy('created_at')->lazy(200)->map(function (SiteAsset $a): array {
+                $variants = $a->variants;
+                krsort($variants);
+                $path = (string) reset($variants);
+
+                return ['path' => $a->id.'-'.Str::slug(pathinfo($a->name, PATHINFO_FILENAME)).'.'.(pathinfo($path, PATHINFO_EXTENSION) ?: 'jpg'),
+                    'contents' => fn () => (string) Storage::disk((string) config('wurk.site_assets_disk'))->get($path)];
+            }));
+        });
         $this->callAfterResolving(HealthSignals::class, fn (HealthSignals $s) => $s->register('website', fn (string $t) => $this->app->make(LaunchSignal::class)($t))); // business health (16.5)
         // Website analytics (Sprint 15.2): an order or booking made on the public site is credited to where the visitor came from.
         Event::listen(ContactRemembered::class, function (ContactRemembered $e): void {

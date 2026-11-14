@@ -40,6 +40,7 @@
             "Wurk\\Bookings\\": "modules/Bookings/src/",
             "Wurk\\Campaigns\\": "modules/Campaigns/src/",
             "Wurk\\Credits\\": "modules/Credits/src/",
+            "Wurk\\Data\\": "modules/Data/src/",
             "Wurk\\Crm\\": "modules/Crm/src/",
             "Wurk\\Features\\": "modules/Features/src/",
             "Wurk\\Health\\": "modules/Health/src/",

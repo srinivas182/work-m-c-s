@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Wurk\Campaigns;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Wurk\Campaigns\Assistant\CreateCouponTool;
 use Wurk\Campaigns\Assistant\DraftCampaignTool;
 use Wurk\Campaigns\Console\SendDueCommand;
 use Wurk\Campaigns\Support\CouponBook;
 use Wurk\Payments\Contracts\Coupons;
 use Wurk\Platform\Contracts\AssistantTools;
+use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 final class CampaignsServiceProvider extends ModuleServiceProvider
 {
@@ -36,6 +39,13 @@ final class CampaignsServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Your data (16.6): what this module keeps, for the full export.
+        $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
+            $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)
+                ->where('tenant_id', app(TenantContext::class)->id())->orderBy($order)->lazy(500)->map(fn ($r) => (array) $r);
+            $x->table('campaigns', 'Campaigns', 'campaigns.manage', $rows('campaigns', 'created_at'));
+            $x->table('coupons', 'Coupons', 'campaigns.manage', $rows('coupons', 'created_at'));
+        });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'campaigns');
         if ($this->app->runningInConsole()) {
             $this->commands([SendDueCommand::class]);

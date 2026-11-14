@@ -29,4 +29,13 @@ test('an owner contacts support from the back office and sees the ticket (Sprint
     'I added the DNS records yesterday',
   );
   await expectAccessible(page);
+
+  // Your data (Sprint 16.6): one click builds the full export (the browser-test queue runs at once).
+  await page.goto(`/${handle}/settings/your-data`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Your data' })).toBeVisible();
+  await expectAccessible(page);
+  await page.getByRole('button', { name: 'Export everything' }).click();
+  await expect(page.getByRole('list', { name: 'Your exports' })).toContainText('Ready');
+  await expect(page.getByRole('link', { name: 'Download' })).toBeVisible();
+  await expectAccessible(page);
 });
