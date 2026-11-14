@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 
 async function expectNoSeriousA11yIssues(page: Page) {
   const results = await new AxeBuilder({ page })

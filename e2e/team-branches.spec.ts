@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible, signUpBusiness } from './support';
 
 test('an owner adds a branch and invites a branch manager', async ({ page }, testInfo) => {

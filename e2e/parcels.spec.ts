@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible, signUpBusiness } from './support';
 
 test('an owner sets parcel boxes and gives a product its weight and size', async ({

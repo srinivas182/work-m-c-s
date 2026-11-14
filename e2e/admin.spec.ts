@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { totp } from './totp';
 
 const SECRET = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible, signUpBusiness } from './support';
 
 test('an owner rewords a booking email within the rails, sends a test and switches on the auto-reply', async ({

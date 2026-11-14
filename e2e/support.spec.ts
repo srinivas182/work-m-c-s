@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible, signUpBusiness } from './support';
 
 test('an owner contacts support from the back office and sees the ticket (Sprint 16.3)', async ({

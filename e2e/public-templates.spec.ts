@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { readdirSync, readFileSync } from 'node:fs';
 import { expectAccessible } from './support';
 

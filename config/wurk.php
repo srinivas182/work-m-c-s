@@ -142,6 +142,17 @@ return [
     // Support tickets (Sprint 16.3): WURK's support inbox email — new tickets and replies are sent here.
     'support_email' => env('WURK_SUPPORT_EMAIL', 'support@wurk.co.za'),
 
+    // Security headers (Sprint 18.1): the Content Security Policy — enforce (default) | report-only | off; HSTS over HTTPS.
+    'security' => [
+        'csp' => env('WURK_CSP', 'enforce'),
+        'hsts' => (bool) env('WURK_HSTS', true),
+        // Who to tell about a security problem (security.txt and the disclosure page).
+        'contact' => env('WURK_SECURITY_EMAIL', 'security@wurk.co.za'),
+        // The load balancer's addresses (comma-separated), or "*" when the servers are reachable only through it:
+        // WURK then sees each visitor's IP (rate limits, audit) and HTTPS (HSTS, secure cookies). Unset: trust nobody.
+        'trusted_proxies' => env('TRUSTED_PROXIES', ''),
+    ],
+
     // The running release (Sprint 18.0): set at build time; otherwise the VERSION file at the root.
     'release' => env('WURK_RELEASE') ?: (is_file(base_path('VERSION')) ? trim((string) file_get_contents(base_path('VERSION'))) : 'dev'),
     'commit' => env('WURK_COMMIT'),

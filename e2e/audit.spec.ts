@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test('an owner sees team changes in their audit log and can export it', async ({ page }) => {
   await page.goto('/sign-in/password');

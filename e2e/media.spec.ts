@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible, signUpBusiness } from './support';
 
 // The picker's AI behaviour (generate panel only where allowed, AI images hidden elsewhere) is covered by

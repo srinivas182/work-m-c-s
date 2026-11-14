@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible } from './support';
 
 // One demo site with an owner (scripts/e2e-setup). Desktop and phone share it, so nothing here depends on order.

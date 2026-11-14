@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { expectAccessible, signUpBusiness } from './support';
 
 /** Header actions (Undo, Versions, Publish) sit behind Puck's menu toggle on phones. */

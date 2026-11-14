@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible } from './support';
 
 test('a shopper adds a dress to the cart and places an order paid by EFT', async ({
