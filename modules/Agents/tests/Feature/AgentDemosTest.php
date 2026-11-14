@@ -79,6 +79,15 @@ it('reminds the agent on days 10 and 13 and archives on day 14 — offline, addr
     $admin = $this->staffWithRole('super-admin');
     $this->actingAs($admin)->get($this->admin('/businesses'))->assertInertia(fn (Assert $p) => $p->where('businesses.data', fn ($d) => collect($d)->where('id', $t->id)->isEmpty()));
     $this->actingAs($admin)->get($this->admin('/businesses?status=deleted&kind=demo'))->assertInertia(fn (Assert $p) => $p->where('businesses.data.0.id', $t->id)->where('businesses.data.0.demo', true));
+
+    // A week after archiving, its data goes for good (Sprint 18.4a) — the pages, photos and settings the template made.
+    $rows = fn () => app(TenantContext::class)->run($t, fn () => DB::connection(app(TenantContext::class)->connectionName())->table('pages')->where('tenant_id', $t->id)->count());
+    expect($rows())->toBeGreaterThan(0);
+    $this->travel(8)->days();
+    $this->artisan('agents:sweep-demos')->expectsOutputToContain('removed 1 for good')->assertSuccessful();
+    expect($rows())->toBe(0)->and($t->refresh()->purged_at)->not->toBeNull()
+        ->and(DB::table('agent_demos')->where('tenant_id', $t->id)->value('purged_at'))->not->toBeNull();
+    $this->artisan('agents:sweep-demos')->expectsOutputToContain('removed 0 for good');
 });
 
 it('lets the agent delete the demo and make another', function () {

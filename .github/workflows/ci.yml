@@ -282,7 +282,7 @@ jobs:
       DB_USERNAME: root
       DB_PASSWORD: root
       TEST_SHARD_DRIVER: mysql
-      TEST_SHARD_DATABASES: wurk_shard_1,wurk_shard_2
+      TEST_SHARD_DATABASES: wurk_shard_1,wurk_shard_2,wurk_shard_3
     steps:
       - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
@@ -299,7 +299,7 @@ jobs:
           restore-keys: composer-${{ runner.os }}-
       - run: composer install --no-interaction --no-progress --prefer-dist
       - name: Create shard databases
-        run: mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE wurk_shard_1; CREATE DATABASE wurk_shard_2;"
+        run: mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE wurk_shard_1; CREATE DATABASE wurk_shard_2; CREATE DATABASE wurk_shard_3;"
       - name: Prepare environment
         run: |
           cp .env.example .env

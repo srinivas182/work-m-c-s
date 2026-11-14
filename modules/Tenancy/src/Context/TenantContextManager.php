@@ -10,11 +10,13 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Storage;
+use Wurk\Tenancy\Actions\TenantMoves;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantContextMissing;
 use Wurk\Tenancy\Events\TenantEntered;
 use Wurk\Tenancy\Events\TenantLeft;
+use Wurk\Tenancy\Exceptions\TenantPaused;
 use Wurk\Tenancy\Sharding\ShardConnections;
 
 final class TenantContextManager implements TenantContext
@@ -35,6 +37,10 @@ final class TenantContextManager implements TenantContext
     {
         if ($this->tenant?->tenantId() === $tenant->tenantId()) {
             return;
+        }
+        // Being moved or restored (18.4a): web requests wait a few minutes; background work isn't stopped here.
+        if (request()->route() !== null && TenantMoves::paused($tenant->tenantId())) {
+            throw new TenantPaused;
         }
 
         $this->forget();

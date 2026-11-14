@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Wurk\Tenancy\Actions;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantProvisioner;
+use Wurk\Tenancy\Models\Shard;
 use Wurk\Tenancy\Models\Tenant;
 use Wurk\Tenancy\Models\TenantDomain;
+use Wurk\Tenancy\Sharding\ShardConnections;
 use Wurk\Tenancy\Support\HandleRules;
+use Wurk\Tenancy\Support\TenantRows;
 
 final readonly class TenantProvisioning implements TenantProvisioner
 {
@@ -40,6 +44,21 @@ final readonly class TenantProvisioning implements TenantProvisioner
             $tenant->domains()->where('type', TenantDomain::TYPE_SUBDOMAIN)->update(['host' => $new.'.'.config('wurk.domains.root')]);
             $tenant->forceFill(['handle' => $new, 'status' => Tenant::STATUS_DELETED])->save(); // the model clears the old handle from the cache
         });
+    }
+
+    public function purge(string $tenantId): void
+    {
+        $tenant = Tenant::query()->findOrFail($tenantId);
+        if ($tenant->status !== Tenant::STATUS_DELETED) {
+            throw new \DomainException('Only an archived business can be removed for good.');
+        }
+        if ($tenant->purged_at !== null) {
+            return;
+        }
+        $shard = Shard::query()->findOrFail($tenant->shard_id);
+        app(TenantRows::class)->delete($tenant->id, app(ShardConnections::class)->register($shard));
+        Storage::disk((string) config('filesystems.default'))->deleteDirectory('tenants/'.$tenant->id);
+        $tenant->forceFill(['purged_at' => now()])->save();
     }
 
     public function claimToken(string $tenantId, \DateTimeInterface $until): string
