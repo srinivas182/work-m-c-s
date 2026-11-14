@@ -25,7 +25,8 @@ final class SystemRoles
         // Platform (WURK staff)
         self::SUPER_ADMIN => ['name' => 'Super admin', 'scope' => Permission::PLATFORM, 'permissions' => ['*']],
         'finance' => ['name' => 'Finance', 'scope' => Permission::PLATFORM, 'permissions' => ['tenants.view', 'packages.view', 'credits.view', 'payments.record-cash', 'invoices.view', 'invoices.manage', 'agents.view', 'agents.pay', 'metrics.view', 'costs.manage', 'health.view']],
-        'support' => ['name' => 'Support', 'scope' => Permission::PLATFORM, 'permissions' => ['tenants.view', 'platform-audit.view', 'packages.view', 'credits.view', 'invoices.view', 'agents.view', 'support.manage', 'health.view']],
+        'support' => ['name' => 'Support', 'scope' => Permission::PLATFORM, 'permissions' => ['tenants.view', 'platform-audit.view', 'packages.view', 'credits.view', 'invoices.view', 'agents.view', 'support.manage', 'health.view', 'watchtower.view']],
+        'engineering' => ['name' => 'Engineering', 'scope' => Permission::PLATFORM, 'permissions' => ['tenants.view', 'platform-audit.view', 'health.view', 'watchtower.view', 'watchtower.manage']], // Watchtower (18.0)
         'managed-services' => ['name' => 'Managed services', 'scope' => Permission::PLATFORM, 'permissions' => ['tenants.view']],
 
         // Business

@@ -51,7 +51,7 @@ it('creates custom staff roles from platform permissions only, and deletes unuse
     $this->actingAs($this->admin)->post($this->admin('/roles'), ['name' => 'Sneaky', 'permissions' => ['team.manage']])->assertSessionHasErrors('permissions');
 
     $role = PlatformRole::query()->where('name', 'Auditor')->firstOrFail();
-    $this->actingAs($this->admin)->get($this->admin('/roles'))->assertInertia(fn (Assert $p) => $p->has('custom', 1)->has('system', 4));
+    $this->actingAs($this->admin)->get($this->admin('/roles'))->assertInertia(fn (Assert $p) => $p->has('custom', 1)->has('system', 5)); // + Engineering (18.0)
     $this->actingAs($this->admin)->delete($this->admin("/roles/{$role->id}"))->assertSessionHas('status');
     expect(PlatformRole::query()->count())->toBe(0);
 });

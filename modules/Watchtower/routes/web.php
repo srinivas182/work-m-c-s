@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
+use Wurk\Watchtower\Http\Controllers\IncidentsController;
+
+// Admin → Watchtower (18.0).
+Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff', 'permission:watchtower.view'])->prefix('watchtower')->name('admin.watchtower')->group(function (): void {
+    Route::get('/', [IncidentsController::class, 'index']);
+    Route::get('/{incident}', [IncidentsController::class, 'show'])->whereUlid('incident')->name('.show');
+    Route::middleware('permission:watchtower.manage')->group(function (): void {
+        Route::put('/settings', [IncidentsController::class, 'settings'])->name('.settings');
+        Route::put('/{incident}', [IncidentsController::class, 'update'])->whereUlid('incident')->name('.update');
+    });
+});

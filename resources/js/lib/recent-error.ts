@@ -44,15 +44,54 @@ export function forgetRecentError(): void {
 }
 
 let installed = false;
+let page: string | null = null;
+const reported = new Set<string>();
+
+/**
+ * Tell WURK HQ's Watchtower (Sprint 18.0) about a crash in this browser: the message, the script stack and which
+ * screen — never what was typed. The server masks personal data and groups repeats. Each message is sent once per
+ * page load, at most five in all, and sending never gets in the way.
+ */
+export function reportCrash(
+  message: string,
+  stack: string | undefined,
+  kind: 'error' | 'rejection' | 'render',
+): void {
+  if (typeof window === 'undefined' || reported.size >= 5 || reported.has(message)) return;
+  reported.add(message);
+  try {
+    void fetch('/_wurk/client-error', {
+      method: 'POST',
+      keepalive: true,
+      credentials: 'omit',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        message: message.slice(0, 1000),
+        stack: (stack ?? '').slice(0, 8000),
+        page,
+        kind,
+      }),
+    }).catch(() => undefined);
+  } catch {
+    // reporting must never break the page
+  }
+}
 
 /** Listen for script errors and failed requests (once per page load). */
 export function watchForErrors(): void {
   if (installed || typeof window === 'undefined') return;
   installed = true;
-  window.addEventListener('error', (e) => remember(e.message || 'A script error'));
-  window.addEventListener('unhandledrejection', (e) =>
-    remember(e.reason instanceof Error ? e.reason.message : 'A request didn’t finish'),
-  );
+  router.on('navigate', (e) => {
+    page = e.detail.page.component;
+  });
+  window.addEventListener('error', (e) => {
+    remember(e.message || 'A script error');
+    if (e.error instanceof Error) reportCrash(e.error.message, e.error.stack, 'error');
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    remember(e.reason instanceof Error ? e.reason.message : 'A request didn’t finish');
+    if (e.reason instanceof Error) reportCrash(e.reason.message, e.reason.stack, 'rejection');
+  });
   router.on('httpException', (e) => remember(`The server answered ${e.detail.response.status}`));
   router.on('networkError', () => remember('The connection dropped'));
 }
