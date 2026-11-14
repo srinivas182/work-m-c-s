@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Security — Sprint 18.2a (isolation sweep — acceptance criterion 7)
+- **Automated isolation test over every route**: two businesses on the same shard (the case where only WURK's scoping keeps them apart); the other business gets a row in **every table** — its shard and its rows in the central database — with every text column marked. Alpha's owner then calls **every back-office route, every method** (≈300 requests), and a visitor calls **every route on Alpha's website address** (bookings, orders, record links, payments, campaign links, the portal) with Bravo's IDs, tokens and references. No response may contain Bravo's data, none of Bravo's rows may change, nothing may crash. New routes are covered automatically. The sweep also proves it would catch a leaky route. Runs on SQLite and MySQL.
+- Static rule: models can't be filled from `$request->all()`, `input()` or `except()` (mass assignment) — CI fails.
+
 ### Security — Sprint 18.1b (scanning, disclosure, trust)
 - **Security checks on every change** (new CI job, about a minute, drafts included): `composer audit` (any advisory fails), `pnpm audit --prod` (high/critical fails), **gitleaks** on the PR's commits, and **WURK's own Semgrep rules** (eval, unserialize, shell, SQL from variables or request input, saving `$request->all()`, predictable secrets, unescaped request data in Blade, raw HTML in React). **OWASP ZAP baseline** scans the running back office with the performance gate; a page without clickjacking protection or a CSP, or a cookie without SameSite, fails (the other headers and HttpOnly are enforced by tests).
 - **Dependabot**: grouped weekly updates for PHP and JavaScript, monthly for GitHub Actions and the Docker image.

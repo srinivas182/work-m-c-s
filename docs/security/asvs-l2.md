@@ -37,14 +37,14 @@ Status: ✅ met and tested · 🟡 met, partly tested or manual · ⏳ gap, sche
 | 3.2 Session binding | New session ID on sign-in and sign-out; tokens from Laravel's CSPRNG | `SignInFlow` (`regenerate()`), Identity tests | ✅ |
 | 3.3 Session termination | Idle and absolute limits per surface (admin 30 min idle / 8 h absolute); "sign out other devices"; other sessions revoked when the password changes | `SessionGuardian`, `SessionRegistry`, `AccountController` + tests | ✅ |
 | 3.4 Cookie-based sessions | `HttpOnly`; `Secure` wherever WURK runs on HTTPS (18.1); `SameSite=Lax`; host-only (no `Domain`) so a business's site never shares the back office's session | `config/session.php` | ✅ |
-| 3.7 Re-authentication | The current password is needed to change it. Not yet for turning MFA off or starting a full data export | `AccountController` | ⏳ |
+| 3.7 Re-authentication | The current password is needed to change it; turning the authenticator off needs a current code from it. Not yet before starting a full data export | `AccountController` + tests | ⏳ 18.2b |
 
 ## V4 Access control
 
 | Control | How WURK meets it | Proof | Status |
 |---|---|---|---|
 | 4.1 Enforced server-side, deny by default | Every back-office route behind `auth` + `permission:*`; menu items hidden but routes checked independently | route middleware; module feature tests | ✅ |
-| 4.2 Operation level (IDOR) | Every tenant query scoped by `BelongsToTenant`; raw queries must filter `tenant_id`; data on separate shards | `tests/Architecture/RawQueriesTest.php`; **18.2 isolation sweep over every route** | ⏳ 18.2 |
+| 4.2 Operation level (IDOR) | Every tenant query scoped by `BelongsToTenant`; raw queries must filter `tenant_id`; data on separate shards. **Isolation sweep**: two businesses on one shard, one row in every table of the other (shard and central), every back-office route (all methods) and every route on a business's website address called with the other's IDs and tokens — no leak, no change, no crash; the sweep proves it can catch a leak | `tests/Architecture/RawQueriesTest.php`, **`tests/Feature/Isolation/IsolationSweepTest.php`** (SQLite and MySQL) | ✅ |
 | 4.3 Administrative interfaces | Admin on its own host, staff only, TOTP required, optional IP allow-list | `AdminIpAllowList`, staff tests | ✅ |
 | 4.3 Support access | WURK staff see a business only with the owner's time-limited consent; sensitive actions never allowed; audited "on behalf of" | `SupportAccess` + tests (16.4) | ✅ |
 
@@ -52,7 +52,7 @@ Status: ✅ met and tested · 🟡 met, partly tested or manual · ⏳ gap, sche
 
 | Control | How WURK meets it | Proof | Status |
 |---|---|---|---|
-| 5.1 Input validation | Laravel validation on every request that writes; mass assignment limited (`$guarded`/validated arrays only) | feature tests; **mass-assignment check in 18.2** | ⏳ 18.2 |
+| 5.1 Input validation | Laravel validation on every request that writes; models are filled from validated arrays only — saving `$request->all()`, `input()` or `except()` fails CI | feature tests; Semgrep rule `php-mass-assign-request-all` | ✅ |
 | 5.2 Sanitisation | Page-editor content is rendered as React elements, never raw HTML; AI-written text has tags stripped; help articles are Markdown with HTML stripped and unsafe links refused; screenshots re-encoded | `SiteGenerator`, `HelpCentre::render`, `Support\Screenshots` | ✅ |
 | 5.3 Output encoding, injection | React escapes by default; Blade `{{ }}`; parameterised queries only (Eloquent / query builder); spreadsheet exports formula-safe | `Data\Exporter` test; code review | ✅ |
 | 5.3.3 XSS defence in depth | **Content Security Policy with a per-request nonce** on every platform page; public sites `script-src 'self'` | `SecurityHeadersTest`, every e2e test fails on a CSP violation | ✅ |
@@ -132,7 +132,6 @@ There is no public API yet (the module system reserves `/api/v1`). Every JSON en
 
 | Gap | Plan |
 |---|---|
-| Email on sign-in from a new device and on password/MFA changes (2.2.3); password or code before turning MFA off or exporting all data (3.7) | **18.2** (small; with the isolation work) |
-| Automated cross-business isolation test over every route (4.2) and mass-assignment check (5.1) | **18.2** |
+| Email on sign-in from a new device and on password/MFA changes (2.2.3); password or code before a full data export (3.7) | **18.2b** |
 | TLS and HSTS verified on the real load balancer (9.1) | **Sprint 17** |
 | External penetration test (grey-box, CREST-accredited) — no open critical/high | **Sprint 17**, on staging |
