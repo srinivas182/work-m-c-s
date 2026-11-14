@@ -39,6 +39,7 @@ describe('Campaigns pages', () => {
             sent_at: '2026-11-09',
             sent: 12,
             failed: 1,
+            total: 0,
             opened: 5,
             clicked: 2,
             redeemed: 3,

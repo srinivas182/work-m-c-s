@@ -27,7 +27,8 @@ case "${1:-serve}" in
     ;;
   worker)
     warm_caches
-    exec php artisan queue:work --sleep=1 --tries=3 --max-time=3600
+    # Critical first (booking messages), then ordinary work, then bulk (campaign batches, exports) — Sprint 18.3a.
+    exec php artisan queue:work --queue=critical,default,bulk --sleep=1 --tries=3 --max-time=3600
     ;;
   scheduler)
     warm_caches

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 use Wurk\Health\Contracts\HealthCheck;
+use Wurk\Platform\Queues;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
 /**
@@ -105,7 +106,7 @@ final readonly class SystemChecks
             return [];
         }
 
-        return array_values(array_unique([(string) config("queue.connections.{$connection}.queue", 'default'), ...(array) config('wurk.watchtower.queues', [])]));
+        return array_values(array_unique([...Queues::ALL, ...(array) config('wurk.watchtower.queues', [])])); // critical, default, bulk (18.3a)
     }
 
     private function backlog(string $queue): ?string

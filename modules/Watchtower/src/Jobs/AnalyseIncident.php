@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Wurk\Platform\Queues;
 use Wurk\Watchtower\Models\Incident;
 use Wurk\Watchtower\Support\Analyst;
 
@@ -20,7 +21,10 @@ final class AnalyseIncident implements ShouldQueue
 
     public int $timeout = 120;
 
-    public function __construct(public readonly string $incidentId) {}
+    public function __construct(public readonly string $incidentId)
+    {
+        $this->onQueue(Queues::BULK); // patient work (18.3a)
+    }
 
     public function handle(Analyst $analyst): void
     {

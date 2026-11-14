@@ -91,7 +91,7 @@ it('sends a personalised email with tracked links, an open image and an opt-out 
     ($this->make)()->assertSessionHas('status');
     $id = ($this->latest)();
     $this->actingAs($this->owner)->post($this->base."/{$id}/test")->assertSessionHas('status', 'Test sent to owner@glow.co.za.');
-    $this->actingAs($this->owner)->post($this->base."/{$id}/send", ['when' => 'now'])->assertSessionHas('status', 'Sent to 1 customer.');
+    $this->actingAs($this->owner)->post($this->base."/{$id}/send", ['when' => 'now'])->assertSessionHas('status', 'Sending to 1 customer — it goes out in the background; this page shows how far it’s got.');
     Mail::assertSent(CampaignMail::class, fn (CampaignMail $m) => $m->hasTo('owner@glow.co.za') && str_starts_with($m->subjectLine, '[Test] We miss you, ') && ! str_contains($m->subjectLine, '{first_name}'));
     $mail = null;
     Mail::assertSent(CampaignMail::class, function (CampaignMail $m) use (&$mail) {
@@ -122,7 +122,7 @@ it('refuses SMS the credits won’t cover, sends it once topped up, and sends sc
     $this->actingAs($this->owner)->post($this->base."/{$id}/send", ['when' => 'now'])->assertSessionHasErrors('send');
     expect($this->sms->sent)->toBe([]);
     $this->ctx->run($this->glow, fn () => app(CreditWallet::class)->grant('purchase', 50000, 'test-topup', 'Test top-up'));
-    $this->actingAs($this->owner)->post($this->base."/{$id}/send", ['when' => 'now'])->assertSessionHas('status', 'Sent to 1 customer.');
+    $this->actingAs($this->owner)->post($this->base."/{$id}/send", ['when' => 'now'])->assertSessionHas('status', 'Sending to 1 customer — it goes out in the background; this page shows how far it’s got.');
     $this->actingAs($this->owner)->post($this->base."/{$id}/send", ['when' => 'later', 'at' => now()->addHour()->format('Y-m-d\TH:i')])
         ->assertSessionHasErrors(['send' => 'This campaign has already been sent.']); // can't reschedule a sent one
     expect($this->sms->sent[0][0])->toBe('+27820000001')->and($this->sms->sent[0][1])->toStartWith('Hi Thandi, 10% off this week! Stop: '.$this->site.'/c/');

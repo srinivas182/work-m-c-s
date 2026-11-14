@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Performance — Sprint 18.3a (fair queues, no N+1)
+- **Three queues, in priority order** — `critical` (booking messages), `default`, `bulk` (campaigns, exports, Watchtower's AI). Workers run `queue:work --queue=critical,default,bulk`: a customer's booking confirmation never waits behind another business's campaign.
+- **Campaigns are sent in the background, in batches of 200** — no longer inside the owner's request ("Send now" with 50,000 customers would have timed out) or one business at a time in the scheduler. Each campaign has at most **one job waiting** at a time, so businesses' campaigns take turns. The campaign list shows progress ("120 of 1,000 done"). Customers who withdraw consent after a campaign starts are skipped (POPIA).
+- **Booking messages are queued** (critical queue, after the booking is saved) instead of making the customer wait for the SMS or email provider.
+- **Query budgets in CI**: customers, leads, today's bookings, products, orders, campaigns, pages, enquiries and the team page are loaded with 1 and 26 rows; the number of queries may not grow with the rows. Found and fixed: the team page queried each member's roles separately.
+- Watchtower watches all three queues for backlogs.
+
 ### Security — Sprint 18.2b (security emails, "Confirm it's you")
 - **"Was this you?" emails**: when an account is signed in to on a device it hasn't used before (browser and system, partial internet address), when the password changes, and when two-step sign-in is turned on or off — with exactly what to do if it wasn't them. Not on the first device, not again on a known one. (People with only a phone number see their devices under Account → Security; no SMS per sign-in.)
 - **"Confirm it's you"** before downloading all of a business's data: the password, or a code sent to the person's email or phone — valid for 15 minutes; signing in with a password or code counts, a remembered device doesn't. Available to every module as the `confirmed` middleware.
