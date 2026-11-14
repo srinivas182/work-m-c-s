@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.18.0] — 2026-11-15 — Sprint 16: Self-service and support
+
+Help centre with 30-second videos and "?" on every screen; the "Ask WURK" assistant (answers from help and the business's own figures, changes confirmed first with undo; 50 free questions a month); support tickets with help-first deflection, the page and last error attached, screenshots, WURK's inbox (assign, priority, notes, canned and AI-suggested replies, reply targets by package in business hours) and ratings; consent-based support access (view-only by default, up to 2 hours, sensitive actions always blocked, audited on behalf); business health for WURK's success team (nightly score, reasons and next steps, MRR at risk, weekly digest); "Your data" full export and 30-day "Recently deleted". Release steps: docs/deployment/docker.md (v0.18.0 rows).
+
 ### Added — Sprint 16.6c (deleted customers, cancelled bookings)
 - **Customers can be deleted** (contact page, `contacts.manage`): hidden everywhere and **never in a campaign** while deleted; restorable from Recently deleted for 30 days, with their history. After that their details are **erased** exactly as for a customer's own request (name, phone, email, notes, consent; what they wrote in forms and chats) — once.
 - **Cancelled bookings can be put back** from Recently deleted for 30 days while they're still ahead and **their time is still free** for the same person; the customer is told as for a new booking. Not for bookings with a deposit (refunded when cancelled) or online meetings (their link was removed) — the reason is shown. A cancelled booking stays in the history after 30 days.
