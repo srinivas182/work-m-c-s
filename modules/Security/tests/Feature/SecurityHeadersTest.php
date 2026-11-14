@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
@@ -61,4 +63,17 @@ it('allows uploaded files from where they are stored, and assets from a CDN', fu
 
 it('no longer serves private files at /storage/{path}', function () {
     expect(Route::has('storage.local'))->toBeFalse()->and(Route::has('storage.local.upload'))->toBeFalse();
+});
+
+it('trusts the load balancer’s forwarded headers only when TRUSTED_PROXIES says so', function () {
+    Route::get('/__sec/ip', fn (Request $r) => $r->ip().'|'.($r->isSecure() ? 'https' : 'http'));
+    $forwarded = ['REMOTE_ADDR' => '10.0.0.5', 'HTTP_X_FORWARDED_FOR' => '41.13.7.9', 'HTTP_X_FORWARDED_PROTO' => 'https'];
+    expect($this->call('GET', '/__sec/ip', server: $forwarded)->getContent())->toBe('10.0.0.5|http');   // nobody trusted by default
+
+    TrustProxies::at(['10.0.0.0/8']);
+    try {
+        expect($this->call('GET', '/__sec/ip', server: $forwarded)->getContent())->toBe('41.13.7.9|https');
+    } finally {
+        TrustProxies::flushState();
+    }
 });

@@ -1,0 +1,15 @@
+# Secret scanning (Sprint 18.1b): gitleaks' default rules, minus known non-secrets.
+title = "WURK"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test fixtures and sample text — not real secrets"
+paths = [
+  '''(^|/)tests/''',
+  '''^e2e/''',
+  '''^\.env\.example$''',
+]
+# The sample shown when a business edits its "Your account password" message (Portal\Support\DefaultPasswords).
+regexes = ['''K7pq-Wx3m-Rt9b''']

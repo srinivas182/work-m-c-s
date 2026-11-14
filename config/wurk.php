@@ -148,6 +148,9 @@ return [
         'hsts' => (bool) env('WURK_HSTS', true),
         // Who to tell about a security problem (security.txt and the disclosure page).
         'contact' => env('WURK_SECURITY_EMAIL', 'security@wurk.co.za'),
+        // The load balancer's addresses (comma-separated), or "*" when the servers are reachable only through it:
+        // WURK then sees each visitor's IP (rate limits, audit) and HTTPS (HSTS, secure cookies). Unset: trust nobody.
+        'trusted_proxies' => env('TRUSTED_PROXIES', ''),
     ],
 
     // The running release (Sprint 18.0): set at build time; otherwise the VERSION file at the root.
