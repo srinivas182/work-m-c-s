@@ -10,7 +10,7 @@ use Wurk\Data\Http\Controllers\YourDataController;
 Route::tenant(function (): void {
     Route::middleware('permission:data.export')->prefix('settings/your-data')->name('tenant.data')->group(function (): void {
         Route::get('/', [YourDataController::class, 'show']);
-        Route::post('/export', [YourDataController::class, 'store'])->middleware('throttle:5,60,data-export')->name('.export');
+        Route::post('/export', [YourDataController::class, 'store'])->middleware(['throttle:5,60,data-export', 'confirmed'])->name('.export'); // confirm it's you first (18.2b)
         Route::get('/export/{export}', [YourDataController::class, 'download'])->middleware('signed')->name('.download');
     });
     // Recently deleted (16.6b): each kind is limited by its own permission.

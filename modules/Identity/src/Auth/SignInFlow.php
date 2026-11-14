@@ -88,6 +88,7 @@ final readonly class SignInFlow
         $request->session()->regenerate();
         $request->session()->put([
             'auth.started_at' => now()->getTimestamp(),
+            'auth.signed_in_at' => now()->getTimestamp(), // a real sign-in (not a remembered device): counts as "confirmed" for 15 minutes (18.2b)
             'auth.last_seen' => now()->getTimestamp(),
             'auth.remember' => $remember,
         ]);

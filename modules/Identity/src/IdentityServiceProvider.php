@@ -13,9 +13,15 @@ use Wurk\Identity\Contracts\PeopleDirectory;
 use Wurk\Identity\Contracts\TeamActivity;
 use Wurk\Identity\Contracts\TextMessenger;
 use Wurk\Identity\Contracts\Verification;
+use Wurk\Identity\Events\MfaDisabled;
+use Wurk\Identity\Events\MfaEnabled;
+use Wurk\Identity\Events\NewDeviceSignedIn;
+use Wurk\Identity\Events\PasswordChanged;
 use Wurk\Identity\Http\Middleware\EnsurePlatformStaff;
+use Wurk\Identity\Http\Middleware\RequireRecentConfirmation;
 use Wurk\Identity\Invites\InvitationService;
 use Wurk\Identity\Listeners\InviteBusinessOwner;
+use Wurk\Identity\Listeners\SendSecurityNotice;
 use Wurk\Identity\Onboarding\AccountService;
 use Wurk\Identity\Onboarding\VerificationService;
 use Wurk\Identity\Otp\LogTextMessenger;
@@ -43,8 +49,12 @@ final class IdentityServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(HealthSignals::class, fn (HealthSignals $s) => $s->register('identity', fn (string $t) => $this->app->make(SignInSignal::class)($t))); // business health (16.5)
         $this->loadViewsFrom($this->modulePath('resources/views'), 'identity');
         Event::listen(OwnerInvitationRequested::class, InviteBusinessOwner::class);
+        // "Was this you?" emails (18.2b).
+        Event::listen([NewDeviceSignedIn::class, PasswordChanged::class, MfaEnabled::class, MfaDisabled::class], SendSecurityNotice::class);
         // Published for other modules' admin routes: active WURK staff with an authenticator.
         $this->app->make(Router::class)->aliasMiddleware('staff', EnsurePlatformStaff::class);
+        // Published for other modules: "confirm it's you" before something sensitive (18.2b).
+        $this->app->make(Router::class)->aliasMiddleware('confirmed', RequireRecentConfirmation::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([CreateIdentityCommand::class]);

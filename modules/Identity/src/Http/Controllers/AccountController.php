@@ -20,6 +20,7 @@ use Wurk\Identity\Events\SignedOut;
 use Wurk\Identity\Mfa\Totp;
 use Wurk\Identity\Models\Identity;
 use Wurk\Identity\Models\IdentitySession;
+use Wurk\Identity\Support\DeviceName;
 use Wurk\Identity\Support\PasswordPolicy;
 use Wurk\Identity\Support\Surface;
 
@@ -50,7 +51,7 @@ final class AccountController
                 ->map(fn (IdentitySession $s) => [
                     'id' => $s->id,
                     'surface' => $s->surface,
-                    'device' => self::describe((string) $s->user_agent),
+                    'device' => DeviceName::of((string) $s->user_agent),
                     'ip' => $s->ip,
                     'last_active' => $s->id === $current ? 'Active now' : $s->last_active_at->diffForHumans(),
                     'current' => $s->id === $current,
@@ -151,26 +152,5 @@ final class AccountController
         abort_unless($identity instanceof Identity, 401);
 
         return $identity;
-    }
-
-    private static function describe(string $agent): string
-    {
-        $browser = match (true) {
-            str_contains($agent, 'Edg/') => 'Edge',
-            str_contains($agent, 'Chrome/') => 'Chrome',
-            str_contains($agent, 'Firefox/') => 'Firefox',
-            str_contains($agent, 'Safari/') => 'Safari',
-            default => 'Browser',
-        };
-        $os = match (true) {
-            str_contains($agent, 'Android') => 'Android',
-            str_contains($agent, 'iPhone') || str_contains($agent, 'iPad') => 'iOS',
-            str_contains($agent, 'Windows') => 'Windows',
-            str_contains($agent, 'Mac OS') => 'macOS',
-            str_contains($agent, 'Linux') => 'Linux',
-            default => 'Unknown device',
-        };
-
-        return "{$browser} on {$os}";
     }
 }
