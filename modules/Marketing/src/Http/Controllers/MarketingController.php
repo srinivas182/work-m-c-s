@@ -46,6 +46,18 @@ final class MarketingController
         return $this->page('Marketing::Legal', ['page' => $page]);
     }
 
+    /** How WURK looks after businesses' data, in plain words (18.1b). */
+    public function trust(): Response
+    {
+        return $this->page('Marketing::Trust', ['contact' => (string) config('wurk.security.contact')]);
+    }
+
+    /** Reporting a security problem: the responsible-disclosure policy (18.1b). */
+    public function security(): Response
+    {
+        return $this->page('Marketing::Security', ['contact' => (string) config('wurk.security.contact')]);
+    }
+
     public function sendContact(Request $request): RedirectResponse
     {
         // Bots fill every field; people never see this one.

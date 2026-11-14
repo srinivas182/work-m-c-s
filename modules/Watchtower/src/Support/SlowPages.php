@@ -39,7 +39,7 @@ final class SlowPages
             $add['samples'] = DB::raw('samples + 1');
             foreach ([300 => 'le300', 1000 => 'le1000', 2000 => 'le2000'] as $limit => $column) {
                 if ($ms <= $limit) {
-                    $add[$column] = DB::raw("{$column} + 1");
+                    $add[$column] = DB::raw("{$column} + 1"); // nosemgrep: php-raw-sql-interpolated — $column is from the fixed list above
                 }
             }
         }

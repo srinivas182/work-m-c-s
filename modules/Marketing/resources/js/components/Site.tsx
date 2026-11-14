@@ -95,6 +95,12 @@ export function Site({
             <Link href="/legal/privacy" className="hover:text-[#1B1640]">
               Privacy (POPIA)
             </Link>
+            <Link href="/trust" className="hover:text-[#1B1640]">
+              Trust and security
+            </Link>
+            <Link href="/security" className="hover:text-[#1B1640]">
+              Report a security problem
+            </Link>
           </nav>
         </div>
       </footer>

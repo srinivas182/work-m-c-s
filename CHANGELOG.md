@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Security — Sprint 18.1b (scanning, disclosure, trust)
+- **Security checks on every change** (new CI job, about a minute, drafts included): `composer audit` (any advisory fails), `pnpm audit --prod` (high/critical fails), **gitleaks** on the PR's commits, and **WURK's own Semgrep rules** (eval, unserialize, shell, SQL from variables or request input, saving `$request->all()`, predictable secrets, unescaped request data in Blade, raw HTML in React). **OWASP ZAP baseline** scans the running back office with the performance gate; a missing security header or cookie flag fails.
+- **Dependabot**: grouped weekly updates for PHP and JavaScript, monthly for GitHub Actions and the Docker image.
+- Static files served by the production server (built scripts, images) now carry the basic security headers too, and no `Server` header (`docker/production/Caddyfile`).
+- **`/.well-known/security.txt`** on WURK's addresses (RFC 9116), **wurk.co.za/security** (how to report a security problem — reply within 3 working days, safe harbour for good-faith research) and **wurk.co.za/trust** (how WURK looks after businesses' data, in plain words), linked from the footer.
+- **OWASP ASVS Level 2 self-assessment**: `docs/security/asvs-l2.md` — every control with how WURK meets it and the test that proves it, plus open gaps.
+
 ### Security — Sprint 18.1a (baseline)
 - **Libraries with security advisories updated**: Laravel 13.38 → 13.42 and Symfony 7.4 components (routing, HTTP foundation/kernel, mime and others) — `composer audit` now clean. The rich-text editor's `happy-dom` (a server-side DOM it bundles but WURK never runs) is pinned to its patched release — `pnpm audit --prod` clean.
 - **Security headers on every response**: a **Content Security Policy with a per-request nonce** on every back-office and platform page (only WURK's own scripts run; styles, images, media and connections limited to WURK and where uploads are stored); no framing; `nosniff`; strict referrer and permissions policies; **HSTS** over HTTPS (with subdomains on WURK's own domain only). Pages with their own policy (public websites, record links, payment hand-offs) keep it. `WURK_CSP=report-only` or `off` for a careful rollout.

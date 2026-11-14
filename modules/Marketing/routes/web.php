@@ -12,4 +12,6 @@ Route::domain((string) config('wurk.domains.root'))->group(function (): void {
     Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
     Route::post('/contact', [MarketingController::class, 'sendContact'])->middleware('throttle:5,10,marketing.contact.send')->name('marketing.contact.send');
     Route::get('/legal/{page}', [MarketingController::class, 'legal'])->name('marketing.legal');
+    Route::get('/trust', [MarketingController::class, 'trust'])->name('marketing.trust');           // 18.1b
+    Route::get('/security', [MarketingController::class, 'security'])->name('marketing.security'); // 18.1b
 });
