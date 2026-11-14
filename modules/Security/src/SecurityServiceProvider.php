@@ -10,6 +10,7 @@ use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Security\Contracts\PlatformSettings;
 use Wurk\Security\Http\Middleware\AdminIpAllowList;
 use Wurk\Security\Http\Middleware\RequireTeamMfa;
+use Wurk\Security\Http\Middleware\SecurityHeaders;
 use Wurk\Security\Support\Settings;
 
 final class SecurityServiceProvider extends ModuleServiceProvider
@@ -45,6 +46,10 @@ final class SecurityServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $kernel = $this->app->make(Kernel::class);
+        // Security headers on every response, web or not (18.1).
+        if (method_exists($kernel, 'prependMiddleware')) {
+            $kernel->prependMiddleware(SecurityHeaders::class);
+        }
         if (method_exists($kernel, 'appendMiddlewareToGroup')) {
             $kernel->appendMiddlewareToGroup('web', AdminIpAllowList::class);
         }

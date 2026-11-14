@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Security — Sprint 18.1a (baseline)
+- **Libraries with security advisories updated**: Laravel 13.38 → 13.42 and Symfony 7.4 components (routing, HTTP foundation/kernel, mime and others) — `composer audit` now clean. The rich-text editor's `happy-dom` (a server-side DOM it bundles but WURK never runs) is pinned to its patched release — `pnpm audit --prod` clean.
+- **Security headers on every response**: a **Content Security Policy with a per-request nonce** on every back-office and platform page (only WURK's own scripts run; styles, images, media and connections limited to WURK and where uploads are stored); no framing; `nosniff`; strict referrer and permissions policies; **HSTS** over HTTPS (with subdomains on WURK's own domain only). Pages with their own policy (public websites, record links, payment hand-offs) keep it. `WURK_CSP=report-only` or `off` for a careful rollout.
+- Session cookies are HTTPS-only wherever WURK runs on HTTPS (unless `SESSION_SECURE_COOKIE` says otherwise).
+- **`TRUSTED_PROXIES`** (new): behind the load balancer WURK now sees each visitor's own IP (rate limits, audit) and HTTPS — previously it would have seen the load balancer for everyone.
+- Every public route that changes something is rate-limited — **checked in CI**, so a new unthrottled one fails the build. The unused `/storage/{path}` file routes are gone.
+- Browser tests fail if the Content Security Policy blocks anything on a page.
+
 ### Added — Sprint 18.0b (Watchtower: AI explanations, slow pages, uptime)
 - **WURK's AI explains each problem worth explaining** (high or critical, back after a fix, or a normal one that keeps happening): it reads the error, the trace, the lines of WURK's own code where it happened (from the running release) and earlier problems in the same file, then writes what broke and for whom, the likely cause, a suggested fix with a test, and its confidence. The explanation leads the email and the fix request. It can raise severity, never lower it. In the background, at most 50 a day (`WATCHTOWER_AI_DAILY_CAP`), on WURK's own AI account; **Explain again** on the problem page. High problems wait up to 3 minutes for it; critical ones never wait.
 - **Slow pages**: response times sampled per route per hour; a route where more than 5% of requests take over 300 ms (the PRD's p95 budget), or five take over 2 seconds, becomes a problem; the slowest routes of the last 24 hours are on the Watchtower page.

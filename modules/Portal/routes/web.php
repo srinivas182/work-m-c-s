@@ -13,11 +13,11 @@ Route::domain('{handle}.'.config('wurk.domains.root'))->middleware('web')->prefi
     Route::get('/', [PortalController::class, 'show']);
     Route::post('/code', [PortalController::class, 'code'])->middleware('throttle:10,1,portal-code')->name('.code');
     Route::post('/verify', [PortalController::class, 'verify'])->middleware('throttle:10,1,portal-verify')->name('.verify');
-    Route::post('/consent', [PortalController::class, 'consent'])->name('.consent');
+    Route::post('/consent', [PortalController::class, 'consent'])->middleware('throttle:20,1,portal-consent')->name('.consent');
     Route::get('/handoff', [PortalController::class, 'handoff'])->middleware('throttle:30,1,handoff')->name('.handoff');
     Route::post('/password', [PortalController::class, 'password'])->middleware('throttle:10,1,portal-password')->name('.password');
     Route::post('/set-password', [PortalController::class, 'setPassword'])->middleware('throttle:10,1,portal-set-password')->name('.set-password');
-    Route::post('/sign-out', [PortalController::class, 'signOut'])->name('.sign-out');
+    Route::post('/sign-out', [PortalController::class, 'signOut'])->middleware('throttle:20,1,portal-sign-out')->name('.sign-out');
     Route::get('/referral-qr.svg', [PortalController::class, 'qr'])->name('.qr');
     Route::get('/id-qr.svg', [PortalController::class, 'idQr'])->middleware('throttle:30,1,id-qr')->name('.id-qr');
     Route::get('/my-information.json', [PortalController::class, 'myData'])->middleware('throttle:10,1,my-data')->name('.my-data');

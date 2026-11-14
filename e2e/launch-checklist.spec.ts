@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible, signUpBusiness } from './support';
 
 test('a new owner sees the launch checklist and can confirm steps', async ({ page }, testInfo) => {

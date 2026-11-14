@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // The block design board: every block, two very different brands, accessibility-scanned.
 for (const business of ['salon', 'dental', 'sections']) {

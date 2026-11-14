@@ -24,6 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         // The referral cookie holds only a public code, and is read on routes with and without the web stack (Sprint 13.2).
         $middleware->encryptCookies(except: ['wurk_ref', 'wurk_agent']); // public codes only (Sprints 13.2, 14.2)
+        // Behind a load balancer (Sprint 18.1): trust its X-Forwarded-* headers so WURK sees the visitor's IP (rate
+        // limits, audit) and HTTPS (HSTS, secure cookies). Comma-separated addresses/ranges, or "*" only when the
+        // servers can be reached through the load balancer alone. Unset: trust nobody.
+        $proxies = (string) env('TRUSTED_PROXIES', '');
+        if ($proxies !== '') {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
         $middleware->redirectGuestsTo(fn () => route('identity.sign-in'));
         $middleware->redirectUsersTo(fn (Request $request) => SignInFlow::home(Surface::of($request)));
     })

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible } from './support';
 
 test('a shopper browses the grid and opens a product page', async ({ page }, testInfo) => {

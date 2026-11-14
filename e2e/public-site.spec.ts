@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible, signUpBusiness } from './support';
 
 test('a published page is complete HTML (no JavaScript needed), accessible, and makes no third-party requests', async ({
