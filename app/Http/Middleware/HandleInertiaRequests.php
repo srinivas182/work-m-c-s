@@ -57,6 +57,10 @@ final class HandleInertiaRequests extends Middleware
             'flash' => fn () => ['status' => $request->session()->get('status'), 'warning' => $request->session()->get('warning')],
             // A page-wide notice a module attached to this request (e.g. Billing's payment reminder).
             'banner' => fn () => $request->attributes->get('wurk.banner'),
+            // "Ask WURK" in a business's back office (Sprint 16.2), when on.
+            'assistant' => fn () => $request->attributes->get('wurk.assistant'),
+            // "Contact support" in a business's back office (Sprint 16.3).
+            'support' => fn () => $request->attributes->get('wurk.support'),
         ];
     }
 }

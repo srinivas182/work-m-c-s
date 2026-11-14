@@ -17,6 +17,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Switch,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
@@ -35,6 +36,7 @@ interface Settings {
   target_margin_pct: number;
   caps: { tenant_daily_requests: number; provider_monthly_usd: Record<string, number | null> };
   retirements?: Record<string, string | null>;
+  assistant: { enabled: boolean; free_questions: number; monthly_cap: number };
 }
 
 interface Props {
@@ -419,6 +421,59 @@ export default function AiAdmin({ settings, providers, tasks, connected, usage }
                 />
               </Field>
             ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Ask WURK</CardTitle>
+            <CardDescription>
+              The assistant in every business&rsquo;s back office. Questions beyond the free ones
+              use the rate card&rsquo;s &ldquo;Ask WURK: a question&rdquo; price; changes it makes
+              are free.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-3">
+            <label className="flex items-center gap-3 text-sm">
+              <Switch
+                aria-label="Ask WURK switched on"
+                checked={form.data.assistant.enabled}
+                onCheckedChange={(v) =>
+                  form.setData('assistant', { ...form.data.assistant, enabled: v })
+                }
+              />
+              Switched on
+            </label>
+            <Field
+              label="Free questions a month (per business)"
+              error={form.errors['assistant.free_questions']}
+            >
+              <Input
+                inputMode="numeric"
+                value={String(form.data.assistant.free_questions)}
+                onChange={(e) =>
+                  form.setData('assistant', {
+                    ...form.data.assistant,
+                    free_questions: Number(e.target.value) || 0,
+                  })
+                }
+              />
+            </Field>
+            <Field
+              label="Most questions a month (per business)"
+              error={form.errors['assistant.monthly_cap']}
+            >
+              <Input
+                inputMode="numeric"
+                value={String(form.data.assistant.monthly_cap)}
+                onChange={(e) =>
+                  form.setData('assistant', {
+                    ...form.data.assistant,
+                    monthly_cap: Number(e.target.value) || 0,
+                  })
+                }
+              />
+            </Field>
           </CardContent>
         </Card>
 

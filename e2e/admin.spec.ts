@@ -95,6 +95,32 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
     /\/metrics\/export\.csv\?period=/,
   );
   await expectAccessible(page);
+  // "?" help (Sprint 16.1b): opens a panel for this page, with search.
+  await page.getByRole('button', { name: 'Help for this page' }).click();
+  await expect(page.getByRole('dialog', { name: 'Help' })).toBeVisible();
+  await expect(page.getByLabel('Search help')).toBeVisible();
+  await expectAccessible(page);
+  await page.keyboard.press('Escape');
+
+  // Support inbox (Sprint 16.3): views, then settings with a canned reply.
+  await page.goto(`${admin}/support`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Support inbox' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Show' })).toBeVisible();
+  await expectAccessible(page);
+  await page.getByRole('link', { name: 'Targets and canned replies' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Support settings' })).toBeVisible();
+  const canned = page.getByRole('form', { name: 'New canned reply' });
+  await canned.getByLabel('Title').fill('Reconnect payments');
+  await canned.getByLabel('Reply').fill('Hi {name}, please reconnect your payment provider.');
+  await canned.getByRole('button', { name: 'Add canned reply' }).click();
+  await expect(page.getByRole('form', { name: 'Canned reply: Reconnect payments' })).toBeVisible();
+  await expectAccessible(page);
+
+  // Business health (Sprint 16.5): scores with reasons and next steps.
+  await page.goto(`${admin}/health`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Business health' })).toBeVisible();
+  await expect(page.getByRole('form', { name: 'Weekly digest' })).toBeVisible();
+  await expectAccessible(page);
 
   // Profitability (Sprint 15.5a): costs and a pricing "what if".
   await page.goto(`${admin}/profitability`);

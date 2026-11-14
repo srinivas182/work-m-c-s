@@ -99,7 +99,7 @@ final readonly class BookingMessages
 
         return [
             'client' => (string) strtok($booking->customer_name, ' '),
-            'service' => $session !== null ? 'Class: '.$session->title : ($isTable ? 'Table for '.$booking->party_size : (string) BookingService::query()->whereKey($booking->service_id)->value('name')),
+            'service' => $session !== null ? 'Class: '.$session->title : ($isTable ? 'Table for '.$booking->party_size : (string) BookingService::withTrashed()->whereKey($booking->service_id)->value('name')),
             'business' => $tenant->displayName(),
             'when' => $start->setTimezone($tenant->timezone())->format('D j M, H:i'),
             'link' => $kind === 'cancelled' || $start->isPast() ? '' : match (true) {

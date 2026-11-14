@@ -114,6 +114,23 @@ export default function Contact({
                 Edit
               </Button>
             )}
+            {canManage && !editing && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-danger-11 justify-self-start"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Delete ${c.name}? You can restore them for 30 days; after that their details are erased.`,
+                    )
+                  )
+                    router.delete(window.location.pathname);
+                }}
+              >
+                Delete customer
+              </Button>
+            )}
             {editing && (
               <form
                 aria-label="Edit contact"

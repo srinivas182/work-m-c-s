@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace Wurk\Ai;
 
+use Illuminate\Routing\Router;
 use Wurk\Ai\Contracts\Ai;
 use Wurk\Ai\Contracts\AiActions;
+use Wurk\Ai\Contracts\HelpAnswers;
+use Wurk\Ai\Http\Middleware\ShareAssistant;
 use Wurk\Ai\Support\AiClient;
 use Wurk\Ai\Support\AiSettings;
 use Wurk\Ai\Support\CostEstimates;
 use Wurk\Ai\Support\CreditedActions;
+use Wurk\Ai\Support\FiguresTool;
+use Wurk\Ai\Support\HelpAnswerer;
 use Wurk\Plans\Contracts\CreditCostEstimates;
+use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
 final class AiServiceProvider extends ModuleServiceProvider
@@ -20,7 +26,14 @@ final class AiServiceProvider extends ModuleServiceProvider
         $this->app->singleton(AiSettings::class);
         $this->app->singleton(Ai::class, AiClient::class);
         $this->app->scoped(AiActions::class, CreditedActions::class);
+        $this->app->bind(HelpAnswers::class, HelpAnswerer::class);
         $this->app->singleton(CreditCostEstimates::class, CostEstimates::class);
+    }
+
+    protected function bootModule(): void
+    {
+        $this->app->make(Router::class)->pushMiddlewareToGroup('tenant.back-office', ShareAssistant::class);
+        $this->callAfterResolving(AssistantTools::class, fn (AssistantTools $t) => $t->register(FiguresTool::class));
     }
 
     /** @return list<array{key: string, label: string, scope?: string}> */

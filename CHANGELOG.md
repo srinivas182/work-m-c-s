@@ -4,6 +4,70 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.18.0] — 2026-11-15 — Sprint 16: Self-service and support
+
+Help centre with 30-second videos and "?" on every screen; the "Ask WURK" assistant (answers from help and the business's own figures, changes confirmed first with undo; 50 free questions a month); support tickets with help-first deflection, the page and last error attached, screenshots, WURK's inbox (assign, priority, notes, canned and AI-suggested replies, reply targets by package in business hours) and ratings; consent-based support access (view-only by default, up to 2 hours, sensitive actions always blocked, audited on behalf); business health for WURK's success team (nightly score, reasons and next steps, MRR at risk, weekly digest); "Your data" full export and 30-day "Recently deleted". Release steps: docs/deployment/docker.md (v0.18.0 rows).
+
+### Added — Sprint 16.6c (deleted customers, cancelled bookings)
+- **Customers can be deleted** (contact page, `contacts.manage`): hidden everywhere and **never in a campaign** while deleted; restorable from Recently deleted for 30 days, with their history. After that their details are **erased** exactly as for a customer's own request (name, phone, email, notes, consent; what they wrote in forms and chats) — once.
+- **Cancelled bookings can be put back** from Recently deleted for 30 days while they're still ahead and **their time is still free** for the same person; the customer is told as for a new booking. Not for bookings with a deposit (refunded when cancelled) or online meetings (their link was removed) — the reason is shown. A cancelled booking stays in the history after 30 days.
+
+### Added — Sprint 16.6b (recently deleted)
+- **Settings → Recently deleted**: what was deleted in the last 30 days, with **Restore**; each kind shown only to people who manage it. After 30 days it's removed for good (nightly).
+- **Products** (with their options and stock) and **shop categories** (with the products that were in them) now go to Recently deleted instead of being deleted for good; their web addresses stay reserved meanwhile.
+- **Booking services** can now be deleted: off the booking page at once, while bookings already made keep the service (name, moving, messages, the customer's manage page). After 30 days a service with bookings stays hidden so those bookings keep its name.
+- **Campaign drafts** can now be deleted (sent and scheduled ones can't); a deleted draft can never be sent.
+- **Website pages** join the same list (already restorable); after 30 days they go for good with their published versions and old addresses.
+- Platform: `RecentlyDeleted` registry (list, restore, purge per kind).
+
+### Added — Sprint 16.6a (your data: full export)
+- **Settings → Your data** (`data.export`; owners): **Export everything** builds one ZIP in the background — a CSV per area (customers and their history, products and stock, orders and items, services, bookings, campaigns, coupons, website pages, patients and their documents' list) and the files (website photos at full size; patient documents, decrypted) — and emails a **signed link valid for 24 hours** (only for signed-in people allowed to export). Deleted after 24 hours.
+- Only what the person may see: health records only with `records.view`; each document read for the export is logged like any other access. Secret-looking columns (tokens, hashes, keys, passwords) never leave; cells that spreadsheets would run as formulas are kept as text; a README lists what's inside.
+- One export at a time, three a day; requested, ready and downloaded are audited.
+- WURK support can never export a business's data, whatever access the owner gives.
+- Platform: `DataExports` registry — each module offers its own tables and files.
+
+### Added — Sprint 16.5 (business health)
+- **Admin → Business health** (`health.view`; Support and Finance roles): every business scored **nightly** (0–100: healthy 80+, watch 50–79, at risk below 50) from what each part of WURK sees, each with **a plain reason and a suggested next step** — e.g. "No one has signed in for 34 days → Call the owner". Signals: no sign-ins (or never), failed payment / suspended / trial ending, website not published a week in, out of credits while using them, support tickets waiting past target / rated "not good" / many this month, and server errors.
+- **MRR at risk** by grade; "needs attention" first, sorted by MRR, lowest score, biggest drop or name; filter by grade, package or name; **CSV export**; the score's trend since the last run.
+- **Weekly digest** (Mondays) to WURK's success team: newly at risk this week, then the most MRR at risk — with what to do. Address set on the page.
+- Server errors are now counted per business per day (no details; the logs keep those).
+- Platform: `HealthSignals` registry — each module contributes its own signals; one failing never hides the others. SSL/DNS for custom domains joins in Sprint 17.
+
+### Added — Sprint 16.4 (consent-based support access)
+- **WURK asks, the business decides**: from a ticket, WURK support asks for view-only or full access with a reason; the owners are emailed and see a banner. **Support access** (Settings; `support.access`) shows the request: **view-only by default** or full, for **15 minutes to 2 hours**; approve or decline.
+- **While WURK is in**: a banner on every screen for both sides (whose back office, which level, until when); **view-only refuses every change**; full access still **never** touches payouts, bank and payment details, billing and credits, the team and roles, security settings or health records; WURK staff can't see or decide on their own access.
+- **Ends at once** when an owner says so, when time runs out, or when WURK is done.
+- **Audited as "WURK staff: name (on behalf of the business)"** — actor type `support`, with the staff member as the impersonator on the business's audit chain.
+- Platform: `SupportSessions` contract (nobody, by default); Access grants WURK staff the business's screens minus the never-list only during an approved session; Identity's workspace check accepts it.
+
+### Added — Sprint 16.3b (support inbox)
+- **Assign** tickets to anyone on WURK's support team (they're emailed, and hear about the business's replies); **priority** (urgent first); views: **mine, unassigned, first reply late, due within an hour**, and by priority; a banner when tickets are past target.
+- **Internal notes** — only WURK sees them; never emailed or shown to the business.
+- **Canned replies** with `{name}` and `{business}` filled in; most used first.
+- **Suggest a reply**: a draft from the help centre with the articles it used, for staff to check and edit — or a nudge to write the missing article.
+- **Admin → Support inbox → Targets and canned replies**: first-reply hours per package, managed and others; business hours and days; the inbox email. New tickets use them; open ones keep theirs.
+
+### Added — Sprint 16.3a (support tickets)
+- **Contact support** (every back office: Settings menu, "?" help, Ask WURK): **help first** — matching articles and an answer from them (free) — then the ticket. It carries **the page, browser and last error** automatically (shown, and removable) plus up to 3 **screenshots**, re-encoded on upload so nothing hidden survives, and kept private.
+- **Your tickets**: the conversation, replies (reopen a solved ticket by replying), **"How did we do?"** when solved. Everyone sees the tickets they opened; owners (`support.tickets`) see all of the business's.
+- **Admin → Support inbox** (`support.manage`, given to the Support role): every business's tickets, soonest due first; the business, package, page, browser and last error beside the conversation; reply, or reply and solve; status; late first replies flagged.
+- **First-reply targets (decision B)**: Starter 24, Growth 8, Pro 4, managed 2 hours — in business hours (weekdays 08:00–17:00 SAST); shown to the business.
+- **Emails both ways**: new tickets and business replies to WURK's support inbox (`WURK_SUPPORT_EMAIL`); WURK's replies to the person who opened the ticket.
+- Ai: `HelpAnswers` contract (answers from the help centre only, with sources; also for 16.3b's suggested replies). Plans: subscriptions include the package type.
+
+### Added — Sprint 16.2 ("Ask WURK" assistant)
+- **"Ask WURK"** (✨ in every business back-office header): ask how to do something — answered from the help centre, with the articles linked — or ask about your own figures ("how many bookings tomorrow?", "best seller this month?"), read-only from the reports you may see.
+- **Changes on request, confirmed first**: "add Saturday 9–1 for Thandi", "create a 10% December coupon", "draft a win-back email" — shows exactly what will change; nothing happens until you confirm (within 30 minutes); checked like the screen itself; your role and package decide what it can do; logged in the audit trail; **Undo** while it still can be (unused coupon, unchanged hours, unsent draft). Campaign drafts are never sent by the assistant.
+- **Allowance (decision A)**: 50 free questions a month per business, then the rate card's "Ask WURK: a question" price (1 credit in South Africa) — asked before spending, refunded if WURK AI can't answer; changes are free; a monthly cap. Free questions, cap and on/off in **Admin → WURK AI**; the assistant's model and fallback are chosen there too.
+- Privacy: only the question, matching help and totals go to the AI provider — never customers' names or contact details. Questions nothing answered are counted by their words for WURK to write next.
+- Platform: `AssistantTools` registry — modules offer read tools and change tools (preview, apply, undo); Help: `HelpSearch` contract.
+
+### Added — Sprint 16.1 (help centre)
+- **help.wurk.co.za**: categories, articles and **30-second videos** (on WURK's own storage — no third-party players or cookies), search, "Was this helpful?". Server-rendered; text rendered safely.
+- **Admin → Help centre** (`help.manage`): write in Markdown, add images and a video, link each article to the screens it helps with; see views, helpfulness and **searches that found nothing** (words only).
+- **"?" on every back-office screen** opens that screen's help in a side panel, with search. **"What's this?"** on key fields (auto top-up, VAT registration, campaign audiences, coupon limits, running cost).
+
 ## [0.17.0] — 2026-11-11 — Sprint 15: Reports and campaigns
 
 Business reports (sales, bookings with utilisation, customers, leads, stock, takings and VAT, referrals; any dates; per branch; highlights; CSV/PDF; owners' summary email), website analytics without cookies, email and SMS campaigns with coupons, WURK's SaaS metrics (MRR, ARR, churn, cohorts, movement, revenue, agents, credits, at-risk businesses), profitability (costs, profit per package, margin alerts, pricing what-if, provider reconciliation), auto top-up and the monthly usage summary. Waiting on Meta-approved templates: WhatsApp campaigns and the weekly WhatsApp summary (email until then). CI: MySQL tests in five parts, 12 minutes each. Release steps: docs/deployment/docker.md (v0.17.0 rows).

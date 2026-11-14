@@ -91,6 +91,17 @@ final class ContactsController
         return back()->with('status', 'Contact saved.');
     }
 
+    /** Delete a customer (Sprint 16.6c): hidden everywhere and never messaged; restorable for 30 days, then erased. */
+    public function destroy(Request $request, string $contact): RedirectResponse
+    {
+        Gate::authorize('contacts.manage');
+        $c = $this->visible($request)->whereKey($contact)->firstOrFail();
+        $c->delete();
+        $this->audit->record('contacts.deleted', 'contact', $c->id, ['erase_after_days' => 30]);
+
+        return redirect()->route('tenant.contacts')->with('status', "{$c->name} deleted. You can restore them from Recently deleted for 30 days — after that their details are erased.");
+    }
+
     public function merge(Request $request, string $contact): RedirectResponse
     {
         Gate::authorize('contacts.manage');

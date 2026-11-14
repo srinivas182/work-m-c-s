@@ -1,0 +1,14 @@
+{
+    "name": "Data",
+    "key": "data",
+    "version": "0.1.0",
+    "description": "“Your data”: a one-click full export of everything a business keeps in WURK (a CSV per area plus its files) as a ZIP, built in the background and emailed as a 24-hour link; and “Recently deleted” for 30 days.",
+    "core": true,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "identity",
+        "access",
+        "audit"
+    ]
+}

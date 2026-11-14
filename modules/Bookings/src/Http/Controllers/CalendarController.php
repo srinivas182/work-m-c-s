@@ -34,7 +34,7 @@ final class CalendarController
         $start = $view === 'week' ? $start->startOfWeek() : $start;
         $end = $start->addDays($view === 'week' ? 7 : 1);
         $services = BookingService::query()->orderBy('position')->orderBy('name')->get(['id', 'name', 'duration_minutes', 'active']);
-        $names = $services->pluck('name', 'id');
+        $names = BookingService::withTrashed()->pluck('name', 'id'); // existing bookings keep a deleted service's name
 
         return Inertia::render('Bookings::Calendar', [
             'view' => $view,

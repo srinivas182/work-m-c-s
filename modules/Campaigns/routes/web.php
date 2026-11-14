@@ -16,6 +16,7 @@ Route::tenant(function (): void {
         Route::get('/{campaign}', [CampaignsController::class, 'show'])->name('.show');
         Route::post('/{campaign}/test', [CampaignsController::class, 'test'])->middleware('throttle:10,10,campaign-test')->name('.test');
         Route::post('/{campaign}/send', [CampaignsController::class, 'send'])->middleware('throttle:10,10,campaign-send')->name('.send');
+        Route::delete('/{campaign}', [CampaignsController::class, 'destroy'])->name('.destroy');
     });
     Route::middleware(['entitled:marketing', 'permission:campaigns.manage'])->prefix('coupons')->name('tenant.coupons')->group(function (): void {
         Route::get('/', [CouponsController::class, 'index']);

@@ -13,6 +13,7 @@ use Wurk\Access\Permissions\Permission;
 use Wurk\Access\Permissions\PermissionRegistry;
 use Wurk\Access\Roles\SystemRoles;
 use Wurk\Identity\Contracts\PeopleDirectory;
+use Wurk\Platform\Contracts\SupportSessions;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -75,8 +76,11 @@ final class AccessManager implements BranchRestriction
         }
 
         $member = $this->member($identityId);
+        if ($member === null) {
+            return $this->memo[$key] = $this->supportPermissions($identityId);
+        }
 
-        return $this->memo[$key] = $member === null ? [] : $this->expand($member->roleKeys(), Permission::BUSINESS);
+        return $this->memo[$key] = $this->expand($member->roleKeys(), Permission::BUSINESS);
     }
 
     /**
@@ -93,7 +97,8 @@ final class AccessManager implements BranchRestriction
 
         $member = $this->member($identityId);
         if ($member === null) {
-            return []; // not on the team: sees nothing
+            // WURK support with the owner's consent sees every branch; anyone else not on the team sees nothing.
+            return app(SupportSessions::class)->active($this->context->id(), $identityId) !== null ? null : [];
         }
 
         if ($member->all_branches || in_array(SystemRoles::OWNER, $member->roleKeys(), true)) {
@@ -101,6 +106,22 @@ final class AccessManager implements BranchRestriction
         }
 
         return array_values(array_map('strval', $member->branches()->pluck('branch_id')->all()));
+    }
+
+    /**
+     * WURK staff let in by the owner (Sprint 16.4) can open the same screens as the business — except, always, money,
+     * who has access, security and health records. Whether they may change anything (view-only refuses every change;
+     * full refuses sensitive ones) is enforced on each request by the Support module's session guard.
+     *
+     * @return list<string>
+     */
+    private function supportPermissions(string $identityId): array
+    {
+        if (app(SupportSessions::class)->active($this->context->id(), $identityId) === null) {
+            return [];
+        }
+
+        return array_values(array_diff($this->registry->keys(Permission::BUSINESS), SupportSessions::NEVER));
     }
 
     public function member(string $identityId): ?Member

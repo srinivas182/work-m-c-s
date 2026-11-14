@@ -13,6 +13,7 @@ import {
   Input,
   PageHeader,
 } from '@/design-system';
+import { HelpTip } from '@/components/HelpTip';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 
@@ -157,7 +158,10 @@ export default function Coupons({
                   checked={form.data.once_per_customer}
                   onCheckedChange={(on) => form.setData('once_per_customer', on === true)}
                 />
-                Once per customer
+                Once per customer{' '}
+                <HelpTip>
+                  We recognise customers by their phone number, however it’s written.
+                </HelpTip>
               </label>
               <Button type="submit" className="justify-self-start" loading={form.processing}>
                 Create coupon

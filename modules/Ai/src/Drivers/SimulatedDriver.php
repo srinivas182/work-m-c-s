@@ -16,6 +16,9 @@ final class SimulatedDriver implements AiDriver
     /** Tests: the exact text to answer with next, if set. */
     public static ?string $nextAnswer = null;
 
+    /** @var list<string> Tests: answers for the next calls, in order (after). */
+    public static array $answers = [];
+
     public function name(): string
     {
         return 'simulated';
@@ -30,7 +33,7 @@ final class SimulatedDriver implements AiDriver
             self::$failNext--;
             throw new ProviderFailed('Simulated failure');
         }
-        $text = self::$nextAnswer ?? $this->fillSlots($prompt) ?? (str_contains($system.$prompt, 'JSON') ? (string) json_encode(['note' => 'simulated']) : 'Simulated answer.');
+        $text = self::$nextAnswer ?? array_shift(self::$answers) ?? $this->fillSlots($prompt) ?? (str_contains($system.$prompt, 'JSON') ? (string) json_encode(['note' => 'simulated']) : 'Simulated answer.');
         self::$nextAnswer = null;
 
         return ['text' => $text, 'input_tokens' => (int) ceil(strlen($system.$prompt) / 4), 'output_tokens' => (int) ceil(strlen($text) / 4)];

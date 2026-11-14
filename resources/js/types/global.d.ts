@@ -22,6 +22,10 @@ export interface SharedProps extends Record<string, unknown> {
     message: string;
     action?: { label: string; href: string };
   };
+  /** "Ask WURK" in a business's back office (Sprint 16.2), when switched on. */
+  assistant?: { url: string } | null;
+  /** "Contact support" in a business's back office (Sprint 16.3). */
+  support?: { url: string } | null;
 }
 
 declare module '@inertiajs/core' {

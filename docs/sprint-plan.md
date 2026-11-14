@@ -6,6 +6,9 @@
 
 **Revision 2 — 23 October 2026.** Agreed with the client: 12 categories and 21 premium templates; category sections (food menu, rooms & rates, quote form, service areas, portfolio, before & after, class timetable, packages & specials, accreditations, promotion banner); online consultations (Google Meet / Zoom) for every category; patient documents for health practices; hotel template starts with enquiries or an embedded booking engine; the cloud provider is chosen near the end. **Goal for every template: a non-technical owner launches a premium site themselves in one hour or less.** Three sprints are added (two for new scope, one because cloud infrastructure moves from Sprint 0 to just before hardening).
 
+> **Order (WURK, 12 Nov 2026):** after Sprint 16, **Sprint 18 (hardening)** comes next, then **Sprint 17 (cloud and going live)**.
+
+
 | Sprint | Dates | Focus | Deliverables | Status |
 |---|---|---|---|---|
 | 0 | | Foundations | PRD & architecture; design system; CI/CD | ✅ v0.1.0 |
@@ -24,7 +27,7 @@
 | 13 | 26 Apr – 07 May | Referral engine | Self + 7 levels; pending/available; wallet rules; attribution; customer payouts; My WURK | ✅ v0.15.0 |
 | 14 | 10 – 21 May | Agents | Sponsor hierarchy; package commissions & clawback; EFT payouts; agent dashboard; demo sites | ✅ v0.16.0 |
 | 15 | 24 May – 04 Jun | Reports & campaigns | Tenant reports; SaaS metrics; **profit per package, pricing simulator, provider reconciliation, margin alerts**; analytics; campaigns & offers with credit estimates; monthly usage summary; auto top-up | ✅ v0.17.0 |
-| 16 | 07 – 18 Jun | Self-service & support | AI assistant; help centre & short videos per category; consent-based impersonation; tickets; tenant health; backup/restore & export | |
+| 16 | 07 – 18 Jun | Self-service & support | AI assistant; help centre & short videos per category; consent-based impersonation; tickets; tenant health; backup/restore & export | ✅ v0.18.0 |
 | 17 | 21 Jun – 02 Jul | **Cloud, domains & production infrastructure** *(moved)* | Chosen cloud (AWS or Azure, South African region); custom domains & SSL (Cloudflare for SaaS); wurk.co.za DNS; infrastructure as code; staging & production; monitoring & alerts; backups | |
 | 18 | 05 – 16 Jul | Hardening | Penetration test; load testing at scale; shard rollout rehearsal; DR drill; accessibility; design polish; UAT | |
 

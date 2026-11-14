@@ -30,3 +30,22 @@ test('an owner writes their first website with AI for free; more needs WURK AI i
   await expect(again.getByText('WURK AI isn’t included in your package.')).toBeVisible();
   await expect(again.getByRole('link', { name: 'Upgrade' })).toBeVisible();
 });
+
+test('an owner asks "Ask WURK" from any back-office page (Sprint 16.2)', async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(90_000);
+  const handle = await signUpBusiness(page, testInfo, 'ask');
+  await page.goto(`/${handle}/website/ai`);
+  await page.getByRole('button', { name: 'Ask WURK' }).click();
+  const panel = page.getByRole('dialog', { name: 'Ask WURK' });
+  await expect(panel.getByRole('list', { name: 'Things you can ask' })).toBeVisible();
+  await expectAccessible(page);
+  await panel.getByRole('button', { name: 'How do I add a team member?' }).click();
+  // No AI provider in this environment: the simulated one gives no answer, so the assistant says so honestly.
+  await expect(
+    panel.getByText(/help articles should answer that|couldn’t find an answer/),
+  ).toBeVisible();
+  await expect(panel.getByText('49 of 50 free questions left this month')).toBeVisible();
+  await expectAccessible(page);
+});

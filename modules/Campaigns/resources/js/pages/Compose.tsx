@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Button, Card, CardContent, Field, Input, PageHeader } from '@/design-system';
+import { HelpTip } from '@/components/HelpTip';
 import AppShell from '@/layouts/AppShell';
 
 interface Draft {
@@ -84,6 +85,13 @@ export default function Compose({
                   <option value="sms">SMS (uses credits)</option>
                 </select>
               </Field>
+              <p className="text-fg-muted flex items-center gap-1">
+                Only customers who agreed to hear from you are included.{' '}
+                <HelpTip>
+                  Customers agree when they tick “Send me offers” at checkout, when booking or on
+                  your forms. Anyone who opts out is removed straight away.
+                </HelpTip>
+              </p>
               <Field label="Who" error={form.errors.segment}>
                 <select
                   className="border-border bg-bg h-10 w-full rounded-md border px-3"

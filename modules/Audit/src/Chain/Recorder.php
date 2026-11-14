@@ -37,6 +37,13 @@ final readonly class Recorder implements AuditLog
         $current = $this->app->bound('request') ? $this->app->make(Request::class) : null;
         $request = $current?->route() !== null ? $current : null;
         $actorType = $options['actor_type'] ?? ($actorId !== null ? 'person' : ($request === null ? 'system' : 'guest'));
+        // WURK staff in a business's back office with the owner's consent (16.4): recorded as such, never as the business.
+        $onBehalf = Context::get('wurk.on_behalf');
+        $impersonator = is_array($onBehalf) && ! $platform && (string) ($onBehalf['staff_id'] ?? '') === (string) $actorId ? (string) $onBehalf['staff_id'] : null;
+        if ($impersonator !== null) {
+            $actorName = (string) $onBehalf['label'];
+            $actorType = 'support';
+        }
         $redacted = self::redact($changes);
 
         // Make sure the chain head exists *before* locking it. Creating it inside the
@@ -47,7 +54,7 @@ final readonly class Recorder implements AuditLog
         ]);
 
         // Retried automatically on transient deadlocks / lock timeouts.
-        $connection->transaction(function () use ($connection, $scope, $action, $subjectType, $subjectId, $redacted, $actorId, $actorName, $actorType, $request, $platform): void {
+        $connection->transaction(function () use ($connection, $scope, $action, $subjectType, $subjectId, $redacted, $actorId, $actorName, $actorType, $request, $platform, $impersonator): void {
             $head = (array) $connection->table('audit_chain_heads')->where('scope', $scope)->lockForUpdate()->firstOrFail();
 
             $row = [
@@ -59,7 +66,7 @@ final readonly class Recorder implements AuditLog
                 'actor_type' => $actorType,
                 'actor_identity_id' => $actorId === null ? null : (string) $actorId,
                 'actor_name' => $actorName,
-                'impersonator_identity_id' => null,
+                'impersonator_identity_id' => $impersonator,
                 'action' => $action,
                 'subject_type' => $subjectType,
                 'subject_id' => $subjectId,

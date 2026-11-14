@@ -19,6 +19,7 @@ use Wurk\Tenancy\Contracts\BranchDirectory;
  * @property Carbon $starts_at
  * @property Carbon $ends_at
  * @property string $status
+ * @property Carbon|null $cancelled_at
  * @property string $customer_name
  * @property string|null $customer_phone
  * @property string|null $customer_email
@@ -50,7 +51,7 @@ final class Booking extends Model
 
     protected function casts(): array
     {
-        return ['consent_at' => 'datetime', 'starts_at' => 'datetime', 'ends_at' => 'datetime', 'deposit_cents' => 'integer', 'online' => 'boolean', 'hold_expires_at' => 'datetime', 'paid_at' => 'datetime', 'refunded_at' => 'datetime'];
+        return ['cancelled_at' => 'datetime', 'consent_at' => 'datetime', 'starts_at' => 'datetime', 'ends_at' => 'datetime', 'deposit_cents' => 'integer', 'online' => 'boolean', 'hold_expires_at' => 'datetime', 'paid_at' => 'datetime', 'refunded_at' => 'datetime'];
     }
 
     /** Statuses that hold their time (claim slots). */

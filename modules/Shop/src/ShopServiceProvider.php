@@ -7,6 +7,7 @@ namespace Wurk\Shop;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -16,6 +17,8 @@ use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Shipping\Contracts\ShipmentUpdated;
@@ -24,8 +27,11 @@ use Wurk\Shop\Console\ExpireOrdersCommand;
 use Wurk\Shop\Listeners\MarkDeliveredOrders;
 use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Order;
+use Wurk\Shop\Models\Product;
+use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Reports\SalesSection;
 use Wurk\Shop\Reports\StockSection;
+use Wurk\Shop\Support\DeletedCatalog;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderStatusChanged;
@@ -65,6 +71,28 @@ final class ShopServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Recently deleted (16.6b): products and categories.
+        $this->callAfterResolving(RecentlyDeleted::class, function (RecentlyDeleted $d): void {
+            $d->register('products', 'Products', 'shop.manage',
+                fn (\DateTimeInterface $since) => Product::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()
+                    ->map(fn (Product $p) => ['id' => $p->id, 'name' => $p->name, 'deleted_at' => $p->deleted_at ?? now()])->all(),
+                fn (string $id) => $this->app->make(DeletedCatalog::class)->restoreProduct($id),
+                fn (\DateTimeInterface $before) => $this->app->make(DeletedCatalog::class)->purgeProducts($before));
+            $d->register('shop-categories', 'Shop categories', 'shop.manage',
+                fn (\DateTimeInterface $since) => ShopCategory::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()
+                    ->map(fn (ShopCategory $c) => ['id' => $c->id, 'name' => $c->name, 'deleted_at' => $c->deleted_at ?? now()])->all(),
+                fn (string $id) => $this->app->make(DeletedCatalog::class)->restoreCategory($id),
+                fn (\DateTimeInterface $before) => $this->app->make(DeletedCatalog::class)->purgeCategories($before));
+        });
+        // Your data (16.6): what this module keeps, for the full export.
+        $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
+            $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)
+                ->where('tenant_id', app(TenantContext::class)->id())->orderBy($order)->lazy(500)->map(fn ($r) => (array) $r);
+            $x->table('products', 'Products', 'shop.manage', $rows('shop_products', 'created_at'));
+            $x->table('product-variants', 'Product variants and stock', 'shop.manage', $rows('shop_variants', 'created_at'));
+            $x->table('orders', 'Orders', 'shop.orders', $rows('shop_orders', 'created_at'));
+            $x->table('order-items', 'Order items', 'shop.orders', $rows('shop_order_items', 'id'));
+        });
         // Reports → Stock (Sprint 15.1b).
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
             $r->register('shop.stock', 150, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))

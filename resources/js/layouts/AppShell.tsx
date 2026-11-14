@@ -34,6 +34,8 @@ import {
   useTheme,
   type ThemePreference,
 } from '@/design-system';
+import { AskWurk } from '@/components/AskWurk';
+import { HelpPanel } from '@/components/HelpPanel';
 import { icon } from '@/design-system/icons';
 import type { NavigationItem, SharedProps } from '@/types/global';
 
@@ -362,6 +364,8 @@ export default function AppShell({ title, user: userProp, children }: AppShellPr
               <div className="md:hidden">
                 <SearchButton />
               </div>
+              <AskWurk />
+              <HelpPanel />
               <Tooltip content="Notifications">
                 <Button variant="ghost" size="icon" aria-label="Notifications">
                   <Bell />

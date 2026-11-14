@@ -51,6 +51,7 @@ final readonly class EloquentCatalog implements Catalog
             'package_id' => $s->package_id,
             'package' => $s->package->name,
             'package_key' => $s->package->key,
+            'package_type' => $s->package->type,
             'version' => $s->version->version,
             'status' => $s->status,
             'period' => $s->billing_period,

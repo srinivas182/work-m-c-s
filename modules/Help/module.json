@@ -1,0 +1,13 @@
+{
+    "name": "Help",
+    "key": "help",
+    "version": "0.1.0",
+    "description": "WURK's help centre: categories and articles (Markdown, 30-second videos, the screens they belong to), the public help site at help.wurk.co.za with search and feedback, and \"?\" help on every back-office screen.",
+    "core": true,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit"
+    ]
+}

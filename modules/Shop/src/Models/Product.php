@@ -6,6 +6,8 @@ namespace Wurk\Shop\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Wurk\Tenancy\Contracts\BelongsToTenant;
 
 /**
@@ -22,11 +24,13 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property int|null $length_mm
  * @property int|null $width_mm
  * @property int|null $height_mm
+ * @property Carbon|null $deleted_at
  */
 final class Product extends Model
 {
     use BelongsToTenant;
     use HasUlids;
+    use SoftDeletes; // recently deleted, 30 days (16.6b)
 
     protected $table = 'shop_products';
 

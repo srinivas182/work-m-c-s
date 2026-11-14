@@ -49,11 +49,12 @@ final readonly class AiClient implements Ai
         throw new AiUnavailable('WURK AI is busy right now. Please try again in a few minutes.');
     }
 
+    /** The daily cap is for paid AI work; "Ask WURK" has its own monthly allowance and cap (16.2). */
     private function checkCaps(?string $tenantId): void
     {
         $caps = (array) $this->settings->all()['caps'];
         if ($tenantId !== null && (int) ($caps['tenant_daily_requests'] ?? 0) > 0
-            && AiRequest::query()->where('tenant_id', $tenantId)->where('status', 'succeeded')->where('created_at', '>=', now()->startOfDay())->count() >= (int) $caps['tenant_daily_requests']) {
+            && AiRequest::query()->where('tenant_id', $tenantId)->where('status', 'succeeded')->where('task', '!=', 'assistant')->where('created_at', '>=', now()->startOfDay())->count() >= (int) $caps['tenant_daily_requests']) {
             throw new AiUnavailable('You’ve reached today’s limit for WURK AI. It resets tomorrow.');
         }
         foreach ((array) ($caps['provider_monthly_usd'] ?? []) as $provider => $usd) {

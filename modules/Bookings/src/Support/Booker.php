@@ -14,6 +14,8 @@ use Wurk\Bookings\Events\BookingMoved;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Payments\Contracts\Coupons;
+use Wurk\Platform\Contracts\CannotRestore;
+use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -97,7 +99,7 @@ final readonly class Booker
      */
     public function move(Booking $booking, CarbonImmutable $startsAt, ?string $memberId, ?string $by): Booking
     {
-        $service = BookingService::query()->whereKey($booking->service_id)->firstOrFail();
+        $service = BookingService::withTrashed()->whereKey($booking->service_id)->firstOrFail(); // still movable if its service was deleted since
         $member = $memberId ?? $booking->member_id;
         $startsAt = $startsAt->utc();
         try {
@@ -123,12 +125,46 @@ final readonly class Booker
     {
         app(Coupons::class)->release('booking', $booking->id); // the booking won't stand: any coupon use goes back (15.3b)
         DB::connection($this->context->connectionName())->transaction(function () use ($booking, $status): void {
-            $booking->update(['status' => $status]);
+            $booking->update(['status' => $status, 'cancelled_at' => $status === 'cancelled' ? now() : null]);
             DB::connection($this->context->connectionName())->table('booking_slots')->where('booking_id', $booking->id)->delete();
         });
         $this->audit->record('bookings.'.$status, 'booking', $booking->id, ['by' => $by]);
         if ($status === 'cancelled') { // not for expired holds or no-shows
             event(new BookingCancelled($this->context->id(), $booking->id));
         }
+    }
+
+    /**
+     * Put a cancelled booking back (Sprint 16.6c): within 30 days, while it's still ahead, if its time is still free
+     * for the same person. Not for paid deposits (refunded when cancelled) or online meetings (their link was removed).
+     * The customer is told, as for a new booking.
+     */
+    public function restore(Booking $booking, ?string $by): Booking
+    {
+        if ($booking->status !== 'cancelled' || $booking->cancelled_at === null || $booking->cancelled_at->lt(now()->subDays(RecentlyDeleted::DAYS))) {
+            throw new CannotRestore('That booking isn’t in Recently deleted any more.');
+        }
+        if ($booking->starts_at->isPast()) {
+            throw new CannotRestore('That booking’s time has passed.');
+        }
+        if ($booking->deposit_cents > 0 || $booking->online) {
+            throw new CannotRestore($booking->online ? 'Online bookings can’t be put back — book it again so a new meeting link is sent.' : 'A booking with a deposit can’t be put back — book it again so the deposit is taken.');
+        }
+        $service = BookingService::withTrashed()->whereKey($booking->service_id)->firstOrFail();
+        $start = CarbonImmutable::instance($booking->starts_at)->utc();
+        try {
+            DB::connection($this->context->connectionName())->transaction(function () use ($booking, $service, $start): void {
+                DB::connection($this->context->connectionName())->table('booking_slots')->insert(array_map(fn (CarbonImmutable $slot) => [
+                    'member_id' => $booking->member_id, 'slot_at' => Instant::db($slot), 'booking_id' => $booking->id, 'tenant_id' => $this->context->id(),
+                ], Availability::slots($start->subMinutes($service->buffer_before_minutes), $start->addMinutes($service->duration_minutes + $service->buffer_after_minutes))));
+                $booking->update(['status' => 'confirmed', 'cancelled_at' => null]);
+            });
+        } catch (UniqueConstraintViolationException) {
+            throw new CannotRestore('That time has been booked since — book it again at another time.');
+        }
+        $this->audit->record('bookings.restored', 'booking', $booking->id, ['by' => $by]);
+        event(new BookingConfirmed($this->context->id(), $booking->id));
+
+        return $booking->refresh();
     }
 }
