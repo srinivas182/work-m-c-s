@@ -15,7 +15,8 @@ interface Article {
 
 /** "?" on every back-office screen (Sprint 16.1b): this screen's help (articles and 30-second videos), and search. */
 export function HelpPanel() {
-  const screen = usePage().component;
+  const { component: screen, props } = usePage<{ support?: { url: string } | null }>();
+  const support = props.support?.url;
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [articles, setArticles] = useState<Article[] | null>(null);
@@ -108,6 +109,14 @@ export function HelpPanel() {
             {home && (
               <a className="underline" href={home} target="_blank" rel="noreferrer">
                 Browse all help
+              </a>
+            )}
+            {support && (
+              <a
+                className="underline"
+                href={`${support}?from=${encodeURIComponent(window.location.pathname)}`}
+              >
+                Still stuck? Contact support
               </a>
             )}
           </div>

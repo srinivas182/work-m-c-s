@@ -60,9 +60,15 @@ final readonly class NavigationBuilder
                     continue;
                 }
 
+                // A business's item on a page outside any business has no {tenant} to link to.
+                if (array_diff($route->parameterNames(), array_keys(array_filter($this->url->getDefaultParameters(), fn ($v) => $v !== null && $v !== ''))) !== []) {
+                    continue;
+                }
+                $href = $this->url->route($entry['route'], [], false);
+
                 $items[] = new NavigationItem(
                     label: $entry['label'],
-                    href: $this->url->route($entry['route'], [], false),
+                    href: $href,
                     icon: $entry['icon'] ?? 'circle',
                     section: $entry['section'] ?? 'Main',
                     order: $entry['order'] ?? 100,

@@ -67,7 +67,10 @@ function usageLine(u: Usage): string {
  * which is shown exactly and only made when confirmed (with undo). Loads when opened.
  */
 export function AskWurk() {
-  const { props, component } = usePage<{ assistant?: { url: string } | null }>();
+  const { props, component } = usePage<{
+    assistant?: { url: string } | null;
+    support?: { url: string } | null;
+  }>();
   const base = props.assistant?.url;
   const [open, setOpen] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -280,6 +283,14 @@ export function AskWurk() {
               <p role="alert" className="text-danger-11">
                 {error}
               </p>
+            )}
+            {props.support && turns.length > 0 && (
+              <a
+                className="text-sm underline"
+                href={`${props.support.url}?from=${encodeURIComponent(window.location.pathname)}`}
+              >
+                Not what you needed? Contact support
+              </a>
             )}
             <form
               className="grid gap-2"

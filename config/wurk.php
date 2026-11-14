@@ -139,4 +139,6 @@ return [
     'site_assets_disk' => env('WURK_SITE_ASSETS_DISK', 'public'),
     // Agents' demo sites (Sprint 14.8): how long a demo stays up, and how long its claim link works.
     'demo_days' => 14,
+    // Support tickets (Sprint 16.3): WURK's support inbox email — new tickets and replies are sent here.
+    'support_email' => env('WURK_SUPPORT_EMAIL', 'support@wurk.co.za'),
 ];

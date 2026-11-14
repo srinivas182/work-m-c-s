@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  LifeBuoy,
   Tag,
   Clock,
   Image,
@@ -75,6 +76,7 @@ export const icons: Record<string, LucideIcon> = {
   package: Package,
   'message-circle': MessageCircle,
   'book-open': BookOpen,
+  'life-buoy': LifeBuoy,
   tag: Tag,
   palette: Palette,
   settings: Settings,
