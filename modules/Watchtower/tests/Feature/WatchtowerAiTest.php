@@ -169,7 +169,7 @@ it('finds slow pages: over 5% of requests above 300 ms, or several over 2 second
         ->and(Incident::query()->where('title', 'Slow page: GET {tenant}/bookings')->value('message'))->toStartWith('17% of requests took over 300 ms')
         ->and(Incident::query()->where('title', 'Slow page: GET {tenant}/bookings')->value('severity'))->toBe('high'); // bookings: a money path
     $this->artisan('watchtower:check');
-    expect(Incident::query()->where('kind', 'slow')->sum('occurrences'))->toBe(2);  // each hour counted once
+    expect((int) Incident::query()->where('kind', 'slow')->sum('occurrences'))->toBe(2);  // each hour counted once
 
     $this->actingAs($this->engineer)->get($this->page)->assertInertia(fn (Assert $p) => $p->where('slow.0.route', 'GET {tenant}/reports')->where('slow.0.over_2s', 6));
 });
