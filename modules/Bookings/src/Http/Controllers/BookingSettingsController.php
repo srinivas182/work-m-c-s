@@ -83,6 +83,16 @@ final class BookingSettingsController
         ]);
     }
 
+    /** Delete a service (Sprint 16.6b): it leaves the booking page at once; existing bookings keep it; restorable for 30 days. */
+    public function deleteService(string $service): RedirectResponse
+    {
+        $model = BookingService::query()->findOrFail($service);
+        $model->delete();
+        $this->audit->record('bookings.service_deleted', 'service', $model->id, ['name' => $model->name]);
+
+        return back()->with('status', "“{$model->name}” deleted. Bookings already made for it stay; you can restore it from Recently deleted for 30 days.");
+    }
+
     public function saveService(Request $request, ?string $service = null): RedirectResponse
     {
         $memberIds = array_column($this->team->members(), 'id');

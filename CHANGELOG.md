@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 16.6b (recently deleted)
+- **Settings → Recently deleted**: what was deleted in the last 30 days, with **Restore**; each kind shown only to people who manage it. After 30 days it's removed for good (nightly).
+- **Products** (with their options and stock) and **shop categories** (with the products that were in them) now go to Recently deleted instead of being deleted for good; their web addresses stay reserved meanwhile.
+- **Booking services** can now be deleted: off the booking page at once, while bookings already made keep the service (name, moving, messages, the customer's manage page). After 30 days a service with bookings stays hidden so those bookings keep its name.
+- **Campaign drafts** can now be deleted (sent and scheduled ones can't); a deleted draft can never be sent.
+- **Website pages** join the same list (already restorable); after 30 days they go for good with their published versions and old addresses.
+- Platform: `RecentlyDeleted` registry (list, restore, purge per kind).
+
 ### Added — Sprint 16.6a (your data: full export)
 - **Settings → Your data** (`data.export`; owners): **Export everything** builds one ZIP in the background — a CSV per area (customers and their history, products and stock, orders and items, services, bookings, campaigns, coupons, website pages, patients and their documents' list) and the files (website photos at full size; patient documents, decrypted) — and emails a **signed link valid for 24 hours** (only for signed-in people allowed to export). Deleted after 24 hours.
 - Only what the person may see: health records only with `records.view`; each document read for the export is logged like any other access. Secret-looking columns (tokens, hashes, keys, passwords) never leave; cells that spreadsheets would run as formulas are kept as text; a README lists what's inside.

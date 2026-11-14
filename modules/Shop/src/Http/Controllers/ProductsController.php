@@ -18,6 +18,7 @@ use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Models\Variant;
 use Wurk\Shop\Support\BranchStock;
+use Wurk\Shop\Support\DeletedCatalog;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\CatalogChanged;
@@ -144,15 +145,9 @@ final class ProductsController
 
     public function destroy(string $product): RedirectResponse
     {
-        $model = Product::query()->whereKey($product)->firstOrFail();
-        DB::connection($this->context->connectionName())->transaction(function () use ($model): void {
-            Variant::query()->where('product_id', $model->id)->delete();
-            $model->delete();
-        });
-        $this->audit->record('shop.product_deleted', 'product', $model->id, ['name' => $model->name]);
-        event(new CatalogChanged($this->context->id()));
+        app(DeletedCatalog::class)->deleteProduct(Product::query()->whereKey($product)->firstOrFail());
 
-        return back()->with('status', 'Product deleted.');
+        return back()->with('status', 'Product deleted. You can restore it from Recently deleted for 30 days.');
     }
 
     public function addCategory(Request $request): RedirectResponse
@@ -162,6 +157,9 @@ final class ProductsController
         if (ShopCategory::query()->where('slug', $slug)->exists()) {
             throw ValidationException::withMessages(['name' => 'You already have a category with that name.']);
         }
+        if (ShopCategory::onlyTrashed()->where('slug', $slug)->exists()) {
+            throw ValidationException::withMessages(['name' => 'A recently deleted category has that name — restore it from Recently deleted.']);
+        }
         ShopCategory::query()->create(['name' => $name, 'slug' => $slug, 'position' => (int) ShopCategory::query()->max('position') + 1]);
 
         return back()->with('status', 'Category added.');
@@ -169,17 +167,16 @@ final class ProductsController
 
     public function removeCategory(string $category): RedirectResponse
     {
-        Product::query()->where('category_id', $category)->update(['category_id' => null]);
-        ShopCategory::query()->whereKey($category)->delete();
+        app(DeletedCatalog::class)->deleteCategory(ShopCategory::query()->whereKey($category)->firstOrFail());
 
-        return back()->with('status', 'Category removed. Its products are kept.');
+        return back()->with('status', 'Category removed. Its products are kept — and you can restore it from Recently deleted for 30 days.');
     }
 
     private function uniqueSlug(string $name, ?string $except): string
     {
         $base = Str::slug($name) ?: 'product';
         $slug = $base;
-        for ($n = 2; Product::query()->where('slug', $slug)->when($except, fn ($q) => $q->whereKeyNot($except))->exists(); $n++) {
+        for ($n = 2; Product::withTrashed()->where('slug', $slug)->when($except, fn ($q) => $q->whereKeyNot($except))->exists(); $n++) { // deleted products keep their address for 30 days
             $slug = "{$base}-{$n}";
         }
 

@@ -52,7 +52,7 @@ final readonly class CampaignSender
     {
         $db = DB::connection($this->context->connectionName());
         $t = $this->context->id();
-        $c = $db->table('campaigns')->where('tenant_id', $t)->where('id', $campaignId)->first() ?? throw new \DomainException('No such campaign.');
+        $c = $db->table('campaigns')->where('tenant_id', $t)->where('id', $campaignId)->whereNull('deleted_at')->first() ?? throw new \DomainException('No such campaign.');
         if (! in_array($c->status, ['draft', 'scheduled'], true)) {
             throw new \DomainException('This campaign has already been sent.');
         }
@@ -78,7 +78,7 @@ final readonly class CampaignSender
     /** A test to the person composing it — "[Test]", no tracking, nothing recorded against customers. */
     public function test(string $campaignId, string $to, string $name = 'Test'): void
     {
-        $c = DB::connection($this->context->connectionName())->table('campaigns')->where('tenant_id', $this->context->id())->where('id', $campaignId)->first() ?? throw new \DomainException('No such campaign.');
+        $c = DB::connection($this->context->connectionName())->table('campaigns')->where('tenant_id', $this->context->id())->where('id', $campaignId)->whereNull('deleted_at')->first() ?? throw new \DomainException('No such campaign.');
         $error = $this->deliver($c, ['id' => 'test', 'name' => $name, 'email' => $to, 'phone' => $to], 'test', true); // reads as a customer would see it
         if ($error !== null) {
             throw new \DomainException('The test didn’t send: '.$error);

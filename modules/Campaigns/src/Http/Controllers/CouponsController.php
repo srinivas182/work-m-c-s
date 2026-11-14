@@ -32,7 +32,7 @@ final class CouponsController
                 'ends_at' => $c->ends_at, 'max_uses' => $c->max_uses, 'once_per_customer' => (bool) $c->once_per_customer, 'active' => (bool) $c->active,
                 'uses' => (int) ($use[$c->id]->uses ?? 0), 'given_cents' => (int) ($use[$c->id]->given ?? 0),
             ])->all(),
-            'campaigns' => $db->table('campaigns')->where('tenant_id', $t)->orderByDesc('created_at')->limit(50)->get(['id', 'name'])->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->all(),
+            'campaigns' => $db->table('campaigns')->where('tenant_id', $t)->whereNull('deleted_at')->orderByDesc('created_at')->limit(50)->get(['id', 'name'])->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->all(),
         ]);
     }
 

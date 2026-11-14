@@ -38,4 +38,10 @@ test('an owner contacts support from the back office and sees the ticket (Sprint
   await expect(page.getByRole('list', { name: 'Your exports' })).toContainText('Ready');
   await expect(page.getByRole('link', { name: 'Download' })).toBeVisible();
   await expectAccessible(page);
+
+  // Recently deleted (Sprint 16.6b): nothing yet for a new business.
+  await page.goto(`/${handle}/settings/recently-deleted`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Recently deleted' })).toBeVisible();
+  await expect(page.getByText('Nothing deleted lately')).toBeVisible();
+  await expectAccessible(page);
 });

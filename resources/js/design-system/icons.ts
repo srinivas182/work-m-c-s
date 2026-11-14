@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Trash2,
   Database,
   LifeBuoy,
   Tag,
@@ -77,6 +78,7 @@ export const icons: Record<string, LucideIcon> = {
   package: Package,
   'message-circle': MessageCircle,
   'book-open': BookOpen,
+  trash: Trash2,
   database: Database,
   'life-buoy': LifeBuoy,
   tag: Tag,

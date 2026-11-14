@@ -116,6 +116,20 @@ final readonly class Pages
         return $page;
     }
 
+    /** Pages deleted more than RESTORE_DAYS ago go for good, with their published versions and old addresses (16.6b). */
+    public function purgeDeleted(\DateTimeInterface $before): int
+    {
+        $ids = Page::onlyTrashed()->where('deleted_at', '<', $before)->pluck('id')->all();
+        if ($ids === []) {
+            return 0;
+        }
+        PageVersion::query()->whereIn('page_id', $ids)->delete();
+        PageSlug::query()->whereIn('page_id', $ids)->delete();
+        Page::onlyTrashed()->whereIn('id', $ids)->forceDelete();
+
+        return count($ids);
+    }
+
     /**
      * Saves the draft only if nobody else saved since $expectedRevision.
      *

@@ -26,7 +26,7 @@ final class SendDueCommand extends Command
                 continue;
             }
             $n += (int) $context->run($tenant, function () use ($context): int {
-                $due = DB::connection($context->connectionName())->table('campaigns')->where('tenant_id', $context->id())->where('status', 'scheduled')
+                $due = DB::connection($context->connectionName())->table('campaigns')->where('tenant_id', $context->id())->where('status', 'scheduled')->whereNull('deleted_at')
                     ->where('scheduled_at', '<=', now())->pluck('id');
                 foreach ($due as $campaign) {
                     try {

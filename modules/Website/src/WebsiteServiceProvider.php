@@ -22,6 +22,7 @@ use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
+use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -39,6 +40,7 @@ use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Listeners\RerenderShopPages;
 use Wurk\Website\Models\Enquiry;
+use Wurk\Website\Models\Page;
 use Wurk\Website\Models\SiteAsset;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\ChatBot;
@@ -107,6 +109,17 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Recently deleted (16.6b): pages.
+        $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('pages', 'Website pages', 'website.edit',
+            fn (\DateTimeInterface $since) => Page::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()
+                ->map(fn (Page $p) => ['id' => $p->id, 'name' => $p->title, 'deleted_at' => $p->deleted_at ?? now()])->all(),
+            function (string $id): string {
+                $page = $this->app->make(Pages::class)->restoreDeleted($id);
+
+                return "Page “{$page->title}” restored.";
+            },
+            fn (\DateTimeInterface $before) => $this->app->make(Pages::class)->purgeDeleted($before),
+        ));
         // Your data (16.6): what this module keeps, for the full export.
         $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
             $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)

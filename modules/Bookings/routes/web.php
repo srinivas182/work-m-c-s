@@ -30,6 +30,7 @@ Route::tenant(function (): void {
         Route::middleware('permission:bookings.settings')->group(function (): void {
             Route::post('/services', [BookingSettingsController::class, 'saveService'])->name('services.store');
             Route::put('/services/{service}', [BookingSettingsController::class, 'saveService'])->name('services.update');
+            Route::delete('/services/{service}', [BookingSettingsController::class, 'deleteService'])->name('services.destroy');
             Route::put('/policy', [BookingSettingsController::class, 'savePolicy'])->name('policy.save');
             Route::put('/messages', [BookingSettingsController::class, 'saveMessages'])->name('messages.save');
             Route::get('/video/connect/{provider}', [VideoConnectionController::class, 'connect'])->whereIn('provider', ['google', 'zoom'])->name('video.connect');
