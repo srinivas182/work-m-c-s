@@ -27,6 +27,7 @@ use Wurk\Tenancy\Resolution\TenantResolver;
  * @property string $timezone
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property Carbon|null $purged_at
  */
 final class Tenant extends Model implements CentralModel, CurrentTenant
 {
@@ -41,6 +42,11 @@ final class Tenant extends Model implements CentralModel, CurrentTenant
     public const STATUS_DELETED = 'deleted';
 
     protected $fillable = ['handle', 'name', 'status', 'database_model', 'shard_id', 'country', 'timezone'];
+
+    protected function casts(): array
+    {
+        return ['purged_at' => 'datetime'];
+    }
 
     protected static function booted(): void
     {

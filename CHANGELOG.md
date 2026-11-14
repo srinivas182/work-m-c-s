@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Resilience — Sprint 18.4a (move, restore and remove a business)
+- **`php artisan tenants:move <business> --to=<shard>`**: copies every row of the business to another shard, compares the copies (rows and a SHA-256 of every row, table by table), and only then switches. The business's pages say "being moved to a new server — back in a few minutes" (503) for that time. If anything fails, it stays where it was and the partial copy is removed. The old copy is kept for 7 days, then removed by `tenants:clear-moved` (daily 04:13). Needed to rebalance shards as WURK grows.
+- **`php artisan tenants:restore <business>`**: restores **one** business from a shard backup restored as a separate database (the `restore` connection, `RESTORE_DB_*`), without touching the other businesses on the shard. Either `--replace` (what it has now is saved to a file first, and put back if the restore fails) or `--to=<shard>` (its current rows stay on the old shard for 7 days). This is WURK's side of decision 16-C.
+- Every move and restore is recorded (`tenant_moves`). See `docs/runbooks/restore.md`.
+- **Archived businesses can be removed for good**: their rows and their files. **Agent demo sites are removed for good 7 days after they're archived** (carried over from Sprint 14).
+
 ### Performance — Sprint 18.3b (load testing)
 - **`php artisan wurk:seed-load`**: load-test businesses spread over the shards — an owner who can sign in, customers, a bookable service with hours, bookings over the next 14 days, products — and `storage/app/load-test.json` for the scripts. Safe to re-run; refused in production.
 - **k6 scripts** (`load/k6/journeys.js`): public site, booking times, back office (signed in) and sign-in, mixed as real traffic. Profiles: `smoke` (any machine; checks the journeys work) and `target` (1,000 requests a second for 15 minutes; 95% within 300 ms; < 0.1% errors) for staging in Sprint 17. CI runs the smoke profile with the performance gate.

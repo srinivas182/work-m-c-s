@@ -18,6 +18,14 @@ interface TenantProvisioner
     /** Archive a business: site offline, address freed (handle and subdomain become archived-<id>), status deleted. */
     public function archive(string $tenantId): void;
 
+    /**
+     * Remove an archived business's data for good (Sprint 18.4a): every row on its shard and its files. The business
+     * record stays (archived, marked purged) so history that mentions it still makes sense.
+     *
+     * @throws \DomainException it isn't archived
+     */
+    public function purge(string $tenantId): void;
+
     /** A signed link that lets someone claim a demo through signup, valid until the given time (Sprint 14.8b). */
     public function claimToken(string $tenantId, \DateTimeInterface $until): string;
 
