@@ -67,7 +67,10 @@ final class AiAdminController
             'caps.provider_monthly_usd.*' => ['nullable', 'numeric', 'min:0'],
             'retirements' => ['array'],
             'retirements.*' => ['nullable', 'date'],
-        ]);
+            'assistant.enabled' => ['required', 'boolean'],
+            'assistant.free_questions' => ['required', 'integer', 'between:0,10000'],
+            'assistant.monthly_cap' => ['required', 'integer', 'between:0,100000', 'gte:assistant.free_questions'],
+        ], ['assistant.monthly_cap.gte' => 'The most questions a month can’t be fewer than the free ones.']);
         if (app()->environment('production') && collect([...$data['tasks'], ...($data['fallback'] ?? [])])->contains('provider', 'simulated')) {
             return back()->withErrors(['tasks' => 'The simulated provider can’t be used in production.']);
         }

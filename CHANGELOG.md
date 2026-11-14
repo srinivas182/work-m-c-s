@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 16.2 ("Ask WURK" assistant)
+- **"Ask WURK"** (✨ in every business back-office header): ask how to do something — answered from the help centre, with the articles linked — or ask about your own figures ("how many bookings tomorrow?", "best seller this month?"), read-only from the reports you may see.
+- **Changes on request, confirmed first**: "add Saturday 9–1 for Thandi", "create a 10% December coupon", "draft a win-back email" — shows exactly what will change; nothing happens until you confirm (within 30 minutes); checked like the screen itself; your role and package decide what it can do; logged in the audit trail; **Undo** while it still can be (unused coupon, unchanged hours, unsent draft). Campaign drafts are never sent by the assistant.
+- **Allowance (decision A)**: 50 free questions a month per business, then the rate card's "Ask WURK: a question" price (1 credit in South Africa) — asked before spending, refunded if WURK AI can't answer; changes are free; a monthly cap. Free questions, cap and on/off in **Admin → WURK AI**; the assistant's model and fallback are chosen there too.
+- Privacy: only the question, matching help and totals go to the AI provider — never customers' names or contact details. Questions nothing answered are counted by their words for WURK to write next.
+- Platform: `AssistantTools` registry — modules offer read tools and change tools (preview, apply, undo); Help: `HelpSearch` contract.
+
 ### Added — Sprint 16.1 (help centre)
 - **help.wurk.co.za**: categories, articles and **30-second videos** (on WURK's own storage — no third-party players or cookies), search, "Was this helpful?". Server-rendered; text rendered safely.
 - **Admin → Help centre** (`help.manage`): write in Markdown, add images and a video, link each article to the screens it helps with; see views, helpfulness and **searches that found nothing** (words only).

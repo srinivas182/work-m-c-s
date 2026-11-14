@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Wurk\Campaigns;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Wurk\Campaigns\Assistant\CreateCouponTool;
+use Wurk\Campaigns\Assistant\DraftCampaignTool;
 use Wurk\Campaigns\Console\SendDueCommand;
 use Wurk\Campaigns\Support\CouponBook;
 use Wurk\Payments\Contracts\Coupons;
+use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
 final class CampaignsServiceProvider extends ModuleServiceProvider
@@ -37,6 +40,10 @@ final class CampaignsServiceProvider extends ModuleServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([SendDueCommand::class]);
         }
+        $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
+            $t->register(CreateCouponTool::class);
+            $t->register(DraftCampaignTool::class);
+        });
         $this->callAfterResolving(Schedule::class, fn (Schedule $s) => $s->command('campaigns:send-due')->everyFiveMinutes()->onOneServer()->withoutOverlapping());
     }
 }

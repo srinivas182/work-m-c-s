@@ -15,7 +15,7 @@ final readonly class AiSettings
 {
     public const PROVIDERS = ['anthropic' => 'Anthropic (Claude)', 'google' => 'Google (Gemini)', 'openai' => 'OpenAI', 'simulated' => 'Simulated (development only)'];
 
-    public const TASKS = ['site_generation' => 'Write a website', 'rewrite' => 'Rewrite a section'];
+    public const TASKS = ['site_generation' => 'Write a website', 'rewrite' => 'Rewrite a section', 'assistant' => 'Ask WURK (assistant)'];
 
     /** Image providers (Google is added once WURK's key lets us verify its API). */
     public const IMAGE_PROVIDERS = ['openai' => 'OpenAI', 'simulated' => 'Simulated (development only)'];
@@ -24,6 +24,7 @@ final readonly class AiSettings
         'tasks' => [
             'site_generation' => ['provider' => 'anthropic', 'model' => 'claude-sonnet-5-5'],
             'rewrite' => ['provider' => 'anthropic', 'model' => 'claude-haiku-5-5'],
+            'assistant' => ['provider' => 'anthropic', 'model' => 'claude-haiku-5-5'],
         ],
         'fallback' => [['provider' => 'google', 'model' => 'gemini-3.8-flash'], ['provider' => 'openai', 'model' => 'gpt-6-sol']],
         // US dollars per million tokens (input, output) — from each provider's pricing page; keep current.
@@ -42,6 +43,9 @@ final readonly class AiSettings
         'image' => ['provider' => 'openai', 'model' => 'gpt-image-1'],
         'image_fallback' => [],
         'image_prices' => ['openai:gpt-image-1' => 0.04, 'simulated:simulated' => 0.0],
+        // "Ask WURK" (16.2, decision A): free questions a month per business, then the rate card's "ai.assistant" price each;
+        // actions are free; no business asks more than the monthly cap.
+        'assistant' => ['enabled' => true, 'free_questions' => 50, 'monthly_cap' => 500],
     ];
 
     public function __construct(private PlatformSettings $settings) {}
