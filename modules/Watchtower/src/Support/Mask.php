@@ -15,7 +15,8 @@ final class Mask
         if ($text === null || $text === '') {
             return '';
         }
-        $text = mb_substr($text, 0, $limit * 2);
+        // The server's own paths (PHP 8.4 names closures "{closure:/srv/app/…:12}"): relative, like everywhere else.
+        $text = str_replace(rtrim(base_path(), '/').'/', '', mb_substr($text, 0, $limit * 2));
         $rules = [
             '/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i' => '[email]',
             '/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i' => '[id]',

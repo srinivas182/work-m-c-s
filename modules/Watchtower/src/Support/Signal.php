@@ -81,7 +81,7 @@ final readonly class Signal
         foreach (array_slice($e->getTrace(), 0, $frames) as $i => $f) {
             $where = isset($f['file']) ? Mask::path((string) $f['file']).':'.($f['line'] ?? '?') : '[internal]';
             $call = (isset($f['class']) ? $f['class'].($f['type'] ?? '->') : '').($f['function'] ?? '');
-            $lines[] = '#'.$i.' '.$where.' '.$call.'()';
+            $lines[] = '#'.$i.' '.$where.' '.str_replace(rtrim(base_path(), '/').'/', '', $call).'()';
         }
         if (($previous = $e->getPrevious()) !== null) {
             $lines[] = 'Caused by '.$previous::class.': '.Mask::text($previous->getMessage(), 300).' at '.Mask::path($previous->getFile()).':'.$previous->getLine();
