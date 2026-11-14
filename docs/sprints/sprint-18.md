@@ -1,6 +1,6 @@
 # Sprint 18 — Hardening (specification)
 
-**Status:** 📝 draft — awaiting WURK approval (15 Nov 2026).
+**Status:** 🚧 in progress. Approved by WURK (14 Nov 2026), including every recommendation and recommended addition.
 **Plan:** penetration test; load testing at scale; shard rollout rehearsal; DR drill; accessibility; design polish; UAT (docs/sprint-plan.md). Runs **before** Sprint 17 (cloud) by WURK's decision of 12 Nov 2026.
 **PRD:** §15 (99.9% availability; PITR + offsite backup in a second region, **RPO ≤ 15 min, RTO ≤ 4 h**; **p95 < 300 ms**; LCP < 1.5 s, Lighthouse ≥ 90; built for 500k businesses; fair queuing; annual pen test + dependency scanning; **WCAG 2.2 AA**; POPIA, data in South Africa), §18 acceptance criteria — especially **7** (automated isolation tests) and **12** (load tests at target scale, DR restore drill, pen test with no open critical/high).
 **Carried in:** permanent purge of archived agent demos (Sprint 14 decision); the **Year 2038** `TIMESTAMP` issue noted in the plan.
@@ -43,15 +43,15 @@ Sprint 17 builds the production and staging environments. Some hardening only me
 5. **Year 2038 fix now**, before production data grows.
 6. **Accessible templates** — businesses' published sites meet WCAG 2.2 AA out of the box (most builders leave this to the owner).
 
-## Decisions for WURK
+## Decisions
 
-| # | Decision | Recommendation |
+| # | Decision | Status |
 |---|---|---|
-| A | **External pen test** — firm and timing | A **CREST-accredited firm** (several in SA), grey-box test of staging in **Sprint 17**, once it mirrors production; retest after fixes. WURK to engage the firm (≈ 2–3 weeks lead time — start now). |
-| B | **Load-test target numbers** | Use the PRD: p95 < 300 ms, error rate < 0.1%, at **10,000 businesses and 1,000 requests/second** on staging (well above launch; the architecture is built for 500k). Confirm or give your own. |
-| C | **Bug bounty** | **Not at launch** — security.txt + disclosure policy now; a private bounty programme after the first pen test is clean. |
-| D | **UAT participants** | WURK team + **2–3 friendly real businesses** (e.g. a salon, a shop, a practice) for criteria 1, 4, 5. Who are they? |
-| E | **2038 migration** | Do it now (recommended), or defer. |
+| A | **External pen test** — firm and timing | A **CREST-accredited firm** (several in SA), grey-box test of staging in **Sprint 17**, once it mirrors production; retest after fixes. WURK to engage the firm (≈ 2–3 weeks lead time — start now). **Accepted (WURK, 14 Nov 2026).** |
+| B | **Load-test target numbers** | Use the PRD: p95 < 300 ms, error rate < 0.1%, at **10,000 businesses and 1,000 requests/second** on staging (well above launch; the architecture is built for 500k). **Accepted (WURK, 14 Nov 2026).** |
+| C | **Bug bounty** | **Not at launch** — security.txt + disclosure policy now; a private bounty programme after the first pen test is clean. **Accepted (WURK, 14 Nov 2026).** |
+| D | **UAT participants** | WURK team + **2–3 friendly real businesses** (e.g. a salon, a shop, a practice) for criteria 1, 4, 5. **Accepted (WURK, 14 Nov 2026)** — the businesses to be named by WURK before UAT. |
+| E | **2038 migration** | Do it now. **Accepted (WURK, 14 Nov 2026).** |
 
 ## Order
 
