@@ -65,7 +65,7 @@ final readonly class MemberCount implements SeatPolicy, TeamDirectory, TeamSize
     public function roster(): array
     {
         $out = [];
-        foreach (Member::query()->with('branches')->orderBy('display_name')->get() as $m) {
+        foreach (Member::query()->with(['branches', 'roles'])->orderBy('display_name')->get() as $m) {
             $roles = $m->roleKeys();
             $out[] = ['id' => (string) $m->id, 'identity_id' => (string) $m->identity_id, 'name' => (string) $m->display_name,
                 'role' => in_array(SystemRoles::OWNER, $roles, true) ? SystemRoles::OWNER : ($roles[0] ?? SystemRoles::STAFF),

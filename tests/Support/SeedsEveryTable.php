@@ -120,6 +120,31 @@ final class SeedsEveryTable
         return $row[$key] ?? (int) DB::connection($this->connection)->table($table)->max($key);
     }
 
+    /**
+     * Sprint 18.3a (query budgets): $n more rows like the seeded one in $table — new keys, unique columns made unique.
+     */
+    public function copies(string $table, int $n): void
+    {
+        $schema = Schema::connection($this->connection);
+        $db = DB::connection($this->connection);
+        $indexes = $schema->getIndexes($table);
+        $primary = collect($indexes)->firstWhere('primary', true)['columns'] ?? ['id'];
+        $unique = collect($indexes)->filter(fn ($i) => $i['unique'] && ! $i['primary'])->flatMap(fn ($i) => $i['columns'])->unique()->all();
+        $types = collect($schema->getColumns($table))->mapWithKeys(fn ($c) => [$c['name'] => strtolower((string) $c['type_name'])])->all();
+        $row = (array) $db->table($table)->where($primary[0], $this->ids[$table])->first();
+        for ($i = 1; $i <= $n; $i++) {
+            $copy = $row;
+            foreach ([...$primary, ...$unique] as $col) {
+                if ($col === 'tenant_id' || ! array_key_exists($col, $copy)) {
+                    continue;
+                }
+                $copy[$col] = str_contains($types[$col] ?? '', 'int') ? (int) $copy[$col] + $i * 1000 + 1 : (strlen((string) $copy[$col]) === 26 // an ID (key or unique): a new one
+                    ? strtolower((string) Str::ulid()) : substr((string) $copy[$col], 0, 40).'-'.$i);
+            }
+            $db->table($table)->insert($copy);
+        }
+    }
+
     private function isText(string $type): bool
     {
         return in_array($type, ['varchar', 'text', 'longtext', 'mediumtext', 'char', 'string'], true);

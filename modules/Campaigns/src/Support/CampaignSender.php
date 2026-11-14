@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Campaigns\Jobs\SendCampaignBatch;
 use Wurk\Campaigns\Mail\CampaignMail;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Crm\Contracts\Audiences;
@@ -16,7 +17,7 @@ use Wurk\Platform\Contracts\AudienceSegments;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
- * Campaigns (Sprint 15.3a): email or SMS to customers who agreed to marketing. A credit estimate first (SMS at the
+ * Campaigns (Sprint 15.3a): email or SMS to customers who agreed to marketing — sent in the background, in batches (18.3a). A credit estimate first (SMS at the
  * business's own rate; email is free); refused if the credits won't cover it. Each message is personalised
  * ({first_name}), its links go through WURK (signed, for click counts), and it carries an opt-out; emails carry the open image.
  */
@@ -47,7 +48,15 @@ final readonly class CampaignSender
         return ['recipients' => $n, 'credits' => (int) ceil($milli / 1000), 'spendable' => intdiv(max(0, $available), 1000), 'enough' => $milli <= $available];
     }
 
-    /** @throws \DomainException a plain reason */
+    /** Customers per batch (Sprint 18.3a). */
+    public const BATCH = 200;
+
+    /**
+     * Start sending (Sprint 18.3a): checked here, sent in the background in batches. Returns how many customers it
+     * will go to.
+     *
+     * @throws \DomainException a plain reason
+     */
     public function send(string $campaignId): int
     {
         $db = DB::connection($this->context->connectionName());
@@ -60,19 +69,60 @@ final readonly class CampaignSender
         if (! $estimate['enough']) {
             throw new \DomainException("You need about {$estimate['credits']} credits for this; you have {$estimate['spendable']}. Top up, or choose fewer customers.");
         }
-        $db->table('campaigns')->where('tenant_id', $t)->where('id', $campaignId)->update(['status' => 'sending', 'updated_at' => now()]);
-        $sent = 0;
-        foreach ($this->recipients((string) $c->channel, (string) $c->segment, $c->branch_id) as $r) {
-            $token = Str::lower(Str::random(32));
-            $error = $this->deliver($c, $r, $token);
-            $db->table('campaign_messages')->insert(['id' => (string) Str::ulid(), 'tenant_id' => $t, 'campaign_id' => $campaignId, 'contact_id' => $r['id'], 'token' => $token,
-                'status' => $error === null ? 'sent' : 'failed', 'error' => $error === null ? null : mb_substr($error, 0, 200), 'created_at' => now()]);
-            $sent += $error === null ? 1 : 0;
+        $started = $db->table('campaigns')->where('tenant_id', $t)->where('id', $campaignId)->whereIn('status', ['draft', 'scheduled'])->update(['status' => 'sending', 'updated_at' => now()]);
+        if ($started === 0) {
+            throw new \DomainException('This campaign has already been sent.');
         }
+        SendCampaignBatch::dispatch($t, $campaignId, true);
+
+        return $estimate['recipients'];
+    }
+
+    /** The first step: who it goes to, each with their own tracking token, waiting to be sent. Returns true. */
+    public function prepare(string $campaignId): bool
+    {
+        $db = DB::connection($this->context->connectionName());
+        $t = $this->context->id();
+        $c = $db->table('campaigns')->where('tenant_id', $t)->where('id', $campaignId)->where('status', 'sending')->first();
+        if ($c === null || $db->table('campaign_messages')->where('tenant_id', $t)->where('campaign_id', $campaignId)->exists()) {
+            return $c !== null; // already listed (a retry): carry on sending
+        }
+        $now = now();
+        foreach (array_chunk($this->recipients((string) $c->channel, (string) $c->segment, $c->branch_id), 500) as $chunk) {
+            $db->table('campaign_messages')->insert(array_map(fn ($r) => ['id' => strtolower((string) Str::ulid()), 'tenant_id' => $t, 'campaign_id' => $campaignId,
+                'contact_id' => $r['id'], 'token' => Str::lower(Str::random(32)), 'status' => 'queued', 'error' => null, 'created_at' => $now], $chunk));
+        }
+
+        return true;
+    }
+
+    /** The next batch. Returns true while there's more to send; the last batch marks the campaign sent. */
+    public function sendBatch(string $campaignId): bool
+    {
+        $db = DB::connection($this->context->connectionName());
+        $t = $this->context->id();
+        $c = $db->table('campaigns')->where('tenant_id', $t)->where('id', $campaignId)->where('status', 'sending')->first();
+        if ($c === null) {
+            return false;
+        }
+        $batch = $db->table('campaign_messages')->where('tenant_id', $t)->where('campaign_id', $campaignId)->where('status', 'queued')->orderBy('id')->limit(self::BATCH)->get();
+        // Details now, not when it was listed: someone who withdrew consent since is skipped (POPIA).
+        $people = collect($this->audiences->audience('contacts', null, array_values($batch->pluck('contact_id')->map(fn ($id) => (string) $id)->all())))->keyBy('id');
+        foreach ($batch as $m) {
+            $r = $people->get((string) $m->contact_id);
+            $usable = $r !== null && ($c->channel === 'sms' ? $r['phone'] !== null : $r['email'] !== null);
+            $error = $usable ? $this->deliver($c, $r, (string) $m->token) : 'No longer agreed to marketing, or no '.($c->channel === 'sms' ? 'phone number' : 'email address');
+            $db->table('campaign_messages')->where('tenant_id', $t)->where('id', $m->id)
+                ->update(['status' => $error === null ? 'sent' : 'failed', 'error' => $error === null ? null : mb_substr($error, 0, 200), 'created_at' => now()]);
+        }
+        if ($db->table('campaign_messages')->where('tenant_id', $t)->where('campaign_id', $campaignId)->where('status', 'queued')->exists()) {
+            return true;
+        }
+        $sent = $db->table('campaign_messages')->where('tenant_id', $t)->where('campaign_id', $campaignId)->where('status', 'sent')->count();
         $db->table('campaigns')->where('tenant_id', $t)->where('id', $campaignId)->update(['status' => 'sent', 'sent_at' => now(), 'recipients' => $sent, 'updated_at' => now()]);
         $this->audit->record('campaigns.sent', 'campaign', $campaignId, ['channel' => $c->channel, 'sent' => $sent]);
 
-        return $sent;
+        return false;
     }
 
     /** A test to the person composing it — "[Test]", no tracking, nothing recorded against customers. */

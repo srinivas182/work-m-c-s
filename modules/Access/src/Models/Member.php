@@ -46,6 +46,9 @@ final class Member extends Model
     /** @return list<string> */
     public function roleKeys(): array
     {
-        return array_values(array_map('strval', $this->roles()->pluck('role_key')->all()));
+        // The loaded relation when there is one (the team page loads every member's roles in one query — 18.3a).
+        $roles = $this->relationLoaded('roles') ? $this->roles : $this->roles()->get(['role_key']);
+
+        return array_values(array_map('strval', $roles->pluck('role_key')->all()));
     }
 }
