@@ -8,7 +8,7 @@ Each business lives on one shard database. Its rows sit beside other businesses'
 
 Use this to rebalance shards, or to put a large business on a shard of its own.
 
-1. **Check that the destination shard is migrated to the same version** (`php artisan shards:migrate --pretend`). A missing table stops the move before anything changes.
+1. **Make sure the destination shard is migrated** (`php artisan shards:migrate --shard=shard-2`; each shard's schema version is in the `shards` table). If it's behind, a missing table or column stops the move before anything changes.
 2. Run the move:
    ```
    php artisan tenants:move glow-salon --to=shard-2
