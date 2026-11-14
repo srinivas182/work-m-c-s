@@ -72,11 +72,11 @@ Incidents list (status: new / acknowledged / fixed in release X / ignored; sever
 
 ### Decisions
 
-| # | Decision | Recommendation |
+| # | Decision | Status |
 |---|---|---|
-| F | Build in-house vs Sentry/Nightwatch | **In-house** (POPIA: data stays in SA; business context; no per-event bill). Revisit if WURK later wants Sentry for depth. |
-| G | External uptime checker | **Better Stack** (free tier: 10 monitors, 3-min checks, email; paid for 30-s checks + status page) or **UptimeRobot** (free: 50 monitors, 5-min). Recommend **Better Stack**; WURK creates the account when the cloud is live (Sprint 17) — Watchtower is wired for its webhook now. |
-| H | Auto-create GitHub issues | **Not now** — email + "Copy fix request" first. Later: a GitHub issue per critical incident (needs a GitHub token in production). |
+| F | Build in-house vs Sentry/Nightwatch | **In-house** (POPIA: data stays in SA; business context; no per-event bill). Revisit if WURK later wants Sentry for depth. **Accepted (WURK, 14 Nov 2026).** |
+| G | External uptime checker | **Better Stack** (free tier: 10 monitors, 3-min checks, email; paid for 30-s checks + status page) or **UptimeRobot** (free: 50 monitors, 5-min). Recommend **Better Stack**; WURK creates the account when the cloud is live (Sprint 17) — Watchtower is wired for its webhook now. **Accepted (WURK, 14 Nov 2026).** |
+| H | Auto-create GitHub issues | **Not now** — email + "Copy fix request" first. Later: a GitHub issue per critical incident (needs a GitHub token in production). **Accepted (WURK, 14 Nov 2026).** |
 
 ### Split
 
