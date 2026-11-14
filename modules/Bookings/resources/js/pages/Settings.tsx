@@ -326,6 +326,21 @@ function ServiceForm({
         <Button type="button" variant="ghost" onClick={onDone}>
           Cancel
         </Button>
+        {service && (
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-danger-11 ml-auto"
+            onClick={() =>
+              router.delete(`${base()}/services/${service.id}`, {
+                preserveScroll: true,
+                onSuccess: onDone,
+              })
+            }
+          >
+            Delete service
+          </Button>
+        )}
       </div>
     </form>
   );

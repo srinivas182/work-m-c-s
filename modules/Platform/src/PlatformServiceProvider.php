@@ -13,11 +13,13 @@ use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\PlatformMetrics;
+use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\SupportSessions;
 use Wurk\Platform\Modules\ModuleRegistry;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\AssistantRegistry;
 use Wurk\Platform\Support\AudienceRegistry;
+use Wurk\Platform\Support\DeletedRegistry;
 use Wurk\Platform\Support\ExportRegistry;
 use Wurk\Platform\Support\HealthRegistry;
 use Wurk\Platform\Support\MetricsRegistry;
@@ -40,6 +42,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(AssistantTools::class, AssistantRegistry::class);
         $this->app->singleton(HealthSignals::class, HealthRegistry::class);
         $this->app->singleton(DataExports::class, ExportRegistry::class);
+        $this->app->singleton(RecentlyDeleted::class, DeletedRegistry::class);
         $this->app->bind(SupportSessions::class, NoSupportSessions::class); // the Support module answers for real
 
         $this->app->singleton(

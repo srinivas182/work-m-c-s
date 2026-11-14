@@ -18,7 +18,7 @@ final readonly class StockSection
     {
         $db = DB::connection($this->context->connectionName());
         $t = $this->context->id();
-        $stock = $db->table('shop_stock')->join('shop_variants', 'shop_variants.id', '=', 'shop_stock.variant_id')->join('shop_products', 'shop_products.id', '=', 'shop_variants.product_id')
+        $stock = $db->table('shop_stock')->join('shop_variants', 'shop_variants.id', '=', 'shop_stock.variant_id')->join('shop_products', 'shop_products.id', '=', 'shop_variants.product_id')->whereNull('shop_variants.deleted_at')->whereNull('shop_products.deleted_at')
             ->where('shop_stock.tenant_id', $t)->where('shop_variants.tenant_id', $t)->where('shop_products.tenant_id', $t)
             ->when($p->branchIds !== null, fn ($q) => $q->whereIn('shop_stock.branch_id', $p->branchIds))
             ->selectRaw('shop_variants.id as id, shop_products.name as product, shop_variants.label as label, sum(shop_stock.quantity) as qty')

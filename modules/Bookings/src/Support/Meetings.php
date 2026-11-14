@@ -158,7 +158,7 @@ final readonly class Meetings
 
     private function title(Booking $b): string
     {
-        return BookingService::query()->whereKey($b->service_id)->value('name').' — '.$b->customer_name;
+        return BookingService::withTrashed()->whereKey($b->service_id)->value('name').' — '.$b->customer_name;
     }
 
     private function google(MeetingConnection $c): PendingRequest

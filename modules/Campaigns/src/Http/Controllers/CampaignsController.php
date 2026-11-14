@@ -15,6 +15,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Campaigns\Support\CampaignSender;
 use Wurk\Campaigns\Support\ReadyMade;
 use Wurk\Crm\Contracts\Takings;
@@ -42,7 +43,7 @@ final class CampaignsController
         $takings = app(Takings::class);
 
         return Inertia::render('Campaigns::Index', [
-            'campaigns' => $db->table('campaigns')->where('tenant_id', $t)->orderByDesc('created_at')->limit(50)->get()->map(fn ($c) => [
+            'campaigns' => $db->table('campaigns')->where('tenant_id', $t)->whereNull('deleted_at')->orderByDesc('created_at')->limit(50)->get()->map(fn ($c) => [
                 'redeemed' => isset($redeemed[$c->id]) ? $redeemed[$c->id]->count() : 0,
                 'sales_cents' => isset($redeemed[$c->id]) ? $takings->paidFor(array_values($redeemed[$c->id]->map(fn ($r) => [(string) $r->source_type, (string) $r->source_id])->all())) : 0,
                 'id' => $c->id, 'name' => $c->name, 'channel' => $c->channel, 'status' => $c->status, 'scheduled_at' => $c->scheduled_at, 'sent_at' => $c->sent_at,
@@ -103,6 +104,19 @@ final class CampaignsController
         return back()->with('status', 'Test sent to '.$to.'.');
     }
 
+    /** Delete a draft (Sprint 16.6b) — restorable from Recently deleted for 30 days. Sent or scheduled campaigns stay. */
+    public function destroy(string $campaign, AuditLog $audit): RedirectResponse
+    {
+        $c = $this->find($campaign);
+        if ($c->status !== 'draft') {
+            return back()->with('warning', 'Only drafts can be deleted — cancel the schedule first.');
+        }
+        DB::connection($this->context->connectionName())->table('campaigns')->where('tenant_id', $this->context->id())->where('id', $c->id)->update(['deleted_at' => now()]);
+        $audit->record('campaigns.draft_deleted', 'campaign', $c->id, ['name' => $c->name]);
+
+        return redirect()->route('tenant.campaigns')->with('status', "Draft “{$c->name}” deleted. You can restore it from Recently deleted for 30 days.");
+    }
+
     public function send(Request $request, string $campaign): RedirectResponse
     {
         $d = $request->validate(['when' => ['required', Rule::in(['now', 'later'])], 'at' => ['nullable', 'required_if:when,later', 'date', 'after:now']], ['at.after' => 'Pick a time in the future.']);
@@ -140,7 +154,7 @@ final class CampaignsController
 
     private function find(string $id): \stdClass
     {
-        return DB::connection($this->context->connectionName())->table('campaigns')->where('tenant_id', $this->context->id())->where('id', $id)->first() ?? abort(404);
+        return DB::connection($this->context->connectionName())->table('campaigns')->where('tenant_id', $this->context->id())->where('id', $id)->whereNull('deleted_at')->first() ?? abort(404);
     }
 
     private function act(\Closure $fn): void

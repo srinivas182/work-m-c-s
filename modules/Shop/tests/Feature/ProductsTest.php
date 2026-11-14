@@ -97,7 +97,7 @@ it('adds categories, and keeps products when a category is removed', function ()
     $this->actingAs($this->owner)->post("{$this->base}/categories", ['name' => 'T-shirts'])->assertSessionHas('status', 'Category added.');
     $cat = ($this->in)(fn () => ShopCategory::query()->sole()->id);
     $this->actingAs($this->owner)->post("{$this->base}/products", [...$this->tee, 'category_id' => $cat]);
-    $this->actingAs($this->owner)->delete("{$this->base}/categories/{$cat}")->assertSessionHas('status', 'Category removed. Its products are kept.');
+    $this->actingAs($this->owner)->delete("{$this->base}/categories/{$cat}")->assertSessionHas('status', 'Category removed. Its products are kept — and you can restore it from Recently deleted for 30 days.');
     ($this->in)(fn () => expect(Product::query()->sole()->category_id)->toBeNull());
 });
 

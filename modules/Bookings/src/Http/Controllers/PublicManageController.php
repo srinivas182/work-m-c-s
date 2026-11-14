@@ -36,7 +36,7 @@ final class PublicManageController
 
         return $this->within($handle, $booking, function (CurrentTenant $tenant, Booking $b) use ($request): Response {
             $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $request->query('date')) === 1 ? (string) $request->query('date') : null;
-            $service = BookingService::query()->whereKey($b->service_id)->firstOrFail();
+            $service = BookingService::withTrashed()->whereKey($b->service_id)->firstOrFail();
             $times = $date === null ? [] : array_map(fn (array $t) => ['starts_at' => $t['starts_at'], 'label' => CarbonImmutable::parse($t['starts_at'])->setTimezone($tenant->timezone())->format('H:i')],
                 app(Availability::class)->on($service, $date, $b->member_id));
 
@@ -48,11 +48,11 @@ final class PublicManageController
     {
         return $this->within($handle, $booking, function (CurrentTenant $tenant, Booking $b): Response {
             if (! $this->changeable($b)) {
-                return $this->page($tenant, $b, BookingService::query()->whereKey($b->service_id)->firstOrFail());
+                return $this->page($tenant, $b, BookingService::withTrashed()->whereKey($b->service_id)->firstOrFail());
             }
             $refunded = app(CancellationPolicy::class)->customerCancels($b)['refunded'];
 
-            return $this->page($tenant, $b->refresh(), BookingService::query()->whereKey($b->service_id)->firstOrFail(), ['notice' => $refunded
+            return $this->page($tenant, $b->refresh(), BookingService::withTrashed()->whereKey($b->service_id)->firstOrFail(), ['notice' => $refunded
                 ? 'Your booking is cancelled and your deposit is being refunded.' : 'Your booking is cancelled.']);
         });
     }
@@ -60,7 +60,7 @@ final class PublicManageController
     public function move(Request $request, string $handle, string $booking): Response
     {
         return $this->within($handle, $booking, function (CurrentTenant $tenant, Booking $b) use ($request): Response {
-            $service = BookingService::query()->whereKey($b->service_id)->firstOrFail();
+            $service = BookingService::withTrashed()->whereKey($b->service_id)->firstOrFail();
             $startsAt = CarbonImmutable::parse((string) $request->input('starts_at'));
             $open = collect(app(Availability::class)->on($service, $startsAt->setTimezone($tenant->timezone())->format('Y-m-d'), $b->member_id))
                 ->contains('starts_at', $startsAt->utc()->toIso8601String());

@@ -79,6 +79,15 @@ export default function Show({ campaign: c, segment, estimate }: Props) {
                 >
                   Send now
                 </Button>
+                {c.status === 'draft' && (
+                  <Button
+                    variant="ghost"
+                    className="text-danger-11"
+                    onClick={() => router.delete(base)}
+                  >
+                    Delete draft
+                  </Button>
+                )}
               </div>
               <form
                 aria-label="Schedule"

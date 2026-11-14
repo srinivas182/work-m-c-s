@@ -97,7 +97,7 @@ final readonly class Booker
      */
     public function move(Booking $booking, CarbonImmutable $startsAt, ?string $memberId, ?string $by): Booking
     {
-        $service = BookingService::query()->whereKey($booking->service_id)->firstOrFail();
+        $service = BookingService::withTrashed()->whereKey($booking->service_id)->firstOrFail(); // still movable if its service was deleted since
         $member = $memberId ?? $booking->member_id;
         $startsAt = $startsAt->utc();
         try {

@@ -18,6 +18,7 @@ use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Shipping\Contracts\ShipmentUpdated;
@@ -26,8 +27,11 @@ use Wurk\Shop\Console\ExpireOrdersCommand;
 use Wurk\Shop\Listeners\MarkDeliveredOrders;
 use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Order;
+use Wurk\Shop\Models\Product;
+use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Reports\SalesSection;
 use Wurk\Shop\Reports\StockSection;
+use Wurk\Shop\Support\DeletedCatalog;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
 use Wurk\Shop\Support\OrderStatusChanged;
@@ -67,6 +71,19 @@ final class ShopServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Recently deleted (16.6b): products and categories.
+        $this->callAfterResolving(RecentlyDeleted::class, function (RecentlyDeleted $d): void {
+            $d->register('products', 'Products', 'shop.manage',
+                fn (\DateTimeInterface $since) => Product::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()
+                    ->map(fn (Product $p) => ['id' => $p->id, 'name' => $p->name, 'deleted_at' => $p->deleted_at ?? now()])->all(),
+                fn (string $id) => $this->app->make(DeletedCatalog::class)->restoreProduct($id),
+                fn (\DateTimeInterface $before) => $this->app->make(DeletedCatalog::class)->purgeProducts($before));
+            $d->register('shop-categories', 'Shop categories', 'shop.manage',
+                fn (\DateTimeInterface $since) => ShopCategory::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()
+                    ->map(fn (ShopCategory $c) => ['id' => $c->id, 'name' => $c->name, 'deleted_at' => $c->deleted_at ?? now()])->all(),
+                fn (string $id) => $this->app->make(DeletedCatalog::class)->restoreCategory($id),
+                fn (\DateTimeInterface $before) => $this->app->make(DeletedCatalog::class)->purgeCategories($before));
+        });
         // Your data (16.6): what this module keeps, for the full export.
         $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
             $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)

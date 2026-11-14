@@ -56,7 +56,7 @@ final readonly class BookingsOnDayTool implements AssistantReadTool
         $stored = (string) config('app.timezone');
         $bookings = Booking::query()->where('starts_at', '>=', $day->setTimezone($stored))->where('starts_at', '<', $day->addDay()->setTimezone($stored))
             ->orderBy('starts_at')->limit(200)->get(['id', 'service_id', 'member_id', 'starts_at', 'ends_at', 'status']);
-        $services = BookingService::query()->whereIn('id', $bookings->pluck('service_id')->unique())->pluck('name', 'id');
+        $services = BookingService::withTrashed()->whereIn('id', $bookings->pluck('service_id')->unique())->pluck('name', 'id');
         $members = array_column($this->team->members(), 'name', 'id');
         $kept = $bookings->where('status', '!=', 'cancelled');
         $lines = [$day->format('l j F Y').': '.$kept->count().' booking(s), '.($bookings->count() - $kept->count()).' cancelled.'];

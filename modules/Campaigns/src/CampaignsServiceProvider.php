@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Campaigns;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
 use Wurk\Campaigns\Assistant\CreateCouponTool;
@@ -12,7 +13,9 @@ use Wurk\Campaigns\Console\SendDueCommand;
 use Wurk\Campaigns\Support\CouponBook;
 use Wurk\Payments\Contracts\Coupons;
 use Wurk\Platform\Contracts\AssistantTools;
+use Wurk\Platform\Contracts\CannotRestore;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -39,6 +42,21 @@ final class CampaignsServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Recently deleted (16.6b): draft campaigns.
+        $this->callAfterResolving(RecentlyDeleted::class, function (RecentlyDeleted $d): void {
+            $table = fn () => DB::connection(app(TenantContext::class)->connectionName())->table('campaigns')->where('tenant_id', app(TenantContext::class)->id());
+            $d->register('campaigns', 'Campaign drafts', 'campaigns.manage',
+                fn (\DateTimeInterface $since) => $table()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get(['id', 'name', 'deleted_at'])
+                    ->map(fn ($c) => ['id' => (string) $c->id, 'name' => (string) $c->name, 'deleted_at' => CarbonImmutable::parse((string) $c->deleted_at)])->all(),
+                function (string $id) use ($table): string {
+                    $c = $table()->where('id', $id)->whereNotNull('deleted_at')->first() ?? throw new CannotRestore('That draft isn’t in Recently deleted any more.');
+                    $table()->where('id', $id)->update(['deleted_at' => null, 'updated_at' => now()]);
+
+                    return "Draft “{$c->name}” is back in Campaigns.";
+                },
+                fn (\DateTimeInterface $before) => $table()->whereNotNull('deleted_at')->where('deleted_at', '<', $before)->where('status', 'draft')->delete(),
+            );
+        });
         // Your data (16.6): what this module keeps, for the full export.
         $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
             $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)

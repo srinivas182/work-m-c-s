@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Bookings\Assistant\AddBookingHoursTool;
 use Wurk\Bookings\Assistant\BookingsOnDayTool;
 use Wurk\Bookings\Console\DemoBookingsCommand;
@@ -26,6 +27,7 @@ use Wurk\Bookings\Events\ReservationCancelled;
 use Wurk\Bookings\Events\ReservationConfirmed;
 use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Models\Booking;
+use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Reports\BookingsSection;
 use Wurk\Bookings\Support\Deposits;
@@ -38,7 +40,9 @@ use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\CannotRestore;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -77,6 +81,26 @@ final class BookingsServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Recently deleted (16.6b): services. One with bookings is kept (hidden) after 30 days, so those bookings keep its name.
+        $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('services', 'Booking services', 'bookings.settings',
+            fn (\DateTimeInterface $since) => BookingService::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()
+                ->map(fn (BookingService $s) => ['id' => $s->id, 'name' => $s->name, 'deleted_at' => $s->deleted_at ?? now()])->all(),
+            function (string $id): string {
+                $s = BookingService::onlyTrashed()->whereKey($id)->first() ?? throw new CannotRestore('That service isn’t in Recently deleted any more.');
+                $s->restore();
+                $this->app->make(AuditLog::class)->record('bookings.service_restored', 'service', $s->id, ['name' => $s->name]);
+
+                return "“{$s->name}” is back on your booking page".($s->active ? '.' : ' list (switched off — switch it on to take bookings).');
+            },
+            function (\DateTimeInterface $before): int {
+                $ctx = $this->app->make(TenantContext::class);
+                $ids = BookingService::onlyTrashed()->where('deleted_at', '<', $before)
+                    ->whereNotExists(fn ($q) => $q->from('bookings')->where('bookings.tenant_id', $ctx->id())->whereColumn('bookings.service_id', 'booking_services.id'))->pluck('id')->all();
+                DB::connection($ctx->connectionName())->table('booking_service_member')->where('tenant_id', $ctx->id())->whereIn('service_id', $ids)->delete();
+
+                return (int) BookingService::onlyTrashed()->whereIn('id', $ids)->forceDelete();
+            },
+        ));
         // Your data (16.6): what this module keeps, for the full export.
         $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
             $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)

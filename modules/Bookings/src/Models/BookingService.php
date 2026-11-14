@@ -6,6 +6,8 @@ namespace Wurk\Bookings\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Wurk\Tenancy\Contracts\BelongsToTenant;
 
 /**
@@ -22,11 +24,13 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property int $position
  * @property string $location_type
  * @property string $deposit_when
+ * @property Carbon|null $deleted_at
  */
 final class BookingService extends Model
 {
     use BelongsToTenant;
     use HasUlids;
+    use SoftDeletes; // recently deleted, 30 days (16.6b); bookings keep its name
 
     protected $table = 'booking_services';
 
