@@ -21,6 +21,8 @@ use Wurk\Identity\Onboarding\VerificationService;
 use Wurk\Identity\Otp\LogTextMessenger;
 use Wurk\Identity\People\EloquentPeopleDirectory;
 use Wurk\Identity\People\EloquentTeamActivity;
+use Wurk\Identity\People\SignInSignal;
+use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Tenancy\Events\OwnerInvitationRequested;
 
@@ -38,6 +40,7 @@ final class IdentityServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->callAfterResolving(HealthSignals::class, fn (HealthSignals $s) => $s->register('identity', fn (string $t) => $this->app->make(SignInSignal::class)($t))); // business health (16.5)
         $this->loadViewsFrom($this->modulePath('resources/views'), 'identity');
         Event::listen(OwnerInvitationRequested::class, InviteBusinessOwner::class);
         // Published for other modules' admin routes: active WURK staff with an authenticator.
