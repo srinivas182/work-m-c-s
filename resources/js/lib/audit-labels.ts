@@ -24,6 +24,13 @@ export const AUDIT_LABELS: Record<string, string> = {
   'platform_role.deleted': 'Staff role deleted',
   'staff.deactivated': 'Staff member deactivated',
   'staff.reactivated': 'Staff member reactivated',
+  'support.ticket_opened': 'Support ticket opened',
+  'support.access_requested': 'WURK support asked for access',
+  'support.access_granted': 'WURK support let in',
+  'support.access_declined': 'WURK support access declined',
+  'support.access_ended': 'WURK support access ended',
+  'assistant.change_made': 'Change made with Ask WURK',
+  'assistant.change_undone': 'Ask WURK change undone',
 };
 
 /** Readable label for an audit action, with a sensible fallback for new actions. */

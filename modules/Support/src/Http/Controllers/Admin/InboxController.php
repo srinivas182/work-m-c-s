@@ -17,6 +17,7 @@ use Wurk\Identity\Contracts\PeopleDirectory;
 use Wurk\Support\Models\SupportCannedReply;
 use Wurk\Support\Models\SupportTicket;
 use Wurk\Support\Support\Screenshots;
+use Wurk\Support\Support\SupportAccess;
 use Wurk\Support\Support\SupportTeam;
 use Wurk\Support\Support\Tickets;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -68,9 +69,10 @@ final class InboxController
         ]);
     }
 
-    public function show(PeopleDirectory $people, int $number): Response
+    public function show(Request $request, PeopleDirectory $people, SupportAccess $access, int $number): Response
     {
         $t = SupportTicket::query()->where('number', $number)->firstOrFail();
+        $grant = $access->forTicket($t);
         $messages = $t->messages()->get();
         $names = $people->names(array_values(array_unique([...$messages->pluck('author_id')->all(), $t->opened_by])));
         $contact = $people->contacts([$t->opened_by])[$t->opened_by] ?? null;
@@ -79,10 +81,12 @@ final class InboxController
 
         return Inertia::render('Support::Admin/Ticket', [
             'team' => $this->team->members(),
+            'access' => $grant === null ? null : ['status' => $grant->status, 'level' => $grant->level ?? $grant->requested_level, 'ends_at' => $grant->ends_at?->toIso8601String(),
+                'mine' => $grant->staff_id === (string) $request->user()?->getAuthIdentifier()],
             'priorities' => self::PRIORITIES,
             'canned' => SupportCannedReply::query()->orderByDesc('uses')->orderBy('title')->get(['id', 'title', 'body'])->toArray(),
             'ticket' => ['number' => $t->number, 'subject' => $t->subject, 'status' => $t->status, 'statuses' => self::STATUSES, 'priority' => $t->priority, 'assignee_id' => $t->assignee_id,
-                'business' => $tenant?->displayName() ?? 'Unknown', 'handle' => $tenant?->handle(), 'package' => $t->package_key, 'target_hours' => $t->target_hours,
+                'business' => $tenant?->displayName() ?? 'Unknown', 'handle' => $tenant?->handle(), 'app_domain' => (string) config('wurk.domains.app'), 'package' => $t->package_key, 'target_hours' => $t->target_hours,
                 'due' => $t->first_response_due_at->toIso8601String(), 'responded' => $t->first_responded_at?->toIso8601String(),
                 'late' => $t->first_responded_at === null ? $t->first_response_due_at->isPast() : $t->first_responded_at->gt($t->first_response_due_at),
                 'page' => $t->page, 'browser' => $t->browser, 'last_error' => $t->last_error,
@@ -154,6 +158,27 @@ final class InboxController
         }
 
         return new JsonResponse($s['answer'] === null ? ['answer' => null, 'sources' => $s['sources'], 'message' => 'The help centre doesn’t cover this one — worth an article?'] : $s);
+    }
+
+    /** Ask the business for access to its back office (16.4). Nothing happens until an owner approves. */
+    public function requestAccess(Request $request, int $number, SupportAccess $access): RedirectResponse
+    {
+        $t = SupportTicket::query()->where('number', $number)->firstOrFail();
+        $d = $request->validate(['level' => ['required', 'in:view,full'], 'reason' => ['required', 'string', 'min:10', 'max:500']]);
+        $access->request($t, (string) $request->user()?->getAuthIdentifier(), $d['level'], $d['reason']);
+
+        return back()->with('status', 'Asked. The business’s owners have been told; you’ll be emailed when they decide.');
+    }
+
+    public function endAccess(Request $request, int $number, SupportAccess $access): RedirectResponse
+    {
+        $t = SupportTicket::query()->where('number', $number)->firstOrFail();
+        $g = $access->forTicket($t);
+        if ($g !== null && $g->status === 'active' && $g->staff_id === (string) $request->user()?->getAuthIdentifier()) {
+            $access->end($g, (string) $request->user()?->getAuthIdentifier(), byWurk: true);
+        }
+
+        return back()->with('status', 'Access ended.');
     }
 
     public function file(int $number, string $file): StreamedResponse
