@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Wurk\Bookings\Assistant\AddBookingHoursTool;
+use Wurk\Bookings\Assistant\BookingsOnDayTool;
 use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
 use Wurk\Bookings\Console\SendRemindersCommand;
@@ -33,6 +35,7 @@ use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
@@ -73,6 +76,10 @@ final class BookingsServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         // Reports → Bookings (Sprint 15.1a).
+        $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
+            $t->register(BookingsOnDayTool::class);
+            $t->register(AddBookingHoursTool::class);
+        });
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
             $r->register('bookings', 200, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
                 && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'bookings')

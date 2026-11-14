@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
+use Wurk\Help\Contracts\HelpSearch;
 use Wurk\Help\Models\HelpArticle;
 use Wurk\Help\Support\HelpCentre;
 
@@ -66,4 +67,19 @@ it('gives the "?" panel this screen’s help — or a search — to signed-in pe
         ->and($this->actingAs($owner)->getJson('http://'.config('wurk.domains.app').'/_help?screen=Shop::Products')->json('articles'))->toBe([]);
     auth()->logout();
     $this->getJson('http://'.config('wurk.domains.app').'/_help?screen=Payments::Settings')->assertUnauthorized();
+});
+
+it('finds the articles that answer a question in plain words, best first — for Ask WURK', function () {
+    ($this->article)(['status' => 'published']);
+    ($this->article)(['title' => 'Refund a customer', 'summary' => 'Give money back for an order.', 'body' => 'Open the order and choose **Refund**. Card payments go back to the card.', 'status' => 'published', 'screens' => []]);
+    ($this->article)(['title' => 'Hidden draft about refunds', 'body' => 'refund refund', 'status' => 'draft', 'screens' => []]);
+    $found = app(HelpSearch::class)->relevant('How do I refund a customer who paid by card?', 3);
+    expect(array_column($found, 'slug'))->toBe(['refund-a-customer', 'turn-on-card-payments'])
+        ->and($found[0]['text'])->toContain('choose **Refund**')
+        ->and($found[0]['url'])->toBe('https://'.config('wurk.domains.help').'/a/refund-a-customer')
+        ->and(app(HelpSearch::class)->relevant('how can I do it?'))->toBe([]); // only filler words
+
+    app(HelpSearch::class)->missed('  How do I connect Xero?  ');
+    app(HelpSearch::class)->missed('how do i connect xero?');
+    expect(DB::table('help_searches')->where('query', 'how do i connect xero?')->value('count'))->toBe(2);
 });
