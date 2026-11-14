@@ -19,6 +19,7 @@ return new class extends Migration
                 Schema::table($t, fn (Blueprint $table) => $table->ulid('branch_id')->nullable()->index());
             }
             // Every existing row → its business's main branch (the branch scope hides rows without a branch from branch managers).
+            // nosemgrep: php-raw-sql-interpolated — $t is one of this migration's own table names, never input
             DB::table($t)->update(['branch_id' => DB::raw("(select b.id from branches b where b.tenant_id = {$t}.tenant_id and b.is_default = 1 limit 1)")]);
         }
         // Which branches offer a service (none listed = every branch), and an optional price per branch.

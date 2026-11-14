@@ -1,0 +1,61 @@
+# WURK's FrankenPHP server: Laravel Octane's own Caddyfile (laravel/octane stubs/Caddyfile) plus security headers
+# for static files (Sprint 18.1b). Keep in step with Octane's stub when Octane is upgraded.
+{
+	{$CADDY_GLOBAL_OPTIONS}
+
+	admin {$CADDY_SERVER_ADMIN_HOST}:{$CADDY_SERVER_ADMIN_PORT}
+
+	frankenphp {
+		worker {
+			file "{$APP_PUBLIC_PATH}/frankenphp-worker.php"
+			{$CADDY_SERVER_WORKER_DIRECTIVE}
+			{$CADDY_SERVER_WATCH_DIRECTIVES}
+		}
+	}
+}
+
+{$CADDY_EXTRA_CONFIG}
+
+{$CADDY_SERVER_SERVER_NAME} {
+	log {
+		level {$CADDY_SERVER_LOG_LEVEL}
+
+		# Redact the authorization query parameter that can be set by Mercure...
+		format filter {
+			wrap {$CADDY_SERVER_LOGGER}
+			fields {
+				request>uri query {
+					replace authorization REDACTED
+				}
+			}
+		}
+	}
+
+	# Compressing the Mercure stream costs memory per subscriber and enables BREACH-style attacks...
+	@compressible not path /.well-known/mercure
+
+	# Sprint 18.1b: files Caddy serves itself (built assets, robots.txt) get the same basic security headers
+	# as WURK's responses; "?" only fills in what WURK hasn't set. No Server header.
+	header {
+		?X-Content-Type-Options nosniff
+		?X-Frame-Options DENY
+		?Referrer-Policy strict-origin-when-cross-origin
+		?Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+		-Server
+	}
+
+	route {
+		root * "{$APP_PUBLIC_PATH}"
+		encode @compressible zstd br gzip
+
+		# Mercure configuration is injected here...
+		{$CADDY_SERVER_EXTRA_DIRECTIVES}
+
+		php_server {
+			index frankenphp-worker.php
+			try_files {path} frankenphp-worker.php
+			# Required for the public/storage/ directory...
+			resolve_root_symlink
+		}
+	}
+}

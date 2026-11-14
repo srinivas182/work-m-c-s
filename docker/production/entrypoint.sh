@@ -19,6 +19,7 @@ case "${1:-serve}" in
   serve)
     warm_caches
     exec php artisan octane:frankenphp \
+      --caddyfile=docker/production/Caddyfile \
       --host=0.0.0.0 \
       --port="${PORT:-8000}" \
       --workers="${OCTANE_WORKERS:-auto}" \
