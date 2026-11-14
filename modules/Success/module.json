@@ -1,0 +1,14 @@
+{
+    "name": "Success",
+    "key": "success",
+    "version": "0.1.0",
+    "description": "Business health for WURK's success team: a nightly score per business from every module's signals, with plain reasons and a suggested next step; filters, MRR at risk, export and a weekly digest. Counts server errors per business.",
+    "core": true,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "plans",
+        "security",
+        "audit"
+    ]
+}

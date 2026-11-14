@@ -17,6 +17,7 @@ use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -37,6 +38,7 @@ use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\ChatBot;
 use Wurk\Website\Support\EloquentSiteTemplates;
+use Wurk\Website\Support\LaunchSignal;
 use Wurk\Website\Support\NoProductCatalog;
 use Wurk\Website\Support\PageRenderer;
 use Wurk\Website\Support\Pages;
@@ -100,6 +102,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->callAfterResolving(HealthSignals::class, fn (HealthSignals $s) => $s->register('website', fn (string $t) => $this->app->make(LaunchSignal::class)($t))); // business health (16.5)
         // Website analytics (Sprint 15.2): an order or booking made on the public site is credited to where the visitor came from.
         Event::listen(ContactRemembered::class, function (ContactRemembered $e): void {
             $host = strtolower(request()->getHost());

@@ -116,6 +116,12 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await expect(page.getByRole('form', { name: 'Canned reply: Reconnect payments' })).toBeVisible();
   await expectAccessible(page);
 
+  // Business health (Sprint 16.5): scores with reasons and next steps.
+  await page.goto(`${admin}/health`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Business health' })).toBeVisible();
+  await expect(page.getByRole('form', { name: 'Weekly digest' })).toBeVisible();
+  await expectAccessible(page);
+
   // Profitability (Sprint 15.5a): costs and a pricing "what if".
   await page.goto(`${admin}/profitability`);
   await expect(page.getByRole('heading', { level: 1, name: 'Profitability' })).toBeVisible();
