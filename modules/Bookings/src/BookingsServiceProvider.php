@@ -7,6 +7,7 @@ namespace Wurk\Bookings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -37,6 +38,7 @@ use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -75,6 +77,13 @@ final class BookingsServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Your data (16.6): what this module keeps, for the full export.
+        $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
+            $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)
+                ->where('tenant_id', app(TenantContext::class)->id())->orderBy($order)->lazy(500)->map(fn ($r) => (array) $r);
+            $x->table('services', 'Services and prices', 'bookings.view', $rows('booking_services', 'position'));
+            $x->table('bookings', 'Bookings', 'bookings.view', $rows('bookings', 'starts_at'));
+        });
         // Reports → Bookings (Sprint 15.1a).
         $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
             $t->register(BookingsOnDayTool::class);

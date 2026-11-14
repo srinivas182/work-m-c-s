@@ -94,6 +94,7 @@ it('keeps view-only access read-only, and full access away from money, access, s
     $this->actingAs($this->agent)->post(($this->back)('/settings/team/invitations'), ['email' => 'x@y.co'])->assertForbidden(); // who has access
     $this->actingAs($this->agent)->put(($this->back)('/settings/security'), [])->assertForbidden();                         // security
     $this->actingAs($this->agent)->get(($this->back)('/records'))->assertNotFound();
+    $this->actingAs($this->agent)->get(($this->back)('/settings/your-data'))->assertNotFound(); // never the whole business's data
 
     // Audited as WURK staff, on behalf of the business — never as the business.
     $e = DB::connection($this->conn)->table('audit_events')->where('action', 'campaigns.coupon_created')->first();

@@ -12,8 +12,8 @@ use DateTimeInterface;
  */
 interface SupportSessions
 {
-    /** Never granted to WURK staff, whatever the owner chooses: money, who has access, security, health records — and deciding on their own access. */
-    public const NEVER = ['billing.manage', 'payments.manage', 'team.manage', 'roles.manage', 'team-security.manage', 'records.view', 'records.manage', 'support.access'];
+    /** Never granted to WURK staff, whatever the owner chooses: money, who has access, security, health records, taking all the data away — and deciding on their own access. */
+    public const NEVER = ['billing.manage', 'payments.manage', 'team.manage', 'roles.manage', 'team-security.manage', 'records.view', 'records.manage', 'support.access', 'data.export'];
 
     /**
      * The access this person has to this business through a support session right now, or null.

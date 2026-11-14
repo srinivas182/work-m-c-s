@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Crm;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Wurk\Crm\Console\FollowUpsCommand;
@@ -23,8 +24,10 @@ use Wurk\Crm\Support\Leads;
 use Wurk\Crm\Support\MarketingAudiences;
 use Wurk\Crm\Support\SignedCustomerIdentity;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 final class CrmServiceProvider extends ModuleServiceProvider
 {
@@ -41,6 +44,13 @@ final class CrmServiceProvider extends ModuleServiceProvider
     public function boot(): void
     {
         parent::boot();
+        // Your data (16.6): what this module keeps, for the full export.
+        $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
+            $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)
+                ->where('tenant_id', app(TenantContext::class)->id())->orderBy($order)->lazy(500)->map(fn ($r) => (array) $r);
+            $x->table('customers', 'Customers', 'contacts.view', $rows('contacts', 'created_at'));
+            $x->table('customer-history', 'Customer history', 'contacts.view', $rows('contact_links', 'occurred_at'));
+        });
         // Reports → Leads (Sprint 15.1b).
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
             $r->register('leads', 400, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
