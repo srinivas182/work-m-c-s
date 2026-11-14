@@ -91,3 +91,12 @@ it('publishes security.txt on WURK’s own addresses, never stale, and the discl
     $this->get("{$root}/security")->assertOk()->assertInertia(fn ($p) => $p->component('Marketing::Security')->where('contact', 'security@wurk.co.za'));
     $this->get("{$root}/trust")->assertOk()->assertInertia(fn ($p) => $p->component('Marketing::Trust'));
 });
+
+it('keeps the session cookie away from scripts (HttpOnly, SameSite) — only the CSRF token cookie is readable, by design', function () {
+    $cookies = collect($this->get($this->signIn)->headers->getCookies())->keyBy(fn ($c) => $c->getName());
+    $session = $cookies[config('session.cookie')] ?? null;
+    expect($session)->not->toBeNull()
+        ->and($session?->isHttpOnly())->toBeTrue()
+        ->and($session?->getSameSite())->toBe('lax')
+        ->and($cookies['XSRF-TOKEN']?->isHttpOnly())->toBeFalse(); // the page reads it to send the CSRF header
+});

@@ -123,7 +123,7 @@ There is no public API yet (the module system reserves `/api/v1`). Every JSON en
 | `pnpm audit --prod` | every change | a high or critical advisory in a production JavaScript dependency |
 | gitleaks (`.gitleaks.toml`) | every change — the PR's commits | any secret |
 | Semgrep with WURK's rules (`.semgrep.yml`) | every change | eval/unserialize/shell, SQL built from variables or request input, saving `$request->all()`, predictable secrets, unescaped request data in Blade, raw HTML in React outside two reviewed places |
-| OWASP ZAP baseline (`.zap/rules.tsv`) | every change ready for review (with the performance gate) | a missing security header or cookie flag on a page |
+| OWASP ZAP baseline (`.zap/rules.tsv`) | every change ready for review (with the performance gate) | a page without clickjacking protection or a CSP, or a cookie without SameSite (other headers and HttpOnly are reported, and enforced by `SecurityHeadersTest`) |
 | Rate limits (`tests/Architecture/RateLimitsTest.php`) | every change | a public write route without a throttle |
 | CSP in the browser (`e2e/fixtures.ts`) | every browser test | anything blocked by the Content Security Policy |
 | Dependabot (`.github/dependabot.yml`) | weekly (Composer, npm), monthly (Actions, Docker) | — opens grouped update PRs |
