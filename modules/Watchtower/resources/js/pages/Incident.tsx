@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import {
   Badge,
@@ -25,6 +25,15 @@ interface Props {
     fixed_in: string | null;
     regressed_at: string | null;
     resolved_at: string | null;
+    analysis: {
+      status: 'pending' | 'done' | 'failed';
+      summary?: string;
+      cause?: string;
+      fix?: string;
+      confidence?: string;
+      error?: string;
+      release?: string;
+    } | null;
   };
   days: { day: string; count: number }[];
   businesses: { id: string; name: string; handle: string }[];
@@ -129,6 +138,51 @@ export default function Incident({
             </CardContent>
           </Card>
         )}
+
+        <Card>
+          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
+            <CardTitle>What WURK’s AI thinks</CardTitle>
+            {can_manage && i.analysis?.status !== 'pending' && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() =>
+                  router.post(`${window.location.pathname}/analyse`, {}, { preserveScroll: true })
+                }
+              >
+                {i.analysis ? 'Explain again' : 'Explain it'}
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="grid gap-2 text-sm">
+            {!i.analysis && <p className="text-fg-muted">Not explained yet.</p>}
+            {i.analysis?.status === 'pending' && (
+              <p className="text-fg-muted">Working on it — refresh in a minute or two.</p>
+            )}
+            {i.analysis?.status === 'failed' && (
+              <p className="text-danger-11">The AI couldn’t explain it: {i.analysis.error}</p>
+            )}
+            {i.analysis?.status === 'done' && (
+              <>
+                <p>{i.analysis.summary}</p>
+                {i.analysis.cause && (
+                  <p>
+                    <strong>Likely cause:</strong> {i.analysis.cause}
+                  </p>
+                )}
+                {i.analysis.fix && (
+                  <p className="whitespace-pre-wrap">
+                    <strong>Suggested fix:</strong> {i.analysis.fix}
+                  </p>
+                )}
+                <p className="text-fg-muted">
+                  {i.analysis.confidence} confidence · from release {i.analysis.release}. Check it
+                  before acting on it.
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">

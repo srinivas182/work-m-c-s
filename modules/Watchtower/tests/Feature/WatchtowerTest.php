@@ -29,7 +29,7 @@ function wtFail(string $message): void
 
 beforeEach(function () {
     Mail::fake();
-    config(['wurk.watchtower.recipients' => ['hq@example.test']]);    // set per deployment (WATCHTOWER_EMAIL), then in Admin
+    config(['wurk.watchtower.recipients' => ['hq@example.test'], 'wurk.watchtower.ai' => false]); // recipients: set per deployment (WATCHTOWER_EMAIL), then in Admin
     $this->createShards(1);
     $this->glow = $this->createTenant('glow-salon', name: 'Glow Salon');
     $this->quiet = $this->createTenant('quiet-cafe', name: 'Quiet Cafe');

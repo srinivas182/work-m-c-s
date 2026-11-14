@@ -12,12 +12,16 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Tenancy\Contracts\TenantDirectory;
+use Wurk\Watchtower\Jobs\AnalyseIncident;
 use Wurk\Watchtower\Models\Incident;
 use Wurk\Watchtower\Support\Alerts;
+use Wurk\Watchtower\Support\Analyst;
 use Wurk\Watchtower\Support\FixRequest;
 use Wurk\Watchtower\Support\Heartbeats;
 use Wurk\Watchtower\Support\Release;
+use Wurk\Watchtower\Support\SlowPages;
 use Wurk\Watchtower\Support\SystemChecks;
+use Wurk\Watchtower\Support\Uptime;
 
 /** Admin → Watchtower (Sprint 18.0): every problem on the platform, the state of each system, and who gets emailed. */
 final class IncidentsController
@@ -44,6 +48,9 @@ final class IncidentsController
             'tasks' => DB::table('watchtower_heartbeats')->orderBy('task')->get()->map(fn ($t) => ['task' => $t->task, 'expression' => $t->expression,
                 'last_started_at' => $t->last_started_at, 'last_status' => $t->last_status, 'last_runtime_ms' => $t->last_runtime_ms])->values()->all(),
             'scheduler' => $pulse,
+            'uptime' => Uptime::summary(),
+            'slow' => SlowPages::worst(),
+            'ai' => ['enabled' => (bool) config('wurk.watchtower.ai', true), 'today' => Analyst::today(), 'cap' => (int) config('wurk.watchtower.ai_daily_cap', 50)],
             'recipients' => $alerts->recipients(),
             'can_manage' => Gate::allows('watchtower.manage'),
             'rows' => ['data' => collect($rows->items())->map(fn (Incident $i) => $this->row($i))->all(), 'total' => $rows->total(), 'next' => $rows->nextPageUrl(), 'prev' => $rows->previousPageUrl()],
@@ -88,6 +95,18 @@ final class IncidentsController
             'ignore' => 'Ignored — it will still be counted, but never emailed.',
             default => 'Reopened.',
         });
+    }
+
+    /** Ask the AI to explain this problem (again) — e.g. after the code changed. */
+    public function analyse(Incident $incident): RedirectResponse
+    {
+        if (! (bool) config('wurk.watchtower.ai', true) || ! Analyst::underCap()) {
+            return back()->with('warning', 'The AI has explained as many problems as it may today — try again tomorrow, or raise WATCHTOWER_AI_DAILY_CAP.');
+        }
+        $incident->forceFill(['analysis' => ['status' => 'pending', 'release' => $incident->last_release, 'at' => now()->toIso8601String()]])->save();
+        AnalyseIncident::dispatch($incident->id);
+
+        return back()->with('status', 'Asked the AI to explain it — the explanation appears here in a minute or two.');
     }
 
     public function settings(Request $request, Alerts $alerts): RedirectResponse

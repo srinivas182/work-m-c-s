@@ -11,6 +11,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Throwable;
@@ -20,6 +21,8 @@ use Wurk\Watchtower\Console\DigestCommand;
 use Wurk\Watchtower\Console\SweepCommand;
 use Wurk\Watchtower\Http\Controllers\ClientErrorController;
 use Wurk\Watchtower\Http\Controllers\HeartbeatController;
+use Wurk\Watchtower\Http\Controllers\UptimeWebhookController;
+use Wurk\Watchtower\Http\Middleware\TimeRequests;
 use Wurk\Watchtower\Support\Heartbeats;
 use Wurk\Watchtower\Support\Recorder;
 use Wurk\Watchtower\Support\Signal;
@@ -83,6 +86,9 @@ final class WatchtowerServiceProvider extends ModuleServiceProvider
             $this->app->make(Recorder::class)->record(Signal::fromThrowable($e->exception, 'job', "job {$job}", 'queue', ['queue' => $e->job->getQueue(), 'attempts' => $e->job->attempts()], 'high'));
         });
 
+        // Response times, sampled, for slow pages (18.0b).
+        $this->app->make(Router::class)->pushMiddlewareToGroup('web', TimeRequests::class);
+
         Event::listen(ScheduledTaskStarting::class, fn (ScheduledTaskStarting $e) => $this->app->make(Heartbeats::class)->starting($e));
         Event::listen(ScheduledTaskFinished::class, fn (ScheduledTaskFinished $e) => $this->app->make(Heartbeats::class)->finished($e));
         Event::listen(ScheduledTaskFailed::class, fn (ScheduledTaskFailed $e) => $this->app->make(Heartbeats::class)->failed($e));
@@ -97,5 +103,6 @@ final class WatchtowerServiceProvider extends ModuleServiceProvider
         }
         Route::get('health/heartbeat', HeartbeatController::class)->name('health.heartbeat');
         Route::post('_wurk/client-error', ClientErrorController::class)->middleware('throttle:20,1,client-error')->name('watchtower.client-error');
+        Route::post('_wurk/uptime/{token}', UptimeWebhookController::class)->middleware('throttle:60,1,uptime-webhook')->where('token', '[A-Za-z0-9_\-]{16,128}')->name('watchtower.uptime');
     }
 }

@@ -122,6 +122,7 @@ Incidents list (status: new / acknowledged / fixed in release X / ignored; sever
 | Part | PR | Notes |
 |---|---|---|
 | 18.0a Watchtower — capture & alerts | #180 | New central Watchtower module. Grouping key: exception class + first frame in WURK's own code + message with IDs/numbers taken out (browser crashes: message + script line with build hashes removed). Alerts are sent by the every-minute check, not inside the failing request. Recipients are set per deployment (`WATCHTOWER_EMAIL`) and in Admin — no address is built into the code. The fix request is in 18.0a already (without the AI analysis, which 18.0b adds). |
+| 18.0b Watchtower — AI, slow pages, uptime | #181 | The AI is a background job (never blocks checks); high problems wait up to 3 minutes for it, critical never. Code context is read from the running release, only from `modules/` and `app/` (never vendor). Slow pages are sampled (2% of requests, every request over 2 s) and written after the response; the 300 ms check is "over 5% of the hour's sample above 300 ms". Outage start isn't emailed by Watchtower (the uptime checker already did); the end is, with what was seen meanwhile. A flaky axe finding on Support settings (mobile, a button mid-update) was seen once — for 18.5. |
 
 ## Verification (before closing)
 

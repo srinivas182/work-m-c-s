@@ -149,7 +149,14 @@ return [
     // Watchtower (Sprint 18.0): who gets problem reports until HQ sets its own list in Admin → Watchtower.
     'watchtower' => [
         'recipients' => array_values(array_filter(array_map('trim', explode(',', (string) env('WATCHTOWER_EMAIL', ''))))),
-        // Token the external uptime checker sends with its webhook (18.0b).
+        // Secret in the external uptime checker's webhook address: /_wurk/uptime/{token} (18.0b). Unset = no webhook.
         'uptime_token' => env('WATCHTOWER_UPTIME_TOKEN'),
+        // The AI explains problems (18.0b): on/off, and how many a day at most (WURK's cost, not businesses').
+        'ai' => (bool) env('WATCHTOWER_AI', true),
+        'ai_daily_cap' => (int) env('WATCHTOWER_AI_DAILY_CAP', 50),
+        // Share of web requests timed for the slow-pages check (every request over 2 s is always counted).
+        'timing_sample' => (float) env('WATCHTOWER_TIMING_SAMPLE', 0.02),
+        // Extra queues to watch for backlogs, besides the connection's default.
+        'queues' => array_values(array_filter(explode(',', (string) env('WATCHTOWER_QUEUES', '')))),
     ],
 ];
