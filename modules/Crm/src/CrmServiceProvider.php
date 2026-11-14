@@ -8,6 +8,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Crm\Console\FollowUpsCommand;
 use Wurk\Crm\Console\LinkExistingCommand;
 use Wurk\Crm\Contracts\Audiences;
@@ -17,6 +18,7 @@ use Wurk\Crm\Contracts\LeadBook;
 use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Crm\Contracts\Takings;
+use Wurk\Crm\Models\Contact;
 use Wurk\Crm\Reports\CustomersSection;
 use Wurk\Crm\Reports\LeadsSection;
 use Wurk\Crm\Support\Contacts;
@@ -24,7 +26,9 @@ use Wurk\Crm\Support\Leads;
 use Wurk\Crm\Support\MarketingAudiences;
 use Wurk\Crm\Support\SignedCustomerIdentity;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\CannotRestore;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -44,6 +48,27 @@ final class CrmServiceProvider extends ModuleServiceProvider
     public function boot(): void
     {
         parent::boot();
+        // Recently deleted (16.6c): customers — after 30 days their details are erased, as for a customer's own request.
+        $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('customers', 'Customers', 'contacts.manage',
+            fn (\DateTimeInterface $since) => Contact::onlyTrashed()->whereNull('erased_at')->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()
+                ->map(fn (Contact $c) => ['id' => $c->id, 'name' => $c->name, 'deleted_at' => $c->deleted_at ?? now()])->all(),
+            function (string $id): string {
+                $c = Contact::onlyTrashed()->whereNull('erased_at')->whereKey($id)->first() ?? throw new CannotRestore('That customer isn’t in Recently deleted any more.');
+                $c->restore();
+                $this->app->make(AuditLog::class)->record('contacts.restored', 'contact', $c->id);
+
+                return "{$c->name} is back in your customers, with their history.";
+            },
+            function (\DateTimeInterface $before): int {
+                $ids = Contact::onlyTrashed()->whereNull('erased_at')->where('deleted_at', '<', $before)->pluck('id')->all();
+                foreach ($ids as $id) {
+                    $this->app->make(Contacts::class)->erase((string) $id);
+                }
+                Contact::onlyTrashed()->whereIn('id', $ids)->update(['erased_at' => now()]);
+
+                return count($ids);
+            },
+        ));
         // Your data (16.6): what this module keeps, for the full export.
         $this->callAfterResolving(DataExports::class, function (DataExports $x): void {
             $rows = fn (string $table, string $order) => fn () => DB::connection(app(TenantContext::class)->connectionName())->table($table)

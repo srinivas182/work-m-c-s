@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 16.6c (deleted customers, cancelled bookings)
+- **Customers can be deleted** (contact page, `contacts.manage`): hidden everywhere and **never in a campaign** while deleted; restorable from Recently deleted for 30 days, with their history. After that their details are **erased** exactly as for a customer's own request (name, phone, email, notes, consent; what they wrote in forms and chats) — once.
+- **Cancelled bookings can be put back** from Recently deleted for 30 days while they're still ahead and **their time is still free** for the same person; the customer is told as for a new booking. Not for bookings with a deposit (refunded when cancelled) or online meetings (their link was removed) — the reason is shown. A cancelled booking stays in the history after 30 days.
+
 ### Added — Sprint 16.6b (recently deleted)
 - **Settings → Recently deleted**: what was deleted in the last 30 days, with **Restore**; each kind shown only to people who manage it. After 30 days it's removed for good (nightly).
 - **Products** (with their options and stock) and **shop categories** (with the products that were in them) now go to Recently deleted instead of being deleted for good; their web addresses stay reserved meanwhile.
