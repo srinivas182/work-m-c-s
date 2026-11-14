@@ -16,10 +16,12 @@ use Wurk\Credits\Contracts\UsageHistory;
 use Wurk\Credits\Events\LowCreditBalance;
 use Wurk\Credits\Listeners\GrantFirstAllowance;
 use Wurk\Credits\Metrics\UsageSection;
+use Wurk\Credits\Support\CreditsSignal;
 use Wurk\Credits\Support\EloquentRateCard;
 use Wurk\Credits\Support\RolledUpUsage;
 use Wurk\Credits\Support\Wallet;
 use Wurk\Plans\Events\SubscriptionChanged;
+use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
@@ -58,6 +60,7 @@ final class CreditsServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->callAfterResolving(HealthSignals::class, fn (HealthSignals $s) => $s->register('credits', fn (string $t) => $this->app->make(CreditsSignal::class)($t))); // business health (16.5)
         // Admin → Metrics → Credits used (Sprint 15.4b), from a nightly roll-up of each business's ledger.
         if ($this->app->runningInConsole()) {
             $this->commands([RollupUsageCommand::class]);

@@ -10,12 +10,14 @@ use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\AudienceSegments;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DashboardTiles;
+use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Contracts\SupportSessions;
 use Wurk\Platform\Modules\ModuleRegistry;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\AssistantRegistry;
 use Wurk\Platform\Support\AudienceRegistry;
+use Wurk\Platform\Support\HealthRegistry;
 use Wurk\Platform\Support\MetricsRegistry;
 use Wurk\Platform\Support\NoSupportSessions;
 use Wurk\Platform\Support\ReportRegistry;
@@ -34,6 +36,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(PlatformMetrics::class, MetricsRegistry::class);
         $this->app->singleton(AudienceSegments::class, AudienceRegistry::class);
         $this->app->singleton(AssistantTools::class, AssistantRegistry::class);
+        $this->app->singleton(HealthSignals::class, HealthRegistry::class);
         $this->app->bind(SupportSessions::class, NoSupportSessions::class); // the Support module answers for real
 
         $this->app->singleton(

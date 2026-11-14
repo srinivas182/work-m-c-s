@@ -60,6 +60,7 @@
             "Wurk\\Security\\": "modules/Security/src/",
             "Wurk\\Shop\\": "modules/Shop/src/",
             "Wurk\\Shipping\\": "modules/Shipping/src/",
+            "Wurk\\Success\\": "modules/Success/src/",
             "Wurk\\Support\\": "modules/Support/src/",
             "Wurk\\Team\\": "modules/Team/src/",
             "Wurk\\Tenancy\\": "modules/Tenancy/src/",

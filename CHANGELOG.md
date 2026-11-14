@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 16.5 (business health)
+- **Admin → Business health** (`health.view`; Support and Finance roles): every business scored **nightly** (0–100: healthy 80+, watch 50–79, at risk below 50) from what each part of WURK sees, each with **a plain reason and a suggested next step** — e.g. "No one has signed in for 34 days → Call the owner". Signals: no sign-ins (or never), failed payment / suspended / trial ending, website not published a week in, out of credits while using them, support tickets waiting past target / rated "not good" / many this month, and server errors.
+- **MRR at risk** by grade; "needs attention" first, sorted by MRR, lowest score, biggest drop or name; filter by grade, package or name; **CSV export**; the score's trend since the last run.
+- **Weekly digest** (Mondays) to WURK's success team: newly at risk this week, then the most MRR at risk — with what to do. Address set on the page.
+- Server errors are now counted per business per day (no details; the logs keep those).
+- Platform: `HealthSignals` registry — each module contributes its own signals; one failing never hides the others. SSL/DNS for custom domains joins in Sprint 17.
+
 ### Added — Sprint 16.4 (consent-based support access)
 - **WURK asks, the business decides**: from a ticket, WURK support asks for view-only or full access with a reason; the owners are emailed and see a banner. **Support access** (Settings; `support.access`) shows the request: **view-only by default** or full, for **15 minutes to 2 hours**; approve or decline.
 - **While WURK is in**: a banner on every screen for both sides (whose back office, which level, until when); **view-only refuses every change**; full access still **never** touches payouts, bank and payment details, billing and credits, the team and roles, security settings or health records; WURK staff can't see or decide on their own access.

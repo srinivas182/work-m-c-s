@@ -24,7 +24,9 @@ use Wurk\Plans\Support\EloquentCatalog;
 use Wurk\Plans\Support\EntitlementService;
 use Wurk\Plans\Support\MrrSnapshots;
 use Wurk\Plans\Support\PackageSeatPolicy;
+use Wurk\Plans\Support\PaymentSignal;
 use Wurk\Plans\Support\StaffMeter;
+use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
@@ -64,6 +66,7 @@ final class PlansServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->callAfterResolving(HealthSignals::class, fn (HealthSignals $s) => $s->register('plans', fn (string $t) => $this->app->make(PaymentSignal::class)($t))); // business health (16.5)
         // WURK's SaaS metrics (Sprint 15.4a): the daily subscription snapshot, and Admin → Metrics → Subscriptions.
         if ($this->app->runningInConsole()) {
             $this->commands([SnapshotMrrCommand::class]);
