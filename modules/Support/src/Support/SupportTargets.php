@@ -31,6 +31,12 @@ final readonly class SupportTargets
         return array_replace_recursive(self::DEFAULTS, (array) $this->settings->get('support', []));
     }
 
+    /** @param array<string, mixed> $settings */
+    public function save(array $settings, ?string $by): void
+    {
+        $this->settings->set('support', $settings, $by);
+    }
+
     /** @return array{hours: int, package_key: string|null} */
     public function forTenant(string $tenantId): array
     {

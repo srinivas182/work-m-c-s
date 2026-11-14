@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -178,4 +179,74 @@ it('puts "Contact support" in the back office, linked from help', function () {
 
 it('leaves "Contact support" out of the menu on pages outside a business (no business to link to)', function () {
     expect($this->actingAs($this->owner)->get($this->app('/'))->status())->toBeLessThan(500);
+});
+
+it('assigns tickets to the support team — emailing them — and filters the inbox: mine, unassigned, late, priority', function () {
+    ($this->open)(null, ['subject' => 'First']);
+    ($this->open)(null, ['subject' => 'Second']);
+    $finance = $this->staffWithRole('finance', 'money@wurk.co.za');
+    $this->actingAs($this->agent)->post($this->inbox.'/1001/assign', ['assignee_id' => $finance->id])->assertSessionHasErrors(['assignee_id' => 'Choose someone on the support team.']);
+
+    $colleague = $this->staffWithRole('support', 'lindi@wurk.co.za');
+    $this->actingAs($this->agent)->post($this->inbox.'/1001/assign', ['assignee_id' => $colleague->id])->assertSessionHas('status', 'Assigned.');
+    Mail::assertSent(TicketMail::class, fn (TicketMail $m) => $m->hasTo('lindi@wurk.co.za') && $m->subjectLine === 'Assigned to you: #1001 First');
+    $this->actingAs($this->agent)->post($this->inbox.'/1002/priority', ['priority' => 'urgent'])->assertSessionHas('status', 'Priority: Urgent.');
+    SupportTicket::query()->where('number', 1001)->update(['first_response_due_at' => now()->subMinute()]);
+
+    $this->actingAs($this->agent)->get($this->inbox)->assertInertia(fn (Assert $p) => $p->where('tickets.0.number', 1002)->where('tickets.0.priority', 'urgent') // urgent first
+        ->where('tickets.1.assignee', 'Thandi Mokoena')->where('late', 1));
+    $this->actingAs($colleague)->get($this->inbox.'?view=mine')->assertInertia(fn (Assert $p) => $p->has('tickets', 1)->where('tickets.0.number', 1001));
+    $this->actingAs($this->agent)->get($this->inbox.'?view=unassigned')->assertInertia(fn (Assert $p) => $p->has('tickets', 1)->where('tickets.0.number', 1002));
+    $this->actingAs($this->agent)->get($this->inbox.'?view=late')->assertInertia(fn (Assert $p) => $p->has('tickets', 1)->where('tickets.0.number', 1001));
+    $this->actingAs($this->agent)->get($this->inbox.'?priority=urgent')->assertInertia(fn (Assert $p) => $p->has('tickets', 1));
+
+    // The business replies: the inbox and the assignee hear about it.
+    $this->actingAs($this->owner)->post($this->base.'/1001/reply', ['body' => 'Any news?']);
+    Mail::assertSent(TicketMail::class, fn (TicketMail $m) => $m->hasTo('lindi@wurk.co.za') && $m->hasTo('support@wurk.co.za') && str_starts_with($m->subjectLine, 'Reply on #1001'));
+});
+
+it('keeps internal notes inside WURK — never shown to or emailed to the business', function () {
+    ($this->open)();
+    Mail::fake();
+    $this->actingAs($this->agent)->post($this->inbox.'/1001/note', ['body' => 'Their Yoco key looks expired.'])->assertSessionHas('status', 'Note added (only WURK sees it).');
+    Mail::assertNothingSent();
+    $this->actingAs($this->agent)->get($this->inbox.'/1001')->assertInertia(fn (Assert $p) => $p->where('messages.1.internal', true));
+    $this->actingAs($this->owner)->get($this->base.'/1001')->assertInertia(fn (Assert $p) => $p->has('messages', 1));
+    expect(SupportTicket::query()->value('first_responded_at'))->toBeNull(); // a note isn't a reply
+});
+
+it('offers canned replies (most used first) and an AI-suggested reply from the help centre', function () {
+    ($this->open)();
+    $settings = $this->admin('/support');
+    $this->actingAs($this->agent)->post($settings.'/canned', ['title' => 'Reconnect Yoco', 'body' => 'Hi {name}, please reconnect Yoco for {business}.'])->assertSessionHas('status', 'Canned reply saved.');
+    $this->actingAs($this->agent)->post($settings.'/canned', ['title' => 'Reconnect Yoco', 'body' => 'x'])->assertSessionHasErrors(['title' => 'You already have a canned reply with that title.']);
+    $this->actingAs($this->agent)->post($settings.'/canned', ['title' => 'Thanks', 'body' => 'Thanks!']);
+    $id = (string) DB::table('support_canned_replies')->where('title', 'Reconnect Yoco')->value('id');
+    $this->actingAs($this->agent)->post($this->inbox.'/1001/reply', ['body' => 'Hi Thandi, please reconnect Yoco for Glow Salon.', 'canned_id' => $id]);
+    $this->actingAs($this->agent)->get($this->inbox.'/1001')->assertInertia(fn (Assert $p) => $p->where('canned.0.title', 'Reconnect Yoco')->where('team.0.name', 'Thandi Mokoena'));
+
+    $cat = HelpCategory::query()->create(['name' => 'Payments', 'slug' => 'payments', 'position' => 1]);
+    HelpArticle::query()->create(['category_id' => $cat->id, 'title' => 'Card payments not working', 'slug' => 'card-payments', 'summary' => null,
+        'body' => 'Reconnect Yoco in Settings → Payments.', 'status' => 'published', 'screens' => []]);
+    SimulatedDriver::$nextAnswer = (string) json_encode(['answer' => "Hi Thandi,\n\nPlease reconnect Yoco.\n\nThe WURK team", 'articles' => ['card-payments'], 'covered' => true]);
+    $this->actingAs($this->agent)->postJson($this->inbox.'/1001/suggest')->assertOk()
+        ->assertJson(['answer' => "Hi Thandi,\n\nPlease reconnect Yoco.\n\nThe WURK team", 'sources' => [['title' => 'Card payments not working']]]);
+    SimulatedDriver::$nextAnswer = (string) json_encode(['answer' => '', 'covered' => false]);
+    $this->actingAs($this->agent)->postJson($this->inbox.'/1001/suggest')->assertOk()->assertJson(['answer' => null, 'message' => 'The help centre doesn’t cover this one — worth an article?']);
+
+    $this->actingAs($this->agent)->delete($settings.'/canned/'.$id)->assertSessionHas('status', 'Canned reply deleted.');
+    expect(DB::table('support_canned_replies')->count())->toBe(1);
+});
+
+it('lets WURK change the targets and business hours — for new tickets only', function () {
+    ($this->open)();
+    $page = $this->admin('/support/settings');
+    $this->actingAs($this->agent)->get($page)->assertInertia(fn (Assert $p) => $p->component('Support::Admin/Settings')->where('settings.targets.growth', 8));
+    $valid = ['targets' => ['starter' => 24, 'growth' => 6, 'pro' => 4], 'managed' => 2, 'other' => 24, 'business_hours' => ['start' => 8, 'end' => 17, 'days' => [1, 2, 3, 4, 5]], 'inbox_email' => 'desk@wurk.co.za'];
+    $this->actingAs($this->agent)->put($page, [...$valid, 'business_hours' => ['start' => 17, 'end' => 9, 'days' => [1]]])->assertSessionHasErrors(['business_hours.end' => 'Closing must be after opening.']);
+    $this->actingAs($this->agent)->put($page, $valid)->assertSessionHasNoErrors();
+
+    ($this->open)(null, ['subject' => 'After the change']);
+    expect(SupportTicket::query()->orderBy('number')->pluck('target_hours')->all())->toBe([8, 6]);
+    Mail::assertSent(TicketMail::class, fn (TicketMail $m) => $m->hasTo('desk@wurk.co.za') && str_contains($m->subjectLine, 'After the change'));
 });

@@ -1,4 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import {
   Badge,
   Button,
@@ -24,6 +25,8 @@ interface Props {
     subject: string;
     status: string;
     statuses: Record<string, string>;
+    priority: string;
+    assignee_id: string | null;
     business: string;
     handle: string | null;
     package: string | null;
@@ -39,15 +42,53 @@ interface Props {
     opener: { name: string; email: string | null; phone: string | null };
   };
   messages: ThreadMessage[];
+  team: { id: string; name: string }[];
+  priorities: Record<string, string>;
+  canned: { id: string; title: string; body: string }[];
+}
+
+function csrf(): string {
+  return decodeURIComponent(document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/)?.[1] ?? '');
 }
 
 const when = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
-/** A ticket in WURK's inbox (Sprint 16.3): the business's context, the conversation, reply or solve. */
-export default function Ticket({ ticket, messages }: Props) {
+/**
+ * A ticket in WURK's inbox (Sprint 16.3): the business's context, the conversation; assign, priority, internal notes;
+ * reply from a canned reply or an AI-suggested draft (checked and edited first), or solve.
+ */
+export default function Ticket({ ticket, messages, team, priorities, canned }: Props) {
   const base = window.location.pathname.replace(/\/$/, '');
   const inbox = base.replace(/\/\d+$/, '');
-  const reply = useForm<{ body: string; solve: boolean }>({ body: '', solve: false });
+  const reply = useForm<{ body: string; solve: boolean; canned_id: string | null }>({
+    body: '',
+    solve: false,
+    canned_id: null,
+  });
+  const note = useForm({ body: '' });
+  const [draft, setDraft] = useState<{
+    answer: string | null;
+    sources: { title: string; url: string }[];
+    message?: string;
+  } | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
+  const firstName = ticket.opener.name.split(' ')[0] ?? '';
+  const fill = (text: string) =>
+    text.replaceAll('{name}', firstName).replaceAll('{business}', ticket.business);
+  const suggest = async () => {
+    setSuggesting(true);
+    const r = await fetch(`${base}/suggest`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { Accept: 'application/json', 'X-XSRF-TOKEN': csrf() },
+    }).catch(() => null);
+    setSuggesting(false);
+    setDraft(
+      r
+        ? ((await r.json()) as typeof draft)
+        : { answer: null, sources: [], message: 'Couldn’t reach WURK AI.' },
+    );
+  };
   const send = (solve: boolean) => {
     reply.transform((d) => ({ ...d, solve }));
     reply.post(`${base}/reply`, { preserveScroll: true, onSuccess: () => reply.reset() });
@@ -80,6 +121,85 @@ export default function Ticket({ ticket, messages }: Props) {
                   send(false);
                 }}
               >
+                <div className="flex flex-wrap items-end gap-2">
+                  {canned.length > 0 && (
+                    <Select
+                      value=""
+                      onValueChange={(id) => {
+                        const c = canned.find((x) => x.id === id);
+                        if (c) {
+                          reply.setData({ ...reply.data, body: fill(c.body), canned_id: c.id });
+                        }
+                      }}
+                    >
+                      <SelectTrigger aria-label="Use a canned reply" className="w-56">
+                        <SelectValue placeholder="Use a canned reply" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {canned.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    loading={suggesting}
+                    onClick={() => void suggest()}
+                  >
+                    Suggest a reply
+                  </Button>
+                </div>
+                {draft && (
+                  <div
+                    className="border-border grid gap-2 rounded-lg border p-3 text-sm"
+                    aria-label="Suggested reply"
+                  >
+                    {draft.answer ? (
+                      <>
+                        <p className="whitespace-pre-line">{draft.answer}</p>
+                        {draft.sources.length > 0 && (
+                          <p className="text-fg-muted">
+                            From:{' '}
+                            {draft.sources.map((src, i) => (
+                              <span key={src.url}>
+                                {i > 0 && ', '}
+                                <a
+                                  className="underline"
+                                  href={src.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {src.title}
+                                </a>
+                              </span>
+                            ))}
+                          </p>
+                        )}
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="justify-self-start"
+                          onClick={() => {
+                            reply.setData({
+                              ...reply.data,
+                              body: draft.answer ?? '',
+                              canned_id: null,
+                            });
+                            setDraft(null);
+                          }}
+                        >
+                          Use this draft
+                        </Button>
+                      </>
+                    ) : (
+                      <p className="text-fg-muted">{draft.message ?? 'No suggestion.'}</p>
+                    )}
+                  </div>
+                )}
                 <Field label="Reply (emailed to the business)" error={reply.errors.body}>
                   <Textarea
                     rows={6}
@@ -103,6 +223,40 @@ export default function Ticket({ ticket, messages }: Props) {
               </form>
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Internal note</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form
+                aria-label="Internal note"
+                className="grid gap-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  note.post(`${base}/note`, {
+                    preserveScroll: true,
+                    onSuccess: () => note.reset(),
+                  });
+                }}
+              >
+                <Field label="Note (only WURK sees it)" error={note.errors.body}>
+                  <Textarea
+                    rows={3}
+                    value={note.data.body}
+                    onChange={(e) => note.setData('body', e.target.value)}
+                  />
+                </Field>
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  className="justify-self-start"
+                  loading={note.processing}
+                >
+                  Add note
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
         <aside className="grid content-start gap-4 text-sm" aria-label="Ticket details">
           <Card>
@@ -122,6 +276,45 @@ export default function Ticket({ ticket, messages }: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(ticket.statuses).map(([k, l]) => (
+                    <SelectItem key={k} value={k}>
+                      {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={ticket.assignee_id ?? 'nobody'}
+                onValueChange={(v) =>
+                  router.post(
+                    `${base}/assign`,
+                    { assignee_id: v === 'nobody' ? null : v },
+                    { preserveScroll: true },
+                  )
+                }
+              >
+                <SelectTrigger aria-label="Assigned to">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nobody">Unassigned</SelectItem>
+                  {team.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={ticket.priority}
+                onValueChange={(v) =>
+                  router.post(`${base}/priority`, { priority: v }, { preserveScroll: true })
+                }
+              >
+                <SelectTrigger aria-label="Priority">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(priorities).map(([k, l]) => (
                     <SelectItem key={k} value={k}>
                       {l}
                     </SelectItem>
