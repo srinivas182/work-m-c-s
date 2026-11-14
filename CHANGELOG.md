@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 16.3a (support tickets)
+- **Contact support** (every back office: Settings menu, "?" help, Ask WURK): **help first** — matching articles and an answer from them (free) — then the ticket. It carries **the page, browser and last error** automatically (shown, and removable) plus up to 3 **screenshots**, re-encoded on upload so nothing hidden survives, and kept private.
+- **Your tickets**: the conversation, replies (reopen a solved ticket by replying), **"How did we do?"** when solved. Everyone sees the tickets they opened; owners (`support.tickets`) see all of the business's.
+- **Admin → Support inbox** (`support.manage`, given to the Support role): every business's tickets, soonest due first; the business, package, page, browser and last error beside the conversation; reply, or reply and solve; status; late first replies flagged.
+- **First-reply targets (decision B)**: Starter 24, Growth 8, Pro 4, managed 2 hours — in business hours (weekdays 08:00–17:00 SAST); shown to the business.
+- **Emails both ways**: new tickets and business replies to WURK's support inbox (`WURK_SUPPORT_EMAIL`); WURK's replies to the person who opened the ticket.
+- Ai: `HelpAnswers` contract (answers from the help centre only, with sources; also for 16.3b's suggested replies). Plans: subscriptions include the package type.
+
 ### Added — Sprint 16.2 ("Ask WURK" assistant)
 - **"Ask WURK"** (✨ in every business back-office header): ask how to do something — answered from the help centre, with the articles linked — or ask about your own figures ("how many bookings tomorrow?", "best seller this month?"), read-only from the reports you may see.
 - **Changes on request, confirmed first**: "add Saturday 9–1 for Thandi", "create a 10% December coupon", "draft a win-back email" — shows exactly what will change; nothing happens until you confirm (within 30 minutes); checked like the screen itself; your role and package decide what it can do; logged in the audit trail; **Undo** while it still can be (unused coupon, unchanged hours, unsent draft). Campaign drafts are never sent by the assistant.

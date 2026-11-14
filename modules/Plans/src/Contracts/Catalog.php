@@ -24,9 +24,9 @@ interface Catalog
     public function subscribe(string $tenantId, string $packageId, string $period, bool $allowTrial): array;
 
     /**
-     * A business's subscription with the price of one billing period (cents, excl. VAT).
+     * A business's subscription (package type: self_managed | managed) with the price of one billing period (cents, excl. VAT).
      *
-     * @return array{package_id: string, package: string, package_key: string, version: int, status: string, period: string, period_cents: int, monthly_credits: int, trial_ends_at: string|null, current_period_start: string|null, current_period_end: string|null, past_due_since: string|null, pending: array{package: string, period: string}|null}|null
+     * @return array{package_id: string, package: string, package_key: string, package_type: string, version: int, status: string, period: string, period_cents: int, monthly_credits: int, trial_ends_at: string|null, current_period_start: string|null, current_period_end: string|null, past_due_since: string|null, pending: array{package: string, period: string}|null}|null
      */
     public function subscriptionOf(string $tenantId): ?array;
 
