@@ -82,6 +82,29 @@ final readonly class Tickets
         $this->audit->record('support.status_changed', 'support_ticket', $ticket->id, ['number' => $ticket->number, 'status' => $status, 'by' => $staffId], ['platform' => true]);
     }
 
+    /** Give the ticket to someone on WURK's support team (or nobody); they're emailed. */
+    public function assign(SupportTicket $ticket, ?string $staffId, string $by): void
+    {
+        $ticket->update(['assignee_id' => $staffId]);
+        $this->audit->record('support.assigned', 'support_ticket', $ticket->id, ['number' => $ticket->number, 'to' => $staffId, 'by' => $by], ['platform' => true]);
+        $email = $staffId === null || $staffId === $by ? null : ($this->people->contacts([$staffId])[$staffId]['email'] ?? null);
+        if ($email !== null) {
+            Mail::to($email)->send(new TicketMail("Assigned to you: {$ticket->reference()} {$ticket->subject}", ["From {$this->business($ticket)}."], route('admin.support.show', ['number' => $ticket->number])));
+        }
+    }
+
+    public function setPriority(SupportTicket $ticket, string $priority, string $by): void
+    {
+        $ticket->update(['priority' => $priority]);
+        $this->audit->record('support.priority_changed', 'support_ticket', $ticket->id, ['number' => $ticket->number, 'priority' => $priority, 'by' => $by], ['platform' => true]);
+    }
+
+    /** A note only WURK sees — never emailed, never shown to the business. */
+    public function note(SupportTicket $ticket, string $staffId, string $body): void
+    {
+        SupportMessage::query()->create(['ticket_id' => $ticket->id, 'author_type' => 'staff', 'author_id' => $staffId, 'body' => trim($body), 'internal' => true, 'created_at' => now()]);
+    }
+
     public function rate(SupportTicket $ticket, string $rating, ?string $comment): void
     {
         $ticket->update(['rating' => $rating, 'rating_comment' => $this->clip($comment, 500)]);
@@ -102,8 +125,12 @@ final readonly class Tickets
 
     private function tellWurk(SupportTicket $ticket, string $subject, string $body): void
     {
-        $to = $this->targets->inboxEmail();
-        if ($to !== null) {
+        // The support inbox, and whoever the ticket is assigned to.
+        $to = array_values(array_unique(array_filter([
+            $this->targets->inboxEmail(),
+            $ticket->assignee_id === null ? null : ($this->people->contacts([$ticket->assignee_id])[$ticket->assignee_id]['email'] ?? null),
+        ])));
+        if ($to !== []) {
             Mail::to($to)->send(new TicketMail($subject, [Str::limit($body, 2000), '', 'Reply in the support inbox:'], route('admin.support.show', ['number' => $ticket->number])));
         }
     }

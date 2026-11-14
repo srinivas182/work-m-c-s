@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 16.3b (support inbox)
+- **Assign** tickets to anyone on WURK's support team (they're emailed, and hear about the business's replies); **priority** (urgent first); views: **mine, unassigned, first reply late, due within an hour**, and by priority; a banner when tickets are past target.
+- **Internal notes** — only WURK sees them; never emailed or shown to the business.
+- **Canned replies** with `{name}` and `{business}` filled in; most used first.
+- **Suggest a reply**: a draft from the help centre with the articles it used, for staff to check and edit — or a nudge to write the missing article.
+- **Admin → Support inbox → Targets and canned replies**: first-reply hours per package, managed and others; business hours and days; the inbox email. New tickets use them; open ones keep theirs.
+
 ### Added — Sprint 16.3a (support tickets)
 - **Contact support** (every back office: Settings menu, "?" help, Ask WURK): **help first** — matching articles and an answer from them (free) — then the ticket. It carries **the page, browser and last error** automatically (shown, and removable) plus up to 3 **screenshots**, re-encoded on upload so nothing hidden survives, and kept private.
 - **Your tickets**: the conversation, replies (reopen a solved ticket by replying), **"How did we do?"** when solved. Everyone sees the tickets they opened; owners (`support.tickets`) see all of the business's.

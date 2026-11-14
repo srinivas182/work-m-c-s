@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Support\Http\Controllers\Admin\InboxController;
+use Wurk\Support\Http\Controllers\Admin\SupportSettingsController;
 use Wurk\Support\Http\Controllers\TicketsController;
 
 // "Contact support" in every business's back office (16.3).
@@ -23,7 +24,16 @@ Route::tenant(function (): void {
 // WURK's support inbox.
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff', 'permission:support.manage'])->prefix('support')->name('admin.support')->group(function (): void {
     Route::get('/', [InboxController::class, 'index']);
+    Route::get('/settings', [SupportSettingsController::class, 'show'])->name('.settings');
+    Route::put('/settings', [SupportSettingsController::class, 'update'])->name('.settings.update');
+    Route::post('/canned', [SupportSettingsController::class, 'saveCanned'])->name('.canned.store');
+    Route::post('/canned/{reply}', [SupportSettingsController::class, 'saveCanned'])->name('.canned.update');
+    Route::delete('/canned/{reply}', [SupportSettingsController::class, 'deleteCanned'])->name('.canned.delete');
     Route::get('/{number}', [InboxController::class, 'show'])->whereNumber('number')->name('.show');
+    Route::post('/{number}/assign', [InboxController::class, 'assign'])->whereNumber('number')->name('.assign');
+    Route::post('/{number}/priority', [InboxController::class, 'priority'])->whereNumber('number')->name('.priority');
+    Route::post('/{number}/note', [InboxController::class, 'note'])->whereNumber('number')->name('.note');
+    Route::post('/{number}/suggest', [InboxController::class, 'suggest'])->whereNumber('number')->middleware('throttle:20,1,support-suggest-reply')->name('.suggest');
     Route::post('/{number}/reply', [InboxController::class, 'reply'])->whereNumber('number')->name('.reply');
     Route::post('/{number}/status', [InboxController::class, 'status'])->whereNumber('number')->name('.status');
     Route::get('/{number}/files/{file}', [InboxController::class, 'file'])->whereNumber('number')->name('.file');
