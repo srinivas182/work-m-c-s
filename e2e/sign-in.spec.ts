@@ -76,6 +76,14 @@ test('an owner signs in and lands in their business, then reviews security and s
   await expect(page.getByText('This device')).toBeVisible();
   await expectNoSeriousA11yIssues(page);
 
+  // "Confirm it's you" (Sprint 18.2b): the password, or a code.
+  await page.goto('/account/confirm?to=/glow-salon');
+  await expect(page.getByRole('heading', { level: 1, name: 'Confirm it’s you' })).toBeVisible();
+  await expectNoSeriousA11yIssues(page);
+  await page.getByLabel(/^Your password/).fill('sunny days in durban');
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click();
+  await expect(page).toHaveURL(/\/glow-salon$/);
+
   await page.getByRole('button', { name: 'Account menu' }).click();
   await page.getByRole('menuitem', { name: 'Sign out' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Sign in to WURK' })).toBeVisible();

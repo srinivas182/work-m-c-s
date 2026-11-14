@@ -28,6 +28,7 @@ uses(InteractsWithIdentity::class, InteractsWithShards::class);
 
 beforeEach(function () {
     Mail::fake();
+    $this->withSession(['auth.confirmed_at' => now()->getTimestamp()]); // "confirm it's you" (18.2b) is tested in Identity
     Storage::fake('records');
     Storage::fake((string) config('filesystems.default'));
     Storage::fake((string) config('wurk.site_assets_disk'));

@@ -24,7 +24,7 @@ Status: ✅ met and tested · 🟡 met, partly tested or manual · ⏳ gap, sche
 |---|---|---|---|
 | 2.1 Passwords | Minimum 10 characters, up to 128, all characters allowed, no composition rules, common passwords refused | `PasswordPolicy`, `NotCommonPassword` + tests | ✅ |
 | 2.2 Anti-automation | Password lockout after 5 attempts for 15 minutes; one-time codes rate-limited per destination (5/hour) and per IP (20/hour); every public write route throttled | `SignInController`, `OtpManager`, **`tests/Architecture/RateLimitsTest.php`** | ✅ |
-| 2.2.3 Notify on security events | Not yet: no email on a sign-in from a new device or a password/MFA change | — | ⏳ |
+| 2.2.3 Notify on security events | Email on a sign-in from a device the person hasn't used before (browser and system, partial IP), a password change, and two-step sign-in turned on or off — with what to do if it wasn't them. Phone-only accounts see devices under Account → Security (no paid SMS per sign-in) | `SendSecurityNotice`, `SecurityNoticesTest` | ✅ |
 | 2.5 Credential recovery | Reset by one-time link/code, expires, single use; no hints or secret questions | `PasswordResetController` + tests | ✅ |
 | 2.7 Out-of-band verifiers | One-time codes: 6 digits, 5 minutes, 5 attempts, hashed at rest, single use | `OtpManager` + tests | ✅ |
 | 2.8 One-time passwords (TOTP) | TOTP for WURK staff (required) and business teams (optional or required by the owner), with recovery codes | `Mfa\Totp`, `RecoveryCodes`, `RequireTeamMfa` + tests | ✅ |
@@ -37,7 +37,7 @@ Status: ✅ met and tested · 🟡 met, partly tested or manual · ⏳ gap, sche
 | 3.2 Session binding | New session ID on sign-in and sign-out; tokens from Laravel's CSPRNG | `SignInFlow` (`regenerate()`), Identity tests | ✅ |
 | 3.3 Session termination | Idle and absolute limits per surface (admin 30 min idle / 8 h absolute); "sign out other devices"; other sessions revoked when the password changes | `SessionGuardian`, `SessionRegistry`, `AccountController` + tests | ✅ |
 | 3.4 Cookie-based sessions | `HttpOnly`; `Secure` wherever WURK runs on HTTPS (18.1); `SameSite=Lax`; host-only (no `Domain`) so a business's site never shares the back office's session | `config/session.php` | ✅ |
-| 3.7 Re-authentication | The current password is needed to change it; turning the authenticator off needs a current code from it. Not yet before starting a full data export | `AccountController` + tests | ⏳ 18.2b |
+| 3.7 Re-authentication | The current password to change it; a current authenticator code to turn it off; **"Confirm it's you"** (password, or a code to the person's email/phone; valid 15 minutes; a remembered device doesn't count) before a full data export — middleware `confirmed` for any other sensitive action | `ConfirmController`, `RequireRecentConfirmation`, `SecurityNoticesTest` | ✅ |
 
 ## V4 Access control
 
@@ -132,6 +132,5 @@ There is no public API yet (the module system reserves `/api/v1`). Every JSON en
 
 | Gap | Plan |
 |---|---|
-| Email on sign-in from a new device and on password/MFA changes (2.2.3); password or code before a full data export (3.7) | **18.2b** |
 | TLS and HSTS verified on the real load balancer (9.1) | **Sprint 17** |
 | External penetration test (grey-box, CREST-accredited) — no open critical/high | **Sprint 17**, on staging |

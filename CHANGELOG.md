@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Security — Sprint 18.2b (security emails, "Confirm it's you")
+- **"Was this you?" emails**: when an account is signed in to on a device it hasn't used before (browser and system, partial internet address), when the password changes, and when two-step sign-in is turned on or off — with exactly what to do if it wasn't them. Not on the first device, not again on a known one. (People with only a phone number see their devices under Account → Security; no SMS per sign-in.)
+- **"Confirm it's you"** before downloading all of a business's data: the password, or a code sent to the person's email or phone — valid for 15 minutes; signing in with a password or code counts, a remembered device doesn't. Available to every module as the `confirmed` middleware.
+
 ### Security — Sprint 18.2a (isolation sweep — acceptance criterion 7)
 - **Automated isolation test over every route**: two businesses on the same shard (the case where only WURK's scoping keeps them apart); the other business gets a row in **every table** — its shard and its rows in the central database — with every text column marked. Alpha's owner then calls **every back-office route, every method** (≈300 requests), and a visitor calls **every route on Alpha's website address** (bookings, orders, record links, payments, campaign links, the portal) with Bravo's IDs, tokens and references. No response may contain Bravo's data, none of Bravo's rows may change, nothing may crash. New routes are covered automatically. The sweep also proves it would catch a leaky route. Runs on SQLite and MySQL.
 - Static rule: models can't be filled from `$request->all()`, `input()` or `except()` (mass assignment) — CI fails.
