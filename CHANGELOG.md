@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 18.0a (Watchtower: platform monitoring)
+- **Admin → Watchtower**: every server error, browser crash, failed job, failing or missed scheduled task, backed-up queue and failing system check (central database, every shard, cache, file storage) — **grouped into problems** (the same bug across businesses and orders is one problem), worst first, with how often, since which release, which businesses, and the trace.
+- **Emails to HQ**: critical and high problems straight away — **one email per problem**, again only if it comes back after a fix, gets ten times worse or more serious; recoveries are announced; everything else in a **daily report at 08:00 SAST** ("all quiet" when it is). Addresses set in Admin (up to 5).
+- Every email and problem page carries a **fix request** — a self-contained report to paste to engineering. **Personal data is removed** before anything is stored (emails, phone numbers, IDs, quoted values; no request data at all).
+- **Mark fixed in a release** — if it happens again, it's flagged as a regression. Acknowledge, ignore, reopen; quiet problems resolve after 7 days.
+- `/health/heartbeat` for the external uptime checker: 503 when the scheduler stops.
+- New **Engineering** platform role (`watchtower.view`, `watchtower.manage`); Support can view.
+
 ## [0.18.0] — 2026-11-15 — Sprint 16: Self-service and support
 
 Help centre with 30-second videos and "?" on every screen; the "Ask WURK" assistant (answers from help and the business's own figures, changes confirmed first with undo; 50 free questions a month); support tickets with help-first deflection, the page and last error attached, screenshots, WURK's inbox (assign, priority, notes, canned and AI-suggested replies, reply targets by package in business hours) and ratings; consent-based support access (view-only by default, up to 2 hours, sensitive actions always blocked, audited on behalf); business health for WURK's success team (nightly score, reasons and next steps, MRR at risk, weekly digest); "Your data" full export and 30-day "Recently deleted". Release steps: docs/deployment/docker.md (v0.18.0 rows).

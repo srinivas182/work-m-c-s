@@ -67,8 +67,11 @@ FROM base AS runtime
 
 ARG APP_USER=wurk
 ARG APP_UID=10001
+# The commit this image was built from (Watchtower shows it on every problem — Sprint 18.0). The release comes from VERSION.
+ARG WURK_COMMIT=
 
-ENV APP_ENV=production \
+ENV WURK_COMMIT=${WURK_COMMIT} \
+    APP_ENV=production \
     APP_DEBUG=false \
     LOG_CHANNEL=stderr \
     OCTANE_SERVER=frankenphp \

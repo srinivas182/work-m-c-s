@@ -141,4 +141,15 @@ return [
     'demo_days' => 14,
     // Support tickets (Sprint 16.3): WURK's support inbox email — new tickets and replies are sent here.
     'support_email' => env('WURK_SUPPORT_EMAIL', 'support@wurk.co.za'),
+
+    // The running release (Sprint 18.0): set at build time; otherwise the VERSION file at the root.
+    'release' => env('WURK_RELEASE') ?: (is_file(base_path('VERSION')) ? trim((string) file_get_contents(base_path('VERSION'))) : 'dev'),
+    'commit' => env('WURK_COMMIT'),
+
+    // Watchtower (Sprint 18.0): who gets problem reports until HQ sets its own list in Admin → Watchtower.
+    'watchtower' => [
+        'recipients' => array_values(array_filter(array_map('trim', explode(',', (string) env('WATCHTOWER_EMAIL', ''))))),
+        // Token the external uptime checker sends with its webhook (18.0b).
+        'uptime_token' => env('WATCHTOWER_UPTIME_TOKEN'),
+    ],
 ];

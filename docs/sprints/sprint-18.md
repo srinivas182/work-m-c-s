@@ -25,7 +25,7 @@ Sprint 17 builds the production and staging environments. Some hardening only me
 
 ## 18.0 Watchtower — platform monitoring with AI incident reports (added by WURK, 14 Nov 2026, before 18.1)
 
-**Ask:** one AI agent that watches the whole platform — bugs, crashes, downtime — and emails a report to the address HQ sets in Admin (default `srinivas@mayuraconsultancy.com`), written so it can be pasted straight to the engineering team (Claude) to fix.
+**Ask:** one AI agent that watches the whole platform — bugs, crashes, downtime — and emails a report to the address HQ sets in Admin, written so it can be pasted straight to the engineering team (Claude) to fix.
 
 ### What the market leaders do
 
@@ -61,7 +61,7 @@ Uses the `Ai` module (WURK's own key, not businesses' credits); a daily cap; if 
 
 ### Alerts
 
-- **Email to the address set in Admin → Settings → Watchtower** (one or more; default `srinivas@mayuraconsultancy.com`). Critical: immediately. High: immediately, grouped (one email per incident, not per error). Normal: in a **daily digest** (08:00 SAST).
+- **Email to the address set in Admin → Settings → Watchtower** (one or more). Critical: immediately. High: immediately, grouped (one email per incident, not per error). Normal: in a **daily digest** (08:00 SAST).
 - **No floods:** one alert per incident; re-alert only on regression, a 10× spike, or a severity rise. Quiet incidents auto-resolve after 7 days.
 - **Downtime/recovery** emails from the external checker; Watchtower adds a post-incident summary when the platform is back (what failed, for how long).
 - Optional later: WhatsApp/SMS for critical (credits), Slack.
@@ -121,6 +121,7 @@ Incidents list (status: new / acknowledged / fixed in release X / ignored; sever
 
 | Part | PR | Notes |
 |---|---|---|
+| 18.0a Watchtower — capture & alerts | #180 | New central Watchtower module. Grouping key: exception class + first frame in WURK's own code + message with IDs/numbers taken out (browser crashes: message + script line with build hashes removed). Alerts are sent by the every-minute check, not inside the failing request. Recipients are set per deployment (`WATCHTOWER_EMAIL`) and in Admin — no address is built into the code. The fix request is in 18.0a already (without the AI analysis, which 18.0b adds). |
 
 ## Verification (before closing)
 
