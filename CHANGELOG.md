@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 16.4 (consent-based support access)
+- **WURK asks, the business decides**: from a ticket, WURK support asks for view-only or full access with a reason; the owners are emailed and see a banner. **Support access** (Settings; `support.access`) shows the request: **view-only by default** or full, for **15 minutes to 2 hours**; approve or decline.
+- **While WURK is in**: a banner on every screen for both sides (whose back office, which level, until when); **view-only refuses every change**; full access still **never** touches payouts, bank and payment details, billing and credits, the team and roles, security settings or health records; WURK staff can't see or decide on their own access.
+- **Ends at once** when an owner says so, when time runs out, or when WURK is done.
+- **Audited as "WURK staff: name (on behalf of the business)"** — actor type `support`, with the staff member as the impersonator on the business's audit chain.
+- Platform: `SupportSessions` contract (nobody, by default); Access grants WURK staff the business's screens minus the never-list only during an approved session; Identity's workspace check accepts it.
+
 ### Added — Sprint 16.3b (support inbox)
 - **Assign** tickets to anyone on WURK's support team (they're emailed, and hear about the business's replies); **priority** (urgent first); views: **mine, unassigned, first reply late, due within an hour**, and by priority; a banner when tickets are past target.
 - **Internal notes** — only WURK sees them; never emailed or shown to the business.

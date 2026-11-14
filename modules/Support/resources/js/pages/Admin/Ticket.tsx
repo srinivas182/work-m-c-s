@@ -29,6 +29,7 @@ interface Props {
     assignee_id: string | null;
     business: string;
     handle: string | null;
+    app_domain: string;
     package: string | null;
     target_hours: number;
     due: string;
@@ -45,6 +46,12 @@ interface Props {
   team: { id: string; name: string }[];
   priorities: Record<string, string>;
   canned: { id: string; title: string; body: string }[];
+  access: {
+    status: 'requested' | 'active';
+    level: string;
+    ends_at: string | null;
+    mine: boolean;
+  } | null;
 }
 
 function csrf(): string {
@@ -57,7 +64,7 @@ const when = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle
  * A ticket in WURK's inbox (Sprint 16.3): the business's context, the conversation; assign, priority, internal notes;
  * reply from a canned reply or an AI-suggested draft (checked and edited first), or solve.
  */
-export default function Ticket({ ticket, messages, team, priorities, canned }: Props) {
+export default function Ticket({ ticket, messages, team, priorities, canned, access }: Props) {
   const base = window.location.pathname.replace(/\/$/, '');
   const inbox = base.replace(/\/\d+$/, '');
   const reply = useForm<{ body: string; solve: boolean; canned_id: string | null }>({
@@ -66,6 +73,7 @@ export default function Ticket({ ticket, messages, team, priorities, canned }: P
     canned_id: null,
   });
   const note = useForm({ body: '' });
+  const ask = useForm<{ level: string; reason: string }>({ level: 'view', reason: '' });
   const [draft, setDraft] = useState<{
     answer: string | null;
     sources: { title: string; url: string }[];
@@ -259,6 +267,78 @@ export default function Ticket({ ticket, messages, team, priorities, canned }: P
           </Card>
         </div>
         <aside className="grid content-start gap-4 text-sm" aria-label="Ticket details">
+          <Card aria-label="Back-office access">
+            <CardHeader>
+              <CardTitle>Their back office</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              {access?.status === 'active' ? (
+                <>
+                  <p>
+                    {access.level === 'full' ? 'Full' : 'View-only'} access until{' '}
+                    {access.ends_at ? when.format(new Date(access.ends_at)) : '—'}.
+                  </p>
+                  {access.mine && ticket.handle && (
+                    <Button asChild size="sm">
+                      <a
+                        href={`${window.location.protocol}//${ticket.app_domain}/${ticket.handle}`}
+                      >
+                        Open their back office
+                      </a>
+                    </Button>
+                  )}
+                  {access.mine && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() =>
+                        router.post(`${base}/access/end`, {}, { preserveScroll: true })
+                      }
+                    >
+                      I’m done — end access
+                    </Button>
+                  )}
+                </>
+              ) : access?.status === 'requested' ? (
+                <p>
+                  Asked for {access.level === 'full' ? 'full' : 'view-only'} access — waiting for
+                  the business to decide.
+                </p>
+              ) : (
+                <form
+                  aria-label="Ask for access"
+                  className="grid gap-2"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    ask.post(`${base}/access`, {
+                      preserveScroll: true,
+                      onSuccess: () => ask.reset(),
+                    });
+                  }}
+                >
+                  <Select value={ask.data.level} onValueChange={(v) => ask.setData('level', v)}>
+                    <SelectTrigger aria-label="Access to ask for">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="view">View only</SelectItem>
+                      <SelectItem value="full">Full (owner decides)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Field label="Why (shown to the business)" error={ask.errors.reason}>
+                    <Textarea
+                      rows={2}
+                      value={ask.data.reason}
+                      onChange={(e) => ask.setData('reason', e.target.value)}
+                    />
+                  </Field>
+                  <Button type="submit" size="sm" variant="secondary" loading={ask.processing}>
+                    Ask for access
+                  </Button>
+                </form>
+              )}
+            </CardContent>
+          </Card>
           <Card>
             <CardContent className="grid gap-3 pt-6">
               <div className="flex flex-wrap items-center gap-2">
