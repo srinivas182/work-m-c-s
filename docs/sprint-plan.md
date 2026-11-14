@@ -29,7 +29,7 @@
 | 15 | 24 May – 04 Jun | Reports & campaigns | Tenant reports; SaaS metrics; **profit per package, pricing simulator, provider reconciliation, margin alerts**; analytics; campaigns & offers with credit estimates; monthly usage summary; auto top-up | ✅ v0.17.0 |
 | 16 | 07 – 18 Jun | Self-service & support | AI assistant; help centre & short videos per category; consent-based impersonation; tickets; tenant health; backup/restore & export | ✅ v0.18.0 |
 | 17 | 21 Jun – 02 Jul | **Cloud, domains & production infrastructure** *(moved)* | Chosen cloud (AWS or Azure, South African region); custom domains & SSL (Cloudflare for SaaS); wurk.co.za DNS; infrastructure as code; staging & production; monitoring & alerts; backups | |
-| 18 | 05 – 16 Jul | Hardening | Penetration test; load testing at scale; shard rollout rehearsal; DR drill; accessibility; design polish; UAT | |
+| 18 | 05 – 16 Jul | Hardening | Penetration test; load testing at scale; shard rollout rehearsal; DR drill; accessibility; design polish; UAT | 🚧 [spec](sprints/sprint-18.md) |
 
 **Closed beta** from ~19 July 2027 with 20–50 pilot businesses; 2–3 sprints of beta feedback before public launch (~August–September 2027). Sprint dates do not yet allow for South African public holidays (e.g. Good Friday and Family Day 2027); affected sprints will be noted in their specifications.
 
