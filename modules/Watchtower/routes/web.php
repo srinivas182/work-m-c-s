@@ -12,5 +12,6 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
     Route::middleware('permission:watchtower.manage')->group(function (): void {
         Route::put('/settings', [IncidentsController::class, 'settings'])->name('.settings');
         Route::put('/{incident}', [IncidentsController::class, 'update'])->whereUlid('incident')->name('.update');
+        Route::post('/{incident}/analyse', [IncidentsController::class, 'analyse'])->whereUlid('incident')->middleware('throttle:10,1,watchtower-analyse')->name('.analyse');
     });
 });

@@ -44,6 +44,7 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property Carbon|null $resolved_at
  * @property string|null $updated_by
  * @property array<string, mixed>|null $analysis
+ * @property Carbon|null $analysed_on
  */
 final class Incident extends Model implements CentralModel
 {
@@ -66,7 +67,7 @@ final class Incident extends Model implements CentralModel
     protected function casts(): array
     {
         return ['context' => 'array', 'analysis' => 'array', 'ongoing' => 'boolean', 'hour_bucket' => 'datetime', 'first_seen_at' => 'datetime', 'last_seen_at' => 'datetime',
-            'alerted_at' => 'datetime', 'regressed_at' => 'datetime', 'fixed_at' => 'datetime', 'resolved_at' => 'datetime', 'occurrences' => 'integer', 'businesses' => 'integer',
+            'alerted_at' => 'datetime', 'regressed_at' => 'datetime', 'fixed_at' => 'datetime', 'resolved_at' => 'datetime', 'analysed_on' => 'date', 'occurrences' => 'integer', 'businesses' => 'integer',
             'hour_count' => 'integer', 'alerted_occurrences' => 'integer', 'line' => 'integer'];
     }
 

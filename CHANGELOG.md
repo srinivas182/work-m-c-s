@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added — Sprint 18.0b (Watchtower: AI explanations, slow pages, uptime)
+- **WURK's AI explains each problem worth explaining** (high or critical, back after a fix, or a normal one that keeps happening): it reads the error, the trace, the lines of WURK's own code where it happened (from the running release) and earlier problems in the same file, then writes what broke and for whom, the likely cause, a suggested fix with a test, and its confidence. The explanation leads the email and the fix request. It can raise severity, never lower it. In the background, at most 50 a day (`WATCHTOWER_AI_DAILY_CAP`), on WURK's own AI account; **Explain again** on the problem page. High problems wait up to 3 minutes for it; critical ones never wait.
+- **Slow pages**: response times sampled per route per hour; a route where more than 5% of requests take over 300 ms (the PRD's p95 budget), or five take over 2 seconds, becomes a problem; the slowest routes of the last 24 hours are on the Watchtower page.
+- **Uptime**: the external uptime checker's webhook (`/_wurk/uptime/{WATCHTOWER_UPTIME_TOKEN}` — Better Stack, UptimeRobot or plain JSON) records each outage; when it's over, HQ is emailed how long it lasted and **what Watchtower saw meanwhile** (usually the reason). Uptime % over 30 days per monitor.
+
 ### Added — Sprint 18.0a (Watchtower: platform monitoring)
 - **Admin → Watchtower**: every server error, browser crash, failed job, failing or missed scheduled task, backed-up queue and failing system check (central database, every shard, cache, file storage) — **grouped into problems** (the same bug across businesses and orders is one problem), worst first, with how often, since which release, which businesses, and the trace.
 - **Emails to HQ**: critical and high problems straight away — **one email per problem**, again only if it comes back after a fix, gets ten times worse or more serious; recoveries are announced; everything else in a **daily report at 08:00 SAST** ("all quiet" when it is). Addresses set in Admin (up to 5).

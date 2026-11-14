@@ -20,7 +20,9 @@ final class IncidentMail extends Mailable
         'recovered' => 'Recovered',
     ];
 
-    public function __construct(public readonly Incident $incident, public readonly string $reason, public readonly string $fixRequest, public readonly string $link) {}
+    /** @param list<Incident> $during for an outage that's over: what else went wrong meanwhile */
+    public function __construct(public readonly Incident $incident, public readonly string $reason, public readonly string $fixRequest, public readonly string $link,
+        public readonly array $during = [], public readonly ?int $downMinutes = null) {}
 
     public function envelope(): Envelope
     {

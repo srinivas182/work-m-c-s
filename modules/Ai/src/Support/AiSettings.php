@@ -15,7 +15,7 @@ final readonly class AiSettings
 {
     public const PROVIDERS = ['anthropic' => 'Anthropic (Claude)', 'google' => 'Google (Gemini)', 'openai' => 'OpenAI', 'simulated' => 'Simulated (development only)'];
 
-    public const TASKS = ['site_generation' => 'Write a website', 'rewrite' => 'Rewrite a section', 'assistant' => 'Ask WURK (assistant)'];
+    public const TASKS = ['site_generation' => 'Write a website', 'rewrite' => 'Rewrite a section', 'assistant' => 'Ask WURK (assistant)', 'watchtower' => 'Watchtower (explains platform problems)'];
 
     /** Image providers (Google is added once WURK's key lets us verify its API). */
     public const IMAGE_PROVIDERS = ['openai' => 'OpenAI', 'simulated' => 'Simulated (development only)'];
@@ -25,6 +25,8 @@ final readonly class AiSettings
             'site_generation' => ['provider' => 'anthropic', 'model' => 'claude-sonnet-5-5'],
             'rewrite' => ['provider' => 'anthropic', 'model' => 'claude-haiku-5-5'],
             'assistant' => ['provider' => 'anthropic', 'model' => 'claude-haiku-5-5'],
+            // Reading code and traces needs the stronger model; a few calls a day at most (Sprint 18.0b).
+            'watchtower' => ['provider' => 'anthropic', 'model' => 'claude-sonnet-5-5'],
         ],
         'fallback' => [['provider' => 'google', 'model' => 'gemini-3.8-flash'], ['provider' => 'openai', 'model' => 'gpt-6-sol']],
         // US dollars per million tokens (input, output) — from each provider's pricing page; keep current.

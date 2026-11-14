@@ -50,7 +50,25 @@ interface Task {
   last_runtime_ms: number | null;
 }
 
+interface Uptime {
+  monitor: string;
+  uptime_pct: number;
+  down_minutes: number;
+  down_now: boolean;
+}
+
+interface Slow {
+  route: string;
+  samples: number;
+  over_budget_pct: number;
+  over_2s: number;
+  max_ms: number;
+}
+
 interface Props {
+  uptime: Uptime[];
+  slow: Slow[];
+  ai: { enabled: boolean; today: number; cap: number };
   filters: { view: string; severity: string; kind: string };
   views: Record<string, string>;
   severities: Record<string, string>;
@@ -73,6 +91,9 @@ export const at = (s: string | null) =>
 
 /** Admin → Watchtower (Sprint 18.0): every problem on the platform, worst first, and the state of each system. */
 export default function Incidents({
+  uptime,
+  slow,
+  ai,
   filters,
   views,
   severities,
@@ -239,6 +260,65 @@ export default function Incidents({
             )}
           </nav>
         )}
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Uptime (30 days, seen from outside)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {uptime.length === 0 ? (
+                <p className="text-fg-muted text-sm">
+                  No outages reported by the uptime checker — or it isn’t connected yet (Sprint 17).
+                </p>
+              ) : (
+                <ul aria-label="Uptime" className="grid gap-1 text-sm">
+                  {uptime.map((u) => (
+                    <li key={u.monitor} className="flex flex-wrap items-center gap-2">
+                      <Badge
+                        tone={u.down_now ? 'danger' : u.uptime_pct >= 99.9 ? 'success' : 'warning'}
+                        dot
+                      >
+                        {u.down_now ? 'Down now' : `${u.uptime_pct}%`}
+                      </Badge>
+                      <span>{u.monitor}</span>
+                      <span className="text-fg-muted">{u.down_minutes} min down</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Slow pages (last 24 hours)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {slow.length === 0 ? (
+                <p className="text-fg-muted text-sm">
+                  Every page within target: 95% of requests answered in 300 ms.
+                </p>
+              ) : (
+                <ul aria-label="Slow pages" className="grid gap-1 text-sm">
+                  {slow.map((r) => (
+                    <li key={r.route}>
+                      <code>{r.route}</code>{' '}
+                      <span className="text-fg-muted">
+                        {r.over_budget_pct}% over 300 ms · {r.over_2s} over 2 s · slowest{' '}
+                        {r.max_ms.toLocaleString()} ms
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        <p className="text-fg-muted text-sm">
+          {ai.enabled
+            ? `The AI has explained ${ai.today} of up to ${ai.cap} problems today.`
+            : 'The AI explanation is switched off (WATCHTOWER_AI).'}
+        </p>
 
         <Card>
           <CardHeader>

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Wurk\Watchtower\Support;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 use Wurk\Security\Contracts\PlatformSettings;
+use Wurk\Watchtower\Jobs\AnalyseIncident;
 use Wurk\Watchtower\Mail\IncidentMail;
 use Wurk\Watchtower\Mail\WatchtowerDigestMail;
 use Wurk\Watchtower\Models\Incident;
@@ -80,7 +82,7 @@ final readonly class Alerts
             ->limit(200)->get();
         foreach ($candidates as $i) {
             $reason = self::reason($i);
-            if ($reason === null) {
+            if ($reason === null || self::awaitingAnalysis($i)) {
                 continue;
             }
             if ($sent >= self::PER_RUN) {
@@ -93,6 +95,66 @@ final readonly class Alerts
         }
 
         return $sent;
+    }
+
+    /**
+     * Ask the AI to explain problems worth explaining (18.0b) — in the background, a few per minute, within the daily
+     * cap. Returns how many were asked for.
+     */
+    public function requestAnalyses(): int
+    {
+        if (! (bool) config('wurk.watchtower.ai', true)) {
+            return 0;
+        }
+        $asked = 0;
+        $candidates = Incident::query()->whereIn('status', Incident::OPEN)->whereNotIn('kind', ['check', 'queue', 'downtime'])
+            ->where('last_seen_at', '>=', now()->subDay())->whereNull('analysed_on')
+            ->orderByRaw("case severity when 'critical' then 0 when 'high' then 1 else 2 end")->orderByDesc('last_seen_at')->limit(50)->get();
+        $regressed = Incident::query()->whereIn('status', Incident::OPEN)->whereNotNull('regressed_at')->whereNotNull('analysed_on')
+            ->where('last_seen_at', '>=', now()->subDay())->limit(10)->get();
+        foreach ($candidates->concat($regressed) as $i) {
+            $state = (array) $i->analysis;
+            $pending = ($state['status'] ?? null) === 'pending' && ($state['release'] ?? null) === $i->last_release;
+            if ($asked >= 5 || ! Analyst::underCap()) {
+                break;
+            }
+            if ($pending || ! Analyst::worthIt($i)) {
+                continue;
+            }
+            $i->forceFill(['analysis' => ['status' => 'pending', 'release' => $i->last_release, 'at' => now()->toIso8601String()]])->save();
+            AnalyseIncident::dispatch($i->id);
+            $asked++;
+        }
+
+        return $asked;
+    }
+
+    /**
+     * High problems wait up to 3 minutes for the AI's explanation, so the email says what's wrong and how to fix it.
+     * Critical ones never wait.
+     */
+    public static function awaitingAnalysis(Incident $i): bool
+    {
+        $state = (array) $i->analysis;
+        if ($i->severity === 'critical' || ($state['status'] ?? null) !== 'pending') {
+            return false;
+        }
+        $at = is_string($state['at'] ?? null) ? CarbonImmutable::parse($state['at']) : null;
+
+        return $at !== null && $at->greaterThan(now()->subMinutes(3));
+    }
+
+    /**
+     * The outage reported by the uptime checker is over: how long it lasted, and what Watchtower saw meanwhile.
+     *
+     * @param  list<Incident>  $during
+     */
+    public function downtimeOver(Incident $i, CarbonImmutable $from, CarbonImmutable $to, array $during): void
+    {
+        $emails = $this->recipients();
+        if ($emails !== []) {
+            $this->send($emails, new IncidentMail($i, 'recovered', FixRequest::for($i), $this->link($i), $during, max(1, (int) round(($to->getTimestamp() - $from->getTimestamp()) / 60))));
+        }
     }
 
     /** A check or backlog that was emailed about has cleared. */
