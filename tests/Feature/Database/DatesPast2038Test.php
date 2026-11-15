@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\Support\InteractsWithShards;
 use Wurk\Platform\Database\DatesPast2038;
+use Wurk\Platform\Database\DatesPast2038Grammar;
 use Wurk\Tenancy\Sharding\ShardConnections;
 
 uses(InteractsWithShards::class);
@@ -19,6 +22,21 @@ function timestampColumns(string $connection): array
 beforeEach(function () {
     if (DB::connection()->getDriverName() !== 'mysql') {
         $this->markTestSkipped('MySQL only: SQLite has no TIMESTAMP type.');
+    }
+});
+
+it('creates timestamp() columns as DATETIME on every MySQL connection', function () {
+    [$shard] = $this->createShards(1);
+    $connection = app(ShardConnections::class)->register($shard);
+    expect(DB::connection()->getSchemaGrammar())->toBeInstanceOf(DatesPast2038Grammar::class)
+        ->and(DB::connection($connection)->getSchemaGrammar())->toBeInstanceOf(DatesPast2038Grammar::class);
+    Schema::dropIfExists('y2038_made');
+    Schema::create('y2038_made', fn (Blueprint $t) => [$t->id(), $t->timestamps(), $t->softDeletes(), $t->timestamp('at', 6)->useCurrent()]);
+    try {
+        expect(collect(DB::select("select DATA_TYPE as t from information_schema.COLUMNS where TABLE_SCHEMA = database() and TABLE_NAME = 'y2038_made' and COLUMN_NAME <> 'id'"))->pluck('t')->unique()->values()->all())
+            ->toBe(['datetime']);
+    } finally {
+        Schema::dropIfExists('y2038_made');
     }
 });
 
