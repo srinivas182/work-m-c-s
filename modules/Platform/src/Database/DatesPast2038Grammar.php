@@ -13,12 +13,14 @@ use Illuminate\Support\Fluent;
  */
 final class DatesPast2038Grammar extends MySqlGrammar
 {
-    protected function typeTimestamp(Fluent $column)
+    /** @param  Fluent<string, mixed>  $column */
+    protected function typeTimestamp(Fluent $column): string
     {
         return $this->typeDateTime($column);
     }
 
-    protected function typeTimestampTz(Fluent $column)
+    /** @param  Fluent<string, mixed>  $column */
+    protected function typeTimestampTz(Fluent $column): string
     {
         return $this->typeDateTime($column);
     }
