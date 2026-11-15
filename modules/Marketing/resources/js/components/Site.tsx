@@ -25,7 +25,9 @@ export function Site({
   signInUrl,
 }: SiteProps & { title?: string; description: string; children: ReactNode }) {
   return (
-    <div className="min-h-dvh bg-[#F7F7FB] text-[#1B1640]">
+    // Always light (Sprint 18.5a): the marketing design is light-only, so the form fields use the light theme too —
+    // in someone's dark theme, their labels were light grey on this white card.
+    <div data-theme="light" className="min-h-dvh bg-[#F7F7FB] text-[#1B1640]">
       <Head title={title}>
         <meta name="description" content={description} />
         <meta property="og:title" content={title ? `${title} · WURK` : 'WURK'} />

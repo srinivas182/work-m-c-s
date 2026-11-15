@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Accessibility — Sprint 18.5a (every screen checked, WCAG 2.2 AA)
+- **Accessibility crawl of every screen** in CI: every GET route that shows a page — the back office, Admin, the agent area, sign-in and signup, the marketing site and help centre, and the pages a business's customers see (booking, class and table pages, orders, the public site). 131 screens, each in the **light and the dark theme**, on **desktop and mobile**: no serious or critical WCAG 2.2 AA issue (including target size), and every control reached with Tab stays visible (WCAG 2.2 "focus not obscured"). `php artisan wurk:screens` creates a business with a record behind each detail screen and lists them. A route that isn't a page (files, data for scripts, redirects) is reviewed in one list, and a new route that can't be resolved fails the crawl.
+- **Fixed**:
+  - On phones, the bottom navigation hid the control someone had tabbed to near the bottom of the screen (on 30 screens), and the sticky header could hide it at the top. The page now scrolls focused controls clear of both.
+  - In a dark theme, the labels on the marketing site's contact form and on signup were light grey on their white card. Those pages are light-only now.
+  - The page editor's buttons in its header were light-on-white in a dark theme. The editor is light-only, like its canvas.
+  - The editor's first-use tips covered the block list for keyboard users. Tabbing away, or Escape, now closes them, as tapping elsewhere already did.
+  - The coupon form's discount amount had no label for screen readers.
+  - A button lost its name for screen readers while it was saving (its label was hidden behind the spinner). Seen once in 18.0b on Support settings; it affected every button with a loading state.
+
 ### Resilience — Sprint 18.4c (Admin → System, backups, restore drill)
 - **Admin → System**: the central database's and every shard's migrations (up to date or how many waiting), the businesses on each shard against its capacity, the latest backup of each part (size, where it's kept, overdue), the latest restore drills against the targets (data lost ≤ 15 minutes, back within 4 hours), and recent business moves and restores. Engineering and Support can see it.
 - **Backups report in**: backup jobs call `php artisan system:backup-taken <target>`. With `BACKUP_TARGETS` set, **Watchtower raises a problem** when a part has had no backup for `BACKUP_MAX_AGE_HOURS` (26).

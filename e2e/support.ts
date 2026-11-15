@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page, type TestInfo } from '@playwright/test';
 
-/** No serious or critical WCAG 2.2 AA issues on the current page. */
-export async function expectAccessible(page: Page) {
+/** Serious or critical WCAG 2.2 AA issues on the current page, as "rule: element, element". */
+export async function accessibilityProblems(page: Page, exclude: string[] = []): Promise<string[]> {
   // Judge the settled page: wait for running animations and transitions (a toast fading in,
   // a colour change) — mid-animation, colours are briefly paler than anyone actually reads them.
   await page.evaluate(() =>
@@ -17,16 +17,19 @@ export async function expectAccessible(page: Page) {
   // Toasts are left out of page scans: when two are stacked, axe misjudges the front toast's text colour
   // (measured: dark #262629 on white, nothing over it, yet reported grey) — an artefact of the overlapping,
   // transformed toasts. Toast contrast itself is checked on a single, settled toast in admin.spec.ts.
-  const results = await new AxeBuilder({ page })
+  let axe = new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-    .exclude('[data-sonner-toaster]')
-    .analyze();
-  const serious = results.violations.filter(
-    (v) => v.impact === 'serious' || v.impact === 'critical',
-  );
-  expect(
-    serious.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
-  ).toEqual([]);
+    .exclude('[data-sonner-toaster]');
+  for (const selector of exclude) axe = axe.exclude(selector);
+  const results = await axe.analyze();
+  return results.violations
+    .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+    .map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
+}
+
+/** No serious or critical WCAG 2.2 AA issues on the current page. */
+export async function expectAccessible(page: Page) {
+  expect(await accessibilityProblems(page)).toEqual([]);
 }
 
 /** Without an SMS provider, e2e writes messages to the log; read the newest code for this number. */
@@ -90,4 +93,41 @@ export async function signUpBusiness(
   await expect(page).toHaveURL(new RegExp(`/${handle}\\?welcome=1$`));
 
   return handle;
+}
+
+/**
+ * WCAG 2.2 "Focus not obscured" (2.4.11): Tab through the page; every focused control must be at least partly
+ * visible — not hidden behind a sticky header, bottom bar or panel. Returns the controls that were fully covered.
+ */
+export async function focusObscured(page: Page, presses = 25): Promise<string[]> {
+  const hidden: string[] = [];
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  for (let i = 0; i < presses; i++) {
+    await page.keyboard.press('Tab');
+    const problem = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement | null;
+      if (!el || el === document.body) return null;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) return null; // e.g. a skip link before it's shown
+      // Sample points across the control: visible if any of them hits the control itself.
+      const points = [
+        [0.5, 0.5],
+        [0.15, 0.5],
+        [0.85, 0.5],
+        [0.5, 0.15],
+        [0.5, 0.85],
+      ].map(([x, y]) => [r.left + r.width * (x ?? 0.5), r.top + r.height * (y ?? 0.5)]);
+      const seen = points.some(([x, y]) => {
+        if ((x ?? 0) < 0 || (y ?? 0) < 0 || (x ?? 0) > innerWidth || (y ?? 0) > innerHeight)
+          return false;
+        const hit = document.elementFromPoint(x ?? 0, y ?? 0);
+        return hit !== null && (hit === el || el.contains(hit) || hit.contains(el));
+      });
+      if (seen) return null;
+      const name = el.getAttribute('aria-label') ?? el.textContent?.trim().slice(0, 40) ?? '';
+      return `${el.tagName.toLowerCase()} “${name}”`;
+    });
+    if (problem && !hidden.includes(problem)) hidden.push(problem);
+  }
+  return hidden;
 }
