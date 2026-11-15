@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Watchtower\Http\Controllers\IncidentsController;
+use Wurk\Watchtower\Http\Controllers\SystemController;
 
 // Admin → Watchtower (18.0).
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff', 'permission:watchtower.view'])->prefix('watchtower')->name('admin.watchtower')->group(function (): void {
@@ -15,3 +16,7 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
         Route::post('/{incident}/analyse', [IncidentsController::class, 'analyse'])->whereUlid('incident')->middleware('throttle:10,1,watchtower-analyse')->name('.analyse');
     });
 });
+
+// Admin → System (18.4c): migrations, backups, restore drills, business moves.
+Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff', 'permission:watchtower.view'])
+    ->get('system', SystemController::class)->name('admin.system');

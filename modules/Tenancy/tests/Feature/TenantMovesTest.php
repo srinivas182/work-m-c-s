@@ -41,6 +41,7 @@ it('moves a business to another shard — identical copies, the neighbour untouc
     $this->artisan('tenants:move', ['handle' => 'glow-salon', '--to' => $this->two->name, '--force' => true])->expectsOutputToContain('copies identical')->assertSuccessful();
 
     expect(Tenant::query()->find($this->glow->id)->shard_id)->toBe($this->two->id)
+        ->and([$this->one->fresh()->tenant_count, $this->two->fresh()->tenant_count])->toBe([1, 1])  // capacity follows the business
         ->and($this->rows->checksum($this->glow->id, ($this->conn)($this->two)))->toBe($before)
         ->and(count($before))->toBeGreaterThan(80)
         ->and($this->rows->checksum($this->other->id, ($this->conn)($this->one)))->toBe($neighbour);

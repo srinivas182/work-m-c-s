@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# Timed restore drill on a local multi-shard MySQL setup (Sprint 18.4c) — docs/runbooks/restore.md.
+# Builds its own environment (.env.drill, databases wurk_drill*), never touches .env or other databases.
+#
+#   MYSQL_PWD=root ./scripts/dr-drill [businesses=40]
+#
+# 1. Two shards with load-test businesses; a backup of each database (mysqldump), reported to Watchtower.
+# 2. Whole-shard disaster: shard 1's database is dropped. Restored from its backup as a new database, the shard is
+#    pointed at it (shards:repoint, health-checked) and the businesses on it answer again. Timed.
+# 3. One business loses its customers. Restored from the backup on its own (tenants:restore --replace). Timed.
+# Both drills are recorded (system:drill-recorded) and shown on Admin → System.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+businesses="${1:-40}"
+host="${DB_HOST:-127.0.0.1}"; port="${DB_PORT:-3306}"; user="${DB_USERNAME:-root}"
+export MYSQL_PWD="${MYSQL_PWD:-${DB_PASSWORD:-}}"
+sql() { mysql -h "$host" -P "$port" -u "$user" -N -e "$1"; }
+art() { APP_ENV=drill php artisan "$@" --no-interaction; }
+now() { date -u '+%Y-%m-%d %H:%M:%S'; }
+backups="storage/app/drill-backups"; mkdir -p "$backups"
+
+echo "== Setting up: central + 2 shards, ${businesses} businesses"
+for db in wurk_drill wurk_drill_shard_1 wurk_drill_shard_2 wurk_drill_shard_1_restored wurk_drill_backup; do sql "drop database if exists \`$db\`; create database \`$db\`"; done
+cp .env.example .env.drill
+sed -i -e 's/^APP_ENV=.*/APP_ENV=drill/' -e 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' -e '/^DB_\(HOST\|PORT\|DATABASE\|USERNAME\|PASSWORD\)=/d' \
+  -e 's/^CACHE_STORE=.*/CACHE_STORE=file/' -e 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' -e 's/^MAIL_MAILER=.*/MAIL_MAILER=log/' -e 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' .env.drill
+cat >> .env.drill <<ENV
+DB_HOST=${host}
+DB_PORT=${port}
+DB_DATABASE=wurk_drill
+DB_USERNAME=${user}
+DB_PASSWORD=${MYSQL_PWD}
+RESTORE_DB_HOST=${host}
+RESTORE_DB_PORT=${port}
+RESTORE_DB_DATABASE=wurk_drill_backup
+RESTORE_DB_USERNAME=${user}
+RESTORE_DB_PASSWORD=${MYSQL_PWD}
+BACKUP_TARGETS=central,shard-1,shard-2
+ENV
+art key:generate --force > /dev/null
+art migrate --force > /dev/null
+for i in 1 2; do art shards:register "shard-$i" --host="$host" --port="$port" --database="wurk_drill_shard_$i" --username="$user" --password="$MYSQL_PWD" > /dev/null; done
+art wurk:seed-load --businesses="$businesses" --customers=200 --bookings=60 --products=20 > /dev/null 2>&1
+count() { sql "select count(*) from \`$1\`.contacts"; }
+echo "   shard 1 holds $(count wurk_drill_shard_1) customers, shard 2 $(count wurk_drill_shard_2)"
+
+echo "== Backups"
+backup_at="$(now)"
+for db in wurk_drill wurk_drill_shard_1 wurk_drill_shard_2; do
+  mysqldump -h "$host" -P "$port" -u "$user" --single-transaction --routines --triggers --no-tablespaces "$db" | gzip > "$backups/$db.sql.gz"
+done
+art system:backup-taken central --at="$backup_at" --size="$(stat -c %s "$backups/wurk_drill.sql.gz")" --location="$backups/wurk_drill.sql.gz" --by=dr-drill > /dev/null
+for i in 1 2; do art system:backup-taken "shard-$i" --at="$backup_at" --size="$(stat -c %s "$backups/wurk_drill_shard_$i.sql.gz")" --location="$backups/wurk_drill_shard_$i.sql.gz" --by=dr-drill > /dev/null; done
+ls -lh "$backups" | tail -n +2
+
+echo "== Drill 1: shard 1's database is lost"
+before="$(count wurk_drill_shard_1)"
+failed_at="$(now)"; t0=$(date +%s)
+sql "drop database wurk_drill_shard_1"
+gunzip -c "$backups/wurk_drill_shard_1.sql.gz" | mysql -h "$host" -P "$port" -u "$user" wurk_drill_shard_1_restored
+art shards:repoint shard-1 --database=wurk_drill_shard_1_restored --force > /dev/null
+art shards:migrate --shard=shard-1 > /dev/null   # pending migrations (none) + health check
+after="$(count wurk_drill_shard_1_restored)"
+t1=$(date +%s)
+[ "$before" = "$after" ] || { echo "   FAILED: $before customers before, $after after"; exit 1; }
+echo "   restored in $((t1 - t0)) s; $after of $before customers back"
+art system:drill-recorded --scope=shard --target=shard-1 --failed="$failed_at" --restored="$(now)" --backup="$backup_at" \
+  --note="Local drill: ${businesses} businesses over 2 shards; shard database dropped, restored from mysqldump in $((t1 - t0)) s, repointed, health-checked." --by=dr-drill
+
+echo "== Drill 2: one business loses its customers"
+handle="$(sql "select handle from wurk_drill.tenants where shard_id = (select id from wurk_drill.shards where name = 'shard-2') order by handle limit 1")"
+tenant="$(sql "select id from wurk_drill.tenants where handle = '$handle'")"
+gunzip -c "$backups/wurk_drill_shard_2.sql.gz" | mysql -h "$host" -P "$port" -u "$user" wurk_drill_backup   # the shard's backup, as its own database
+before="$(sql "select count(*) from wurk_drill_shard_2.contacts where tenant_id = '$tenant'")"
+others="$(sql "select count(*) from wurk_drill_shard_2.contacts where tenant_id <> '$tenant'")"
+failed_at="$(now)"; t0=$(date +%s)
+sql "delete from wurk_drill_shard_2.contact_links where tenant_id = '$tenant'; delete from wurk_drill_shard_2.contacts where tenant_id = '$tenant'"
+art tenants:restore "$handle" --from=restore --replace --force > /dev/null
+t1=$(date +%s)
+after="$(sql "select count(*) from wurk_drill_shard_2.contacts where tenant_id = '$tenant'")"
+[ "$before" = "$after" ] && [ "$others" = "$(sql "select count(*) from wurk_drill_shard_2.contacts where tenant_id <> '$tenant'")" ] || { echo "   FAILED"; exit 1; }
+echo "   $handle restored in $((t1 - t0)) s; $after of $before customers back; other businesses untouched"
+art system:drill-recorded --scope=business --target="$handle" --failed="$failed_at" --restored="$(now)" --backup="$backup_at" \
+  --note="Local drill: one business's customers deleted; restored alone from the shard backup in $((t1 - t0)) s (tenants:restore --replace)." --by=dr-drill
+
+echo "== Done. Admin → System shows both drills (APP_ENV=drill php artisan serve)."

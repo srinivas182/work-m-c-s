@@ -131,6 +131,12 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await emails.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByText('Saved. Problem reports go to hq@example.test.')).toBeVisible();
 
+  // System (Sprint 18.4c): databases and their migrations, backups, drills, business moves.
+  await page.goto(`${admin}/system`);
+  await expect(page.getByRole('heading', { level: 1, name: 'System' })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: 'e2e-shard' })).toBeVisible();
+  await expectAccessible(page);
+
   // Profitability (Sprint 15.5a): costs and a pricing "what if".
   await page.goto(`${admin}/profitability`);
   await expect(page.getByRole('heading', { level: 1, name: 'Profitability' })).toBeVisible();
