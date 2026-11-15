@@ -56,6 +56,9 @@ return [
         // Default capacity of a shared shard (tenants per database).
         'shard_capacity' => (int) env('WURK_SHARD_CAPACITY', 5000),
 
+        // The shard migrated (and health-checked) first on every rollout — Sprint 18.4b. Empty: the first by name.
+        'canary_shard' => (string) env('WURK_CANARY_SHARD', ''),
+
         // Seconds tenant lookups by handle/host are cached.
         'resolution_cache_ttl' => 600,
     ],

@@ -138,6 +138,7 @@ it('checks every system each minute — critical when one fails, and says when i
 });
 
 it('notices a scheduled task that stopped running, and a job that failed for good', function () {
+    $this->travelTo(now()->setTimezone('UTC')->setTime(12, 0)); // midday: the task's 02:37 SAST run is past (failed when CI ran 02:37–02:47 SAST)
     DB::table('watchtower_heartbeats')->insert(['task' => 'success:score', 'expression' => '37 2 * * *', 'last_started_at' => now()->subDays(2), 'last_status' => 'ok']);
     $this->artisan('watchtower:check');
     expect(Incident::query()->where('kind', 'scheduler')->sole())->severity->toBe('high')->title->toStartWith('Scheduled task “success:score” didn’t run at 02:37');
