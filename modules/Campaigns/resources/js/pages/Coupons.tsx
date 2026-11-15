@@ -99,6 +99,9 @@ export default function Coupons({
                     <option value="amount">Rand</option>
                   </select>
                   <Input
+                    aria-label={
+                      form.data.kind === 'percent' ? 'Discount in percent' : 'Discount in rand'
+                    }
                     inputMode="decimal"
                     value={form.data.value}
                     onChange={(e) => form.setData('value', e.target.value)}

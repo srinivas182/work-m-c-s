@@ -57,7 +57,8 @@ export function Button({
       {loading && !asChild ? (
         <>
           <Loader2 className="absolute animate-spin" aria-hidden />
-          <span className="invisible inline-flex items-center gap-2">{children}</span>
+          {/* Transparent, not invisible: the label keeps the button's name for screen readers while it works (18.5a). */}
+          <span className="inline-flex items-center gap-2 opacity-0">{children}</span>
         </>
       ) : (
         children

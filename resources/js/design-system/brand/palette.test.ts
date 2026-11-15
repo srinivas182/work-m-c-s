@@ -101,7 +101,7 @@ describe('generatePalette', () => {
       expectAccessible(palette.light);
       expectAccessible(palette.dark);
     }
-  });
+  }, 30_000); // 300 palettes: about 1 s alone, over 5 s on a busy CI machine
 });
 
 describe('generateNeutral', () => {
