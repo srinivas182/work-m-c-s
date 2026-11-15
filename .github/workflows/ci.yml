@@ -253,7 +253,7 @@ jobs:
         run: vendor/bin/pest --group=clamav --fail-on-skipped --compact
 
   backend-tests-mysql:
-    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 5)
+    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 6)
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
@@ -262,7 +262,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        part: [1, 2, 3, 4, 5]
+        part: [1, 2, 3, 4, 5, 6]
     timeout-minutes: 12 # each part runs ~4-6 min; GitHub's slower machines add ~3-4 min, which cancelled four good runs at 10 (WURK, 9 Nov 2026)
     services:
       mysql:
