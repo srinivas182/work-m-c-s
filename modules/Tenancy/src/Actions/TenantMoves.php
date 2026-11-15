@@ -108,7 +108,13 @@ final readonly class TenantMoves
             if ($this->rows->checksum($tenant->id, $fromConnection) !== $this->rows->checksum($tenant->id, $target)) {
                 throw new \RuntimeException('The copy doesn’t match the original — nothing was switched.');
             }
-            DB::transaction(fn () => $tenant->forceFill(['shard_id' => $to->id])->save()); // the model clears its cached resolution
+            DB::transaction(function () use ($tenant, $to, $previous): void {
+                $tenant->forceFill(['shard_id' => $to->id])->save(); // the model clears its cached resolution
+                if ($previous !== $to->id) {                          // keep shard capacity right for new businesses
+                    Shard::query()->whereKey($previous)->where('tenant_count', '>', 0)->decrement('tenant_count');
+                    Shard::query()->whereKey($to->id)->increment('tenant_count');
+                }
+            });
             $move->forceFill(['status' => 'done', 'rows' => $copied, 'finished_at' => now(), 'clear_after' => $keepOld && $previous !== $to->id ? now()->addDays(self::KEEP_DAYS) : null])->save();
 
             return $move;

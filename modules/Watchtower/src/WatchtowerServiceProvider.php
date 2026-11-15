@@ -16,8 +16,10 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Throwable;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Watchtower\Console\BackupTakenCommand;
 use Wurk\Watchtower\Console\CheckCommand;
 use Wurk\Watchtower\Console\DigestCommand;
+use Wurk\Watchtower\Console\DrillRecordedCommand;
 use Wurk\Watchtower\Console\SweepCommand;
 use Wurk\Watchtower\Http\Controllers\ClientErrorController;
 use Wurk\Watchtower\Http\Controllers\HeartbeatController;
@@ -37,7 +39,10 @@ final class WatchtowerServiceProvider extends ModuleServiceProvider
 {
     public function menu(): array
     {
-        return [['label' => 'Watchtower', 'route' => 'admin.watchtower', 'icon' => 'radar', 'section' => 'Platform', 'permission' => 'watchtower.view', 'order' => 13]];
+        return [
+            ['label' => 'Watchtower', 'route' => 'admin.watchtower', 'icon' => 'radar', 'section' => 'Platform', 'permission' => 'watchtower.view', 'order' => 13],
+            ['label' => 'System', 'route' => 'admin.system', 'icon' => 'database', 'section' => 'Platform', 'permission' => 'watchtower.view', 'order' => 14],
+        ];
     }
 
     public function permissions(): array
@@ -57,7 +62,7 @@ final class WatchtowerServiceProvider extends ModuleServiceProvider
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'watchtower');
         if ($this->app->runningInConsole()) {
-            $this->commands([CheckCommand::class, DigestCommand::class, SweepCommand::class]);
+            $this->commands([CheckCommand::class, DigestCommand::class, SweepCommand::class, BackupTakenCommand::class, DrillRecordedCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $s): void {
             $s->command('watchtower:check')->everyMinute()->onOneServer()->withoutOverlapping(5);

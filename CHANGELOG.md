@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Resilience — Sprint 18.4c (Admin → System, backups, restore drill)
+- **Admin → System**: the central database's and every shard's migrations (up to date or how many waiting), the businesses on each shard against its capacity, the latest backup of each part (size, where it's kept, overdue), the latest restore drills against the targets (data lost ≤ 15 minutes, back within 4 hours), and recent business moves and restores. Engineering and Support can see it.
+- **Backups report in**: backup jobs call `php artisan system:backup-taken <target>`. With `BACKUP_TARGETS` set, **Watchtower raises a problem** when a part has had no backup for `BACKUP_MAX_AGE_HOURS` (26).
+- **Restore drills are recorded** with `php artisan system:drill-recorded` and judged against the targets. `scripts/dr-drill` runs a timed drill on a local multi-shard MySQL setup: a lost shard, and one business losing its customers. Locally, 300 businesses: the shard was back in 5 s, the business in 4 s.
+- **`php artisan shards:repoint <shard>`**: points a shard at a restored copy of its database, only once the copy passes the health check.
+- Fixed: moving a business between shards didn't update the shards' business counts, so new businesses could have been placed on a shard that was already full.
+- `docs/runbooks/restore.md` now covers restoring a whole shard, the central database and files; the canary rollout; backups; and the drill.
+
 ### Resilience — Sprint 18.4b (canary shard rollouts, dates past 2038)
 - **`shards:migrate` migrates the canary shard first** (`WURK_CANARY_SHARD`, otherwise the first by name) and health-checks it before touching any other: it answers, it has every migration WURK ships, and every business table can be read. Every shard is checked the same way after its migrations. On a failure the rollout stops, and **the migrations that run applied to that shard are rolled back**. `--canary` migrates only the canary, so it can be watched before the rest.
 - **The release step now migrates the shards too.** The image's `migrate` command ran only the central database's migrations; it now runs `shards:migrate` straight after.

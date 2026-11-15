@@ -54,7 +54,7 @@ final readonly class SystemChecks
                     $this->alerts->recovered($cleared);
                 }
             } else {
-                $this->recorder->record(new Signal('check', $name, $this->label($name).': '.$message, severity: str_starts_with($name, 'queue:') ? 'high' : 'critical',
+                $this->recorder->record(new Signal('check', $name, $this->label($name).': '.$message, severity: str_starts_with($name, 'queue:') || $name === 'backups' ? 'high' : 'critical',
                     message: $message, location: 'system check '.$name, surface: 'system', ongoing: true));
             }
         }
@@ -91,6 +91,9 @@ final readonly class SystemChecks
 
             return $back === 'ok' ? null : 'Files can’t be written and read back';
         };
+        if ((array) config('wurk.watchtower.backup_targets', []) !== []) {
+            $checks['backups'] = fn (): ?string => Backups::stale(); // 18.4c
+        }
         foreach ($this->queues() as $queue) {
             $checks['queue:'.$queue] = fn (): ?string => $this->backlog($queue);
         }
@@ -169,6 +172,7 @@ final readonly class SystemChecks
             $name === 'database' => 'Central database',
             $name === 'cache' => 'Cache (Redis)',
             $name === 'storage' => 'File storage',
+            $name === 'backups' => 'Backups overdue',
             str_starts_with($name, 'shard:') => 'Database shard '.substr($name, 6),
             str_starts_with($name, 'queue:') => 'Queue “'.substr($name, 6).'” backed up',
             default => Str::headline($name),

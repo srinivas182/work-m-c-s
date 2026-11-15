@@ -171,6 +171,12 @@ return [
         // The AI explains problems (18.0b): on/off, and how many a day at most (WURK's cost, not businesses').
         'ai' => (bool) env('WATCHTOWER_AI', true),
         'ai_daily_cap' => (int) env('WATCHTOWER_AI_DAILY_CAP', 50),
+        // Backups (18.4c): the targets that must have a recent backup (e.g. "central,shard-1,files"), how old the latest
+        // may be before it's a problem, and WURK's recovery targets (PRD §15): data lost ≤ 15 min, back within 4 hours.
+        'backup_targets' => array_values(array_filter(array_map('trim', explode(',', (string) env('BACKUP_TARGETS', ''))))),
+        'backup_max_age_hours' => (int) env('BACKUP_MAX_AGE_HOURS', 26),
+        'rpo_minutes' => 15,
+        'rto_minutes' => 240,
         // Share of web requests timed for the slow-pages check (every request over 2 s is always counted).
         'timing_sample' => (float) env('WATCHTOWER_TIMING_SAMPLE', 0.02),
         // Extra queues to watch for backlogs, besides the connection's default.
