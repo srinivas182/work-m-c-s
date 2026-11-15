@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Resilience — Sprint 18.4b (canary shard rollouts, dates past 2038)
+- **`shards:migrate` migrates the canary shard first** (`WURK_CANARY_SHARD`, otherwise the first by name) and health-checks it before touching any other: it answers, it has every migration WURK ships, and every business table can be read. Every shard is checked the same way after its migrations. On a failure the rollout stops, and **the migrations that run applied to that shard are rolled back**. `--canary` migrates only the canary, so it can be watched before the rest.
+- **The release step now migrates the shards too.** The image's `migrate` command ran only the central database's migrations; it now runs `shards:migrate` straight after.
+- **Year 2038**: every `TIMESTAMP` column (central database and shards) becomes `DATETIME`, keeping precision, nullability, defaults and comments. MySQL's `TIMESTAMP` can't hold dates after 19 January 2038 — bookings, subscription ends and retention dates would have failed. New migrations must use `datetime()`, `datetimes()` and `softDeletesDatetime()` (architecture test), and `make:migration` now writes `datetimes()`.
+
 ### Resilience — Sprint 18.4a (move, restore and remove a business)
 - **`php artisan tenants:move <business> --to=<shard>`**: copies every row of the business to another shard, compares the copies (rows and a SHA-256 of every row, table by table), and only then switches. The business's pages say "being moved to a new server — back in a few minutes" (503) for that time. If anything fails, it stays where it was and the partial copy is removed. The old copy is kept for 7 days, then removed by `tenants:clear-moved` (daily 04:13). Needed to rebalance shards as WURK grows.
 - **`php artisan tenants:restore <business>`**: restores **one** business from a shard backup restored as a separate database (the `restore` connection, `RESTORE_DB_*`), without touching the other businesses on the shard. Either `--replace` (what it has now is saved to a file first, and put back if the restore fails) or `--to=<shard>` (its current rows stay on the old shard for 7 days). This is WURK's side of decision 16-C.
