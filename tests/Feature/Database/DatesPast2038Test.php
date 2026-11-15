@@ -28,8 +28,9 @@ beforeEach(function () {
 it('creates timestamp() columns as DATETIME on every MySQL connection', function () {
     [$shard] = $this->createShards(1);
     $connection = app(ShardConnections::class)->register($shard);
-    expect(DB::connection()->getSchemaGrammar())->toBeInstanceOf(DatesPast2038Grammar::class)
-        ->and(DB::connection($connection)->getSchemaGrammar())->toBeInstanceOf(DatesPast2038Grammar::class);
+    // The schema grammar is made when the schema builder is first used on a connection.
+    expect(DB::connection()->getSchemaBuilder()->getConnection()->getSchemaGrammar())->toBeInstanceOf(DatesPast2038Grammar::class)
+        ->and(DB::connection($connection)->getSchemaBuilder()->getConnection()->getSchemaGrammar())->toBeInstanceOf(DatesPast2038Grammar::class);
     Schema::dropIfExists('y2038_made');
     Schema::create('y2038_made', fn (Blueprint $t) => [$t->id(), $t->timestamps(), $t->softDeletes(), $t->timestamp('at', 6)->useCurrent()]);
     try {
