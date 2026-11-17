@@ -4,6 +4,100 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.19.0] — 2026-11-18 — Sprint 18: Hardening
+
+### Polish and acceptance — Sprint 18.6
+- **Error pages in WURK's words** (403, 404, 419, 429, 500, 503): what happened and what to do next, in light and dark, with no internal details. They work even when the rest of the app can't load. Moving around the app shows the same words in place. An expired form goes back with a message instead of a dead end.
+- **Beta acceptance script** for PRD criteria 1–12 (`docs/uat/acceptance-script.md`): each step, the expected result, and who runs it, with a bug-bash process. Criteria 2 and 12 run on staging in Sprint 17.
+- **Release checklist** (`docs/runbooks/release-checklist.md`), including a screen-reader check before each release.
+- **Sprint plan**: Sprints 19–25 for the African market (AI receptionist, premium templates, two-way WhatsApp, mobile money, easy setup and money tools, languages and light on data, reach and trust), then Sprint 17 (cloud and going live).
+
+### Accessibility — Sprint 18.5b (keyboard, no dragging, every template's colours, statement)
+- **The main journeys are tested with the keyboard alone**: signing in (pasting the one-time code), booking an appointment, buying something, adding and moving a section in the page editor, and Ask WURK. Focus is checked to be visible at every step.
+- **Nothing needs dragging** (WCAG 2.2): the page editor has **"Add section"** (a list of every section; it goes in after the selected one) and **"Move up" / "Move down"** above a selected section's fields and on its toolbar.
+- **Booking times and class lists are one Tab stop**: the arrow keys, Home and End move between the choices. Before, a day with 30 free times took 30 Tab presses to reach "Your name".
+- **Focus goes back where it came from** when any dialog or panel closes. Dialogs opened from a plain button (Ask WURK, confirmations) left focus at the top of the page.
+- **All 24 website designs pass WCAG 2.2 AA on every page in their own colours, and on their home page in six very different brand colours.** Checked in CI on every change. A design can be previewed in other colours (`?primary=#rrggbb&secondary=#rrggbb`).
+- **Accessibility statement** at wurk.co.za/accessibility (linked in the footer): what WURK aims for, what works, how it's checked, what isn't perfect yet, and how to report a problem.
+
+### Accessibility — Sprint 18.5a (every screen checked, WCAG 2.2 AA)
+- **Accessibility crawl of every screen** in CI: every GET route that shows a page — the back office, Admin, the agent area, sign-in and signup, the marketing site and help centre, and the pages a business's customers see (booking, class and table pages, orders, the public site). 131 screens, each in the **light and the dark theme**, on **desktop and mobile**: no serious or critical WCAG 2.2 AA issue (including target size), and every control reached with Tab stays visible (WCAG 2.2 "focus not obscured"). `php artisan wurk:screens` creates a business with a record behind each detail screen and lists them. A route that isn't a page (files, data for scripts, redirects) is reviewed in one list, and a new route that can't be resolved fails the crawl.
+- **Fixed**:
+  - On phones, the bottom navigation hid the control someone had tabbed to near the bottom of the screen (on 30 screens), and the sticky header could hide it at the top. The page now scrolls focused controls clear of both.
+  - In a dark theme, the labels on the marketing site's contact form and on signup were light grey on their white card. Those pages are light-only now.
+  - The page editor's buttons in its header were light-on-white in a dark theme. The editor is light-only, like its canvas.
+  - The editor's first-use tips covered the block list for keyboard users. Tabbing away, or Escape, now closes them, as tapping elsewhere already did.
+  - The coupon form's discount amount had no label for screen readers.
+  - A button lost its name for screen readers while it was saving (its label was hidden behind the spinner). Seen once in 18.0b on Support settings; it affected every button with a loading state.
+
+### Resilience — Sprint 18.4c (Admin → System, backups, restore drill)
+- **Admin → System**: the central database's and every shard's migrations (up to date or how many waiting), the businesses on each shard against its capacity, the latest backup of each part (size, where it's kept, overdue), the latest restore drills against the targets (data lost ≤ 15 minutes, back within 4 hours), and recent business moves and restores. Engineering and Support can see it.
+- **Backups report in**: backup jobs call `php artisan system:backup-taken <target>`. With `BACKUP_TARGETS` set, **Watchtower raises a problem** when a part has had no backup for `BACKUP_MAX_AGE_HOURS` (26).
+- **Restore drills are recorded** with `php artisan system:drill-recorded` and judged against the targets. `scripts/dr-drill` runs a timed drill on a local multi-shard MySQL setup: a lost shard, and one business losing its customers. Locally, 300 businesses: the shard was back in 5 s, the business in 4 s.
+- **`php artisan shards:repoint <shard>`**: points a shard at a restored copy of its database, only once the copy passes the health check.
+- Fixed: moving a business between shards didn't update the shards' business counts, so new businesses could have been placed on a shard that was already full.
+- `docs/runbooks/restore.md` now covers restoring a whole shard, the central database and files; the canary rollout; backups; and the drill.
+
+### Resilience — Sprint 18.4b (canary shard rollouts, dates past 2038)
+- **`shards:migrate` migrates the canary shard first** (`WURK_CANARY_SHARD`, otherwise the first by name) and health-checks it before touching any other: it answers, it has every migration WURK ships, and every business table can be read. Every shard is checked the same way after its migrations. On a failure the rollout stops, and **the migrations that run applied to that shard are rolled back**. `--canary` migrates only the canary, so it can be watched before the rest.
+- **The release step now migrates the shards too.** The image's `migrate` command ran only the central database's migrations; it now runs `shards:migrate` straight after.
+- **Year 2038**: every `TIMESTAMP` column (central database and shards) becomes `DATETIME`, keeping precision, nullability, defaults and comments. MySQL's `TIMESTAMP` can't hold dates after 19 January 2038 — bookings, subscription ends and retention dates would have failed. On MySQL, `timestamp()`, `timestamps()` and `softDeletes()` now create `DATETIME` columns anyway, so a new shard or a fresh install never has a column that stops in 2038. New migrations must still use `datetime()`, `datetimes()` and `softDeletesDatetime()` (architecture test), and `make:migration` writes `datetimes()`.
+
+### Resilience — Sprint 18.4a (move, restore and remove a business)
+- **`php artisan tenants:move <business> --to=<shard>`**: copies every row of the business to another shard, compares the copies (rows and a SHA-256 of every row, table by table), and only then switches. The business's pages say "being moved to a new server — back in a few minutes" (503) for that time. If anything fails, it stays where it was and the partial copy is removed. The old copy is kept for 7 days, then removed by `tenants:clear-moved` (daily 04:13). Needed to rebalance shards as WURK grows.
+- **`php artisan tenants:restore <business>`**: restores **one** business from a shard backup restored as a separate database (the `restore` connection, `RESTORE_DB_*`), without touching the other businesses on the shard. Either `--replace` (what it has now is saved to a file first, and put back if the restore fails) or `--to=<shard>` (its current rows stay on the old shard for 7 days). This is WURK's side of decision 16-C.
+- Every move and restore is recorded (`tenant_moves`). See `docs/runbooks/restore.md`.
+- **Archived businesses can be removed for good**: their rows and their files. **Agent demo sites are removed for good 7 days after they're archived** (carried over from Sprint 14).
+
+### Performance — Sprint 18.3b (load testing)
+- **`php artisan wurk:seed-load`**: load-test businesses spread over the shards — an owner who can sign in, customers, a bookable service with hours, bookings over the next 14 days, products — and `storage/app/load-test.json` for the scripts. Safe to re-run; refused in production.
+- **k6 scripts** (`load/k6/journeys.js`): public site, booking times, back office (signed in) and sign-in, mixed as real traffic. Profiles: `smoke` (any machine; checks the journeys work) and `target` (1,000 requests a second for 15 minutes; 95% within 300 ms; < 0.1% errors) for staging in Sprint 17. CI runs the smoke profile with the performance gate.
+- **`WURK_LOAD_TEST_TOKEN`** (staging only, refused in production): test machines can play many separate visitors, so per-visitor rate limits behave as for real people.
+- `docs/performance/load-testing.md`: targets, journeys, how to run on staging, what to do when a journey misses.
+
+### Performance — Sprint 18.3a (fair queues, no N+1)
+- **Three queues, in priority order** — `critical` (booking messages), `default`, `bulk` (campaigns, exports, Watchtower's AI). Workers run `queue:work --queue=critical,default,bulk`: a customer's booking confirmation never waits behind another business's campaign.
+- **Campaigns are sent in the background, in batches of 200** — no longer inside the owner's request ("Send now" with 50,000 customers would have timed out) or one business at a time in the scheduler. Each campaign has at most **one job waiting** at a time, so businesses' campaigns take turns. The campaign list shows progress ("120 of 1,000 done"). Customers who withdraw consent after a campaign starts are skipped (POPIA).
+- **Booking messages are queued** (critical queue, after the booking is saved) instead of making the customer wait for the SMS or email provider.
+- **Query budgets in CI**: customers, leads, today's bookings, products, orders, campaigns, pages, enquiries and the team page are loaded with 1 and 26 rows; the number of queries may not grow with the rows. Found and fixed: the team page queried each member's roles separately.
+- Watchtower watches all three queues for backlogs.
+
+### Security — Sprint 18.2b (security emails, "Confirm it's you")
+- **"Was this you?" emails**: when an account is signed in to on a device it hasn't used before (browser and system, partial internet address), when the password changes, and when two-step sign-in is turned on or off — with exactly what to do if it wasn't them. Not on the first device, not again on a known one. (People with only a phone number see their devices under Account → Security; no SMS per sign-in.)
+- **"Confirm it's you"** before downloading all of a business's data: the password, or a code sent to the person's email or phone — valid for 15 minutes; signing in with a password or code counts, a remembered device doesn't. Available to every module as the `confirmed` middleware.
+
+### Security — Sprint 18.2a (isolation sweep — acceptance criterion 7)
+- **Automated isolation test over every route**: two businesses on the same shard (the case where only WURK's scoping keeps them apart); the other business gets a row in **every table** — its shard and its rows in the central database — with every text column marked. Alpha's owner then calls **every back-office route, every method** (≈300 requests), and a visitor calls **every route on Alpha's website address** (bookings, orders, record links, payments, campaign links, the portal) with Bravo's IDs, tokens and references. No response may contain Bravo's data, none of Bravo's rows may change, nothing may crash. New routes are covered automatically. The sweep also proves it would catch a leaky route. Runs on SQLite and MySQL.
+- Static rule: models can't be filled from `$request->all()`, `input()` or `except()` (mass assignment) — CI fails.
+
+### Security — Sprint 18.1b (scanning, disclosure, trust)
+- **Security checks on every change** (new CI job, about a minute, drafts included): `composer audit` (any advisory fails), `pnpm audit --prod` (high/critical fails), **gitleaks** on the PR's commits, and **WURK's own Semgrep rules** (eval, unserialize, shell, SQL from variables or request input, saving `$request->all()`, predictable secrets, unescaped request data in Blade, raw HTML in React). **OWASP ZAP baseline** scans the running back office with the performance gate; a page without clickjacking protection or a CSP, or a cookie without SameSite, fails (the other headers and HttpOnly are enforced by tests).
+- **Dependabot**: grouped weekly updates for PHP and JavaScript, monthly for GitHub Actions and the Docker image.
+- Static files served by the production server (built scripts, images) now carry the basic security headers too, and no `Server` header (`docker/production/Caddyfile`).
+- **`/.well-known/security.txt`** on WURK's addresses (RFC 9116), **wurk.co.za/security** (how to report a security problem — reply within 3 working days, safe harbour for good-faith research) and **wurk.co.za/trust** (how WURK looks after businesses' data, in plain words), linked from the footer.
+- **OWASP ASVS Level 2 self-assessment**: `docs/security/asvs-l2.md` — every control with how WURK meets it and the test that proves it, plus open gaps.
+
+### Security — Sprint 18.1a (baseline)
+- **Libraries with security advisories updated**: Laravel 13.38 → 13.42 and Symfony 7.4 components (routing, HTTP foundation/kernel, mime and others) — `composer audit` now clean. The rich-text editor's `happy-dom` (a server-side DOM it bundles but WURK never runs) is pinned to its patched release — `pnpm audit --prod` clean.
+- **Security headers on every response**: a **Content Security Policy with a per-request nonce** on every back-office and platform page (only WURK's own scripts run; styles, images, media and connections limited to WURK and where uploads are stored); no framing; `nosniff`; strict referrer and permissions policies; **HSTS** over HTTPS (with subdomains on WURK's own domain only). Pages with their own policy (public websites, record links, payment hand-offs) keep it. `WURK_CSP=report-only` or `off` for a careful rollout.
+- Session cookies are HTTPS-only wherever WURK runs on HTTPS (unless `SESSION_SECURE_COOKIE` says otherwise).
+- **`TRUSTED_PROXIES`** (new): behind the load balancer WURK now sees each visitor's own IP (rate limits, audit) and HTTPS — previously it would have seen the load balancer for everyone.
+- Every public route that changes something is rate-limited — **checked in CI**, so a new unthrottled one fails the build. The unused `/storage/{path}` file routes are gone.
+- Browser tests fail if the Content Security Policy blocks anything on a page.
+
+### Added — Sprint 18.0b (Watchtower: AI explanations, slow pages, uptime)
+- **WURK's AI explains each problem worth explaining** (high or critical, back after a fix, or a normal one that keeps happening): it reads the error, the trace, the lines of WURK's own code where it happened (from the running release) and earlier problems in the same file, then writes what broke and for whom, the likely cause, a suggested fix with a test, and its confidence. The explanation leads the email and the fix request. It can raise severity, never lower it. In the background, at most 50 a day (`WATCHTOWER_AI_DAILY_CAP`), on WURK's own AI account; **Explain again** on the problem page. High problems wait up to 3 minutes for it; critical ones never wait.
+- **Slow pages**: response times sampled per route per hour; a route where more than 5% of requests take over 300 ms (the PRD's p95 budget), or five take over 2 seconds, becomes a problem; the slowest routes of the last 24 hours are on the Watchtower page.
+- **Uptime**: the external uptime checker's webhook (`/_wurk/uptime/{WATCHTOWER_UPTIME_TOKEN}` — Better Stack, UptimeRobot or plain JSON) records each outage; when it's over, HQ is emailed how long it lasted and **what Watchtower saw meanwhile** (usually the reason). Uptime % over 30 days per monitor.
+
+### Added — Sprint 18.0a (Watchtower: platform monitoring)
+- **Admin → Watchtower**: every server error, browser crash, failed job, failing or missed scheduled task, backed-up queue and failing system check (central database, every shard, cache, file storage) — **grouped into problems** (the same bug across businesses and orders is one problem), worst first, with how often, since which release, which businesses, and the trace.
+- **Emails to HQ**: critical and high problems straight away — **one email per problem**, again only if it comes back after a fix, gets ten times worse or more serious; recoveries are announced; everything else in a **daily report at 08:00 SAST** ("all quiet" when it is). Addresses set in Admin (up to 5).
+- Every email and problem page carries a **fix request** — a self-contained report to paste to engineering. **Personal data is removed** before anything is stored (emails, phone numbers, IDs, quoted values; no request data at all).
+- **Mark fixed in a release** — if it happens again, it's flagged as a regression. Acknowledge, ignore, reopen; quiet problems resolve after 7 days.
+- `/health/heartbeat` for the external uptime checker: 503 when the scheduler stops.
+- New **Engineering** platform role (`watchtower.view`, `watchtower.manage`); Support can view.
+
 ## [0.18.0] — 2026-11-15 — Sprint 16: Self-service and support
 
 Help centre with 30-second videos and "?" on every screen; the "Ask WURK" assistant (answers from help and the business's own figures, changes confirmed first with undo; 50 free questions a month); support tickets with help-first deflection, the page and last error attached, screenshots, WURK's inbox (assign, priority, notes, canned and AI-suggested replies, reply targets by package in business hours) and ratings; consent-based support access (view-only by default, up to 2 hours, sensitive actions always blocked, audited on behalf); business health for WURK's success team (nightly score, reasons and next steps, MRR at risk, weekly digest); "Your data" full export and 30-day "Recently deleted". Release steps: docs/deployment/docker.md (v0.18.0 rows).

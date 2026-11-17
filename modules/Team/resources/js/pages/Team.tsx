@@ -123,7 +123,8 @@ function MemberRow({
           variant="ghost"
           size="sm"
           className="justify-self-start"
-          aria-label={`Remove ${m.name}`}
+          // The name starts with the words on the button (WCAG 2.5.3), then says who.
+          aria-label={`Remove from team: ${m.name}`}
           onClick={() => {
             if (window.confirm(`Remove ${m.name} from the team? Their past work stays on record.`))
               router.delete(`${base}/${m.id}`, done);

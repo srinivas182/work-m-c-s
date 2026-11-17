@@ -1,0 +1,38 @@
+# Dependency updates (Sprint 18.1b): a weekly PR per ecosystem, security fixes as soon as they're published.
+# Updates are grouped so CI runs once per ecosystem per week, not once per package.
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /
+    target-branch: develop
+    schedule: { interval: weekly, day: monday, time: '05:00', timezone: Africa/Johannesburg }
+    open-pull-requests-limit: 3
+    groups:
+      php-minor-and-patch:
+        update-types: [minor, patch]
+    labels: [dependencies]
+
+  - package-ecosystem: npm # pnpm-lock.yaml
+    directory: /
+    target-branch: develop
+    schedule: { interval: weekly, day: monday, time: '05:00', timezone: Africa/Johannesburg }
+    open-pull-requests-limit: 3
+    groups:
+      js-minor-and-patch:
+        update-types: [minor, patch]
+    labels: [dependencies]
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule: { interval: monthly }
+    groups:
+      actions:
+        patterns: ['*']
+    labels: [dependencies]
+
+  - package-ecosystem: docker
+    directory: /docker/production
+    target-branch: develop
+    schedule: { interval: monthly }
+    labels: [dependencies]

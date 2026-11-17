@@ -46,7 +46,7 @@ return [
         // Business handles that can never be claimed (they collide with platform hosts or routes).
         'reserved_handles' => [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
-            'help', 'login', 'logout', 'mail', 'my', 'agent', 'partners', 'register', 'signup', 'static',
+            '.well-known', 'help', 'login', 'logout', 'mail', 'my', 'agent', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
             'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'templates', 'forms', 'settings', 'webhooks', 'signup', 'oauth',
             'pay',
@@ -55,6 +55,9 @@ return [
 
         // Default capacity of a shared shard (tenants per database).
         'shard_capacity' => (int) env('WURK_SHARD_CAPACITY', 5000),
+
+        // The shard migrated (and health-checked) first on every rollout — Sprint 18.4b. Empty: the first by name.
+        'canary_shard' => (string) env('WURK_CANARY_SHARD', ''),
 
         // Seconds tenant lookups by handle/host are cached.
         'resolution_cache_ttl' => 600,
@@ -141,4 +144,42 @@ return [
     'demo_days' => 14,
     // Support tickets (Sprint 16.3): WURK's support inbox email — new tickets and replies are sent here.
     'support_email' => env('WURK_SUPPORT_EMAIL', 'support@wurk.co.za'),
+
+    // Security headers (Sprint 18.1): the Content Security Policy — enforce (default) | report-only | off; HSTS over HTTPS.
+    'security' => [
+        'csp' => env('WURK_CSP', 'enforce'),
+        'hsts' => (bool) env('WURK_HSTS', true),
+        // Who to tell about a security problem (security.txt and the disclosure page).
+        'contact' => env('WURK_SECURITY_EMAIL', 'security@wurk.co.za'),
+        // The load balancer's addresses (comma-separated), or "*" when the servers are reachable only through it:
+        // WURK then sees each visitor's IP (rate limits, audit) and HTTPS (HSTS, secure cookies). Unset: trust nobody.
+        'trusted_proxies' => env('TRUSTED_PROXIES', ''),
+    ],
+
+    // Load tests on staging (Sprint 18.3b): the secret that lets test machines play many visitors. Never in production.
+    'load_test' => ['token' => env('WURK_LOAD_TEST_TOKEN', '')],
+
+    // The running release (Sprint 18.0): set at build time; otherwise the VERSION file at the root.
+    'release' => env('WURK_RELEASE') ?: (is_file(base_path('VERSION')) ? trim((string) file_get_contents(base_path('VERSION'))) : 'dev'),
+    'commit' => env('WURK_COMMIT'),
+
+    // Watchtower (Sprint 18.0): who gets problem reports until HQ sets its own list in Admin → Watchtower.
+    'watchtower' => [
+        'recipients' => array_values(array_filter(array_map('trim', explode(',', (string) env('WATCHTOWER_EMAIL', ''))))),
+        // Secret in the external uptime checker's webhook address: /_wurk/uptime/{token} (18.0b). Unset = no webhook.
+        'uptime_token' => env('WATCHTOWER_UPTIME_TOKEN'),
+        // The AI explains problems (18.0b): on/off, and how many a day at most (WURK's cost, not businesses').
+        'ai' => (bool) env('WATCHTOWER_AI', true),
+        'ai_daily_cap' => (int) env('WATCHTOWER_AI_DAILY_CAP', 50),
+        // Backups (18.4c): the targets that must have a recent backup (e.g. "central,shard-1,files"), how old the latest
+        // may be before it's a problem, and WURK's recovery targets (PRD §15): data lost ≤ 15 min, back within 4 hours.
+        'backup_targets' => array_values(array_filter(array_map('trim', explode(',', (string) env('BACKUP_TARGETS', ''))))),
+        'backup_max_age_hours' => (int) env('BACKUP_MAX_AGE_HOURS', 26),
+        'rpo_minutes' => 15,
+        'rto_minutes' => 240,
+        // Share of web requests timed for the slow-pages check (every request over 2 s is always counted).
+        'timing_sample' => (float) env('WATCHTOWER_TIMING_SAMPLE', 0.02),
+        // Extra queues to watch for backlogs, besides the connection's default.
+        'queues' => array_values(array_filter(explode(',', (string) env('WATCHTOWER_QUEUES', '')))),
+    ],
 ];

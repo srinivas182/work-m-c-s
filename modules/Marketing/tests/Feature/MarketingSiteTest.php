@@ -41,6 +41,8 @@ it('serves every marketing page and only known legal pages', function () {
         $this->get(root($path))->assertOk();
     }
     $this->get(root('/legal/anything'))->assertNotFound();
+    // The accessibility statement (18.5b), with where to report a problem.
+    $this->get(root('/accessibility'))->assertOk()->assertInertia(fn (Assert $p) => $p->component('Marketing::Accessibility')->where('contact', config('wurk.support_email')));
 });
 
 it('stores and forwards contact messages, and quietly drops bot submissions', function () {

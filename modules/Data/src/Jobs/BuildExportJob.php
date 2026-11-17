@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Wurk\Data\Models\DataExport;
 use Wurk\Data\Support\Exporter;
+use Wurk\Platform\Queues;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -21,7 +22,10 @@ final class BuildExportJob implements ShouldQueue
 
     public int $timeout = 1800;
 
-    public function __construct(public string $tenantId, public string $exportId) {}
+    public function __construct(public string $tenantId, public string $exportId)
+    {
+        $this->onQueue(Queues::BULK); // patient work (18.3a)
+    }
 
     public function handle(TenantDirectory $tenants, TenantContext $context, Exporter $exporter): void
     {

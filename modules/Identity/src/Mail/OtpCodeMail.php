@@ -24,7 +24,11 @@ final class OtpCodeMail extends Mailable
     {
         return new Content(markdown: 'identity::mail.otp', with: [
             'code' => $this->code,
-            'reason' => $this->purpose === 'reset' ? 'reset your password' : 'sign in',
+            'reason' => match ($this->purpose) {
+                'reset' => 'reset your password',
+                'confirm' => 'confirm it’s you',
+                default => 'sign in',
+            },
             'minutes' => intdiv((int) config('wurk.identity.otp.ttl_seconds', 300), 60),
         ]);
     }

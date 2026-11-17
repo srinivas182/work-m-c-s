@@ -106,7 +106,9 @@ function Shell({
     flash?: { warning?: string | null };
   }>().props;
   return (
-    <div className="min-h-dvh bg-[#F7F7FB] text-[#1B1640]">
+    // Always light (Sprint 18.5a): the marketing design is light-only, so the form fields use the light theme too —
+    // in someone's dark theme, their labels were light grey on this white card.
+    <div data-theme="light" className="min-h-dvh bg-[#F7F7FB] text-[#1B1640]">
       <Head title={`Sign up — ${title}`} />
       <div className="mx-auto max-w-xl px-5 py-8 sm:py-14">
         <p className="font-display flex items-center gap-2.5 text-lg font-bold">

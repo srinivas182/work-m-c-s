@@ -1,5 +1,5 @@
 // The agent area (Sprint 14.7): signing in, home, and banking details up to the confirmation code.
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible } from './support';
 
 test('an agent signs in, sees their link and asks to change their banking details', async ({

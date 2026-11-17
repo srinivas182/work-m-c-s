@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Tenancy;
 
 use Closure;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Log\Context\Repository as LogContext;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobProcessed;
@@ -18,12 +19,17 @@ use Laravel\Octane\Events\RequestReceived;
 use Laravel\Octane\Events\RequestTerminated;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Tenancy\Actions\TenantProvisioning;
+use Wurk\Tenancy\Console\ClearMovedCommand;
 use Wurk\Tenancy\Console\CreateTenantCommand;
 use Wurk\Tenancy\Console\MigrateShardsCommand;
+use Wurk\Tenancy\Console\MoveTenantCommand;
 use Wurk\Tenancy\Console\RegisterShardCommand;
+use Wurk\Tenancy\Console\RepointShardCommand;
+use Wurk\Tenancy\Console\RestoreTenantCommand;
 use Wurk\Tenancy\Console\RunForTenantsCommand;
 use Wurk\Tenancy\Context\TenantContextManager;
 use Wurk\Tenancy\Contracts\BranchDirectory;
+use Wurk\Tenancy\Contracts\ShardStatus;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Tenancy\Contracts\TenantProvisioner;
@@ -37,6 +43,7 @@ use Wurk\Tenancy\Policies\TenantPolicy;
 use Wurk\Tenancy\Resolution\EloquentTenantDirectory;
 use Wurk\Tenancy\Support\Branches;
 use Wurk\Tenancy\Support\HandleRules;
+use Wurk\Tenancy\Support\ShardStatusReport;
 
 final class TenancyServiceProvider extends ModuleServiceProvider
 {
@@ -49,6 +56,7 @@ final class TenancyServiceProvider extends ModuleServiceProvider
         $this->app->singleton(TenantProvisioner::class, TenantProvisioning::class);
         $this->app->singleton(TenantContext::class, TenantContextManager::class);
         $this->app->singleton(TenantDirectory::class, EloquentTenantDirectory::class);
+        $this->app->bind(ShardStatus::class, ShardStatusReport::class);
     }
 
     /**
@@ -87,11 +95,16 @@ final class TenancyServiceProvider extends ModuleServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 RegisterShardCommand::class,
+                RepointShardCommand::class,
                 MigrateShardsCommand::class,
                 CreateTenantCommand::class,
                 RunForTenantsCommand::class,
+                MoveTenantCommand::class,
+                RestoreTenantCommand::class,
+                ClearMovedCommand::class,
             ]);
         }
+        $this->callAfterResolving(Schedule::class, fn (Schedule $s) => $s->command('tenants:clear-moved')->dailyAt('04:13')->onOneServer()); // 18.4a
     }
 
     /**

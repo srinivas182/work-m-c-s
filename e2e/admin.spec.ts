@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { totp } from './totp';
 
 const SECRET = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
@@ -120,6 +120,21 @@ test('WURK staff sign in with an authenticator and run the admin', async ({ page
   await page.goto(`${admin}/health`);
   await expect(page.getByRole('heading', { level: 1, name: 'Business health' })).toBeVisible();
   await expect(page.getByRole('form', { name: 'Weekly digest' })).toBeVisible();
+  await expectAccessible(page);
+
+  // Watchtower (Sprint 18.0): problems, system checks and who's emailed.
+  await page.goto(`${admin}/watchtower`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Watchtower' })).toBeVisible();
+  await expectAccessible(page); // before saving: the confirmation toast sits over the filters
+  const emails = page.getByRole('form', { name: 'Problem emails' });
+  await emails.getByLabel('Email addresses (comma-separated, up to 5)').fill('hq@example.test');
+  await emails.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Saved. Problem reports go to hq@example.test.')).toBeVisible();
+
+  // System (Sprint 18.4c): databases and their migrations, backups, drills, business moves.
+  await page.goto(`${admin}/system`);
+  await expect(page.getByRole('heading', { level: 1, name: 'System' })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: 'e2e-shard' })).toBeVisible();
   await expectAccessible(page);
 
   // Profitability (Sprint 15.5a): costs and a pricing "what if".

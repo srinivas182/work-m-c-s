@@ -44,7 +44,8 @@ it('matches a statement by message ID — billed-not-sent, sent-not-billed, and 
         ->and(($this->result)()['statementOnlyRows'])->toBe([['2027-03-06', 'P9', 'R0.30']]);
     $csv = (string) $this->actingAs($this->finance)->get($this->admin('/reconciliation/export.csv'))->assertOk()->getContent();
     expect($csv)->toContain('"On the statement only",2027-03-06,P9,R0.30')->toContain('"In WURK only",2027-03-06,P5,"Glow Salon"')->toContain('"(no provider ID)"');
-    $log = (string) json_encode(DB::table('audit_events')->where('action', 'billing.reconciliation')->first());   // the whole logged event
+    $log = (string) json_encode(DB::table('audit_events')->where('action', 'billing.reconciliation')->first());   // the whole logged event…
+    $log = (string) preg_replace('/\b[0-9a-z]{26}\b|\b[0-9a-f]{32,}\b/i', '', $log);                             // …less random IDs and hashes, which can contain "082" by chance
     expect($log)->not->toContain('082')->not->toContain('+27');                                                           // counts only
 });
 

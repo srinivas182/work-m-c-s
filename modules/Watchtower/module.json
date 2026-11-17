@@ -1,0 +1,14 @@
+{
+    "name": "Watchtower",
+    "key": "watchtower",
+    "version": "0.1.0",
+    "description": "Platform monitoring for WURK HQ: crashes and bugs grouped into incidents, failed jobs, missed scheduled tasks, queue backlogs, infrastructure checks and downtime — emailed to HQ with an AI explanation and a ready-to-paste fix request (personal data removed); slow pages and uptime.",
+    "core": true,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "security",
+        "health",
+        "ai"
+    ]
+}

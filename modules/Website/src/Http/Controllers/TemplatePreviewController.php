@@ -9,7 +9,10 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Website\Support\Templates;
 
-/** Public preview of a published template (signup's "Preview" link). Drafts are never shown. */
+/**
+ * Public preview of a published template (signup's "Preview" link). Drafts are never shown. `?primary=#rrggbb` and
+ * `?secondary=#rrggbb` show it in other colours (Sprint 18.5b: every template is checked for contrast in many colours).
+ */
 final class TemplatePreviewController
 {
     public function __invoke(Request $request, string $template, Templates $templates): Response
@@ -30,9 +33,23 @@ final class TemplatePreviewController
             'page' => ['key' => $page['key'], 'title' => $page['title']],
             'pages' => $pages->map(fn ($p) => ['key' => $p['key'], 'title' => $p['title']])->values()->all(),
             'content' => $page['content'],
-            'branding' => [...(array) $definition['branding'], 'logo' => null, 'favicon' => null],
+            'branding' => [...(array) $definition['branding'], ...$this->colours($request), 'logo' => null, 'favicon' => null],
             'menus' => ['header' => $menu($definition['menus']['header'] ?? []), 'footer' => $menu($definition['menus']['footer'] ?? [])],
             'previewBase' => $base,
         ]);
+    }
+
+    /** @return array{primary?: string, secondary?: string} */
+    private function colours(Request $request): array
+    {
+        $out = [];
+        foreach (['primary', 'secondary'] as $key) {
+            $value = $request->query($key);
+            if (is_string($value) && preg_match('/^#[0-9a-fA-F]{6}$/', $value) === 1) {
+                $out[$key] = strtoupper($value);
+            }
+        }
+
+        return $out;
     }
 }

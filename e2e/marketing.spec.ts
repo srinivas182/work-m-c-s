@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 
 const site = `http://wurk.test:${process.env.E2E_PORT ?? 8123}`;
 
@@ -33,7 +33,7 @@ test('the marketing site is accessible and shows live prices', async ({ page }) 
   await expect(starter.getByText('R2 990', { exact: true })).toBeVisible();
   await expectAccessible(page);
 
-  for (const path of ['/faq', '/contact', '/legal/terms']) {
+  for (const path of ['/faq', '/contact', '/legal/terms', '/trust', '/security']) {
     await page.goto(`${site}${path}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expectAccessible(page);

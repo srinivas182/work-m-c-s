@@ -3,7 +3,7 @@
 #   serve      (default) cache configuration, then run Octane on FrankenPHP
 #   worker     run a queue worker
 #   scheduler  run the task scheduler
-#   migrate    run database migrations (use as a one-off release step)
+#   migrate    run database migrations — central, then every shard (one-off release step)
 #   ssr        server-side renderer for wurk.co.za (point web containers at it
 #              with INERTIA_SSR_URL=http://<ssr-host>:13714)
 #   <anything> run that command, e.g. `php artisan tinker`
@@ -19,6 +19,7 @@ case "${1:-serve}" in
   serve)
     warm_caches
     exec php artisan octane:frankenphp \
+      --caddyfile=docker/production/Caddyfile \
       --host=0.0.0.0 \
       --port="${PORT:-8000}" \
       --workers="${OCTANE_WORKERS:-auto}" \
@@ -26,7 +27,8 @@ case "${1:-serve}" in
     ;;
   worker)
     warm_caches
-    exec php artisan queue:work --sleep=1 --tries=3 --max-time=3600
+    # Critical first (booking messages), then ordinary work, then bulk (campaign batches, exports) — Sprint 18.3a.
+    exec php artisan queue:work --queue=critical,default,bulk --sleep=1 --tries=3 --max-time=3600
     ;;
   scheduler)
     warm_caches
@@ -36,7 +38,9 @@ case "${1:-serve}" in
     SSR_HOST="${SSR_HOST:-0.0.0.0}" exec node bootstrap/ssr/ssr.js
     ;;
   migrate)
-    exec php artisan migrate --force --no-interaction
+    # Central database, then the shards — the canary first, health-checked, stopping on the first failure (18.4b).
+    php artisan migrate --force --no-interaction
+    exec php artisan shards:migrate --no-interaction
     ;;
   *)
     exec "$@"

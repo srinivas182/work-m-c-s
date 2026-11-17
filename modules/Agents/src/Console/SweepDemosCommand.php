@@ -17,7 +17,7 @@ final class SweepDemosCommand extends Command
     public function handle(AgentDemos $demos): int
     {
         $r = $demos->sweep();
-        $this->info("Reminded {$r['reminded']}, archived {$r['archived']}.");
+        $this->info("Reminded {$r['reminded']}, archived {$r['archived']}, removed {$r['purged']} for good.");
 
         return self::SUCCESS;
     }

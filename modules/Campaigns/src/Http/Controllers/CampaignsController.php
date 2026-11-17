@@ -35,7 +35,7 @@ final class CampaignsController
     {
         $db = DB::connection($this->context->connectionName());
         $t = $this->context->id();
-        $stats = $db->table('campaign_messages')->where('tenant_id', $t)->selectRaw("campaign_id, count(*) as total, sum(case when status = 'sent' then 1 else 0 end) as sent, count(opened_at) as opened, count(clicked_at) as clicked")
+        $stats = $db->table('campaign_messages')->where('tenant_id', $t)->selectRaw("campaign_id, count(*) as total, sum(case when status = 'sent' then 1 else 0 end) as sent, sum(case when status = 'failed' then 1 else 0 end) as failed, count(opened_at) as opened, count(clicked_at) as clicked")
             ->groupBy('campaign_id')->get()->keyBy('campaign_id');
 
         $redeemed = $db->table('coupon_redemptions')->join('coupons', 'coupons.id', '=', 'coupon_redemptions.coupon_id')->where('coupon_redemptions.tenant_id', $t)->where('coupons.tenant_id', $t)
@@ -47,7 +47,7 @@ final class CampaignsController
                 'redeemed' => isset($redeemed[$c->id]) ? $redeemed[$c->id]->count() : 0,
                 'sales_cents' => isset($redeemed[$c->id]) ? $takings->paidFor(array_values($redeemed[$c->id]->map(fn ($r) => [(string) $r->source_type, (string) $r->source_id])->all())) : 0,
                 'id' => $c->id, 'name' => $c->name, 'channel' => $c->channel, 'status' => $c->status, 'scheduled_at' => $c->scheduled_at, 'sent_at' => $c->sent_at,
-                'sent' => (int) ($stats[$c->id]->sent ?? 0), 'failed' => (int) ($stats[$c->id]->total ?? 0) - (int) ($stats[$c->id]->sent ?? 0),
+                'sent' => (int) ($stats[$c->id]->sent ?? 0), 'failed' => (int) ($stats[$c->id]->failed ?? 0), 'total' => (int) ($stats[$c->id]->total ?? 0),
                 'opened' => (int) ($stats[$c->id]->opened ?? 0), 'clicked' => (int) ($stats[$c->id]->clicked ?? 0),
             ])->all(),
             'readyMade' => ReadyMade::all(),
@@ -135,7 +135,7 @@ final class CampaignsController
             $sent = $this->sender->send($campaign);
         });
 
-        return back()->with('status', "Sent to {$sent} ".($sent === 1 ? 'customer' : 'customers').'.');
+        return back()->with('status', "Sending to {$sent} ".($sent === 1 ? 'customer' : 'customers').' — it goes out in the background; this page shows how far it’s got.');
     }
 
     /** @return array{channel: string, segment: string, branch_id?: string|null} */

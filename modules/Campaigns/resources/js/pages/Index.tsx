@@ -22,6 +22,7 @@ interface Campaign {
   sent_at: string | null;
   sent: number;
   failed: number;
+  total: number;
   opened: number;
   clicked: number;
   redeemed: number;
@@ -107,6 +108,13 @@ export default function Index({
                         ? 'Sending'
                         : 'Draft'}
                 </Badge>
+                {c.status === 'sending' && (
+                  <span className="text-fg-muted" aria-live="polite">
+                    {c.total > 0
+                      ? `${c.sent + c.failed} of ${c.total} done`
+                      : 'Getting the list ready…'}
+                  </span>
+                )}
                 {c.status === 'sent' && (
                   <span className="text-fg-muted">
                     {c.sent} sent{c.failed > 0 ? ` · ${c.failed} failed` : ''}

@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Wurk\Security;
 
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Routing\Router;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Security\Contracts\PlatformSettings;
 use Wurk\Security\Http\Middleware\AdminIpAllowList;
+use Wurk\Security\Http\Middleware\LoadTestVisitors;
 use Wurk\Security\Http\Middleware\RequireTeamMfa;
+use Wurk\Security\Http\Middleware\SecurityHeaders;
 use Wurk\Security\Support\Settings;
 
 final class SecurityServiceProvider extends ModuleServiceProvider
@@ -44,7 +47,18 @@ final class SecurityServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        // Behind a load balancer (18.1): trust its X-Forwarded-* headers — from config, so it works with a cached config.
+        $proxies = trim((string) config('wurk.security.trusted_proxies', ''));
+        if ($proxies !== '') {
+            TrustProxies::at($proxies === '*' ? '*' : array_values(array_filter(array_map('trim', explode(',', $proxies)))));
+        }
+
         $kernel = $this->app->make(Kernel::class);
+        // Security headers on every response, web or not (18.1).
+        if (method_exists($kernel, 'prependMiddleware')) {
+            $kernel->prependMiddleware(SecurityHeaders::class);
+            $kernel->prependMiddleware(LoadTestVisitors::class); // staging load tests only (18.3b)
+        }
         if (method_exists($kernel, 'appendMiddlewareToGroup')) {
             $kernel->appendMiddlewareToGroup('web', AdminIpAllowList::class);
         }

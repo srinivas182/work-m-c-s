@@ -1,6 +1,6 @@
 import { Dialog as DialogPrimitive } from 'radix-ui';
 import { X } from 'lucide-react';
-import type { ComponentProps, ReactNode } from 'react';
+import { useRef, type ComponentProps, type ReactNode } from 'react';
 import { cn } from '../lib/cn';
 
 export const Dialog = DialogPrimitive.Root;
@@ -22,6 +22,38 @@ function CloseButton() {
   );
 }
 
+/**
+ * Focus goes back where it came from when a dialog or panel closes (WCAG 2.4.3, Sprint 18.5b). Radix does this only
+ * for a DialogTrigger; dialogs opened from a plain button or by code (Ask WURK, confirmations) left focus on the page
+ * body, so a keyboard user started again from the top.
+ */
+function useReturnFocus(
+  props: Pick<
+    ComponentProps<typeof DialogPrimitive.Content>,
+    'onOpenAutoFocus' | 'onCloseAutoFocus'
+  >,
+) {
+  const opener = useRef<HTMLElement | null>(null);
+  return {
+    onOpenAutoFocus: (e: Event) => {
+      opener.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      props.onOpenAutoFocus?.(e);
+    },
+    onCloseAutoFocus: (e: Event) => {
+      props.onCloseAutoFocus?.(e);
+      requestAnimationFrame(() => {
+        const back = opener.current;
+        if (
+          (document.activeElement === document.body || document.activeElement === null) &&
+          back?.isConnected
+        )
+          back.focus();
+      });
+    },
+  };
+}
+
 interface DialogContentProps extends ComponentProps<typeof DialogPrimitive.Content> {
   title: string;
   description?: ReactNode;
@@ -33,8 +65,11 @@ export function DialogContent({
   title,
   description,
   children,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
 }: DialogContentProps) {
+  const focus = useReturnFocus({ onOpenAutoFocus, onCloseAutoFocus });
   return (
     <DialogPrimitive.Portal>
       <Overlay />
@@ -45,6 +80,7 @@ export function DialogContent({
           className,
         )}
         {...props}
+        {...focus}
       >
         <div className="pr-8">
           <DialogPrimitive.Title className="font-display text-lg font-semibold tracking-tight">
@@ -87,8 +123,11 @@ export function SheetContent({
   side = 'right',
   hideTitle = false,
   children,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
 }: SheetContentProps) {
+  const focus = useReturnFocus({ onOpenAutoFocus, onCloseAutoFocus });
   return (
     <DialogPrimitive.Portal>
       <Overlay />
@@ -102,6 +141,7 @@ export function SheetContent({
           className,
         )}
         {...props}
+        {...focus}
       >
         <DialogPrimitive.Title
           className={cn('font-display px-6 pt-6 text-lg font-semibold', hideTitle && 'sr-only')}

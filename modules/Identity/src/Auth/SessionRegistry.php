@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Wurk\Identity\Auth;
 
 use Illuminate\Http\Request;
+use Wurk\Identity\Events\NewDeviceSignedIn;
 use Wurk\Identity\Models\Identity;
 use Wurk\Identity\Models\IdentitySession;
+use Wurk\Identity\Support\DeviceName;
 
 /**
  * Tracks signed-in devices so people can review them and sign out others,
@@ -29,6 +31,13 @@ final class SessionRegistry
     {
         $key = self::key($request->session()->getId());
         $request->session()->put(self::SESSION_KEY, $key);
+
+        // A device this person hasn't signed in on before (and not their very first sign-in): tell them (18.2b).
+        $device = DeviceName::of((string) $request->userAgent());
+        $known = IdentitySession::query()->where('identity_id', $identity->id)->where('id', '!=', $key)->pluck('user_agent');
+        if ($known->isNotEmpty() && ! $known->contains(fn ($agent) => DeviceName::of((string) $agent) === $device)) {
+            event(new NewDeviceSignedIn($identity, $device, $request->ip(), $surface));
+        }
 
         IdentitySession::query()->updateOrCreate(['id' => $key], [
             'identity_id' => $identity->id,

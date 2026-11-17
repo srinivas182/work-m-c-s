@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { expectAccessible, latestCode, signUpBusiness } from './support';
 
 test('a new customer signs in to the business’s portal with a code, agrees once, sees their account and signs out', async ({

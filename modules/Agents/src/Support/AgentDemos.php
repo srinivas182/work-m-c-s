@@ -28,6 +28,9 @@ final readonly class AgentDemos
 {
     public const DAYS = 14; // = config('wurk.demo_days') — Website's banner uses the config
 
+    /** Days after archiving before a demo's data is removed for good (18.4a). */
+    public const PURGE_AFTER_DAYS = 7;
+
     public function __construct(private TenantProvisioner $provisioner, private TenantDirectory $tenants, private TenantContext $context,
         private SiteTemplates $templates, private Accounts $accounts, private PeopleDirectory $people, private AuditLog $audit) {}
 
@@ -82,13 +85,20 @@ final readonly class AgentDemos
     }
 
     /**
-     * Daily: reminders on days 10 and 13, archive on day 14.
+     * Daily: reminders on days 10 and 13, archive on day 14, and archived demos' data removed for good 7 days later
+     * (Sprint 18.4a — the sample content was the agent's, not a customer's).
      *
-     * @return array{reminded: int, archived: int}
+     * @return array{reminded: int, archived: int, purged: int}
      */
     public function sweep(): array
     {
-        $out = ['reminded' => 0, 'archived' => 0];
+        $out = ['reminded' => 0, 'archived' => 0, 'purged' => 0];
+        foreach (DB::table('agent_demos')->whereNotNull('archived_at')->whereNull('claimed_at')->whereNull('purged_at')->where('archived_at', '<', now()->subDays(self::PURGE_AFTER_DAYS))->get() as $d) {
+            $this->provisioner->purge((string) $d->tenant_id);
+            DB::table('agent_demos')->where('id', $d->id)->update(['purged_at' => now(), 'updated_at' => now()]);
+            $this->audit->record('agents.demo_purged', 'tenant', (string) $d->tenant_id, ['agent' => $d->agent_id]);
+            $out['purged']++;
+        }
         foreach (DB::table('agent_demos')->whereNull('archived_at')->whereNull('claimed_at')->get() as $d) {
             $left = now()->diffInHours($d->expires_at, false) / 24;
             if ($left <= 0) {

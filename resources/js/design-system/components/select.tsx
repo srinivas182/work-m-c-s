@@ -18,7 +18,7 @@ export function SelectTrigger({
       data-slot="select-trigger"
       className={cn(
         fieldControlClasses,
-        'data-[placeholder]:text-fg-subtle flex h-10 items-center justify-between gap-2 px-3 text-left text-sm [&>span]:truncate',
+        'data-[placeholder]:text-fg-muted flex h-10 items-center justify-between gap-2 px-3 text-left text-sm [&>span]:truncate',
         className,
       )}
       {...props}

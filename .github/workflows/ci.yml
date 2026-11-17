@@ -44,6 +44,9 @@ jobs:
           filters: |
             shared: &shared
               - '.github/workflows/**'
+              - '.semgrep.yml'
+              - '.gitleaks.toml'
+              - '.zap/**'
             backend:
               - *shared
               - 'app/**'
@@ -80,6 +83,7 @@ jobs:
               - '.prettierrc.json'
               - 'e2e/**'
               - 'playwright.config.ts'
+              - 'load/**'
             docker:
               - *shared
               - 'docker/**'
@@ -87,6 +91,38 @@ jobs:
               - '.dockerignore'
               - 'composer.lock'
               - 'pnpm-lock.yaml'
+
+  # Sprint 18.1b: on every change, drafts included (about a minute). Any PHP advisory, a high or critical advisory in
+  # a JavaScript production dependency, a secret in this PR's commits, or a breach of WURK's static rules fails CI.
+  security:
+    name: Security · audits, secrets & static rules
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # gitleaks reads this PR's commits
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: none
+          tools: composer:v2
+      - name: PHP dependencies (composer audit — any advisory fails)
+        run: composer audit --locked --no-interaction
+      - uses: pnpm/action-setup@v6
+      - name: JavaScript production dependencies (high or critical fails; dev tools are left to Dependabot)
+        run: pnpm audit --prod --audit-level high
+      - name: Secrets in this PR's commits (gitleaks)
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz | tar xz gitleaks
+          ./gitleaks git . --no-banner --redact --config .gitleaks.toml --log-opts="origin/${{ github.base_ref }}..HEAD"
+      - name: WURK's static security rules (Semgrep, .semgrep.yml)
+        run: >-
+          pipx run semgrep==1.185.0 scan --config .semgrep.yml --metrics off --error --quiet
+          --exclude vendor --exclude node_modules --exclude public --exclude storage
+          --exclude bootstrap/ssr --exclude bootstrap/site-render
 
   backend-quick:
     name: Backend · style & static analysis
@@ -217,7 +253,7 @@ jobs:
         run: vendor/bin/pest --group=clamav --fail-on-skipped --compact
 
   backend-tests-mysql:
-    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 5)
+    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 6)
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
@@ -226,7 +262,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        part: [1, 2, 3, 4, 5]
+        part: [1, 2, 3, 4, 5, 6]
     timeout-minutes: 12 # each part runs ~4-6 min; GitHub's slower machines add ~3-4 min, which cancelled four good runs at 10 (WURK, 9 Nov 2026)
     services:
       mysql:
@@ -246,7 +282,7 @@ jobs:
       DB_USERNAME: root
       DB_PASSWORD: root
       TEST_SHARD_DRIVER: mysql
-      TEST_SHARD_DATABASES: wurk_shard_1,wurk_shard_2
+      TEST_SHARD_DATABASES: wurk_shard_1,wurk_shard_2,wurk_shard_3
     steps:
       - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
@@ -263,7 +299,7 @@ jobs:
           restore-keys: composer-${{ runner.os }}-
       - run: composer install --no-interaction --no-progress --prefer-dist
       - name: Create shard databases
-        run: mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE wurk_shard_1; CREATE DATABASE wurk_shard_2;"
+        run: mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE wurk_shard_1; CREATE DATABASE wurk_shard_2; CREATE DATABASE wurk_shard_3;"
       - name: Prepare environment
         run: |
           cp .env.example .env
@@ -293,18 +329,19 @@ jobs:
         run: pnpm build
 
   e2e:
-    name: E2E · ${{ matrix.part == 'performance' && 'performance gate' || format('smoke & accessibility ({0})', matrix.part) }}
+    name: E2E · ${{ matrix.part == 'performance' && 'performance gate' || startsWith(matrix.part, 'screens') && format('every screen ({0})', matrix.part) || format('smoke & accessibility ({0})', matrix.part) }}
     needs: [changes, backend-quick, frontend-quick]
     if: >-
       always() && !cancelled() && !contains(needs.*.result, 'failure')
       && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true')
       && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    # Three parts: the browser suite in two halves, and the 24-template performance gate on its own.
+    # The browser suite in two halves; the accessibility crawl of every screen (18.5a) in three; the 24-template
+    # performance gate on its own.
     strategy:
       fail-fast: false
       matrix:
-        part: ['1/2', '2/2', 'performance']
+        part: ['1/2', '2/2', 'screens 1/3', 'screens 2/3', 'screens 3/3', 'performance']
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
@@ -344,10 +381,15 @@ jobs:
         timeout-minutes: 4
         run: pnpm exec playwright install chromium
       - name: Playwright (half ${{ matrix.part }})
-        if: matrix.part != 'performance'
+        if: matrix.part == '1/2' || matrix.part == '2/2'
         env:
           APP_ENV: e2e
-        run: pnpm test:e2e --shard=${{ matrix.part }}
+        run: pnpm test:e2e --shard=${{ matrix.part }} --grep-invert=@screens
+      - name: Accessibility crawl — every screen, both themes, desktop and mobile (${{ matrix.part }})
+        if: startsWith(matrix.part, 'screens')
+        env:
+          APP_ENV: e2e
+        run: pnpm test:e2e e2e/a11y-screens.spec.ts --shard=${{ matrix.part == 'screens 1/3' && '1/3' || matrix.part == 'screens 2/3' && '2/3' || '3/3' }}
       # Every template's public home page: mobile Lighthouse ≥ 90 and layout shift < 0.1 (Sprint 5 gate).
       - name: Performance gate (mobile Lighthouse on all 24 templates)
         if: matrix.part == 'performance'
@@ -358,6 +400,34 @@ jobs:
           php artisan serve --host=127.0.0.1 --port=8124 > /dev/null 2>&1 &
           for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:8124/ && break; sleep 1; done
           CHROME_PATH="$(node -e "console.log(require('@playwright/test').chromium.executablePath())")" node scripts/performance-gate.mjs --port=8124
+      # Sprint 18.3b: the load-test journeys still work (k6 smoke: a few visitors for 30 s; timings are judged on staging).
+      - name: Load-test scripts (k6 smoke)
+        if: matrix.part == 'performance'
+        timeout-minutes: 3
+        env:
+          APP_ENV: e2e
+        run: |
+          echo "WURK_LOAD_TEST_TOKEN=ci-load-test" >> .env.e2e
+          php artisan wurk:seed-load --businesses=5 --customers=50 --bookings=20 --products=5
+          curl -sSfL https://github.com/grafana/k6/releases/download/v0.57.0/k6-v0.57.0-linux-amd64.tar.gz | tar xz --strip-components=1 k6-v0.57.0-linux-amd64/k6
+          ./k6 run --quiet -e TARGET=http://127.0.0.1:8124 -e LOAD_TOKEN=ci-load-test load/k6/journeys.js
+      # Sprint 18.1b: OWASP ZAP's passive baseline against the running back office (same server as the gate).
+      # Rules in .zap/rules.tsv: missing security headers or cookie flags fail; anything else is reported.
+      - name: OWASP ZAP baseline (passive scan)
+        if: matrix.part == 'performance'
+        timeout-minutes: 5
+        run: |
+          chmod 777 .zap
+          docker run --rm --network host -v "$PWD/.zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t http://127.0.0.1:8124/sign-in -c rules.tsv -m 1 -I -r zap-report.html -J zap-report.json
+      - name: Upload ZAP report
+        if: always() && matrix.part == 'performance'
+        uses: actions/upload-artifact@v7
+        with:
+          name: zap-baseline
+          path: .zap/zap-report.*
+          retention-days: 14
+          if-no-files-found: ignore
       - name: Summarise failures
         if: failure()
         run: node e2e/report-failures.mjs
@@ -459,7 +529,7 @@ jobs:
   ci:
     name: CI
     if: always()
-    needs: [changes, backend-quick, frontend-quick, backend-tests, backend-clamav, backend-tests-mysql, frontend-tests, e2e, docker-dev, docker-prod]
+    needs: [changes, security, backend-quick, frontend-quick, backend-tests, backend-clamav, backend-tests-mysql, frontend-tests, e2e, docker-dev, docker-prod]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

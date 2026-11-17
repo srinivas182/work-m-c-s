@@ -51,7 +51,7 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            'serve' => false, // no public /storage/{path} routes: private files are sent by their own controllers (18.1)
             'throw' => false,
             'report' => false,
         ],

@@ -39,7 +39,7 @@ final class SendDueCommand extends Command
                 return $due->count();
             });
         }
-        $this->info("Sent {$n} campaigns.");
+        $this->info("Started {$n} campaigns."); // sent in the background, in batches (18.3a)
 
         return self::SUCCESS;
     }

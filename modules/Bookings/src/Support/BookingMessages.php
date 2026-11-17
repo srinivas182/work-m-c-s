@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Throwable;
+use Wurk\Bookings\Jobs\SendBookingMessage;
 use Wurk\Bookings\Mail\BookingMessageMail;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
@@ -30,8 +31,18 @@ final readonly class BookingMessages
 {
     public function __construct(private TenantContext $context, private Messenger $messenger, private CreditWallet $wallet) {}
 
-    /** @param  string  $kind  confirmed | reminder | moved | cancelled; $occurrence makes repeats distinct (e.g. reminder_24h, moved_2) */
+    /**
+     * Queue a booking message (Sprint 18.3a: on the critical queue, after the booking is saved).
+     *
+     * @param  string  $kind  confirmed | reminder | moved | cancelled; $occurrence makes repeats distinct (e.g. reminder_24h, moved_2)
+     */
     public function send(Booking|Reservation|ClassAttendee $booking, string $kind, ?string $occurrence = null): void
+    {
+        SendBookingMessage::dispatch($this->context->id(), $booking::class, (string) $booking->id, $kind, $occurrence)->afterCommit();
+    }
+
+    /** Send it now (the job calls this). */
+    public function deliver(Booking|Reservation|ClassAttendee $booking, string $kind, ?string $occurrence = null): void
     {
         $key = $occurrence ?? $kind;
         $db = DB::connection($this->context->connectionName());

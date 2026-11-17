@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Wurk\Identity\Http\Controllers\AccountController;
 use Wurk\Identity\Http\Controllers\BusinessesController;
+use Wurk\Identity\Http\Controllers\ConfirmController;
 use Wurk\Identity\Http\Controllers\InvitationController;
 use Wurk\Identity\Http\Controllers\MfaController;
 use Wurk\Identity\Http\Controllers\PasswordResetController;
@@ -45,6 +46,11 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/account/mfa/confirm', [AccountController::class, 'confirmMfa'])->name('identity.account.mfa.confirm');
     Route::delete('/account/mfa', [AccountController::class, 'disableMfa'])->name('identity.account.mfa.disable');
     Route::delete('/account/sessions', [AccountController::class, 'revokeOtherSessions'])->name('identity.account.sessions.revoke');
+    // "Confirm it's you" (18.2b).
+    Route::get('/account/confirm', [ConfirmController::class, 'show'])->name('identity.confirm');
+    Route::post('/account/confirm/password', [ConfirmController::class, 'password'])->middleware('throttle:10,1,identity-confirm')->name('identity.confirm.password');
+    Route::post('/account/confirm/code', [ConfirmController::class, 'sendCode'])->middleware('throttle:5,1,identity-confirm-code')->name('identity.confirm.code');
+    Route::post('/account/confirm/code/verify', [ConfirmController::class, 'verifyCode'])->middleware('throttle:10,1,identity-confirm-verify')->name('identity.confirm.verify');
     Route::get('/businesses', BusinessesController::class)->name('identity.businesses');
 });
 

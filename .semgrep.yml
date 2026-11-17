@@ -1,0 +1,126 @@
+# Static security rules (Sprint 18.1b) — WURK's own, run on every change (no network, no registry).
+# Each rule is something that must never reach production; add an exception only with a comment saying why it's safe.
+rules:
+  - id: php-eval
+    languages: [php]
+    severity: ERROR
+    message: eval() runs arbitrary code — never use it.
+    pattern: eval(...)
+
+  - id: php-unserialize
+    languages: [php]
+    severity: ERROR
+    message: unserialize() on data that could come from outside allows object injection. Use JSON.
+    pattern-either:
+      - pattern: unserialize(...)
+
+  - id: php-shell
+    languages: [php]
+    severity: ERROR
+    message: Running a shell command from PHP — use a Symfony Process with an argument list, never a string with input in it.
+    pattern-either:
+      - pattern: shell_exec(...)
+      - pattern: exec(...)
+      - pattern: system(...)
+      - pattern: passthru(...)
+      - pattern: popen(...)
+      - pattern: proc_open($CMD, ...)
+
+  - id: php-raw-sql-interpolated
+    languages: [php]
+    severity: ERROR
+    message: SQL built by string interpolation with a variable — use bindings (?) or the query builder.
+    patterns:
+      - pattern-either:
+          - pattern: DB::$M("...$X...", ...)
+          - pattern: $Q->whereRaw("...$X...", ...)
+          - pattern: $Q->selectRaw("...$X...", ...)
+          - pattern: $Q->orderByRaw("...$X...", ...)
+          - pattern: $Q->havingRaw("...$X...", ...)
+      - metavariable-regex:
+          metavariable: $M
+          regex: ^(select|statement|insert|update|delete|unprepared|raw)$
+
+  - id: php-request-into-raw-sql
+    languages: [php]
+    severity: ERROR
+    message: Request input concatenated into raw SQL — use bindings.
+    pattern-either:
+      - pattern: DB::raw(<... $REQUEST->$M(...) ...>)
+      - pattern: $Q->whereRaw(<... $REQUEST->$M(...) ...>, ...)
+      - pattern: $Q->orderByRaw(<... $REQUEST->$M(...) ...>, ...)
+      - pattern: $Q->selectRaw(<... $REQUEST->$M(...) ...>, ...)
+
+  - id: php-mass-assign-request-all
+    languages: [php]
+    severity: ERROR
+    message: Saving $request->all() / input() / except() lets anyone set any column — save the validated fields only.
+    patterns:
+      - metavariable-regex:
+          metavariable: $REQUEST
+          regex: (?i)^\$?request
+      - pattern-either:
+          - pattern: $M::create($REQUEST->all())
+          - pattern: $M::query()->create($REQUEST->all())
+          - pattern: $X->update($REQUEST->all())
+          - pattern: $X->fill($REQUEST->all())
+          - pattern: $X->forceFill($REQUEST->all())
+          - pattern: $M::create($REQUEST->input())
+          - pattern: $M::query()->create($REQUEST->input())
+          - pattern: $X->update($REQUEST->input())
+          - pattern: $X->fill($REQUEST->input())
+          - pattern: $M::create($REQUEST->except(...))
+          - pattern: $M::query()->create($REQUEST->except(...))
+          - pattern: $X->update($REQUEST->except(...))
+          - pattern: $X->fill($REQUEST->except(...))
+
+  - id: php-weak-random-for-secrets
+    languages: [php]
+    severity: ERROR
+    message: rand()/mt_rand()/uniqid() are predictable — use random_int(), Str::random() or random_bytes() for anything secret.
+    patterns:
+      - pattern-either:
+          - pattern: $T = uniqid(...)
+          - pattern: $T = md5(uniqid(...))
+      - metavariable-regex:
+          metavariable: $T
+          regex: (?i).*(token|secret|password|code|key|nonce).*
+
+  - id: php-hash-equals-for-secrets
+    languages: [php]
+    severity: WARNING
+    message: Compare secrets with hash_equals() (constant time), not ===.
+    patterns:
+      - pattern-either:
+          - pattern: $A === config('...')
+          - pattern: config('...') === $A
+      - metavariable-regex:
+          metavariable: $A
+          regex: (?i).*(token|secret|signature).*
+
+  - id: blade-unescaped-request
+    languages: [generic]
+    severity: ERROR
+    message: Unescaped Blade output of request data — use {{ }}.
+    paths:
+      include: ['*.blade.php']
+    pattern-regex: '\{!!\s*(request\(|\$request->|old\()'
+
+  - id: react-dangerous-html
+    languages: [typescript]
+    severity: ERROR
+    message: Raw HTML in React. Only allowed for HTML WURK rendered safely on the server (listed in the rule's exclusions).
+    paths:
+      exclude:
+        - resources/js/components/HelpPanel.tsx      # help articles: Markdown with HTML stripped (HelpCentre::render)
+        - modules/Identity/resources/js/pages/MfaSetup.tsx  # the QR code: SVG generated on the server
+        - '*.test.tsx'
+    pattern: <$EL dangerouslySetInnerHTML={...} />
+
+  - id: js-eval
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: eval / new Function run arbitrary code.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)

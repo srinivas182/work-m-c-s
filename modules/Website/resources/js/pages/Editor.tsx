@@ -9,6 +9,7 @@ import { ArrowLeft, Check, CloudOff, History, Loader2, Rocket, TriangleAlert } f
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Button, Dialog, DialogContent, DialogFooter, Field, Input } from '@/design-system';
 import { buildConfig, fromPuck, toPuck } from '../editor/adapter';
+import { AddSection, noDragOverrides } from '../editor/no-drag';
 import { firstError, request } from '../editor/http';
 import { siteTheme } from '../site/theme';
 import type { Branding, ContentDocument, MenuItem } from '../site/types';
@@ -133,14 +134,24 @@ function EditorTips() {
     }
     setIndex(-1);
   };
-  // Once the owner taps anywhere else they're editing — the tip never stands in their way.
+  // Once the owner taps or tabs anywhere else they're editing — the tip never stands in their way (or hides the
+  // control they've moved to: WCAG 2.2 "focus not obscured"). Escape closes it too.
   useEffect(() => {
     if (index < 0) return;
-    const away = (e: PointerEvent) => {
+    const away = (e: Event) => {
       if (card.current && !card.current.contains(e.target as Node)) dismiss();
     };
+    const escape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') dismiss();
+    };
     document.addEventListener('pointerdown', away, true);
-    return () => document.removeEventListener('pointerdown', away, true);
+    document.addEventListener('focusin', away, true);
+    document.addEventListener('keydown', escape, true);
+    return () => {
+      document.removeEventListener('pointerdown', away, true);
+      document.removeEventListener('focusin', away, true);
+      document.removeEventListener('keydown', escape, true);
+    };
   });
   if (index < 0) return null;
   const last = index === TIPS.length - 1;
@@ -367,7 +378,9 @@ export default function Editor({
   const s = STATUS[status];
 
   return (
-    <>
+    // The editor is light-only (Puck's own interface is), so WURK's buttons in its header are too (18.5a: in a
+    // dark theme they were light text on Puck's white header). Dialogs are portals and follow the theme.
+    <div data-theme="light" className="contents">
       <Head title={`Edit ${page.title}`} />
       <EditorTips />
       <Puck
@@ -377,6 +390,8 @@ export default function Editor({
         onChange={onChange}
         // Puck's own labels, in our voice (its defaults are lowercase).
         dictionary={{ 'header-undo': 'Undo', 'header-redo': 'Redo' }}
+        // Add and move sections without dragging (WCAG 2.2, 18.5b).
+        overrides={noDragOverrides}
         headerTitle={page.title}
         headerPath={page.is_home ? '/' : `/${page.slug}`}
         viewports={[
@@ -386,6 +401,7 @@ export default function Editor({
         ]}
         renderHeaderActions={() => (
           <div className="flex items-center gap-2">
+            <AddSection />
             <a
               href={urls.pages}
               className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-[#5b5776] hover:bg-[#f2f0f9]"
@@ -537,6 +553,6 @@ export default function Editor({
           </DialogContent>
         </Dialog>
       )}
-    </>
+    </div>
   );
 }
