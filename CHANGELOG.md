@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### AI receptionist — Sprint 19.4b (Chats and Results)
+- **Customers → Chats → AI assistant conversations**: every conversation with a customer (not the owner's tests), newest first, with what was said and the outcome: booked, ordered, answered, or passed to you.
+- **Take over**: the assistant stops for that chat. If the customer hasn't left a phone number or email, the chat asks for one and keeps it, so you can reply by phone, WhatsApp or email. **Hand back** gives the chat back to the assistant; **Close** ends it.
+- **Teach it**: turn a question the assistant couldn't answer into one of your chat's answers (the words people use and your answer), which the assistant reads from then on.
+- **Reports → Website chat assistant**: conversations, bookings and orders it made, chats passed to a person, and the credits used, compared with the period before. If many chats are passed to a person, Reports suggests teaching it.
+
 ### AI receptionist — Sprint 19.4a (owner settings and "Try it")
 - **Website → Chat → AI assistant**: switch it on, choose what it may do besides answering (book, move or cancel bookings, help with shop orders; options not in the package are shown but can't be ticked), how it sounds (friendly or formal), its greeting, the languages it replies in (English, isiZulu, isiXhosa, Afrikaans, Sesotho, Swahili, French, Portuguese; others get English), when a person can take over, and the most replies a month. **The price of a reply and this month's use are shown before switching it on.** The website chat has to be on first.
 - **Try it**: chat with the assistant as a customer would, with your real answers and free times. Nothing is booked, changed, ordered or handed over, and test chats don't count towards the monthly limit. Each test reply costs the same as a real one (up to 100 a day).

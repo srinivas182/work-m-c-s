@@ -20,6 +20,8 @@ use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\ChatAnswer;
 use Wurk\Website\Models\ChatHandoff;
+use Wurk\Website\Models\ReceptionistConversation;
+use Wurk\Website\Models\ReceptionistMessage;
 use Wurk\Website\Models\Site;
 use Wurk\Website\Support\ChatBot;
 use Wurk\Website\Support\Receptionist;
@@ -170,17 +172,76 @@ final class WebsiteChatController
     public function chats(Request $request): Response
     {
         $tz = $this->context->current()->timezone();
-        $show = $request->query('show') === 'archived' ? 'archived' : 'open';
+        $show = in_array($request->query('show'), ['archived', 'ai'], true) ? (string) $request->query('show') : 'open';
 
         return Inertia::render('Website::Chats', [
             'show' => $show,
-            'chats' => ChatHandoff::query()->when($show === 'archived', fn ($q) => $q->where('status', 'archived'), fn ($q) => $q->where('status', '!=', 'archived'))
+            'assistant' => $this->receptionist->settings()['enabled'] || ReceptionistConversation::query()->where('channel', '!=', Receptionist::TRY)->exists(),
+            'chats' => $show === 'ai' ? [] : ChatHandoff::query()->when($show === 'archived', fn ($q) => $q->where('status', 'archived'), fn ($q) => $q->where('status', '!=', 'archived'))
                 ->orderByDesc('created_at')->limit(200)->get()->map(fn (ChatHandoff $c) => [
                     'id' => $c->id, 'name' => $c->name, 'phone' => $c->phone, 'email' => $c->email, 'message' => $c->message, 'transcript' => $c->transcript, 'status' => $c->status,
                     'at' => $c->created_at->setTimezone($tz)->format('j M Y, H:i'),
                     'contact_id' => Gate::allows('contacts.view') ? $c->contact_id : null, 'lead_id' => Gate::allows('leads.view') ? $c->lead_id : null,
                 ])->all(),
+            'conversations' => $show === 'ai' ? $this->conversations($tz) : [],
         ]);
+    }
+
+    /**
+     * The AI assistant's conversations with customers (19.4b), newest first: who (when known), the outcome, and what was
+     * said by the customer, the assistant and any person (tool steps are left out).
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function conversations(string $tz): array
+    {
+        $rows = ReceptionistConversation::query()->where('channel', '!=', Receptionist::TRY)->orderByDesc('last_message_at')->limit(100)->get();
+        $messages = ReceptionistMessage::query()->whereIn('conversation_id', $rows->pluck('id'))->whereIn('role', ['user', 'assistant', 'person'])
+            ->orderBy('position')->get()->groupBy('conversation_id');
+
+        return array_values($rows->map(fn (ReceptionistConversation $c) => [
+            'id' => $c->id, 'name' => $c->name, 'phone' => $c->phone, 'email' => $c->email, 'status' => $c->status, 'outcome' => $c->outcome,
+            'at' => $c->last_message_at->setTimezone($tz)->format('j M Y, H:i'), 'replies' => $c->replies,
+            'contact_id' => Gate::allows('contacts.view') ? $c->contact_id : null,
+            'lines' => ($messages[$c->id] ?? collect())->map(fn (ReceptionistMessage $m) => [
+                'from' => ['user' => 'customer', 'assistant' => 'assistant', 'person' => 'person'][$m->role], 'text' => trim((string) ($m->content['content'] ?? '')),
+            ])->filter(fn (array $l) => $l['text'] !== '')->values()->all(),
+        ])->all());
+    }
+
+    /** Take over (the assistant stops for this chat), hand it back, or close it. */
+    public function conversation(Request $request, string $conversation): RedirectResponse
+    {
+        /** @var 'take_over'|'hand_back'|'close' $action */
+        $action = $request->validate(['action' => ['required', 'in:take_over,hand_back,close']])['action'];
+        $c = ReceptionistConversation::query()->where('channel', '!=', Receptionist::TRY)->whereKey($conversation)->firstOrFail();
+        $c->update(['take_over' => ['status' => 'person', 'keep' => true], 'hand_back' => ['status' => 'ai'], 'close' => ['status' => 'closed']][$action]);
+        $this->audit->record('website.receptionist_'.$action, 'receptionist_conversation', $c->id, []);
+        $reach = $c->phone === null && $c->email === null
+            ? 'The chat will ask them for a phone number or email so you can reply.'
+            : 'Reply to them by phone, WhatsApp or email.';
+
+        return back()->with('status', [
+            'take_over' => 'You have this chat: the assistant has stopped. '.$reach,
+            'hand_back' => 'The assistant has this chat again.',
+            'close' => 'Chat closed.',
+        ][$action]);
+    }
+
+    /** "Teach it": a question the assistant couldn't answer becomes one of the business's own answers. */
+    public function teach(Request $request, string $conversation): RedirectResponse
+    {
+        ReceptionistConversation::query()->where('channel', '!=', Receptionist::TRY)->whereKey($conversation)->firstOrFail();
+        $d = $request->validate(['keywords' => ['required', 'string', 'max:300'], 'answer' => ['required', 'string', 'max:600']],
+            ['keywords.required' => 'Add a few words people use when they ask this.']);
+        if (ChatAnswer::query()->count() >= self::MAX_ANSWERS) {
+            throw ValidationException::withMessages(['answer' => 'You have '.self::MAX_ANSWERS.' answers already — remove one in Website → Chat first.']);
+        }
+        $a = ChatAnswer::query()->create(['kind' => 'keyword', 'label' => null, 'keywords' => trim($d['keywords']), 'answer' => trim($d['answer']),
+            'link_kind' => 'none', 'link_target' => null, 'fact' => null, 'edited' => false, 'position' => (int) ChatAnswer::query()->max('position') + 1]);
+        $this->audit->record('website.chat_taught', 'chat_answer', $a->id, ['conversation' => $conversation]);
+
+        return back()->with('status', 'Saved — the assistant (and your chat’s own answers) will use it from now on.');
     }
 
     public function status(Request $request, string $chat): RedirectResponse

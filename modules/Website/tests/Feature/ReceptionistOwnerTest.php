@@ -13,7 +13,10 @@ use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\ReceptionistTool;
 use Wurk\Platform\Contracts\ReceptionistTools;
+use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Analytics\AssistantSection;
+use Wurk\Website\Models\ChatAnswer;
 use Wurk\Website\Models\ChatHandoff;
 use Wurk\Website\Models\ReceptionistConversation;
 use Wurk\Website\Models\Site;
@@ -136,4 +139,47 @@ it('tries it with the real lookups but never books, hands over, or counts toward
     // Someone outside the business can't try it.
     $status = $this->actingAs($this->person(['email' => 'stranger@example.com', 'phone' => '+27829999999']))->postJson("{$this->base}/try", ['message' => 'Hi'])->status();
     expect($status)->toBeIn([403, 404]);
+});
+
+it('shows the assistant’s conversations; the owner takes over, teaches it an answer, and sees the results', function () {
+    ($this->in)(function () {
+        Site::query()->firstOrFail()->update(['settings' => ['chat' => ['enabled' => true]]]);
+        app(Receptionist::class)->save(['enabled' => true]);
+    });
+    $site = 'http://glow-salon.'.config('wurk.domains.root');
+    $say = fn (string $text, ?string $conversation = null, string $visitor = 'visitor-key-0123456789') => $this->postJson("{$site}/chat/message",
+        ['visitor' => $visitor, 'message' => $text, 'conversation' => $conversation])->assertOk()->json();
+    SimulatedDriver::$script = [['text' => 'I’m not sure — I’ll check with the salon.'], ['tool' => 'book_appointment'], ['text' => 'Booked!']];
+    $asked = $say('Do you do bridal packages?');
+    $this->travel(1)->minutes();
+    $say('Book me', null, 'another-visitor-0123456789');
+    SimulatedDriver::$script = [['text' => 'Owner test.']];
+    $this->actingAs($this->owner)->postJson("{$this->base}/try", ['message' => 'test'])->assertOk(); // not a customer
+
+    $chats = $this->app('/glow-salon/website/chats');
+    $this->actingAs($this->owner)->get($chats)->assertInertia(fn ($p) => $p->where('assistant', true)->where('conversations', []));
+    $page = $this->actingAs($this->owner)->get("{$chats}?show=ai")->assertInertia(fn ($p) => $p->component('Website::Chats')->has('conversations', 2)
+        ->where('conversations.1.lines', [['from' => 'customer', 'text' => 'Do you do bridal packages?'], ['from' => 'assistant', 'text' => 'I’m not sure — I’ll check with the salon.']])
+        ->where('conversations.0.outcome', 'booked'));
+
+    // Take over: the assistant stops; with no way to reply yet, the chat asks for one and keeps it.
+    $this->actingAs($this->owner)->put("{$chats}/ai/{$asked['conversation']}", ['action' => 'take_over'])
+        ->assertSessionHas('status', 'You have this chat: the assistant has stopped. The chat will ask them for a phone number or email so you can reply.');
+    $seen = count(SimulatedDriver::$seen);
+    expect($say('Hello?', $asked['conversation'])['reply'])->toContain('Please leave a phone number or email');
+    expect($say('It’s 082 555 0199, or thandi@example.com', $asked['conversation'])['reply'])->toBe('Thanks — your message has been passed on.')
+        ->and(SimulatedDriver::$seen)->toHaveCount($seen); // the AI wasn't asked
+    ($this->in)(fn () => expect(ReceptionistConversation::query()->find($asked['conversation']))->status->toBe('person')->phone->toBe('082 555 0199')->email->toBe('thandi@example.com')->keep->toBeTrue());
+    $this->actingAs($this->owner)->put("{$chats}/ai/{$asked['conversation']}", ['action' => 'hand_back'])->assertSessionHas('status', 'The assistant has this chat again.');
+    $this->actingAs($this->owner)->put("{$chats}/ai/{$asked['conversation']}", ['action' => 'delete'])->assertSessionHasErrors('action');
+
+    // Teach it: the answer joins the business's own answers, which the assistant reads.
+    $this->actingAs($this->owner)->post("{$chats}/ai/{$asked['conversation']}/teach", ['keywords' => '', 'answer' => 'x'])->assertSessionHasErrors(['keywords' => 'Add a few words people use when they ask this.']);
+    $this->actingAs($this->owner)->post("{$chats}/ai/{$asked['conversation']}/teach", ['keywords' => 'bridal, wedding', 'answer' => 'Yes — bridal packages from R2 500, for the bride and up to 5 bridesmaids.'])
+        ->assertSessionHas('status', 'Saved — the assistant (and your chat’s own answers) will use it from now on.');
+    ($this->in)(fn () => expect(ChatAnswer::query()->where('keywords', 'bridal, wedding')->sole())->kind->toBe('keyword'));
+
+    // Reports: customers' conversations only.
+    $section = ($this->in)(fn () => app(AssistantSection::class)->build(ReportPeriod::named('month', 'Africa/Johannesburg')));
+    expect(array_column($section['metrics'], 'value', 'label'))->toBe(['Conversations' => 2, 'Bookings and orders it made' => 1, 'Passed to a person' => 0, 'Credits used' => 0.4]); // two customer replies (the owner's test isn't counted)
 });

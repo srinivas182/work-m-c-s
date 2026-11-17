@@ -26,6 +26,7 @@ use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Analytics\AssistantSection;
 use Wurk\Website\Analytics\SiteVisits;
 use Wurk\Website\Analytics\WebsiteSection;
 use Wurk\Website\Console\DemoSitesCommand;
@@ -149,6 +150,10 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
             $r->register('website', 500, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
                 && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'website')
                 ? app(WebsiteSection::class)->build($p) : null);
+            // Reports → Website chat assistant (19.4b).
+            $r->register('website.assistant', 510, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
+                && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'website')
+                ? app(AssistantSection::class)->build($p) : null);
         });
         $this->app->bindIf(ProductCatalog::class, NoProductCatalog::class); // Shop provides the real one
         $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);
