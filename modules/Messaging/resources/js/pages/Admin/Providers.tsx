@@ -67,6 +67,8 @@ function ChannelCard({ channel }: { channel: Channel }) {
     active: channel.current?.active ?? false,
   });
   const test = useForm({ to: '' });
+  // Message providers send a real test; the others (AI, Paystack, meetings) check the keys (19.6).
+  const sends = ['sms', 'whatsapp', 'email'].includes(channel.channel);
   const driver = channel.drivers.find((d) => d.key === form.data.driver) ?? channel.drivers[0];
   const sameDriver = channel.current?.driver === form.data.driver;
   const [title, description] = channel.channel.startsWith('payments.')
@@ -193,7 +195,7 @@ function ChannelCard({ channel }: { channel: Channel }) {
             }}
             className="border-border flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-end"
           >
-            {!channel.channel.startsWith('payments.') && (
+            {sends && (
               <Field
                 label={
                   channel.channel === 'email' ? 'Send a test to (email)' : 'Send a test to (mobile)'
@@ -207,9 +209,9 @@ function ChannelCard({ channel }: { channel: Channel }) {
               type="submit"
               variant="secondary"
               loading={test.processing}
-              disabled={!channel.channel.startsWith('payments.') && !test.data.to}
+              disabled={sends && !test.data.to}
             >
-              <Send /> {channel.channel.startsWith('payments.') ? 'Check' : 'Send test'}
+              <Send /> {sends ? 'Send test' : 'Test connection'}
             </Button>
             {channel.current.last_test && (
               <p
@@ -221,7 +223,9 @@ function ChannelCard({ channel }: { channel: Channel }) {
                   <CircleAlert className="size-4" aria-hidden />
                 )}
                 {channel.current.last_test.ok
-                  ? 'Last test sent'
+                  ? sends
+                    ? 'Last test sent'
+                    : 'Connected'
                   : channel.current.last_test.message}
               </p>
             )}

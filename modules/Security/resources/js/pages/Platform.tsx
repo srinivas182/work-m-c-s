@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
   Checkbox,
+  Field,
   Input,
   Label,
   PageHeader,
@@ -21,6 +22,7 @@ interface Props {
   cashOtpRecipients: string[];
   cashReceiptRecipients: string[];
   staff: { id: string; name: string }[];
+  contacts: { contact_email: string; support_email: string; security_email: string };
 }
 
 function ListEditor({
@@ -81,6 +83,7 @@ export default function Platform({
   cashOtpRecipients,
   cashReceiptRecipients,
   staff,
+  contacts,
 }: Props) {
   const form = useForm({
     allowlist,
@@ -170,6 +173,62 @@ export default function Platform({
           Save security settings
         </Button>
       </form>
+      <Contacts contacts={contacts} />
     </AppShell>
+  );
+}
+
+/** WURK's own contact addresses (19.6): set here, no longer only in the server's settings. */
+function Contacts({ contacts }: { contacts: Props['contacts'] }) {
+  const f = useForm(contacts);
+  const fields: [keyof Props['contacts'], string, string][] = [
+    [
+      'contact_email',
+      'Contact form messages go to',
+      'Messages from wurk.co.za’s contact form and the sales assistant.',
+    ],
+    [
+      'support_email',
+      'Support address',
+      'Given to businesses in emails, and where support emails go when no inbox is set.',
+    ],
+    [
+      'security_email',
+      'Security contact',
+      'On security.txt and the Trust and Security pages, for reporting a problem.',
+    ],
+  ];
+  return (
+    <form
+      aria-label="WURK’s contact addresses"
+      className="mt-8 grid max-w-3xl gap-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        f.put('/security/contacts', { preserveScroll: true });
+      }}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>WURK’s contact addresses</CardTitle>
+          <CardDescription>
+            Where WURK can be reached, and where messages to WURK go.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          {fields.map(([key, label, hint]) => (
+            <Field key={key} label={label} hint={hint} error={f.errors[key]}>
+              <Input
+                type="email"
+                value={f.data[key]}
+                onChange={(e) => f.setData(key, e.target.value)}
+              />
+            </Field>
+          ))}
+          <Button type="submit" className="w-fit" loading={f.processing}>
+            Save contact addresses
+          </Button>
+        </CardContent>
+      </Card>
+    </form>
   );
 }
