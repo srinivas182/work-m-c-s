@@ -106,3 +106,140 @@ describe('the chat panel', () => {
     expect(document.activeElement).toBe(opener);
   });
 });
+
+describe('the chat panel with the AI receptionist', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    sessionStorage.clear();
+    localStorage.clear();
+  });
+  const respond = (body: unknown, status = 200) =>
+    Promise.resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+  const settle = () =>
+    new Promise((r) => setTimeout(r, 0)).then(() => new Promise((r) => setTimeout(r, 0)));
+  const config = {
+    greeting: 'Hi!',
+    fallback: 'Not sure — talk to someone?',
+    buttons: [],
+    keywords,
+    reply: 'We’ll get back to you.',
+    ai: {
+      greeting: 'Hi! I’m the salon’s AI assistant.',
+      notice: 'You’re chatting with an AI assistant.',
+    },
+  };
+  const fresh = async () => {
+    vi.resetModules();
+    document.body.innerHTML = '<button data-chat-open>Chat</button>';
+    const m = await import('./site-chat-panel');
+    await m.openChat(document.querySelector<HTMLButtonElement>('[data-chat-open]')!);
+    const input = document.querySelector<HTMLInputElement>(
+      'input[aria-label="Type your question"]',
+    )!;
+    const ask = (text: string) => {
+      input.value = text;
+      input.form!.dispatchEvent(new Event('submit', { cancelable: true }));
+    };
+    return { ask, log: () => document.querySelector('[role="log"]')!.textContent ?? '' };
+  };
+
+  it('tells the visitor it’s an AI, shows its reply with a booking card, and keeps the conversation across pages', async () => {
+    const replies: unknown[] = [
+      { conversation: 'C'.repeat(26), mode: 'ai', reply: 'Monday 09:00 is free.', cards: [] },
+      {
+        conversation: 'C'.repeat(26),
+        mode: 'ai',
+        reply: 'You’re booked!',
+        cards: [
+          {
+            type: 'booking',
+            service: 'Knotless braids',
+            when: 'Monday 3 May, 09:00',
+            price: 'R450.00',
+            action: { label: 'Change or cancel', url: 'https://glow.example/book/manage/1' },
+          },
+          { service: 'Evil', action: { label: 'Click', url: 'javascript:alert(1)' } },
+        ],
+      },
+    ];
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url) =>
+      url === '/chat' ? respond(config) : respond(replies.shift()),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const { ask, log } = await fresh();
+    expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+      'You’re chatting with an AI assistant.',
+    );
+    expect(log()).toContain('Hi! I’m the salon’s AI assistant.');
+
+    ask('Braids on Monday?');
+    expect(document.querySelector('[role="status"]')!.textContent).toBe(
+      'The assistant is replying…',
+    );
+    await settle();
+    expect(log()).toContain('Monday 09:00 is free.');
+    const first = JSON.parse(String(fetchMock.mock.calls[1]![1]!.body)) as {
+      visitor: string;
+      message: string;
+      conversation: string | null;
+    };
+    expect(first.message).toBe('Braids on Monday?');
+    expect(first.conversation).toBeNull();
+    expect(first.visitor).toMatch(/^[a-f0-9]{48}$/);
+
+    ask('Book it: Sipho, 082 555 0101, yes');
+    await settle();
+    const second = JSON.parse(String(fetchMock.mock.calls[2]![1]!.body)) as {
+      visitor: string;
+      conversation: string;
+    };
+    expect(second.conversation).toBe('C'.repeat(26));
+    expect(second.visitor).toBe(first.visitor);
+    const card = document.querySelector('[data-card="booking"]')!;
+    expect(card.textContent).toContain('Knotless braids');
+    expect(card.textContent).toContain('R450.00');
+    expect(card.querySelector('a')!.getAttribute('href')).toBe(
+      'https://glow.example/book/manage/1',
+    );
+    expect(document.querySelectorAll('[data-card] a')).toHaveLength(1); // a javascript: link is never shown
+
+    // Another page of the site: the conversation carries on where it was.
+    replies.push({ conversation: 'C'.repeat(26), mode: 'ai', reply: 'See you Monday.', cards: [] });
+    const next = await fresh();
+    expect(next.log()).toContain('You’re booked!');
+    expect(next.log().split('Hi! I’m the salon’s AI assistant.')).toHaveLength(2); // the greeting once, not again
+    next.ask('Thanks');
+    await settle();
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)![1]!.body))).toMatchObject({
+      conversation: 'C'.repeat(26),
+    });
+  });
+
+  it('falls back to the business’s own answers when the receptionist isn’t available', async () => {
+    let next: 'rules' | 'down' = 'rules';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) =>
+        url === '/chat'
+          ? respond(config)
+          : next === 'rules'
+            ? respond({ conversation: 'C'.repeat(26), mode: 'rules', reply: null, cards: [] })
+            : Promise.reject(new Error('offline')),
+      ),
+    );
+    const { ask, log } = await fresh();
+    ask('Where can I park?');
+    await settle();
+    expect(log()).toContain('Free parking behind us.');
+    next = 'down';
+    ask('do you do weddings');
+    await settle();
+    expect(log()).toContain('Not sure — talk to someone?');
+    expect(document.querySelector('[role="status"]')!.textContent).toBe('');
+  });
+});
