@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### AI receptionist — Sprint 19.2b (booking)
+- **The receptionist books appointments for real**: it lists the business's services and prices, offers only times that are actually free (in the business's own time zone), and books with the customer's name, mobile number and consent. The same rules apply as the booking form: staff, hours, breaks, buffers, blocked time, notice and how far ahead.
+- **Deposits**: when a service needs one, the customer gets a "Pay the deposit" link in the chat, and the time is held until it's paid.
+- **Changing and cancelling** (when the owner allows it): bookings made in the same chat, or any upcoming booking once the customer types a **6-digit code sent to the phone or email on that booking**. Nobody can change a booking just by knowing someone's details, and the chat never reveals whether someone has a booking. The code goes by SMS when the business has credits, otherwise by free email. Cancelling follows the business's cancellation policy, stated before the customer confirms.
+- Bookings made by the assistant show **"Booked by the AI assistant"** in the calendar, and the chat is marked as booked.
+
 ### AI receptionist — Sprint 19.2a (the receptionist)
 - **Every business can switch on an AI receptionist on its website chat.**
   - It answers from the business's own website facts and the owner's own answers, and hands the chat to a person (stored with the customer, owner emailed) when asked, when it can't help, or for anything sensitive.

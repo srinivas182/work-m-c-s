@@ -58,9 +58,12 @@ describe('islands on published pages', () => {
     const range = document.querySelector<HTMLInputElement>('[data-ba-range]')!;
     range.value = '20';
     range.dispatchEvent(new Event('input'));
-    expect(document.querySelector<HTMLElement>('[data-ba-clip]')!.style.clipPath).toBe(
-      'inset(0 80% 0 0)',
-    );
+    // jsdom 31 serialises zero lengths as "0px"; both mean the same clip.
+    expect(
+      document
+        .querySelector<HTMLElement>('[data-ba-clip]')!
+        .style.clipPath.replace(/\b0px\b/g, '0'),
+    ).toBe('inset(0 80% 0 0)');
     expect(document.querySelector<HTMLElement>('[data-ba-line]')!.style.left).toBe('20%');
   });
 
