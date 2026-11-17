@@ -7,6 +7,7 @@ namespace Wurk\Ai;
 use Illuminate\Routing\Router;
 use Wurk\Ai\Contracts\Ai;
 use Wurk\Ai\Contracts\AiActions;
+use Wurk\Ai\Contracts\AiConversations;
 use Wurk\Ai\Contracts\HelpAnswers;
 use Wurk\Ai\Http\Middleware\ShareAssistant;
 use Wurk\Ai\Support\AiClient;
@@ -25,6 +26,7 @@ final class AiServiceProvider extends ModuleServiceProvider
     {
         $this->app->singleton(AiSettings::class);
         $this->app->singleton(Ai::class, AiClient::class);
+        $this->app->singleton(AiConversations::class, AiClient::class); // 19.1: conversations with tools
         $this->app->scoped(AiActions::class, CreditedActions::class);
         $this->app->bind(HelpAnswers::class, HelpAnswerer::class);
         $this->app->singleton(CreditCostEstimates::class, CostEstimates::class);

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Wurk\Ai\Drivers;
 
+use Wurk\Ai\Contracts\ChatTool;
+
 /**
  * Stands in for a real provider until WURK's API keys arrive (and in tests).
  * Never used in production. Answers with valid JSON when asked for JSON.
  */
-final class SimulatedDriver implements AiDriver
+final class SimulatedDriver implements AiDriver, ChatDriver
 {
     /** Tests: make the next N calls fail (to exercise fallback and refunds). */
     public static int $failNext = 0;
@@ -18,6 +20,17 @@ final class SimulatedDriver implements AiDriver
 
     /** @var list<string> Tests: answers for the next calls, in order (after). */
     public static array $answers = [];
+
+    /**
+     * Tests (19.1): the conversation's next steps, in order — each either `['tool' => name, 'arguments' => [...]]`
+     * (one or more tool calls: `['tools' => [[name, args], ...]]`) or `['text' => '…']`. Empty: a plain answer.
+     *
+     * @var list<array<string, mixed>>
+     */
+    public static array $script = [];
+
+    /** @var list<array{system: string, items: list<array<string, mixed>>, tools: list<string>}> Tests: what each chat step was given. */
+    public static array $seen = [];
 
     public function name(): string
     {
@@ -58,5 +71,24 @@ final class SimulatedDriver implements AiDriver
         $seo = array_map(fn () => ['title' => "[Simulated] {$business}", 'description' => "[Simulated] {$business} — sample description."], $pages);
 
         return (string) json_encode(['pages' => $pages, 'seo' => $seo]);
+    }
+
+    public function chat(string $model, string $system, array $items, array $tools, int $maxTokens, string $apiKey): array
+    {
+        if (app()->environment('production')) {
+            throw new ProviderFailed('The simulated provider is never used in production.');
+        }
+        if (self::$failNext > 0) {
+            self::$failNext--;
+            throw new ProviderFailed('Simulated failure');
+        }
+        self::$seen[] = ['system' => $system, 'items' => $items, 'tools' => array_map(fn (ChatTool $t) => $t->name, $tools)];
+        $step = array_shift(self::$script) ?? ['text' => 'Simulated answer.'];
+        $raw = isset($step['tool']) ? [[$step['tool'], $step['arguments'] ?? []]] : (array) ($step['tools'] ?? []);
+        $calls = ToolCalls::of(array_map(fn ($c, $i) => ['sim-'.count(self::$seen).'-'.$i, $c[0] ?? '', $c[1] ?? []], $raw, array_keys($raw)));
+        $text = (string) ($step['text'] ?? '');
+        $in = (int) ceil(strlen($system.json_encode($items)) / 4);
+
+        return ['text' => $text, 'tool_calls' => $calls, 'input_tokens' => $in, 'output_tokens' => (int) ceil((strlen($text) + strlen((string) json_encode($calls))) / 4)];
     }
 }
