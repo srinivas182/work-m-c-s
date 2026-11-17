@@ -29,6 +29,13 @@ use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\ClassAttendee;
+use Wurk\Bookings\Receptionist\BookAppointmentTool;
+use Wurk\Bookings\Receptionist\CancelBookingTool;
+use Wurk\Bookings\Receptionist\ConfirmBookingCodeTool;
+use Wurk\Bookings\Receptionist\FindBookingTool;
+use Wurk\Bookings\Receptionist\FreeTimesTool;
+use Wurk\Bookings\Receptionist\MoveBookingTool;
+use Wurk\Bookings\Receptionist\ServicesTool;
 use Wurk\Bookings\Reports\BookingsSection;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
@@ -44,6 +51,7 @@ use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\CannotRestore;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\RecentlyDeleted;
+use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -129,6 +137,12 @@ final class BookingsServiceProvider extends ModuleServiceProvider
             $x->table('bookings', 'Bookings', 'bookings.view', $rows('bookings', 'starts_at'));
         });
         // Reports → Bookings (Sprint 15.1a).
+        // The AI receptionist (19.2b): services, free times, booking; moving and cancelling a booking made in the chat.
+        $this->callAfterResolving(ReceptionistTools::class, function (ReceptionistTools $t): void {
+            foreach ([ServicesTool::class, FreeTimesTool::class, BookAppointmentTool::class, MoveBookingTool::class, CancelBookingTool::class, FindBookingTool::class, ConfirmBookingCodeTool::class] as $tool) {
+                $t->register($tool);
+            }
+        });
         $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
             $t->register(BookingsOnDayTool::class);
             $t->register(AddBookingHoursTool::class);
