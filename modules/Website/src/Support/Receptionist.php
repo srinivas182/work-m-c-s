@@ -108,7 +108,7 @@ final readonly class Receptionist
         $conversation->update(['last_message_at' => now()]);
 
         if (in_array($conversation->status, ['waiting', 'person'], true)) {
-            return $this->out($conversation, 'person', 'Thanks — your message has been passed on.');
+            return $this->out($conversation, 'person', $this->passedOn($conversation, $message));
         }
         $s = $this->settings();
         if ((! $s['enabled'] && $conversation->channel !== self::TRY) || $this->repliesThisMonth() >= $s['monthly_cap']) {
@@ -292,6 +292,24 @@ TXT;
         }
 
         return $was ?? 'answered';
+    }
+
+    /**
+     * A person has the conversation (handed over, or the owner took over — 19.4b). Their reply reaches the customer
+     * by phone, WhatsApp or email, so until the chat has a way back, it asks for one and keeps what the customer types.
+     */
+    private function passedOn(ReceptionistConversation $conversation, string $message): string
+    {
+        if ($conversation->phone === null && preg_match('/(\+?\d[\d ()-]{7,18}\d)/', $message, $m) === 1) {
+            $conversation->update(['phone' => trim($m[1])]);
+        }
+        if ($conversation->email === null && preg_match('/[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}/i', $message, $m) === 1) {
+            $conversation->update(['email' => mb_strtolower($m[0])]);
+        }
+
+        return $conversation->phone === null && $conversation->email === null
+            ? 'Thanks — someone from the team will reply. Please leave a phone number or email so they can get back to you.'
+            : 'Thanks — your message has been passed on.';
     }
 
     /** Replies to customers this month, for the owner's cap (the owner's own test chats don't count). */

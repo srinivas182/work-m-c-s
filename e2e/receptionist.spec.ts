@@ -61,4 +61,19 @@ test('the owner switches the AI assistant on and tries it; a visitor is told it�
   await expect(visitor.getByRole('log', { name: 'Conversation' })).toContainText(
     'Are you open on Saturday?',
   );
+
+  // The owner: Customers → Chats → AI assistant conversations; takes one over.
+  await page.goto(`/${handle}/website/chats?show=ai`);
+  const mine = page
+    .getByRole('list', { name: 'AI assistant conversations' })
+    .getByRole('listitem')
+    .filter({ hasText: 'Are you open on Saturday?' })
+    .first();
+  await expect(mine).toContainText('Simulated answer.');
+  await expectAccessible(page);
+  const takeOver = mine.getByRole('button', { name: 'Take over' });
+  if (await takeOver.isVisible()) {
+    await takeOver.click();
+    await expect(page.getByText(/You have this chat: the assistant has stopped\./)).toBeVisible();
+  }
 });
