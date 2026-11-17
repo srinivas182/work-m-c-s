@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Wurk\Ai;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Routing\Router;
+use Wurk\Ai\Console\SweepSalesConversationsCommand;
 use Wurk\Ai\Contracts\Ai;
 use Wurk\Ai\Contracts\AiActions;
 use Wurk\Ai\Contracts\AiConversations;
@@ -36,6 +38,12 @@ final class AiServiceProvider extends ModuleServiceProvider
     {
         $this->app->make(Router::class)->pushMiddlewareToGroup('tenant.back-office', ShareAssistant::class);
         $this->callAfterResolving(AssistantTools::class, fn (AssistantTools $t) => $t->register(FiguresTool::class));
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('ai:sweep-sales-conversations')->dailyAt('03:35')->onOneServer()->withoutOverlapping(); // 19.5
+        });
+        if ($this->app->runningInConsole()) {
+            $this->commands([SweepSalesConversationsCommand::class]);
+        }
     }
 
     /** @return list<array{key: string, label: string, scope?: string}> */

@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### WURK's sales assistant — Sprint 19.5a (engine and settings)
+- **WURK's own AI sales assistant** answers visitors' questions about WURK from the **live packages and prices** (rands, excluding VAT, said so) and the help centre. It recommends a package, gives a link that **opens signup with that package chosen**, and passes the visitor to WURK through the contact form (with consent). When the visitor came through an **agent's link**, it can pass them to that agent, who is emailed their details. Like the receptionist, it never states a price no tool gave it.
+- **Admin → WURK AI → WURK's sales assistant**: on or off (off until HQ switches it on), the greeting, and the most replies a month, with this month's replies and their cost to WURK. WURK pays for it: no credits. Over the cap, or when WURK AI can't be reached, visitors are offered the contact form.
+- Conversations are kept for 30 days, and visitors are told so. A daily clean-up (`ai:sweep-sales-conversations`) deletes them after that.
+- The chat on wurk.co.za comes in 19.5b.
+
 ### AI receptionist — Sprint 19.4b (Chats and Results)
 - **Customers → Chats → AI assistant conversations**: every conversation with a customer (not the owner's tests), newest first, with what was said and the outcome: booked, ordered, answered, or passed to you.
 - **Take over**: the assistant stops for that chat. If the customer hasn't left a phone number or email, the chat asks for one and keeps it, so you can reply by phone, WhatsApp or email. **Hand back** gives the chat back to the assistant; **Close** ends it.

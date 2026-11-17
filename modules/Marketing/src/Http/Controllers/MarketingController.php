@@ -6,12 +6,9 @@ namespace Wurk\Marketing\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Wurk\Marketing\Mail\ContactMessageMail;
+use Wurk\Marketing\Actions\RecordContactMessage;
 use Wurk\Plans\Contracts\Catalog;
 
 /** wurk.co.za. Pages are server-rendered for search engines (Inertia SSR on this host only). */
@@ -78,15 +75,10 @@ final class MarketingController
             'message' => ['required', 'string', 'min:10', 'max:3000'],
         ]);
 
-        DB::table('contact_messages')->insert([...$data, 'id' => (string) Str::ulid(), 'ip' => $request->ip(), 'created_at' => now(), 'updated_at' => now()]);
-        if (($to = config('wurk.contact_email')) !== null && $to !== '') {
-            Mail::to((string) $to)->send(new ContactMessageMail([
-                'name' => (string) $data['name'],
-                'contact' => (string) $data['contact'],
-                'business' => isset($data['business']) ? (string) $data['business'] : null,
-                'message' => (string) $data['message'],
-            ]));
-        }
+        app(RecordContactMessage::class)([
+            'name' => (string) $data['name'], 'contact' => (string) $data['contact'],
+            'business' => isset($data['business']) ? (string) $data['business'] : null, 'message' => (string) $data['message'],
+        ], $request->ip());
 
         return back()->with('status', 'Thanks — we’ll be in touch within one working day.');
     }

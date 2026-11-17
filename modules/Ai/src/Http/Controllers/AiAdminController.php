@@ -17,6 +17,7 @@ use Wurk\Ai\Drivers\ProviderFailed;
 use Wurk\Ai\Drivers\SimulatedDriver;
 use Wurk\Ai\Models\AiRequest;
 use Wurk\Ai\Support\AiSettings;
+use Wurk\Ai\Support\SalesAssistant;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -42,6 +43,9 @@ final class AiAdminController
             'tasks' => AiSettings::TASKS,
             'connected' => collect(['anthropic', 'google', 'openai'])->mapWithKeys(fn ($p) => [$p => ($providers->active('ai.'.$p)['credentials']['api_key'] ?? '') !== ''])->all(),
             'usage' => ['byProvider' => $byProvider, 'byBusiness' => $byBusiness, 'totalZar' => round(array_sum(array_column($byProvider, 'zar')), 2)],
+            // WURK's sales assistant this month (19.5): its replies, and what they cost WURK.
+            'sales' => ['replies' => app(SalesAssistant::class)->repliesThisMonth(),
+                'zar' => round((int) (clone $month)->where('task', SalesAssistant::TASK)->sum('cost_usd_micro') / 1e6 * $fx, 2)],
         ]);
     }
 
@@ -70,6 +74,9 @@ final class AiAdminController
             'assistant.enabled' => ['required', 'boolean'],
             'assistant.free_questions' => ['required', 'integer', 'between:0,10000'],
             'assistant.monthly_cap' => ['required', 'integer', 'between:0,100000', 'gte:assistant.free_questions'],
+            'sales.enabled' => ['required', 'boolean'],
+            'sales.greeting' => ['required', 'string', 'max:200'],
+            'sales.monthly_cap' => ['required', 'integer', 'between:0,1000000'],
         ], ['assistant.monthly_cap.gte' => 'The most questions a month can’t be fewer than the free ones.']);
         if (app()->environment('production') && collect([...$data['tasks'], ...($data['fallback'] ?? [])])->contains('provider', 'simulated')) {
             return back()->withErrors(['tasks' => 'The simulated provider can’t be used in production.']);
