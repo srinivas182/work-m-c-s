@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### AI receptionist — Sprint 19.2a (the receptionist)
+- **Every business can switch on an AI receptionist on its website chat.**
+  - It answers from the business's own website facts and the owner's own answers, and hands the chat to a person (stored with the customer, owner emailed) when asked, when it can't help, or for anything sensitive.
+  - Tools that book, change bookings or take orders are offered only when the owner allows them. Booking is on by default; changing bookings and orders are off.
+- **It never states a time or price no tool gave it**: any reply that does is replaced with an honest "I couldn't check that" and an offer of a person. It never claims to be a person.
+- **Customers are told it's an AI**, and that the conversation is kept for 30 days. Conversations that led nowhere are deleted after 30 days (`website:sweep-conversations`, daily). Ones that led to a booking, an order or a hand-off are kept.
+- **Each AI reply costs credits** (rate card "AI receptionist: a reply", 0.2 credits in South Africa until WURK sets it), within the owner's monthly cap and spending limit. When it's off, out of credits, over its cap, or WURK AI is unavailable, the chat carries on as the rule-based chat.
+
 ### AI receptionist — Sprint 19.1 (conversations with tools)
 - WURK AI can now hold a **conversation with tools**: the AI asks for a tool (for example "free times on Saturday"), WURK runs it with the business's own permissions, and the AI answers from the result. It works with Anthropic, OpenAI and Google. Each step is logged and costed. If a provider fails mid-conversation, the next one carries on without repeating any action already taken.
 - New AI tasks in Admin → AI: **AI receptionist** and **WURK's sales assistant**.

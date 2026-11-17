@@ -15,6 +15,7 @@ use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Contracts\RecentlyDeleted;
+use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Contracts\SupportSessions;
 use Wurk\Platform\Database\DatesPast2038Connection;
 use Wurk\Platform\Modules\ModuleRegistry;
@@ -26,6 +27,7 @@ use Wurk\Platform\Support\ExportRegistry;
 use Wurk\Platform\Support\HealthRegistry;
 use Wurk\Platform\Support\MetricsRegistry;
 use Wurk\Platform\Support\NoSupportSessions;
+use Wurk\Platform\Support\ReceptionistRegistry;
 use Wurk\Platform\Support\ReportRegistry;
 use Wurk\Platform\Support\TileRegistry;
 
@@ -44,6 +46,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(PlatformMetrics::class, MetricsRegistry::class);
         $this->app->singleton(AudienceSegments::class, AudienceRegistry::class);
         $this->app->singleton(AssistantTools::class, AssistantRegistry::class);
+        $this->app->singleton(ReceptionistTools::class, ReceptionistRegistry::class); // 19.2
         $this->app->singleton(HealthSignals::class, HealthRegistry::class);
         $this->app->singleton(DataExports::class, ExportRegistry::class);
         $this->app->singleton(RecentlyDeleted::class, DeletedRegistry::class);
