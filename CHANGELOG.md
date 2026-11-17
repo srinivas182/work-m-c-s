@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### AI receptionist — Sprint 19.1 (conversations with tools)
+- WURK AI can now hold a **conversation with tools**: the AI asks for a tool (for example "free times on Saturday"), WURK runs it with the business's own permissions, and the AI answers from the result. It works with Anthropic, OpenAI and Google. Each step is logged and costed. If a provider fails mid-conversation, the next one carries on without repeating any action already taken.
+- New AI tasks in Admin → AI: **AI receptionist** and **WURK's sales assistant**.
+
 ## [0.19.0] — 2026-11-18 — Sprint 18: Hardening
 
 ### Polish and acceptance — Sprint 18.6
