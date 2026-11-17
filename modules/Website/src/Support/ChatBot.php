@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace Wurk\Website\Support;
 
+use Illuminate\Support\Facades\Mail;
+use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Crm\Contracts\LeadBook;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Mail\ChatHandoffMail;
 use Wurk\Website\Models\ChatAnswer;
+use Wurk\Website\Models\ChatHandoff;
 use Wurk\Website\Models\Site;
 
 /**
@@ -162,5 +168,38 @@ final readonly class ChatBot
         };
 
         return $href === null ? null : ['kind' => $link['link_kind'], 'href' => $href];
+    }
+
+    /**
+     * A visitor asks for a person (the rule-based chat's form, or the AI receptionist's "hand_over"): the chat is
+     * stored with the contact (and a lead if the owner wants them), the optional auto-reply goes out, and the owner is
+     * emailed. Returns when they can expect a reply.
+     *
+     * @param  array{name: string, phone?: string|null, email?: string|null, message?: string|null}  $data
+     * @param  list<array{from: string, text: string}>  $transcript
+     */
+    public function handOff(array $data, array $transcript, string $ipHash, bool $news): string
+    {
+        $chat = ChatHandoff::query()->create([
+            'name' => $data['name'], 'phone' => $data['phone'] ?? null, 'email' => isset($data['email']) ? mb_strtolower((string) $data['email']) : null,
+            'message' => $data['message'] ?? null, 'transcript' => $transcript, 'marketing_consent_at' => $news ? now() : null,
+            'ip_hash' => $ipHash, 'created_at' => now(),
+        ]);
+        $contact = app(ContactBook::class)->remember($data['name'], $data['phone'] ?? null, $data['email'] ?? null, 'chat', $chat->id, null, 'Website chat', $news ? 'Website chat' : null);
+        $lead = $this->settings()['leads']
+            ? app(LeadBook::class)->open($contact, 'Chat: '.$data['name'], 'chat', null, null, ($data['message'] ?? '') !== '' ? $data['message'] : null)
+            : null;
+        $chat->update(['contact_id' => $contact, 'lead_id' => $lead]);
+        $business = app(TenantContext::class)->current()->displayName();
+        $this->autoReply($data['email'] ?? null, $data['name'], $business); // optional
+        $notify = Site::query()->first()?->settings['enquiry_email'] ?? null;
+        if (is_string($notify) && $notify !== '') {
+            Mail::to($notify)->send(new ChatHandoffMail($business, [
+                'name' => (string) $data['name'], 'phone' => $data['phone'] ?? null, 'email' => $data['email'] ?? null, 'message' => $data['message'] ?? null,
+                'transcript' => array_values(array_map(fn (array $l) => ['from' => (string) $l['from'], 'text' => (string) $l['text']], $transcript)),
+            ]));
+        }
+
+        return 'Thanks — '.lcfirst($this->replyTime());
     }
 }

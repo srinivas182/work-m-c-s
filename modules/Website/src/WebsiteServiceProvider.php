@@ -34,6 +34,7 @@ use Wurk\Website\Console\InstallTemplatesCommand;
 use Wurk\Website\Console\RerenderDatedPagesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
 use Wurk\Website\Console\SeedSampleTemplatesCommand;
+use Wurk\Website\Console\SweepConversationsCommand;
 use Wurk\Website\Contracts\CatalogChanged;
 use Wurk\Website\Contracts\MediaLibrary;
 use Wurk\Website\Contracts\ProductCatalog;
@@ -168,15 +169,19 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         // The chatbot: per business AND visitor (never one counter across businesses).
         RateLimiter::for('chat', fn (Request $r) => Limit::perMinute(60)->by('chat|'.(string) $r->route('handle').'|'.$r->ip()));
         RateLimiter::for('chat-handoff', fn (Request $r) => Limit::perMinutes(10, 5)->by('chat-handoff|'.(string) $r->route('handle').'|'.$r->ip()));
+        // The AI receptionist (19.2): a person types, at most about one message every 3 seconds.
+        RateLimiter::for('chat-ai', fn (Request $r) => Limit::perMinute(20)->by('chat-ai|'.(string) $r->route('handle').'|'.$r->ip()));
         RateLimiter::for('quote-form', fn (Request $r) => Limit::perMinutes(10, 10)->by('quote-form|'.(string) $r->route('handle').'|'.$r->ip()));
         // Dated content (promotions, expiring specials) refreshed just after midnight.
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('website:rerender-dated')->dailyAt('00:05')->timezone('Africa/Johannesburg')->onOneServer()->withoutOverlapping();
             $schedule->command('website:expire-form-files')->dailyAt('03:15')->onOneServer()->withoutOverlapping();
+            $schedule->command('website:sweep-conversations')->dailyAt('03:25')->onOneServer()->withoutOverlapping(); // 19.2
         });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'website');
         if ($this->app->runningInConsole()) {
-            $this->commands([ExpireFormFilesCommand::class, SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
+            $this->commands([ExpireFormFilesCommand::class,
+                SweepConversationsCommand::class, SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
         }
     }
 }
