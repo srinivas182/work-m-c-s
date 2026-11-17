@@ -8,6 +8,10 @@
 
 > **Order (WURK, 12 Nov 2026):** after Sprint 16, **Sprint 18 (hardening)** comes next, then **Sprint 17 (cloud and going live)**.
 
+> **Order (WURK, 18 Nov 2026):** after Sprint 18, **seven feature sprints (19–25) for the African market**, built for owners and customers new to technology. **Sprint 17 (cloud and going live) comes last.** Each sprint still gets its own spec, market review and approval. The 18 Nov approval also set two rules:
+> - Every provider key is set in **Admin → Providers** (encrypted, with "Test connection"), never only on the server. Infrastructure secrets are the exception.
+> - Template demo photos come from an African stock library or AI-generated banners, and owners replace them with their own.
+
 
 | Sprint | Dates | Focus | Deliverables | Status |
 |---|---|---|---|---|
@@ -30,6 +34,13 @@
 | 16 | 07 – 18 Jun | Self-service & support | AI assistant; help centre & short videos per category; consent-based impersonation; tickets; tenant health; backup/restore & export | ✅ v0.18.0 |
 | 17 | 21 Jun – 02 Jul | **Cloud, domains & production infrastructure** *(moved)* | Chosen cloud (AWS or Azure, South African region); custom domains & SSL (Cloudflare for SaaS); wurk.co.za DNS; infrastructure as code; staging & production; monitoring & alerts; backups | |
 | 18 | 05 – 16 Jul | Hardening | Penetration test; load testing at scale; shard rollout rehearsal; DR drill; accessibility; design polish; UAT | 🚧 [spec](sprints/sprint-18.md) |
+| 19 | next | **AI receptionist** *(new)* | One AI assistant per business on its website chat: answers from the business's facts and FAQs; books, moves and cancels appointments and class/table bookings through the real calendar; orders and payment links; hand-over to a person; paid with AI credits. Also WURK's own sales bot on wurk.co.za | |
+| 20 | | **Premium templates** *(new)* | 3–4 designs per category, each in 3 styles (luxury, modern-minimal, bold); new categories (barbershop, church & NGO, school, catering, spaza & grocery, cleaning, security, real estate, legal & accounting, tailoring & fashion, car wash, agriculture, funeral services, beauty supplies); an African photo library plus AI-generated banners as demo images that owners replace; richer heroes, motion, video backgrounds, more sections; a written quality bar against the leaders' premium templates | |
+| 21 | | **WhatsApp, both ways** *(new)* | Two-way WhatsApp in the Chats inbox; the AI receptionist on WhatsApp; voice notes understood; booking, reminders, paying and reordering in WhatsApp; owner's daily summary and reply-to-confirm | |
+| 22 | | **Mobile money & payments** *(new)* | M-Pesa, MTN MoMo, Airtel Money, SnapScan/Zapper, cash recording; businesses pay WURK by mobile money (a second gateway with wide African coverage alongside Paystack); low entry plans and pay-as-you-go | |
+| 23 | | **Easy setup & money tools** *(new)* | Set up by voice note or WhatsApp; agents' 15-minute onboarding on their phone; who owes me, end-of-day cash-up, profit in plain words, weekly "how did I do" | |
+| 24 | | **Languages & light on data** *(new)* | Back office and customer pages in isiZulu, isiXhosa, Afrikaans, Sesotho, Swahili, French, Portuguese, Hausa, Yoruba; a lite mode for 3G and older Android phones that keeps working with a weak signal and catches up later | |
+| 25 | | **Reach & trust** *(new)* | USSD and SMS booking for customers without smartphones or data; verified-business badge; reviews on WhatsApp; clear refunds; country packs (currency, VAT, phone formats, payment providers); help in the owner's language: video clips and a WhatsApp help line backed by AI | |
 
 **Closed beta** from ~19 July 2027 with 20–50 pilot businesses; 2–3 sprints of beta feedback before public launch (~August–September 2027). Sprint dates do not yet allow for South African public holidays (e.g. Good Friday and Family Day 2027); affected sprints will be noted in their specifications.
 

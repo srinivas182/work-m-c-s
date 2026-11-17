@@ -8,6 +8,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 use Wurk\Identity\Auth\SignInFlow;
 use Wurk\Identity\Http\Middleware\SessionGuardian;
 use Wurk\Identity\Support\Surface;
@@ -39,5 +41,21 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return null;
+        });
+        // Moving around the app (an Inertia visit): the error is shown in place, in WURK's words, instead of the raw
+        // error box Inertia shows for a non-Inertia response (18.6a). Full page loads get resources/views/errors.
+        // In local development the detailed error page still shows for 500s.
+        $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
+            $status = $response->getStatusCode();
+            if (! $request->hasHeader('X-Inertia') || $request->expectsJson() || ! in_array($status, [403, 404, 419, 500, 503], true)
+                || ($status === 500 && config('app.debug'))) {
+                return $response;
+            }
+            if ($status === 419) { // an expired form: back to it, with a message, rather than a dead end
+                return back()->with('warning', 'This page timed out. Please try again.');
+            }
+
+            return Inertia::render('Error', ['status' => $status, 'message' => $status === 503 ? ($e->getMessage() ?: null) : null])
+                ->toResponse($request)->setStatusCode($status);
         });
     })->create();
