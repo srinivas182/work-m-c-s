@@ -11,7 +11,13 @@ type Config = {
   keywords: { words: string[]; answer: string; link: Link }[];
   reply: string;
   ai?: { greeting: string; notice: string } | null;
+  /** "Talk to someone" opens this page instead of the hand-off form (WURK's own chat: the contact page, 19.5b). */
+  handoff_url?: string;
 };
+/** Where the chat talks to: a business's website (the default), or WURK's sales assistant on wurk.co.za (19.5b). */
+export type Endpoints = { config: string; message: string };
+const BUSINESS: Endpoints = { config: '/chat', message: '/chat/message' };
+let endpoints: Endpoints = BUSINESS;
 type Line = { from: 'visitor' | 'bot'; text: string };
 /** A booking, class, table or cart the receptionist made: shown under its reply with one action (pay, check out, change). */
 export type Card = {
@@ -116,12 +122,18 @@ const LINK_TEXT: Record<string, string> = {
 
 let panel: HTMLElement | null = null;
 
-export async function openChat(opener: HTMLButtonElement): Promise<void> {
+export async function openChat(
+  opener: HTMLButtonElement,
+  where: Endpoints = BUSINESS,
+): Promise<void> {
   if (panel) {
     show(opener);
     return;
   }
-  const r = await fetch('/chat', { headers: { Accept: 'application/json' } }).catch(() => null);
+  endpoints = where;
+  const r = await fetch(endpoints.config, { headers: { Accept: 'application/json' } }).catch(
+    () => null,
+  );
   if (!r || !r.ok) return;
   const config = (await r.json()) as Config;
   panel = build(config, opener);
@@ -226,15 +238,11 @@ function build(c: Config, opener: HTMLButtonElement): HTMLElement {
     'aria-label': 'Quick questions',
     style: 'display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 8px',
   });
-  const handoff = el(
-    'button',
-    {
-      type: 'button',
-      style:
-        'border:1px solid #1f2937;background:#fff;color:#1f2937;border-radius:9999px;padding:6px 12px;cursor:pointer',
-    },
-    'Talk to someone',
-  );
+  const pill =
+    'border:1px solid #1f2937;background:#fff;color:#1f2937;border-radius:9999px;padding:6px 12px;cursor:pointer';
+  const handoff = c.handoff_url
+    ? el('a', { href: c.handoff_url, style: `${pill};text-decoration:none` }, 'Talk to someone')
+    : el('button', { type: 'button', style: pill }, 'Talk to someone');
   for (const b of c.buttons) {
     const btn = el(
       'button',
@@ -305,7 +313,7 @@ function build(c: Config, opener: HTMLButtonElement): HTMLElement {
     send.disabled = true;
     input.setAttribute('aria-busy', 'true');
     busy.textContent = 'The assistant is replying…';
-    void fetch('/chat/message', {
+    void fetch(endpoints.message, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({
@@ -330,7 +338,7 @@ function build(c: Config, opener: HTMLButtonElement): HTMLElement {
       });
   });
   handoff.addEventListener('click', () => {
-    if (box.querySelector('[data-handoff]')) return;
+    if (c.handoff_url || box.querySelector('[data-handoff]')) return;
     box.insertBefore(handoffForm(c, transcript, say), ask);
     box.querySelector<HTMLInputElement>('[data-handoff] input')?.focus();
   });

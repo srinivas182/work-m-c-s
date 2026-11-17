@@ -37,6 +37,7 @@ interface Settings {
   caps: { tenant_daily_requests: number; provider_monthly_usd: Record<string, number | null> };
   retirements?: Record<string, string | null>;
   assistant: { enabled: boolean; free_questions: number; monthly_cap: number };
+  sales: { enabled: boolean; greeting: string; monthly_cap: number };
 }
 
 interface Props {
@@ -44,6 +45,7 @@ interface Props {
   providers: Record<string, string>;
   tasks: Record<string, string>;
   connected: Record<string, boolean>;
+  sales: { replies: number; zar: number };
   usage: {
     byProvider: {
       provider: string;
@@ -96,7 +98,7 @@ function StepPicker({
   );
 }
 
-export default function AiAdmin({ settings, providers, tasks, connected, usage }: Props) {
+export default function AiAdmin({ settings, providers, tasks, connected, usage, sales }: Props) {
   const form = useForm<Settings>({ ...settings, retirements: settings.retirements ?? {} });
   const [trial, setTrial] = useState<Step>({
     provider: 'anthropic',
@@ -469,6 +471,49 @@ export default function AiAdmin({ settings, providers, tasks, connected, usage }
                 onChange={(e) =>
                   form.setData('assistant', {
                     ...form.data.assistant,
+                    monthly_cap: Number(e.target.value) || 0,
+                  })
+                }
+              />
+            </Field>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>WURK&rsquo;s sales assistant</CardTitle>
+            <CardDescription>
+              Chats with visitors on wurk.co.za: answers from the live packages and the help centre,
+              recommends a package, opens signup, and passes visitors to WURK or to the agent who
+              referred them. WURK pays for it. This month: {sales.replies} replies, R
+              {sales.zar.toFixed(2)}.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-3">
+            <label className="flex items-center gap-3 text-sm">
+              <Switch
+                aria-label="WURK’s sales assistant switched on"
+                checked={form.data.sales.enabled}
+                onCheckedChange={(v) => form.setData('sales', { ...form.data.sales, enabled: v })}
+              />
+              Switched on
+            </label>
+            <Field label="Greeting" error={form.errors['sales.greeting']} className="sm:col-span-2">
+              <Input
+                value={form.data.sales.greeting}
+                maxLength={200}
+                onChange={(e) =>
+                  form.setData('sales', { ...form.data.sales, greeting: e.target.value })
+                }
+              />
+            </Field>
+            <Field label="Most replies a month" error={form.errors['sales.monthly_cap']}>
+              <Input
+                inputMode="numeric"
+                value={String(form.data.sales.monthly_cap)}
+                onChange={(e) =>
+                  form.setData('sales', {
+                    ...form.data.sales,
                     monthly_cap: Number(e.target.value) || 0,
                   })
                 }
