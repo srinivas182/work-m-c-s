@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Keys in settings — Sprint 19.6b (contact addresses and the uptime token)
+- **Admin → Security → WURK's contact addresses**: where contact-form messages go, the support address, and the security contact (security.txt, the Trust and Security pages). Before, they were only in the server's settings. The saved addresses apply to every page, email and background job straight away. The server's values are used only until they're set here.
+- **Admin → Watchtower → Uptime checker**: shows the webhook address for Better Stack or UptimeRobot, and **makes a new one** (encrypted; the old address stops working at once). Only people who manage Watchtower see it. The server's token is used only until one is made here.
+- Infrastructure secrets (database, app key, Redis) stay on the server, as agreed.
+
 ### Keys in settings — Sprint 19.6a ("Test connection" for every key)
 - **Every key in Admin → Providers can now be tested before switching it on.**
   - AI keys (Anthropic, OpenAI, Google) and Paystack are tried with a read-only request.

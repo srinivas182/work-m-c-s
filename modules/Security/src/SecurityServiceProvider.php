@@ -6,13 +6,17 @@ namespace Wurk\Security;
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Event;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Security\Contracts\PlatformSettings;
 use Wurk\Security\Http\Middleware\AdminIpAllowList;
+use Wurk\Security\Http\Middleware\ApplyPlatformContacts;
 use Wurk\Security\Http\Middleware\LoadTestVisitors;
 use Wurk\Security\Http\Middleware\RequireTeamMfa;
 use Wurk\Security\Http\Middleware\SecurityHeaders;
+use Wurk\Security\Support\PlatformContacts;
 use Wurk\Security\Support\Settings;
 
 final class SecurityServiceProvider extends ModuleServiceProvider
@@ -58,7 +62,11 @@ final class SecurityServiceProvider extends ModuleServiceProvider
         if (method_exists($kernel, 'prependMiddleware')) {
             $kernel->prependMiddleware(SecurityHeaders::class);
             $kernel->prependMiddleware(LoadTestVisitors::class); // staging load tests only (18.3b)
+            $kernel->prependMiddleware(ApplyPlatformContacts::class); // WURK's contact addresses from settings (19.6)
         }
+        // …and for every queued job, and commands (which boot fresh).
+        Event::listen(JobProcessing::class, fn () => $this->app->make(PlatformContacts::class)->apply());
+        $this->app->booted(fn () => $this->app->make(PlatformContacts::class)->apply());
         if (method_exists($kernel, 'appendMiddlewareToGroup')) {
             $kernel->appendMiddlewareToGroup('web', AdminIpAllowList::class);
         }
