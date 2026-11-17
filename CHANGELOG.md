@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### AI receptionist — Sprint 19.2c (classes, tables, shop)
+- **Class places**: the receptionist lists classes in the next two weeks, with the price, how it's paid and the places left, and books a place. It never overbooks. Paid places get a payment link and are held until paid.
+- **Tables**: it offers only arrival times with room for the party and reserves one, with notes such as a birthday. Bigger parties than the restaurant takes online are passed to a person.
+- **Shop**: it finds products with their options, prices and stock, and sends a **"Check out" link that fills the customer's cart on the website**, where they choose delivery and pay. The chat never takes card details, and the website re-checks every price and stock level.
+- A class place or a table is changed or cancelled with the link in its confirmation, as before.
+
 ### AI receptionist — Sprint 19.2b (booking)
 - **The receptionist books appointments for real**: it lists the business's services and prices, offers only times that are actually free (in the business's own time zone), and books with the customer's name, mobile number and consent. The same rules apply as the booking form: staff, hours, breaks, buffers, blocked time, notice and how far ahead.
 - **Deposits**: when a service needs one, the customer gets a "Pay the deposit" link in the chat, and the time is held until it's paid.

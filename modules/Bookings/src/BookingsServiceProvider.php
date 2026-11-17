@@ -31,11 +31,15 @@ use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Receptionist\BookAppointmentTool;
 use Wurk\Bookings\Receptionist\CancelBookingTool;
+use Wurk\Bookings\Receptionist\ClassesTool;
 use Wurk\Bookings\Receptionist\ConfirmBookingCodeTool;
 use Wurk\Bookings\Receptionist\FindBookingTool;
 use Wurk\Bookings\Receptionist\FreeTimesTool;
+use Wurk\Bookings\Receptionist\JoinClassTool;
 use Wurk\Bookings\Receptionist\MoveBookingTool;
+use Wurk\Bookings\Receptionist\ReserveTableTool;
 use Wurk\Bookings\Receptionist\ServicesTool;
+use Wurk\Bookings\Receptionist\TableTimesTool;
 use Wurk\Bookings\Reports\BookingsSection;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
@@ -137,9 +141,10 @@ final class BookingsServiceProvider extends ModuleServiceProvider
             $x->table('bookings', 'Bookings', 'bookings.view', $rows('bookings', 'starts_at'));
         });
         // Reports → Bookings (Sprint 15.1a).
-        // The AI receptionist (19.2b): services, free times, booking; moving and cancelling a booking made in the chat.
+        // The AI receptionist (19.2b, c): services, free times, booking; finding, moving and cancelling; classes and tables.
         $this->callAfterResolving(ReceptionistTools::class, function (ReceptionistTools $t): void {
-            foreach ([ServicesTool::class, FreeTimesTool::class, BookAppointmentTool::class, MoveBookingTool::class, CancelBookingTool::class, FindBookingTool::class, ConfirmBookingCodeTool::class] as $tool) {
+            foreach ([ServicesTool::class, FreeTimesTool::class, BookAppointmentTool::class, MoveBookingTool::class, CancelBookingTool::class, FindBookingTool::class, ConfirmBookingCodeTool::class,
+                ClassesTool::class, JoinClassTool::class, TableTimesTool::class, ReserveTableTool::class] as $tool) {
                 $t->register($tool);
             }
         });
