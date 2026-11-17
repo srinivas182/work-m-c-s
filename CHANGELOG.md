@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Keys in settings — Sprint 19.6a ("Test connection" for every key)
+- **Every key in Admin → Providers can now be tested before switching it on.**
+  - AI keys (Anthropic, OpenAI, Google) and Paystack are tried with a read-only request.
+  - Google Meet and Zoom app credentials are checked without anyone signing in.
+  - Nothing is sent or charged. A refused key is reported in plain words, and the last result is shown.
+- **Fixed: Paystack's "Check" button always failed**, because the server asked for an address to send a test to, which the page never showed.
+- **Removed from Providers: PayFast, Yoco, Ozow and Peach keys.** Nothing used them. WURK's keys for these are set in Admin → Payment methods, where they're checked when saved, so keys entered in Providers did nothing.
+
 ### WURK's sales assistant — Sprint 19.5b (the chat on wurk.co.za)
 - **wurk.co.za has a chat button while HQ has the sales assistant on.** It's the same chat as businesses' websites: the AI notice, cards (e.g. "Start your free trial" with the package chosen), the conversation kept across pages, and accessible. It loads only when tapped. "Talk to someone" opens the contact page. When the assistant can't reply, the visitor is pointed to the pricing and contact pages.
 
