@@ -9,6 +9,7 @@ import { ArrowLeft, Check, CloudOff, History, Loader2, Rocket, TriangleAlert } f
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Button, Dialog, DialogContent, DialogFooter, Field, Input } from '@/design-system';
 import { buildConfig, fromPuck, toPuck } from '../editor/adapter';
+import { AddSection, noDragOverrides } from '../editor/no-drag';
 import { firstError, request } from '../editor/http';
 import { siteTheme } from '../site/theme';
 import type { Branding, ContentDocument, MenuItem } from '../site/types';
@@ -389,6 +390,8 @@ export default function Editor({
         onChange={onChange}
         // Puck's own labels, in our voice (its defaults are lowercase).
         dictionary={{ 'header-undo': 'Undo', 'header-redo': 'Redo' }}
+        // Add and move sections without dragging (WCAG 2.2, 18.5b).
+        overrides={noDragOverrides}
         headerTitle={page.title}
         headerPath={page.is_home ? '/' : `/${page.slug}`}
         viewports={[
@@ -398,6 +401,7 @@ export default function Editor({
         ]}
         renderHeaderActions={() => (
           <div className="flex items-center gap-2">
+            <AddSection />
             <a
               href={urls.pages}
               className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-[#5b5776] hover:bg-[#f2f0f9]"

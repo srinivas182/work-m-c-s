@@ -14,4 +14,5 @@ Route::domain((string) config('wurk.domains.root'))->group(function (): void {
     Route::get('/legal/{page}', [MarketingController::class, 'legal'])->name('marketing.legal');
     Route::get('/trust', [MarketingController::class, 'trust'])->name('marketing.trust');           // 18.1b
     Route::get('/security', [MarketingController::class, 'security'])->name('marketing.security'); // 18.1b
+    Route::get('/accessibility', [MarketingController::class, 'accessibility'])->name('marketing.accessibility'); // 18.5b
 });

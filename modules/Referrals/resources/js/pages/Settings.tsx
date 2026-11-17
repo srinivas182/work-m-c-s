@@ -166,13 +166,14 @@ export default function ReferralSettings({ rules, limits, returnDays, wallet }: 
               <CardTitle>How referrals count</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4">
-              <fieldset className="grid gap-2">
+              <fieldset className="grid gap-3">
                 <legend className="text-sm font-medium">Who gets the credit</legend>
+                {/* Radios at least 20 px with room around them: WCAG 2.2 target size. */}
                 <label className="flex items-start gap-2 text-sm">
                   <input
                     type="radio"
                     name="attribution"
-                    className="mt-1"
+                    className="mt-0.5 size-5 shrink-0"
                     checked={form.data.attribution === 'first'}
                     onChange={() => form.setData('attribution', 'first')}
                   />
@@ -182,7 +183,7 @@ export default function ReferralSettings({ rules, limits, returnDays, wallet }: 
                   <input
                     type="radio"
                     name="attribution"
-                    className="mt-1"
+                    className="mt-0.5 size-5 shrink-0"
                     checked={form.data.attribution === 'last'}
                     onChange={() => form.setData('attribution', 'last')}
                   />
