@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### AI receptionist — Sprint 19.3 (the website chat)
+- **When the owner switches the receptionist on, the website chat says so** ("You're chatting with an AI assistant…") and typed questions go to it. Its bookings, class places, tables and carts appear as **cards** with one clear action: pay the deposit, check out, or change or cancel.
+- **The conversation carries on across the site's pages**, in the same tab.
+- **While it works**, the chat says "The assistant is replying…" once, for screen readers too. If the receptionist is off, out of credits, over its cap, or can't be reached, **the business's own answers carry on** without the visitor noticing a break. The quick-question buttons and "Talk to someone" work as before.
+- The chat code still loads only when someone opens the chat. Links in cards must be the business's own pages or secure (https) payment pages.
+
 ### AI receptionist — Sprint 19.2c (classes, tables, shop)
 - **Class places**: the receptionist lists classes in the next two weeks, with the price, how it's paid and the places left, and books a place. It never overbooks. Paid places get a payment link and are held until paid.
 - **Tables**: it offers only arrival times with room for the party and reserves one, with notes such as a birthday. Bigger parties than the restaurant takes online are passed to a person.
