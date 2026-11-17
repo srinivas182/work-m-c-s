@@ -52,6 +52,14 @@ final readonly class AiClient implements Ai, AiConversations
         throw new AiUnavailable('WURK AI is busy right now. Please try again in a few minutes.');
     }
 
+    public function health(string $task, \DateTimeInterface $from, \DateTimeInterface $to, int $slowMs): array
+    {
+        $r = AiRequest::query()->where('task', $task)->where('created_at', '>=', $from)->where('created_at', '<', $to)->toBase()
+            ->selectRaw("count(*) as steps, sum(case when status = 'failed' then 1 else 0 end) as failed, sum(case when duration_ms > ? then 1 else 0 end) as slow, max(duration_ms) as slowest", [$slowMs])->first();
+
+        return ['steps' => (int) ($r->steps ?? 0), 'failed' => (int) ($r->failed ?? 0), 'slow' => (int) ($r->slow ?? 0), 'slowest_ms' => (int) ($r->slowest ?? 0)];
+    }
+
     public function converse(string $task, string $system, array $items, array $tools, callable $runTool, ?string $tenantId = null, int $maxSteps = 6, int $maxTokens = 1200): ChatReply
     {
         $this->checkCaps($tenantId);

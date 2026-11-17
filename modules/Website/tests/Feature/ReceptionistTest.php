@@ -55,7 +55,7 @@ final class FakeFreeTimes implements ReceptionistTool
             throw new ReceptionistRefused('Closed on Sundays.');
         }
 
-        return ['service' => 'Box braids', 'price_cents' => 85000, 'times' => ['14:00', '15:30']];
+        return ['service' => 'Box braids', 'price_cents' => 85000, 'long_braids' => 'R1 200.00', 'times' => ['14:00', '15:30']];
     }
 }
 
@@ -155,6 +155,11 @@ it('never passes on a time or price no tool gave — it says so and offers a per
     expect(($this->say)('Anything later?')['reply'])->toContain('couldn’t check that properly');
     SimulatedDriver::$script = [['text' => 'Braids are R1200.']];
     expect(($this->say)('How much?')['reply'])->toContain('couldn’t check that properly');
+    // Thousands written with a space, as WURK and South Africans write them (found by the 19.7 evaluation set).
+    SimulatedDriver::$script = [['tool' => 'free_times', 'arguments' => ['date' => 'saturday']], ['text' => 'That’s R850 — or R1 200 for long braids.']];
+    expect(($this->say)('And long braids?')['reply'])->toBe('That’s R850 — or R1 200 for long braids.');
+    SimulatedDriver::$script = [['tool' => 'free_times', 'arguments' => ['date' => 'saturday']], ['text' => 'Long braids are R1 500.']];
+    expect(($this->say)('Sure?')['reply'])->toContain('couldn’t check that properly');
     // A tool's refusal reaches the AI as an error, not a crash.
     SimulatedDriver::$script = [['tool' => 'free_times', 'arguments' => ['date' => 'sunday']], ['text' => 'We’re closed on Sundays.']];
     expect(($this->say)('Sunday?')['reply'])->toBe('We’re closed on Sundays.')
