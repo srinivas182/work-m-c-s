@@ -31,6 +31,49 @@ final readonly class ChatBookings
         return $service ?? throw new ReceptionistRefused('There is no service like that. Use the services tool to see what’s offered.');
     }
 
+    /**
+     * The customer's details, checked like the booking form: a name, a mobile number, consent to be contacted, and a
+     * valid email when one is needed (payments email the receipt).
+     *
+     * @param  array<string, mixed>  $arguments
+     * @return array{name: string, phone: string, email: string|null}
+     */
+    public function customer(array $arguments, bool $needsEmail = false, string $what = 'the booking'): array
+    {
+        $name = trim((string) ($arguments['name'] ?? ''));
+        $phone = trim((string) ($arguments['phone'] ?? ''));
+        $email = trim((string) ($arguments['email'] ?? '')) ?: null;
+        if ($name === '' || preg_match('/^[+0-9 ()-]{6,20}$/', $phone) !== 1) {
+            throw new ReceptionistRefused('Ask for their name and a mobile number first.');
+        }
+        if ($email !== null && filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            throw new ReceptionistRefused('That email doesn’t look right — ask them to check it.');
+        }
+        if (($arguments['agreed_to_be_contacted'] ?? false) !== true) {
+            throw new ReceptionistRefused("Ask whether they agree to be contacted about {$what} first.");
+        }
+        if ($needsEmail && $email === null) {
+            throw new ReceptionistRefused('This is paid when booking and the receipt is emailed: ask for their email.');
+        }
+
+        return ['name' => mb_substr($name, 0, 120), 'phone' => $phone, 'email' => $email];
+    }
+
+    /**
+     * The JSON-schema properties every booking tool asks for.
+     *
+     * @return array<string, array<string, string>>
+     */
+    public static function contactProperties(): array
+    {
+        return [
+            'name' => ['type' => 'string'],
+            'phone' => ['type' => 'string', 'description' => 'Mobile number'],
+            'email' => ['type' => 'string', 'description' => 'Email (needed when it’s paid)'],
+            'agreed_to_be_contacted' => ['type' => 'boolean', 'description' => 'True only if they agreed to be contacted about it'],
+        ];
+    }
+
     public function money(?int $cents): ?string
     {
         return $cents === null ? null : 'R'.number_format($cents / 100, 2, '.', ' ');

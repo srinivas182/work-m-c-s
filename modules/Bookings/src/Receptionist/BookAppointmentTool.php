@@ -37,12 +37,9 @@ final readonly class BookAppointmentTool implements ReceptionistTool
         return ['type' => 'object', 'properties' => [
             'service' => ['type' => 'string', 'description' => 'The service’s id or name'],
             'starts_at' => ['type' => 'string', 'description' => 'The "starts_at" of the chosen free time, exactly as free_times returned it'],
-            'name' => ['type' => 'string'],
-            'phone' => ['type' => 'string', 'description' => 'Mobile number'],
-            'email' => ['type' => 'string', 'description' => 'Email (needed when there’s a deposit)'],
+            ...ChatBookings::contactProperties(),
             'online' => ['type' => 'boolean', 'description' => 'True for an online (video) appointment, when the service offers it'],
             'notes' => ['type' => 'string'],
-            'agreed_to_be_contacted' => ['type' => 'boolean', 'description' => 'True only if they agreed to be contacted about the booking'],
         ], 'required' => ['service', 'starts_at', 'name', 'phone', 'agreed_to_be_contacted']];
     }
 
@@ -59,18 +56,7 @@ final readonly class BookAppointmentTool implements ReceptionistTool
     public function run(array $arguments, array $context): array
     {
         $service = $this->chat->service((string) ($arguments['service'] ?? ''));
-        $name = trim((string) ($arguments['name'] ?? ''));
-        $phone = trim((string) ($arguments['phone'] ?? ''));
-        $email = trim((string) ($arguments['email'] ?? '')) ?: null;
-        if ($name === '' || preg_match('/^[+0-9 ()-]{6,20}$/', $phone) !== 1) {
-            throw new ReceptionistRefused('Ask for their name and a mobile number first.');
-        }
-        if ($email !== null && filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            throw new ReceptionistRefused('That email doesn’t look right — ask them to check it.');
-        }
-        if (($arguments['agreed_to_be_contacted'] ?? false) !== true) {
-            throw new ReceptionistRefused('Ask whether they agree to be contacted about the booking first.');
-        }
+        $customer = $this->chat->customer($arguments);
         try {
             $startsAt = CarbonImmutable::parse((string) ($arguments['starts_at'] ?? ''));
         } catch (\Throwable) {
@@ -81,11 +67,11 @@ final readonly class BookAppointmentTool implements ReceptionistTool
             throw new ReceptionistRefused('Online consultations need the practice’s consent terms: send them to the booking form on the website to book online.');
         }
         $deposit = $this->deposits->amountFor($service, $online);
-        if ($deposit > 0 && $email === null) {
+        if ($deposit > 0 && $customer['email'] === null) {
             throw new ReceptionistRefused('This service needs a deposit and the receipt is emailed: ask for their email.');
         }
         try {
-            $booking = $this->booker->book($service, $startsAt, ['name' => mb_substr($name, 0, 120), 'phone' => $phone, 'email' => $email, 'notes' => mb_substr((string) ($arguments['notes'] ?? ''), 0, 1000) ?: null],
+            $booking = $this->booker->book($service, $startsAt, [...$customer, 'notes' => mb_substr((string) ($arguments['notes'] ?? ''), 0, 1000) ?: null],
                 null, source: 'chat', status: $deposit > 0 ? 'pending_payment' : 'confirmed', online: $online);
         } catch (SlotTaken) {
             throw new ReceptionistRefused('That time has just been taken. Check free_times again and offer the nearest ones.');
@@ -94,7 +80,7 @@ final readonly class BookAppointmentTool implements ReceptionistTool
         $when = $this->chat->local($booking->starts_at)->format('l j F, H:i');
         $card = ['type' => 'booking', 'service' => $service->name, 'when' => $when, 'price' => $this->chat->money($service->price_cents)];
         if ($deposit > 0) {
-            $pay = $this->deposits->start($booking, $deposit, (string) $email, $this->chat->returnUrl());
+            $pay = $this->deposits->start($booking, $deposit, (string) $customer['email'], $this->chat->returnUrl());
             if ($pay === null) {
                 $this->booker->cancel($booking, null, 'expired');
                 throw new ReceptionistRefused('Online payment isn’t available right now, so this can’t be booked here. Offer to pass it to a person.');

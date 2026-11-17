@@ -6,7 +6,7 @@ import { SiteRenderer } from '@modules/Website/resources/js/site/SiteRenderer';
 import type { Branding, ContentDocument } from '@modules/Website/resources/js/site/types';
 
 (window as { __noAutoIslands?: boolean }).__noAutoIslands = true;
-const { startIslands } = await import('./site-islands');
+const { addFromLink, startIslands } = await import('./site-islands');
 
 const branding: Branding = {
   primary: '#9D174D',
@@ -776,5 +776,28 @@ describe('checkout with couriers', () => {
       },
     });
     vi.unstubAllGlobals();
+  });
+});
+
+describe('cart links from the AI receptionist', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('adds the linked items to the cart once, keeping what was there, and ignores junk', () => {
+    localStorage.setItem(
+      'wurk-cart',
+      JSON.stringify([{ variant: '01JAAAAAAAAAAAAAAAAAAAAAAA', quantity: 1 }]),
+    );
+    window.history.replaceState(
+      null,
+      '',
+      '/cart?add=01JBBBBBBBBBBBBBBBBBBBBBBB:2,01JAAAAAAAAAAAAAAAAAAAAAAA:3,<script>:1',
+    );
+    expect(addFromLink()).toBe(2);
+    expect(JSON.parse(localStorage.getItem('wurk-cart')!)).toEqual([
+      { variant: '01JAAAAAAAAAAAAAAAAAAAAAAA', quantity: 3 },
+      { variant: '01JBBBBBBBBBBBBBBBBBBBBBBB', quantity: 2 },
+    ]);
+    expect(window.location.search).toBe(''); // a reload doesn't add them again
+    expect(addFromLink()).toBe(0);
   });
 });

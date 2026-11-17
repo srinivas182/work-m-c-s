@@ -12,6 +12,11 @@ use Wurk\Bookings\Mail\BookingMessageMail;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Models\ClassAttendee;
+use Wurk\Bookings\Models\ClassSession;
+use Wurk\Bookings\Models\Reservation;
+use Wurk\Bookings\Models\ReservationHours;
+use Wurk\Bookings\Models\ReservationSettings;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Messaging\Contracts\Messenger;
@@ -191,4 +196,44 @@ it('finds a booking made elsewhere only with a code sent to the booking’s own 
     expect($sms->sent)->toHaveCount(1)->and($sms->sent[0][0])->toBe('+27825550101')->and($again->id)->not->toBeNull();
     ($this->run)('find_booking', ['phone' => '082 555 0101'], 'conv-3');
     expect(fn () => ($this->run)('find_booking', ['phone' => '082 555 0101'], 'conv-3'))->toThrow(ReceptionistRefused::class, 'Several codes');
+});
+
+it('books class places like the timetable: real places, paid places pay first, never overbooked', function () {
+    $this->connectYoco($this->glow);
+    [$braiding, $paid] = ($this->in)(fn () => [
+        ClassSession::query()->create(['title' => 'Braiding basics', 'starts_at' => '2027-05-03 15:00:00', 'ends_at' => '2027-05-03 17:00:00', 'capacity' => 1, 'location_type' => 'in_person']),
+        ClassSession::query()->create(['title' => 'Masterclass', 'starts_at' => '2027-05-04 15:00:00', 'ends_at' => '2027-05-04 17:00:00', 'capacity' => 5, 'location_type' => 'in_person', 'price_cents' => 35000, 'pay_online' => true]),
+    ]);
+    $list = ($this->run)('classes', ['search' => 'braid']);
+    expect($list['classes'])->toBe([['class_id' => $braiding->id, 'title' => 'Braiding basics', 'when' => 'Monday 3 May, 15:00', 'minutes' => 120, 'online' => false, 'price' => 'Free', 'paid' => null, 'places_left' => 1]]);
+    expect(($this->run)('classes', ['search' => 'master'])['classes'][0])->price->toBe('R350.00')->paid->toBe('online when booking');
+
+    $who = ['name' => 'Ayanda', 'phone' => '082 555 0102', 'agreed_to_be_contacted' => true];
+    expect(fn () => ($this->run)('join_class', ['class_id' => $braiding->id, ...$who, 'agreed_to_be_contacted' => false]))->toThrow(ReceptionistRefused::class, 'agree to be contacted about the class');
+    $r = ($this->run)('join_class', ['class_id' => $braiding->id, ...$who]);
+    expect($r['booked'])->toBeTrue()->and($r['card']['action']['url'])->toContain('/book/class/');
+    expect(fn () => ($this->run)('join_class', ['class_id' => $braiding->id, ...$who, 'name' => 'Lerato']))->toThrow(ReceptionistRefused::class, 'full');
+
+    expect(fn () => ($this->run)('join_class', ['class_id' => $paid->id, ...$who]))->toThrow(ReceptionistRefused::class, 'ask for their email');
+    $pay = ($this->run)('join_class', ['class_id' => $paid->id, ...$who, 'email' => 'ayanda@example.com']);
+    expect($pay['awaiting_payment'])->toBeTrue()->and($pay['price'])->toBe('R350.00')->and($pay['pay_url'])->toStartWith('https://');
+    ($this->in)(fn () => expect(ClassAttendee::query()->where('session_id', $paid->id)->sole())->status->toBe('pending_payment')->source->toBe('chat'));
+});
+
+it('reserves tables only at times with room, for parties the restaurant takes online', function () {
+    expect(fn () => ($this->run)('table_times', ['date' => '2027-05-03', 'party' => 2]))->toThrow(ReceptionistRefused::class, 'doesn’t take table bookings');
+    ($this->in)(function () {
+        ReservationSettings::query()->create(['tenant_id' => app(TenantContext::class)->id(), 'enabled' => true, 'covers' => 6, 'sitting_minutes' => 90, 'step_minutes' => 30, 'max_party' => 6]);
+        ReservationHours::query()->create(['weekday' => 0, 'starts' => '18:00', 'ends' => '19:00']);
+    });
+    expect(fn () => ($this->run)('table_times', ['date' => '2027-05-03', 'party' => 9]))->toThrow(ReceptionistRefused::class, '1 to 6 guests');
+    $t = ($this->run)('table_times', ['date' => '2027-05-03', 'party' => 4]);
+    expect(array_column($t['times'], 'time'))->toBe(['18:00', '18:30', '19:00']);
+
+    $who = ['name' => 'Sipho', 'phone' => '082 555 0101', 'agreed_to_be_contacted' => true];
+    $r = ($this->run)('reserve_table', ['starts_at' => $t['times'][0]['starts_at'], 'party' => 4, 'notes' => 'Birthday', ...$who]);
+    expect($r['when'])->toBe('Monday 3 May, 18:00')->and($r['card']['service'])->toBe('Table for 4');
+    ($this->in)(fn () => expect(Reservation::query()->sole())->source->toBe('chat')->notes->toBe('Birthday'));
+    // 4 of 6 covers are taken through 19:30: no room for 4 more until then.
+    expect(fn () => ($this->run)('reserve_table', ['starts_at' => $t['times'][1]['starts_at'], 'party' => 4, ...$who]))->toThrow(ReceptionistRefused::class, 'no longer room');
 });
