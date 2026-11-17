@@ -103,6 +103,9 @@ export function Site({
             <Link href="/security" className="hover:text-[#1B1640]">
               Report a security problem
             </Link>
+            <Link href="/accessibility" className="hover:text-[#1B1640]">
+              Accessibility
+            </Link>
           </nav>
         </div>
       </footer>

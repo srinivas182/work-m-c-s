@@ -98,6 +98,47 @@ type BookBranch = { id: string; name: string; address: string | null };
 /** A health practice: fixed, versioned consent wording for online consultations. */
 type HealthTerms = { consent: string; version: string } | null;
 
+/**
+ * A group of choice buttons (free times, classes) is one Tab stop; the arrow keys, Home and End move between the
+ * choices (Sprint 18.5b). Thirty times for a day used to be thirty Tab presses before "Your name".
+ */
+function roving(group: HTMLElement) {
+  const buttons = () =>
+    Array.from(group.querySelectorAll<HTMLButtonElement>('button:not([disabled])'));
+  const sync = () => {
+    const all = buttons();
+    const current = all.find((b) => b.getAttribute('aria-pressed') === 'true') ?? all[0];
+    for (const b of all) b.tabIndex = b === current ? 0 : -1;
+  };
+  new MutationObserver(sync).observe(group, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['aria-pressed'],
+  });
+  group.addEventListener('keydown', (e) => {
+    const all = buttons();
+    const i = all.indexOf(document.activeElement as HTMLButtonElement);
+    if (i < 0) return;
+    const next =
+      e.key === 'ArrowRight' || e.key === 'ArrowDown'
+        ? all[(i + 1) % all.length]
+        : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+          ? all[(i - 1 + all.length) % all.length]
+          : e.key === 'Home'
+            ? all[0]
+            : e.key === 'End'
+              ? all[all.length - 1]
+              : undefined;
+    if (!next) return;
+    e.preventDefault();
+    for (const b of all) b.tabIndex = b === next ? 0 : -1;
+    next.focus();
+  });
+  group.setAttribute('aria-description', 'Use the arrow keys to move between the choices.');
+  sync();
+}
+
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   props: Partial<HTMLElementTagNameMap[K]> & { class?: string } = {},
@@ -198,6 +239,7 @@ async function booking(root: HTMLElement): Promise<void> {
   const times = el('div', { class: 'mt-2 flex flex-wrap gap-2' });
   times.setAttribute('role', 'group');
   times.setAttribute('aria-label', 'Free times');
+  roving(times);
   let chosen: string | null = null;
 
   // Where: a choice when the service allows either; a note when it's online only.
@@ -458,6 +500,7 @@ async function tables(root: HTMLElement): Promise<void> {
   const times = el('div', { class: 'mt-2 flex flex-wrap gap-2' });
   times.setAttribute('role', 'group');
   times.setAttribute('aria-label', 'Free times');
+  roving(times);
   let chosen: string | null = null;
 
   const refreshTimes = async () => {
@@ -635,6 +678,7 @@ async function classes(root: HTMLElement): Promise<void> {
   const picker = el('div', { class: 'grid gap-2' });
   picker.setAttribute('role', 'group');
   picker.setAttribute('aria-label', 'Upcoming classes');
+  roving(picker);
   let chosen: string | null = null;
   const draw = () => {
     picker.replaceChildren();

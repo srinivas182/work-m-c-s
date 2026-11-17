@@ -52,6 +52,12 @@ final class MarketingController
         return $this->page('Marketing::Trust', ['contact' => (string) config('wurk.security.contact')]);
     }
 
+    /** WURK's accessibility statement (18.5b): what we aim for, how we test, what's known not to work, how to tell us. */
+    public function accessibility(): Response
+    {
+        return $this->page('Marketing::Accessibility', ['contact' => (string) config('wurk.support_email')]);
+    }
+
     /** Reporting a security problem: the responsible-disclosure policy (18.1b). */
     public function security(): Response
     {

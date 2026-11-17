@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Accessibility — Sprint 18.5b (keyboard, no dragging, every template's colours, statement)
+- **The main journeys are tested with the keyboard alone**: signing in (pasting the one-time code), booking an appointment, buying something, adding and moving a section in the page editor, and Ask WURK. Focus is checked to be visible at every step.
+- **Nothing needs dragging** (WCAG 2.2): the page editor has **"Add section"** (a list of every section; it goes in after the selected one) and **"Move up" / "Move down"** above a selected section's fields and on its toolbar.
+- **Booking times and class lists are one Tab stop**: the arrow keys, Home and End move between the choices. Before, a day with 30 free times took 30 Tab presses to reach "Your name".
+- **Focus goes back where it came from** when any dialog or panel closes. Dialogs opened from a plain button (Ask WURK, confirmations) left focus at the top of the page.
+- **All 24 website designs pass WCAG 2.2 AA on every page in their own colours, and on their home page in six very different brand colours.** Checked in CI on every change. A design can be previewed in other colours (`?primary=#rrggbb&secondary=#rrggbb`).
+- **Accessibility statement** at wurk.co.za/accessibility (linked in the footer): what WURK aims for, what works, how it's checked, what isn't perfect yet, and how to report a problem.
+
 ### Accessibility — Sprint 18.5a (every screen checked, WCAG 2.2 AA)
 - **Accessibility crawl of every screen** in CI: every GET route that shows a page — the back office, Admin, the agent area, sign-in and signup, the marketing site and help centre, and the pages a business's customers see (booking, class and table pages, orders, the public site). 131 screens, each in the **light and the dark theme**, on **desktop and mobile**: no serious or critical WCAG 2.2 AA issue (including target size), and every control reached with Tab stays visible (WCAG 2.2 "focus not obscured"). `php artisan wurk:screens` creates a business with a record behind each detail screen and lists them. A route that isn't a page (files, data for scripts, redirects) is reviewed in one list, and a new route that can't be resolved fails the crawl.
 - **Fixed**:

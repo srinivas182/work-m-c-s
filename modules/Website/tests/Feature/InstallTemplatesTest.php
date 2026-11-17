@@ -51,3 +51,13 @@ it('builds a site with the business’s name in its legal pages, and switches de
             ->and(Page::query()->pluck('slug')->all())->toContain('gallery', 'privacy'); // nothing dropped
     });
 });
+
+it('previews a design in other colours — only real colours are taken (Sprint 18.5b)', function () {
+    $this->artisan('website:install-templates');
+    $url = 'http://'.config('wurk.domains.app').'/templates/salon-hair-braids/preview';
+    $default = $this->get($url)->assertOk()->viewData('page')['props']['branding'];
+    $this->get($url.'?primary=%23e53935&secondary=%23ffffff')->assertOk()
+        ->assertInertia(fn ($p) => $p->where('branding.primary', '#E53935')->where('branding.secondary', '#FFFFFF'));
+    $this->get($url.'?primary=red;background:url(x)')->assertOk()
+        ->assertInertia(fn ($p) => $p->where('branding.primary', $default['primary']));
+});
