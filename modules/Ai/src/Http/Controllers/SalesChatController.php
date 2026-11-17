@@ -16,12 +16,19 @@ final class SalesChatController
     /** Messages a day in all, a backstop against abuse (HQ's monthly cap is the real limit). */
     private const DAILY_CAP = 5000;
 
+    /** The chat's set-up, in the website chat's own shape (19.5b reuses that chat); not found while it's off. */
     public function config(SalesAssistant $sales): JsonResponse
     {
         $s = $sales->settings();
+        abort_unless($s['enabled'], 404);
 
-        return new JsonResponse($s['enabled'] ? ['enabled' => true, 'greeting' => $s['greeting'],
-            'notice' => 'You’re chatting with WURK’s AI assistant. The conversation is kept for '.SalesConversation::KEEP_DAYS.' days.'] : ['enabled' => false]);
+        return (new JsonResponse([
+            'greeting' => $s['greeting'], 'buttons' => [], 'keywords' => [],
+            'fallback' => 'I can’t answer just now. See every package on the pricing page, or send us a message and we’ll reply within one working day.',
+            'reply' => 'We’ll get back to you within one working day.',
+            'ai' => ['greeting' => $s['greeting'], 'notice' => 'You’re chatting with WURK’s AI assistant. The conversation is kept for '.SalesConversation::KEEP_DAYS.' days.'],
+            'handoff_url' => '/contact',
+        ]))->setPublic()->setMaxAge(300);
     }
 
     public function message(Request $request, SalesAssistant $sales): JsonResponse

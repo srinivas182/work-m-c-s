@@ -41,11 +41,12 @@ beforeEach(function () {
 });
 
 it('is off until HQ switches it on, and then says it’s an AI', function () {
-    $this->getJson("{$this->root}/_sales")->assertOk()->assertExactJson(['enabled' => false]);
+    $this->getJson("{$this->root}/_sales")->assertNotFound();
     expect(($this->say)('Hi')['mode'])->toBe('off')->and(SimulatedDriver::$seen)->toBe([]);
     ($this->on)();
     $c = $this->getJson("{$this->root}/_sales")->assertOk()->json();
-    expect($c['greeting'])->toContain('WURK’s AI assistant')->and($c['notice'])->toContain('kept for 30 days');
+    expect($c['ai']['greeting'])->toContain('WURK’s AI assistant')->and($c['ai']['notice'])->toContain('kept for 30 days')
+        ->and($c['handoff_url'])->toBe('/contact')->and($c['buttons'])->toBe([]);
     $this->postJson("{$this->root}/_sales/message", ['visitor' => 'short', 'message' => 'Hi'])->assertUnprocessable();
 });
 
@@ -112,5 +113,5 @@ it('is set in Admin → AI, with its use this month', function () {
     $settings = [...AiSettings::DEFAULTS, 'sales' => ['enabled' => true, 'greeting' => 'Sawubona!', 'monthly_cap' => 500]];
     $this->actingAs($staff)->put($this->admin('/settings/ai'), [...$settings, 'sales' => [...$settings['sales'], 'greeting' => '']])->assertSessionHasErrors('sales.greeting');
     $this->actingAs($staff)->put($this->admin('/settings/ai'), $settings)->assertSessionHas('status', 'WURK AI settings saved.');
-    expect($this->getJson("{$this->root}/_sales")->json('greeting'))->toBe('Sawubona!');
+    expect($this->getJson("{$this->root}/_sales")->json('ai.greeting'))->toBe('Sawubona!');
 });

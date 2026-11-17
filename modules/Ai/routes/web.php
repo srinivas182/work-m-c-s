@@ -14,8 +14,9 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
 });
 
 // "Ask WURK" (16.2): the assistant panel in every business's back office.
-// WURK's sales assistant on wurk.co.za (19.5).
-Route::domain((string) config('wurk.domains.root'))->prefix('_sales')->name('marketing.sales')->group(function (): void {
+// WURK's sales assistant on wurk.co.za (19.5): like the public websites' chat, no session or CSRF (nothing signed in to
+// protect); per-visitor limits and HQ's caps guard against abuse. The agent's link cookie is unencrypted (a public code).
+Route::domain((string) config('wurk.domains.root'))->withoutMiddleware(['web'])->prefix('_sales')->name('marketing.sales')->group(function (): void {
     Route::get('/', [SalesChatController::class, 'config'])->middleware('throttle:60,1,sales-config');
     Route::post('/message', [SalesChatController::class, 'message'])->middleware('throttle:20,1,sales-message')->name('.message');
 });

@@ -4,6 +4,9 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### WURK's sales assistant — Sprint 19.5b (the chat on wurk.co.za)
+- **wurk.co.za has a chat button while HQ has the sales assistant on.** It's the same chat as businesses' websites: the AI notice, cards (e.g. "Start your free trial" with the package chosen), the conversation kept across pages, and accessible. It loads only when tapped. "Talk to someone" opens the contact page. When the assistant can't reply, the visitor is pointed to the pricing and contact pages.
+
 ### WURK's sales assistant — Sprint 19.5a (engine and settings)
 - **WURK's own AI sales assistant** answers visitors' questions about WURK from the **live packages and prices** (rands, excluding VAT, said so) and the help centre. It recommends a package, gives a link that **opens signup with that package chosen**, and passes the visitor to WURK through the contact form (with consent). When the visitor came through an **agent's link**, it can pass them to that agent, who is emailed their details. Like the receptionist, it never states a price no tool gave it.
 - **Admin → WURK AI → WURK's sales assistant**: on or off (off until HQ switches it on), the greeting, and the most replies a month, with this month's replies and their cost to WURK. WURK pays for it: no credits. Over the cap, or when WURK AI can't be reached, visitors are offered the contact form.
