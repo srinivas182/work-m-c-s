@@ -36,7 +36,8 @@ export const Header: BlockDefinition<HeaderProps> = {
         className="h-9 w-auto max-w-[180px] object-contain"
       />
     ) : (
-      <span className="font-[family-name:var(--s-font-display)] text-xl font-bold tracking-tight">
+      // A long business name wraps rather than pushing the button and menu off a phone's screen.
+      <span className="block font-[family-name:var(--s-font-display)] text-xl leading-tight font-bold tracking-tight [overflow-wrap:anywhere]">
         {site.businessName}
       </span>
     );
@@ -45,8 +46,8 @@ export const Header: BlockDefinition<HeaderProps> = {
         className={`z-30 border-b border-[var(--s-border)] bg-[var(--s-bg)]/90 px-5 backdrop-blur sm:px-8 ${p.sticky ? 'sticky top-0' : ''}`}
       >
         {/* Padding outside the column, like every section, so the logo and button line up with the content below. */}
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 py-4">
-          <a href={href('/')} className="shrink-0">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 py-4 sm:gap-6">
+          <a href={href('/')} className="min-w-0">
             {brand}
           </a>
           {items.length > 0 && (
@@ -97,7 +98,7 @@ export const Header: BlockDefinition<HeaderProps> = {
               )}
             </nav>
           )}
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {p.buttonLabel && (
               <a
                 href={href(p.buttonHref)}

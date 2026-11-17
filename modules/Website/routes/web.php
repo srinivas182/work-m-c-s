@@ -59,6 +59,8 @@ Route::tenant(function (): void {
         Route::get('/chat', [WebsiteChatController::class, 'designer'])->name('chat');
         Route::put('/chat/settings', [WebsiteChatController::class, 'settings'])->name('chat.settings');
         Route::put('/chat/answers', [WebsiteChatController::class, 'answers'])->name('chat.answers');
+        Route::put('/chat/receptionist', [WebsiteChatController::class, 'receptionist'])->name('chat.receptionist'); // 19.4
+        Route::post('/chat/try', [WebsiteChatController::class, 'tryIt'])->middleware('throttle:20,1,receptionist-try')->name('chat.try');
         Route::get('/chats', [WebsiteChatController::class, 'chats'])->name('chats');
         Route::put('/chats/{chat}', [WebsiteChatController::class, 'status'])->name('chats.status');
         Route::get('/enquiries', [EnquiriesController::class, 'index'])->name('enquiries');
