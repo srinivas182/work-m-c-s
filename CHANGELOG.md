@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.19.0] — 2026-11-18 — Sprint 18: Hardening
+
+### Polish and acceptance — Sprint 18.6
+- **Error pages in WURK's words** (403, 404, 419, 429, 500, 503): what happened and what to do next, in light and dark, with no internal details. They work even when the rest of the app can't load. Moving around the app shows the same words in place. An expired form goes back with a message instead of a dead end.
+- **Beta acceptance script** for PRD criteria 1–12 (`docs/uat/acceptance-script.md`): each step, the expected result, and who runs it, with a bug-bash process. Criteria 2 and 12 run on staging in Sprint 17.
+- **Release checklist** (`docs/runbooks/release-checklist.md`), including a screen-reader check before each release.
+- **Sprint plan**: Sprints 19–25 for the African market (AI receptionist, premium templates, two-way WhatsApp, mobile money, easy setup and money tools, languages and light on data, reach and trust), then Sprint 17 (cloud and going live).
+
 ### Accessibility — Sprint 18.5b (keyboard, no dragging, every template's colours, statement)
 - **The main journeys are tested with the keyboard alone**: signing in (pasting the one-time code), booking an appointment, buying something, adding and moving a section in the page editor, and Ask WURK. Focus is checked to be visible at every step.
 - **Nothing needs dragging** (WCAG 2.2): the page editor has **"Add section"** (a list of every section; it goes in after the selected one) and **"Move up" / "Move down"** above a selected section's fields and on its toolbar.

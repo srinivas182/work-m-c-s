@@ -134,7 +134,39 @@ Incidents list (status: new / acknowledged / fixed in release X / ignored; sever
 | 18.4c Admin → System, backups, drill | #190 | Backups are taken by the platform (managed database snapshots and PITR, object-storage versioning — Sprint 17), not by WURK. So WURK *records* them (`system:backup-taken`) and watches for gaps, rather than running its own dumps: dumps would duplicate the managed backups and couldn't meet the 15-minute RPO. Drills are recorded with their timings and judged against RPO/RTO. The page lives in Watchtower (platform operations) and reads shard state through a new Tenancy contract. `shards:repoint` health-checks the restored copy before switching. Found while testing: moves didn't update shard business counts (placement relies on them). Local drill (`scripts/dr-drill`, 300 businesses): shard back in 5 s, one business in 4 s. The drill that counts is Sprint 17's, on staging. |
 | 18.5a Every screen, WCAG 2.2 AA | #191 | 18.5 split: 18.5a = the crawl and the WCAG 2.2 "focus not obscured" check, with fixes; 18.5b = keyboard journeys, accessible sign-in (pasting codes), dragging alternatives, template contrast with every colour preset, the accessibility statement. The crawl lists routes from the router rather than following links, so a screen without a link to it is still checked, and a new route that can't be resolved fails it. A route is reviewed as "not a page" only with a reason. Its data is a dedicated business with one realistic record behind each detail screen, not the schema-driven rows of 18.2a, whose made-up values aren't what owners see. Focus visibility is checked by tabbing through each screen and testing that each focused control can be hit, which catches sticky bars that axe can't. The editor's canvas (Puck's drag handles) is left out of axe; its keyboard use is an 18.5b journey. The crawl runs as three extra CI parts (about 5 minutes each). |
 | 18.5b Keyboard, dragging, templates, statement | #192 | Keyboard journeys run on desktop only, since keyboard users are on computers. Each journey has its own phone number because of the 30-second resend rule. Dragging alternatives: the editor's own controls (Add section dialog, Move up/down) rather than Puck's drawer, whose items are drag handles (an extra button inside them nested two controls). The calendar has no drag-only actions. Accessible authentication: one-time codes accept a paste of all six digits; the password field has `current-password` and the email field `username`. Template contrast: every page in the template's colours, plus the home page in 6 brand colours chosen to stress the palette engine (very light yellow, grey, near-black with white, etc.). Each template is its own visitor through the load-test token, so the preview rate limit isn't hit. Found: focus was lost when a dialog without a Radix trigger closed (fixed in the design system for every dialog), and keyboard users had to tab through every free time. The statement is honest about limits: the Puck canvas, untagged PDFs, business-written content, the payment provider's pages. Its manual screen-reader check is added to the release checklist (18.6). |
+| 18.6 Error pages, UAT script, release | #193 | Error pages are self-contained Blade (no built assets), so they show even when the app's assets or database are the problem. Moving around the app (Inertia visits) shows the same words in place; an expired form goes back with a message rather than to a dead end; JSON callers keep JSON. Consistency pass: 45 screens with lists use the shared empty state, and the rest are forms or settings. Dark mode, mobile and plain words on every screen are checked by the 18.5 crawl. UAT script (`docs/uat/acceptance-script.md`) and release checklist (`docs/runbooks/release-checklist.md`, including the manual screen-reader check the statement promises). **The bug bash with WURK is waiting on WURK**: the script, logging and severity rules are ready. Sprint plan updated with Sprints 19–25 (approved 18 Nov). |
 
 ## Verification (before closing)
 
-Every spec item and agreed addition, against the code and its tests.
+Every spec item and agreed addition, against the code and its tests. Verified 18 Nov 2026.
+
+| Item | Where | Status |
+|---|---|---|
+| 18.0 Watchtower: crashes, front-end errors, failed jobs, heartbeats, infrastructure, slowness, downtime, AI reports, email to the address HQ sets, "Copy fix request" | modules/Watchtower; WatchtowerTest, AnalystTest, SlowPagesTest, UptimeTest | ✅ |
+| 18.1 Security headers on every surface, nonce CSP | SecurityHeaders; SecurityHeadersTest (per surface); e2e CSP guard | ✅ |
+| 18.1 CI scanning: composer/pnpm audit, gitleaks, Semgrep, Dependabot, ZAP baseline | CI "Security" job, performance job, .github/dependabot.yml | ✅ (Dependabot security updates and push protection need turning on by WURK in GitHub) |
+| 18.1 security.txt, disclosure page, Trust page, ASVS L2 self-assessment | SecurityTxtController, /security, /trust, docs/security/asvs-l2.md | ✅ |
+| 18.1 Sessions and cookies: Secure/HttpOnly/SameSite, rotation, staff idle timeout | SessionGuardian, SignInFlow; cookie test | ✅ |
+| 18.1 Every public POST and sign-in/OTP route throttled | tests/Architecture/RateLimitsTest | ✅ |
+| 18.2 Isolation sweep over every route; signed links; files; exports; Ask WURK tools | IsolationSweepTest (SQLite and MySQL) | ✅ |
+| 18.2 Mass assignment; file IDOR | Semgrep rule; sweep file routes | ✅ |
+| 18.2 New-device and password/2FA change emails; "Confirm it's you" before 2FA off and full export | SecurityNotice, ConfirmController; Identity tests | ✅ (payout/bank and role changes: WURK to decide) |
+| 18.3 `wurk:seed-load`; query budgets; k6 journeys; fair queuing | SeedLoadCommand, QueryBudgetTest, load/k6, FairQueuesTest; k6 smoke in CI | ✅ (full-scale run: Sprint 17, staging) |
+| 18.4 Single-business restore; move between shards (copy, checksum, switch, keep 7 days) | TenantMoves, TenantRows; TenantMovesTest (MySQL) | ✅ |
+| 18.4 Canary shard rollout, health check, stop and roll back | shards:migrate, ShardHealth; ShardRolloutTest | ✅ |
+| 18.4 Year 2038 | DatesPast2038 (migration and grammar); architecture test | ✅ |
+| 18.4 Admin → System; backup records; overdue-backup alert; timed drill and runbook | SystemController, Backups; SystemPageTest; scripts/dr-drill; docs/runbooks/restore.md | ✅ |
+| 18.4 Per-shard PITR backups, point-in-time restore | Managed database PITR and object-storage versioning | ➡️ Sprint 17 by design (18.4c: WURK records and watches backups rather than duplicating them) |
+| 18.4 Archived agent demos purged | AgentDemos::sweep; AgentDemosTest | ✅ |
+| 18.5 axe on every screen, both themes, desktop and mobile; target size; focus not obscured | wurk:screens, a11y-screens.spec (3 CI parts) | ✅ |
+| 18.5 Accessible authentication; dragging alternatives; keyboard journeys | keyboard.spec; editor Add section and Move up/down | ✅ |
+| 18.5 All 24 templates in many colours; accessibility statement | template-contrast.spec; /accessibility | ✅ |
+| 18.6 Error pages 403/404/419/429/500/503 | resources/views/errors, pages/Error.tsx; ErrorPagesTest, errors.spec | ✅ |
+| 18.6 Consistency pass: empty states, mobile, dark, plain words | Shared empty state on 45 list screens; the 18.5 crawl | ✅ |
+| 18.6 UAT script for criteria 1–12; bug bash | docs/uat/acceptance-script.md | ✅ script ready; **run with WURK** (2 and 12 on staging, Sprint 17) |
+| Addition: Trust page | /trust | ✅ |
+| Addition: isolation over every route automatically | IsolationSweepTest | ✅ |
+| Addition: backup/restore status in Admin | Admin → System | ✅ |
+| Addition: move between shards | tenants:move | ✅ |
+| Addition: 2038 fix now | 18.4b | ✅ |
+| Addition: accessible templates | template-contrast.spec | ✅ |
