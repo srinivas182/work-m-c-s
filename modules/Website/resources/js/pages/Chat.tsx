@@ -13,6 +13,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { ReceptionistCard, type ReceptionistProps } from '../chat/ReceptionistCard';
 
 interface Answer {
   id?: string;
@@ -38,6 +39,7 @@ interface Props {
   pages: { path: string; title: string }[];
   preview: { greeting: string; buttons: { label: string }[]; reply: string };
   taps: { label: string; taps: number }[];
+  receptionist: ReceptionistProps;
 }
 
 const LINKS: [Answer['link_kind'], string][] = [
@@ -50,7 +52,7 @@ const LINKS: [Answer['link_kind'], string][] = [
 ];
 const select = 'border-border bg-bg h-10 w-full rounded-md border px-3 text-sm';
 
-export default function Chat({ settings, answers, pages, preview, taps }: Props) {
+export default function Chat({ settings, answers, pages, preview, taps, receptionist }: Props) {
   const s = useForm(settings);
   const [rows, setRows] = useState<Answer[]>(answers);
   const [error, setError] = useState<string | null>(null);
@@ -142,6 +144,8 @@ export default function Chat({ settings, answers, pages, preview, taps }: Props)
             </form>
           </CardContent>
         </Card>
+
+        <ReceptionistCard r={receptionist} base={base} />
 
         <Card>
           <CardHeader>

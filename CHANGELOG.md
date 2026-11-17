@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### AI receptionist — Sprint 19.4a (owner settings and "Try it")
+- **Website → Chat → AI assistant**: switch it on, choose what it may do besides answering (book, move or cancel bookings, help with shop orders; options not in the package are shown but can't be ticked), how it sounds (friendly or formal), its greeting, the languages it replies in (English, isiZulu, isiXhosa, Afrikaans, Sesotho, Swahili, French, Portuguese; others get English), when a person can take over, and the most replies a month. **The price of a reply and this month's use are shown before switching it on.** The website chat has to be on first.
+- **Try it**: chat with the assistant as a customer would, with your real answers and free times. Nothing is booked, changed, ordered or handed over, and test chats don't count towards the monthly limit. Each test reply costs the same as a real one (up to 100 a day).
+- **Fixed: a long business name no longer pushes the website header off a phone's screen.** The name now wraps. Before, "Book now" and the menu were pushed out, the phone zoomed the whole page out, and taps landed in the wrong place (the chat button couldn't be tapped). Every template is now checked at phone width.
+- **Fixed in CI: the template checks from 18.5b now run.** The colour checks on all 24 templates (their own colours and six others) were tagged for the "screens" runs, but those runs only ran the screen crawl. They now run everything tagged for them, including the new phone-width check.
+
 ### AI receptionist — Sprint 19.3 (the website chat)
 - **When the owner switches the receptionist on, the website chat says so** ("You're chatting with an AI assistant…") and typed questions go to it. Its bookings, class places, tables and carts appear as **cards** with one clear action: pay the deposit, check out, or change or cancel.
 - **The conversation carries on across the site's pages**, in the same tab.
