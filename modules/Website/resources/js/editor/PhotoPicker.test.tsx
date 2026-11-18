@@ -61,3 +61,45 @@ describe('PhotoPicker and AI images', () => {
     expect(screen.queryByRole('button', { name: /AI image/ })).toBeNull();
   });
 });
+
+describe('demo photos (Sprint 20.3)', () => {
+  it('marks a design photo as demo, and offers the design’s other demo photos', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              ...library,
+              demo: [
+                { src: '/images/templates/x/hero-1600.webp', alt: '', name: 'A stylist at work' },
+              ],
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } },
+          ),
+      ),
+    );
+    const onChange = vi.fn();
+    render(
+      <PhotoPicker
+        value={[{ src: '/storage/templates/x/01jabc-1600.webp', alt: '' }]}
+        onChange={onChange}
+        max={1}
+        photosUrl="/t/website/photos"
+      />,
+    );
+    expect(screen.getByText('Demo photo — replace it with one of your own business.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Choose from my photos' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Use the demo photo: A stylist at work' }),
+    );
+    expect(onChange).toHaveBeenCalledWith([{ src: '/images/templates/x/hero-1600.webp', alt: '' }]);
+  });
+
+  it('tells the business’s own photos from demo ones', async () => {
+    const { isDemoPhoto } = await import('./PhotoPicker');
+    expect(isDemoPhoto('/images/templates/salon/hero-1600.webp')).toBe(true);
+    expect(isDemoPhoto('https://cdn.test/storage/templates/salon/01jabc-640.webp')).toBe(true);
+    expect(isDemoPhoto('https://cdn.test/storage/sites/01T/01jabc-1600.webp')).toBe(false);
+  });
+});

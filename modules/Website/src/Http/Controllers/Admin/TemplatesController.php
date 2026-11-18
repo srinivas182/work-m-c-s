@@ -20,6 +20,8 @@ use Wurk\Website\Models\SiteTemplateVersion;
 use Wurk\Website\Models\TemplateAsset;
 use Wurk\Website\Support\SiteAssets;
 use Wurk\Website\Support\TemplateDefinition;
+use Wurk\Website\Support\TemplatePhotoImporter;
+use Wurk\Website\Support\TemplatePhotos;
 use Wurk\Website\Support\Templates;
 
 /** WURK staff: categories and templates (spec §3, 6.1). */
@@ -65,7 +67,7 @@ final class TemplatesController
         return redirect()->route('admin.templates.show', ['template' => $template->key])->with('status', 'Template created.');
     }
 
-    public function show(string $template): Response
+    public function show(string $template, TemplatePhotos $photos): Response
     {
         Gate::authorize('templates.manage');
         $model = SiteTemplate::query()->with('category')->where('key', $template)->firstOrFail();
@@ -78,6 +80,8 @@ final class TemplatesController
             'branding' => $draft['branding'] ?? [],
             'versions' => SiteTemplateVersion::query()->where('template_id', $model->id)->orderByDesc('number')->get(['id', 'number', 'note', 'created_at'])->toArray(),
             'fontPairings' => config('website.font_pairings'),
+            'demoPhotos' => TemplatePhotosController::slotsFor($model, $photos),
+            'licences' => TemplatePhotoImporter::LICENCES,
         ]);
     }
 
@@ -185,11 +189,11 @@ final class TemplatesController
     }
 
     /** Staff preview of the draft — what publishing would give businesses. */
-    public function preview(Request $request, string $template): Response
+    public function preview(Request $request, string $template, TemplatePhotos $photos): Response
     {
         Gate::authorize('templates.manage');
         $model = SiteTemplate::query()->with('category')->where('key', $template)->firstOrFail();
-        $definition = TemplateDefinition::validate(json_decode($model->draft, true));
+        $definition = $photos->resolve($model, TemplateDefinition::validate(json_decode($model->draft, true)));
         $pageKey = (string) $request->query('page', '');
         $pages = collect($definition['pages']);
         $page = ($pageKey === '' ? $pages->firstWhere('is_home', true) : $pages->firstWhere('key', $pageKey)) ?? abort(404);

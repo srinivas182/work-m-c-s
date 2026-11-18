@@ -33,6 +33,7 @@ import {
   Textarea,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { DemoPhotos, type DemoPhotoSlot } from '../../admin/DemoPhotos';
 
 interface PageRow {
   key: string;
@@ -64,6 +65,9 @@ interface Props {
   branding: { primary: string; secondary: string | null; font_pairing: string; corners: string };
   versions: { id: string; number: number; note: string | null; created_at: string }[];
   fontPairings: Record<string, { label: string }>;
+  /** Sprint 20.3: the design's photo places and HQ's demo photos. */
+  demoPhotos?: DemoPhotoSlot[];
+  licences?: string[];
 }
 
 const move = <T,>(list: T[], i: number, d: number): T[] => {
@@ -80,6 +84,8 @@ export default function Template({
   branding,
   versions,
   fontPairings,
+  demoPhotos = [],
+  licences = [],
 }: Props) {
   const base = `/templates/${template.key}`;
   const form = useForm({
@@ -492,6 +498,8 @@ export default function Template({
             </Button>
           )}
         </div>
+
+        {demoPhotos.length > 0 && <DemoPhotos slots={demoPhotos} base={base} licences={licences} />}
 
         {versions.length > 0 && (
           <Card>

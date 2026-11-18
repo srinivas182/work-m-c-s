@@ -15,7 +15,7 @@ use Wurk\Website\Models\SiteTemplateVersion;
 /** WURK staff manage templates: drafts, immutable published versions, retiring. */
 final readonly class Templates
 {
-    public function __construct(private AuditLog $audit) {}
+    public function __construct(private AuditLog $audit, private TemplatePhotos $photos) {}
 
     public function create(SiteCategory $category, string $key, string $name, ?string $description, ?string $copyFrom, ?string $by): SiteTemplate
     {
@@ -89,7 +89,9 @@ final readonly class Templates
         }
         $definition = SiteTemplateVersion::query()->where('template_id', $template->id)->where('number', $template->published_version)->value('definition');
 
-        return $definition === null ? null : ['template' => $template, 'version' => $template->published_version, 'definition' => (array) json_decode((string) $definition, true)];
+        // HQ's demo photos (20.3) replace the stand-ins wherever the design is shown or applied.
+        return $definition === null ? null : ['template' => $template, 'version' => $template->published_version,
+            'definition' => $this->photos->resolve($template, (array) json_decode((string) $definition, true))];
     }
 
     /** @return list<array{key: string, name: string, description: string|null, icon: string, templates: list<array{key: string, name: string, description: string|null}>}> */

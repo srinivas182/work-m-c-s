@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Premium templates — Sprint 20.3 (demo photos)
+- **Demo photos for every design.** HQ fills each photo place (hero, gallery, team…) with a sharp, licensed photo: paste a link from Nappy, Pexels or Unsplash, or upload one. WURK records the photographer, licence and source, and keeps WURK AI images to decorative places. New sites, previews and demo sites get the photos straight away.
+- **Owners see what to replace.** Demo photos carry a **Demo** badge in the editor, and the launch checklist says **Replace demo photos (N left)**. Choosing a photo also offers the design's other demo photos, to use until the owner has their own.
+- **For HQ:** Admin → Templates → a design → **Demo photos**, and `php artisan website:import-template-photos` for a list (see docs/templates/demo-photos.md).
+
 ### Premium templates — Sprint 20.2b (video)
 - **Video hero:** a new "Full video" first screen. A short, muted clip loops behind the heading, with a **Pause the video** button. Visitors who've asked for less motion, have Save-Data on or are on a slow connection see the still picture instead, and download none of the video. With no video yet, the hero uses its first photo.
 - **Video section:** a short clip of the business's work or premises. It plays, with sound and controls, only when a visitor taps it; until then only the still loads. Without JavaScript the picture links to the video.

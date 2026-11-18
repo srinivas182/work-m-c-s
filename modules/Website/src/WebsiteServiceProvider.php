@@ -31,6 +31,7 @@ use Wurk\Website\Analytics\SiteVisits;
 use Wurk\Website\Analytics\WebsiteSection;
 use Wurk\Website\Console\DemoSitesCommand;
 use Wurk\Website\Console\ExpireFormFilesCommand;
+use Wurk\Website\Console\ImportTemplatePhotosCommand;
 use Wurk\Website\Console\InstallTemplatesCommand;
 use Wurk\Website\Console\RerenderDatedPagesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
@@ -186,7 +187,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->loadViewsFrom($this->modulePath('resources/views'), 'website');
         if ($this->app->runningInConsole()) {
             $this->commands([ExpireFormFilesCommand::class,
-                SweepConversationsCommand::class, SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
+                SweepConversationsCommand::class, SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, ImportTemplatePhotosCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
         }
     }
 }

@@ -32,13 +32,17 @@ final readonly class LaunchChecklist
 
         $contact = $blocks->where('type', 'Contact')->contains(fn ($b) => trim((string) ($b['props']['phone'] ?? '').($b['props']['whatsapp'] ?? '').($b['props']['email'] ?? '')) !== '');
         $priced = $blocks->where('type', 'ServicesPrices')->contains(fn ($b) => collect((array) ($b['props']['items'] ?? []))->contains(fn ($i) => (int) ($i['price'] ?? 0) > 0));
-        $standIns = $pages->contains(fn (Page $p) => str_contains((string) $p->draft, '\/images\/templates\/') || str_contains((string) $p->draft, '/images/templates/'));
+        // Demo photos (20.3): every photo still coming from the design, counted once whatever its size or page.
+        $demos = $pages->flatMap(fn (Page $p) => TemplatePhotos::demosIn((string) $p->draft))->unique()->count();
+        $firstDemo = $pages->first(fn (Page $p) => TemplatePhotos::demosIn((string) $p->draft) !== []);
 
         return [
             ['key' => 'logo', 'label' => 'Add your logo', 'hint' => 'And check your colours.', 'done' => ! empty($site->branding['logo']), 'href' => route('tenant.website.branding', [], false), 'confirm' => false],
             ['key' => 'contact', 'label' => 'Add your contact details', 'hint' => 'Phone, WhatsApp or email — so customers can reach you.', 'done' => $contact, 'href' => $edit($find('Contact') ?? $home), 'confirm' => false],
             ['key' => 'prices', 'label' => 'Add your prices', 'hint' => 'Or confirm that “Ask us” is what you want.', 'done' => $priced || ! empty($confirmed['prices']), 'href' => $edit($find('ServicesPrices') ?? $home), 'confirm' => true],
-            ['key' => 'photos', 'label' => 'Use your own photos', 'hint' => 'Replace every sample photo with one of yours.', 'done' => ! $standIns, 'href' => $edit($home), 'confirm' => false],
+            ['key' => 'photos', 'label' => $demos > 0 ? "Replace demo photos ({$demos} left)" : 'Use your own photos',
+                'hint' => 'Demo photos show what fits each place. Swap each for a photo of your own business, team and work.',
+                'done' => $demos === 0, 'href' => $edit($firstDemo ?? $home), 'confirm' => false],
             ['key' => 'hours', 'label' => 'Check your opening hours', 'hint' => 'Sample hours are filled in — make them yours.', 'done' => ! empty($confirmed['hours']), 'href' => $edit($find('OpeningHours') ?? $home), 'confirm' => true],
             ['key' => 'legal', 'label' => 'Review your legal pages', 'hint' => 'Privacy, terms and cookies are templates, not legal advice — read them before you publish.', 'done' => ! empty($confirmed['legal']), 'href' => $edit($pages->firstWhere('slug', 'privacy') ?? $home), 'confirm' => true],
             ['key' => 'publish', 'label' => 'Publish your website', 'hint' => 'You can keep editing afterwards.', 'done' => $home?->published_version_id !== null, 'href' => $edit($home), 'confirm' => false],
