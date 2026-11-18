@@ -34,7 +34,7 @@ What leaders agree on (and reviewers look for): structure that fits the business
 ### 20.2 Richer first screens, motion and new sections
 - **Heroes:** full-bleed photo with overlay, split, Ken Burns slideshow, and **video background** (muted, looped, with a visible pause button; a still poster instead under "reduce motion", Save-Data or slow connections). The media library accepts short videos (MP4/WebM, up to 20 MB and 30 seconds).
 - **Motion:** gentle reveal on scroll and hover effects, CSS only, off under "reduce motion".
-- **New sections:** Stats (numbers that matter), How it works (steps), Logos and press, Pricing table (up to 4 plans), Map and directions (a light static map and "Open in Maps", no third-party embed by default), Announcement bar, Video.
+- **New sections:** Numbers (stats that matter), How it works (steps), Logos (brands, clients, medical aids, press), Map and directions (address, a landmark, Google Maps / Waze / Apple Maps buttons, and a map that loads only when tapped), Video. A pricing table and an announcement bar already exist as "Packages & specials" and "Promotion banner".
 
 ### 20.3 Demo photos owners replace
 - Every design lists its **photo slots** (hero, gallery, team, about…), each with what it should show.
@@ -43,7 +43,8 @@ What leaders agree on (and reviewers look for): structure that fits the business
   - The launch checklist shows "Replace demo photos (N left)".
   - The editor shows a small "Demo photo — replace" badge.
   - Replacing offers the owner's own upload, the media library, another demo photo from the design's set, or an AI banner (decorative slots only).
-- Until WURK's licensed photos are uploaded, the current stand-ins stay.
+- **Import by link:** for each slot, HQ pastes a link to a photo on Nappy, Pexels or Unsplash; the server downloads it (only from those sites), makes the sizes and records photographer, licence and source. The slot's description and search words open the right search on each site. `php artisan website:import-template-photos <file>` imports a list in one go.
+- Every design must look finished and professional with demo content (as on Wix or WordPress): sharp photos, real-sounding copy, no blurred stand-ins on a launched template.
 
 ### 20.4 Fourteen new categories, three designs each
 Barbershop, church and NGO, school, catering, spaza and grocery, cleaning, security, real estate, legal and accounting, tailoring and fashion, car wash, agriculture, funeral services, and beauty supplies. Each design has its own structure (not a colour swap), real copy for that business, the right sections (e.g. quote form for cleaning and security, product grid for spaza and beauty supplies, listings for real estate, a donations call to action for church and NGO), and the category's legal pages.
@@ -63,11 +64,11 @@ So every category has at least three designs.
 
 | # | Decision | Recommendation |
 |---|---|---|
-| A | Where demo photos come from | A licensed African library for people, work and places, e.g. Nappy (CC0: commercial use, no credit needed, no reselling unmodified photos, so WURK should confirm templates are allowed) plus a paid African library for gaps. **WURK AI banners only for decorative slots.** HQ uploads them in Admin → Template photos; until then the stand-ins stay |
+| A | Where demo photos come from | **Decided (WURK, 18 Nov 2026):** real, sharp photos (no blurred stand-ins) from Nappy, with Pexels and Unsplash for gaps; WURK AI only for decorative banners, used as demo content. Nappy's licence (CC0 plus its own terms) allows commercial use and modification without credit; it forbids reselling photos without significant modification, reposting them on stock sites, and implying the photographer endorses anything. Shipping them as replaceable demo content in templates is ordinary commercial use. CC0 doesn't cover the rights of people in a photo (no model releases), so people photos are always marked demo, the launch checklist asks owners to replace them, and Nappy's sponsored photos are not used. Each photo records its source link, photographer and licence, so one can be swapped everywhere at once. This workspace can't download from photo sites, so HQ imports them on the server (Admin → Template photos, or `website:import-template-photos`) |
 | B | AI pictures of people or "our work" | **No.** They'd show customers things the business didn't do. Decorative only, as agreed in Sprint 7 |
 | C | Video backgrounds | Owner-uploaded, short (≤ 30 s, ≤ 20 MB); a poster image on phones with Save-Data or slow connections and under "reduce motion"; always a pause button |
 | D | How many designs | 3 per category to start (14 new categories × 3 = 42; 12 existing categories + 1 each = 12; 78 designs in all), each in 3 styles (234 looks). A fourth design per category later, where owners ask |
-| E | Map section | A static map image (generated once, cached) with "Open in Maps"; an interactive embed only if the owner switches it on (it adds third-party cookies and weight) |
+| E | Map section | **Revised in 20.2:** a static image needs a map-tile service, a licence and attribution. Instead: address, landmark and buttons for the map apps people use; the owner can add a map that loads only when the visitor taps "Show the map" (Google's address embed, no key; until the tap, nothing loads and no provider learns of the visit) |
 
 ## Acceptance
 
@@ -87,3 +88,5 @@ So every category has at least three designs.
 | Part | PR | Notes |
 |---|---|---|
 | 20.1 Three styles | #210 | Styles are CSS variables set from `branding.style`, and `site.css` rules that sit outside Tailwind's layers, so all 33 section types follow without being rewritten. The page sets the rhythm: every section except first screens, banners and call-to-action cards is a band candidate, and every other one is a band (`:nth-child(even of .s-band)`; the editor's canvas is counted through Puck's wrappers with `:has()`). Luxury's bands redefine the colour variables from the palette engine's dark scale, so nested cards, borders and links follow and stay AA. Choosing a style sets its fonts and corners (presets kept equal in PHP and TypeScript by a test). Signup asks for the style next to the design. |
+| 20.2a New sections and motion | #212 | 20.2 split: 20.2a = four new sections and motion; 20.2b = the richer heroes, video upload, the video hero and the Video section. New: Numbers, How it works, Logos, and Map and directions (decision E revised). The map's frame is allowed by the public sites' policy (`frame-src https://www.google.com`) and created only on tap, with focus moved to it. Motion: sections rise into place as they scroll in (CSS scroll-driven animations; still where unsupported); a full-photo hero settles with a slow zoom. Never while editing or under "reduce motion"; nothing fades, so text is never faint and contrast checks stay true. |
+| 20.2b Video | #212 | Uploads are re-encoded by ffmpeg on the server (H.264, ≤ 1280 wide, first 30 s, AAC, metadata removed, fast start) and keep a WebP poster as the row's photo sizes; the storage quota counts both. The published HTML holds only the poster: an island adds the muted loop when motion, Save-Data and the connection (Network Information API: not 2G/3G) allow, with a pause button whose name says what it does next. The Video section plays only on tap, with controls; without JavaScript the poster links to the MP4. Media lists videos apart from photos, finds where each is used by its MP4 or poster address, and deletes the MP4 with it. The image installs ffmpeg; CI's "real tools" job installs it and runs the encode tests with `--fail-on-skipped`. Also fixed a duplicate `security` key in `config/wurk.php` that hid the admin allow-list's emergency switch. |

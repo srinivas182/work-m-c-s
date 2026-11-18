@@ -31,6 +31,13 @@ return [
         'widths' => [640, 1600],
         'webp_quality' => 80,
     ],
+    // Short videos (Sprint 20.2) for the video hero and the Video section: re-encoded with ffmpeg, so only a clean,
+    // light H.264 file is ever served, with a still poster for "reduce motion" and Save-Data.
+    'videos' => [
+        'max_mb' => 20,
+        'max_seconds' => 30,
+        'max_width' => 1280,
+    ],
     'max_blocks' => 80,
     // Files visitors attach to forms: removed this many months after their enquiry, once it's archived (POPIA: no longer than needed).
     'form_files_months' => 12,

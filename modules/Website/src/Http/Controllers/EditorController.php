@@ -38,6 +38,7 @@ final class EditorController
                 'publish' => $base.'/publish',
                 'versions' => $base.'/versions',
                 'photos' => route('tenant.website.photos', [], false),
+                'videos' => route('tenant.website.videos', [], false),
                 'aiImage' => route('tenant.website.ai.image', [], false),
                 'aiQuote' => route('tenant.website.ai.quote', [], false),
             ],

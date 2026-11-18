@@ -1,8 +1,9 @@
 import type { Config, Data, Field as PuckField } from '@puckeditor/core';
 import { BLOCKS } from '../site/registry';
 import { blockClass, upgradeBlock } from '../site/SiteRenderer';
-import type { ContentDocument, Field, SiteContext } from '../site/types';
+import type { ContentDocument, Field, SiteContext, VideoValue } from '../site/types';
 import { PhotoPicker } from './PhotoPicker';
+import { VideoPicker } from './VideoPicker';
 
 /*
  * The only place that knows about Puck (Sprint 4 decision 1). Pages are stored in
@@ -14,6 +15,8 @@ import { PhotoPicker } from './PhotoPicker';
 export interface EditorDeps {
   site: SiteContext;
   photosUrl: string;
+  /** Owners only: uploading videos (the staff template editor has none). */
+  videosUrl?: string;
   /** Owners only: generating AI images (the staff template editor has none). */
   ai?: { url: string; quoteUrl: string; tenantBase: string };
 }
@@ -44,6 +47,10 @@ function moneyField(label: string): PuckField {
   };
 }
 
+function isVideo(v: unknown): v is VideoValue {
+  return typeof v === 'object' && v !== null && typeof (v as VideoValue).src === 'string';
+}
+
 function toPuckField(field: Field, deps: EditorDeps, allowAi = false): PuckField {
   switch (field.kind) {
     case 'text':
@@ -71,6 +78,18 @@ function toPuckField(field: Field, deps: EditorDeps, allowAi = false): PuckField
             ai={deps.ai}
             value={typeof value === 'string' && value !== '' ? [{ src: value, alt: '' }] : []}
             onChange={(next) => onChange(next[0]?.src ?? '')}
+          />
+        ),
+      };
+    case 'video':
+      return {
+        type: 'custom',
+        label: field.label,
+        render: ({ value, onChange }) => (
+          <VideoPicker
+            videosUrl={deps.videosUrl}
+            value={isVideo(value) ? value : { src: '', poster: '' }}
+            onChange={onChange}
           />
         ),
       };
@@ -105,6 +124,8 @@ function emptyItem(item: Record<string, Field>): Record<string, unknown> {
           return [k, f.options[0]?.value ?? ''];
         case 'list':
           return [k, []];
+        case 'video':
+          return [k, { src: '', poster: '' }];
         default:
           return [k, ''];
       }

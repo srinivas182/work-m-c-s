@@ -45,7 +45,7 @@ final class ScreensCommand extends Command
         'admin.businesses.check-handle' => 'JSON', 'signup.check-handle' => 'JSON', 'tenant.contacts.search' => 'JSON', 'tenant.campaigns.estimate' => 'JSON',
         'tenant.sales.find' => 'JSON', 'tenant.billing.change.quote' => 'JSON', 'tenant.website.ai.quote' => 'JSON', 'tenant.website.draft' => 'JSON',
         'tenant.assistant' => 'JSON for Ask WURK', 'website.public.chat' => 'JSON for the chat widget', 'marketing.sales' => 'JSON for WURK’s sales chat (19.5)', 'tenant.website.versions' => 'JSON for the editor',
-        'tenant.website.photos' => 'JSON for the photo picker', 'tenant.shop.photos' => 'JSON for the photo picker', 'admin.templates.versions' => 'JSON for the editor',
+        'tenant.website.photos' => 'JSON for the photo picker', 'tenant.website.videos' => 'JSON for the video picker (20.2)', 'tenant.shop.photos' => 'JSON for the photo picker', 'admin.templates.versions' => 'JSON for the editor',
         'admin.templates.photos' => 'JSON for the photo picker', 'help.panel.app' => 'JSON for the help panel', 'help.panel.admin' => 'JSON for the help panel', 'help.search' => 'JSON',
         'bookings.public.services' => 'JSON for the booking widget', 'bookings.public.times' => 'JSON for the booking widget', 'bookings.public.tables.times' => 'JSON for the booking widget',
         'bookings.public.classes' => 'JSON for the booking widget', 'tenant.website.chat' => 'JSON for the chat widget',

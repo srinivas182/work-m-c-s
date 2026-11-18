@@ -48,6 +48,12 @@ export interface SiteContext {
   editing: boolean;
 }
 
+/** A video as blocks store it: the re-encoded MP4 and its still poster (empty src = none). */
+export interface VideoValue {
+  src: string;
+  poster: string;
+}
+
 /** Editor field description, independent of the editor library (mapped to Puck in 4.3). */
 export type Field =
   | {
@@ -69,6 +75,8 @@ export type Field =
       options: { value: string | number | boolean; label: string }[];
     }
   | { kind: 'image'; label: string }
+  /** A short uploaded video and its still poster (Sprint 20.2). */
+  | { kind: 'video'; label: string }
   | { kind: 'link'; label: string }
   | { kind: 'money'; label: string }
   | { kind: 'list'; label: string; item: Record<string, Field>; max?: number };

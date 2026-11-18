@@ -18,7 +18,7 @@ final readonly class SiteMediaLibrary implements MediaLibrary
     public function library(): array
     {
         return [
-            'photos' => array_values(SiteAsset::query()->latest()->limit(200)->get()
+            'photos' => array_values(SiteAsset::query()->where('kind', 'photo')->latest()->limit(200)->get()
                 ->map(fn (SiteAsset $a) => [...$this->assets->photo($a, (string) $a->description), 'id' => $a->id, 'name' => $a->name, 'ai' => $a->ai_generated])->all()),
             'used_mb' => round($this->assets->usedBytes() / 1048576, 1),
             'limit_mb' => (int) ($this->entitlements->limits($this->context->id())['storage_mb'] ?? 0),

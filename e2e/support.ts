@@ -10,7 +10,14 @@ export async function accessibilityProblems(page: Page, exclude: string[] = []):
     Promise.all(
       document
         .getAnimations()
-        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        // Only short, time-based ones: scroll-driven motion (sections rising into view) finishes only when scrolled,
+        // and a hero's slow Ken Burns zoom moves the photo without changing any colour (20.2).
+        .filter(
+          (a) =>
+            a.timeline === document.timeline &&
+            a.effect?.getComputedTiming().iterations !== Infinity &&
+            Number(a.effect?.getComputedTiming().endTime ?? 0) <= 3000,
+        )
         .map((a) => a.finished.catch(() => undefined)),
     ),
   );

@@ -106,3 +106,40 @@
   font-weight: 800;
   padding-inline: 1.75rem;
 }
+
+/*
+ * Motion (Sprint 20.2): sections rise gently into place as they scroll into view, and a full-photo hero settles with a
+ * slow zoom. Only on live pages and previews (not while editing), never under "reduce motion", and only where the
+ * browser can tie it to scrolling (elsewhere, everything is simply still). Nothing fades, so text is never faint.
+ */
+@keyframes s-rise {
+  from {
+    transform: translateY(28px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes s-kenburns {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .wurk-site[data-motion] .s-band > section > div {
+      animation: s-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+
+  .wurk-site[data-motion] .s-kenburns {
+    animation: s-kenburns 16s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  }
+}

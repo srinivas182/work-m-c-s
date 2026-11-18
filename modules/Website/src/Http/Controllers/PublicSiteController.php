@@ -157,8 +157,9 @@ final class PublicSiteController
             'X-Frame-Options' => 'DENY',
             'Permissions-Policy' => 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
         ];
+        // frame-src: the "Map and directions" section's map, loaded only when a visitor taps "Show the map" (20.2).
         if (! Vite::isRunningHot()) { // the development server lives on another origin
-            $headers['Content-Security-Policy'] = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'";
+            $headers['Content-Security-Policy'] = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self'; frame-src https://www.google.com; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'";
         }
 
         return $headers;

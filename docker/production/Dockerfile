@@ -65,6 +65,11 @@ FROM node:${NODE_VERSION}-bookworm-slim AS node-runtime
 
 FROM base AS runtime
 
+# ffmpeg/ffprobe re-encode website videos and take their poster frame (Sprint 20.2).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
 ARG APP_USER=wurk
 ARG APP_UID=10001
 # The commit this image was built from (Watchtower shows it on every problem — Sprint 18.0). The release comes from VERSION.

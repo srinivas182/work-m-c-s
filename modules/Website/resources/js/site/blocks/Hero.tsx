@@ -1,10 +1,10 @@
 import { photoSrcSet } from './shared';
 import { ImagePlus } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { BlockDefinition, SiteContext } from '../types';
+import type { BlockDefinition, SiteContext, VideoValue } from '../types';
 import { HeroSlideshow, type Photo } from './HeroSlideshow';
 
-export type HeroLayout = 'photo' | 'split' | 'collage' | 'slideshow' | 'centered';
+export type HeroLayout = 'photo' | 'video' | 'split' | 'collage' | 'slideshow' | 'centered';
 
 export interface HeroProps extends Record<string, unknown> {
   layout: HeroLayout;
@@ -20,24 +20,39 @@ export interface HeroProps extends Record<string, unknown> {
   images: Photo[];
   /** Slideshow only: advance on its own (slowly, pausable, never with reduced motion). */
   autoplay: boolean;
+  /** Video layout only (Sprint 20.2): a short muted loop behind the text; its poster (or the first photo) otherwise. */
+  video: VideoValue;
 }
 
 const PHOTOS_USED: Record<HeroLayout, number> = {
   photo: 1,
+  video: 1,
   split: 1,
   collage: 3,
   slideshow: 5,
   centered: 0,
 };
 
-function AddPhotos({ count, className = '' }: { count: number; className?: string }) {
+function AddPhotos({
+  count,
+  className = '',
+  video = false,
+}: {
+  count: number;
+  className?: string;
+  video?: boolean;
+}) {
   return (
     <div
       className={`grid place-items-center rounded-[var(--s-radius)] border-2 border-dashed border-[var(--s-border)] bg-[var(--s-brand-softer)] text-[var(--s-brand-text)] ${className}`}
     >
       <span className="flex flex-col items-center gap-2 px-6 text-center text-sm font-medium">
         <ImagePlus className="size-7" aria-hidden />
-        {count > 1 ? `Add up to ${count} photos of your business` : 'Add a photo of your business'}
+        {video
+          ? 'Add a short video of your business (and a photo, shown until it plays)'
+          : count > 1
+            ? `Add up to ${count} photos of your business`
+            : 'Add a photo of your business'}
       </span>
     </div>
   );
@@ -120,6 +135,7 @@ export const Hero: BlockDefinition<HeroProps> = {
       label: 'Layout',
       options: [
         { value: 'photo', label: 'Full photo' },
+        { value: 'video', label: 'Full video' },
         { value: 'split', label: 'Text and photo' },
         { value: 'collage', label: 'Photo collage' },
         { value: 'slideshow', label: 'Slideshow' },
@@ -147,6 +163,7 @@ export const Hero: BlockDefinition<HeroProps> = {
         alt: { kind: 'text', label: 'Describe the photo (for screen readers)', max: 140 },
       },
     },
+    video: { kind: 'video', label: 'Video (Full video layout)' },
     autoplay: {
       kind: 'select',
       label: 'Slideshow moves on its own',
@@ -167,6 +184,7 @@ export const Hero: BlockDefinition<HeroProps> = {
     facts: [],
     images: [],
     autoplay: false,
+    video: { src: '', poster: '' },
   },
   // v1 stored a single photo as image / imageAlt.
   upgrade: (props, from) => {
@@ -184,8 +202,10 @@ export const Hero: BlockDefinition<HeroProps> = {
     const photos = p.images.filter((i) => i.src).slice(0, PHOTOS_USED[p.layout]);
     const wanted = PHOTOS_USED[p.layout];
 
-    // Without photos on a live site every layout falls back to a strong text-only hero.
-    if (wanted === 0 || (photos.length === 0 && !site.editing)) {
+    const video = p.layout === 'video' && p.video?.src ? p.video : null;
+
+    // Without photos (or a video) on a live site every layout falls back to a strong text-only hero.
+    if (wanted === 0 || (photos.length === 0 && !video && !site.editing)) {
       return frame(
         p.layout === 'centered' ? (
           <Copy p={p} site={site} align="center" />
@@ -195,7 +215,44 @@ export const Hero: BlockDefinition<HeroProps> = {
       );
     }
 
-    if (p.layout === 'photo') {
+    if (p.layout === 'video' && video) {
+      return (
+        <section className="relative isolate flex min-h-[560px] items-end overflow-hidden px-5 pt-40 pb-14 text-white sm:min-h-[680px] sm:px-8 sm:pb-20">
+          {/* The poster is the page: the island adds the moving video only when the visitor's settings and connection allow it. */}
+          <div
+            data-island="hero-video"
+            data-src={site.editing ? undefined : video.src}
+            className="absolute inset-0 -z-20"
+          >
+            <img
+              src={video.poster}
+              srcSet={photoSrcSet(video.poster)}
+              sizes="100vw"
+              alt=""
+              fetchPriority="high"
+              className="size-full object-cover"
+            />
+            <button
+              type="button"
+              data-video-toggle
+              hidden
+              className="absolute right-4 bottom-4 z-10 inline-flex min-h-11 items-center gap-2 rounded-full bg-black/65 px-4 text-sm font-semibold text-white backdrop-blur hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Pause the video
+            </button>
+          </div>
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/45 to-black/10"
+          />
+          <div className="mx-auto w-full max-w-6xl">
+            <Copy p={p} site={site} onPhoto />
+          </div>
+        </section>
+      );
+    }
+
+    if (p.layout === 'photo' || p.layout === 'video') {
       const photo = photos[0];
       return (
         <section className="relative isolate flex min-h-[560px] items-end overflow-hidden px-5 pt-40 pb-14 text-white sm:min-h-[680px] sm:px-8 sm:pb-20">
@@ -206,11 +263,12 @@ export const Hero: BlockDefinition<HeroProps> = {
               sizes="100vw"
               alt={photo.alt}
               fetchPriority="high"
-              className="absolute inset-0 -z-20 size-full object-cover"
+              className="s-kenburns absolute inset-0 -z-20 size-full object-cover"
             />
           ) : (
             <AddPhotos
               count={1}
+              video={p.layout === 'video'}
               className="absolute inset-4 -z-20 border-white/40 bg-[var(--s-brand-text)] text-white"
             />
           )}
