@@ -40,6 +40,11 @@ return [
         'probe' => env('WURK_FFPROBE', 'ffprobe'),
     ],
 
+    // Customers' WhatsApp voice notes (Sprint 21.4): the audio is deleted after this many days; the transcript stays.
+    'whatsapp' => [
+        'voice_note_days' => (int) env('WURK_VOICE_NOTE_DAYS', 30),
+    ],
+
     'domains' => [
         'root' => $root,
         'admin' => env('WURK_ADMIN_DOMAIN', 'admin.'.$root),

@@ -56,7 +56,8 @@ final readonly class WhatsAppChats
                 // With the assistant on for WhatsApp it answers first (21.3); otherwise the chat waits for the team.
                 'channel' => self::CHANNEL, 'visitor' => hash('sha256', 'wa:'.$e->from), 'status' => app(WhatsAppReceptionist::class)->on() ? 'ai' : 'waiting',
                 'name' => $contact['name'] ?? ($e->name !== null ? mb_substr($e->name, 0, 80) : null), 'phone' => $phone,
-                'contact_id' => $contact['id'] ?? null, 'last_message_at' => now(),
+                // Kept like the chats in the WhatsApp app (not swept after 30 days like the website assistant's); voice notes' audio still expires.
+                'contact_id' => $contact['id'] ?? null, 'last_message_at' => now(), 'keep' => true,
             ]);
             if ($conversation->contact_id === null) {
                 $id = $this->contacts->remember($conversation->name ?? $phone, $phone, null, 'whatsapp_chat', $conversation->id, null, 'WhatsApp');
@@ -78,7 +79,7 @@ final readonly class WhatsAppChats
             $this->append($conversation, 'person', 'You won’t get marketing messages from us any more. You can still message us any time.', null);
             app(WhatsAppBusiness::class)->sendText($phone, 'You won’t get marketing messages from us any more. You can still message us any time.');
             $this->audit->record('website.whatsapp_opt_out', 'receptionist_conversation', $conversation->id, []);
-        } elseif ($conversation->status === 'ai') {
+        } elseif ($conversation->status === 'ai' && ($e->type !== 'audio' || $e->mediaId === null)) { // voice notes are answered once transcribed (21.4)
             AnswerOnWhatsApp::dispatch($this->context->id(), $conversation->id, $message->id)->delay(now()->addSeconds(AnswerOnWhatsApp::SETTLE));
         }
 
@@ -92,6 +93,16 @@ final readonly class WhatsAppChats
         // Meta's statuses can arrive out of order: never step back from "read" to "delivered".
         if ($m !== null && ($rank[$e->status] ?? 0) > ($rank[$m->delivery] ?? 0)) {
             $m->update(['delivery' => $e->status, 'delivery_error' => $e->status === 'failed' ? mb_substr((string) $e->error, 0, 300) : null]);
+        }
+    }
+
+    /** The assistant answers this message now, if it has the chat and nothing newer came in (voice notes — 21.4). */
+    public function answerLater(ReceptionistMessage $message): void
+    {
+        $c = ReceptionistConversation::query()->find($message->conversation_id);
+        $latest = ReceptionistMessage::query()->where('conversation_id', $message->conversation_id)->where('role', 'user')->orderByDesc('position')->value('id');
+        if ($c !== null && $c->status === 'ai' && $latest === $message->id) {
+            AnswerOnWhatsApp::dispatch($this->context->id(), $c->id, $message->id);
         }
     }
 

@@ -228,8 +228,14 @@ final class WebsiteChatController
                 'from' => ['user' => 'customer', 'assistant' => 'assistant', 'person' => 'person'][$m->role], 'text' => trim((string) ($m->content['content'] ?? '')),
             ] + ($c->channel !== WhatsAppChats::CHANNEL ? [] : [ // ticks and files are WhatsApp's
                 'delivery' => $m->delivery, 'error' => $m->delivery_error,
-                'file' => isset($m->attachment['path']) ? ['url' => $base.'/ai/'.$c->id.'/files/'.$m->id, 'name' => $m->attachment['name'], 'kind' => $m->attachment['kind']]
-                    : (isset($m->attachment['blocked']) ? ['blocked' => $m->attachment['blocked']] : null),
+                'file' => isset($m->attachment['path']) ? ['url' => $base.'/ai/'.$c->id.'/files/'.$m->id, 'name' => $m->attachment['name'] ?? 'file', 'kind' => $m->attachment['kind'] ?? 'document']
+                    : (isset($m->attachment['blocked']) ? ['blocked' => $m->attachment['blocked']] : (($m->attachment['expired'] ?? false) ? ['blocked' => 'expired'] : null)),
+                // Voice notes (21.4): their words are the text; this says how sure WURK AI was, and in which language.
+                'voice' => ($m->attachment['kind'] ?? null) !== 'audio' ? null : [
+                    'seconds' => $m->attachment['seconds'] ?? null, 'unclear' => (bool) ($m->content['voice']['unclear'] ?? false),
+                    'language' => Receptionist::LANGUAGES[$m->content['voice']['language'] ?? ''] ?? null,
+                    'transcribed' => isset($m->content['voice']) && ! isset($m->content['voice']['too_long']),
+                ],
             ]))->filter(fn (array $l) => $l['text'] !== '')->values()->all(),
         ])->all());
     }

@@ -38,11 +38,15 @@ interface Settings {
   retirements?: Record<string, string | null>;
   assistant: { enabled: boolean; free_questions: number; monthly_cap: number };
   sales: { enabled: boolean; greeting: string; monthly_cap: number };
+  speech: Step;
+  speech_fallback: Step[];
+  speech_prices: Record<string, number>;
 }
 
 interface Props {
   settings: Settings;
   providers: Record<string, string>;
+  speechProviders: Record<string, string>;
   tasks: Record<string, string>;
   connected: Record<string, boolean>;
   sales: { replies: number; zar: number };
@@ -98,7 +102,15 @@ function StepPicker({
   );
 }
 
-export default function AiAdmin({ settings, providers, tasks, connected, usage, sales }: Props) {
+export default function AiAdmin({
+  settings,
+  providers,
+  speechProviders,
+  tasks,
+  connected,
+  usage,
+  sales,
+}: Props) {
   const form = useForm<Settings>({ ...settings, retirements: settings.retirements ?? {} });
   const [trial, setTrial] = useState<Step>({
     provider: 'anthropic',
@@ -280,6 +292,43 @@ export default function AiAdmin({ settings, providers, tasks, connected, usage, 
                   <Plus /> Add a fallback
                 </Button>
               )}
+            </fieldset>
+            <fieldset className="grid gap-3">
+              <legend className="mb-2 text-sm font-medium">Voice notes (speech to text)</legend>
+              <p className="text-fg-muted text-sm">
+                Customers’ WhatsApp voice notes are transcribed with this model, then answered like
+                typed messages. Test the African languages in the evaluation set before switching.
+              </p>
+              <StepPicker
+                label="Voice notes"
+                providers={speechProviders}
+                step={form.data.speech}
+                onChange={(s) => form.setData('speech', s)}
+              />
+              <StepPicker
+                label="Voice notes fallback"
+                providers={speechProviders}
+                step={form.data.speech_fallback[0] ?? { provider: 'google', model: '' }}
+                onChange={(s) => form.setData('speech_fallback', s.model === '' ? [] : [s])}
+              />
+              <div className="grid gap-2 sm:grid-cols-2">
+                {Object.keys(form.data.speech_prices).map((key) => (
+                  <Field key={key} label={`${key}: US$ per minute`}>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.0001"
+                      value={form.data.speech_prices[key]}
+                      onChange={(e) =>
+                        form.setData('speech_prices', {
+                          ...form.data.speech_prices,
+                          [key]: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </Field>
+                ))}
+              </div>
             </fieldset>
             <div className="border-border grid gap-3 rounded-xl border p-4">
               <p className="font-medium">Try a model before switching</p>
