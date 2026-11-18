@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Payments — Sprint 22.3 (cash and in-person payments, recorded)
+- **Bookings → Calendar → Paid in person:** record a deposit or the full price paid in cash, by card machine, or by SnapScan / Zapper at the counter. The amount is suggested, and WURK notes who took it. A booking awaiting its deposit is confirmed straight away.
+- **Shop → an order → Mark as paid:** say how a pay-later order was paid (EFT, cash, card machine or QR at the counter).
+- Every payment is audited, counts in **Reports → Takings**, and is kept by method and day.
+
 ### Payments — Sprint 22.2 (mobile money, direct)
 - **M-Pesa** (Daraja STK push to the business's Paybill or Till), **MTN MoMo** (Request to Pay) and **Airtel Money** (USSD push), with the business's own keys in Settings → Payments. Keys are tested when saved.
 - **The customer:** types their number on the business's payment page (prefilled when known), gets a prompt on their phone, and approves it with their PIN. The page waits and confirms, or says plainly what went wrong: declined, timed out, not enough money, or wrong PIN.

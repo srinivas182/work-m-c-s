@@ -8,7 +8,7 @@ cd "$(dirname "$0")/.."
 PART1=(Records Health Regions Data Success Website) # Website back from part 7 (19.5): part 7 reached 12 min with the receptionist and sales tests; part 1 took 2 min # Admin to part 2: part 1 reached 10m17s (15.5c); Data, Success from part 5 (18.0b)
 PART2=(Admin Identity Audit Team Referrals) # Tenancy now in part 5 ("everything else"): part 2 timed out at 9m10s (15.1b); Messaging, Sales, Portal to part 7 (21.2: 12 min on a slow runner)
 PART3=(Bookings Access Plans Features)
-PART7=(Ai Security Marketing Messaging Sales Portal) # 19.2: part 3 passed 12 min on a slow runner; the receptionist adds Ai tests. Part 7 took 1.5 min (21.2)
+PART7=(Ai Security Marketing Messaging Sales Portal Support Watchtower) # 19.2: part 3 passed 12 min on a slow runner; the receptionist adds Ai tests. Part 7 took 1.5 min (21.2)
 # Website's slowest files run in part 8 (20.1): Website alone takes ~8.5 min on MySQL, and part 1 with all of it was
 # cancelled at 12 min. Website's other files stay in part 1 (~4.5 min with the rest of part 1).
 WEBSITE_PART8=(QuoteFormTest SiteModelTest PhotoUploadTest ChatBotTest ReceptionistTest VideoUploadTest TemplatePhotosTest WhatsAppChatsTest WhatsAppReceptionistTest VoiceNotesTest) # WhatsApp (21)
@@ -19,7 +19,7 @@ website_files() { # $1 = in | out (of WEBSITE_PART8)
   done
 }
 PART6=(Tenancy Agents Crm) # Tenancy on its own (18.4b): moves, restores and rollouts migrate several MySQL shards per test (~6 min); part 3 with it passed 12 min. Agents, Crm from part 5 (10.5 min) to part 6 (4.5 min) — 21.2
-PART4=(Payments Credits Billing Shop Support Watchtower) # money; Support, Watchtower from part 5, which passed 12 min (18.0b)
+PART4=(Payments Credits Billing Shop) # money; Support, Watchtower to part 7 (22.3: Sprint 22 adds payment tests; part 4 took 6.6 min, part 7 3.6)
 in_list() { local x="$1"; shift; for y in "$@"; do [[ "$x" == "$y" ]] && return 0; done; return 1; }
 case "${1:-}" in
   1) for m in "${PART1[@]}"; do

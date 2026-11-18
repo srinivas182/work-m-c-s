@@ -16,8 +16,10 @@ use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\CancellationPolicy;
+use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\SlotTaken;
+use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners and staff: the bookings calendar — day or week, per team member. */
@@ -35,6 +37,10 @@ final class CalendarController
         $end = $start->addDays($view === 'week' ? 7 : 1);
         $services = BookingService::query()->orderBy('position')->orderBy('name')->get(['id', 'name', 'duration_minutes', 'active']);
         $names = BookingService::withTrashed()->pluck('name', 'id'); // existing bookings keep a deleted service's name
+        $prices = BookingService::withTrashed()->pluck('price_cents', 'id');
+
+        $bookings = Booking::query()->where('starts_at', '>=', Instant::db($start))->where('starts_at', '<', Instant::db($end))->where('status', '!=', 'cancelled')->orderBy('starts_at')->get();
+        $inPerson = app(InPersonPayments::class)->takenForMany('booking', array_values(array_map('strval', $bookings->modelKeys())));
 
         return Inertia::render('Bookings::Calendar', [
             'view' => $view,
@@ -44,13 +50,16 @@ final class CalendarController
             'timezone' => $tz,
             'team' => $this->team->members(),
             'services' => $services->where('active', true)->values()->map(fn (BookingService $s) => ['id' => $s->id, 'name' => $s->name, 'duration' => $s->duration_minutes])->all(),
-            'bookings' => Booking::query()->where('starts_at', '>=', Instant::db($start))->where('starts_at', '<', Instant::db($end))
-                ->where('status', '!=', 'cancelled')->orderBy('starts_at')->get()->map(fn (Booking $b) => [
-                    'id' => $b->id, 'member_id' => $b->member_id, 'service' => (string) ($names[$b->service_id] ?? 'Service'),
-                    'customer' => $b->customer_name, 'phone' => $b->customer_phone, 'notes' => $b->notes, 'status' => $b->status, 'source' => $b->source,
-                    'customer_confirmed' => $b->customer_confirmed_at !== null,
-                    'starts_at' => $b->starts_at->setTimezone($tz)->toIso8601String(), 'ends_at' => $b->ends_at->setTimezone($tz)->toIso8601String(),
-                ])->all(),
+            'bookings' => $bookings->map(fn (Booking $b) => [
+                'id' => $b->id, 'member_id' => $b->member_id, 'service' => (string) ($names[$b->service_id] ?? 'Service'),
+                'customer' => $b->customer_name, 'phone' => $b->customer_phone, 'notes' => $b->notes, 'status' => $b->status, 'source' => $b->source,
+                'customer_confirmed' => $b->customer_confirmed_at !== null,
+                'starts_at' => $b->starts_at->setTimezone($tz)->toIso8601String(), 'ends_at' => $b->ends_at->setTimezone($tz)->toIso8601String(),
+                // What's due and paid (Sprint 22.3): the price, a deposit paid online, and money taken in person.
+                'price_cents' => (int) ($prices[$b->service_id] ?? 0), 'deposit_cents' => $b->deposit_cents,
+                'deposit_paid' => $b->payment_reference !== null && $b->paid_at !== null && $b->refunded_at === null,
+                'in_person_cents' => $inPerson[$b->id] ?? 0,
+            ])->all(),
             'canManage' => $request->user()?->can('bookings.manage') ?? false,
         ]);
     }
@@ -111,6 +120,23 @@ final class CalendarController
         }
 
         return back()->with('status', ['cancelled' => 'Booking cancelled.', 'no_show' => 'Marked as a no-show.', 'completed' => 'Marked as done.'][$status]);
+    }
+
+    /** Money taken in person (Sprint 22.3): the deposit or the full price, how it was paid, and who took it. */
+    public function paid(Request $request, string $booking): RedirectResponse
+    {
+        $data = $request->validate([
+            'method' => ['required', Rule::in(array_keys(InPersonPayments::METHODS))],
+            'amount' => ['required', 'numeric', 'min:0.01', 'max:1000000'],
+        ]);
+        $model = Booking::query()->whereKey($booking)->firstOrFail();
+        abort_if(in_array($model->status, ['cancelled', 'expired'], true), 422);
+        $user = $request->user();
+        $me = (string) $user?->getAuthIdentifier();
+        $name = collect($this->team->roster())->firstWhere('identity_id', $me)['name'] ?? 'Team';
+        app(Deposits::class)->paidInPerson($model, (string) $data['method'], (int) round((float) $data['amount'] * 100), $me, (string) $name);
+
+        return back()->with('status', 'R'.number_format((float) $data['amount'], 2).' recorded: '.strtolower(InPersonPayments::METHODS[$data['method']]).'.');
     }
 
     private function at(string $date, string $time): CarbonImmutable

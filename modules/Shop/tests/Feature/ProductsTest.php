@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -10,6 +11,7 @@ use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -170,6 +172,27 @@ it('shows orders by what needs doing, offers only sensible next steps, and recor
     $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/refund", ['amount_cents' => 5000, 'restock' => false])->assertSessionHas('status', 'Refund recorded — the customer has been told.');
     $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/refund", ['amount_cents' => 50000, 'restock' => false])->assertSessionHasErrors(['order' => 'Refund up to R190.00 (what’s left of this order).']);
     ($this->in)(fn () => expect($order->refresh()->refunded_cents)->toBe(5000));
+});
+
+it('records how a pay-later order was paid: cash at collection counts as taken in person, with who took it', function () {
+    ($this->subscribe)(['website', 'shop']);
+    $order = ($this->in)(function () {
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id()]);
+        app(BusinessPayments::class)->setUpEft('FNB');
+        $p = Product::query()->create(['name' => 'Cap', 'slug' => 'cap', 'status' => 'published', 'options' => []]);
+        Variant::query()->create(['product_id' => $p->id, 'price_cents' => 12000, 'stock' => 4]);
+
+        return app(OrderPlacer::class)->place([['variant' => Variant::query()->sole()->id, 'quantity' => 2]], ['name' => 'Sipho', 'phone' => '082 555 0101'], 'collection', 'offline');
+    });
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/advance", ['to' => 'paid', 'how' => 'bitcoin'])->assertSessionHasErrors('how');
+    $this->actingAs($this->owner)->post("{$this->base}/orders/{$order->id}/advance", ['to' => 'paid', 'how' => 'cash'])->assertSessionHas('status', 'Marked as paid: cash.');
+    $this->actingAs($this->owner)->get("{$this->base}/orders/{$order->id}")->assertInertia(fn (Assert $p) => $p->where('order.timeline.1.event', 'paid'));
+    ($this->in)(function () use ($order) {
+        expect(app(InPersonPayments::class)->takenFor('order', $order->id))->toBe(24000)
+            ->and(app(InPersonPayments::class)->totals(now()->startOfDay(), now()->endOfDay()))->toBe(['cash' => 24000])
+            ->and(DB::connection(app(TenantContext::class)->connectionName())->table('in_person_payments')->value('taken_by_name'))->toBe('Thandi Mokoena')
+            ->and(DB::connection(app(TenantContext::class)->connectionName())->table('shop_order_events')->where('event', 'paid')->value('note'))->toBe('Paid in person: Cash');
+    });
 });
 
 it('keeps the stock total when a single-branch shop saves a product with an empty per-branch list', function () {

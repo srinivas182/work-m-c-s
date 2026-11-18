@@ -28,6 +28,10 @@ interface BookingRow {
   customer_confirmed?: boolean;
   starts_at: string;
   ends_at: string;
+  price_cents: number;
+  deposit_cents: number;
+  deposit_paid: boolean;
+  in_person_cents: number;
 }
 interface Props {
   view: 'day' | 'week';
@@ -55,6 +59,54 @@ const STATUS: Record<string, string> = {
   pending_payment: 'Awaiting deposit',
 };
 
+const rand = (cents: number) => `R${(cents / 100).toFixed(2)}`;
+const METHODS: [string, string][] = [
+  ['cash', 'Cash'],
+  ['card_machine', 'Card machine'],
+  ['qr', 'SnapScan / Zapper at the counter'],
+];
+
+/** Money taken in person: how it was paid, and how much (the deposit or what's left of the price). */
+function RecordPayment({ b, done }: { b: BookingRow; done: () => void }) {
+  const paid = (b.deposit_paid ? b.deposit_cents : 0) + b.in_person_cents;
+  const due = b.status === 'pending_payment' ? b.deposit_cents : Math.max(b.price_cents - paid, 0);
+  const form = useForm({ method: 'cash', amount: due > 0 ? (due / 100).toFixed(2) : '' });
+  return (
+    <form
+      aria-label={`Record a payment from ${b.customer}`}
+      className="grid gap-2 sm:grid-cols-[1fr_8rem_auto] sm:items-end"
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.post(`${base()}/${b.id}/paid`, { preserveScroll: true, onSuccess: done });
+      }}
+    >
+      <Field label="How they paid" error={form.errors.method}>
+        <select
+          className={selectClass}
+          value={form.data.method}
+          onChange={(e) => form.setData('method', e.target.value)}
+        >
+          {METHODS.map(([k, label]) => (
+            <option key={k} value={k}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Amount (R)" error={form.errors.amount}>
+        <Input
+          inputMode="decimal"
+          value={form.data.amount}
+          onChange={(e) => form.setData('amount', e.target.value)}
+        />
+      </Field>
+      <Button type="submit" size="sm" loading={form.processing}>
+        Record
+      </Button>
+    </form>
+  );
+}
+
 function BookingItem({
   b,
   team,
@@ -65,6 +117,8 @@ function BookingItem({
   canManage: boolean;
 }) {
   const [moving, setMoving] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const paid = (b.deposit_paid ? b.deposit_cents : 0) + b.in_person_cents;
   const move = useForm({
     date: b.starts_at.slice(0, 10),
     time: hm(b.starts_at),
@@ -90,6 +144,9 @@ function BookingItem({
         {b.service}
         {b.phone ? ` · ${b.phone}` : ''}
         {b.notes ? ` · ${b.notes}` : ''}
+        {paid > 0
+          ? ` · Paid ${rand(paid)}${b.price_cents > 0 ? ` of ${rand(b.price_cents)}` : ''}`
+          : ''}
       </p>
       {canManage && !moving && (
         <div className="flex flex-wrap gap-2">
@@ -101,6 +158,16 @@ function BookingItem({
           >
             Move
           </Button>
+          {['confirmed', 'pending_payment', 'completed'].includes(b.status) && (
+            <Button
+              size="sm"
+              variant="ghost"
+              aria-label={`Paid in person: ${b.customer} at ${hm(b.starts_at)}`}
+              onClick={() => setPaying(!paying)}
+            >
+              Paid in person
+            </Button>
+          )}
           {b.status === 'confirmed' && (
             <>
               <Button
@@ -131,6 +198,7 @@ function BookingItem({
           )}
         </div>
       )}
+      {paying && canManage && <RecordPayment b={b} done={() => setPaying(false)} />}
       {moving && (
         <form
           aria-label={`Move ${b.customer}’s booking`}
