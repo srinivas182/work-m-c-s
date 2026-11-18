@@ -408,9 +408,9 @@ jobs:
           if [ "$n" -le 3 ]; then
             pnpm test:e2e --grep=@screens e2e/a11y-screens.spec.ts --shard="$n/3"
           elif [ "$n" -le 6 ]; then
-            pnpm test:e2e --grep=@screens e2e/template-contrast.spec.ts --shard="$((n - 3))/3"
+            pnpm test:e2e --grep=@screens --project=desktop e2e/template-contrast.spec.ts --shard="$((n - 3))/3" # desktop only (the mobile copies skip)
           else
-            pnpm test:e2e --grep=@screens e2e/phone-width.spec.ts
+            pnpm test:e2e --grep=@screens --project=mobile e2e/phone-width.spec.ts # mobile only
           fi
       # Every template's public home page: mobile Lighthouse ≥ 90 and layout shift < 0.1 (Sprint 5 gate), half each.
       - name: Performance gate (mobile Lighthouse on every template)
