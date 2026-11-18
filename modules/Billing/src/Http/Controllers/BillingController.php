@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Billing\Contracts\CreditTopUps;
 use Wurk\Billing\Gateways\DebitOrderProvider;
 use Wurk\Billing\Gateways\FakeDebitOrderProvider;
 use Wurk\Billing\Models\BillingAccount;
@@ -21,6 +22,7 @@ use Wurk\Billing\Models\Mandate;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\AutoTopUp;
 use Wurk\Billing\Support\BillingStatus;
+use Wurk\Billing\Support\CreditTopUpService;
 use Wurk\Billing\Support\Dunning;
 use Wurk\Billing\Support\Payments;
 use Wurk\Billing\Support\PrepaidPlans;
@@ -36,7 +38,7 @@ use Wurk\Tenancy\Contracts\TenantContext;
 final class BillingController
 {
     /** The smallest top-up, in rand including VAT (Sprint 22.5). */
-    public const MIN_TOP_UP_RAND = 20;
+    public const MIN_TOP_UP_RAND = CreditTopUps::MIN_RAND;
 
     public function __construct(private readonly TenantContext $context, private readonly Payments $payments, private readonly Catalog $catalog, private readonly Entitlements $entitlements) {}
 
@@ -133,14 +135,7 @@ final class BillingController
             'amount' => ['required_without:pack_id', 'nullable', 'numeric', 'min:'.self::MIN_TOP_UP_RAND, 'max:50000'],
         ], ['amount.min' => 'Top up at least R'.self::MIN_TOP_UP_RAND.'.']);
         if (($data['pack_id'] ?? null) === null) {
-            $perCredit = app(PrepaidPlans::class)->centsPerCredit();
-            $vatBp = (int) (app(Countries::class)->find($this->context->current()->countryCode())['vat_bp'] ?? 1500);
-            $excl = (int) floor((float) $data['amount'] * 100 * 10000 / (10000 + $vatBp));
-            $credits = $perCredit === null ? 0 : (int) floor($excl / $perCredit);
-            if ($credits < 1) {
-                throw ValidationException::withMessages(['amount' => 'Credits aren’t on sale right now. Try again later.']);
-            }
-            $pack = new CreditPack(['name' => 'Top-up', 'credits' => $credits, 'price_cents' => $excl]);
+            $pack = app(CreditTopUpService::class)->pack($this->context->id(), (float) $data['amount']);
         } else {
             $pack = CreditPack::query()->whereKey($data['pack_id'])->where('active', true)->firstOrFail();
         }

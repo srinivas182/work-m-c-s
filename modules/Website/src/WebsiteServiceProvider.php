@@ -45,6 +45,7 @@ use Wurk\Website\Console\SweepConversationsCommand;
 use Wurk\Website\Contracts\CatalogChanged;
 use Wurk\Website\Contracts\MediaLibrary;
 use Wurk\Website\Contracts\ProductCatalog;
+use Wurk\Website\Contracts\SiteLaunches;
 use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Digest\ChatsDigest;
 use Wurk\Website\Listeners\RerenderShopPages;
@@ -61,6 +62,7 @@ use Wurk\Website\Support\PageRenderer;
 use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteAssets;
 use Wurk\Website\Support\SiteBuilder;
+use Wurk\Website\Support\SiteLaunchLookup;
 use Wurk\Website\Support\SiteMediaLibrary;
 use Wurk\Website\Support\StorageMeter;
 use Wurk\Website\Support\Templates;
@@ -85,6 +87,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->app->scoped(TemplateSwitcher::class);
         $this->app->scoped(PageRenderer::class);
         $this->app->scoped(SiteTemplates::class, EloquentSiteTemplates::class);
+        $this->app->bind(SiteLaunches::class, SiteLaunchLookup::class); // 23.4
     }
 
     /**

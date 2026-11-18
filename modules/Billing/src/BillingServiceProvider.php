@@ -15,6 +15,7 @@ use Wurk\Billing\Console\ChargePrepaidCommand;
 use Wurk\Billing\Console\DunningCommand;
 use Wurk\Billing\Console\RenewSubscriptionsCommand;
 use Wurk\Billing\Console\UsageSummariesCommand;
+use Wurk\Billing\Contracts\CreditTopUps;
 use Wurk\Billing\Contracts\ServiceStatus;
 use Wurk\Billing\Contracts\SplitPayments;
 use Wurk\Billing\Contracts\SubscriptionPayments;
@@ -34,6 +35,7 @@ use Wurk\Billing\Metrics\ProfitSection;
 use Wurk\Billing\Metrics\RevenueSection;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\BillingSettings;
+use Wurk\Billing\Support\CreditTopUpService;
 use Wurk\Billing\Support\DunningServiceStatus;
 use Wurk\Billing\Support\Invoices;
 use Wurk\Billing\Support\PackCreditPricing;
@@ -54,6 +56,7 @@ final class BillingServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         $this->app->bind(SubscriptionPayments::class, PaidSubscriptions::class);
+        $this->app->bind(CreditTopUps::class, CreditTopUpService::class); // 23.4
         $this->app->bind(WurkRefundWindow::class, BillingSettings::class);
         $this->app->singleton(CreditPricing::class, PackCreditPricing::class);
         $this->app->singleton(SplitPayments::class, PaystackSplitPayments::class);

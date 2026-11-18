@@ -34,6 +34,7 @@ final class SetupTalkController
             'started' => $i->answers !== [],
             'photos' => array_map(fn (array $p) => ['source' => $p['source'], 'chosen' => $p['chosen']], array_values((array) ($i->brief['photos'] ?? []))),
             'reviews' => ($i->brief['reviews_url'] ?? '') !== '',
+            'return' => self::returnTo($request->query('return')), // 23.4: an agent's setup flow, to carry on there
         ]);
     }
 
@@ -91,6 +92,9 @@ final class SetupTalkController
     public function apply(Request $request): RedirectResponse
     {
         $done = $this->talk->apply($this->current($request), (string) $request->user()?->getAuthIdentifier());
+        if (($return = self::returnTo($request->input('return'))) !== null) {
+            return redirect($return)->with('status', 'All set up: '.implode('; ', $done).'.');
+        }
 
         return redirect()->route('tenant.website.pages', ['tenant' => $request->route('tenant')])
             ->with('status', 'All set up: '.implode('; ', $done).'. Check the preview, then publish when you’re happy.');
@@ -101,6 +105,12 @@ final class SetupTalkController
         $this->current($request)->update(['status' => 'done']);
 
         return back();
+    }
+
+    /** Where to go after setting up: only a path on this site (never another site). */
+    private static function returnTo(mixed $path): ?string
+    {
+        return is_string($path) && preg_match('#^/[A-Za-z0-9/_-]{0,200}$#', $path) === 1 ? $path : null;
     }
 
     private function current(Request $request): SetupInterview
