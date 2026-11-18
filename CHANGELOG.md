@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### WhatsApp — Sprint 21.2 (two-way WhatsApp in Chats)
+- **Customers → Chats → WhatsApp:** customers' messages to the business's own number arrive in Chats, one thread per customer, matched to a contact (or a new one is added). Text, photos, documents, locations and voice notes all come in; files are virus-checked and kept privately.
+- **Reply from Chats** with text, a photo or a PDF. The thread shows how long you can still reply freely (WhatsApp's 24-hour window) and sent, delivered and read ticks. The reply box says what each message costs in credits, since Meta now charges replies too. When WhatsApp refuses a message, the reason is in plain words and the credits come back.
+- **After 24 hours:** a **Send follow-up** button sends the business's approved follow-up message ("Hi Zodwa, this is Glow Salon following up on your message…"), once per silence. WURK submits it to Meta for each business when the number is connected; **Settings → WhatsApp** shows Meta's review.
+- **STOP** (and "unsubscribe", "yima", "hamba", "stop asseblief"…) stops marketing messages to that customer, with a confirmation.
+- **Security:** Meta's webhooks must carry WURK's app signature and are routed to the business by its number. Files are fetched only from Meta's own servers, never followed elsewhere, and are stored encrypted. Repeated deliveries from Meta are ignored.
+
 ### WhatsApp — Sprint 21.1 (connect the business's own number)
 - **Settings → WhatsApp:** an owner connects their own WhatsApp number through Meta's sign-up, in about five minutes. By default they keep using the WhatsApp Business app on their phone, and WURK sees the same chats. A new number works too.
 - The page shows the number's display-name review, quality rating and daily messaging limit in plain words, with **Check with Meta** and **Disconnect**.

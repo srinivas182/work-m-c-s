@@ -17,6 +17,8 @@ use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactRemembered;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Messaging\Events\WhatsAppReceived;
+use Wurk\Messaging\Events\WhatsAppStatusChanged;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Contracts\BusinessReports;
@@ -60,6 +62,7 @@ use Wurk\Website\Support\Templates;
 use Wurk\Website\Support\TemplateSwitcher;
 use Wurk\Website\Support\Uploads\ClamdScanner;
 use Wurk\Website\Support\Uploads\VirusScanner;
+use Wurk\Website\Support\WhatsAppChats;
 
 final class WebsiteServiceProvider extends ModuleServiceProvider
 {
@@ -140,6 +143,9 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         });
         $this->callAfterResolving(HealthSignals::class, fn (HealthSignals $s) => $s->register('website', fn (string $t) => $this->app->make(LaunchSignal::class)($t))); // business health (16.5)
         // Website analytics (Sprint 15.2): an order or booking made on the public site is credited to where the visitor came from.
+        // WhatsApp conversations in Chats (21.2): the webhook dispatches these inside the business's context.
+        Event::listen(WhatsAppReceived::class, fn (WhatsAppReceived $e) => app(WhatsAppChats::class)->received($e));
+        Event::listen(WhatsAppStatusChanged::class, fn (WhatsAppStatusChanged $e) => app(WhatsAppChats::class)->status($e));
         Event::listen(ContactRemembered::class, function (ContactRemembered $e): void {
             $host = strtolower(request()->getHost());
             $root = strtolower((string) config('wurk.domains.root'));

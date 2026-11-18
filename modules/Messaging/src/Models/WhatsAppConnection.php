@@ -24,6 +24,7 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property string|null $quality
  * @property string|null $messaging_limit
  * @property bool|null $payment_method
+ * @property array<string, string>|null $templates Meta's review status of WURK's templates on the account, by name
  * @property string $token
  * @property string|null $pin
  * @property string|null $connected_by
@@ -43,7 +44,7 @@ final class WhatsAppConnection extends Model implements CentralModel
 
     protected function casts(): array
     {
-        return ['token' => 'encrypted', 'pin' => 'encrypted', 'coexistence' => 'boolean', 'payment_method' => 'boolean',
+        return ['token' => 'encrypted', 'pin' => 'encrypted', 'coexistence' => 'boolean', 'payment_method' => 'boolean', 'templates' => 'array',
             'connected_at' => 'datetime', 'disconnected_at' => 'datetime', 'checked_at' => 'datetime'];
     }
 

@@ -9,6 +9,7 @@ use Wurk\Messaging\Contracts\DeliveryLog;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\ProviderCredentials;
+use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Otp\PhoneOtpChannel;
 use Wurk\Messaging\Otp\SmsTextMessenger;
 use Wurk\Messaging\Support\Deliveries;
@@ -17,6 +18,7 @@ use Wurk\Messaging\Support\MailConfigurator;
 use Wurk\Messaging\Support\MessengerService;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Messaging\Support\Templates;
+use Wurk\Messaging\Support\WhatsAppBusinessService;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
 final class MessagingServiceProvider extends ModuleServiceProvider
@@ -30,6 +32,7 @@ final class MessagingServiceProvider extends ModuleServiceProvider
         $this->app->singleton(Messenger::class, MessengerService::class);
         $this->app->singleton(TextMessenger::class, SmsTextMessenger::class);
         $this->app->singleton(ProviderCredentials::class, EloquentProviderCredentials::class);
+        $this->app->bind(WhatsAppBusiness::class, WhatsAppBusinessService::class); // 21.2
     }
 
     /**

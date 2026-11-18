@@ -28,6 +28,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property bool $keep
  * @property Carbon $last_message_at
  * @property Carbon $created_at
+ * @property Carbon|null $last_inbound_at the customer's last WhatsApp message: replies are free-form for 24 hours after (21.2)
  */
 final class ReceptionistConversation extends Model
 {
@@ -42,7 +43,7 @@ final class ReceptionistConversation extends Model
 
     protected function casts(): array
     {
-        return ['keep' => 'boolean', 'replies' => 'integer', 'credits_milli' => 'integer', 'last_message_at' => 'datetime'];
+        return ['keep' => 'boolean', 'replies' => 'integer', 'credits_milli' => 'integer', 'last_message_at' => 'datetime', 'last_inbound_at' => 'datetime'];
     }
 
     /** @return HasMany<ReceptionistMessage, $this> */
