@@ -1,0 +1,411 @@
+{
+  "category": "catering",
+  "key": "catering-home-kitchen",
+  "name": "Home kitchen & meal prep",
+  "position": 3,
+  "description": "Homely and personal: weekly meals, braai packs, cakes and orders to collect.",
+  "definition": {
+    "branding": {
+      "primary": "#B45309",
+      "secondary": "#65A30D",
+      "font_pairing": "friendly",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Menu",
+          "type": "page",
+          "page": "menu"
+        },
+        {
+          "label": "Order",
+          "type": "page",
+          "page": "order"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Home-cooked meals, cakes and meal prep",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "collage",
+                "heading": "Home cooking, ready when you are",
+                "text": "Weekly meals, family trays, braai packs and cakes — made in my kitchen, ready to collect or delivered nearby.",
+                "primaryLabel": "Order",
+                "primaryHref": "/order",
+                "secondaryLabel": "This week’s menu",
+                "secondaryHref": "/menu",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/catering-home-kitchen/meals-1600.webp",
+                    "alt": "Weekly meals in containers"
+                  },
+                  {
+                    "src": "/images/templates/catering-home-kitchen/cake-1600.webp",
+                    "alt": "A home-baked celebration cake"
+                  },
+                  {
+                    "src": "/images/templates/catering-home-kitchen/cook-1600.webp",
+                    "alt": "The cook in her kitchen"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "menu",
+              "type": "FoodMenu",
+              "version": 1,
+              "props": {
+                "heading": "This week",
+                "intro": "The menu changes every week. Order by Wednesday for Friday collection.",
+                "note": "",
+                "sections": [
+                  {
+                    "name": "Meals",
+                    "dishes": [
+                      {
+                        "name": "Chicken curry & rice",
+                        "description": "Serves 1 or a family tray",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Beef stew & dumplings",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Veg lasagne",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Bakes",
+                    "dishes": [
+                      {
+                        "name": "Scones",
+                        "description": "Per dozen",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Vetkoek",
+                        "description": "Per dozen",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Celebration cake",
+                        "description": "Order 3 days ahead",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "From my kitchen to your table",
+                "text": "Tell people who you are, how you learnt to cook, and what makes your food special.",
+                "image": "/images/templates/catering-home-kitchen/cook-1600.webp",
+                "imageAlt": "The cook in her kitchen",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Collection: Fridays 14:00–18:00 and Saturdays 09:00–12:00."
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Collection point",
+                "address": "",
+                "landmark": "Tell people where to collect — a street, a complex or a landmark.",
+                "showMap": true
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Good to know",
+                "items": [
+                  {
+                    "question": "Do you deliver?",
+                    "answer": "Nearby, for a small fee. Collection is free."
+                  },
+                  {
+                    "question": "How do I pay?",
+                    "answer": "Pay when you order to confirm it."
+                  },
+                  {
+                    "question": "Can you cook for my party?",
+                    "answer": "Yes — order family trays a week ahead."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "menu",
+        "title": "Menu",
+        "slug": "menu",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "trays",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Family trays & packs",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Family tray",
+                    "description": "Serves 4–6",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Braai pack",
+                    "description": "Wors, chops, chicken — for 4",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Salads",
+                    "description": "Potato, coleslaw or beetroot",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Celebration cake",
+                    "description": "20 cm, choice of flavour",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "menu",
+              "type": "FoodMenu",
+              "version": 1,
+              "props": {
+                "heading": "Weekly meals",
+                "intro": "",
+                "note": "Tell me about allergies when you order.",
+                "sections": [
+                  {
+                    "name": "This week",
+                    "dishes": [
+                      {
+                        "name": "Chicken curry & rice",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Beef stew & dumplings",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Veg lasagne",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "order",
+        "title": "Order",
+        "slug": "order",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Place an order",
+                "intro": "Choose what you’d like and when you’ll collect.",
+                "services": [
+                  {
+                    "name": "Weekly meals"
+                  },
+                  {
+                    "name": "Family tray"
+                  },
+                  {
+                    "name": "Braai pack"
+                  },
+                  {
+                    "name": "Cake"
+                  },
+                  {
+                    "name": "Bakes"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Send my order",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Collection or delivery date",
+                    "type": "date",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Quantity and details",
+                    "type": "long",
+                    "choices": "",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact me",
+                "intro": "WhatsApp is quickest.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
