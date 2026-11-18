@@ -1,0 +1,433 @@
+{
+  "category": "legal-accounting",
+  "key": "law-firm",
+  "name": "Law firm",
+  "position": 1,
+  "description": "Authoritative and approachable: practice areas, attorneys and a first consultation.",
+  "definition": {
+    "branding": {
+      "primary": "#1C1917",
+      "secondary": "#B45309",
+      "font_pairing": "classic",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Practice areas",
+          "type": "page",
+          "page": "practice"
+        },
+        {
+          "label": "Attorneys",
+          "type": "page",
+          "page": "attorneys"
+        },
+        {
+          "label": "Consultation",
+          "type": "page",
+          "page": "consult"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Attorneys — family, property, labour and commercial law",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a consultation",
+                "buttonHref": "/consult",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Clear advice. Strong representation.",
+                "text": "We help people and businesses with family, property, labour and commercial matters — in plain language.",
+                "primaryLabel": "Book a consultation",
+                "primaryHref": "/consult",
+                "secondaryLabel": "Practice areas",
+                "secondaryHref": "/practice",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/law-firm/hero-1600.webp",
+                    "alt": "An attorney meeting a client"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "areas",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Practice areas",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "users",
+                    "title": "Family law",
+                    "text": "Divorce, maintenance and custody."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Property & conveyancing",
+                    "text": "Transfers and bonds."
+                  },
+                  {
+                    "icon": "shield",
+                    "title": "Labour law",
+                    "text": "CCMA, disputes and contracts."
+                  },
+                  {
+                    "icon": "check",
+                    "title": "Wills & estates",
+                    "text": "Wills, trusts and deceased estates."
+                  },
+                  {
+                    "icon": "pin",
+                    "title": "Commercial",
+                    "text": "Contracts and company matters."
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Litigation",
+                    "text": "Civil claims and debt collection."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Working with us",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "First consultation",
+                    "text": "Tell us what happened; we explain your options."
+                  },
+                  {
+                    "title": "Clear fees",
+                    "text": "We tell you how we charge before we start."
+                  },
+                  {
+                    "title": "Action",
+                    "text": "We act for you and keep you informed."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "firm",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "About the firm",
+                "text": "Your history, values and the communities you serve. Mention languages spoken.",
+                "image": "/images/templates/law-firm/office-1600.webp",
+                "imageAlt": "The firm’s boardroom",
+                "imageSide": "right",
+                "buttonLabel": "Our attorneys",
+                "buttonHref": "/attorneys"
+              }
+            },
+            {
+              "id": "disclaimer",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Please note",
+                "text": "Information on this website is general and is not legal advice. Contact us about your own situation."
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "practice",
+        "title": "Practice areas",
+        "slug": "practice",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a consultation",
+                "buttonHref": "/consult",
+                "sticky": true
+              }
+            },
+            {
+              "id": "practice",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "How we can help",
+                "intro": "",
+                "note": "Fees depend on the matter; we confirm them in writing before we start.",
+                "items": [
+                  {
+                    "name": "Divorce and family",
+                    "description": "Settlement agreements, maintenance, custody",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Conveyancing",
+                    "description": "Transfers, bonds, sectional title",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Labour",
+                    "description": "CCMA, disciplinary hearings, contracts",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Wills and estates",
+                    "description": "Wills, trusts, deceased estates",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Commercial",
+                    "description": "Contracts, shareholder agreements",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Litigation",
+                    "description": "Civil claims, debt collection",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Is the first consultation free?",
+                    "answer": "State your first-consultation fee or policy."
+                  },
+                  {
+                    "question": "Do you do legal aid or contingency work?",
+                    "answer": "Explain which matters you take on contingency, if any."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "attorneys",
+        "title": "Attorneys",
+        "slug": "attorneys",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a consultation",
+                "buttonHref": "/consult",
+                "sticky": true
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Our attorneys",
+                "intro": "Names, admission and what each attorney does.",
+                "people": []
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Admitted and regulated",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Legal Practice Council",
+                    "logo": "",
+                    "detail": "All attorneys admitted and in good standing"
+                  },
+                  {
+                    "name": "Fidelity Fund",
+                    "logo": "",
+                    "detail": "Certificate held"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "consult",
+        "title": "Consultation",
+        "slug": "consult",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a consultation",
+                "buttonHref": "/consult",
+                "sticky": true
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "enquiry",
+                "heading": "Book a consultation",
+                "intro": "Tell us briefly what it’s about. Everything you share is confidential.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Request a consultation",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Type of matter",
+                    "type": "choice",
+                    "choices": "Family, Property, Labour, Wills & estates, Commercial, Litigation, Other",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Preferred language",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Our offices",
+                "intro": "Office hours: Monday to Friday, 08:00–17:00.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find us",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

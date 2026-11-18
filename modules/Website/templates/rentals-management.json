@@ -1,0 +1,445 @@
+{
+  "category": "real-estate",
+  "key": "rentals-management",
+  "name": "Rentals & property management",
+  "position": 3,
+  "description": "Practical and trusted: homes to rent for tenants, and management for landlords.",
+  "definition": {
+    "branding": {
+      "primary": "#065F46",
+      "secondary": "#F59E0B",
+      "font_pairing": "clean",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Rentals",
+          "type": "page",
+          "page": "rentals"
+        },
+        {
+          "label": "Landlords",
+          "type": "page",
+          "page": "landlords"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Rentals and property management",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Landlords",
+                "buttonHref": "/landlords",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Rentals made simple",
+                "text": "Tenants find good homes. Landlords get rent on time and properties looked after.",
+                "primaryLabel": "Find a rental",
+                "primaryHref": "/rentals",
+                "secondaryLabel": "For landlords",
+                "secondaryHref": "/landlords",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/rentals-management/hero-1600.webp",
+                    "alt": "Keys being handed over at a front door"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "rentals",
+              "type": "Listings",
+              "version": 1,
+              "props": {
+                "heading": "Available to rent",
+                "intro": "",
+                "buttonLabel": "All rentals",
+                "buttonHref": "/rentals",
+                "listings": [
+                  {
+                    "title": "Two-bedroom flat, close to transport",
+                    "photo": "/images/templates/rentals-management/rental-1-1600.webp",
+                    "photoAlt": "A flat to rent",
+                    "deal": "rent",
+                    "price": 0,
+                    "area": "",
+                    "beds": "2",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "65",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  },
+                  {
+                    "title": "Garden cottage, own entrance",
+                    "photo": "/images/templates/rentals-management/rental-2-1600.webp",
+                    "photoAlt": "A cottage to rent",
+                    "deal": "rent",
+                    "price": 0,
+                    "area": "",
+                    "beds": "1",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "40",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "landlords",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "For landlords",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Tenant placement",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "We find and vet the tenant; you manage after that",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/landlords"
+                  },
+                  {
+                    "name": "Full management",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Rent collection, inspections, repairs and reports",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/landlords"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "tenants",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Renting through us",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Find a home",
+                    "text": "Browse and book a viewing."
+                  },
+                  {
+                    "title": "Apply",
+                    "text": "Payslips, ID and bank statements."
+                  },
+                  {
+                    "title": "Move in",
+                    "text": "Sign the lease, pay the deposit, collect the keys."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registered",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "PPRA",
+                    "logo": "",
+                    "detail": "Fidelity Fund Certificate"
+                  },
+                  {
+                    "name": "Trust account",
+                    "logo": "",
+                    "detail": "Deposits held in a trust account"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "rentals",
+        "title": "Rentals",
+        "slug": "rentals",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Landlords",
+                "buttonHref": "/landlords",
+                "sticky": true
+              }
+            },
+            {
+              "id": "rentals",
+              "type": "Listings",
+              "version": 1,
+              "props": {
+                "heading": "Rentals",
+                "intro": "",
+                "buttonLabel": "",
+                "buttonHref": "",
+                "listings": [
+                  {
+                    "title": "Two-bedroom flat, close to transport",
+                    "photo": "/images/templates/rentals-management/rental-1-1600.webp",
+                    "photoAlt": "A flat to rent",
+                    "deal": "rent",
+                    "price": 0,
+                    "area": "",
+                    "beds": "2",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "65",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  },
+                  {
+                    "title": "Garden cottage, own entrance",
+                    "photo": "/images/templates/rentals-management/rental-2-1600.webp",
+                    "photoAlt": "A cottage to rent",
+                    "deal": "rent",
+                    "price": 0,
+                    "area": "",
+                    "beds": "1",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "40",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "waiting_list",
+                "heading": "Apply or book a viewing",
+                "intro": "Tell us which home and when you’d like to move.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Send",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Which property?",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Move-in date",
+                    "type": "date",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "Monthly income",
+                    "type": "choice",
+                    "choices": "Under R10 000, R10 000–R20 000, Over R20 000",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "landlords",
+        "title": "Landlords",
+        "slug": "landlords",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Landlords",
+                "buttonHref": "/landlords",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Landlord services",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Tenant placement",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Advertising, viewings, vetting and lease",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/landlords"
+                  },
+                  {
+                    "name": "Full management",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Everything, every month",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/landlords"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "List your property",
+                "intro": "Tell us about your property.",
+                "services": [
+                  {
+                    "name": "Tenant placement"
+                  },
+                  {
+                    "name": "Full management"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Send",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Address or suburb",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Property type",
+                    "type": "choice",
+                    "choices": "House, Flat, Cottage, Room, Commercial",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions landlords ask",
+                "items": [
+                  {
+                    "question": "How do you vet tenants?",
+                    "answer": "Credit checks, references and affordability."
+                  },
+                  {
+                    "question": "Where is the deposit kept?",
+                    "answer": "In an interest-bearing trust account, as the Rental Housing Act requires."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Maintenance emergencies: use the number on your lease.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Premium templates — Sprint 20.4d (real estate, legal & accounting)
+- **New section: Property listings.** Homes for sale or to rent, with price (or "price on request"), rent per month, area, bedrooms, bathrooms, parking and size. Each listing can be marked under offer, sold or let, and links to a viewing form or a portal.
+- **Real estate:** estate agency (featured homes, selling steps, free valuation, PPRA), new development (unit types, how to buy, show-unit tour, register interest), rentals and property management (rentals, landlord packages, applications, deposits in trust).
+- **Legal & accounting:** law firm (six practice areas, how we work, a "not legal advice" note, LPC), accounting and tax practice (monthly packages, once-off services, SARS), business registration and compliance (CIPC, B-BBEE, CSD, tender-ready bundle).
+- All 14 new categories now have three designs each: 42 new designs in all.
+
 ### Premium templates — Sprint 20.4c (four more categories)
 - **Church & NGO:** community church (service times, "New here?", ministries, giving), charity and NGO (programmes, ways to give, registration, volunteering), ministry and outreach (events, film, weekly programme).
 - **School:** primary school (admissions, fees, application steps), high school and college (facilities, subject streams, extra lessons, open days), skills academy (accredited courses, intakes, employers).

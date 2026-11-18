@@ -1,0 +1,451 @@
+{
+  "category": "legal-accounting",
+  "key": "accounting-practice",
+  "name": "Accounting & tax practice",
+  "position": 2,
+  "description": "Calm and organised: monthly accounting, tax and payroll, with packages and SARS registration.",
+  "definition": {
+    "branding": {
+      "primary": "#0C4A6E",
+      "secondary": "#16A34A",
+      "font_pairing": "modern",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Packages",
+          "type": "page",
+          "page": "packages"
+        },
+        {
+          "label": "Get a quote",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Accounting and tax practice for small businesses",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Your books, done. Your tax, sorted.",
+                "text": "Monthly accounting, tax returns, payroll and advice for small businesses and individuals.",
+                "primaryLabel": "Get a quote",
+                "primaryHref": "/quote",
+                "secondaryLabel": "Packages",
+                "secondaryHref": "/packages",
+                "facts": [
+                  {
+                    "text": "Registered tax practitioners"
+                  },
+                  {
+                    "text": "Fixed monthly fees"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/accounting-practice/hero-1600.webp",
+                    "alt": "An accountant reviewing reports with a business owner"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Monthly packages",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Starter",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Bookkeeping, VAT and an annual return for small businesses",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  },
+                  {
+                    "name": "Growth",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Monthly management accounts, payroll and tax planning",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  },
+                  {
+                    "name": "Individuals",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Personal tax returns and SARS queries",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "services",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "What we do",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "check",
+                    "title": "Accounting",
+                    "text": "Monthly books and annual financial statements."
+                  },
+                  {
+                    "icon": "calendar",
+                    "title": "Tax",
+                    "text": "Income tax, VAT, PAYE and provisional tax."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Payroll",
+                    "text": "Payslips, UIF, SDL and EMP201s."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "switch",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Switching to us",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Talk to us",
+                    "text": "A free first meeting."
+                  },
+                  {
+                    "title": "Hand over",
+                    "text": "We collect your records from your old accountant."
+                  },
+                  {
+                    "title": "Relax",
+                    "text": "Deadlines and returns handled, every month."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "desk",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Reports you understand",
+                "text": "Explain the software you use and how clients see their numbers each month.",
+                "image": "/images/templates/accounting-practice/desk-1600.webp",
+                "imageAlt": "A tidy desk with a laptop and reports",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registered",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "SAIPA / SAICA",
+                    "logo": "",
+                    "detail": "Add your professional body"
+                  },
+                  {
+                    "name": "SARS",
+                    "logo": "",
+                    "detail": "Registered tax practitioners"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "packages",
+        "title": "Packages",
+        "slug": "packages",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Packages",
+                "intro": "Fixed monthly fees, agreed up front.",
+                "items": [
+                  {
+                    "name": "Starter",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Bookkeeping, VAT, annual return",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  },
+                  {
+                    "name": "Growth",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Management accounts, payroll, tax planning",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  },
+                  {
+                    "name": "Individuals",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Personal tax",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "once-off",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Once-off services",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Company registration",
+                    "description": "CIPC",
+                    "duration": "1–2 weeks",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Tax clearance (TCS)",
+                    "description": "SARS",
+                    "duration": "1 week",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "B-BBEE affidavit",
+                    "description": "EME and QSE",
+                    "duration": "2 days",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Annual financial statements",
+                    "description": "",
+                    "duration": "2–4 weeks",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Can you sort out my SARS problems?",
+                    "answer": "Yes — overdue returns, penalties and payment arrangements."
+                  },
+                  {
+                    "question": "Do you work with clients outside our town?",
+                    "answer": "Yes, online."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Get a quote",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Get a quote",
+                "intro": "Tell us about your business.",
+                "services": [
+                  {
+                    "name": "Bookkeeping"
+                  },
+                  {
+                    "name": "Tax"
+                  },
+                  {
+                    "name": "Payroll"
+                  },
+                  {
+                    "name": "Company registration"
+                  },
+                  {
+                    "name": "Personal tax"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Get my quote",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Business type",
+                    "type": "choice",
+                    "choices": "Sole proprietor, Company, NPO, Individual",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Employees",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "VAT registered?",
+                    "type": "yesno",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Office hours: Monday to Friday, 08:00–17:00.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

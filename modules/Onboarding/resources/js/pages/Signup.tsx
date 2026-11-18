@@ -23,6 +23,8 @@ import {
   Church,
   School,
   ShieldCheck,
+  House,
+  Scale,
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
@@ -426,6 +428,8 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   school: School,
   'flower-2': Flower2,
   'shield-check': ShieldCheck,
+  house: House,
+  scale: Scale,
 };
 
 function CategoryStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {

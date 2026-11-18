@@ -808,5 +808,86 @@
       "shows": "Live camera view on a phone app",
       "search": "CCTV phone app view"
     }
+  },
+  "estate-agency": {
+    "hero": {
+      "shows": "A beautiful family home exterior in good light",
+      "search": "modern house exterior South Africa"
+    },
+    "home-1": {
+      "shows": "A family home with a garden",
+      "search": "family home garden"
+    },
+    "home-2": {
+      "shows": "A bright apartment living room",
+      "search": "apartment living room modern"
+    },
+    "home-3": {
+      "shows": "A townhouse in a secure complex or estate",
+      "search": "townhouse complex"
+    },
+    "agent": {
+      "shows": "An agent showing clients around a home",
+      "search": "Black estate agent showing house"
+    }
+  },
+  "property-development": {
+    "hero": {
+      "shows": "An artist’s impression or photo of the development",
+      "search": "new apartment development render"
+    },
+    "unit-1": {
+      "shows": "A show unit: one-bedroom living area",
+      "search": "show apartment interior"
+    },
+    "unit-2": {
+      "shows": "A show unit: kitchen or bedroom",
+      "search": "new apartment kitchen"
+    },
+    "site": {
+      "shows": "The site under construction, or the finished clubhouse",
+      "search": "apartment construction site"
+    }
+  },
+  "rentals-management": {
+    "hero": {
+      "shows": "Keys being handed over to a happy tenant at a door",
+      "search": "handing over house keys"
+    },
+    "rental-1": {
+      "shows": "A tidy flat to rent",
+      "search": "apartment for rent interior"
+    },
+    "rental-2": {
+      "shows": "A garden cottage or backroom to rent",
+      "search": "garden cottage"
+    }
+  },
+  "law-firm": {
+    "hero": {
+      "shows": "An attorney meeting a client across a desk",
+      "search": "Black lawyer client meeting office"
+    },
+    "office": {
+      "shows": "The firm’s office or boardroom",
+      "search": "law office boardroom"
+    }
+  },
+  "accounting-practice": {
+    "hero": {
+      "shows": "An accountant reviewing figures with a small-business owner",
+      "search": "Black accountant business owner meeting"
+    },
+    "desk": {
+      "shows": "A tidy desk with a laptop showing financial reports",
+      "search": "accounting desk laptop reports",
+      "decorative": true
+    }
+  },
+  "business-services": {
+    "hero": {
+      "shows": "A young entrepreneur at a desk completing documents",
+      "search": "young African entrepreneur paperwork"
+    }
   }
 }

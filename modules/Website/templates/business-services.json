@@ -1,0 +1,400 @@
+{
+  "category": "legal-accounting",
+  "key": "business-services",
+  "name": "Business registration & compliance",
+  "position": 3,
+  "description": "Fast and friendly: company registration, B-BBEE, tax and compliance for new businesses.",
+  "definition": {
+    "branding": {
+      "primary": "#6D28D9",
+      "secondary": "#F59E0B",
+      "font_pairing": "friendly",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Prices",
+          "type": "page",
+          "page": "prices"
+        },
+        {
+          "label": "Start",
+          "type": "page",
+          "page": "start"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Company registration, B-BBEE and compliance services",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Start my business",
+                "buttonHref": "/start",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "centered",
+                "heading": "Register your business this week",
+                "text": "Company registration, tax numbers, B-BBEE certificates and bank-ready documents — done for you, explained simply.",
+                "primaryLabel": "Start my business",
+                "primaryHref": "/start",
+                "secondaryLabel": "Prices",
+                "secondaryHref": "/prices",
+                "facts": [],
+                "images": [],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How it works",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Tell us about your business",
+                    "text": "Name ideas, directors and what you’ll do."
+                  },
+                  {
+                    "title": "We register",
+                    "text": "CIPC, SARS and the paperwork."
+                  },
+                  {
+                    "title": "You’re ready",
+                    "text": "Documents to open a bank account and tender."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Popular services",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Company registration",
+                    "description": "CIPC, with share certificates",
+                    "duration": "1–5 days",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Name reservation",
+                    "description": "Up to four names",
+                    "duration": "1–2 days",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "B-BBEE affidavit",
+                    "description": "EME and QSE",
+                    "duration": "Same day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Tax and VAT registration",
+                    "description": "SARS",
+                    "duration": "1–2 weeks",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "CSD registration",
+                    "description": "Central Supplier Database, for tenders",
+                    "duration": "1–2 days",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Annual returns",
+                    "description": "CIPC, to stay compliant",
+                    "duration": "1 day",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "done-for-you",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Done for you, explained simply",
+                "text": "Introduce the people who help: what they’ve registered, the languages they speak, and how quickly they answer.",
+                "image": "/images/templates/business-services/hero-1600.webp",
+                "imageAlt": "A young entrepreneur signing documents",
+                "imageSide": "right",
+                "buttonLabel": "Start my business",
+                "buttonHref": "/start"
+              }
+            },
+            {
+              "id": "bundles",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Bundles",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Starter",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Company registration, tax number and B-BBEE affidavit",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Start",
+                    "buttonHref": "/start"
+                  },
+                  {
+                    "name": "Tender-ready",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Starter, plus CSD, tax clearance and a company profile",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Start",
+                    "buttonHref": "/start"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Can I do this from home?",
+                    "answer": "Yes — send documents on WhatsApp or email."
+                  },
+                  {
+                    "question": "What do I need?",
+                    "answer": "Certified IDs of directors and proof of address."
+                  },
+                  {
+                    "question": "How fast is it?",
+                    "answer": "Most companies are registered within a week."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What business owners say",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "prices",
+        "title": "Prices",
+        "slug": "prices",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Start my business",
+                "buttonHref": "/start",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Prices",
+                "intro": "",
+                "note": "Government fees are included unless we say otherwise.",
+                "items": [
+                  {
+                    "name": "Company registration",
+                    "description": "",
+                    "duration": "1–5 days",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Name reservation",
+                    "description": "",
+                    "duration": "1–2 days",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "B-BBEE affidavit",
+                    "description": "",
+                    "duration": "Same day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Tax and VAT registration",
+                    "description": "",
+                    "duration": "1–2 weeks",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "CSD registration",
+                    "description": "",
+                    "duration": "1–2 days",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Annual returns",
+                    "description": "",
+                    "duration": "1 day",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "start",
+        "title": "Start",
+        "slug": "start",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Start my business",
+                "buttonHref": "/start",
+                "sticky": true
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "enquiry",
+                "heading": "Start my business",
+                "intro": "Tell us what you need; we’ll call you to get going.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Get started",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "What do you need?",
+                    "type": "choice",
+                    "choices": "Register a company, B-BBEE, Tax, Tender-ready bundle, Not sure",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Name ideas (optional)",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "WhatsApp is quickest.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
