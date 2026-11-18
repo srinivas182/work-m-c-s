@@ -23,7 +23,8 @@ final readonly class BillingSettings implements WurkRefundWindow
 
     public const DEFAULT_REFUND_DAYS = 30;
 
-    public const DEFAULT_DUNNING = ['retry_days' => [3, 5, 7], 'restrict_from_day' => 8, 'suspend_on_day' => 15];
+    // prepaid_grace_days: how long a pay-as-you-go business keeps working with no credits before the usual dunning (22.5).
+    public const DEFAULT_DUNNING = ['retry_days' => [3, 5, 7], 'restrict_from_day' => 8, 'suspend_on_day' => 15, 'prepaid_grace_days' => 3];
 
     public function __construct(private PlatformSettings $settings) {}
 
@@ -41,10 +42,10 @@ final readonly class BillingSettings implements WurkRefundWindow
         return $issuer['vat_number'] === self::DEFAULT_ISSUER['vat_number'] || $issuer['address'] === self::DEFAULT_ISSUER['address'];
     }
 
-    /** @return array{retry_days: list<int>, restrict_from_day: int, suspend_on_day: int} */
+    /** @return array{retry_days: list<int>, restrict_from_day: int, suspend_on_day: int, prepaid_grace_days: int} */
     public function dunning(): array
     {
-        /** @var array{retry_days: list<int>, restrict_from_day: int, suspend_on_day: int} */
+        /** @var array{retry_days: list<int>, restrict_from_day: int, suspend_on_day: int, prepaid_grace_days: int} */
         return [...self::DEFAULT_DUNNING, ...(array) $this->settings->get('dunning', [])];
     }
 
@@ -54,7 +55,7 @@ final readonly class BillingSettings implements WurkRefundWindow
         $this->settings->set('invoice_issuer', $issuer, $by);
     }
 
-    /** @param  array{retry_days: list<int>, restrict_from_day: int, suspend_on_day: int}  $dunning */
+    /** @param  array{retry_days: list<int>, restrict_from_day: int, suspend_on_day: int, prepaid_grace_days: int}  $dunning */
     public function setDunning(array $dunning, ?string $by): void
     {
         $this->settings->set('dunning', $dunning, $by);

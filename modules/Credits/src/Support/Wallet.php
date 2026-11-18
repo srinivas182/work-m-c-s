@@ -66,6 +66,22 @@ final readonly class Wallet implements CreditWallet
         return abs($entry->amount_milli);
     }
 
+    public function chargeAmount(int $amountMilli, string $channel, string $key, string $description): void
+    {
+        if ($amountMilli <= 0) {
+            throw new InvalidArgumentException('Charges must be positive.');
+        }
+        $this->write(function (CreditBalance $balance) use ($amountMilli, $channel, $key, $description): array {
+            if ($balance->balance_milli < $amountMilli) {
+                throw new InsufficientCredits($amountMilli, $balance->balance_milli);
+            }
+
+            return ['type' => 'debit', 'amount_milli' => -$amountMilli, 'channel' => $channel, 'key' => $key, 'description' => $description, 'by' => null,
+                'allowance_delta' => -min($amountMilli, $balance->allowance_milli)];
+        }, $key);
+        $this->maybeAlert();
+    }
+
     public function refund(string $chargeKey, string $description): void
     {
         $charge = CreditLedgerEntry::query()->where('idempotency_key', $chargeKey)->where('type', 'debit')->first();

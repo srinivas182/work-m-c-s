@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Billing — Sprint 22.5 (pay as you go)
+- **Admin → Packages → Pay as you go:** a package's price is taken from the business's WURK credits each day (the monthly price ÷ the days in the month) instead of an invoice. This makes low-entry packages practical without a card.
+- **Top up any amount from R20** in Settings → Billing, by any of WURK's methods, including Capitec Pay and SnapScan.
+- **Warnings** by email and SMS at 7, 3 and 1 day(s) left. When credits run out, the business keeps working for a grace period (Admin → Invoice settings, default 3 days), then the usual reminders and suspension apply. Nothing is deleted, and a top-up restores the business at once.
+- **Home and Billing** show about how many days the credits last.
+
 ### Payments — Sprint 22.4 (businesses pay WURK by QR and mobile money)
 - **Settings → Billing:** owners can pay WURK's invoices and credit packs by **Capitec Pay, SnapScan, EFT or card** through WURK's Paystack account. Every channel WURK's account allows is offered.
 - **Flutterwave, WURK's second gateway,** takes mobile money and cards. HQ adds its keys and webhook secret hash in **Admin → Payment methods**, and the key is tested when saved. A payment counts only once Flutterwave confirms it, and refunds go back through Flutterwave. Businesses never offer it to their own customers.
