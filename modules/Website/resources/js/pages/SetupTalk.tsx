@@ -1,5 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Check, Mic, Square } from 'lucide-react';
+import { Check, Link2, Mic, Square } from 'lucide-react';
 import { useRef, useState } from 'react';
 import {
   Button,
@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
   Field,
+  Input,
   PageHeader,
   Textarea,
 } from '@/design-system';
@@ -23,6 +24,9 @@ interface Props {
   questions: Question[];
   next: string | null;
   preview: string[] | null;
+  started: boolean;
+  /** 23.2: the business's own photos found online; only chosen ones are used. */
+  photos: { source: string; chosen: boolean }[];
 }
 
 const base = () => window.location.pathname.replace(/\/$/, '');
@@ -116,7 +120,72 @@ function AnswerForm({
   );
 }
 
-export default function SetupTalk({ questions, next, preview }: Props) {
+/** 23.2: start from a Google listing, Facebook page, Instagram profile or website. */
+function ImportForm() {
+  const form = useForm({ link: '' });
+  return (
+    <form
+      aria-label="Start from what you already have online"
+      className="grid gap-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.post(`${base()}/import`, { preserveScroll: true, onSuccess: () => form.reset() });
+      }}
+    >
+      <Field
+        label="Your Google listing, Facebook page, Instagram or website — or your business name and area"
+        error={form.errors.link}
+      >
+        <Input
+          value={form.data.link}
+          onChange={(e) => form.setData('link', e.target.value)}
+          placeholder="e.g. https://facebook.com/glowsalon or Glow Salon Soweto"
+        />
+      </Field>
+      <Button
+        type="submit"
+        variant="secondary"
+        className="justify-self-start"
+        loading={form.processing}
+      >
+        <Link2 aria-hidden /> Fill in from there
+      </Button>
+    </form>
+  );
+}
+
+/** Pick which of the photos found online go on the website (thumbnails come through WURK). */
+function PhotoPicker({ photos }: { photos: Props['photos'] }) {
+  const chosen = photos.flatMap((p, i) => (p.chosen ? [i] : []));
+  const toggle = (i: number) =>
+    router.post(
+      `${base()}/photos`,
+      { chosen: chosen.includes(i) ? chosen.filter((c) => c !== i) : [...chosen, i] },
+      { preserveScroll: true },
+    );
+  return (
+    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {photos.map((p, i) => (
+        <li key={i}>
+          <label className="border-border has-[:checked]:border-brand grid cursor-pointer gap-2 rounded-md border p-2 text-xs">
+            <img
+              src={`${base()}/photo/${i}`}
+              alt={`Photo ${i + 1} from ${p.source}`}
+              className="aspect-[4/3] w-full rounded object-cover"
+              loading="lazy"
+            />
+            <span className="flex items-center gap-2">
+              <input type="checkbox" checked={p.chosen} onChange={() => toggle(i)} />
+              Use photo {i + 1}
+            </span>
+          </label>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default function SetupTalk({ questions, next, preview, started, photos }: Props) {
   const [changing, setChanging] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
   const answered = questions.filter((q) => q.answer !== null);
@@ -129,6 +198,20 @@ export default function SetupTalk({ questions, next, preview }: Props) {
           title="Set up by talking"
           description="Answer six short questions, typed or as voice notes, in any language. WURK sets up your website, services and hours from exactly what you say — nothing is invented, and nothing goes live until you publish."
         />
+        {!started && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Already online? Start from there</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 text-sm">
+              <p className="text-fg-muted">
+                WURK reads only what’s public, and you check every answer before anything is set up.
+                Reviews aren’t copied.
+              </p>
+              <ImportForm />
+            </CardContent>
+          </Card>
+        )}
         {answered.length > 0 && (
           <Card>
             <CardHeader>
@@ -157,6 +240,20 @@ export default function SetupTalk({ questions, next, preview }: Props) {
                   </li>
                 ))}
               </ol>
+            </CardContent>
+          </Card>
+        )}
+        {photos.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Your photos</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 text-sm">
+              <p className="text-fg-muted">
+                These are photos you put online yourself. Tick the ones to use on your website —
+                only use photos of your own business and work.
+              </p>
+              <PhotoPicker photos={photos} />
             </CardContent>
           </Card>
         )}

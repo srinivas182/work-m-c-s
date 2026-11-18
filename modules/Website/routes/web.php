@@ -47,6 +47,9 @@ Route::tenant(function (): void {
         Route::get('/set-up', [SetupTalkController::class, 'show'])->name('setup');
         Route::post('/set-up/answer', [SetupTalkController::class, 'answer'])->middleware('throttle:30,1,website-setup')->name('setup.answer');
         Route::post('/set-up/voice', [SetupTalkController::class, 'voice'])->middleware('throttle:20,1,website-setup-voice')->name('setup.voice');
+        Route::post('/set-up/import', [SetupTalkController::class, 'import'])->middleware('throttle:10,1,website-setup-import')->name('setup.import'); // 23.2
+        Route::get('/set-up/photo/{n}', [SetupTalkController::class, 'photo'])->whereNumber('n')->middleware('throttle:60,1,website-setup-photo')->name('setup.photo');
+        Route::post('/set-up/photos', [SetupTalkController::class, 'photos'])->name('setup.photos');
         Route::post('/set-up/apply', [SetupTalkController::class, 'apply'])->middleware('throttle:5,1,website-setup-apply')->name('setup.apply');
         Route::post('/set-up/restart', [SetupTalkController::class, 'restart'])->name('setup.restart');
 
