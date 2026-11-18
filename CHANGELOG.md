@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### WhatsApp — Sprint 21.3 (the AI assistant on WhatsApp)
+- **Website → Chat → AI assistant:** a separate switch lets the assistant answer on the business's WhatsApp number too, with the same answers, booking tools, limits and hand-over as the website chat.
+- **Customers tap instead of type:** free times, services, classes and products come as WhatsApp reply buttons (up to 3) or a list (up to 10). A booking's **Pay the deposit** or **Change or cancel** link comes as a button.
+- **Out of hours:** outside the opening hours on the website, customers first get the owner's away message (once a day), and the assistant still answers and books.
+- It waits a few seconds so a customer can finish typing, then answers all their messages at once.
+- **Never silence:** when the assistant is switched off, over its monthly limit or out of credits, the chat goes to the team in Chats and the customer is told someone will reply. **Take over** and **Hand back** work as on the website.
+
 ### WhatsApp — Sprint 21.2 (two-way WhatsApp in Chats)
 - **Customers → Chats → WhatsApp:** customers' messages to the business's own number arrive in Chats, one thread per customer, matched to a contact (or a new one is added). Text, photos, documents, locations and voice notes all come in; files are virus-checked and kept privately.
 - **Reply from Chats** with text, a photo or a PDF. The thread shows how long you can still reply freely (WhatsApp's 24-hour window) and sent, delivered and read ticks. The reply box says what each message costs in credits, since Meta now charges replies too. When WhatsApp refuses a message, the reason is in plain words and the credits come back.

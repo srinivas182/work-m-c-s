@@ -24,6 +24,14 @@ interface WhatsAppBusiness
      */
     public function sendMedia(string $to, string $kind, string $contents, string $mime, string $filename, string $caption = ''): SendResult;
 
+    /**
+     * Sends one of WhatsApp's interactive messages (inside the 24-hour window): reply buttons, a list, or a link button
+     * — the `interactive` object of Meta's Cloud API (21.3). Costs credits.
+     *
+     * @param  array<string, mixed>  $interactive
+     */
+    public function sendInteractive(string $to, array $interactive): SendResult;
+
     /** Whether Meta has approved the business's follow-up template, for reaching a customer after the 24-hour window. */
     public function followUpReady(): bool;
 
