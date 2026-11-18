@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.25.0] — 2026-11-19 — Sprint 24: Languages & light on data
+
+### Release — Sprint 24.6
+- End-to-end tests (desktop and mobile):
+  - an owner picks their language;
+  - lite mode follows the choice for the phone;
+  - an expense recorded with no signal waits and is sent once when the signal returns.
+- Covered by feature tests instead: translations and reviews, customer messages and pages in the customer's language, Data Saver, and the "sent once" rule.
+
 ### Offline — Sprint 24.5 (keep working with a weak signal, catch up later)
 - **WURK opens without a signal:**
   - A service worker keeps the app's files on the phone and shows the last-seen pages, with a bar that says you're offline.
