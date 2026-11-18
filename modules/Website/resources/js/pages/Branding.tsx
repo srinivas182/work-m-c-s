@@ -1,16 +1,10 @@
 import '../site/fonts';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import { generatePalette } from '@/design-system/brand/palette';
 import AppShell from '@/layouts/AppShell';
 import { PhotoPicker } from '../editor/PhotoPicker';

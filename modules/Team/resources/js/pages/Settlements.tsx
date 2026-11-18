@@ -1,14 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { ArrowLeftRight } from 'lucide-react';
 import { __ } from '@/i18n';

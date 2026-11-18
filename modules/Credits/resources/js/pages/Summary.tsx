@@ -1,20 +1,8 @@
 import { Coins } from 'lucide-react';
-import {
-  Badge,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  StatCard,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, StatCard } from '@/design-system/components/feedback';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/design-system/components/table';
 import { __ } from '@/i18n';
 
 export interface CreditSummary {

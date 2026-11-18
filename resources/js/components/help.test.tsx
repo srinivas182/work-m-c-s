@@ -5,7 +5,7 @@ vi.mock('@inertiajs/react', () => ({
   usePage: () => ({ component: 'Payments::Settings', props: {} }),
 }));
 
-import { TooltipProvider } from '@/design-system';
+import { TooltipProvider } from '@/design-system/components/tooltip';
 import { HelpPanel } from './HelpPanel';
 import { HelpTip } from './HelpTip';
 

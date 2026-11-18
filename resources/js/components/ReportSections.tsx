@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/design-system';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
 import { rand } from '@/lib/money';
 
 // A report section card (Sprint 15.1, shared with Admin → Metrics in 15.4): figures with the change on the period

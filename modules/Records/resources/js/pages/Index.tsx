@@ -1,19 +1,12 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FileLock } from 'lucide-react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

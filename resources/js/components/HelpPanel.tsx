@@ -1,7 +1,10 @@
 import { usePage } from '@inertiajs/react';
 import { CircleHelp } from 'lucide-react';
 import { useState } from 'react';
-import { Button, Input, Sheet, SheetContent, Tooltip } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Input } from '@/design-system/components/input';
+import { Sheet, SheetContent } from '@/design-system/components/dialog';
+import { Tooltip } from '@/design-system/components/tooltip';
 import { __ } from '@/i18n';
 
 interface Article {

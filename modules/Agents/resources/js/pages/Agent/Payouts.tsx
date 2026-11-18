@@ -1,4 +1,5 @@
-import { Badge, EmptyState } from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { EmptyState } from '@/design-system/components/feedback';
 import { Wallet } from 'lucide-react';
 import { rand } from '@/lib/money';
 import { AgentLayout } from '../../components/AgentLayout';

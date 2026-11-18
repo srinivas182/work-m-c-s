@@ -26,60 +26,22 @@ import {
   contrast,
   isHex,
 } from '@/design-system/brand';
-import {
-  Avatar,
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogTrigger,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  EmptyState,
-  Field,
-  Input,
-  Label,
-  PageHeader,
-  RadioGroup,
-  RadioGroupItem,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  Skeleton,
-  StatCard,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Textarea,
-  toast,
-  Tooltip,
-  useTheme,
-} from '@/design-system';
+import { Avatar } from '@/design-system/components/avatar';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Checkbox, RadioGroup, RadioGroupItem, Switch } from '@/design-system/components/choice';
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogTrigger, Sheet, SheetContent, SheetTrigger } from '@/design-system/components/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/design-system/components/dropdown-menu';
+import { EmptyState, PageHeader, Skeleton, StatCard } from '@/design-system/components/feedback';
+import { Field, Label } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/design-system/components/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/design-system/components/tabs';
+import { toast } from '@/design-system/components/toast';
+import { Tooltip } from '@/design-system/components/tooltip';
+import { useTheme } from '@/design-system/theme/use-theme';
 import { DEFAULT_BRAND } from '@/design-system/tokens/defaults';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';

@@ -1,21 +1,11 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { ArrowDown, ArrowUp, CornerDownRight, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Input,
-  PageHeader,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

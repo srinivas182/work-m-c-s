@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/design-system';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
 import { rand } from '@/lib/money';
 import { AgentLayout } from '../../components/AgentLayout';
 import { __ } from '@/i18n';

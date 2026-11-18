@@ -1,16 +1,10 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { CreditOverview, type CreditSummary } from '../Summary';
 import { __ } from '@/i18n';

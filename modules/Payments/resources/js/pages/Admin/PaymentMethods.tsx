@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { PageHeader } from '@/design-system';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { type Method, MethodCard } from '../../components/MethodCard';
 import { __ } from '@/i18n';

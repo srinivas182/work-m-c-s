@@ -1,6 +1,9 @@
 import { Head, router } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
-import { Card, CardContent, EmptyState, Label, PageHeader, Switch } from '@/design-system';
+import { Card, CardContent } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Label } from '@/design-system/components/field';
+import { Switch } from '@/design-system/components/choice';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

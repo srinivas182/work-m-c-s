@@ -1,15 +1,10 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Field,
-  Input,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import { rand } from '@/lib/money';
 import { PortalLayout } from '../components/PortalLayout';
 import { __ } from '@/i18n';

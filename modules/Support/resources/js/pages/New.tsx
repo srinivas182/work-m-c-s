@@ -1,17 +1,10 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-  Textarea,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { forgetRecentError, recentError } from '@/lib/recent-error';
 import { __ } from '@/i18n';

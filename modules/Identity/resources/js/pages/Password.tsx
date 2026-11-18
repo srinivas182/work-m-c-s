@@ -1,7 +1,10 @@
 import { Link, useForm } from '@inertiajs/react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Button, Checkbox, Field, Input, Label } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Checkbox } from '@/design-system/components/choice';
+import { Field, Label } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AuthLayout from '@/layouts/AuthLayout';
 import { __ } from '@/i18n';
 

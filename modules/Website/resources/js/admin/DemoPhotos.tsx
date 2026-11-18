@@ -1,22 +1,12 @@
 import { router, useForm } from '@inertiajs/react';
 import { ExternalLink, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
 import { __ } from '@/i18n';
 
 export interface DemoPhotoSlot {

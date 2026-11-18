@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Lite mode — Sprint 24.4 (light on data)
+- **Lite mode switches on by itself** when the browser's Data Saver is on (`Save-Data`) or the connection is 2G/3G. A person can set it to Automatic, Always on or Off for their phone in Account & security, which also shows about how much data WURK used on that phone this month.
+- **What lite mode changes:**
+  - On the business's site: web fonts aren't preloaded and system fonts are used; the hero slideshow doesn't move by itself; pages `Vary` on Save-Data.
+  - In the back office: the page is marked lite, for the next steps to build on.
+- **Data budget, checked on every build** (`scripts/bundle-budget.mjs`, run by `pnpm build`):
+  - Each page's own code must stay within 60 KB compressed; the heaviest today is about 30 KB. The page editor, branding and the design showcase have their own larger limits.
+  - The first load must stay within 225 KB compressed. That is a ceiling that only comes down: it's 219 KB today, and the approved target is 170 KB.
+- **Lighter:** test files are no longer shipped in the app, and pages import design-system components directly.
+
 ### Languages — Sprint 24.3a (customer pages in the customer's language)
 - **On a business's own address, pages follow the customer's language.** It comes from `?lang=` (remembered), then the cookie, then the browser. The pages say which language they're in (`<html lang>`, `Content-Language`), and the customer's language is remembered with their contact for their messages.
 - **Translated so far:** the invoice page, the booking confirmations and manage pages, class and table pages, the shop order page, the mobile money and payment hand-off pages, and the enquiry thank-you page. The invoice page has language links.

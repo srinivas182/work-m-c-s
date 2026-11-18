@@ -1,4 +1,4 @@
-import { Badge } from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
 import { __ } from '@/i18n';
 
 export interface ThreadMessage {

@@ -1,26 +1,14 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  Field,
-  PageHeader,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/dialog';
+import { Field } from '@/design-system/components/field';
+import { PageHeader } from '@/design-system/components/feedback';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
+import { Textarea } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

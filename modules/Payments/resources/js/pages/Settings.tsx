@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
-import { Button, Field, Input, PageHeader } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { type Method, MethodCard } from '../components/MethodCard';
 import { __ } from '@/i18n';

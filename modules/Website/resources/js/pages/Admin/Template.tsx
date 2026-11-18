@@ -11,27 +11,14 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  Field,
-  Input,
-  PageHeader,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/dialog';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
 import AppShell from '@/layouts/AppShell';
 import { DemoPhotos, type DemoPhotoSlot } from '../../admin/DemoPhotos';
 import { __ } from '@/i18n';

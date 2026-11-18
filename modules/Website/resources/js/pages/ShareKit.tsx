@@ -1,7 +1,9 @@
 import { Head } from '@inertiajs/react';
 import { Copy, Download, Image as ImageIcon, Share2 } from 'lucide-react';
 import { useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/design-system';
+import { Button } from '@/design-system/components/button';
 import { __ } from '@/i18n';
 
 /**

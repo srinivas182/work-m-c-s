@@ -1,5 +1,8 @@
 import { useForm } from '@inertiajs/react';
-import { Button, Card, CardContent, Field, Input } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import { AgentLayout } from '../../components/AgentLayout';
 import { __ } from '@/i18n';
 

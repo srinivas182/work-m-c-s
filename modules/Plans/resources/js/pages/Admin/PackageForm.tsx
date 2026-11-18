@@ -1,30 +1,14 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Archive } from 'lucide-react';
 import type { FormEvent } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Field,
-  Input,
-  Label,
-  PageHeader,
-  RadioGroup,
-  RadioGroupItem,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Textarea,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Checkbox, RadioGroup, RadioGroupItem, Switch } from '@/design-system/components/choice';
+import { Field, Label } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
 import { rand, type PackageData } from './Packages';
 import { __ } from '@/i18n';

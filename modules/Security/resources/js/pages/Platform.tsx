@@ -1,19 +1,12 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Plus, X } from 'lucide-react';
 import type { FormEvent } from 'react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Field,
-  Input,
-  Label,
-  PageHeader,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { Field, Label } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

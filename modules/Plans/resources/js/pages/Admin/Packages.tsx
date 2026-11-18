@@ -1,16 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import { Check, Package as PackageIcon, Plus } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { rand as money } from '@/lib/money';
 import { __ } from '@/i18n';

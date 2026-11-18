@@ -29,17 +29,11 @@ import {
 } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { rand } from '@/lib/money';
-import {
-  Button,
-  Field,
-  Input,
-  OtpInput,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { OtpInput } from '@/design-system/components/otp-input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
 import { __ } from '@/i18n';
 
 interface Pkg {

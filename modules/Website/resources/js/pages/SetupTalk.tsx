@@ -1,17 +1,11 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { Check, Link2, Mic, Square } from 'lucide-react';
 import { useRef, useState } from 'react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-  Textarea,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

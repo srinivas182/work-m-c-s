@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
-import { Button, OtpInput } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { OtpInput } from '@/design-system/components/otp-input';
 import AuthLayout from '@/layouts/AuthLayout';
 import { __ } from '@/i18n';
 

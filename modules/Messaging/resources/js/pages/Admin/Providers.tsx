@@ -1,31 +1,15 @@
 import { Head, useForm } from '@inertiajs/react';
 import { CheckCircle2, CircleAlert, Send } from 'lucide-react';
 import type { FormEvent } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  Label,
-  PageHeader,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field, Label } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
+import { Switch } from '@/design-system/components/choice';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

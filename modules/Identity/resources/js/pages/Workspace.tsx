@@ -1,6 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
 import { Rocket } from 'lucide-react';
-import { Button, Card, CardContent, EmptyState, PageHeader } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

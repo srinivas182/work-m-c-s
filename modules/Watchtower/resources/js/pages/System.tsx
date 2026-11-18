@@ -1,13 +1,7 @@
 import { Head } from '@inertiajs/react';
-import {
-  Badge,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  PageHeader,
-  StatCard,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { PageHeader, StatCard } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { at } from './Incidents';
 import { __ } from '@/i18n';

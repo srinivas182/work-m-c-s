@@ -1,19 +1,11 @@
 import { useForm } from '@inertiajs/react';
 import { useId, useRef, useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Field,
-  Input,
-  RadioGroup,
-  RadioGroupItem,
-  Textarea,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Checkbox, RadioGroup, RadioGroupItem } from '@/design-system/components/choice';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
 import { firstError, request } from '../editor/http';
 import { __ } from '@/i18n';
 

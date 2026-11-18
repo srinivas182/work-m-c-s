@@ -1,6 +1,8 @@
 import { useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Button, Field, Input } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import { PortalLayout } from '../components/PortalLayout';
 import { __ } from '@/i18n';
 

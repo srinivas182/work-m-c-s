@@ -1,6 +1,7 @@
 import { Link, router } from '@inertiajs/react';
 import { Building2, ChevronRight, LogOut } from 'lucide-react';
-import { Button, EmptyState } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { EmptyState } from '@/design-system/components/feedback';
 import AuthLayout from '@/layouts/AuthLayout';
 import { __ } from '@/i18n';
 
