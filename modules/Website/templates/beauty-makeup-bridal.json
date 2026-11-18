@@ -1,0 +1,394 @@
+{
+  "category": "salon-beauty",
+  "key": "beauty-makeup-bridal",
+  "name": "Makeup & bridal beauty",
+  "position": 3,
+  "description": "Glamorous and personal: makeup for weddings, matric dances and shoots, on location.",
+  "definition": {
+    "branding": {
+      "primary": "#831843",
+      "secondary": "#D4A373",
+      "font_pairing": "elegant",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Packages",
+          "type": "page",
+          "page": "packages"
+        },
+        {
+          "label": "Book",
+          "type": "page",
+          "page": "book"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Makeup artist — bridal, matric dance and events",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my date",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "slideshow",
+                "heading": "Look like you, on your best day",
+                "text": "Bridal, matric dance and event makeup — flawless in photos, comfortable all day. We come to you.",
+                "primaryLabel": "Check my date",
+                "primaryHref": "/book",
+                "secondaryLabel": "Packages",
+                "secondaryHref": "/packages",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/beauty-makeup-bridal/look-1-1600.webp",
+                    "alt": "Bridal makeup, close up"
+                  },
+                  {
+                    "src": "/images/templates/beauty-makeup-bridal/look-2-1600.webp",
+                    "alt": "Soft glam for a matric dance"
+                  },
+                  {
+                    "src": "/images/templates/beauty-makeup-bridal/look-3-1600.webp",
+                    "alt": "Bridesmaids getting ready"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "looks",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Recent looks",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/beauty-makeup-bridal/look-1-1600.webp",
+                    "alt": "Bridal makeup, close up"
+                  },
+                  {
+                    "src": "/images/templates/beauty-makeup-bridal/look-2-1600.webp",
+                    "alt": "Soft glam for a matric dance"
+                  },
+                  {
+                    "src": "/images/templates/beauty-makeup-bridal/look-3-1600.webp",
+                    "alt": "Bridesmaids getting ready"
+                  },
+                  {
+                    "src": "/images/templates/beauty-makeup-bridal/hero-1600.webp",
+                    "alt": "A makeup artist doing a bride’s makeup"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Packages",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Bride",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Trial, wedding-day makeup and lashes",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Check my date",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Bridal party",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Bride plus bridesmaids and mothers",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Matric dance & events",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Soft or full glam, with lashes",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/book"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How booking works",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Check the date",
+                    "text": "Weekends book up months ahead."
+                  },
+                  {
+                    "title": "Trial",
+                    "text": "We perfect your look before the day."
+                  },
+                  {
+                    "title": "The day",
+                    "text": "We arrive early, with everything."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What brides say",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "packages",
+        "title": "Packages",
+        "slug": "packages",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my date",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Prices",
+                "intro": "",
+                "note": "Travel fee depends on the venue.",
+                "items": [
+                  {
+                    "name": "Bridal makeup",
+                    "description": "Including trial",
+                    "duration": "2 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Bridesmaid",
+                    "description": "Per person",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Matric dance",
+                    "description": "Soft or full glam",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Photoshoot",
+                    "description": "Studio or location",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Lashes",
+                    "description": "Strip or individual",
+                    "duration": "15 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "How far ahead should I book?",
+                    "answer": "For weddings, three to six months."
+                  },
+                  {
+                    "question": "Do you travel?",
+                    "answer": "Yes — to homes, venues and hotels."
+                  },
+                  {
+                    "question": "Is a deposit needed?",
+                    "answer": "Yes, to secure your date."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "book",
+        "title": "Book",
+        "slug": "book",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my date",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Check my date",
+                "intro": "Tell us about your day.",
+                "services": [
+                  {
+                    "name": "Wedding"
+                  },
+                  {
+                    "name": "Matric dance"
+                  },
+                  {
+                    "name": "Event"
+                  },
+                  {
+                    "name": "Photoshoot"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Check my date",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Date",
+                    "type": "date",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Number of people",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Venue / area",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact me",
+                "intro": "WhatsApp a photo of looks you love.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

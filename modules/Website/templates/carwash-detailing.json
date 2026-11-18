@@ -1,0 +1,408 @@
+{
+  "category": "car-wash",
+  "key": "carwash-detailing",
+  "name": "Detailing studio",
+  "position": 2,
+  "description": "Premium and precise: paint correction, ceramic coating and interior detailing.",
+  "definition": {
+    "branding": {
+      "primary": "#0F172A",
+      "secondary": "#E11D48",
+      "font_pairing": "technical",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Packages",
+          "type": "page",
+          "page": "packages"
+        },
+        {
+          "label": "Book",
+          "type": "page",
+          "page": "book"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Car detailing — paint correction, ceramic coating, interiors",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a detail",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Better than the day you bought it",
+                "text": "Paint correction, ceramic coating and interior detailing — by appointment, with care for every panel.",
+                "primaryLabel": "Book a detail",
+                "primaryHref": "/book",
+                "secondaryLabel": "Packages",
+                "secondaryHref": "/packages",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/carwash-detailing/hero-1600.webp",
+                    "alt": "A glossy car bonnet reflecting studio lights"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Before & after",
+                "intro": "Swirls, scratches and stains — gone.",
+                "layout": "slider",
+                "items": []
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Detailing packages",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Showroom wash",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Snow-foam wash, decontamination, sealant",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Paint correction",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "One- or two-stage machine polish",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Ceramic coating",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Long-lasting protection and gloss",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Interior detail",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Deep clean, leather care, odour removal",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/book"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "process",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Our process",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Inspection",
+                    "text": "We check the paint and agree what’s possible."
+                  },
+                  {
+                    "title": "Decontamination",
+                    "text": "Wash, clay and iron removal."
+                  },
+                  {
+                    "title": "Correction & protection",
+                    "text": "Polish, then coat or seal."
+                  },
+                  {
+                    "title": "Handover",
+                    "text": "A walk-around and care tips."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "In the studio",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/carwash-detailing/detail-1-1600.webp",
+                    "alt": "A machine polisher on car paint"
+                  },
+                  {
+                    "src": "/images/templates/carwash-detailing/detail-2-1600.webp",
+                    "alt": "A clean leather car interior"
+                  },
+                  {
+                    "src": "/images/templates/carwash-detailing/detail-3-1600.webp",
+                    "alt": "Water beading on a coated car"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "How long does a ceramic coating last?",
+                    "answer": "Depending on the product and care, from one to several years — we explain the options."
+                  },
+                  {
+                    "question": "How long do you need the car?",
+                    "answer": "From half a day for an interior detail to two or three days for correction and coating."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "packages",
+        "title": "Packages",
+        "slug": "packages",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a detail",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Packages",
+                "intro": "Prices depend on the size and condition of the car.",
+                "items": [
+                  {
+                    "name": "Showroom wash",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Wash, decontamination, sealant",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Paint correction",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Machine polish",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Ceramic coating",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Coating with aftercare",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Interior detail",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Deep clean and leather care",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/book"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "extras",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Extras",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Headlight restoration",
+                    "description": "Clear, bright lenses",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Engine bay detail",
+                    "description": "Clean and dress",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Wheel coating",
+                    "description": "Easier cleaning",
+                    "duration": "2 hrs",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "book",
+        "title": "Book",
+        "slug": "book",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a detail",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "book-online",
+              "type": "BookOnline",
+              "version": 1,
+              "props": {
+                "mode": "appointments",
+                "heading": "Book a detail",
+                "intro": "Choose a package and a drop-off time.",
+                "fallbackText": "Call or message us to book.",
+                "fallbackLabel": "Contact us",
+                "fallbackHref": "/contact"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the studio",
+                "intro": "Send photos of your car for advice.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the studio",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

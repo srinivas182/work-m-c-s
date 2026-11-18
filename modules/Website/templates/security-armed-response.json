@@ -1,0 +1,356 @@
+{
+  "category": "security",
+  "key": "security-armed-response",
+  "name": "Armed response",
+  "position": 1,
+  "description": "Strong and reassuring: response times, coverage, monitoring and sign-up.",
+  "definition": {
+    "branding": {
+      "primary": "#111827",
+      "secondary": "#DC2626",
+      "font_pairing": "bold",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Coverage",
+          "type": "page",
+          "page": "coverage"
+        },
+        {
+          "label": "Get a quote",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Armed response and alarm monitoring",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get protected",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "When the alarm goes, we’re on our way",
+                "text": "Armed response, 24-hour monitoring and patrols for homes and businesses.",
+                "primaryLabel": "Get protected",
+                "primaryHref": "/quote",
+                "secondaryLabel": "Areas we cover",
+                "secondaryHref": "/coverage",
+                "facts": [
+                  {
+                    "text": "24-hour control room"
+                  },
+                  {
+                    "text": "PSIRA registered"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/security-armed-response/hero-1600.webp",
+                    "alt": "An armed response vehicle on patrol at night"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "alarm",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "When your alarm goes off",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "We see it",
+                    "text": "The control room receives the signal instantly."
+                  },
+                  {
+                    "title": "We call you",
+                    "text": "To check if it’s a false alarm."
+                  },
+                  {
+                    "title": "We respond",
+                    "text": "An armed officer is dispatched to your property."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "services",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "shield",
+                    "title": "Armed response",
+                    "text": "Officers dispatched the moment your alarm triggers."
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Monitoring",
+                    "text": "Alarms, panic buttons and cameras watched 24/7."
+                  },
+                  {
+                    "icon": "pin",
+                    "title": "Patrols",
+                    "text": "Regular, visible patrols in your area."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "control",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Our control room",
+                "text": "Describe your control room, staff and backup power, so clients know who is watching.",
+                "image": "/images/templates/security-armed-response/control-1600.webp",
+                "imageAlt": "Operators in a control room",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registered and compliant",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "PSIRA",
+                    "logo": "",
+                    "detail": "Add your registration number"
+                  },
+                  {
+                    "name": "Insurance",
+                    "logo": "",
+                    "detail": "Public liability cover"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Sign up today",
+                "text": "Ask about installation and monthly fees.",
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "coverage",
+        "title": "Coverage",
+        "slug": "coverage",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get protected",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we cover",
+                "intro": "",
+                "areas": [],
+                "note": "Not covered yet? Ask us — we may be expanding.",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "plans",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Plans",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Home",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Monitoring and response",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  },
+                  {
+                    "name": "Business",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Monitoring, response and patrols",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Get a quote",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get protected",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Get a quote",
+                "intro": "Tell us about the property.",
+                "services": [
+                  {
+                    "name": "Home"
+                  },
+                  {
+                    "name": "Business"
+                  },
+                  {
+                    "name": "Estate or complex"
+                  },
+                  {
+                    "name": "Farm"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Get my quote",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Suburb / area",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Existing alarm?",
+                    "type": "yesno",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Emergencies: use your panic button or call the control room.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

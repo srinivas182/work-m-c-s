@@ -1,0 +1,443 @@
+{
+  "category": "hospitality",
+  "key": "hospitality-cafe-bakery",
+  "name": "Café & bakery",
+  "position": 3,
+  "description": "Cosy and appetising: menu, fresh bakes, cake orders and opening hours.",
+  "definition": {
+    "branding": {
+      "primary": "#78350F",
+      "secondary": "#DB2777",
+      "font_pairing": "friendly",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Menu",
+          "type": "page",
+          "page": "menu"
+        },
+        {
+          "label": "Cakes",
+          "type": "page",
+          "page": "cakes"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Café and bakery — breakfast, coffee and cakes",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order a cake",
+                "buttonHref": "/cakes",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Fresh bakes, good coffee, every morning",
+                "text": "Breakfast, light lunches, coffee and cakes baked here daily.",
+                "primaryLabel": "See the menu",
+                "primaryHref": "/menu",
+                "secondaryLabel": "Order a cake",
+                "secondaryHref": "/cakes",
+                "facts": [
+                  {
+                    "text": "Open from 07:00"
+                  },
+                  {
+                    "text": "Free Wi-Fi"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/hospitality-cafe-bakery/hero-1600.webp",
+                    "alt": "Coffee and pastries on a café table"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "menu",
+              "type": "FoodMenu",
+              "version": 1,
+              "props": {
+                "heading": "Favourites",
+                "intro": "",
+                "note": "",
+                "sections": [
+                  {
+                    "name": "Breakfast",
+                    "dishes": [
+                      {
+                        "name": "Full breakfast",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Vetkoek & mince",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Granola bowl",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Bakery",
+                    "dishes": [
+                      {
+                        "name": "Croissants",
+                        "description": "Baked every morning",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Scones",
+                        "description": "With jam and cream",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Carrot cake",
+                        "description": "Per slice",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cakes",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Cakes for every celebration",
+                "text": "Birthdays, weddings and baby showers — order three days ahead.",
+                "image": "/images/templates/hospitality-cafe-bakery/cakes-1600.webp",
+                "imageAlt": "A celebration cake",
+                "imageSide": "right",
+                "buttonLabel": "Order a cake",
+                "buttonHref": "/cakes"
+              }
+            },
+            {
+              "id": "inside",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "The café",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/hospitality-cafe-bakery/inside-1600.webp",
+                    "alt": "Inside the café"
+                  },
+                  {
+                    "src": "/images/templates/hospitality-cafe-bakery/hero-1600.webp",
+                    "alt": "Coffee and pastries on a café table"
+                  },
+                  {
+                    "src": "/images/templates/hospitality-cafe-bakery/cakes-1600.webp",
+                    "alt": "A celebration cake"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Open every day; kitchen closes 30 minutes before."
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find us",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "menu",
+        "title": "Menu",
+        "slug": "menu",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order a cake",
+                "buttonHref": "/cakes",
+                "sticky": true
+              }
+            },
+            {
+              "id": "menu",
+              "type": "FoodMenu",
+              "version": 1,
+              "props": {
+                "heading": "Menu",
+                "intro": "",
+                "note": "Ask us about allergies.",
+                "sections": [
+                  {
+                    "name": "Breakfast",
+                    "dishes": [
+                      {
+                        "name": "Full breakfast",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Vetkoek & mince",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Granola bowl",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Lunch",
+                    "dishes": [
+                      {
+                        "name": "Chicken wrap",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Toasted sandwiches",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Soup of the day",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Coffee & drinks",
+                    "dishes": [
+                      {
+                        "name": "Cappuccino",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Rooibos latte",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Fresh juice",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Bakery",
+                    "dishes": [
+                      {
+                        "name": "Croissants",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Scones",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Cake of the day",
+                        "description": "Per slice",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "cakes",
+        "title": "Cakes",
+        "slug": "cakes",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order a cake",
+                "buttonHref": "/cakes",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Order a cake",
+                "intro": "Tell us about the celebration.",
+                "services": [
+                  {
+                    "name": "Birthday"
+                  },
+                  {
+                    "name": "Wedding"
+                  },
+                  {
+                    "name": "Baby shower"
+                  },
+                  {
+                    "name": "Cupcakes"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Order",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Date needed",
+                    "type": "date",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Number of people",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Photo of a cake you like",
+                    "type": "file",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Call or WhatsApp the café.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -27,9 +27,9 @@ final readonly class EloquentSiteTemplates implements SiteTemplates
         return false;
     }
 
-    public function apply(string $templateKey): void
+    public function apply(string $templateKey, ?string $style = null): void
     {
-        $this->builder->apply($templateKey);
+        $this->builder->apply($templateKey, $style);
     }
 
     public function publishAll(string $note): void

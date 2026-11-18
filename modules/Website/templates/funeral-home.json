@@ -1,0 +1,417 @@
+{
+  "category": "funeral-services",
+  "key": "funeral-home",
+  "name": "Funeral home",
+  "position": 1,
+  "description": "Calm and dignified: a 24-hour line, what to do first, services and plans.",
+  "definition": {
+    "branding": {
+      "primary": "#1F2937",
+      "secondary": "#A16207",
+      "font_pairing": "elegant",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "What to do first",
+          "type": "page",
+          "page": "first-steps"
+        },
+        {
+          "label": "Funeral plans",
+          "type": "page",
+          "page": "plans"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Funeral home — 24-hour service, arrangements and funeral plans",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Call us, day or night",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "promo",
+              "type": "PromotionBanner",
+              "version": 1,
+              "props": {
+                "text": "We answer 24 hours a day, every day",
+                "linkLabel": "Contact us",
+                "linkHref": "/contact",
+                "tone": "dark",
+                "starts": "",
+                "ends": ""
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "With care, dignity and respect",
+                "text": "We look after your loved one and your family — from the first call to the graveside.",
+                "primaryLabel": "Call us, day or night",
+                "primaryHref": "/contact",
+                "secondaryLabel": "What to do first",
+                "secondaryHref": "/first-steps",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/funeral-home/hero-1600.webp",
+                    "alt": "White lilies in soft light"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "first",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "When someone has died",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Call us",
+                    "text": "Any time, day or night. We come to the home or hospital."
+                  },
+                  {
+                    "title": "Paperwork",
+                    "text": "We help with the death certificate and Home Affairs."
+                  },
+                  {
+                    "title": "Plan the service",
+                    "text": "Church, home or graveside — your traditions, your way."
+                  },
+                  {
+                    "title": "The day",
+                    "text": "Transport, tent, chairs and catering if you need them."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "How we help",
+                "intro": "We explain every cost before you decide.",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Funeral arrangements",
+                    "description": "Collection, care and preparation",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Repatriation",
+                    "description": "Bringing loved ones home, across provinces and borders",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Cremation",
+                    "description": "With a memorial service if you wish",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Tent, chairs and catering",
+                    "description": "For the service and gathering",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "chapel",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Our chapel",
+                "text": "Describe your chapel, mortuary facilities and fleet, so families know their loved one is cared for.",
+                "image": "/images/templates/funeral-home/chapel-1600.webp",
+                "imageAlt": "The chapel set for a service",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "plans",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Plan ahead",
+                "text": "A funeral plan protects your family from unexpected costs.",
+                "buttonLabel": "See funeral plans",
+                "buttonHref": "/plans"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "first-steps",
+        "title": "What to do first",
+        "slug": "first-steps",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Call us, day or night",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "first",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "What to do first",
+                "text": "Write a calm, simple guide: who to call, documents needed (ID, death notification), and how you help with each step."
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions families ask",
+                "items": [
+                  {
+                    "question": "How quickly can you collect?",
+                    "answer": "Usually within a few hours; tell families your response times."
+                  },
+                  {
+                    "question": "What documents are needed?",
+                    "answer": "The deceased’s ID, the informant’s ID and the medical death notification (DHA-1663)."
+                  },
+                  {
+                    "question": "Can you arrange repatriation?",
+                    "answer": "Yes — between provinces and to neighbouring countries."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "plans",
+        "title": "Funeral plans",
+        "slug": "plans",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Call us, day or night",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "plans",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Funeral plans",
+                "intro": "Tell people who underwrites your plans and the waiting periods.",
+                "items": [
+                  {
+                    "name": "Single",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Cover for one person",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/contact"
+                  },
+                  {
+                    "name": "Family",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "You, your spouse and children",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/contact"
+                  },
+                  {
+                    "name": "Extended family",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Parents and extended family",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/contact"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Regulated",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "FSP number",
+                    "logo": "",
+                    "detail": "Add your licence or your underwriter’s"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Call us, day or night",
+                "buttonHref": "/contact",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us — 24 hours",
+                "intro": "Call or WhatsApp us any time.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Visit our offices",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Our phone line is answered 24 hours a day."
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

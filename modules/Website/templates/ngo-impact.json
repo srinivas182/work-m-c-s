@@ -1,0 +1,428 @@
+{
+  "category": "church-ngo",
+  "key": "ngo-impact",
+  "name": "Charity & NGO",
+  "position": 2,
+  "description": "Clear and credible: programmes, impact stories, partners, volunteering and donations.",
+  "definition": {
+    "branding": {
+      "primary": "#0F766E",
+      "secondary": "#F97316",
+      "font_pairing": "modern",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Our work",
+          "type": "page",
+          "page": "work"
+        },
+        {
+          "label": "Donate",
+          "type": "page",
+          "page": "donate"
+        },
+        {
+          "label": "Volunteer",
+          "type": "page",
+          "page": "volunteer"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Charity and NGO — programmes, impact and donations",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Donate",
+                "buttonHref": "/donate",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Change that lasts, one family at a time",
+                "text": "Tell people in one sentence who you help, where, and how.",
+                "primaryLabel": "Donate",
+                "primaryHref": "/donate",
+                "secondaryLabel": "Our work",
+                "secondaryHref": "/work",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/ngo-impact/hero-1600.webp",
+                    "alt": "Volunteers working with children in the community"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "programmes",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Our programmes",
+                "intro": "Replace these with your own programmes.",
+                "items": [
+                  {
+                    "icon": "heart",
+                    "title": "Feeding",
+                    "text": "Meals for children after school."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Education",
+                    "text": "Homework clubs and bursaries."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Skills",
+                    "text": "Training that leads to work."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "programme",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Where your money goes",
+                "text": "Explain simply what a donation pays for, and how you report on it.",
+                "image": "/images/templates/ngo-impact/programme-1600.webp",
+                "imageAlt": "A community food garden",
+                "imageSide": "right",
+                "buttonLabel": "Donate",
+                "buttonHref": "/donate"
+              }
+            },
+            {
+              "id": "give",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Ways to give",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Once-off",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Any amount, any time",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Donate",
+                    "buttonHref": "/donate"
+                  },
+                  {
+                    "name": "Monthly",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Regular giving lets us plan ahead",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Give monthly",
+                    "buttonHref": "/donate"
+                  },
+                  {
+                    "name": "Corporate",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "CSI and employee giving",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Talk to us",
+                    "buttonHref": "/donate"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "partners",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Our partners and funders",
+                "items": []
+              }
+            },
+            {
+              "id": "volunteer",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Volunteer with us",
+                "text": "Tell people how they can give their time and skills.",
+                "image": "/images/templates/ngo-impact/volunteers-1600.webp",
+                "imageAlt": "A group of volunteers",
+                "imageSide": "left",
+                "buttonLabel": "Volunteer",
+                "buttonHref": "/volunteer"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "work",
+        "title": "Our work",
+        "slug": "work",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Donate",
+                "buttonHref": "/donate",
+                "sticky": true
+              }
+            },
+            {
+              "id": "mission",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Our mission",
+                "text": "Your mission, where you work, and who you serve."
+              }
+            },
+            {
+              "id": "stories",
+              "type": "Portfolio",
+              "version": 1,
+              "props": {
+                "heading": "Stories",
+                "intro": "Real stories, shared with permission.",
+                "projects": []
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registered and accountable",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "NPO number",
+                    "logo": "",
+                    "detail": "Add your NPO registration"
+                  },
+                  {
+                    "name": "PBO / Section 18A",
+                    "logo": "",
+                    "detail": "If donations are tax-deductible"
+                  },
+                  {
+                    "name": "Annual report",
+                    "logo": "",
+                    "detail": "Link to your latest report"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Our team and board",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "donate",
+        "title": "Donate",
+        "slug": "donate",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Donate",
+                "buttonHref": "/donate",
+                "sticky": true
+              }
+            },
+            {
+              "id": "donate",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Donate",
+                "text": "Add your banking details or online giving link, and say whether you issue Section 18A tax certificates."
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "interest",
+                "heading": "Corporate and monthly giving",
+                "intro": "Leave your details and we’ll be in touch.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Send",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Organisation (if any)",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "How would you like to give?",
+                    "type": "choice",
+                    "choices": "Monthly, Once-off, Corporate / CSI",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "volunteer",
+        "title": "Volunteer",
+        "slug": "volunteer",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Donate",
+                "buttonHref": "/donate",
+                "sticky": true
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "interest",
+                "heading": "Volunteer with us",
+                "intro": "Tell us how you’d like to help.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Sign me up",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "How would you like to help?",
+                    "type": "choice",
+                    "choices": "Weekends, Weekdays, Skills (e.g. accounting, IT), Events",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Area",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Partnerships, media and general questions.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

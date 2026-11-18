@@ -29,6 +29,8 @@ interface Props {
     publish: string;
     versions: string;
     photos: string;
+    /** Owners only (the staff template editor has none). */
+    videos?: string;
     aiImage?: string;
     aiQuote?: string;
   };
@@ -223,6 +225,7 @@ export default function Editor({
     const base = buildConfig({
       site: { businessName, editing: true, logo: branding.logo, menus },
       photosUrl: urls.photos,
+      videosUrl: urls.videos,
       ai:
         urls.aiImage && urls.aiQuote
           ? {
@@ -253,7 +256,16 @@ export default function Editor({
         ),
       },
     };
-  }, [businessName, branding, menus, urls.photos, urls.aiImage, urls.aiQuote, urls.pages]);
+  }, [
+    businessName,
+    branding,
+    menus,
+    urls.photos,
+    urls.videos,
+    urls.aiImage,
+    urls.aiQuote,
+    urls.pages,
+  ]);
 
   const initialData = useMemo(() => toPuck(content), [content]);
   // Puck doesn't record the page as loaded in its history, so the first edit after

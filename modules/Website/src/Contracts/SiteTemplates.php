@@ -12,8 +12,8 @@ interface SiteTemplates
 
     public function offers(string $categoryKey, string $templateKey): bool;
 
-    /** Builds the current business's site from the template (run inside its tenant context). */
-    public function apply(string $templateKey): void;
+    /** Builds the current business's site from the template (run inside its tenant context), in one of its styles (20.1). */
+    public function apply(string $templateKey, ?string $style = null): void;
 
     /** Publishes every page of the current business's site at once (an agent's demo — Sprint 14.8). */
     public function publishAll(string $note): void;

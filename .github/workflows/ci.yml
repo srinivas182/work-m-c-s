@@ -208,11 +208,11 @@ jobs:
         run: vendor/bin/pest --parallel --compact
 
   backend-clamav:
-    name: Backend · malware scanner (real ClamAV)
+    name: Backend · real tools (ClamAV, ffmpeg)
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     services:
       clamav:
         image: clamav/clamav:1.4
@@ -237,6 +237,10 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+      # Website videos are re-encoded with ffmpeg (Sprint 20.2); the production image installs it too.
+      # Installed while ClamAV loads; a slow package mirror once took 9 minutes, hence the job's 15-minute limit.
+      - name: Install ffmpeg
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends -o Acquire::Retries=3 ffmpeg
       # ClamAV loads its virus list before answering (usually 1–3 minutes).
       - name: Wait for ClamAV
         run: |
@@ -245,15 +249,16 @@ jobs:
             sleep 5
           done
           echo "::error::ClamAV didn't start in 5 minutes"; exit 1
-      - name: Scan the antivirus test file and an ordinary file
+      - name: Scan the antivirus test file, and re-encode real videos
         env:
           CLAMAV_LIVE: '1'
           CLAMAV_HOST: 127.0.0.1
-        # --fail-on-skipped: if the test ever skips here, the job fails — so a pass means a real scan.
-        run: vendor/bin/pest --group=clamav --fail-on-skipped --compact
+          FFMPEG_LIVE: '1'
+        # --fail-on-skipped: if a test ever skips here, the job fails — so a pass means a real scan and a real encode.
+        run: vendor/bin/pest --group=clamav --group=video --fail-on-skipped --compact
 
   backend-tests-mysql:
-    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 7)
+    name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 8)
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
@@ -262,7 +267,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        part: [1, 2, 3, 4, 5, 6, 7]
+        part: [1, 2, 3, 4, 5, 6, 7, 8]
     timeout-minutes: 12 # each part runs ~4-6 min; GitHub's slower machines add ~3-4 min, which cancelled four good runs at 10 (WURK, 9 Nov 2026)
     services:
       mysql:
@@ -329,19 +334,19 @@ jobs:
         run: pnpm build
 
   e2e:
-    name: E2E · ${{ matrix.part == 'performance' && 'performance gate' || startsWith(matrix.part, 'screens') && format('every screen ({0})', matrix.part) || format('smoke & accessibility ({0})', matrix.part) }}
+    name: E2E · ${{ startsWith(matrix.part, 'performance') && format('performance gate ({0})', matrix.part) || startsWith(matrix.part, 'screens') && format('every screen ({0})', matrix.part) || format('smoke & accessibility ({0})', matrix.part) }}
     needs: [changes, backend-quick, frontend-quick]
     if: >-
       always() && !cancelled() && !contains(needs.*.result, 'failure')
       && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true')
       && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    # The browser suite in two halves; the accessibility crawl of every screen (18.5a) in three; the 24-template
-    # performance gate on its own.
+    # The browser suite in three parts (78 templates' public pages: one half reached 11 minutes); the accessibility crawl of every screen (18.5a) and every template in seven
+    # (78 templates from Sprint 20: with five, one part reached 11 minutes at 66 templates); the performance gate in two.
     strategy:
       fail-fast: false
       matrix:
-        part: ['1/2', '2/2', 'screens 1/3', 'screens 2/3', 'screens 3/3', 'performance']
+        part: ['1/3', '2/3', '3/3', 'screens 1/7', 'screens 2/7', 'screens 3/7', 'screens 4/7', 'screens 5/7', 'screens 6/7', 'screens 7/7', 'performance 1/2', 'performance 2/2']
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
@@ -380,31 +385,33 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit != 'true'
         timeout-minutes: 4
         run: pnpm exec playwright install chromium
-      - name: Playwright (half ${{ matrix.part }})
-        if: matrix.part == '1/2' || matrix.part == '2/2'
+      - name: Playwright (part ${{ matrix.part }})
+        if: matrix.part == '1/3' || matrix.part == '2/3' || matrix.part == '3/3'
         env:
           APP_ENV: e2e
         run: pnpm test:e2e --shard=${{ matrix.part }} --grep-invert=@screens
       # Everything tagged @screens: the crawl of every screen, every template in its own and six other colours
-      # (18.5b), and every template at phone width (19.4a). The halves above leave these out.
+      # (18.5b), and every template at phone width (19.4a). The parts above leave these out.
       - name: Accessibility crawl — every screen, both themes, desktop and mobile; every template (${{ matrix.part }})
         if: startsWith(matrix.part, 'screens')
         env:
           APP_ENV: e2e
-        run: pnpm test:e2e --grep=@screens --shard=${{ matrix.part == 'screens 1/3' && '1/3' || matrix.part == 'screens 2/3' && '2/3' || '3/3' }}
-      # Every template's public home page: mobile Lighthouse ≥ 90 and layout shift < 0.1 (Sprint 5 gate).
-      - name: Performance gate (mobile Lighthouse on all 24 templates)
-        if: matrix.part == 'performance'
+          PART: ${{ matrix.part }}
+        run: pnpm test:e2e --grep=@screens --shard="${PART#screens }"
+      # Every template's public home page: mobile Lighthouse ≥ 90 and layout shift < 0.1 (Sprint 5 gate), half each.
+      - name: Performance gate (mobile Lighthouse on every template)
+        if: startsWith(matrix.part, 'performance')
         env:
           APP_ENV: e2e
+          PART: ${{ matrix.part }}
         run: |
           php artisan website:demo-sites --no-interaction
           php artisan serve --host=127.0.0.1 --port=8124 > /dev/null 2>&1 &
           for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:8124/ && break; sleep 1; done
-          CHROME_PATH="$(node -e "console.log(require('@playwright/test').chromium.executablePath())")" node scripts/performance-gate.mjs --port=8124
+          CHROME_PATH="$(node -e "console.log(require('@playwright/test').chromium.executablePath())")" node scripts/performance-gate.mjs --port=8124 --shard="${PART#performance }"
       # Sprint 18.3b: the load-test journeys still work (k6 smoke: a few visitors for 30 s; timings are judged on staging).
       - name: Load-test scripts (k6 smoke)
-        if: matrix.part == 'performance'
+        if: matrix.part == 'performance 1/2'
         timeout-minutes: 3
         env:
           APP_ENV: e2e
@@ -416,14 +423,14 @@ jobs:
       # Sprint 18.1b: OWASP ZAP's passive baseline against the running back office (same server as the gate).
       # Rules in .zap/rules.tsv: missing security headers or cookie flags fail; anything else is reported.
       - name: OWASP ZAP baseline (passive scan)
-        if: matrix.part == 'performance'
+        if: matrix.part == 'performance 2/2'
         timeout-minutes: 5
         run: |
           chmod 777 .zap
           docker run --rm --network host -v "$PWD/.zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py -t http://127.0.0.1:8124/sign-in -c rules.tsv -m 1 -I -r zap-report.html -J zap-report.json
       - name: Upload ZAP report
-        if: always() && matrix.part == 'performance'
+        if: always() && matrix.part == 'performance 2/2'
         uses: actions/upload-artifact@v7
         with:
           name: zap-baseline

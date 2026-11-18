@@ -1,0 +1,325 @@
+{
+  "category": "tailoring-fashion",
+  "key": "fashion-label",
+  "name": "Fashion label",
+  "position": 2,
+  "description": "Editorial and bold: a designer’s collections, lookbook and online shop.",
+  "definition": {
+    "branding": {
+      "primary": "#18181B",
+      "secondary": "#E11D48",
+      "font_pairing": "editorial",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Lookbook",
+          "type": "page",
+          "page": "lookbook"
+        },
+        {
+          "label": "Shop",
+          "type": "page",
+          "page": "shop"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Fashion label — contemporary African design",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop the collection",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "slideshow",
+                "heading": "The new collection",
+                "text": "Contemporary African design, made in small runs. Tell people what this season is about.",
+                "primaryLabel": "Shop the collection",
+                "primaryHref": "/shop",
+                "secondaryLabel": "Lookbook",
+                "secondaryHref": "/lookbook",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/fashion-label/hero-1600.webp",
+                    "alt": "A model wearing the new collection"
+                  },
+                  {
+                    "src": "/images/templates/fashion-label/look-1-1600.webp",
+                    "alt": "Lookbook image, look one"
+                  },
+                  {
+                    "src": "/images/templates/fashion-label/look-2-1600.webp",
+                    "alt": "Lookbook image, look two"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "Shop the collection",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-6"
+              }
+            },
+            {
+              "id": "designer",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "The designer",
+                "text": "Introduce yourself: your training, your influences and how each piece is made.",
+                "image": "/images/templates/fashion-label/studio-1600.webp",
+                "imageAlt": "The designer at work in the studio",
+                "imageSide": "right",
+                "buttonLabel": "Our story",
+                "buttonHref": "/lookbook"
+              }
+            },
+            {
+              "id": "video",
+              "type": "Video",
+              "version": 1,
+              "props": {
+                "heading": "Behind the collection",
+                "text": "A short film from the shoot or the studio.",
+                "video": {
+                  "src": "",
+                  "poster": ""
+                },
+                "description": "Behind the scenes of the collection shoot"
+              }
+            },
+            {
+              "id": "press",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "As seen in",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "lookbook",
+        "title": "Lookbook",
+        "slug": "lookbook",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop the collection",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "lookbook",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Lookbook",
+                "intro": "Photographed for this season’s collection.",
+                "images": [
+                  {
+                    "src": "/images/templates/fashion-label/hero-1600.webp",
+                    "alt": "A model wearing the new collection"
+                  },
+                  {
+                    "src": "/images/templates/fashion-label/look-1-1600.webp",
+                    "alt": "Lookbook image, look one"
+                  },
+                  {
+                    "src": "/images/templates/fashion-label/look-2-1600.webp",
+                    "alt": "Lookbook image, look two"
+                  },
+                  {
+                    "src": "/images/templates/fashion-label/look-3-1600.webp",
+                    "alt": "Lookbook image, look three"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "shop",
+        "title": "Shop",
+        "slug": "shop",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop the collection",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Shop",
+                "text": "Pieces from the current collection, made in small runs."
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "The collection",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-12"
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Orders",
+                "items": [
+                  {
+                    "question": "How long does delivery take?",
+                    "answer": "Say how long delivery takes."
+                  },
+                  {
+                    "question": "Can I exchange a size?",
+                    "answer": "Explain your exchange policy."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop the collection",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the studio",
+                "intro": "Stockists, press and custom orders.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

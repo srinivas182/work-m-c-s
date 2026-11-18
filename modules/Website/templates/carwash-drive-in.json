@@ -1,0 +1,372 @@
+{
+  "category": "car-wash",
+  "key": "carwash-drive-in",
+  "name": "Drive-in car wash",
+  "position": 1,
+  "description": "Fast and friendly: a wash list on the board and a queue that moves.",
+  "definition": {
+    "branding": {
+      "primary": "#1D4ED8",
+      "secondary": "#FACC15",
+      "font_pairing": "bold",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Prices",
+          "type": "page",
+          "page": "prices"
+        },
+        {
+          "label": "Find us",
+          "type": "page",
+          "page": "find-us"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Car wash — hand wash, vacuum and valet",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Prices",
+                "buttonHref": "/prices",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Clean car, quick",
+                "text": "Hand wash, vacuum and valet while you wait — or drop it off and come back to a shine.",
+                "primaryLabel": "See prices",
+                "primaryHref": "/prices",
+                "secondaryLabel": "Find us",
+                "secondaryHref": "/find-us",
+                "facts": [
+                  {
+                    "text": "No booking needed"
+                  },
+                  {
+                    "text": "Wi-Fi and coffee while you wait"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/carwash-drive-in/hero-1600.webp",
+                    "alt": "A car covered in foam at the wash bay"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Wash list",
+                "intro": "Taxis, bakkies and trucks: ask for our prices.",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Wash & go",
+                    "description": "Outside wash and dry",
+                    "duration": "15 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Wash & vac",
+                    "description": "Outside, vacuum, dashboard wipe",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Full valet",
+                    "description": "Inside and out, tyre shine, windows",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Engine wash",
+                    "description": "Degrease and rinse",
+                    "duration": "20 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Mats & boot",
+                    "description": "Mats washed, boot vacuumed",
+                    "duration": "10 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "club",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Wash club",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Monthly wash club",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Four wash & vacs a month, skip the queue",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Join at the bay",
+                    "buttonHref": "/find-us"
+                  },
+                  {
+                    "name": "Fleet",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Company cars and taxis on account",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/find-us"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "team",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "A team that takes pride",
+                "text": "Tell people about your washers, how you train them and how you pay them fairly.",
+                "image": "/images/templates/carwash-drive-in/bay-1600.webp",
+                "imageAlt": "Washers drying a car with cloths",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Open every day, including most public holidays."
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What customers say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Pop in today",
+                "text": "No appointment needed.",
+                "buttonLabel": "Find us",
+                "buttonHref": "/find-us"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "prices",
+        "title": "Prices",
+        "slug": "prices",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Prices",
+                "buttonHref": "/prices",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Prices",
+                "intro": "",
+                "note": "Prices on the board at the wash bay.",
+                "items": [
+                  {
+                    "name": "Wash & go",
+                    "description": "Sedan / SUV / bakkie",
+                    "duration": "15 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Wash & vac",
+                    "description": "Sedan / SUV / bakkie",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Full valet",
+                    "description": "Inside and out",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Engine wash",
+                    "description": "",
+                    "duration": "20 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Polish",
+                    "description": "Hand polish and buff",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Taxi wash",
+                    "description": "15-seater",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "find-us",
+        "title": "Find us",
+        "slug": "find-us",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Prices",
+                "buttonHref": "/prices",
+                "sticky": true
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find us",
+                "address": "",
+                "landmark": "Tell people what you’re next to — a garage, a mall or a taxi rank.",
+                "showMap": true
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Please confirm public holiday hours with us."
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Questions about fleets or taxis? Call us.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

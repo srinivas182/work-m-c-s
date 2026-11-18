@@ -1,0 +1,388 @@
+{
+  "category": "funeral-services",
+  "key": "funeral-cover-society",
+  "name": "Funeral cover & burial society",
+  "position": 2,
+  "description": "Clear and trustworthy: plans, how to join, how claims work.",
+  "definition": {
+    "branding": {
+      "primary": "#1E3A8A",
+      "secondary": "#059669",
+      "font_pairing": "clean",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Plans",
+          "type": "page",
+          "page": "plans"
+        },
+        {
+          "label": "Join",
+          "type": "page",
+          "page": "join"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Funeral cover and burial society — plans and claims",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Join",
+                "buttonHref": "/join",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Peace of mind for your family",
+                "text": "Affordable funeral cover with fast claims — so your family can say goodbye without money worries.",
+                "primaryLabel": "Join",
+                "primaryHref": "/join",
+                "secondaryLabel": "Plans",
+                "secondaryHref": "/plans",
+                "facts": [
+                  {
+                    "text": "Claims paid in 48 hours"
+                  },
+                  {
+                    "text": "Family cover from one premium"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/funeral-cover-society/hero-1600.webp",
+                    "alt": "A family together at home"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How it works",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Choose a plan",
+                    "text": "Single, family or extended."
+                  },
+                  {
+                    "title": "Join",
+                    "text": "Sign up with your ID; pay monthly."
+                  },
+                  {
+                    "title": "Claim",
+                    "text": "One call; we pay quickly so the funeral can go ahead."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "plans",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Plans",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Single",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Cover for you",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Join",
+                    "buttonHref": "/join"
+                  },
+                  {
+                    "name": "Family",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "You, your spouse and children",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Join",
+                    "buttonHref": "/join"
+                  },
+                  {
+                    "name": "Extended",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Add parents and extended family",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Join",
+                    "buttonHref": "/join"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why families choose us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "clock",
+                    "title": "Fast claims",
+                    "text": "Paid within two working days of the documents."
+                  },
+                  {
+                    "icon": "shield",
+                    "title": "Regulated",
+                    "text": "Underwritten by a licensed insurer."
+                  },
+                  {
+                    "icon": "heart",
+                    "title": "Extra help",
+                    "text": "Tent, chairs and grocery benefits on some plans."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Is there a waiting period?",
+                    "answer": "State your waiting periods for natural and accidental death."
+                  },
+                  {
+                    "question": "Which documents are needed to claim?",
+                    "answer": "Death certificate, ID of the deceased and the claimant, and bank details."
+                  },
+                  {
+                    "question": "What if I miss a payment?",
+                    "answer": "Explain your grace period."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "plans",
+        "title": "Plans",
+        "slug": "plans",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Join",
+                "buttonHref": "/join",
+                "sticky": true
+              }
+            },
+            {
+              "id": "plans",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Plans and benefits",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Single",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Cover for one person",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Join",
+                    "buttonHref": "/join"
+                  },
+                  {
+                    "name": "Family",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Spouse and children",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Join",
+                    "buttonHref": "/join"
+                  },
+                  {
+                    "name": "Extended",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Parents and extended family",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Join",
+                    "buttonHref": "/join"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Regulated and registered",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "FSP number",
+                    "logo": "",
+                    "detail": "Add your licence"
+                  },
+                  {
+                    "name": "Underwriter",
+                    "logo": "",
+                    "detail": "Name the insurer"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "terms",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Important",
+                "text": "Waiting periods, age limits and exclusions — written plainly. Link to your full policy terms."
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "join",
+        "title": "Join",
+        "slug": "join",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Join",
+                "buttonHref": "/join",
+                "sticky": true
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "interest",
+                "heading": "Join or get a call back",
+                "intro": "Leave your details and an agent will call you.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Call me back",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Plan",
+                    "type": "choice",
+                    "choices": "Single, Family, Extended",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Best time to call",
+                    "type": "choice",
+                    "choices": "Morning, Afternoon, Evening",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Claims line and branch details.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

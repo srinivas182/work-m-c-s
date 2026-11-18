@@ -1,0 +1,424 @@
+{
+  "category": "real-estate",
+  "key": "property-development",
+  "name": "New development",
+  "position": 2,
+  "description": "Aspirational and clear: one development, its units, the steps to buy and registration of interest.",
+  "definition": {
+    "branding": {
+      "primary": "#1E3A8A",
+      "secondary": "#10B981",
+      "font_pairing": "modern",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Units",
+          "type": "page",
+          "page": "units"
+        },
+        {
+          "label": "Register interest",
+          "type": "page",
+          "page": "register"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "New development — apartments for first-time buyers",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Register interest",
+                "buttonHref": "/register",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Your first home, brand new",
+                "text": "Modern one- and two-bedroom homes, close to schools, transport and shops. Transfer duty included on selected units.",
+                "primaryLabel": "Register interest",
+                "primaryHref": "/register",
+                "secondaryLabel": "See the units",
+                "secondaryHref": "/units",
+                "facts": [
+                  {
+                    "text": "Phase 1 launching soon"
+                  },
+                  {
+                    "text": "From first-time-buyer prices"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/property-development/hero-1600.webp",
+                    "alt": "An artist’s impression of the new development"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why buy here",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "shield",
+                    "title": "Secure",
+                    "text": "Controlled access and 24-hour security."
+                  },
+                  {
+                    "icon": "pin",
+                    "title": "Connected",
+                    "text": "Near taxi routes, schools and a mall."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "New",
+                    "text": "Energy-saving geysers and prepaid meters."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "units",
+              "type": "Listings",
+              "version": 1,
+              "props": {
+                "heading": "Unit types",
+                "intro": "",
+                "buttonLabel": "",
+                "buttonHref": "",
+                "listings": [
+                  {
+                    "title": "One-bedroom apartment",
+                    "photo": "/images/templates/property-development/unit-1-1600.webp",
+                    "photoAlt": "A one-bedroom show unit",
+                    "deal": "sale",
+                    "price": 0,
+                    "area": "",
+                    "beds": "1",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "45",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  },
+                  {
+                    "title": "Two-bedroom apartment",
+                    "photo": "/images/templates/property-development/unit-2-1600.webp",
+                    "photoAlt": "A two-bedroom show unit",
+                    "deal": "sale",
+                    "price": 0,
+                    "area": "",
+                    "beds": "2",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "62",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "buy",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How to buy",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Register interest",
+                    "text": "We send prices and plans."
+                  },
+                  {
+                    "title": "Get pre-approved",
+                    "text": "We help with bond applications."
+                  },
+                  {
+                    "title": "Sign and reserve",
+                    "text": "Pay a reservation deposit."
+                  },
+                  {
+                    "title": "Move in",
+                    "text": "Transfer and keys on completion."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "video",
+              "type": "Video",
+              "version": 1,
+              "props": {
+                "heading": "Take a tour",
+                "text": "Walk through the show unit.",
+                "video": {
+                  "src": "",
+                  "poster": ""
+                },
+                "description": "A video tour of the show unit"
+              }
+            },
+            {
+              "id": "progress",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Building progress",
+                "text": "Share construction updates and the expected completion date.",
+                "image": "/images/templates/property-development/site-1600.webp",
+                "imageAlt": "Construction on site",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Do I pay transfer duty?",
+                    "answer": "Say which units include transfer costs."
+                  },
+                  {
+                    "question": "Can I buy with a housing subsidy?",
+                    "answer": "Explain FLISP or other support if it applies."
+                  },
+                  {
+                    "question": "Are levies included?",
+                    "answer": "State the estimated monthly levies."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "units",
+        "title": "Units",
+        "slug": "units",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Register interest",
+                "buttonHref": "/register",
+                "sticky": true
+              }
+            },
+            {
+              "id": "units",
+              "type": "Listings",
+              "version": 1,
+              "props": {
+                "heading": "Unit types and prices",
+                "intro": "Prices on request; plans sent when you register.",
+                "buttonLabel": "",
+                "buttonHref": "",
+                "listings": [
+                  {
+                    "title": "One-bedroom apartment",
+                    "photo": "/images/templates/property-development/unit-1-1600.webp",
+                    "photoAlt": "A one-bedroom show unit",
+                    "deal": "sale",
+                    "price": 0,
+                    "area": "",
+                    "beds": "1",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "45",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  },
+                  {
+                    "title": "Two-bedroom apartment",
+                    "photo": "/images/templates/property-development/unit-2-1600.webp",
+                    "photoAlt": "A two-bedroom show unit",
+                    "deal": "sale",
+                    "price": 0,
+                    "area": "",
+                    "beds": "2",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "62",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Show unit",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/property-development/unit-1-1600.webp",
+                    "alt": "A one-bedroom show unit"
+                  },
+                  {
+                    "src": "/images/templates/property-development/unit-2-1600.webp",
+                    "alt": "A two-bedroom show unit"
+                  },
+                  {
+                    "src": "/images/templates/property-development/site-1600.webp",
+                    "alt": "Construction on site"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "register",
+        "title": "Register interest",
+        "slug": "register",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Register interest",
+                "buttonHref": "/register",
+                "sticky": true
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "interest",
+                "heading": "Register your interest",
+                "intro": "Be first to hear about prices and launch dates.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Register",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Unit type",
+                    "type": "choice",
+                    "choices": "One-bedroom, Two-bedroom",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Pre-approved for a bond?",
+                    "type": "yesno",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Sales office",
+                "intro": "Visit the show unit on weekends.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the development",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -148,7 +148,7 @@ export const RoomsRates: BlockDefinition<RoomsRatesProps> = {
           {p.buttonLabel && (
             <a
               href={site.editing ? undefined : p.buttonHref}
-              className="inline-flex min-h-12 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-6 font-semibold text-[var(--s-on-brand)]"
+              className="s-btn inline-flex min-h-12 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-6 font-semibold text-[var(--s-on-brand)]"
             >
               {p.buttonLabel}
             </a>

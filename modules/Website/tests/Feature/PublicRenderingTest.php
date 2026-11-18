@@ -17,7 +17,7 @@ uses(InteractsWithShards::class);
 
 beforeEach(function () {
     Storage::fake('local');
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     $this->createShards(1);
     $this->glow = $this->createTenant('glow-salon', name: 'Glow Salon');
     $this->ctx = app(TenantContext::class);
@@ -100,7 +100,7 @@ it('re-renders pages with dated content (a promotion with an end date) each nigh
 it('serves the right status for every situation, always with the security headers', function () {
     Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Glow live</h1>', 'fonts' => []]))]);
     $csp = fn ($r) => $r->assertHeader('X-Content-Type-Options', 'nosniff')->assertHeader('X-Frame-Options', 'DENY')
-        ->assertHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'");
+        ->assertHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self'; frame-src https://www.google.com; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'");
 
     // Not published yet: coming soon, kept out of search engines.
     $csp($this->get($this->site)->assertOk()->assertSee('Coming soon')->assertHeader('X-Robots-Tag', 'noindex'));

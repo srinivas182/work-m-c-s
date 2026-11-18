@@ -3,7 +3,8 @@ import { expect, test } from './fixtures';
 import { accessibilityProblems } from './support';
 
 /*
- * Sprint 18.5b — all 24 website templates, every page, pass WCAG 2.2 AA (contrast included) in their own colours;
+ * Sprint 18.5b — all 24 website templates, every page, pass WCAG 2.2 AA (contrast included) in their own colours and
+ * (20.1) in each of their three styles;
  * and their home pages in a spread of colours a business might choose: the palette engine guarantees readable
  * pairings for any colour (palette.test.ts), this checks the templates actually use them. Desktop; part of the
  * accessibility crawl in CI.
@@ -28,8 +29,8 @@ const templates = readdirSync('modules/Website/templates')
       },
   );
 
-test('all 24 templates are checked @screens', () => {
-  expect(templates.length).toBe(24);
+test('every template is checked, at least three for each category @screens', () => {
+  expect(templates.length).toBeGreaterThanOrEqual(78); // 26 categories × 3 designs (Sprints 6–7, 20.4, 20.5)
 });
 
 for (const [i, template] of templates.entries()) {
@@ -40,9 +41,9 @@ for (const [i, template] of templates.entries()) {
       testInfo.project.name !== 'desktop',
       'Colours don’t depend on the screen size; desktop only.',
     );
-    test.setTimeout(120_000);
+    test.setTimeout(240_000);
     // Previews are limited to 120 a minute per visitor; each template counts as its own visitor (the e2e environment's
-    // load-test token, as in load/k6), so 24 templates checked in parallel aren't throttled.
+    // load-test token, as in load/k6), so templates checked in parallel aren't throttled.
     await page.setExtraHTTPHeaders({
       'X-Wurk-Load-Test': 'e2e-visitors',
       'X-Wurk-Load-Visitor': `10.18.5.${i + 1}`,
@@ -50,6 +51,13 @@ for (const [i, template] of templates.entries()) {
     const base = `/templates/${template.key}/preview`;
     const visits = [
       ...template.definition.pages.map((p) => ({ label: p.key, url: `${base}?page=${p.key}` })),
+      // Sprint 20.1: every page in the other two styles too (Luxury's deep bands, Bold's colour washes).
+      ...(['luxury', 'bold'] as const).flatMap((style) =>
+        template.definition.pages.map((p) => ({
+          label: `${p.key} in ${style}`,
+          url: `${base}?page=${p.key}&style=${style}`,
+        })),
+      ),
       ...COLOURS.map((c) => ({
         label: `home in ${c.primary}${c.secondary ? `/${c.secondary}` : ''}`,
         url: `${base}?${new URLSearchParams(c).toString()}`,

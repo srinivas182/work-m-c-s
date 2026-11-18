@@ -130,7 +130,7 @@ export const ProductDetail: BlockDefinition<Record<string, never>> = {
                 {/* Without JavaScript: */}
                 <a
                   href="/contact"
-                  className="inline-flex min-h-12 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-7 font-semibold text-[var(--s-on-brand)]"
+                  className="s-btn inline-flex min-h-12 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-7 font-semibold text-[var(--s-on-brand)]"
                 >
                   Ask about this product
                 </a>
@@ -138,7 +138,7 @@ export const ProductDetail: BlockDefinition<Record<string, never>> = {
             ) : (
               <a
                 href={site.editing ? undefined : '/contact'}
-                className="inline-flex min-h-12 items-center justify-self-start rounded-[var(--s-radius)] bg-[var(--s-brand)] px-7 font-semibold text-[var(--s-on-brand)]"
+                className="s-btn inline-flex min-h-12 items-center justify-self-start rounded-[var(--s-radius)] bg-[var(--s-brand)] px-7 font-semibold text-[var(--s-on-brand)]"
               >
                 Ask about this product
               </a>

@@ -7,11 +7,13 @@ namespace Wurk\Website\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\Templates;
 
 /**
  * Public preview of a published template (signup's "Preview" link). Drafts are never shown. `?primary=#rrggbb` and
- * `?secondary=#rrggbb` show it in other colours (Sprint 18.5b: every template is checked for contrast in many colours).
+ * `?secondary=#rrggbb` show it in other colours (Sprint 18.5b: every template is checked for contrast in many colours);
+ * `?style=luxury|minimal|bold` in another of its three styles (20.1).
  */
 final class TemplatePreviewController
 {
@@ -33,10 +35,18 @@ final class TemplatePreviewController
             'page' => ['key' => $page['key'], 'title' => $page['title']],
             'pages' => $pages->map(fn ($p) => ['key' => $p['key'], 'title' => $p['title']])->values()->all(),
             'content' => $page['content'],
-            'branding' => [...(array) $definition['branding'], ...$this->colours($request), 'logo' => null, 'favicon' => null],
+            'branding' => [...(array) $definition['branding'], ...$this->style($request), ...$this->colours($request), 'logo' => null, 'favicon' => null],
             'menus' => ['header' => $menu($definition['menus']['header'] ?? []), 'footer' => $menu($definition['menus']['footer'] ?? [])],
             'previewBase' => $base,
         ]);
+    }
+
+    /** @return array<string, string> the style and the fonts and corners it brings */
+    private function style(Request $request): array
+    {
+        $style = $request->query('style');
+
+        return is_string($style) && isset(Branding::STYLE_PRESETS[$style]) ? ['style' => $style, ...Branding::STYLE_PRESETS[$style]] : [];
     }
 
     /** @return array{primary?: string, secondary?: string} */

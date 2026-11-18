@@ -1,0 +1,356 @@
+{
+  "category": "events-creative",
+  "key": "events-dj-sound",
+  "name": "DJ, sound & entertainment",
+  "position": 3,
+  "description": "High-energy: a DJ or sound-hire business with mixes, packages and date checks.",
+  "definition": {
+    "branding": {
+      "primary": "#0F172A",
+      "secondary": "#A3E635",
+      "font_pairing": "technical",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Packages",
+          "type": "page",
+          "page": "packages"
+        },
+        {
+          "label": "Book",
+          "type": "page",
+          "page": "book"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "DJ, sound and lighting hire for events",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my date",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Your event. Your sound.",
+                "text": "DJs, sound and lights for weddings, parties, corporate events and festivals.",
+                "primaryLabel": "Check my date",
+                "primaryHref": "/book",
+                "secondaryLabel": "Packages",
+                "secondaryHref": "/packages",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/events-dj-sound/hero-1600.webp",
+                    "alt": "A DJ performing at an event"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "video",
+              "type": "Video",
+              "version": 1,
+              "props": {
+                "heading": "Watch a set",
+                "text": "A minute from a recent event.",
+                "video": {
+                  "src": "",
+                  "poster": ""
+                },
+                "description": "Highlights from a recent event"
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Packages",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Party",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "DJ, sound and basic lights — 5 hours",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Check my date",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Wedding",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Ceremony sound, MC mic, DJ and dance floor lights",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Check my date",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Corporate",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "PA, mics and background music",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/book"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sound",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Sound and light hire",
+                "text": "List your equipment for hire: speakers, mics, lights, staging.",
+                "image": "/images/templates/events-dj-sound/sound-1600.webp",
+                "imageAlt": "Speakers and lights set up for an event",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "venues",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Venues we’ve played",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "packages",
+        "title": "Packages",
+        "slug": "packages",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my date",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hire",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Equipment hire",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Speaker pair",
+                    "description": "With stands",
+                    "duration": "Per day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Wireless mics",
+                    "description": "Each",
+                    "duration": "Per day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Dance-floor lights",
+                    "description": "Set",
+                    "duration": "Per day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Generator",
+                    "description": "For outdoor events",
+                    "duration": "Per day",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Do you bring a generator?",
+                    "answer": "Ask us for outdoor events."
+                  },
+                  {
+                    "question": "Can we choose the music?",
+                    "answer": "Yes — send a must-play and a do-not-play list."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "book",
+        "title": "Book",
+        "slug": "book",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Check my date",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Check my date",
+                "intro": "Tell us about your event.",
+                "services": [
+                  {
+                    "name": "Wedding"
+                  },
+                  {
+                    "name": "Party"
+                  },
+                  {
+                    "name": "Corporate"
+                  },
+                  {
+                    "name": "Festival"
+                  },
+                  {
+                    "name": "Equipment hire"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Check my date",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Date",
+                    "type": "date",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Venue / area",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Number of guests",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Bookings and hire.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

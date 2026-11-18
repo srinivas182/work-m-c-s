@@ -1,0 +1,380 @@
+{
+  "category": "car-mechanics",
+  "key": "mechanics-tyres-fitment",
+  "name": "Tyres & fitment centre",
+  "position": 3,
+  "description": "Fast and clear: tyres, alignment, batteries and exhausts while you wait.",
+  "definition": {
+    "branding": {
+      "primary": "#111827",
+      "secondary": "#EAB308",
+      "font_pairing": "bold",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "Tyre quote",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Tyres, alignment and batteries — fitment centre",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a tyre quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Tyres fitted while you wait",
+                "text": "New tyres, wheel alignment, balancing, batteries and exhausts — fast, honest and priced up front.",
+                "primaryLabel": "Get a tyre quote",
+                "primaryHref": "/quote",
+                "secondaryLabel": "Services",
+                "secondaryHref": "/services",
+                "facts": [
+                  {
+                    "text": "No appointment needed"
+                  },
+                  {
+                    "text": "All major brands"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/mechanics-tyres-fitment/hero-1600.webp",
+                    "alt": "A technician fitting a tyre"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Tyres",
+                    "description": "Supply and fit, all sizes",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Wheel alignment",
+                    "description": "Computerised",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Balancing",
+                    "description": "Per wheel",
+                    "duration": "10 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Batteries",
+                    "description": "Free battery test",
+                    "duration": "15 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Exhausts",
+                    "description": "Repairs and replacements",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Puncture repair",
+                    "description": "",
+                    "duration": "15 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "alignment",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Alignment that saves your tyres",
+                "text": "Explain how alignment and balancing make tyres last longer.",
+                "image": "/images/templates/mechanics-tyres-fitment/alignment-1600.webp",
+                "imageAlt": "A car on an alignment machine",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "brands",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Tyre brands we fit",
+                "items": []
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Please confirm public holiday hours with us."
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the centre",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a tyre quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Prices",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Tyres",
+                    "description": "Ask for your size",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Alignment",
+                    "description": "",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Balancing",
+                    "description": "Per wheel",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Battery",
+                    "description": "Supply and fit",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Exhaust",
+                    "description": "Quote on inspection",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Do I need to book?",
+                    "answer": "No — drive in."
+                  },
+                  {
+                    "question": "Do you sell second-hand tyres?",
+                    "answer": "Say whether you do."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Tyre quote",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a tyre quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Get a tyre quote",
+                "intro": "Tell us your tyre size (it’s on the side of the tyre).",
+                "services": [
+                  {
+                    "name": "Tyres"
+                  },
+                  {
+                    "name": "Alignment"
+                  },
+                  {
+                    "name": "Battery"
+                  },
+                  {
+                    "name": "Exhaust"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Get my quote",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Tyre size (e.g. 195/65 R15)",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "How many?",
+                    "type": "choice",
+                    "choices": "1, 2, 3, 4",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Fleet and taxi accounts: ask us.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

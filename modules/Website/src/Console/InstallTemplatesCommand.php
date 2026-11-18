@@ -18,7 +18,8 @@ use Wurk\Website\Support\Templates;
  */
 final class InstallTemplatesCommand extends Command
 {
-    protected $signature = 'website:install-templates';
+    // --only=key (repeatable): install just those designs — tests use it; deploys install everything.
+    protected $signature = 'website:install-templates {--only=* : Install only these template keys}';
 
     protected $description = 'Install or update WURK’s website templates from the repository';
 
@@ -28,6 +29,9 @@ final class InstallTemplatesCommand extends Command
         $created = $updated = 0;
         foreach (glob(base_path('modules/Website/templates/*.json')) ?: [] as $file) {
             $source = (array) json_decode((string) file_get_contents($file), true, flags: JSON_THROW_ON_ERROR);
+            if ($this->option('only') !== [] && ! in_array($source['key'], (array) $this->option('only'), true)) {
+                continue;
+            }
             $definition = (array) $source['definition'];
             $definition['pages'] = [...(array) $definition['pages'], ...LegalPages::pages()];
             $definition = TemplateDefinition::validate($definition);

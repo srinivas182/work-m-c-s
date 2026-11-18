@@ -1,0 +1,332 @@
+{
+  "category": "beauty-supplies",
+  "key": "beauty-salon-wholesale",
+  "name": "Salon wholesale",
+  "position": 3,
+  "description": "Trade-first: products and equipment for salons, barbers and nail techs, with trade accounts.",
+  "definition": {
+    "branding": {
+      "primary": "#0F172A",
+      "secondary": "#EC4899",
+      "font_pairing": "clean",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Ranges",
+          "type": "page",
+          "page": "ranges"
+        },
+        {
+          "label": "Trade account",
+          "type": "page",
+          "page": "trade"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Salon wholesale — hair, nail and barber supplies",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Open a trade account",
+                "buttonHref": "/trade",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Everything your salon runs on",
+                "text": "Professional hair, nail and barber products and equipment — trade prices, delivered to your salon.",
+                "primaryLabel": "Open a trade account",
+                "primaryHref": "/trade",
+                "secondaryLabel": "Ranges",
+                "secondaryHref": "/ranges",
+                "facts": [
+                  {
+                    "text": "Trade prices for salons"
+                  },
+                  {
+                    "text": "Delivery nationwide"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/beauty-salon-wholesale/hero-1600.webp",
+                    "alt": "Salon products in bulk on shelves"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "ranges",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Ranges",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Hair care & colour",
+                    "description": "Professional sizes",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Braiding hair & extensions",
+                    "description": "By the box",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Nails",
+                    "description": "Gels, acrylics, tools",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Barber",
+                    "description": "Clippers, blades, aftershave",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Equipment",
+                    "description": "Chairs, dryers, basins",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Hygiene",
+                    "description": "Capes, towels, disinfectant",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "Trade specials",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-6"
+              }
+            },
+            {
+              "id": "equipment",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Setting up a salon?",
+                "text": "We help new salons choose equipment and stock for their first month — ask for a starter quote.",
+                "image": "/images/templates/beauty-salon-wholesale/equipment-1600.webp",
+                "imageAlt": "A salon chair and hood dryer",
+                "imageSide": "left",
+                "buttonLabel": "Ask for a quote",
+                "buttonHref": "/trade"
+              }
+            },
+            {
+              "id": "brands",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Brands we distribute",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "ranges",
+        "title": "Ranges",
+        "slug": "ranges",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Open a trade account",
+                "buttonHref": "/trade",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Ranges",
+                "text": "Trade prices for registered salons, barbers and nail techs."
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "All products",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-12"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "trade",
+        "title": "Trade account",
+        "slug": "trade",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Open a trade account",
+                "buttonHref": "/trade",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Open a trade account",
+                "intro": "For salons, barbers and nail techs.",
+                "services": [
+                  {
+                    "name": "Hair salon"
+                  },
+                  {
+                    "name": "Barbershop"
+                  },
+                  {
+                    "name": "Nail bar"
+                  },
+                  {
+                    "name": "Training academy"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Apply",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Business name",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Registration or ID number",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "What do you buy most?",
+                    "type": "long",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact sales",
+                "intro": "Call or WhatsApp our sales team.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

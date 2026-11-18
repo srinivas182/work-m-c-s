@@ -4,6 +4,90 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.21.0] — 2026-11-18 — Sprint 20: Premium templates
+
+### Premium templates — Sprint 20.6 (quality bar and release)
+- **A written quality bar** for every design (`docs/templates/quality-bar.md`). It covers structure, the first screen, typography, photography, copy, mobile, motion, speed, accessibility and launch in under an hour, and says which checks are automatic and which are reviewed.
+- **78 designs in 26 categories, each in three styles (234 looks).** Each one passes WCAG 2.2 AA in its own and six other colours, fits a phone, and scores 97–100 on mobile Lighthouse.
+- **Steadier pages on Android:** while a site's fonts load, text uses a phone font sized to match (Roboto, Noto Serif, Liberation), so nothing jumps when the real font arrives.
+
+### Premium templates — Sprint 20.5 (a third design for every category)
+- The first twelve categories each get a third design:
+  - **Salon & beauty:** makeup and bridal beauty.
+  - **Health:** physiotherapy and allied health.
+  - **Spa & wellness:** massage and mobile spa.
+  - **Retail:** gifts and homeware.
+  - **Fitness:** yoga, pilates and dance studio.
+  - **Professional services:** consultant and coach.
+  - **Car mechanics:** tyres and fitment centre.
+  - **Hospitality:** café and bakery.
+  - **Trades & home:** builder and renovations.
+  - **Education:** driving school.
+  - **Events & creative:** DJ, sound and entertainment.
+  - **Transport & logistics:** freight and trucking.
+- **78 designs in 26 categories**, each in three styles (234 looks).
+
+### Premium templates — Sprint 20.4d (real estate, legal & accounting)
+- **New section: Property listings.** Homes for sale or to rent, with price (or "price on request"), rent per month, area, bedrooms, bathrooms, parking and size. Each listing can be marked under offer, sold or let, and links to a viewing form or a portal.
+- **Real estate:** estate agency (featured homes, selling steps, free valuation, PPRA), new development (unit types, how to buy, show-unit tour, register interest), rentals and property management (rentals, landlord packages, applications, deposits in trust).
+- **Legal & accounting:** law firm (six practice areas, how we work, a "not legal advice" note, LPC), accounting and tax practice (monthly packages, once-off services, SARS), business registration and compliance (CIPC, B-BBEE, CSD, tender-ready bundle).
+- All 14 new categories now have three designs each: 42 new designs in all.
+
+### Premium templates — Sprint 20.4c (four more categories)
+- **Church & NGO:** community church (service times, "New here?", ministries, giving), charity and NGO (programmes, ways to give, registration, volunteering), ministry and outreach (events, film, weekly programme).
+- **School:** primary school (admissions, fees, application steps), high school and college (facilities, subject streams, extra lessons, open days), skills academy (accredited courses, intakes, employers).
+- **Funeral services:** funeral home (24-hour line, what to do first, plans), funeral cover and burial society (plans, claims, call-back), tombstones and memorials (designs, process, quotes). The tone is calm, and the photos are flowers, candles or the chapel, never grieving people.
+- **Security:** armed response (what happens when the alarm goes, coverage, PSIRA), guarding (sectors, risk assessment, compliance), alarms, CCTV and fencing (installations, projects, free site quote).
+- "How it works" with four steps now shows them in one row on wide screens.
+
+### Premium templates — Sprint 20.4b (four more categories)
+- **Spaza & grocery:** corner shop (airtime, electricity, WhatsApp orders), fresh produce market (weekly boxes), wholesale and bulk (delivery areas, trade accounts).
+- **Beauty supplies:** beauty supply store, skin care brand (story, ingredients, routine), salon wholesale (trade accounts, equipment).
+- **Tailoring & fashion:** made-to-measure tailor (fittings, group orders), fashion label (lookbook, collection shop, film), alterations and repairs.
+- **Agriculture:** family farm (produce, farm-gate orders), agri supplies and feed (advice, quotes), co-operative (how it works, partners, buyers).
+- Shop pages use the online shop's product sections, with an introduction so the page reads well before products are added.
+
+### Premium templates — Sprint 20.4a (four new categories)
+- **Barbershop, Cleaning, Car wash and Catering**, each with three designs that differ in layout, not only colour:
+  - **Barbershop:** classic shop, street-style studio, mobile barber.
+  - **Cleaning:** home cleaning, office and commercial, carpet and pressure washing.
+  - **Car wash:** drive-in wash, detailing studio, mobile wash.
+  - **Catering:** event catering, office lunches, home kitchen and meal prep.
+- Each design comes with real copy for that kind of business and the sections it needs: booking, quote forms with the right questions, menus, packages, before and after, service areas, and directions.
+- No invented reviews or prices: owners add their own.
+- Photo places show crisp placeholders until HQ adds real demo photos (Admin → Templates → Demo photos).
+- **Fixed:** the hero slideshow's photos can be scrolled with the keyboard.
+
+### Premium templates — Sprint 20.3 (demo photos)
+- **Demo photos for every design.** HQ fills each photo place (hero, gallery, team…) with a sharp, licensed photo: paste a link from Nappy, Pexels or Unsplash, or upload one. WURK records the photographer, licence and source, and keeps WURK AI images to decorative places. New sites, previews and demo sites get the photos straight away.
+- **Owners see what to replace.** Demo photos carry a **Demo** badge in the editor, and the launch checklist says **Replace demo photos (N left)**. Choosing a photo also offers the design's other demo photos, to use until the owner has their own.
+- **For HQ:** Admin → Templates → a design → **Demo photos**, and `php artisan website:import-template-photos` for a list (see docs/templates/demo-photos.md).
+
+### Premium templates — Sprint 20.2b (video)
+- **Video hero:** a new "Full video" first screen. A short, muted clip loops behind the heading, with a **Pause the video** button. Visitors who've asked for less motion, have Save-Data on or are on a slow connection see the still picture instead, and download none of the video. With no video yet, the hero uses its first photo.
+- **Video section:** a short clip of the business's work or premises. It plays, with sound and controls, only when a visitor taps it; until then only the still loads. Without JavaScript the picture links to the video.
+- **Videos in the media library:** MP4, MOV or WebM, up to 20 MB. WURK keeps the first 30 seconds, makes it at most 1280 wide in a light format every phone plays, removes the phone's hidden details (such as where it was filmed), and takes a still from it. Videos are listed in **Website → Media** with where each is used; deleting one removes the file too.
+- **Fixed:** the emergency switch for the admin IP allow-list (`WURK_ADMIN_IP_ALLOWLIST=false`) was ignored, because a second "security" settings block hid it.
+- **Deploying:** the production image now includes ffmpeg (see docs/deployment/docker.md, v0.21.0).
+
+### Premium templates — Sprint 20.2a (new sections and motion)
+- **Four new sections:**
+  - **Numbers:** years open, customers served, a rating.
+  - **How it works:** numbered steps from first contact to done.
+  - **Logos:** brands you stock, clients, medical aids, press.
+  - **Map and directions:** address, a "how to find us" landmark, and buttons for Google Maps, Waze and Apple Maps. Optionally a map that loads only when the visitor taps "Show the map", so the page spends no data on it and no map provider learns of the visit until then.
+- **Motion:** sections rise gently into place as they scroll into view, and a full-photo hero settles with a slow zoom. It's off in the editor and for visitors who've asked for less motion, and nothing ever fades, so text stays readable.
+
+### Premium templates — Sprint 20.1 (three styles for every design)
+- **Every design now comes in three styles: Luxury, Modern minimal and Bold.** A style sets the type, spacing, headings, buttons, corners and the look of alternate sections:
+  - **Luxury:** refined serif type and generous space; alternate sections become deep, quiet bands.
+  - **Modern minimal:** clean type, white space and fine lines.
+  - **Bold:** big type, round corners and washes of the brand colour.
+- **Owners choose the style when they sign up** (preview opens in that style). They can change it any time in **Website → Branding → Style**; their words and photos stay as they are.
+- **Readable in every colour.** Text in Luxury's deep bands uses the dark side of the same colour engine, so it stays readable whatever colour the owner picks (checked for eight brand colours). Every template page passes WCAG 2.2 AA in Luxury and Bold, and fits a phone in Bold (the largest type).
+- **Sites keep a steady rhythm.** Alternate bands and section spacing now come from the page and the style, not from each section, so sections never sit in two grey bands in a row. Existing sites keep their look (Modern minimal).
+- The template preview takes `?style=luxury|minimal|bold`.
+
 ## [0.20.0] — 2026-11-18 — Sprint 19: AI receptionist
 
 ### AI receptionist — Sprint 19.7 (quality and release)

@@ -18,3 +18,128 @@
 .wurk-site :is(h3, h4, h5, h6) {
   font-weight: 600;
 }
+
+/*
+ * Styles (Sprint 20.1): one design, three looks. The variables come from theme.ts; these rules sit outside Tailwind's
+ * layers, so they shape every section without each block knowing about styles.
+ *
+ * The page sets the rhythm: every section except first screens, banners and call-to-action cards is an "s-band", and
+ * every other one of those is a band, whose look the style decides. The editor's canvas wraps each section in its own
+ * element, so the same count is taken there with :has().
+ */
+.wurk-site .s-band > section {
+  padding-block: var(--s-section-y, clamp(4rem, 8vw, 6rem));
+}
+
+.wurk-site
+  :is(
+    .s-band:nth-child(even of .s-band),
+    [data-puck-component]:nth-child(even of :has(> .s-band)) > .s-band
+  ) {
+  background: var(--s-surface);
+}
+
+.wurk-site :is(h1, h2) {
+  font-weight: var(--s-heading-weight, 700);
+  letter-spacing: var(--s-heading-tracking, -0.01em);
+}
+
+.wurk-site h2 {
+  font-size: calc(clamp(1.875rem, 1.4rem + 1.6vw, 2.5rem) * var(--s-heading-scale, 1));
+  line-height: 1.12;
+}
+
+.wurk-site .s-btn {
+  text-transform: var(--s-btn-case, none);
+  letter-spacing: var(--s-btn-tracking, 0);
+  font-size: var(--s-btn-size, 1rem);
+}
+
+/* Luxury: bands are deep and quiet, with every colour inside them taken from the dark palette. */
+.wurk-site[data-style='luxury']
+  :is(
+    .s-band:nth-child(even of .s-band),
+    [data-puck-component]:nth-child(even of :has(> .s-band)) > .s-band
+  ) {
+  --s-bg: var(--s-inv-bg);
+  --s-surface: var(--s-inv-surface);
+  --s-surface-2: var(--s-inv-surface-2);
+  --s-border: var(--s-inv-border);
+  --s-fg: var(--s-inv-fg);
+  --s-fg-muted: var(--s-inv-fg-muted);
+  --s-brand: var(--s-inv-brand);
+  --s-on-brand: var(--s-inv-on-brand);
+  --s-brand-text: var(--s-inv-brand-text);
+  --s-brand-soft: var(--s-inv-brand-soft);
+  --s-brand-softer: var(--s-inv-brand-softer);
+  --s-accent: var(--s-inv-accent);
+  --s-on-accent: var(--s-inv-on-accent);
+  background: var(--s-inv-bg);
+  color: var(--s-inv-fg);
+}
+
+.wurk-site[data-style='luxury'] .s-btn {
+  font-weight: 600;
+}
+
+/* Modern minimal: white space and fine lines; bands are the quietest grey. */
+.wurk-site[data-style='minimal']
+  :is(
+    .s-band:nth-child(even of .s-band),
+    [data-puck-component]:nth-child(even of :has(> .s-band)) > .s-band
+  ) {
+  border-block: 1px solid var(--s-border);
+}
+
+/* Bold: bands are a wash of the brand colour. */
+.wurk-site[data-style='bold']
+  :is(
+    .s-band:nth-child(even of .s-band),
+    [data-puck-component]:nth-child(even of :has(> .s-band)) > .s-band
+  ) {
+  --s-bg: var(--s-brand-softer);
+  --s-surface: var(--s-brand-soft);
+  background: var(--s-brand-softer);
+}
+
+.wurk-site[data-style='bold'] .s-btn {
+  font-weight: 800;
+  padding-inline: 1.75rem;
+}
+
+/*
+ * Motion (Sprint 20.2): sections rise gently into place as they scroll into view, and a full-photo hero settles with a
+ * slow zoom. Only on live pages and previews (not while editing), never under "reduce motion", and only where the
+ * browser can tie it to scrolling (elsewhere, everything is simply still). Nothing fades, so text is never faint.
+ */
+@keyframes s-rise {
+  from {
+    transform: translateY(28px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes s-kenburns {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .wurk-site[data-motion] .s-band > section > div {
+      animation: s-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+
+  .wurk-site[data-motion] .s-kenburns {
+    animation: s-kenburns 16s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  }
+}

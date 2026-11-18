@@ -16,7 +16,7 @@ final readonly class SiteBuilder
 {
     public function __construct(private TenantContext $context, private Templates $templates, private AuditLog $audit) {}
 
-    public function apply(string $templateKey): Site
+    public function apply(string $templateKey, ?string $style = null): Site
     {
         $published = $this->templates->published($templateKey)
             ?? throw ValidationException::withMessages(['template' => 'That template isn’t available.']);
@@ -25,13 +25,14 @@ final readonly class SiteBuilder
         }
         $definition = LegalPages::fill($published['definition'], ['business' => $this->context->current()->displayName()]);
 
-        $site = DB::connection($this->context->connectionName())->transaction(function () use ($published, $definition): Site {
+        $site = DB::connection($this->context->connectionName())->transaction(function () use ($published, $definition, $style): Site {
             $site = Site::query()->create([
                 'tenant_id' => $this->context->id(),
                 'category_key' => $published['template']->category?->key,
                 'template_key' => $published['template']->key,
                 'template_version' => $published['version'],
-                'branding' => [...(array) $definition['branding'], 'logo' => null, 'favicon' => null],
+                'branding' => [...(array) $definition['branding'], ...(isset(Branding::STYLE_PRESETS[(string) $style]) ? ['style' => $style, ...Branding::STYLE_PRESETS[(string) $style]] : []),
+                    'logo' => null, 'favicon' => null],
                 'menus' => ['header' => [], 'footer' => [], 'mobile' => []],
                 'settings' => [],
             ]);

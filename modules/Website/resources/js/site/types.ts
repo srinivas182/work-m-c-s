@@ -13,11 +13,15 @@ export interface ContentDocument {
   blocks: StoredBlock[];
 }
 
+export type SiteStyle = 'luxury' | 'minimal' | 'bold';
+
 export interface Branding {
   primary: string;
   secondary: string | null;
   font_pairing: string;
   corners: 'square' | 'soft' | 'round';
+  /** One design, three looks (Sprint 20.1); a site without one keeps the look it had (modern minimal). */
+  style?: SiteStyle;
   logo: string | null;
   favicon: string | null;
 }
@@ -44,6 +48,12 @@ export interface SiteContext {
   editing: boolean;
 }
 
+/** A video as blocks store it: the re-encoded MP4 and its still poster (empty src = none). */
+export interface VideoValue {
+  src: string;
+  poster: string;
+}
+
 /** Editor field description, independent of the editor library (mapped to Puck in 4.3). */
 export type Field =
   | {
@@ -65,6 +75,8 @@ export type Field =
       options: { value: string | number | boolean; label: string }[];
     }
   | { kind: 'image'; label: string }
+  /** A short uploaded video and its still poster (Sprint 20.2). */
+  | { kind: 'video'; label: string }
   | { kind: 'link'; label: string }
   | { kind: 'money'; label: string }
   | { kind: 'list'; label: string; item: Record<string, Field>; max?: number };

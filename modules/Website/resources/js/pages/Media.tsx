@@ -24,8 +24,20 @@ interface Photo {
   usedIn: string[];
 }
 
+interface Video {
+  id: string;
+  src: string;
+  poster: string;
+  name: string;
+  seconds: number;
+  kb: number;
+  usedIn: string[];
+}
+
 interface Props {
   photos: Photo[];
+  /** Short videos for the video hero and the Video section (Sprint 20.2). */
+  videos?: Video[];
   usedMb: number;
   limitMb: number;
   base: string;
@@ -104,7 +116,46 @@ function PhotoCard({ photo, base }: { photo: Photo; base: string }) {
   );
 }
 
-export default function Media({ photos, usedMb, limitMb, base }: Props) {
+function VideoCard({ video, base }: { video: Video; base: string }) {
+  return (
+    <Card>
+      <CardContent className="grid gap-3 p-4">
+        <video
+          src={video.src}
+          poster={video.poster}
+          controls
+          preload="none"
+          aria-label={video.name}
+          className="aspect-video w-full rounded-lg bg-black object-contain"
+        />
+        <p className="text-fg-muted text-sm">
+          {video.name} · {video.seconds} s · {Math.round(video.kb / 102.4) / 10} MB
+        </p>
+        <p className="text-sm">
+          {video.usedIn.length > 0 ? (
+            <>Used on: {video.usedIn.join(', ')}</>
+          ) : (
+            <span className="text-fg-muted">Not used anywhere</span>
+          )}
+        </p>
+        <div>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            disabled={video.usedIn.length > 0}
+            aria-label={`Delete ${video.name}`}
+            onClick={() => router.delete(`${base}/${video.id}`, { preserveScroll: true })}
+          >
+            <Trash2 /> Delete
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Media({ photos, videos = [], usedMb, limitMb, base }: Props) {
   return (
     <AppShell title="Media">
       <Head title="Media" />
@@ -125,6 +176,18 @@ export default function Media({ photos, usedMb, limitMb, base }: Props) {
               <PhotoCard key={p.id} photo={p} base={base} />
             ))}
           </div>
+        )}
+        {videos.length > 0 && (
+          <section aria-labelledby="media-videos" className="grid gap-4">
+            <h2 id="media-videos" className="text-lg font-semibold">
+              Videos
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {videos.map((v) => (
+                <VideoCard key={v.id} video={v} base={base} />
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </AppShell>

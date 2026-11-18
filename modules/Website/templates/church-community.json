@@ -1,0 +1,431 @@
+{
+  "category": "church-ngo",
+  "key": "church-community",
+  "name": "Community church",
+  "position": 1,
+  "description": "Warm and welcoming: service times, “new here?”, ministries and giving.",
+  "definition": {
+    "branding": {
+      "primary": "#4C1D95",
+      "secondary": "#F59E0B",
+      "font_pairing": "classic",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "About us",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Plan your visit",
+          "type": "page",
+          "page": "visit"
+        },
+        {
+          "label": "Give",
+          "type": "page",
+          "page": "give"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Community church — service times and ministries",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Plan your visit",
+                "buttonHref": "/visit",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "You belong here",
+                "text": "A church family that worships, prays and serves our community together. Come as you are.",
+                "primaryLabel": "Plan your visit",
+                "primaryHref": "/visit",
+                "secondaryLabel": "Service times",
+                "secondaryHref": "/visit",
+                "facts": [
+                  {
+                    "text": "Sundays 09:00"
+                  },
+                  {
+                    "text": "Everyone welcome"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/church-community/hero-1600.webp",
+                    "alt": "A congregation worshipping together"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Join us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "clock",
+                    "title": "Sunday 09:00",
+                    "text": "Main service, with children’s church"
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Wednesday 18:30",
+                    "text": "Prayer and Bible study"
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Friday 18:00",
+                    "text": "Youth"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "new",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "New here?",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Come as you are",
+                    "text": "No dress code; just come."
+                  },
+                  {
+                    "title": "We’ll meet you",
+                    "text": "Our welcome team will show you around."
+                  },
+                  {
+                    "title": "Stay for tea",
+                    "text": "Meet people after the service."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "ministries",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Ministries",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "users",
+                    "title": "Youth",
+                    "text": "Fridays — games, worship and real talk."
+                  },
+                  {
+                    "icon": "heart",
+                    "title": "Women and men",
+                    "text": "Fellowship and support groups."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Children",
+                    "text": "Safe, fun Sunday school for every age."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "choir",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Worship",
+                "text": "Tell people about your worship, your choir and the languages you worship in.",
+                "image": "/images/templates/church-community/choir-1600.webp",
+                "imageAlt": "The choir singing",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "video",
+              "type": "Video",
+              "version": 1,
+              "props": {
+                "heading": "A message from our pastor",
+                "text": "A short welcome or part of last Sunday’s message.",
+                "video": {
+                  "src": "",
+                  "poster": ""
+                },
+                "description": "Our pastor welcoming visitors"
+              }
+            },
+            {
+              "id": "give",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Partner with us",
+                "text": "Your giving supports our ministries and community outreach.",
+                "buttonLabel": "Give",
+                "buttonHref": "/give"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About us",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Plan your visit",
+                "buttonHref": "/visit",
+                "sticky": true
+              }
+            },
+            {
+              "id": "beliefs",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "What we believe",
+                "text": "Share your statement of faith in a few short paragraphs."
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Our leaders",
+                "intro": "Pastors, elders and ministry leaders.",
+                "people": []
+              }
+            },
+            {
+              "id": "kids",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "For the whole family",
+                "text": "Describe children’s and youth ministries and how you keep children safe.",
+                "image": "/images/templates/church-community/kids-1600.webp",
+                "imageAlt": "Children in Sunday school",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "visit",
+        "title": "Plan your visit",
+        "slug": "visit",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Plan your visit",
+                "buttonHref": "/visit",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Service times",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "clock",
+                    "title": "Sunday 09:00",
+                    "text": "Main service"
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Wednesday 18:30",
+                    "text": "Prayer and Bible study"
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Friday 18:00",
+                    "text": "Youth"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find us",
+                "address": "",
+                "landmark": "Tell visitors where to park or which entrance to use.",
+                "showMap": true
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "enquiry",
+                "heading": "Get in touch",
+                "intro": "Questions, prayer or a visit from the pastor — we’re here.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Send",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "How can we help?",
+                    "type": "choice",
+                    "choices": "I’m planning a visit, Prayer, Pastoral visit, Wedding or baptism, Other",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "give",
+        "title": "Give",
+        "slug": "give",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Plan your visit",
+                "buttonHref": "/visit",
+                "sticky": true
+              }
+            },
+            {
+              "id": "give",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Give",
+                "text": "Thank you for giving. Add your bank details or giving options here (EFT, SnapScan, cash on Sunday), and what giving supports."
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions about giving",
+                "items": [
+                  {
+                    "question": "Can I get a receipt?",
+                    "answer": "Say whether you issue receipts and Section 18A certificates (if registered)."
+                  },
+                  {
+                    "question": "Can I give once-off?",
+                    "answer": "Yes — any amount, any time."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

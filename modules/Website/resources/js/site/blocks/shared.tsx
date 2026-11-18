@@ -14,14 +14,10 @@ export function Section({
   children: ReactNode;
   narrow?: boolean;
 }) {
-  const bg =
-    tone === 'surface'
-      ? 'bg-[var(--s-surface)]'
-      : tone === 'brand'
-        ? 'bg-[var(--s-brand)] text-[var(--s-on-brand)]'
-        : '';
+  // Alternate backgrounds come from the page's rhythm and the style (site.css), not from each section (20.1).
+  const bg = tone === 'brand' ? 'bg-[var(--s-brand)] text-[var(--s-on-brand)]' : '';
   return (
-    <section id={id} className={`px-5 py-16 sm:px-8 sm:py-24 ${bg}`}>
+    <section id={id} data-tone={tone} className={`s-section px-5 sm:px-8 ${bg}`}>
       <div className="mx-auto max-w-6xl">
         {narrow ? <div className="max-w-3xl">{children}</div> : children}
       </div>

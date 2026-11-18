@@ -19,6 +19,9 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property int $height
  * @property int $bytes
  * @property array<int|string, string> $variants
+ * @property string $kind photo | video (20.2)
+ * @property string|null $video_path
+ * @property int|null $duration_ms
  * @property string|null $uploaded_by
  * @property Carbon|null $created_at
  */
@@ -31,6 +34,6 @@ final class SiteAsset extends Model
 
     protected function casts(): array
     {
-        return ['ai_generated' => 'boolean', 'variants' => 'array', 'width' => 'integer', 'height' => 'integer', 'bytes' => 'integer'];
+        return ['ai_generated' => 'boolean', 'variants' => 'array', 'width' => 'integer', 'height' => 'integer', 'bytes' => 'integer', 'duration_ms' => 'integer'];
     }
 }

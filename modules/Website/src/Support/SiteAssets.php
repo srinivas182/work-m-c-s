@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\Process\Process;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -176,6 +177,91 @@ final readonly class SiteAssets
         ];
     }
 
+    /**
+     * A short video (Sprint 20.2): checked by its content (ffprobe), re-encoded to H.264 MP4 (at most 1280 wide and
+     * 30 seconds; faststart for quick playback; metadata dropped), with a still poster through the photo pipeline.
+     * The original upload is never kept or served.
+     */
+    public function storeVideo(UploadedFile $file, ?string $by): SiteAsset
+    {
+        $config = (array) config('website.videos');
+        $fail = fn (string $message) => throw ValidationException::withMessages(['video' => $message]);
+        if ($file->getSize() > (int) $config['max_mb'] * 1024 * 1024) {
+            $fail('That video is larger than '.(int) $config['max_mb'].' MB. Use a shorter clip.');
+        }
+        $probe = new Process([(string) config('wurk.ffmpeg.probe'), '-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', $file->getRealPath()]);
+        $probe->setTimeout(30)->run();
+        if ($probe->getExitCode() === 127) { // ffprobe isn't installed: the server's fault, not the file's
+            report(new \RuntimeException('ffprobe is not installed; website videos cannot be processed (see docs/deployment/docker.md).'));
+            $fail('Videos can’t be added right now. Please try again later, or use a photo.');
+        }
+        $info = json_decode($probe->getOutput(), true);
+        $video = collect(is_array($info) ? (array) ($info['streams'] ?? []) : [])->firstWhere('codec_type', 'video');
+        $formats = explode(',', (string) ($info['format']['format_name'] ?? ''));
+        if (! $probe->isSuccessful() || ! is_array($video) || array_intersect($formats, ['mov', 'mp4', 'm4a', '3gp', 'matroska', 'webm']) === []) {
+            $fail('Upload an MP4, MOV or WebM video.');
+        }
+
+        $id = (string) Str::ulid();
+        $work = sys_get_temp_dir().'/wurk-video-'.$id;
+        @mkdir($work, 0700, true);
+        try {
+            $max = (int) $config['max_width'];
+            $encode = new Process([(string) config('wurk.ffmpeg.binary'), '-v', 'error', '-y', '-i', $file->getRealPath(), '-t', (string) (int) $config['max_seconds'],
+                '-map', '0:v:0', '-map', '0:a:0?', '-vf', "scale='min({$max},iw)':-2", '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '28', '-pix_fmt', 'yuv420p',
+                '-c:a', 'aac', '-b:a', '96k', '-map_metadata', '-1', '-movflags', '+faststart', $work.'/out.mp4']);
+            $encode->setTimeout(180)->run();
+            $poster = new Process([(string) config('wurk.ffmpeg.binary'), '-v', 'error', '-y', '-ss', '1', '-i', $work.'/out.mp4', '-frames:v', '1', $work.'/poster.png']);
+            if ($encode->isSuccessful()) {
+                $poster->setTimeout(30)->run();
+                if (! is_file($work.'/poster.png')) { // shorter than a second
+                    $poster = new Process([(string) config('wurk.ffmpeg.binary'), '-v', 'error', '-y', '-i', $work.'/out.mp4', '-frames:v', '1', $work.'/poster.png']);
+                    $poster->setTimeout(30)->run();
+                }
+            }
+            if (! $encode->isSuccessful() || ! is_file($work.'/poster.png')) {
+                $fail('That video couldn’t be read. Try saving it again as an MP4.');
+            }
+            $meta = json_decode((new Process([(string) config('wurk.ffmpeg.probe'), '-v', 'error', '-print_format', 'json', '-show_format', $work.'/out.mp4']))->mustRun()->getOutput(), true);
+            $durationMs = (int) round((float) ($meta['format']['duration'] ?? 0) * 1000);
+
+            $disk = Storage::disk((string) config('wurk.site_assets_disk'));
+            $directory = 'sites/'.$this->context->id();
+            $still = $this->process(new UploadedFile($work.'/poster.png', 'poster.png', 'image/png', null, true), $directory, $id);
+            $mp4 = $directory.'/'.strtolower($id).'.mp4';
+            $disk->put($mp4, (string) file_get_contents($work.'/out.mp4'), ['visibility' => 'public']);
+            $bytes = $still['bytes'] + (int) filesize($work.'/out.mp4');
+            $this->assertQuota($bytes, [...$still['variants'], $mp4], $disk);
+
+            $asset = SiteAsset::query()->create([
+                'id' => $id, 'kind' => 'video', 'name' => mb_substr($file->getClientOriginalName(), 0, 160) ?: 'video',
+                'width' => $still['width'], 'height' => $still['height'], 'bytes' => $bytes, 'variants' => $still['variants'],
+                'video_path' => $mp4, 'duration_ms' => $durationMs, 'ai_generated' => false, 'uploaded_by' => $by,
+            ]);
+            $this->audit->record('website.video_uploaded', 'site_asset', $asset->id, ['name' => $asset->name, 'bytes' => $bytes, 'seconds' => intdiv($durationMs, 1000)]);
+
+            return $asset;
+        } finally {
+            foreach ((array) glob($work.'/*') as $f) {
+                @unlink((string) $f);
+            }
+            @rmdir($work);
+        }
+    }
+
+    /**
+     * The value blocks store for a video: the MP4 and its poster.
+     *
+     * @return array{asset: string, src: string, poster: string, width: int, height: int, seconds: int}
+     */
+    public function video(SiteAsset $asset): array
+    {
+        $poster = $this->photo($asset);
+
+        return ['asset' => $asset->id, 'src' => Storage::disk((string) config('wurk.site_assets_disk'))->url((string) $asset->video_path),
+            'poster' => $poster['src'], 'width' => $poster['width'], 'height' => $poster['height'], 'seconds' => intdiv((int) $asset->duration_ms, 1000)];
+    }
+
     public function usedBytes(): int
     {
         return (int) SiteAsset::query()->sum('bytes');
@@ -251,7 +337,7 @@ final readonly class SiteAssets
         }
         $ids = [];
         array_walk_recursive($values, function ($v) use (&$ids): void {
-            if (is_string($v) && preg_match('#/sites/[0-9A-Za-z]+/([0-9a-z]{26})-\d+\.webp#', $v, $m) === 1) {
+            if (is_string($v) && preg_match('#/sites/[0-9A-Za-z]+/([0-9a-z]{26})(?:-\d+\.webp|\.mp4)#', $v, $m) === 1) {
                 $ids[$m[1]] = true;
             }
         });

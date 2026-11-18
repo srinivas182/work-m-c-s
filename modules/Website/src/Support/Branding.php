@@ -17,27 +17,38 @@ use Wurk\Tenancy\Contracts\TenantContext;
  */
 final class Branding
 {
-    /** @return array{primary: string, secondary: string|null, font_pairing: string, corners: string, logo: string|null, favicon: string|null} */
+    /** One design, three looks (Sprint 20.1): luxury, modern minimal, bold. */
+    public const STYLES = ['luxury', 'minimal', 'bold'];
+
+    /** What choosing a style sets (the owner may change fonts and corners after); the same as STYLES in site/theme.ts. */
+    public const STYLE_PRESETS = [
+        'luxury' => ['font_pairing' => 'elegant', 'corners' => 'square'],
+        'minimal' => ['font_pairing' => 'clean', 'corners' => 'soft'],
+        'bold' => ['font_pairing' => 'bold', 'corners' => 'round'],
+    ];
+
+    /** @return array{primary: string, secondary: string|null, font_pairing: string, corners: string, style: string, logo: string|null, favicon: string|null} */
     public function defaults(): array
     {
-        return ['primary' => '#6D4AFF', 'secondary' => null, 'font_pairing' => 'modern', 'corners' => 'soft', 'logo' => null, 'favicon' => null];
+        return ['primary' => '#6D4AFF', 'secondary' => null, 'font_pairing' => 'modern', 'corners' => 'soft', 'style' => 'minimal', 'logo' => null, 'favicon' => null];
     }
 
     /**
      * @param  array<string, mixed>  $input
-     * @return array{primary: string, secondary: string|null, font_pairing: string, corners: string, logo: string|null, favicon: string|null}
+     * @return array{primary: string, secondary: string|null, font_pairing: string, corners: string, style: string, logo: string|null, favicon: string|null}
      *
      * @throws ValidationException
      */
     public function validate(array $input): array
     {
         $hex = 'regex:/^#[0-9A-Fa-f]{6}$/';
-        /** @var array{primary: string, secondary?: string|null, font_pairing: string, corners: string} $data */
+        /** @var array{primary: string, secondary?: string|null, font_pairing: string, corners: string, style?: string|null} $data */
         $data = Validator::make($input, [
             'primary' => ['required', $hex],
             'secondary' => ['nullable', $hex],
             'font_pairing' => ['required', Rule::in(array_keys((array) config('website.font_pairings')))],
             'corners' => ['required', Rule::in((array) config('website.corner_styles'))],
+            'style' => ['nullable', Rule::in(self::STYLES)], // 20.1: a design's three looks
             // Only photos this business uploaded — never an image hosted elsewhere.
             'logo' => ['nullable', 'string', 'max:500', fn ($attr, $value, $fail) => $this->ownAsset($value) || $fail('Upload the logo here.')],
             'favicon' => ['nullable', 'string', 'max:500', fn ($attr, $value, $fail) => $this->ownAsset($value) || $fail('Upload the icon here.')],
@@ -48,6 +59,7 @@ final class Branding
             'secondary' => isset($data['secondary']) ? strtoupper((string) $data['secondary']) : null,
             'font_pairing' => $data['font_pairing'],
             'corners' => $data['corners'],
+            'style' => in_array($data['style'] ?? null, self::STYLES, true) ? (string) $data['style'] : 'minimal',
             'logo' => isset($data['logo']) && $data['logo'] !== '' ? (string) $data['logo'] : null,
             'favicon' => isset($data['favicon']) && $data['favicon'] !== '' ? (string) $data['favicon'] : null,
         ];
@@ -70,12 +82,12 @@ final class Branding
      * Colours, fonts and corners only — what a template carries (never a logo or icon).
      *
      * @param  array<string, mixed>  $input
-     * @return array{primary: string, secondary: string|null, font_pairing: string, corners: string}
+     * @return array{primary: string, secondary: string|null, font_pairing: string, corners: string, style: string}
      */
     public function validateColoursAndType(array $input): array
     {
         $clean = $this->validate([...$input, 'logo' => null, 'favicon' => null]);
 
-        return ['primary' => $clean['primary'], 'secondary' => $clean['secondary'], 'font_pairing' => $clean['font_pairing'], 'corners' => $clean['corners']];
+        return ['primary' => $clean['primary'], 'secondary' => $clean['secondary'], 'font_pairing' => $clean['font_pairing'], 'corners' => $clean['corners'], 'style' => $clean['style']];
     }
 }

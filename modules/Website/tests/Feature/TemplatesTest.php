@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Validation\ValidationException;
 use Tests\Support\InteractsWithShards;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Console\SeedCategoriesCommand;
 use Wurk\Website\Exceptions\DraftConflict;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\Site;
@@ -38,11 +39,11 @@ beforeEach(function () {
     $this->templates = app(Templates::class);
 });
 
-it('seeds the 12 agreed categories once, without overwriting edits', function () {
+it('seeds the agreed categories once, without overwriting edits', function () {
     $this->salon->update(['name' => 'Salons & beauty']);
     $this->artisan('website:seed-categories')->expectsOutputToContain('0 categories created');
 
-    expect(SiteCategory::query()->count())->toBe(12)
+    expect(SiteCategory::query()->count())->toBe(count(SeedCategoriesCommand::CATEGORIES))
         ->and($this->salon->fresh()->name)->toBe('Salons & beauty');
 });
 

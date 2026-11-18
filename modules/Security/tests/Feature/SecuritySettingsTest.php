@@ -69,3 +69,10 @@ it('lets owners require an authenticator for the team, and sends members without
     $this->actingAs($desk)->get($this->app('/glow-salon'))->assertOk();
     $this->actingAs($desk)->get($this->app('/glow-salon/settings/security'))->assertNotFound();
 });
+
+it('reads the emergency switch from the environment, next to the other security settings', function () {
+    // config/wurk.php once had two "security" keys and the second one hid this switch.
+    $config = require base_path('config/wurk.php');
+    expect($config['security'])->toHaveKeys(['admin_ip_allowlist', 'csp', 'hsts', 'contact', 'trusted_proxies'])
+        ->and($config['security']['admin_ip_allowlist'])->toBeTrue();
+});
