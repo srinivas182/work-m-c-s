@@ -14,6 +14,7 @@ interface AiActions
         'generate_site' => ['label' => 'Write my website', 'task' => 'site_generation'],
         'rewrite' => ['label' => 'Rewrite this section', 'task' => 'rewrite'],
         'image' => ['label' => 'Generate an image', 'task' => 'image'],
+        'read_slip' => ['label' => 'Read an expense slip', 'task' => 'slip'], // 23.5b
     ];
 
     /** @return array{action: string, label: string, credits: float, free: bool, balance: float, after: float, allowed: bool, reason: string|null, can_buy: bool} */

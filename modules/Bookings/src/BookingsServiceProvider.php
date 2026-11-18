@@ -43,6 +43,7 @@ use Wurk\Bookings\Receptionist\ReserveTableTool;
 use Wurk\Bookings\Receptionist\ServicesTool;
 use Wurk\Bookings\Receptionist\TableTimesTool;
 use Wurk\Bookings\Reports\BookingsSection;
+use Wurk\Bookings\Setup\BookingsSetupStep;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
@@ -56,8 +57,10 @@ use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\CannotRestore;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
@@ -100,6 +103,7 @@ final class BookingsServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(BookingsDigest::class)); // the owner's evening WhatsApp summary (21.6)
+        $this->callAfterResolving(BusinessSetup::class, fn (BusinessSetup $s) => $s->register(BookingsSetupStep::class)); // set up by talking (23.1)
         // Recently deleted (16.6b): services. One with bookings is kept (hidden) after 30 days, so those bookings keep its name.
         $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('services', 'Booking services', 'bookings.settings',
             fn (\DateTimeInterface $since) => BookingService::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()
@@ -188,6 +192,11 @@ final class BookingsServiceProvider extends ModuleServiceProvider
                 }
             });
         });
+        // Who owes me (23.5): deposits asked for and not yet paid.
+        $this->callAfterResolving(MoneyOwed::class, fn (MoneyOwed $o) => $o->register('bookings', fn () => Booking::query()->where('status', 'pending_payment')->where('deposit_cents', '>', 0)
+            ->whereNull('paid_at')->orderBy('starts_at')->limit(200)->get()->map(fn (Booking $b) => ['key' => 'deposit:'.$b->id, 'kind' => 'deposit', 'title' => 'Deposit for a booking',
+                'customer' => $b->customer_name, 'phone' => $b->customer_phone, 'email' => $b->customer_email, 'amount_cents' => $b->deposit_cents,
+                'since' => $b->created_at?->toDateString() ?? now()->toDateString(), 'due' => $b->starts_at->toDateString(), 'link' => '/bookings/calendar?date='.$b->starts_at->toDateString()])->values()->all()));
         Event::listen(BusinessPaymentReceived::class, fn (BusinessPaymentReceived $e) => str_starts_with($e->reference, 'dep_') ? $this->app->make(Deposits::class)->confirm($e->reference) : null);
         Event::listen([BookingConfirmed::class, BookingMoved::class, BookingCancelled::class, ReservationConfirmed::class, ReservationCancelled::class, ClassJoined::class, ClassLeft::class], SendBookingMessages::class);
         Event::listen([BookingConfirmed::class, ClassJoined::class], ConfirmPaymentOnWhatsApp::class); // 21.5

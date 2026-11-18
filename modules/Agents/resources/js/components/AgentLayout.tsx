@@ -12,6 +12,7 @@ export function AgentLayout({ title, children }: { title: string; children: Reac
         <span className="font-semibold">WURK agents</span>
         <nav aria-label="Agent area" className="flex flex-wrap items-center gap-3 text-sm">
           <Link href="/agent">Home</Link>
+          <Link href="/agent/onboard">Set up a business</Link>
           <Link href="/agent/businesses">My businesses</Link>
           <Link href="/agent/earnings">Earnings</Link>
           <Link href="/agent/team">Team</Link>

@@ -12,6 +12,7 @@ Route::tenant(function (): void {
             Route::get('/find', [SalesController::class, 'find'])->middleware('throttle:60,1,sales-find')->name('.find');
             Route::post('/identify', [SalesController::class, 'identify'])->middleware('throttle:60,1,sales-identify')->name('.identify');
             Route::post('/', [SalesController::class, 'store'])->name('.store');
+            Route::post('/{sale}/settle', [SalesController::class, 'settle'])->name('.settle'); // a sale on account is paid (23.5a)
         });
         Route::middleware('permission:sales.approve')->prefix('sales/{sale}')->name('tenant.sales')->group(function (): void {
             Route::post('/approve', [SalesController::class, 'approve'])->name('.approve');

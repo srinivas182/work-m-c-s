@@ -4,6 +4,57 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.0] — 2026-11-18 — Sprint 23: Easy setup & money tools
+
+### Release — Sprint 23.6
+- End-to-end tests cover setup by talking, the share page, an invoice from creation to paid, a cash-up with a difference, an expense, and an agent's setup through to hand-over, on desktop and mobile. Google listings, payment providers, WhatsApp, reminders and the Monday summary are covered by feature tests against recorded responses.
+
+### Money — Sprint 23.5b (cash-up, expenses, profit, Monday summary)
+- **Money → Cash-up:** at the end of the day the owner or a cashier counts the till against what it should hold. That expected amount comes from the day's money taken in person (bookings, orders, invoices, sales on account paid) and in-store cash and card sales. A cash difference above an amount the owner sets (default R20) needs a reason. Each cash-up is locked and audited; only an owner can reopen it. Counting is a new permission, `money.cashup`, so cashiers can do it without seeing the rest of Money.
+- **Money → Expenses and profit:**
+  - Add an expense in seconds (amount, category and note), or take a **photo of the slip**. WURK AI reads the amount, date and what it was for (1 credit); the owner checks it before it's added, and the photo is kept privately with the expense.
+  - Categories: stock, rent, wages, transport, data and airtime, other.
+  - "This month you took R…, spent R…, so you made about R…" on this page, on Home, and as a new Profit section in Reports.
+- **WURK AI reads photos:** new `Ai::see()`, through providers that can read images (Anthropic, OpenAI). There's a new task, "Reads expense slips", in Admin → AI.
+- **Monday "how did I do" on WhatsApp** (`money:weekly-summaries`, 08:20 SAST), from WURK's number with the new template `wurk_weekly_summary`. It goes to each owner's verified mobile and covers last week's takings against the week before, the best seller, new and returning customers, who owes, and one tip. On by default; STOP turns it off, and switching it back on in Money → Expenses undoes STOP.
+
+### Money — Sprint 23.5a (who owes me, invoices, reminders)
+- **New module: Money → Who owes me.** One list of what customers still owe, and the total: unpaid deposits (Bookings), pay-later orders (Shop), sales on account (Sales) and invoices. Each module adds its own items through the new Platform contract `MoneyOwed`. Items can be marked paid in person (cash, card machine, QR) or by EFT, straight from the list.
+- **Simple invoices:**
+  - Lines, VAT at 15% with the VAT number when the business is VAT-registered, a due date, and a signed pay link to the customer's invoice page on the business's own address. The customer pays online with the business's own payment methods, or by EFT.
+  - Sent from the business's WhatsApp number once Meta approves the new template `wurk_payment_request` (submitted automatically, like the reminder template). Otherwise by SMS (credits), then email. With no phone number or email, the invoice comes with a link to share, and a "Share on WhatsApp" button sends it from the owner's own phone.
+  - Paid by link: marked paid only once the provider confirms the payment. Paid in person: recorded with who took it, and counted in the day's takings.
+- **Reminders:** sent automatically on days 1, 7 and 14 after the due date (`money:remind-invoices`, 09:00 SAST), or with one tap. Never more than one a week, three in all. A customer's STOP on WhatsApp is respected. Reminders can be switched off per invoice.
+- **Record sale → On account (pays later):** the sale shows in Who owes me until it's marked paid.
+
+### Agents — Sprint 23.4 (a business set up in 15 minutes, on the agent's phone)
+- **Agent area → Set up a business,** one guided flow with a clock:
+  1. The owner's name, business and mobile. A one-time code goes to the owner's phone, and the owner reads it out.
+  2. A package. The business is created, owned by the owner, and credited to the agent under the usual commission rules. A demo the agent made earlier can become the business.
+  3. Set up by talking or from a link (23.1, 23.2), with the owner beside the agent. The agent helps as a team member until hand-over.
+  4. The first top-up from R20: online (WURK's methods, such as Capitec Pay, SnapScan or card) or cash to the agent with a receipt number. Cash counts once a WURK approver confirms it. The top-up can also be left for later.
+  5. Hand-over: the owner gets their sign-in link and share kit on WhatsApp (new template `wurk_agent_handover`; SMS until it's approved), and the agent's access ends.
+- The agent's recent setups show how long each took and whether the site is live yet ("set up, not yet live" until the owner publishes).
+- Billing has a new `CreditTopUps` contract, so other modules can top up without reading Billing's tables. Website has a new `SiteLaunches` contract.
+
+### Website — Sprint 23.3 (share kit)
+- **Website → Share:** share the website, the booking page, the shop and each product, current specials and the WhatsApp chat link in one tap. Only what's published is offered.
+  - **WhatsApp Status:** a 9:16 image in the business's colours, with its logo, what's shared, a QR code and the link. On a phone it goes straight to the share sheet; elsewhere it downloads.
+  - **WhatsApp chat, Facebook, Instagram,** or any app through the phone's share sheet, and copy link.
+- **Posters and table cards** as PDFs: A4, A5, and a table card that folds in half. Each has "Scan to book", "Scan to order", "Scan to chat on WhatsApp" or "Scan to visit us", with the business's QR code, logo and colours.
+- **Every link is tagged** with where it was shared (`utm_source`: status, whatsapp, facebook, instagram, share, poster). Reports → Website shows which brought visitors and bookings.
+
+### Setup — Sprint 23.2 (set up from what you already have online)
+- **Set up by talking → Already online? Start from there:** paste a Google Maps link, a business name and area, or a link to a Facebook page, Instagram profile or old website. WURK fills in the answers it finds (name, area and address, phone, hours, services and prices) for the owner to check and change. Nothing is set up until they confirm.
+- **Google listings** are read through the Google Places API, with the key in **Admin → Providers → Google Places**. **Pages** are read from their public preview and text by WURK AI, fetched only from public https addresses (every redirect is checked too).
+- **Photos:** only the business's own photos are offered (from its listing or its page's preview), and the owner ticks which to use. Chosen photos go through the same checks as an upload, then into the opening banner and the gallery.
+- **Reviews stay on Google:** the website's reviews section links to them ("Read our reviews on Google") and never copies them. The Testimonials section has a new optional link for this.
+
+### Setup — Sprint 23.1 (set up by talking)
+- **Website → Set up by talking:** six short questions (the business, the area, what it sells and for how much, hours, contact, online booking or a shop), answered by typing or a voice note. WURK AI reads each answer and shows what it understood; every value is checked (prices, times, email, category) before it's kept.
+- **Nothing is set up until the owner confirms.** One tap then makes the website (the first one is free), fills in the contact and opening-hours sections, adds bookable services and hours when the business has bookings, and adds products with prices when it has a shop.
+- Modules add their own setup steps through a new Platform contract (`BusinessSetup` / `SetupStep`), so new modules can join setup without changes to Website.
+
 ## [0.23.0] — 2026-11-18 — Sprint 22: Mobile money & payments
 
 ### Payments — Sprint 22.6 (in the chat, in the summary, and release)

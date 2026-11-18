@@ -17,7 +17,9 @@ use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
@@ -37,6 +39,7 @@ use Wurk\Shop\Receptionist\ProductsTool;
 use Wurk\Shop\Receptionist\ReorderTool;
 use Wurk\Shop\Reports\SalesSection;
 use Wurk\Shop\Reports\StockSection;
+use Wurk\Shop\Setup\ShopSetupStep;
 use Wurk\Shop\Support\DeletedCatalog;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
@@ -78,6 +81,7 @@ final class ShopServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(ShopDigest::class)); // the owner's evening WhatsApp summary (21.6)
+        $this->callAfterResolving(BusinessSetup::class, fn (BusinessSetup $s) => $s->register(ShopSetupStep::class)); // set up by talking (23.1)
         // Recently deleted (16.6b): products and categories.
         // The AI receptionist (19.2c): find products, and a link that fills the cart on the website.
         $this->callAfterResolving(ReceptionistTools::class, function (ReceptionistTools $t): void {
@@ -120,6 +124,11 @@ final class ShopServiceProvider extends ModuleServiceProvider
         });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'shop');
         Event::listen(BusinessPaymentReceived::class, [OrderPayments::class, 'handle']);
+        // Who owes me (23.5): pay-later orders not yet paid.
+        $this->callAfterResolving(MoneyOwed::class, fn (MoneyOwed $o) => $o->register('shop', fn () => Order::query()->where('status', 'awaiting_payment')->where('payment_method', 'offline')
+            ->orderBy('created_at')->limit(200)->get()->map(fn (Order $order) => ['key' => 'order:'.$order->id, 'kind' => 'order', 'title' => 'Order #'.$order->number.' (pay later)',
+                'customer' => $order->customer_name, 'phone' => $order->customer_phone, 'email' => $order->customer_email, 'amount_cents' => $order->dueCents(),
+                'since' => $order->created_at->toDateString(), 'due' => null, 'link' => '/shop/orders/'.$order->id, 'settle' => '/shop/orders/'.$order->id.'/advance'])->values()->all()));
         Event::listen(OrderStatusChanged::class, [OrderMessages::class, 'handle']);
         Event::listen(ShipmentUpdated::class, [MarkDeliveredOrders::class, 'handle']); // a courier delivered it
         Event::listen(ContactsBackfillRequested::class, function (): void { // existing customers → contacts

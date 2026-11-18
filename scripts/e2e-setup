@@ -52,6 +52,9 @@ done
 for project in desktop mobile; do
   php artisan identities:create "agent-${project}@wurk.co.za" --first=Dineo --last=Agent --password="sunny days in durban"
   php artisan agents:create "agent-${project}@wurk.co.za" --first=Dineo --last=Agent > /dev/null
+  # A second agent who sets businesses up on their phone (23.4), so the first one's "no businesses yet" holds.
+  php artisan identities:create "onboard-${project}@wurk.co.za" --first=Sipho --last=Agent --password="sunny days in durban"
+  php artisan agents:create "onboard-${project}@wurk.co.za" --first=Sipho --last=Agent > /dev/null
 done
 
 # Example packages for the pricing page and signup.

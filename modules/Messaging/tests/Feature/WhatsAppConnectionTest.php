@@ -77,7 +77,7 @@ it('connects the owner’s number with Embedded Signup, keeping the WhatsApp Bus
     // The follow-up message for after the 24-hour window goes to Meta for review on the business's own account.
     Http::assertSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/waba-1/message_templates') && $r['name'] === 'wurk_follow_up'
         && $r['category'] === 'UTILITY' && str_contains($r['components'][0]['text'], 'following up on your message'));
-    expect($c->templates)->toEqual(['wurk_follow_up' => 'PENDING', 'wurk_reminder' => 'PENDING']); // JSON: MySQL keeps keys in its own order
+    expect($c->templates)->toEqual(['wurk_follow_up' => 'PENDING', 'wurk_reminder' => 'PENDING', 'wurk_payment_request' => 'PENDING']); // JSON: MySQL keeps keys in its own order
     // Reminders carry Confirm / Move / Cancel quick-reply buttons (21.5).
     Http::assertSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/waba-1/message_templates') && $r['name'] === 'wurk_reminder'
         && $r['components'][1] === ['type' => 'BUTTONS', 'buttons' => [['type' => 'QUICK_REPLY', 'text' => 'Confirm'], ['type' => 'QUICK_REPLY', 'text' => 'Move'], ['type' => 'QUICK_REPLY', 'text' => 'Cancel']]]);
@@ -143,9 +143,10 @@ it('checks the number with Meta again, and disconnects (forgetting the token)', 
     WhatsAppConnection::query()->create(['tenant_id' => $this->glow->id, 'waba_id' => 'waba-1', 'phone_number_id' => 'pn-1', 'token' => 'biz-token', 'status' => 'connected', 'quality' => 'GREEN']);
     ($this->meta)([GRAPH.'/waba-1/phone_numbers*' => Http::response(['data' => [['id' => 'pn-1', 'display_phone_number' => '+27 82 555 0101', 'quality_rating' => 'YELLOW', 'messaging_limit_tier' => 'TIER_10K', 'name_status' => 'APPROVED']]]),
         GRAPH.'/waba-1/message_templates*' => Http::response(['data' => [['name' => 'wurk_follow_up', 'status' => 'APPROVED', 'language' => 'en'],
-            ['name' => 'wurk_reminder', 'status' => 'REJECTED', 'language' => 'en'], ['name' => 'someone_elses', 'status' => 'APPROVED', 'language' => 'en']]])]);
+            ['name' => 'wurk_reminder', 'status' => 'REJECTED', 'language' => 'en'], ['name' => 'wurk_payment_request', 'status' => 'APPROVED', 'language' => 'en'],
+            ['name' => 'someone_elses', 'status' => 'APPROVED', 'language' => 'en']]])]);
     $this->actingAs($this->owner)->post("{$this->base}/refresh")->assertSessionHas('status', 'Checked with Meta just now.');
-    expect(WhatsAppConnection::query()->sole()->only(['quality', 'messaging_limit', 'templates']))->toEqual(['quality' => 'YELLOW', 'messaging_limit' => 'TIER_10K', 'templates' => ['wurk_follow_up' => 'APPROVED', 'wurk_reminder' => 'REJECTED']]);
+    expect(WhatsAppConnection::query()->sole()->only(['quality', 'messaging_limit', 'templates']))->toEqual(['quality' => 'YELLOW', 'messaging_limit' => 'TIER_10K', 'templates' => ['wurk_follow_up' => 'APPROVED', 'wurk_reminder' => 'REJECTED', 'wurk_payment_request' => 'APPROVED']]);
     Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_contains($r->url(), 'message_templates')); // already there: not submitted twice
     $this->actingAs($this->owner)->get($this->base)->assertInertia(fn (Assert $p) => $p->where('connection.follow_up_status', 'APPROVED'));
 
@@ -177,7 +178,7 @@ it('hears Meta’s template reviews by webhook, and checks every account hourly 
     ($this->meta)([GRAPH.'/waba-1/message_templates*' => fn ($r) => $r->method() === 'POST' ? Http::response(['id' => 't', 'status' => 'PENDING'])
         : Http::response(['data' => [['name' => 'wurk_follow_up', 'status' => 'APPROVED', 'language' => 'en']]])]);
     $this->artisan('messaging:sync-whatsapp-templates')->expectsOutput('Accounts checked: 1. Failed: 0.')->assertSuccessful();
-    expect(WhatsAppConnection::query()->sole()->templates)->toEqual(['wurk_follow_up' => 'APPROVED', 'wurk_reminder' => 'PENDING']);
+    expect(WhatsAppConnection::query()->sole()->templates)->toEqual(['wurk_follow_up' => 'APPROVED', 'wurk_reminder' => 'PENDING', 'wurk_payment_request' => 'PENDING']);
     Http::assertSent(fn ($r) => $r->method() === 'POST' && str_contains($r->url(), 'message_templates') && $r['name'] === 'wurk_reminder');
 });
 

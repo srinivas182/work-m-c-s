@@ -10,7 +10,7 @@ use Wurk\Ai\Contracts\ChatTool;
  * Stands in for a real provider until WURK's API keys arrive (and in tests).
  * Never used in production. Answers with valid JSON when asked for JSON.
  */
-final class SimulatedDriver implements AiDriver, ChatDriver
+final class SimulatedDriver implements AiDriver, ChatDriver, VisionDriver
 {
     /** Tests: make the next N calls fail (to exercise fallback and refunds). */
     public static int $failNext = 0;
@@ -50,6 +50,12 @@ final class SimulatedDriver implements AiDriver, ChatDriver
         self::$nextAnswer = null;
 
         return ['text' => $text, 'input_tokens' => (int) ceil(strlen($system.$prompt) / 4), 'output_tokens' => (int) ceil(strlen($text) / 4)];
+    }
+
+    /** Tests: the photo is ignored; the answer is $nextAnswer / $answers as for text. */
+    public function see(string $model, string $system, string $prompt, string $image, string $mime, int $maxTokens, string $apiKey): array
+    {
+        return $this->complete($model, $system, $prompt, $maxTokens, $apiKey);
     }
 
     /** For "write my website": fill every listed slot with clearly simulated copy. */

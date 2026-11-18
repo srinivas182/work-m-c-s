@@ -23,6 +23,7 @@ use Wurk\Messaging\Events\WhatsAppStatusChanged;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\OwnerDigest;
@@ -44,12 +45,14 @@ use Wurk\Website\Console\SweepConversationsCommand;
 use Wurk\Website\Contracts\CatalogChanged;
 use Wurk\Website\Contracts\MediaLibrary;
 use Wurk\Website\Contracts\ProductCatalog;
+use Wurk\Website\Contracts\SiteLaunches;
 use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Digest\ChatsDigest;
 use Wurk\Website\Listeners\RerenderShopPages;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\SiteAsset;
+use Wurk\Website\Setup\WebsiteSetupStep;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\ChatBot;
 use Wurk\Website\Support\EloquentSiteTemplates;
@@ -59,6 +62,7 @@ use Wurk\Website\Support\PageRenderer;
 use Wurk\Website\Support\Pages;
 use Wurk\Website\Support\SiteAssets;
 use Wurk\Website\Support\SiteBuilder;
+use Wurk\Website\Support\SiteLaunchLookup;
 use Wurk\Website\Support\SiteMediaLibrary;
 use Wurk\Website\Support\StorageMeter;
 use Wurk\Website\Support\Templates;
@@ -83,6 +87,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->app->scoped(TemplateSwitcher::class);
         $this->app->scoped(PageRenderer::class);
         $this->app->scoped(SiteTemplates::class, EloquentSiteTemplates::class);
+        $this->app->bind(SiteLaunches::class, SiteLaunchLookup::class); // 23.4
     }
 
     /**
@@ -103,6 +108,8 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
     public function menu(): array
     {
         return [
+            ['label' => 'Set up by talking', 'route' => 'tenant.website.setup', 'icon' => 'mic', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 99],
+            ['label' => 'Share', 'route' => 'tenant.website.share', 'icon' => 'share-2', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 101],
             ['label' => 'Pages', 'route' => 'tenant.website.pages', 'icon' => 'globe', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 100],
             ['label' => 'Branding', 'route' => 'tenant.website.branding', 'icon' => 'palette', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
             ['label' => 'Time to launch', 'route' => 'admin.launch-times', 'icon' => 'clock', 'section' => 'Platform', 'permission' => 'tenants.view', 'order' => 61],
@@ -119,6 +126,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(ChatsDigest::class)); // the owner's evening WhatsApp summary (21.6)
+        $this->callAfterResolving(BusinessSetup::class, fn (BusinessSetup $s) => $s->register(WebsiteSetupStep::class)); // set up by talking (23.1)
         // Recently deleted (16.6b): pages.
         $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('pages', 'Website pages', 'website.edit',
             fn (\DateTimeInterface $since) => Page::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()

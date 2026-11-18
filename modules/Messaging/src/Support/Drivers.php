@@ -67,6 +67,8 @@ final class Drivers
             'ai.anthropic' => ['anthropic' => ['name' => 'Anthropic (Claude)', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
             'ai.google' => ['google' => ['name' => 'Google (Gemini)', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
             'ai.openai' => ['openai' => ['name' => 'OpenAI', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
+            // Setting a business up from its Google listing (Sprint 23.2): Places API (New), one lookup per setup.
+            'places.google' => ['google' => ['name' => 'Google Places', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
         ];
     }
 

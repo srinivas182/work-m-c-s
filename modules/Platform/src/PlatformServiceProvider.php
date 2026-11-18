@@ -10,9 +10,11 @@ use Wurk\Platform\Console\MakeModuleCommand;
 use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\AudienceSegments;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
+use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Contracts\RecentlyDeleted;
@@ -24,10 +26,12 @@ use Wurk\Platform\Modules\ModuleRegistry;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\AssistantRegistry;
 use Wurk\Platform\Support\AudienceRegistry;
+use Wurk\Platform\Support\BusinessSetupRegistry;
 use Wurk\Platform\Support\DeletedRegistry;
 use Wurk\Platform\Support\ExportRegistry;
 use Wurk\Platform\Support\HealthRegistry;
 use Wurk\Platform\Support\MetricsRegistry;
+use Wurk\Platform\Support\MoneyOwedRegistry;
 use Wurk\Platform\Support\NoSupportSessions;
 use Wurk\Platform\Support\OwnerDigestRegistry;
 use Wurk\Platform\Support\ReceptionistRegistry;
@@ -52,6 +56,8 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(AssistantTools::class, AssistantRegistry::class);
         $this->app->singleton(ReceptionistTools::class, ReceptionistRegistry::class); // 19.2
         $this->app->singleton(OwnerDigest::class, OwnerDigestRegistry::class); // 21.6
+        $this->app->singleton(BusinessSetup::class, BusinessSetupRegistry::class); // 23.1
+        $this->app->singleton(MoneyOwed::class, MoneyOwedRegistry::class); // 23.5
         $this->app->singleton(SalesTools::class, SalesRegistry::class); // 19.5
         $this->app->singleton(HealthSignals::class, HealthRegistry::class);
         $this->app->singleton(DataExports::class, ExportRegistry::class);

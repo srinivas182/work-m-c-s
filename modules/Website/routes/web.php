@@ -22,6 +22,8 @@ use Wurk\Website\Http\Controllers\PublicChatController;
 use Wurk\Website\Http\Controllers\PublicSeoController;
 use Wurk\Website\Http\Controllers\PublicSiteController;
 use Wurk\Website\Http\Controllers\QuoteFormController;
+use Wurk\Website\Http\Controllers\SetupTalkController;
+use Wurk\Website\Http\Controllers\ShareKitController;
 use Wurk\Website\Http\Controllers\TemplatePreviewController;
 use Wurk\Website\Http\Controllers\VideosController;
 use Wurk\Website\Http\Controllers\WebsiteChatController;
@@ -42,6 +44,19 @@ Route::tenant(function (): void {
         Route::post('/pages/{page}/restore', [PagesController::class, 'restore'])->name('pages.restore');
         Route::post('/checklist/{step}', [PagesController::class, 'confirmStep'])->name('checklist.confirm');
         Route::post('/design', [PagesController::class, 'switchDesign'])->middleware('throttle:10,1,website-design')->name('design');
+        // Set up by talking (23.1): six questions, typed or spoken, then one confirmed set-up.
+        Route::get('/set-up', [SetupTalkController::class, 'show'])->name('setup');
+        Route::post('/set-up/answer', [SetupTalkController::class, 'answer'])->middleware('throttle:30,1,website-setup')->name('setup.answer');
+        Route::post('/set-up/voice', [SetupTalkController::class, 'voice'])->middleware('throttle:20,1,website-setup-voice')->name('setup.voice');
+        Route::post('/set-up/import', [SetupTalkController::class, 'import'])->middleware('throttle:10,1,website-setup-import')->name('setup.import'); // 23.2
+        Route::get('/set-up/photo/{n}', [SetupTalkController::class, 'photo'])->whereNumber('n')->middleware('throttle:60,1,website-setup-photo')->name('setup.photo');
+        Route::post('/set-up/photos', [SetupTalkController::class, 'photos'])->name('setup.photos');
+        Route::post('/set-up/apply', [SetupTalkController::class, 'apply'])->middleware('throttle:5,1,website-setup-apply')->name('setup.apply');
+        Route::post('/set-up/restart', [SetupTalkController::class, 'restart'])->name('setup.restart');
+        // Share kit (23.3): tagged links, WhatsApp Status images, posters and table cards.
+        Route::get('/share', [ShareKitController::class, 'show'])->name('share');
+        Route::get('/share/status/{key}', [ShareKitController::class, 'status'])->where('key', '[a-z0-9-]{1,40}')->middleware('throttle:30,1,website-share-status')->name('share.status');
+        Route::get('/share/poster', [ShareKitController::class, 'poster'])->middleware('throttle:20,1,website-share-poster')->name('share.poster');
 
         Route::get('/pages/{page}/edit', EditorController::class)->name('editor');
         Route::get('/pages/{page}/draft', [DraftController::class, 'show'])->name('draft');

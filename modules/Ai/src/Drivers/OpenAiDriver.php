@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Wurk\Ai\Contracts\ChatTool;
 
 /** OpenAI Responses API (POST /v1/responses). */
-final class OpenAiDriver implements AiDriver, ChatDriver
+final class OpenAiDriver implements AiDriver, ChatDriver, VisionDriver
 {
     public function name(): string
     {
@@ -29,6 +29,22 @@ final class OpenAiDriver implements AiDriver, ChatDriver
         }
         $text = collect((array) $r->json('output'))->where('type', 'message')->flatMap(fn ($m) => (array) ($m['content'] ?? []))
             ->where('type', 'output_text')->pluck('text')->implode('');
+
+        return ['text' => (string) $text, 'input_tokens' => (int) $r->json('usage.input_tokens'), 'output_tokens' => (int) $r->json('usage.output_tokens')];
+    }
+
+    public function see(string $model, string $system, string $prompt, string $image, string $mime, int $maxTokens, string $apiKey): array
+    {
+        try {
+            $r = Http::timeout(60)->acceptJson()->withToken($apiKey)->post('https://api.openai.com/v1/responses', ['model' => $model, 'instructions' => $system, 'max_output_tokens' => $maxTokens,
+                'input' => [['role' => 'user', 'content' => [['type' => 'input_image', 'image_url' => 'data:'.$mime.';base64,'.base64_encode($image)], ['type' => 'input_text', 'text' => $prompt]]]]]);
+        } catch (ConnectionException $e) {
+            throw new ProviderFailed('OpenAI unreachable');
+        }
+        if (! $r->successful()) {
+            throw new ProviderFailed('OpenAI: '.($r->json('error.message') ?? 'HTTP '.$r->status()));
+        }
+        $text = collect((array) $r->json('output'))->where('type', 'message')->flatMap(fn ($m) => (array) ($m['content'] ?? []))->where('type', 'output_text')->pluck('text')->implode('');
 
         return ['text' => (string) $text, 'input_tokens' => (int) $r->json('usage.input_tokens'), 'output_tokens' => (int) $r->json('usage.output_tokens')];
     }
