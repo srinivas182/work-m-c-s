@@ -4,6 +4,83 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.20.0] — 2026-11-18 — Sprint 19: AI receptionist
+
+### AI receptionist — Sprint 19.7 (quality and release)
+- **An evaluation set of 120 conversations with a demo salon** covers booking, moving, cancelling, prices, opening hours, out of scope, abuse, prompt injection, eight languages, no free time and closed days. It runs in CI on every change, with the model's behaviour scripted, so it checks WURK's guardrails around any model:
+  - only real bookings;
+  - no invented times or prices;
+  - the owner's permissions;
+  - nothing reaching another customer.
+- **`wurk:eval-receptionist` runs the same set against the real model on staging** before a release, and scores what doesn't depend on wording.
+- **Fixed (found by the evaluation set): prices of R1 000 or more were wrongly blocked** when written with a space ("R1 200.00", "R2 500"), as WURK and South Africans write them. Customers got "I couldn't check that" instead of the correct price.
+- **Watchtower watches the AI receptionist and the sales assistant**: many failed AI replies in an hour, or several very slow ones, become a problem, emailed like any other.
+- An isolation test for the receptionist's tools: one business's assistant never sees another's services, times or bookings, even with another business's booking number.
+
+### Keys in settings — Sprint 19.6b (contact addresses and the uptime token)
+- **Admin → Security → WURK's contact addresses**: where contact-form messages go, the support address, and the security contact (security.txt, the Trust and Security pages). Before, they were only in the server's settings. The saved addresses apply to every page, email and background job straight away. The server's values are used only until they're set here.
+- **Admin → Watchtower → Uptime checker**: shows the webhook address for Better Stack or UptimeRobot, and **makes a new one** (encrypted; the old address stops working at once). Only people who manage Watchtower see it. The server's token is used only until one is made here.
+- Infrastructure secrets (database, app key, Redis) stay on the server, as agreed.
+
+### Keys in settings — Sprint 19.6a ("Test connection" for every key)
+- **Every key in Admin → Providers can now be tested before switching it on.**
+  - AI keys (Anthropic, OpenAI, Google) and Paystack are tried with a read-only request.
+  - Google Meet and Zoom app credentials are checked without anyone signing in.
+  - Nothing is sent or charged. A refused key is reported in plain words, and the last result is shown.
+- **Fixed: Paystack's "Check" button always failed**, because the server asked for an address to send a test to, which the page never showed.
+- **Removed from Providers: PayFast, Yoco, Ozow and Peach keys.** Nothing used them. WURK's keys for these are set in Admin → Payment methods, where they're checked when saved, so keys entered in Providers did nothing.
+
+### WURK's sales assistant — Sprint 19.5b (the chat on wurk.co.za)
+- **wurk.co.za has a chat button while HQ has the sales assistant on.** It's the same chat as businesses' websites: the AI notice, cards (e.g. "Start your free trial" with the package chosen), the conversation kept across pages, and accessible. It loads only when tapped. "Talk to someone" opens the contact page. When the assistant can't reply, the visitor is pointed to the pricing and contact pages.
+
+### WURK's sales assistant — Sprint 19.5a (engine and settings)
+- **WURK's own AI sales assistant** answers visitors' questions about WURK from the **live packages and prices** (rands, excluding VAT, said so) and the help centre. It recommends a package, gives a link that **opens signup with that package chosen**, and passes the visitor to WURK through the contact form (with consent). When the visitor came through an **agent's link**, it can pass them to that agent, who is emailed their details. Like the receptionist, it never states a price no tool gave it.
+- **Admin → WURK AI → WURK's sales assistant**: on or off (off until HQ switches it on), the greeting, and the most replies a month, with this month's replies and their cost to WURK. WURK pays for it: no credits. Over the cap, or when WURK AI can't be reached, visitors are offered the contact form.
+- Conversations are kept for 30 days, and visitors are told so. A daily clean-up (`ai:sweep-sales-conversations`) deletes them after that.
+- The chat on wurk.co.za comes in 19.5b.
+
+### AI receptionist — Sprint 19.4b (Chats and Results)
+- **Customers → Chats → AI assistant conversations**: every conversation with a customer (not the owner's tests), newest first, with what was said and the outcome: booked, ordered, answered, or passed to you.
+- **Take over**: the assistant stops for that chat. If the customer hasn't left a phone number or email, the chat asks for one and keeps it, so you can reply by phone, WhatsApp or email. **Hand back** gives the chat back to the assistant; **Close** ends it.
+- **Teach it**: turn a question the assistant couldn't answer into one of your chat's answers (the words people use and your answer), which the assistant reads from then on.
+- **Reports → Website chat assistant**: conversations, bookings and orders it made, chats passed to a person, and the credits used, compared with the period before. If many chats are passed to a person, Reports suggests teaching it.
+
+### AI receptionist — Sprint 19.4a (owner settings and "Try it")
+- **Website → Chat → AI assistant**: switch it on, choose what it may do besides answering (book, move or cancel bookings, help with shop orders; options not in the package are shown but can't be ticked), how it sounds (friendly or formal), its greeting, the languages it replies in (English, isiZulu, isiXhosa, Afrikaans, Sesotho, Swahili, French, Portuguese; others get English), when a person can take over, and the most replies a month. **The price of a reply and this month's use are shown before switching it on.** The website chat has to be on first.
+- **Try it**: chat with the assistant as a customer would, with your real answers and free times. Nothing is booked, changed, ordered or handed over, and test chats don't count towards the monthly limit. Each test reply costs the same as a real one (up to 100 a day).
+- **Fixed: a long business name no longer pushes the website header off a phone's screen.** The name now wraps. Before, "Book now" and the menu were pushed out, the phone zoomed the whole page out, and taps landed in the wrong place (the chat button couldn't be tapped). Every template is now checked at phone width.
+- **Fixed in CI: the template checks from 18.5b now run.** The colour checks on all 24 templates (their own colours and six others) were tagged for the "screens" runs, but those runs only ran the screen crawl. They now run everything tagged for them, including the new phone-width check.
+
+### AI receptionist — Sprint 19.3 (the website chat)
+- **When the owner switches the receptionist on, the website chat says so** ("You're chatting with an AI assistant…") and typed questions go to it. Its bookings, class places, tables and carts appear as **cards** with one clear action: pay the deposit, check out, or change or cancel.
+- **The conversation carries on across the site's pages**, in the same tab.
+- **While it works**, the chat says "The assistant is replying…" once, for screen readers too. If the receptionist is off, out of credits, over its cap, or can't be reached, **the business's own answers carry on** without the visitor noticing a break. The quick-question buttons and "Talk to someone" work as before.
+- The chat code still loads only when someone opens the chat. Links in cards must be the business's own pages or secure (https) payment pages.
+
+### AI receptionist — Sprint 19.2c (classes, tables, shop)
+- **Class places**: the receptionist lists classes in the next two weeks, with the price, how it's paid and the places left, and books a place. It never overbooks. Paid places get a payment link and are held until paid.
+- **Tables**: it offers only arrival times with room for the party and reserves one, with notes such as a birthday. Bigger parties than the restaurant takes online are passed to a person.
+- **Shop**: it finds products with their options, prices and stock, and sends a **"Check out" link that fills the customer's cart on the website**, where they choose delivery and pay. The chat never takes card details, and the website re-checks every price and stock level.
+- A class place or a table is changed or cancelled with the link in its confirmation, as before.
+
+### AI receptionist — Sprint 19.2b (booking)
+- **The receptionist books appointments for real**: it lists the business's services and prices, offers only times that are actually free (in the business's own time zone), and books with the customer's name, mobile number and consent. The same rules apply as the booking form: staff, hours, breaks, buffers, blocked time, notice and how far ahead.
+- **Deposits**: when a service needs one, the customer gets a "Pay the deposit" link in the chat, and the time is held until it's paid.
+- **Changing and cancelling** (when the owner allows it): bookings made in the same chat, or any upcoming booking once the customer types a **6-digit code sent to the phone or email on that booking**. Nobody can change a booking just by knowing someone's details, and the chat never reveals whether someone has a booking. The code goes by SMS when the business has credits, otherwise by free email. Cancelling follows the business's cancellation policy, stated before the customer confirms.
+- Bookings made by the assistant show **"Booked by the AI assistant"** in the calendar, and the chat is marked as booked.
+
+### AI receptionist — Sprint 19.2a (the receptionist)
+- **Every business can switch on an AI receptionist on its website chat.**
+  - It answers from the business's own website facts and the owner's own answers, and hands the chat to a person (stored with the customer, owner emailed) when asked, when it can't help, or for anything sensitive.
+  - Tools that book, change bookings or take orders are offered only when the owner allows them. Booking is on by default; changing bookings and orders are off.
+- **It never states a time or price no tool gave it**: any reply that does is replaced with an honest "I couldn't check that" and an offer of a person. It never claims to be a person.
+- **Customers are told it's an AI**, and that the conversation is kept for 30 days. Conversations that led nowhere are deleted after 30 days (`website:sweep-conversations`, daily). Ones that led to a booking, an order or a hand-off are kept.
+- **Each AI reply costs credits** (rate card "AI receptionist: a reply", 0.2 credits in South Africa until WURK sets it), within the owner's monthly cap and spending limit. When it's off, out of credits, over its cap, or WURK AI is unavailable, the chat carries on as the rule-based chat.
+
+### AI receptionist — Sprint 19.1 (conversations with tools)
+- WURK AI can now hold a **conversation with tools**: the AI asks for a tool (for example "free times on Saturday"), WURK runs it with the business's own permissions, and the AI answers from the result. It works with Anthropic, OpenAI and Google. Each step is logged and costed. If a provider fails mid-conversation, the next one carries on without repeating any action already taken.
+- New AI tasks in Admin → AI: **AI receptionist** and **WURK's sales assistant**.
+
 ## [0.19.0] — 2026-11-18 — Sprint 18: Hardening
 
 ### Polish and acceptance — Sprint 18.6

@@ -16,6 +16,7 @@ use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\SendResult;
 use Wurk\Messaging\Models\MessageDelivery;
 use Wurk\Messaging\Models\ProviderSetting;
+use Wurk\Messaging\Support\ConnectionCheck;
 use Wurk\Messaging\Support\Drivers;
 use Wurk\Messaging\Support\MailConfigurator;
 use Wurk\Messaging\Support\ProviderSettings;
@@ -62,18 +63,23 @@ final class ProvidersController
     {
         Gate::authorize('providers.manage');
         $setting = ProviderSetting::query()->find($channel) ?? abort(404);
-        $data = $request->validate(['to' => ['required', 'string', 'max:255']]);
+        $sends = in_array($channel, ['sms', 'whatsapp', 'email'], true);
+        $to = $sends ? (string) $request->validate(['to' => ['required', 'string', 'max:255']])['to'] : '';
 
         $result = match ($channel) {
-            'sms' => $this->withActive($setting, fn () => $messenger->sms($data['to'], 'WURK test message: your SMS provider is working.', 'provider_test')),
-            'whatsapp' => $this->withActive($setting, fn () => $messenger->whatsappTemplate($data['to'], 'hello_world', [], 'provider_test', 'en_US')),
-            'email' => $this->testEmail($setting, $data['to']),
-            default => SendResult::failed('Payment gateways are connection-tested when billing goes live (Sprint 3); credentials are stored securely now.'),
+            'sms' => $this->withActive($setting, fn () => $messenger->sms($to, 'WURK test message: your SMS provider is working.', 'provider_test')),
+            'whatsapp' => $this->withActive($setting, fn () => $messenger->whatsappTemplate($to, 'hello_world', [], 'provider_test', 'en_US')),
+            'email' => $this->testEmail($setting, $to),
+            default => app(ConnectionCheck::class)->check($channel, $setting), // 19.6: keys that don't send messages
         };
 
-        $setting->forceFill(['last_tested_at' => now(), 'last_test_ok' => $result->ok, 'last_test_message' => $result->ok ? 'Sent' : $result->error])->save();
+        $setting->forceFill(['last_tested_at' => now(), 'last_test_ok' => $result->ok, 'last_test_message' => $result->ok ? ($sends ? 'Sent' : 'Connected') : $result->error])->save();
 
-        return back()->with('status', $result->ok ? 'Test sent — check the device or inbox.' : 'Test failed: '.$result->error);
+        return back()->with('status', match (true) {
+            ! $result->ok => 'Test failed: '.$result->error,
+            $sends => 'Test sent — check the device or inbox.',
+            default => 'Connected — the keys work.',
+        });
     }
 
     /** Tests the saved (possibly not yet active) settings without switching them on for everyone. */

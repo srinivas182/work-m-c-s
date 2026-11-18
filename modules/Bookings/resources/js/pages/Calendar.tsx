@@ -78,6 +78,7 @@ function BookingItem({
         </p>
         <span className="flex gap-1">
           {b.source === 'website' && <Badge tone="info">Booked online</Badge>}
+          {b.source === 'chat' && <Badge tone="info">Booked by the AI assistant</Badge>}
           {STATUS[b.status] && <Badge tone="neutral">{STATUS[b.status]}</Badge>}
         </span>
       </div>

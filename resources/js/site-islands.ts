@@ -837,6 +837,34 @@ const writeCart = (lines: CartLine[]) => {
 };
 const randOf = (c: number) => `R${(c / 100).toFixed(2)}`;
 
+/**
+ * A cart link from the AI receptionist (Sprint 19.2c): /cart?add=variant:2,variant:1 adds those items to this
+ * browser's cart, then the address is cleaned so a reload doesn't add them twice. Prices and stock are re-checked
+ * by the server as always; unknown variants simply drop out when priced.
+ */
+export function addFromLink(search: string = location.search): number {
+  const add = new URLSearchParams(search).get('add');
+  if (!add) return 0;
+  const cart = readCart();
+  let added = 0;
+  for (const part of add.split(',').slice(0, 20)) {
+    const [variant, qty] = part.split(':');
+    const quantity = Math.min(Math.max(Number.parseInt(qty ?? '1', 10) || 1, 1), 99);
+    if (!variant || !/^[A-Za-z0-9]{10,40}$/.test(variant)) continue;
+    const line = cart.find((l) => l.variant === variant);
+    if (line) line.quantity = Math.max(line.quantity, quantity);
+    else cart.push({ variant, quantity });
+    added++;
+  }
+  writeCart(cart);
+  try {
+    history.replaceState(null, '', location.pathname);
+  } catch {
+    /* sandboxed: harmless */
+  }
+  return added;
+}
+
 /** An optional coupon code on a booking or class form (Sprint 15.3b); the server applies it to what's paid online. */
 function couponField(fieldId: string, wording: string) {
   const input = el('input', {
@@ -1007,6 +1035,7 @@ async function checkout(root: HTMLElement): Promise<void> {
     }).catch(() => null);
     return r?.ok ? ((await r.json()) as { lines: Priced[]; checkout: Settings }) : null;
   };
+  addFromLink();
   let data = readCart().length ? await price() : null;
   if (!data || data.lines.length === 0) {
     writeCart([]);

@@ -1,6 +1,7 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { MessageCircle } from 'lucide-react';
-import { Badge, Button, EmptyState, PageHeader } from '@/design-system';
+import { useState } from 'react';
+import { Badge, Button, EmptyState, Field, Input, PageHeader, Textarea } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 
 interface ChatRow {
@@ -16,7 +17,45 @@ interface ChatRow {
   lead_id: string | null;
 }
 
-export default function Chats({ chats, show }: { chats: ChatRow[]; show: 'open' | 'archived' }) {
+/** An AI assistant conversation with a customer (19.4b). */
+interface Conversation {
+  id: string;
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  status: 'ai' | 'waiting' | 'person' | 'closed';
+  outcome: 'answered' | 'booked' | 'ordered' | 'handed_over' | null;
+  at: string;
+  replies: number;
+  contact_id: string | null;
+  lines: { from: 'customer' | 'assistant' | 'person'; text: string }[];
+}
+type Show = 'open' | 'archived' | 'ai';
+
+const OUTCOME: Record<string, [string, 'success' | 'info' | 'warning' | 'neutral']> = {
+  booked: ['Booked', 'success'],
+  ordered: ['Ordered', 'success'],
+  handed_over: ['Passed to you', 'warning'],
+  answered: ['Answered', 'neutral'],
+};
+const STATUS: Record<Conversation['status'], string> = {
+  ai: 'The assistant is answering',
+  waiting: 'Waiting for you',
+  person: 'You have this chat',
+  closed: 'Closed',
+};
+
+export default function Chats({
+  chats,
+  show,
+  assistant = false,
+  conversations = [],
+}: {
+  chats: ChatRow[];
+  show: Show;
+  assistant?: boolean;
+  conversations?: Conversation[];
+}) {
   const base = window.location.pathname.replace(/\/$/, '');
   const appBase = `/${window.location.pathname.split('/')[1] ?? ''}`;
   const status = (c: ChatRow, to: ChatRow['status']) =>
@@ -29,12 +68,41 @@ export default function Chats({ chats, show }: { chats: ChatRow[]; show: 'open' 
           title="Chats"
           description="People who asked, in your website chat, for you to get back to them — with the conversation."
         />
-        <p className="text-sm">
-          <Link className="underline" href={show === 'open' ? `${base}?show=archived` : base}>
-            {show === 'open' ? 'Show archived' : 'Show current'}
-          </Link>
-        </p>
-        {chats.length === 0 ? (
+        <nav aria-label="Which chats" className="flex flex-wrap gap-4 text-sm">
+          {(
+            [
+              ['open', 'Asked for a person', base],
+              ...(assistant
+                ? [['ai', 'AI assistant conversations', `${base}?show=ai`] as const]
+                : []),
+              ['archived', 'Archived', `${base}?show=archived`],
+            ] as const
+          ).map(([key, label, href]) => (
+            <Link
+              key={key}
+              href={href}
+              className={show === key ? 'font-semibold' : 'underline'}
+              aria-current={show === key ? 'page' : undefined}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+        {show === 'ai' ? (
+          conversations.length === 0 ? (
+            <EmptyState
+              icon={MessageCircle}
+              title="No conversations yet"
+              description="When customers chat with your AI assistant, the conversations appear here."
+            />
+          ) : (
+            <ul aria-label="AI assistant conversations" className="grid gap-4">
+              {conversations.map((c) => (
+                <ConversationItem key={c.id} c={c} base={base} appBase={appBase} />
+              ))}
+            </ul>
+          )
+        ) : chats.length === 0 ? (
           <EmptyState
             icon={MessageCircle}
             title="No chats yet"
@@ -93,5 +161,127 @@ export default function Chats({ chats, show }: { chats: ChatRow[]; show: 'open' 
         )}
       </div>
     </AppShell>
+  );
+}
+
+function ConversationItem({
+  c,
+  base,
+  appBase,
+}: {
+  c: Conversation;
+  base: string;
+  appBase: string;
+}) {
+  const [teaching, setTeaching] = useState(false);
+  const lastQuestion = [...c.lines].reverse().find((l) => l.from === 'customer')?.text ?? '';
+  const teach = useForm({
+    keywords: lastQuestion
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}\s]+/gu, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length > 3)
+      .slice(0, 6)
+      .join(', '),
+    answer: '',
+  });
+  const act = (action: 'take_over' | 'hand_back' | 'close') =>
+    router.put(`${base}/ai/${c.id}`, { action }, { preserveScroll: true });
+  const who = c.name ?? 'A visitor';
+  const outcome = c.outcome ? OUTCOME[c.outcome] : undefined;
+  return (
+    <li className="border-border grid gap-3 rounded-lg border p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <strong>{who}</strong>
+        {outcome && <Badge tone={outcome[1]}>{outcome[0]}</Badge>}
+        <span className="text-fg-muted text-sm">
+          {STATUS[c.status]} · {c.at}
+        </span>
+      </div>
+      {(c.phone || c.email) && (
+        <p className="text-sm">{[c.phone, c.email].filter(Boolean).join(' · ')}</p>
+      )}
+      <ol
+        aria-label={`Conversation with ${who}`}
+        className="bg-muted grid gap-1 rounded-md p-3 text-sm"
+      >
+        {c.lines.map((l, k) => (
+          <li key={k} className="whitespace-pre-line">
+            <strong>
+              {l.from === 'customer' ? who : l.from === 'assistant' ? 'Assistant' : 'You'}:
+            </strong>{' '}
+            {l.text}
+          </li>
+        ))}
+      </ol>
+      <div className="flex flex-wrap gap-3 text-sm">
+        {c.contact_id && (
+          <a className="underline" href={`${appBase}/contacts/${c.contact_id}`}>
+            Contact
+          </a>
+        )}
+        {c.status === 'ai' || c.status === 'waiting' ? (
+          <Button size="sm" variant="secondary" onClick={() => act('take_over')}>
+            Take over
+          </Button>
+        ) : c.status === 'person' ? (
+          <Button size="sm" variant="ghost" onClick={() => act('hand_back')}>
+            Hand back to the assistant
+          </Button>
+        ) : null}
+        {c.status !== 'closed' && (
+          <Button size="sm" variant="ghost" onClick={() => act('close')}>
+            Close
+          </Button>
+        )}
+        <Button
+          size="sm"
+          variant="ghost"
+          aria-expanded={teaching}
+          onClick={() => setTeaching(!teaching)}
+        >
+          Teach it
+        </Button>
+      </div>
+      {teaching && (
+        <form
+          aria-label={`Teach the assistant an answer, from the chat with ${who}`}
+          className="border-border grid gap-3 rounded-md border p-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            teach.post(`${base}/ai/${c.id}/teach`, {
+              preserveScroll: true,
+              onSuccess: () => setTeaching(false),
+            });
+          }}
+        >
+          <p className="text-fg-muted text-sm">
+            Your answer is added to your chat’s answers (Website → Chat). The assistant uses it from
+            now on.
+          </p>
+          <Field
+            label="Words people use when they ask this"
+            hint="Separate with commas."
+            error={teach.errors.keywords}
+          >
+            <Input
+              value={teach.data.keywords}
+              onChange={(e) => teach.setData('keywords', e.target.value)}
+            />
+          </Field>
+          <Field label="Your answer" error={teach.errors.answer}>
+            <Textarea
+              rows={3}
+              maxLength={600}
+              value={teach.data.answer}
+              onChange={(e) => teach.setData('answer', e.target.value)}
+            />
+          </Field>
+          <Button type="submit" size="sm" className="justify-self-start" loading={teach.processing}>
+            Save the answer
+          </Button>
+        </form>
+      )}
+    </li>
   );
 }

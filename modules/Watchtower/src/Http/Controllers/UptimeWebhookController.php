@@ -9,17 +9,18 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Throwable;
 use Wurk\Watchtower\Support\Uptime;
+use Wurk\Watchtower\Support\UptimeToken;
 
 /**
  * POST /_wurk/uptime/{token} (Sprint 18.0b): the external uptime checker reports an outage starting or ending.
  * Understands Better Stack's incident webhook, UptimeRobot's alert webhook, and a plain {monitor, status, cause}.
- * The token (WATCHTOWER_UPTIME_TOKEN) is the only secret; without it set, the endpoint doesn't exist.
+ * The token (Admin → Watchtower, or WATCHTOWER_UPTIME_TOKEN) is the only secret; without it set, the endpoint doesn't exist.
  */
 final class UptimeWebhookController
 {
-    public function __invoke(Request $request, string $token, Uptime $uptime): Response
+    public function __invoke(Request $request, string $token, Uptime $uptime, UptimeToken $tokens): Response
     {
-        $expected = (string) config('wurk.watchtower.uptime_token');
+        $expected = $tokens->current();
         abort_if($expected === '' || ! hash_equals($expected, $token), 404);
 
         [$monitor, $state, $cause, $at] = self::parse($request);

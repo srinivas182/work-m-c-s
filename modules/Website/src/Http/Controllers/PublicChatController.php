@@ -7,22 +7,21 @@ namespace Wurk\Website\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
-use Wurk\Crm\Contracts\ContactBook;
-use Wurk\Crm\Contracts\LeadBook;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
-use Wurk\Website\Mail\ChatHandoffMail;
 use Wurk\Website\Models\ChatAnswer;
-use Wurk\Website\Models\ChatHandoff;
-use Wurk\Website\Models\Site;
+use Wurk\Website\Models\ReceptionistConversation;
 use Wurk\Website\Support\ChatBot;
+use Wurk\Website\Support\Receptionist;
 
 /** The chat the website loads (only when switched on): greeting, buttons, keyword answers, reply time. */
 final class PublicChatController
 {
     private const DAILY_CAP = 50;
+
+    /** AI receptionist messages per business per day: a backstop against abuse (the owner's monthly cap is the real limit). */
+    private const AI_DAILY_CAP = 2000;
 
     public function config(string $handle, TenantDirectory $tenants, TenantContext $context): JsonResponse
     {
@@ -33,8 +32,34 @@ final class PublicChatController
             $bot = app(ChatBot::class);
             abort_unless($bot->settings()['enabled'], 404);
 
-            return (new JsonResponse($bot->publicConfig()))->setPublic()->setMaxAge(300); // answers change rarely
+            $ai = app(Receptionist::class)->settings();
+
+            return (new JsonResponse([...$bot->publicConfig(),
+                // 19.2: when the AI receptionist is on, typed messages go to it (the buttons still answer instantly).
+                'ai' => $ai['enabled'] ? ['greeting' => $ai['greeting'], 'notice' => 'You’re chatting with an AI assistant. The conversation is kept for '.ReceptionistConversation::KEEP_DAYS.' days so the business can see it.'] : null,
+            ]))->setPublic()->setMaxAge(300); // answers change rarely
         });
+    }
+
+    /** 19.2: a typed message to the AI receptionist. The browser keeps its own random key for its conversation. */
+    public function message(Request $request, string $handle, TenantDirectory $tenants, TenantContext $context): JsonResponse
+    {
+        $tenant = $tenants->findByHandle($handle);
+        abort_if($tenant === null || ! $tenant->isActive(), 404);
+        $data = $request->validate([
+            'visitor' => ['required', 'string', 'min:16', 'max:64', 'regex:/^[A-Za-z0-9_-]+$/'],
+            'message' => ['required', 'string', 'max:2000'],
+            'conversation' => ['nullable', 'string', 'size:26'],
+        ]);
+        $capKey = 'chat-ai-cap:'.$tenant->tenantId().':'.now()->format('Y-m-d');
+        abort_if(RateLimiter::tooManyAttempts($capKey, self::AI_DAILY_CAP), 429);
+        RateLimiter::hit($capKey, 86400);
+
+        return new JsonResponse($context->run($tenant, function () use ($data): array {
+            abort_unless(app(ChatBot::class)->settings()['enabled'], 404);
+
+            return app(Receptionist::class)->reply($data['visitor'], $data['message'], $data['conversation'] ?? null);
+        }));
     }
 
     /** Decision A: a chat is stored only when the visitor asks for a person (with consent). */
@@ -64,32 +89,13 @@ final class PublicChatController
         abort_if(RateLimiter::tooManyAttempts($capKey, self::DAILY_CAP), 429);
         RateLimiter::hit($capKey, 86400);
 
-        [$notify, $reply] = $context->run($tenant, function () use ($data, $request): array {
-            $bot = app(ChatBot::class);
-            abort_unless($bot->settings()['enabled'], 404);
-            $news = $request->boolean('news');
-            $chat = ChatHandoff::query()->create([
-                'name' => $data['name'], 'phone' => $data['phone'] ?? null, 'email' => isset($data['email']) ? mb_strtolower($data['email']) : null,
-                'message' => $data['message'] ?? null, 'transcript' => array_values($data['transcript'] ?? []), 'marketing_consent_at' => $news ? now() : null,
-                'ip_hash' => hash_hmac('sha256', (string) $request->ip(), (string) config('app.key')), 'created_at' => now(),
-            ]);
-            $contact = app(ContactBook::class)->remember($data['name'], $data['phone'] ?? null, $data['email'] ?? null, 'chat', $chat->id, null, 'Website chat', $news ? 'Website chat' : null);
-            $lead = $bot->settings()['leads']
-                ? app(LeadBook::class)->open($contact, 'Chat: '.$data['name'], 'chat', null, null, ($data['message'] ?? '') !== '' ? $data['message'] : null)
-                : null;
-            $chat->update(['contact_id' => $contact, 'lead_id' => $lead]);
-            $bot->autoReply($data['email'] ?? null, $data['name'], app(TenantContext::class)->current()->displayName()); // optional
+        $reply = $context->run($tenant, function () use ($data, $request): string {
+            abort_unless(app(ChatBot::class)->settings()['enabled'], 404);
 
-            return [Site::query()->first()?->settings['enquiry_email'] ?? null, $bot->replyTime()];
+            return app(ChatBot::class)->handOff($data, array_values($data['transcript'] ?? []), hash_hmac('sha256', (string) $request->ip(), (string) config('app.key')), $request->boolean('news'));
         });
-        if (is_string($notify) && $notify !== '') {
-            Mail::to($notify)->send(new ChatHandoffMail($tenant->displayName(), [
-                'name' => (string) $data['name'], 'phone' => $data['phone'] ?? null, 'email' => $data['email'] ?? null, 'message' => $data['message'] ?? null,
-                'transcript' => array_values(array_map(fn (array $l) => ['from' => (string) $l['from'], 'text' => (string) $l['text']], $data['transcript'] ?? [])),
-            ]));
-        }
 
-        return new JsonResponse(['ok' => true, 'reply' => 'Thanks — '.lcfirst($reply)]);
+        return new JsonResponse(['ok' => true, 'reply' => $reply]);
     }
 
     /** Anonymous: count a button tap (no visitor details), so owners can see which answers are used. */
