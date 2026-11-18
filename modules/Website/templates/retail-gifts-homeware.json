@@ -1,0 +1,273 @@
+{
+  "category": "retail",
+  "key": "retail-gifts-homeware",
+  "name": "Gifts & homeware",
+  "position": 3,
+  "description": "Curated and stylish: an online shop of gifts, décor and handmade goods.",
+  "definition": {
+    "branding": {
+      "primary": "#9A3412",
+      "secondary": "#0F766E",
+      "font_pairing": "editorial",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Shop",
+          "type": "page",
+          "page": "shop"
+        },
+        {
+          "label": "Our makers",
+          "type": "page",
+          "page": "makers"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Gifts and homeware — handmade by local makers",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "promo",
+              "type": "PromotionBanner",
+              "version": 1,
+              "props": {
+                "text": "Free delivery on orders over a set amount — add yours",
+                "linkLabel": "Shop now",
+                "linkHref": "/shop",
+                "tone": "brand",
+                "starts": "",
+                "ends": ""
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "collage",
+                "heading": "Beautiful things, made here",
+                "text": "Handmade homeware and gifts from local makers — for your home or someone you love.",
+                "primaryLabel": "Shop",
+                "primaryHref": "/shop",
+                "secondaryLabel": "Our makers",
+                "secondaryHref": "/makers",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/retail-gifts-homeware/hero-1600.webp",
+                    "alt": "Handmade baskets and ceramics on a table"
+                  },
+                  {
+                    "src": "/images/templates/retail-gifts-homeware/maker-1600.webp",
+                    "alt": "A craftswoman weaving a basket"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "New in",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-6"
+              }
+            },
+            {
+              "id": "makers",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Meet the makers",
+                "text": "Tell the stories of the people who make your products, and how you work with them fairly.",
+                "image": "/images/templates/retail-gifts-homeware/maker-1600.webp",
+                "imageAlt": "A craftswoman weaving a basket",
+                "imageSide": "right",
+                "buttonLabel": "Our makers",
+                "buttonHref": "/makers"
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why shop with us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "heart",
+                    "title": "Handmade",
+                    "text": "Every piece is unique."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Gift-wrapped",
+                    "text": "Add a note; we wrap it."
+                  },
+                  {
+                    "icon": "check",
+                    "title": "Easy returns",
+                    "text": "Explain your returns policy."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "shop",
+        "title": "Shop",
+        "slug": "shop",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Shop",
+                "text": "Homeware and gifts, made by hand."
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "All products",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-12"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "makers",
+        "title": "Our makers",
+        "slug": "makers",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Our makers",
+                "text": "Introduce each maker: where they work, their craft and their story."
+              }
+            },
+            {
+              "id": "studio",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "In the studio",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/retail-gifts-homeware/maker-1600.webp",
+                    "alt": "A craftswoman weaving a basket"
+                  },
+                  {
+                    "src": "/images/templates/retail-gifts-homeware/hero-1600.webp",
+                    "alt": "Handmade baskets and ceramics on a table"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

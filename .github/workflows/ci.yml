@@ -341,12 +341,12 @@ jobs:
       && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true')
       && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    # The browser suite in two halves; the accessibility crawl of every screen (18.5a) and every template in five
-    # (78 templates from Sprint 20: three parts reached 12 minutes); the performance gate in two.
+    # The browser suite in two halves; the accessibility crawl of every screen (18.5a) and every template in seven
+    # (78 templates from Sprint 20: with five, one part reached 11 minutes at 66 templates); the performance gate in two.
     strategy:
       fail-fast: false
       matrix:
-        part: ['1/2', '2/2', 'screens 1/5', 'screens 2/5', 'screens 3/5', 'screens 4/5', 'screens 5/5', 'performance 1/2', 'performance 2/2']
+        part: ['1/2', '2/2', 'screens 1/7', 'screens 2/7', 'screens 3/7', 'screens 4/7', 'screens 5/7', 'screens 6/7', 'screens 7/7', 'performance 1/2', 'performance 2/2']
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7

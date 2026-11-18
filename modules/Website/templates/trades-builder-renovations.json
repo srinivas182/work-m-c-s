@@ -1,0 +1,360 @@
+{
+  "category": "trades-home",
+  "key": "trades-builder-renovations",
+  "name": "Builder & renovations",
+  "position": 3,
+  "description": "Solid and proven: projects, process, NHBRC registration and a site-visit quote.",
+  "definition": {
+    "branding": {
+      "primary": "#7C2D12",
+      "secondary": "#0EA5E9",
+      "font_pairing": "technical",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Projects",
+          "type": "page",
+          "page": "projects"
+        },
+        {
+          "label": "Site visit",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Builder — extensions, renovations and new homes",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a site visit",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Built properly. Finished on time.",
+                "text": "Extensions, new homes, renovations, tiling and paving — with clear quotes and a builder who answers the phone.",
+                "primaryLabel": "Book a site visit",
+                "primaryHref": "/quote",
+                "secondaryLabel": "Our projects",
+                "secondaryHref": "/projects",
+                "facts": [
+                  {
+                    "text": "NHBRC registered"
+                  },
+                  {
+                    "text": "Written quotes"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/trades-builder-renovations/hero-1600.webp",
+                    "alt": "Builders working on a house extension"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "process",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How we work",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Site visit",
+                    "text": "We measure and listen."
+                  },
+                  {
+                    "title": "Quote and plans",
+                    "text": "A written quote; plans if you need them."
+                  },
+                  {
+                    "title": "Build",
+                    "text": "Weekly updates and photos."
+                  },
+                  {
+                    "title": "Handover",
+                    "text": "A walk-through and a clean site."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "projects",
+              "type": "Portfolio",
+              "version": 1,
+              "props": {
+                "heading": "Recent projects",
+                "intro": "",
+                "projects": [
+                  {
+                    "title": "Two-room extension",
+                    "photo": "/images/templates/trades-builder-renovations/project-1-1600.webp",
+                    "photoAlt": "A finished home extension",
+                    "category": "Extension",
+                    "story": "Describe the job.",
+                    "outcome": "What the client got."
+                  },
+                  {
+                    "title": "Bathroom renovation",
+                    "photo": "/images/templates/trades-builder-renovations/project-2-1600.webp",
+                    "photoAlt": "A renovated bathroom",
+                    "category": "Renovation",
+                    "story": "Describe the job.",
+                    "outcome": "What the client got."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registered",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "NHBRC",
+                    "logo": "",
+                    "detail": "Add your registration number"
+                  },
+                  {
+                    "name": "CIDB",
+                    "logo": "",
+                    "detail": "Add your grading, if any"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What customers say",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "projects",
+        "title": "Projects",
+        "slug": "projects",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a site visit",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Before & after",
+                "intro": "Real projects.",
+                "layout": "slider",
+                "items": []
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Gallery",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/trades-builder-renovations/project-1-1600.webp",
+                    "alt": "A finished home extension"
+                  },
+                  {
+                    "src": "/images/templates/trades-builder-renovations/project-2-1600.webp",
+                    "alt": "A renovated bathroom"
+                  },
+                  {
+                    "src": "/images/templates/trades-builder-renovations/hero-1600.webp",
+                    "alt": "Builders working on a house extension"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Site visit",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a site visit",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Book a site visit",
+                "intro": "Tell us about the project.",
+                "services": [
+                  {
+                    "name": "Extension"
+                  },
+                  {
+                    "name": "New house"
+                  },
+                  {
+                    "name": "Renovation"
+                  },
+                  {
+                    "name": "Tiling"
+                  },
+                  {
+                    "name": "Paving"
+                  },
+                  {
+                    "name": "Roofing"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Book my visit",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Area",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Do you have plans?",
+                    "type": "yesno",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "Budget (rough)",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we build in",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Call or WhatsApp.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

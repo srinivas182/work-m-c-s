@@ -1,0 +1,329 @@
+{
+  "category": "professional-services",
+  "key": "professional-consultant",
+  "name": "Consultant & coach",
+  "position": 3,
+  "description": "Personal and credible: one expert, their offer, results and a discovery call.",
+  "definition": {
+    "branding": {
+      "primary": "#1E293B",
+      "secondary": "#EAB308",
+      "font_pairing": "editorial",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "Book a call",
+          "type": "page",
+          "page": "call"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Business consultant and coach",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a call",
+                "buttonHref": "/call",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Clarity for your next move",
+                "text": "I help small-business owners and teams plan, grow and lead — practical advice, no jargon.",
+                "primaryLabel": "Book a call",
+                "primaryHref": "/call",
+                "secondaryLabel": "How I help",
+                "secondaryHref": "/services",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/professional-consultant/hero-1600.webp",
+                    "alt": "A consultant speaking with a client"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "clients",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Clients I’ve worked with",
+                "items": []
+              }
+            },
+            {
+              "id": "offer",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "How I help",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "star",
+                    "title": "Strategy",
+                    "text": "A clear plan for the next 12 months."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Leadership coaching",
+                    "text": "One-to-one, for owners and managers."
+                  },
+                  {
+                    "icon": "sparkles",
+                    "title": "Workshops",
+                    "text": "Half- or full-day sessions with your team."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "workshops",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Workshops that change how teams work",
+                "text": "Describe a typical workshop and what teams take away.",
+                "image": "/images/templates/professional-consultant/workshop-1600.webp",
+                "imageAlt": "A workshop with a team",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Working together",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Discovery call",
+                    "text": "Free, 30 minutes."
+                  },
+                  {
+                    "title": "Proposal",
+                    "text": "Scope, timeline and fee."
+                  },
+                  {
+                    "title": "Work",
+                    "text": "Sessions, check-ins and results."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What clients say",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a call",
+                "buttonHref": "/call",
+                "sticky": true
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Ways to work with me",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Strategy day",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "One day, one plan",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book a call",
+                    "buttonHref": "/call"
+                  },
+                  {
+                    "name": "Coaching",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Monthly one-to-one sessions",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Book a call",
+                    "buttonHref": "/call"
+                  },
+                  {
+                    "name": "Team workshop",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Half or full day",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book a call",
+                    "buttonHref": "/call"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "about",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "About me",
+                "text": "Your background, qualifications and why you do this work."
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "call",
+        "title": "Book a call",
+        "slug": "call",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a call",
+                "buttonHref": "/call",
+                "sticky": true
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "enquiry",
+                "heading": "Book a discovery call",
+                "intro": "Tell me a little about your business.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Book my call",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Business",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "What would you like help with?",
+                    "type": "long",
+                    "choices": "",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact me",
+                "intro": "Speaking and media requests welcome.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

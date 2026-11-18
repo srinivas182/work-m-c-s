@@ -1,0 +1,352 @@
+{
+  "category": "spa-wellness",
+  "key": "spa-mobile-massage",
+  "name": "Massage & mobile spa",
+  "position": 3,
+  "description": "Soothing and simple: massages and treatments at home, hotels or events.",
+  "definition": {
+    "branding": {
+      "primary": "#365314",
+      "secondary": "#D97706",
+      "font_pairing": "clean",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Treatments",
+          "type": "page",
+          "page": "treatments"
+        },
+        {
+          "label": "Book",
+          "type": "page",
+          "page": "book"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Mobile massage — spa treatments at home",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a massage",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Relax. We’ll bring the spa.",
+                "text": "Massages and treatments in your home, hotel or office — towels, oils and music included.",
+                "primaryLabel": "Book a massage",
+                "primaryHref": "/book",
+                "secondaryLabel": "Treatments",
+                "secondaryHref": "/treatments",
+                "facts": [
+                  {
+                    "text": "Home, hotel or office"
+                  },
+                  {
+                    "text": "Evenings and weekends"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/spa-mobile-massage/hero-1600.webp",
+                    "alt": "A relaxing massage with oils"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "treatments",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Treatments",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Swedish massage",
+                    "description": "Relaxing, full body",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Deep tissue",
+                    "description": "For tight muscles",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Hot stones",
+                    "description": "Warm, deeply relaxing",
+                    "duration": "75 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Couples massage",
+                    "description": "Two therapists",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "setup",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "We set up everything",
+                "text": "A professional table, fresh linen, oils and music. You just relax.",
+                "image": "/images/templates/spa-mobile-massage/setup-1600.webp",
+                "imageAlt": "A massage table set up at home",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "events",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "For groups",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Bridal shower",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Massages for the bride and friends",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Office wellness day",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Chair massages for the team",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/book"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we travel to",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "treatments",
+        "title": "Treatments",
+        "slug": "treatments",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a massage",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "treatments",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Treatments and prices",
+                "intro": "",
+                "note": "A travel fee may apply outside our main areas.",
+                "items": [
+                  {
+                    "name": "Swedish massage",
+                    "description": "",
+                    "duration": "60 or 90 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Deep tissue",
+                    "description": "",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Hot stones",
+                    "description": "",
+                    "duration": "75 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Foot massage",
+                    "description": "",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Couples massage",
+                    "description": "",
+                    "duration": "60 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Good to know",
+                "items": [
+                  {
+                    "question": "What do I need to provide?",
+                    "answer": "A quiet room with space for the table."
+                  },
+                  {
+                    "question": "Are your therapists qualified?",
+                    "answer": "Say where your therapists trained."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "book",
+        "title": "Book",
+        "slug": "book",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a massage",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "book-online",
+              "type": "BookOnline",
+              "version": 1,
+              "props": {
+                "mode": "appointments",
+                "heading": "Book a massage",
+                "intro": "Choose a treatment and time; add your address.",
+                "fallbackText": "Call or message us to book.",
+                "fallbackLabel": "Contact us",
+                "fallbackHref": "/contact"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "WhatsApp us for groups and events.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

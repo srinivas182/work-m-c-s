@@ -30,7 +30,7 @@ const templates = readdirSync('modules/Website/templates')
   );
 
 test('every template is checked, at least three for each category @screens', () => {
-  expect(templates.length).toBeGreaterThanOrEqual(66); // 24 (Sprints 6–7) + 42 from 20.4 (14 categories × 3)
+  expect(templates.length).toBeGreaterThanOrEqual(78); // 26 categories × 3 designs (Sprints 6–7, 20.4, 20.5)
 });
 
 for (const [i, template] of templates.entries()) {
