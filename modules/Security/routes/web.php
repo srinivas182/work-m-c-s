@@ -11,6 +11,7 @@ Route::domain((string) config('wurk.domains.admin'))
     ->group(function (): void {
         Route::get('/security', [SecurityController::class, 'platform'])->name('admin.security');
         Route::put('/security', [SecurityController::class, 'updatePlatform'])->name('admin.security.update');
+        Route::put('/security/contacts', [SecurityController::class, 'updateContacts'])->name('admin.security.contacts'); // 19.6
     });
 
 Route::tenant(function (): void {

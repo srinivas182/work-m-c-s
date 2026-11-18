@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Watchtower\Jobs\AnalyseIncident;
 use Wurk\Watchtower\Models\Incident;
@@ -22,6 +23,7 @@ use Wurk\Watchtower\Support\Release;
 use Wurk\Watchtower\Support\SlowPages;
 use Wurk\Watchtower\Support\SystemChecks;
 use Wurk\Watchtower\Support\Uptime;
+use Wurk\Watchtower\Support\UptimeToken;
 
 /** Admin → Watchtower (Sprint 18.0): every problem on the platform, the state of each system, and who gets emailed. */
 final class IncidentsController
@@ -52,6 +54,8 @@ final class IncidentsController
             'slow' => SlowPages::worst(),
             'ai' => ['enabled' => (bool) config('wurk.watchtower.ai', true), 'today' => Analyst::today(), 'cap' => (int) config('wurk.watchtower.ai_daily_cap', 50)],
             'recipients' => $alerts->recipients(),
+            // 19.6: the uptime checker's webhook address — shown in full only to people who manage Watchtower.
+            'uptime_hook' => Gate::allows('watchtower.manage') ? ['url' => app(UptimeToken::class)->url(), 'source' => app(UptimeToken::class)->source()] : null,
             'can_manage' => Gate::allows('watchtower.manage'),
             'rows' => ['data' => collect($rows->items())->map(fn (Incident $i) => $this->row($i))->all(), 'total' => $rows->total(), 'next' => $rows->nextPageUrl(), 'prev' => $rows->previousPageUrl()],
         ]);
@@ -117,6 +121,15 @@ final class IncidentsController
         $alerts->setRecipients($emails, (string) $request->user()?->getAuthIdentifier());
 
         return back()->with('status', $emails === [] ? 'No one will be emailed — problems are still recorded here.' : 'Saved. Problem reports go to '.implode(', ', $emails).'.');
+    }
+
+    /** A new uptime webhook address (19.6); the old one stops working. */
+    public function uptimeToken(Request $request, UptimeToken $tokens): RedirectResponse
+    {
+        $tokens->rotate((string) $request->user()?->getAuthIdentifier());
+        app(AuditLog::class)->record('watchtower.uptime_token_rotated', 'platform', 'watchtower', []);
+
+        return back()->with('status', 'New webhook address made. Paste it into your uptime checker: the old one has stopped working.');
     }
 
     /** @return array<string, mixed> */

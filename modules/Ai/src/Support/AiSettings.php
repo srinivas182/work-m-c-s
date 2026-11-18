@@ -51,6 +51,8 @@ final readonly class AiSettings
         // "Ask WURK" (16.2, decision A): free questions a month per business, then the rate card's "ai.assistant" price each;
         // actions are free; no business asks more than the monthly cap.
         'assistant' => ['enabled' => true, 'free_questions' => 50, 'monthly_cap' => 500],
+        // WURK's sales assistant on wurk.co.za (19.5): off until HQ switches it on; WURK pays, within this monthly cap.
+        'sales' => ['enabled' => false, 'greeting' => 'Hi! I’m WURK’s AI assistant. Ask me about packages, prices and what WURK can do for your business.', 'monthly_cap' => 2000],
     ];
 
     public function __construct(private PlatformSettings $settings) {}

@@ -9,6 +9,7 @@
         "tenancy",
         "security",
         "health",
-        "ai"
+        "ai",
+        "audit"
     ]
 }

@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 // Direct imports keep the public site's JavaScript small (no full design-system bundle).
 import { Button } from '@/design-system/components/button';
+import { SalesChat } from './SalesChat';
 export { rand } from '@/lib/money';
 
 export interface SiteProps {
@@ -109,6 +110,7 @@ export function Site({
           </nav>
         </div>
       </footer>
+      <SalesChat />
     </div>
   );
 }

@@ -67,7 +67,14 @@ php artisan website:demo-sites --no-interaction > /dev/null
 php artisan identities:create chat-owner@demo.co.za --first=Nomsa --last=Dube \
   --password="sunny days in durban" --tenant=demo-salon-hair-braids
 php artisan bookings:demo --no-interaction > /dev/null   # the demo sites take bookings
+# The AI receptionist's journey (Sprint 19.4a) on its own demo site, so the rule-based chat test above is unaffected:
+# an owner, and test credits for its replies (the simulated AI provider answers: there are no AI keys in tests).
+php artisan identities:create ai-owner@demo.co.za --first=Zanele --last=Khumalo \
+  --password="sunny days in durban" --tenant=demo-salon-nails-lashes-barbers > /dev/null
+php artisan tinker --execute="app(Wurk\\Tenancy\\Contracts\\TenantContext::class)->run(app(Wurk\\Tenancy\\Contracts\\TenantDirectory::class)->findByHandle('demo-salon-nails-lashes-barbers'), fn () => app(Wurk\\Credits\\Contracts\\CreditWallet::class)->grant('purchase', 100000, 'e2e:ai-receptionist', 'Test credits'));" > /dev/null
 php artisan shop:demo --no-interaction > /dev/null           # the retail demos sell (product grids and pages)
+# WURK's sales assistant on wurk.co.za (Sprint 19.5b), switched on as HQ would in Admin → WURK AI.
+php artisan tinker --execute="\$s = app(Wurk\\Ai\\Support\\AiSettings::class); \$all = \$s->all(); \$s->save([...\$all, 'sales' => [...\$all['sales'], 'enabled' => true]], null);" > /dev/null
 
 # The accessibility crawl (Sprint 18.5a): a business with a record behind every screen, the list of every screen,
 # and staff accounts for its Admin chunks (authenticator codes are single-use, so each chunk signs in as its own person).

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Gate;
 use Wurk\Agents\Console\CreateAgentCommand;
 use Wurk\Agents\Console\SweepDemosCommand;
 use Wurk\Agents\Metrics\CommissionSection;
+use Wurk\Agents\Sales\YourAgentTool;
 use Wurk\Agents\Support\AgentAttribution;
 use Wurk\Agents\Support\AgentCommission;
 use Wurk\Agents\Support\AgentDemos;
@@ -17,6 +18,7 @@ use Wurk\Billing\Events\CreditNoteIssued;
 use Wurk\Billing\Events\PaymentChargedBack;
 use Wurk\Billing\Events\PaymentSucceeded;
 use Wurk\Platform\Contracts\PlatformMetrics;
+use Wurk\Platform\Contracts\SalesTools;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Events\TenantClaimed;
@@ -26,6 +28,8 @@ final class AgentsServiceProvider extends ModuleServiceProvider
 {
     protected function bootModule(): void
     {
+        // WURK's sales assistant (19.5) can pass a visitor to the agent whose link they followed.
+        $this->callAfterResolving(SalesTools::class, fn (SalesTools $t) => $t->register(YourAgentTool::class));
         // Admin → Metrics → Agent commission (Sprint 15.4b).
         $this->callAfterResolving(PlatformMetrics::class, function (PlatformMetrics $m): void {
             $m->register('agents', 300, fn (ReportPeriod $p) => Gate::allows('metrics.view') ? app(CommissionSection::class)->build($p) : null);
