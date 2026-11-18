@@ -130,7 +130,7 @@ describe('block library', () => {
 
   it('scopes each site’s theme to its own root', () => {
     const html = render([]);
-    expect(html).toMatch(/class="wurk-site" style="--s-bg:/);
+    expect(html).toMatch(/class="wurk-site" data-style="minimal" style="--s-bg:/);
   });
 });
 

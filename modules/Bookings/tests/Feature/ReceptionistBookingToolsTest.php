@@ -248,7 +248,10 @@ it('never sees another business: its services, times and bookings stay with it (
 
         return [$s, app(Booker::class)->book($s, CarbonImmutable::parse('2027-05-03 10:00', 'Africa/Johannesburg'), ['name' => 'Zodwa', 'phone' => '083 111 2222'])];
     });
-    expect(json_encode(($this->run)('services', [])))->not->toContain('Secret silk press')->not->toContain('999');
+    // Check names and prices, not the whole JSON: a random id can contain "999".
+    $listed = ($this->run)('services', [])['services'];
+    expect(json_encode($listed))->not->toContain('Secret silk press')
+        ->and(collect($listed)->flatMap(fn (array $x) => array_filter($x, fn ($v, $k) => $k !== 'id', ARRAY_FILTER_USE_BOTH))->implode(' '))->not->toContain('999');
     expect(fn () => ($this->run)('free_times', ['service' => $theirs[0]->id, 'date' => '2027-05-03']))->toThrow(ReceptionistRefused::class, 'no service like that');
     expect(fn () => ($this->run)('book_appointment', [...$this->book, 'service' => $theirs[0]->id]))->toThrow(ReceptionistRefused::class, 'no service like that');
     $mine = ($this->run)('book_appointment', $this->book);

@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Premium templates — Sprint 20.1 (three styles for every design)
+- **Every design now comes in three styles: Luxury, Modern minimal and Bold.** A style sets the type, spacing, headings, buttons, corners and the look of alternate sections:
+  - **Luxury:** refined serif type and generous space; alternate sections become deep, quiet bands.
+  - **Modern minimal:** clean type, white space and fine lines.
+  - **Bold:** big type, round corners and washes of the brand colour.
+- **Owners choose the style when they sign up** (preview opens in that style). They can change it any time in **Website → Branding → Style**; their words and photos stay as they are.
+- **Readable in every colour.** Text in Luxury's deep bands uses the dark side of the same colour engine, so it stays readable whatever colour the owner picks (checked for eight brand colours). Every template page passes WCAG 2.2 AA in Luxury and Bold, and fits a phone in Bold (the largest type).
+- **Sites keep a steady rhythm.** Alternate bands and section spacing now come from the page and the style, not from each section, so sections never sit in two grey bands in a row. Existing sites keep their look (Modern minimal).
+- The template preview takes `?style=luxury|minimal|bold`.
+
 ## [0.20.0] — 2026-11-18 — Sprint 19: AI receptionist
 
 ### AI receptionist — Sprint 19.7 (quality and release)

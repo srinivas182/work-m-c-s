@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { generateNeutral, generatePalette } from '@/design-system/brand/palette';
-import type { Branding } from './types';
+import type { Branding, SiteStyle } from './types';
 
 type FontPairing = { display: string; body: string };
 
@@ -48,6 +48,64 @@ export const FONT_PAIRINGS: Record<string, FontPairing> = {
 const RADIUS = { square: '2px', soft: '14px', round: '28px' } as const;
 
 /**
+ * The three styles of every design (Sprint 20.1). Choosing one sets its type pairing and corners (the owner can still
+ * change those after); the rest of the look comes from these variables and site.css.
+ */
+export const STYLES: Record<
+  SiteStyle,
+  { label: string; description: string; font_pairing: string; corners: Branding['corners'] }
+> = {
+  luxury: {
+    label: 'Luxury',
+    description: 'Refined serif type, generous space and deep, quiet bands.',
+    font_pairing: 'elegant',
+    corners: 'square',
+  },
+  minimal: {
+    label: 'Modern minimal',
+    description: 'Clean type, white space and fine lines; one accent colour.',
+    font_pairing: 'clean',
+    corners: 'soft',
+  },
+  bold: {
+    label: 'Bold',
+    description: 'Big, confident type and solid colour bands.',
+    font_pairing: 'bold',
+    corners: 'round',
+  },
+};
+
+const STYLE_VARS: Record<SiteStyle, Record<string, string>> = {
+  luxury: {
+    '--s-section-y': 'clamp(5rem, 10vw, 8.5rem)',
+    '--s-heading-weight': '500',
+    '--s-heading-tracking': '0.005em',
+    '--s-heading-scale': '1.12',
+    '--s-btn-case': 'uppercase',
+    '--s-btn-tracking': '0.14em',
+    '--s-btn-size': '0.8125rem',
+  },
+  minimal: {
+    '--s-section-y': 'clamp(4rem, 8vw, 6rem)',
+    '--s-heading-weight': '650',
+    '--s-heading-tracking': '-0.02em',
+    '--s-heading-scale': '1',
+    '--s-btn-case': 'none',
+    '--s-btn-tracking': '0',
+    '--s-btn-size': '1rem',
+  },
+  bold: {
+    '--s-section-y': 'clamp(4rem, 8vw, 6.5rem)',
+    '--s-heading-weight': '800',
+    '--s-heading-tracking': '-0.035em',
+    '--s-heading-scale': '1.22',
+    '--s-btn-case': 'none',
+    '--s-btn-tracking': '-0.005em',
+    '--s-btn-size': '1.0625rem',
+  },
+};
+
+/**
  * A site's look as CSS variables, scoped to the site's root element so one
  * business's palette never reaches another's (or the back office). Colours come
  * from the Sprint 0 engine, which guarantees WCAG 2.2 AA pairings.
@@ -77,5 +135,31 @@ export function siteTheme(branding: Branding): CSSProperties {
     '--s-font-display': fonts.display,
     '--s-font-body': fonts.body,
     '--s-radius': RADIUS[branding.corners] ?? RADIUS.soft,
+    ...STYLE_VARS[branding.style ?? 'minimal'],
+    // The colours of a deep band (Luxury's alternate sections): the dark side of the same palettes, so text on it is
+    // as readable as on the light side, whatever colour the owner picks.
+    ...inverted(branding),
   } as CSSProperties;
+}
+
+function inverted(branding: Branding): Record<string, string> {
+  const brand = generatePalette(branding.primary).dark;
+  const n = generateNeutral(branding.primary).dark.scale;
+  const accent = branding.secondary ? generatePalette(branding.secondary).dark : brand;
+
+  return {
+    '--s-inv-bg': n[0],
+    '--s-inv-surface': n[1],
+    '--s-inv-surface-2': n[2],
+    '--s-inv-border': n[5],
+    '--s-inv-fg': n[11],
+    '--s-inv-fg-muted': n[10],
+    '--s-inv-brand': brand.scale[8],
+    '--s-inv-on-brand': brand.onSolid,
+    '--s-inv-brand-text': brand.scale[10],
+    '--s-inv-brand-soft': brand.scale[2],
+    '--s-inv-brand-softer': brand.scale[1],
+    '--s-inv-accent': accent.scale[8],
+    '--s-inv-on-accent': accent.onSolid,
+  };
 }

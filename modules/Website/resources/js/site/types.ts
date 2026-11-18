@@ -13,11 +13,15 @@ export interface ContentDocument {
   blocks: StoredBlock[];
 }
 
+export type SiteStyle = 'luxury' | 'minimal' | 'bold';
+
 export interface Branding {
   primary: string;
   secondary: string | null;
   font_pairing: string;
   corners: 'square' | 'soft' | 'round';
+  /** One design, three looks (Sprint 20.1); a site without one keeps the look it had (modern minimal). */
+  style?: SiteStyle;
   logo: string | null;
   favicon: string | null;
 }

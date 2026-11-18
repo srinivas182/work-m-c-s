@@ -27,7 +27,10 @@ for (const [i, template] of templates.entries()) {
     });
     const port = new URL(testInfo.project.use.baseURL ?? 'http://127.0.0.1:8123').port;
     const visits = [
-      ...template.definition.pages.map((p) => `/templates/${template.key}/preview?page=${p.key}`),
+      ...template.definition.pages.flatMap((p) => [
+        `/templates/${template.key}/preview?page=${p.key}`,
+        `/templates/${template.key}/preview?page=${p.key}&style=bold`, // 20.1: the biggest type
+      ]),
       `http://demo-${template.key}.wurk.test:${port}/`,
     ];
     const tooWide: string[] = [];

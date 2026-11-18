@@ -68,7 +68,7 @@ function Copy({
         {p.primaryLabel && (
           <a
             href={site.editing ? undefined : p.primaryHref}
-            className="inline-flex min-h-12 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-6 font-semibold text-[var(--s-on-brand)] underline-offset-4 shadow-sm transition-opacity hover:underline"
+            className="s-btn inline-flex min-h-12 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-6 font-semibold text-[var(--s-on-brand)] underline-offset-4 shadow-sm transition-opacity hover:underline"
           >
             {p.primaryLabel}
           </a>

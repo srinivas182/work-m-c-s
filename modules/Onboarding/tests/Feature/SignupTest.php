@@ -192,14 +192,16 @@ it('lets a new owner choose a category and design, and builds their website from
     $this->post($app('/signup/category'), ['category' => 'health'])->assertSessionHasErrors('category'); // not offered: no template yet
     $this->post($app('/signup/category'), ['category' => 'salon-beauty'])->assertSessionHasNoErrors();
     $this->post($app('/signup/template'), ['template' => 'someone-elses'])->assertSessionHasErrors('template');
-    $this->post($app('/signup/template'), ['template' => 'salon-hair'])->assertSessionHasNoErrors();
-    $this->get($app('/signup'))->assertInertia(fn (Assert $p) => $p->where('step', 'address'));
+    $this->post($app('/signup/template'), ['template' => 'salon-hair', 'style' => 'gaudy'])->assertSessionHasErrors('style');
+    $this->post($app('/signup/template'), ['template' => 'salon-hair', 'style' => 'luxury'])->assertSessionHasNoErrors(); // 20.1: one of its three styles
+    $this->get($app('/signup'))->assertInertia(fn (Assert $p) => $p->where('step', 'address')->where('data.style', 'luxury'));
     $this->post($app('/signup/address'), ['handle' => 'glow-salon']);
     $this->post($app('/signup/complete'))->assertRedirect('/glow-salon?welcome=1');
 
     $tenant = Tenant::query()->where('handle', 'glow-salon')->firstOrFail();
     app(TenantContext::class)->run($tenant, function () {
         expect(Site::query()->firstOrFail()->only(['category_key', 'template_key']))->toBe(['category_key' => 'salon-beauty', 'template_key' => 'salon-hair'])
+            ->and(Site::query()->firstOrFail()->branding)->toMatchArray(['style' => 'luxury', 'font_pairing' => 'elegant', 'corners' => 'square', 'primary' => '#9D174D'])
             ->and(Page::query()->orderBy('position')->pluck('slug')->all())->toBe(['home', 'prices']);
     });
 });
