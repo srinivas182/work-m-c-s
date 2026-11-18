@@ -67,8 +67,10 @@ test('an owner sees a new order and takes it from paid to done', async ({ page }
   await expect(page.getByRole('heading', { level: 1, name: 'Order #1001' })).toBeVisible();
   await expectAccessible(page);
 
+  // Paid in cash at collection (Sprint 22.3): recorded as taken in person.
+  await page.getByLabel('How the order was paid').selectOption('cash');
   for (const [button, done] of [
-    ['Mark as paid', 'Marked as paid.'],
+    ['Mark as paid', 'Marked as paid: cash.'],
     ['Mark as packed', 'Marked as packed.'],
     ['Ready for collection', 'Marked ready — the customer has been told.'],
     ['Mark as done', 'Marked as done.'],

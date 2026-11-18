@@ -18,6 +18,8 @@ use Wurk\Billing\Models\CreditPack;
 use Wurk\Billing\Models\Payment;
 use Wurk\Billing\Support\PrepaidPlans;
 use Wurk\Credits\Contracts\CreditWallet;
+use Wurk\Messaging\Contracts\Messenger;
+use Wurk\Messaging\Contracts\SendResult;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
@@ -92,6 +94,45 @@ it('warns at 3 and 1 day(s) left, gives the grace period, then the usual dunning
     expect(app(Catalog::class)->subscriptionOf($this->glow->id)['status'])->toBe('active')
         ->and(BillingAccount::query()->find($this->glow->id)->prepaid_ran_out_on)->toBeNull()
         ->and(($this->balance)())->toBe(18000);
+});
+
+it('warns on WhatsApp first, falling back to SMS when WhatsApp can’t deliver', function () {
+    BillingAccount::query()->whereKey($this->glow->id)->update(['billing_phone' => '+27821234567']);
+    $messenger = new class implements Messenger
+    {
+        /** @var list<array<int, mixed>> */
+        public array $sent = [];
+
+        public function sms(string $to, string $text, string $purpose): SendResult
+        {
+            $this->sent[] = ['sms', $purpose];
+
+            return SendResult::sent('s1');
+        }
+
+        public function whatsappTemplate(string $to, string $template, array $parameters, string $purpose, string $language = 'en'): SendResult
+        {
+            $this->sent[] = ['whatsapp', $template, $parameters];
+
+            return $template === PrepaidPlans::TEMPLATE_LOW ? SendResult::sent('w1') : SendResult::failed('template not approved');
+        }
+
+        public function channelActive(string $channel): bool
+        {
+            return true;
+        }
+    };
+    $this->app->instance(Messenger::class, $messenger);
+    ($this->give)(10, 'p1');
+    ($this->run)(); // 7 left: 2 days
+    $this->travel(1)->days();
+    ($this->run)(); // 4 left: 1 day
+    $this->travel(1)->days();
+    ($this->run)(); // 1 left
+    $this->travel(1)->days();
+    ($this->run)(); // out
+    expect($messenger->sent[0][0])->toBe('whatsapp')->and($messenger->sent[0][1])->toBe('wurk_credits_low')->and($messenger->sent[0][2][0])->toBe('Glow Salon')
+        ->and(collect($messenger->sent)->contains(fn ($s) => $s[0] === 'sms' && $s[1] === 'prepaid_empty'))->toBeTrue(); // the "out" template isn't approved yet: SMS instead
 });
 
 it('lets owners top up any amount from R20 and shows how many days their credits last', function () {

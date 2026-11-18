@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\FakesYoco;
 use Tests\Support\InteractsWithShards;
@@ -22,6 +24,8 @@ use Wurk\Bookings\Support\Booker;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\SendResult;
+use Wurk\Payments\Jobs\CheckMobileMoneyPayment;
+use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -261,4 +265,19 @@ it('never sees another business: its services, times and bookings stay with it (
     expect(fn () => ($this->run)('cancel_booking', ['booking_id' => $theirs[1]->id, 'confirmed' => true]))->toThrow(ReceptionistRefused::class);
     app(TenantContext::class)->run($other, fn () => expect(Booking::query()->find($theirs[1]->id)->status)->toBe('confirmed'));
     expect($mine['booked'])->toBeTrue();
+});
+
+it('sends the deposit’s mobile money prompt straight to the customer’s WhatsApp number, with no email needed (Sprint 22)', function () {
+    $this->glow->forceFill(['country' => 'KE'])->save();
+    Bus::fake([CheckMobileMoneyPayment::class]);
+    Http::fake([
+        'sandbox.safaricom.co.ke/oauth/*' => Http::response(['access_token' => 'tok', 'expires_in' => '3599']),
+        'sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest' => Http::response(['CheckoutRequestID' => 'ws_CO_1', 'ResponseCode' => '0']),
+    ]);
+    ($this->in)(fn () => PaymentAccount::query()->create(['provider' => 'mpesa', 'mode' => 'test', 'active' => true,
+        'test_credentials' => ['shortcode' => '174379', 'passkey' => 'pk', 'consumer_key' => 'ck', 'consumer_secret' => 'cs']]));
+    $r = ($this->in)(fn () => ($this->tool)('book_appointment')->run([...$this->book, 'service' => 'colour'],
+        ['conversation' => 'wa-1', 'channel' => 'whatsapp', 'customer' => ['name' => 'Akinyi', 'phone' => '+254712345678', 'email' => null, 'verified' => true]]));
+    expect($r['prompt_sent'])->toBeTrue()->and($r['tell_the_customer'])->toContain('approve it with their mobile money PIN');
+    Http::assertSent(fn ($req) => str_ends_with($req->url(), '/processrequest') && $req['PhoneNumber'] === '254712345678' && $req['Amount'] === 100);
 });

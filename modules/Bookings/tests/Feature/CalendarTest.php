@@ -9,6 +9,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
+use Wurk\Bookings\Digest\BookingsDigest;
 use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
@@ -106,6 +107,7 @@ it('records money taken in person — confirming a booking that awaited its depo
     $this->ctx->run($this->glow, function () {
         expect(app(InPersonPayments::class)->totals(now()->startOfDay(), now()->endOfDay()))->toEqual(['cash' => 10000, 'card_machine' => 35000])
             ->and(app(Takings::class)->net(now()->subDay(), now()->addDay(), null))->toBe(45000)
+            ->and(app(BookingsDigest::class)->figures(CarbonImmutable::now('Africa/Johannesburg')->startOfDay())['received_cents'])->toBe(45000) // the evening summary
             ->and(DB::connection(app(TenantContext::class)->connectionName())->table('audit_events')->where('action', 'payments.taken_in_person')->count())->toBe(2);
     });
 });

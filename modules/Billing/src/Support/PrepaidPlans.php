@@ -26,6 +26,15 @@ final readonly class PrepaidPlans
 {
     public const WARN_AT = [7, 3, 1];
 
+    /**
+     * WURK's WhatsApp templates (utility, English), submitted by HQ on WURK's own number:
+     * low: "{{1}} has about {{2}} days of WURK left. Top up any amount from R20 to keep going: {{3}}"
+     * out: "{{1}}'s WURK credits have run out. Everything keeps working for {{2}} more days. Top up from R20: {{3}}"
+     */
+    public const TEMPLATE_LOW = 'wurk_credits_low';
+
+    public const TEMPLATE_OUT = 'wurk_credits_out';
+
     public function __construct(private Catalog $catalog, private TenantDirectory $tenants, private TenantContext $context, private BillingSettings $settings,
         private Dunning $dunning, private Messenger $messenger) {}
 
@@ -124,6 +133,12 @@ final readonly class PrepaidPlans
         $url = 'https://'.config('wurk.domains.app').'/'.$handle.'/settings/billing';
         Mail::to($account->billing_email)->send(new PrepaidNoticeMail($kind, $business, $days, $url));
         if ($account->billing_phone !== null) {
+            // WhatsApp first, on WURK's number (approved templates); SMS when WhatsApp can't deliver it.
+            $sent = $this->messenger->whatsappTemplate($account->billing_phone, $kind === 'empty' ? self::TEMPLATE_OUT : self::TEMPLATE_LOW,
+                [$business, (string) $days, $url], 'prepaid_'.$kind);
+            if ($sent->ok) {
+                return;
+            }
             $this->messenger->sms($account->billing_phone, $kind === 'empty'
                 ? "WURK: {$business}'s credits have run out. Top up from R20 to keep going: {$url}"
                 : "WURK: {$business} has about {$days} ".($days === 1 ? 'day' : 'days')." of WURK left. Top up from R20: {$url}", 'prepaid_'.$kind);

@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.23.0] — 2026-11-18 — Sprint 22: Mobile money & payments
+
+### Payments — Sprint 22.6 (in the chat, in the summary, and release)
+- **On WhatsApp, the mobile money prompt goes straight to the customer's phone.** When a business takes mobile money, the assistant's deposit request pops up on the customer's own WhatsApp number. They approve it with their PIN without leaving the chat. No email is needed, and the payment link still works as a fallback.
+- **The owner's evening summary counts money taken in person.** Cash, card machine and QR payments recorded on bookings are added to today's money; shop orders paid in cash were already counted.
+- **Pay-as-you-go warnings go by WhatsApp first,** on WURK's number with two new templates, `wurk_credits_low` and `wurk_credits_out`. They fall back to SMS until those are approved.
+- End-to-end tests for recording cash and card-machine payments on a booking, cash on collection for an order, and Paystack's settings.
+
 ### Billing — Sprint 22.5 (pay as you go)
 - **Admin → Packages → Pay as you go:** a package's price is taken from the business's WURK credits each day (the monthly price ÷ the days in the month) instead of an invoice. This makes low-entry packages practical without a card.
 - **Top up any amount from R20** in Settings → Billing, by any of WURK's methods, including Capitec Pay and SnapScan.

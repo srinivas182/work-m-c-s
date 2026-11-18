@@ -47,9 +47,10 @@ final readonly class InPersonLedger implements InPersonPayments
         return array_map(fn ($c) => (int) $c, $rows->all());
     }
 
-    public function totals(\DateTimeInterface $from, \DateTimeInterface $to): array
+    public function totals(\DateTimeInterface $from, \DateTimeInterface $to, ?string $sourceType = null): array
     {
         $rows = DB::connection($this->context->connectionName())->table('in_person_payments')->where('tenant_id', $this->context->id())
+            ->when($sourceType !== null, fn ($q) => $q->where('source_type', $sourceType))
             ->where('taken_at', '>=', self::db($from))->where('taken_at', '<', self::db($to))
             ->groupBy('method')->selectRaw('method, SUM(amount_cents) as cents')->pluck('cents', 'method');
 

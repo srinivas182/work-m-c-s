@@ -26,9 +26,10 @@ interface InPersonPayments
     public function takenForMany(string $sourceType, array $sourceIds): array;
 
     /**
-     * Cents taken in person between two moments, by method (cash, card_machine, qr).
+     * Cents taken in person between two moments, by method (cash, card_machine, qr); optionally only for bookings,
+     * class places or orders.
      *
      * @return array<string, int>
      */
-    public function totals(\DateTimeInterface $from, \DateTimeInterface $to): array;
+    public function totals(\DateTimeInterface $from, \DateTimeInterface $to, ?string $sourceType = null): array;
 }
