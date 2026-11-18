@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.0] — 2026-11-18 — Sprint 23: Easy setup & money tools
+
+### Release — Sprint 23.6
+- End-to-end tests cover setup by talking, the share page, an invoice from creation to paid, a cash-up with a difference, an expense, and an agent's setup through to hand-over, on desktop and mobile. Google listings, payment providers, WhatsApp, reminders and the Monday summary are covered by feature tests against recorded responses.
+
 ### Money — Sprint 23.5b (cash-up, expenses, profit, Monday summary)
 - **Money → Cash-up:** at the end of the day the owner or a cashier counts the till against what it should hold. That expected amount comes from the day's money taken in person (bookings, orders, invoices, sales on account paid) and in-store cash and card sales. A cash difference above an amount the owner sets (default R20) needs a reason. Each cash-up is locked and audited; only an owner can reopen it. Counting is a new permission, `money.cashup`, so cashiers can do it without seeing the rest of Money.
 - **Money → Expenses and profit:**
