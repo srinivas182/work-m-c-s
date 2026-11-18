@@ -51,6 +51,7 @@ final class MessagingServiceProvider extends ModuleServiceProvider
         return [
             ['label' => 'Providers', 'route' => 'admin.providers', 'icon' => 'message-circle', 'section' => 'Settings', 'permission' => 'providers.manage', 'order' => 920],
             ['label' => 'Messages', 'route' => 'tenant.messages', 'icon' => 'message-circle', 'section' => 'Settings', 'permission' => 'messages.manage', 'order' => 835],
+            ['label' => 'WhatsApp', 'route' => 'tenant.whatsapp', 'icon' => 'message-circle', 'section' => 'Settings', 'permission' => 'messages.manage', 'order' => 836],
         ];
     }
 

@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### WhatsApp — Sprint 21.1 (connect the business's own number)
+- **Settings → WhatsApp:** an owner connects their own WhatsApp number through Meta's sign-up, in about five minutes. By default they keep using the WhatsApp Business app on their phone, and WURK sees the same chats. A new number works too.
+- The page shows the number's display-name review, quality rating and daily messaging limit in plain words, with **Check with Meta** and **Disconnect**.
+- **Security:** the business's token from Meta is encrypted and never shown. The return from Meta must match the owner's own session, user and business, and a number can belong to only one business on WURK.
+- **For HQ:** the Meta app ID and Embedded Signup configuration ID are set in **Admin → Providers → WhatsApp**, next to the app secret. Until they're set, owners see "Coming soon".
+
 ## [0.21.0] — 2026-11-18 — Sprint 20: Premium templates
 
 ### Premium templates — Sprint 20.6 (quality bar and release)
