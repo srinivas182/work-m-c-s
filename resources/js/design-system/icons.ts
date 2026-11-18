@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Mic,
   Trash2,
   Database,
   LifeBuoy,
@@ -70,6 +71,7 @@ export const icons: Record<string, LucideIcon> = {
   clock: Clock,
   image: Image,
   sparkles: Sparkles,
+  mic: Mic,
   inbox: Inbox,
   menu: Menu,
   'layout-template': LayoutTemplate,

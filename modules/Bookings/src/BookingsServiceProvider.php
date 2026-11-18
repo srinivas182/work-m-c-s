@@ -43,6 +43,7 @@ use Wurk\Bookings\Receptionist\ReserveTableTool;
 use Wurk\Bookings\Receptionist\ServicesTool;
 use Wurk\Bookings\Receptionist\TableTimesTool;
 use Wurk\Bookings\Reports\BookingsSection;
+use Wurk\Bookings\Setup\BookingsSetupStep;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
@@ -56,6 +57,7 @@ use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\CannotRestore;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\OwnerDigest;
@@ -100,6 +102,7 @@ final class BookingsServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(BookingsDigest::class)); // the owner's evening WhatsApp summary (21.6)
+        $this->callAfterResolving(BusinessSetup::class, fn (BusinessSetup $s) => $s->register(BookingsSetupStep::class)); // set up by talking (23.1)
         // Recently deleted (16.6b): services. One with bookings is kept (hidden) after 30 days, so those bookings keep its name.
         $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('services', 'Booking services', 'bookings.settings',
             fn (\DateTimeInterface $since) => BookingService::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()

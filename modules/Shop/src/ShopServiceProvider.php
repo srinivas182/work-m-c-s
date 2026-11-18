@@ -17,6 +17,7 @@ use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\BusinessReports;
+use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
@@ -37,6 +38,7 @@ use Wurk\Shop\Receptionist\ProductsTool;
 use Wurk\Shop\Receptionist\ReorderTool;
 use Wurk\Shop\Reports\SalesSection;
 use Wurk\Shop\Reports\StockSection;
+use Wurk\Shop\Setup\ShopSetupStep;
 use Wurk\Shop\Support\DeletedCatalog;
 use Wurk\Shop\Support\OrderMessages;
 use Wurk\Shop\Support\OrderPayments;
@@ -78,6 +80,7 @@ final class ShopServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(ShopDigest::class)); // the owner's evening WhatsApp summary (21.6)
+        $this->callAfterResolving(BusinessSetup::class, fn (BusinessSetup $s) => $s->register(ShopSetupStep::class)); // set up by talking (23.1)
         // Recently deleted (16.6b): products and categories.
         // The AI receptionist (19.2c): find products, and a link that fills the cart on the website.
         $this->callAfterResolving(ReceptionistTools::class, function (ReceptionistTools $t): void {
