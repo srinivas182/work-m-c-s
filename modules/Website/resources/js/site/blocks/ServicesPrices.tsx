@@ -55,7 +55,7 @@ export const ServicesPrices: BlockDefinition<ServicesPricesProps> = {
     note: '',
   },
   render: (p) => (
-    <section id="prices" className="bg-[var(--s-surface)] px-5 py-16 sm:px-8 sm:py-24">
+    <section id="prices" className="px-5 py-16 sm:px-8 sm:py-24">
       {/* Same left edge as the other sections; the list keeps a comfortable reading width. */}
       <div className="mx-auto max-w-6xl">
         <div className="max-w-3xl">

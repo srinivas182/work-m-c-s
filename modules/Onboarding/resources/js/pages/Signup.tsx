@@ -62,6 +62,7 @@ interface Props {
     handle: string;
     category: string;
     template: string;
+    style: 'luxury' | 'minimal' | 'bold';
   };
   catalogue: Category[];
   maskedContact: string | null;
@@ -463,9 +464,19 @@ function CategoryStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
   );
 }
 
+/** The three styles of every design (Sprint 20.1). */
+const SIGNUP_STYLES: ['luxury' | 'minimal' | 'bold', string, string][] = [
+  ['minimal', 'Modern minimal', 'Clean and light'],
+  ['luxury', 'Luxury', 'Refined and deep'],
+  ['bold', 'Bold', 'Big and confident'],
+];
+
 function TemplateStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
   const category = catalogue.find((c) => c.key === data.category);
-  const form = useForm({ template: data.template || category?.templates[0]?.key || '' });
+  const form = useForm({
+    template: data.template || category?.templates[0]?.key || '',
+    style: data.style || 'minimal',
+  });
   return (
     <form
       onSubmit={(e) => {
@@ -504,7 +515,7 @@ function TemplateStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
                 {t.description && <span className="text-sm text-[#5b5776]">{t.description}</span>}
               </button>
               <a
-                href={`/templates/${t.key}/preview`}
+                href={`/templates/${t.key}/preview?style=${form.data.style}`}
                 target="_blank"
                 rel="noopener"
                 className="shrink-0 rounded-lg px-3 py-2 text-sm font-semibold text-[#5b3df5] hover:bg-white"
@@ -520,6 +531,31 @@ function TemplateStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
           {form.errors.template}
         </p>
       )}
+      <fieldset className="grid gap-3">
+        <legend className="mb-2 font-semibold">Style</legend>
+        <p className="-mt-1 text-sm text-[#5b5776]">
+          Every design comes in three styles. Preview it in the one you choose; you can change it
+          any time.
+        </p>
+        <div role="radiogroup" aria-label="Style" className="grid gap-3 sm:grid-cols-3">
+          {SIGNUP_STYLES.map(([key, label, hint]) => {
+            const selected = form.data.style === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => form.setData('style', key)}
+                className={`rounded-2xl border p-3 text-left transition ${selected ? 'border-[#5b3df5] bg-[#F4F1FF] ring-2 ring-[#5b3df5]/25' : 'border-[#E4E1F0]'}`}
+              >
+                <span className="block font-semibold">{label}</span>
+                <span className="text-sm text-[#5b5776]">{hint}</span>
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
       <Button
         type="submit"
         size="lg"

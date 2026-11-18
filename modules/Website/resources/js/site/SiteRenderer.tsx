@@ -35,7 +35,7 @@ function renderBlock(block: StoredBlock, site: SiteContext) {
   const out = def && props ? def.render(props as never, site) : null;
   // A block with nothing to show (e.g. an empty gallery on a live site) leaves no trace.
   return out === null || out === undefined ? null : (
-    <div key={block.id} data-block={block.type}>
+    <div key={block.id} data-block={block.type} className={blockClass(block.type)}>
       {out}
     </div>
   );
@@ -113,4 +113,21 @@ export function SiteRenderer({
       {foot.map((b) => renderBlock(b, site))}
     </div>
   );
+}
+
+/**
+ * Sections that keep their own look (first screens, banners, call-to-action cards). Every other section takes part in
+ * the page's rhythm: the style's spacing, and alternate bands (Sprint 20.1, site.css).
+ */
+const OWN_LOOK = new Set([
+  'Header',
+  'Footer',
+  'Hero',
+  'HeroSlideshow',
+  'PromotionBanner',
+  'CallToAction',
+]);
+
+export function blockClass(type: string): string {
+  return OWN_LOOK.has(type) ? 's-block' : 's-block s-band';
 }

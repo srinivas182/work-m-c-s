@@ -1,6 +1,6 @@
 import type { Config, Data, Field as PuckField } from '@puckeditor/core';
 import { BLOCKS } from '../site/registry';
-import { upgradeBlock } from '../site/SiteRenderer';
+import { blockClass, upgradeBlock } from '../site/SiteRenderer';
 import type { ContentDocument, Field, SiteContext } from '../site/types';
 import { PhotoPicker } from './PhotoPicker';
 
@@ -132,7 +132,9 @@ export function buildConfig(deps: EditorDeps): Config {
         ),
         defaultProps: def.defaults,
         render: (all: Record<string, unknown>) => (
-          <>{def.render(blockProps(all) as never, { ...deps.site, editing: true })}</>
+          <div className={blockClass(def.type)}>
+            {def.render(blockProps(all) as never, { ...deps.site, editing: true })}
+          </div>
         ),
       },
     ]),

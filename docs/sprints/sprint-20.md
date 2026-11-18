@@ -86,3 +86,4 @@ So every category has at least three designs.
 
 | Part | PR | Notes |
 |---|---|---|
+| 20.1 Three styles | — | Styles are CSS variables set from `branding.style`, and `site.css` rules that sit outside Tailwind's layers, so all 33 section types follow without being rewritten. The page sets the rhythm: every section except first screens, banners and call-to-action cards is a band candidate, and every other one is a band (`:nth-child(even of .s-band)`; the editor's canvas is counted through Puck's wrappers with `:has()`). Luxury's bands redefine the colour variables from the palette engine's dark scale, so nested cards, borders and links follow and stay AA. Choosing a style sets its fonts and corners (presets kept equal in PHP and TypeScript by a test). Signup asks for the style next to the design. |

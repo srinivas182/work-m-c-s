@@ -82,6 +82,7 @@ final class SignupController
                 'handle' => $data['handle'] ?? ($demo === null ? '' : (string) preg_replace('/-demo-[a-z0-9]{4}$/', '', $demo->handle())),
                 'category' => $data['category'] ?? '',
                 'template' => $data['template'] ?? '',
+                'style' => $data['style'] ?? 'minimal',
             ],
             'maskedContact' => $data['masked'] ?? null,
             'packages' => $packages,
@@ -184,11 +185,12 @@ final class SignupController
     public function template(Request $request): RedirectResponse
     {
         $signup = $this->require($request, 'template', 'address', 'finish');
-        $key = (string) $request->validate(['template' => ['required', 'string']])['template'];
+        $d = $request->validate(['template' => ['required', 'string'], 'style' => ['nullable', 'in:luxury,minimal,bold']]);
+        $key = (string) $d['template'];
         if (! ($this->templates()?->offers((string) ($signup->data['category'] ?? ''), $key) ?? false)) {
             throw ValidationException::withMessages(['template' => 'Choose one of the designs shown.']);
         }
-        $signup->update(['step' => isset($signup->data['handle']) ? 'finish' : 'address', 'data' => [...$signup->data, 'template' => $key]]);
+        $signup->update(['step' => isset($signup->data['handle']) ? 'finish' : 'address', 'data' => [...$signup->data, 'template' => $key, 'style' => $d['style'] ?? 'minimal']]);
 
         return back();
     }
@@ -270,7 +272,7 @@ final class SignupController
         // fatal: if it fails the business still exists and gets the starter layout instead.
         if (! empty($d['template']) && empty($d['claim_tenant_id']) && isset($result['tenant']) && ($templates = $this->templates()) !== null) {
             try {
-                app(TenantContext::class)->run($result['tenant'], fn () => $templates->apply((string) $d['template']));
+                app(TenantContext::class)->run($result['tenant'], fn () => $templates->apply((string) $d['template'], isset($d['style']) ? (string) $d['style'] : null));
             } catch (\Throwable $e) {
                 report($e);
             }
