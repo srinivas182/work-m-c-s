@@ -212,7 +212,7 @@ jobs:
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     services:
       clamav:
         image: clamav/clamav:1.4
@@ -237,6 +237,10 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+      # Website videos are re-encoded with ffmpeg (Sprint 20.2); the production image installs it too.
+      # Installed while ClamAV loads; a slow package mirror once took 9 minutes, hence the job's 15-minute limit.
+      - name: Install ffmpeg
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends -o Acquire::Retries=3 ffmpeg
       # ClamAV loads its virus list before answering (usually 1–3 minutes).
       - name: Wait for ClamAV
         run: |
@@ -245,9 +249,6 @@ jobs:
             sleep 5
           done
           echo "::error::ClamAV didn't start in 5 minutes"; exit 1
-      # Website videos are re-encoded with ffmpeg (Sprint 20.2); the production image installs it too.
-      - name: Install ffmpeg
-        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends ffmpeg
       - name: Scan the antivirus test file, and re-encode real videos
         env:
           CLAMAV_LIVE: '1'
