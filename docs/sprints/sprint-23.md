@@ -186,7 +186,7 @@ Every spec item and acceptance criterion, checked against the code and its tests
 | 23.5 Who owes me: deposits, pay-later orders, sales on account, invoices | MoneyOwed registry; WhoOwesMeTest | ✅ |
 | 23.5 Invoice: lines, VAT, due date, pay link; WhatsApp or email; paid by link marked automatically; cash recorded | Invoices, PublicInvoiceController; WhoOwesMeTest, e2e | ✅ SMS is a further fallback. |
 | 23.5 Reminders days 1, 7, 14; WhatsApp first; STOP; never more than one a week | Invoices::remindOverdue / remind / stop; WhoOwesMeTest | ✅ |
-| 23.5 Cash-up: expected cash and card per day; counted; reason above an owner-set amount; locked, audited, owner reopens | MoneyBook::expected / cashUp / reopen; CashUpAndProfitTest, e2e | ✅ Per business; per-person and per-branch splits follow with branch cash-ups in Sprint 24. |
+| 23.5 Cash-up: expected cash and card per day; counted; reason above an owner-set amount; locked, audited, owner reopens | MoneyBook::expected / cashUp / reopen; CashUpAndProfitTest, e2e | ⚠️ Per business for now: not yet split per person or per branch (open item, to schedule) |
 | 23.5 Expenses in seconds or from a slip photo read by AI and confirmed; simple categories | MoneyBook::addExpense / readSlip, Ai::see; CashUpAndProfitTest, e2e | ✅ |
 | 23.5 "This month you took R…, spent R…, so you made about R…" on Reports and Home | MoneyBook::profit, Reports section, Home tile; CashUpAndProfitTest | ✅ |
 | 23.5 Monday "how did I do" on WhatsApp; on by default; STOP turns it off | WeeklySummary, WurkWhatsAppReceived; CashUpAndProfitTest | ✅ |
