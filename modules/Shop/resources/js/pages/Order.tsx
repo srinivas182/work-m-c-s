@@ -1,4 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import {
   Badge,
   Button,
@@ -71,6 +72,7 @@ export default function Order({ order: o }: { order: OrderData }) {
   const base = window.location.pathname.replace(/\/$/, '');
   const cancel = useForm({ reason: '' });
   const refund = useForm({ amount: '', restock: false, note: '' });
+  const [how, setHow] = useState('eft'); // how a pay-later order was paid (Sprint 22.3)
   const err =
     (cancel.errors as Record<string, string | undefined>).order ??
     (refund.errors as Record<string, string | undefined>).order;
@@ -166,11 +168,31 @@ export default function Order({ order: o }: { order: OrderData }) {
           </p>
         )}
         {o.next.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {o.next.includes('paid') && (
+              <label className="flex items-center gap-2 text-sm">
+                Paid by
+                <select
+                  aria-label="How the order was paid"
+                  className="border-border bg-bg h-9 rounded-md border px-2"
+                  value={how}
+                  onChange={(e) => setHow(e.target.value)}
+                >
+                  <option value="eft">EFT / bank transfer</option>
+                  <option value="cash">Cash</option>
+                  <option value="card_machine">Card machine</option>
+                  <option value="qr">SnapScan / Zapper at the counter</option>
+                </select>
+              </label>
+            )}
             {o.next.map((to) => (
               <Button
                 key={to}
-                onClick={() => router.post(`${base}/advance`, { to }, { preserveScroll: true })}
+                onClick={() =>
+                  router.post(`${base}/advance`, to === 'paid' ? { to, how } : { to }, {
+                    preserveScroll: true,
+                  })
+                }
               >
                 {STEP[to]}
               </Button>

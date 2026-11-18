@@ -17,6 +17,7 @@ use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\CouponCustomer;
 use Wurk\Payments\Contracts\Coupons;
+use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Team\Contracts\BranchLedger;
@@ -186,6 +187,28 @@ final readonly class Deposits
         event(new PurchaseMade($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $booking->deposit_cents, $booking->deposit_cents, $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id,
             app(RefundWindow::class)->finalAt($booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at))); // final: the appointment + the window
 
+    }
+
+    /**
+     * Money taken in person (Sprint 22.3) — the deposit or the full price, in cash, by card machine or a QR code at the
+     * counter — with who took it. A booking still awaiting its deposit is confirmed. It counts in the takings.
+     */
+    public function paidInPerson(Booking $booking, string $method, int $cents, ?string $by, string $byName): void
+    {
+        // A deposit already paid online (before this): it counts towards what this booking has paid.
+        $online = $booking->payment_reference !== null && $booking->paid_at !== null && $booking->refunded_at === null ? $booking->deposit_cents - (int) $booking->wallet_cents : 0;
+        $ledger = app(InPersonPayments::class);
+        $ledger->record('booking', $booking->id, $method, $cents, $by, $byName, $booking->branch_id);
+        if ($booking->status === 'pending_payment') {
+            if ($booking->payment_reference !== null) {
+                BookingHold::query()->whereKey($booking->payment_reference)->delete();
+            }
+            // Paid at the counter, not online: nothing to verify or refund through a provider.
+            $booking->update(['status' => 'confirmed', 'paid_at' => Instant::db(now()), 'hold_expires_at' => null, 'payment_reference' => null]);
+            event(new BookingConfirmed($this->context->id(), $booking->id));
+        }
+        $paid = $online + $ledger->takenFor('booking', $booking->id); // everything paid for this booking so far
+        event(new PurchaseMade('booking', $booking->id, $paid, $paid, $booking->branch_id, app(RefundWindow::class)->finalAt($booking->starts_at)));
     }
 
     public static function source(Booking|ClassAttendee $booking): string

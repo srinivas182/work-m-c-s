@@ -9,9 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\Coupons;
+use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Payments\Contracts\PlatformPayments;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
+use Wurk\Payments\Support\InPersonLedger;
 use Wurk\Payments\Support\NoCoupons;
 use Wurk\Payments\Support\NoStoreCredit;
 use Wurk\Payments\Support\Payments;
@@ -29,6 +31,7 @@ final class PaymentsServiceProvider extends ModuleServiceProvider
         $this->app->bindIf(Coupons::class, NoCoupons::class); // the Campaigns module supplies the real coupon book (15.3b)
         $this->mergeConfigFrom($this->modulePath('config/payments.php'), 'payments');
         $this->app->bind(BusinessPayments::class, Payments::class);
+        $this->app->bind(InPersonPayments::class, InPersonLedger::class);
         $this->app->bind(PlatformPayments::class, WurkPayments::class);
     }
 
