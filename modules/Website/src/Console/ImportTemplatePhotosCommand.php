@@ -56,7 +56,7 @@ final class ImportTemplatePhotosCommand extends Command
                 $problems[] = "{$where}: licence must be one of ".implode(', ', array_diff(TemplatePhotoImporter::LICENCES, ['WURK AI']));
             } elseif (! TemplatePhotoImporter::allowed($link)) {
                 $problems[] = "{$where}: link must be an https link on Nappy, Pexels or Unsplash";
-            } elseif (in_array(($photos->chosen($template)[$slot] ?? null)?->source_url, [$link, $row['source'] ?? null], true)) {
+            } elseif (($current = $photos->chosen($template)[$slot] ?? null) !== null && in_array($current->source_url, array_filter([$link, $row['source'] ?? null]), true)) {
                 $skipped++;
             } elseif (! $this->option('dry-run')) {
                 try {
