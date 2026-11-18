@@ -57,7 +57,7 @@ final readonly class ReserveTableTool implements ReceptionistTool
         }
         try {
             $r = $this->reserver->reserve($startsAt, (int) ($arguments['party'] ?? 0),
-                [...$customer, 'notes' => mb_substr((string) ($arguments['notes'] ?? ''), 0, 500) ?: null], 'chat');
+                [...$customer, 'notes' => mb_substr((string) ($arguments['notes'] ?? ''), 0, 500) ?: null], ChatBookings::source($context));
         } catch (TableFull) {
             throw new ReceptionistRefused('There’s no longer room at that time. Check table_times again and offer the nearest ones.');
         }

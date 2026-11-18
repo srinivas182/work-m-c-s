@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\InteractsWithShards;
 use Wurk\Bookings\Events\BookingConfirmed;
+use Wurk\Bookings\Listeners\ConfirmPaymentOnWhatsApp;
 use Wurk\Bookings\Mail\BookingMessageMail;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Bookings\Receptionist\FindBookingTool;
 use Wurk\Bookings\Support\Availability;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\BookingMessages;
@@ -21,6 +23,8 @@ use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Models\WhatsAppConnection;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Models\ReceptionistConversation;
+use Wurk\Website\Models\ReceptionistMessage;
 
 /*
  * Sprint 21.5: booking reminders from the business's own WhatsApp number with Confirm / Move / Cancel buttons, each tap
@@ -135,4 +139,39 @@ it('falls back to the usual reminder until Meta approves the template, or when W
     ($this->remind)();
     expect(($this->messages)())->toHaveCount(0);
     Mail::assertSent(BookingMessageMail::class, fn (BookingMessageMail $m) => $m->hasTo('sipho@example.com'));
+});
+
+it('shows the reminder in the customer’s WhatsApp conversation in Chats', function () {
+    ($this->remind)();
+    ($this->button)('booking:confirm:'.$this->booking->id, 'Confirm');
+    ($this->in)(fn () => expect(ReceptionistMessage::query()->orderBy('position')->get()->map(fn ($m) => [$m->role, $m->content['content']])->all())->toBe([
+        ['assistant', 'Hi Sipho, a reminder of your Knotless braids at Glow Salon on Mon 3 May, 09:00. Tap below to confirm, move or cancel.'],
+        ['user', 'Confirm'],
+        ['assistant', 'Thanks, Sipho! You’re confirmed for Monday 3 May at 09:00. See you then.'],
+    ])->and(ReceptionistConversation::query()->count())->toBe(1));
+});
+
+it('confirms in the chat when the deposit for a WhatsApp booking is paid', function () {
+    $id = ($this->in)(function () {
+        $b = app(Booker::class)->book($this->service, CarbonImmutable::parse('2027-05-03 14:00', 'Africa/Johannesburg'), ['name' => 'Zodwa Mkhize', 'phone' => '+27825550199', 'email' => 'z@example.com'],
+            null, source: 'whatsapp', status: 'pending_payment');
+        $b->update(['deposit_cents' => 20000, 'paid_at' => now(), 'status' => 'confirmed']);
+
+        return $b->id;
+    });
+    app(ConfirmPaymentOnWhatsApp::class)->handle(new BookingConfirmed($this->glow->id, $id));
+    $text = ($this->messages)()->sole();
+    expect($text['to'])->toBe('27825550199')
+        ->and($text['text']['body'])->toBe('Payment received — thank you, Zodwa! Your R200.00 deposit is in, and your Knotless braids on Monday 3 May at 14:00 is confirmed.');
+    ($this->in)(fn () => expect(ReceptionistMessage::query()->sole()->content['notice'])->toBeTrue());
+
+    app(ConfirmPaymentOnWhatsApp::class)->handle(new BookingConfirmed($this->glow->id, $this->booking->id)); // booked another way, no deposit: nothing
+    expect(($this->messages)())->toHaveCount(1);
+});
+
+it('finds a WhatsApp customer’s own bookings straight away — their number is verified', function () {
+    $r = ($this->in)(fn () => app(FindBookingTool::class)->run([], ['conversation' => 'conv-1', 'channel' => 'whatsapp', 'customer' => ['phone' => '+27825550101', 'verified' => true]]));
+    expect($r['verified'])->toBeTrue()->and($r['bookings'])->toHaveCount(1)->and($r['bookings'][0]['booking_id'])->toBe($this->booking->id);
+    // Without verification (a website chat), it still sends a code.
+    expect(($this->in)(fn () => app(FindBookingTool::class)->run(['phone' => '082 555 0101'], ['conversation' => 'conv-2', 'channel' => 'web', 'customer' => []])))->toHaveKey('code_sent_if_booked');
 });

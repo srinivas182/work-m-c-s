@@ -81,6 +81,7 @@ function BookingItem({
         <span className="flex gap-1">
           {b.source === 'website' && <Badge tone="info">Booked online</Badge>}
           {b.source === 'chat' && <Badge tone="info">Booked by the AI assistant</Badge>}
+          {b.source === 'whatsapp' && <Badge tone="info">Booked on WhatsApp</Badge>}
           {b.customer_confirmed && <Badge tone="success">Confirmed by the customer</Badge>}
           {STATUS[b.status] && <Badge tone="neutral">{STATUS[b.status]}</Badge>}
         </span>

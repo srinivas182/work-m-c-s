@@ -72,7 +72,7 @@ final readonly class BookAppointmentTool implements ReceptionistTool
         }
         try {
             $booking = $this->booker->book($service, $startsAt, [...$customer, 'notes' => mb_substr((string) ($arguments['notes'] ?? ''), 0, 1000) ?: null],
-                null, source: 'chat', status: $deposit > 0 ? 'pending_payment' : 'confirmed', online: $online);
+                null, source: ChatBookings::source($context), status: $deposit > 0 ? 'pending_payment' : 'confirmed', online: $online);
         } catch (SlotTaken) {
             throw new ReceptionistRefused('That time has just been taken. Check free_times again and offer the nearest ones.');
         }

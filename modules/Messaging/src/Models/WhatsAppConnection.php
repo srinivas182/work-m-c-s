@@ -24,6 +24,7 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property string|null $quality
  * @property string|null $messaging_limit
  * @property bool|null $payment_method
+ * @property string|null $chat_text the message the click-to-chat link starts with (21.5)
  * @property array<string, string>|null $templates Meta's review status of WURK's templates on the account, by name
  * @property string $token
  * @property string|null $pin

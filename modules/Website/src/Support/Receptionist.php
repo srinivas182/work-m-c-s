@@ -147,7 +147,8 @@ final readonly class Receptionist
         foreach ($tools as $t) {
             $byName[$t->name()] = $t;
         }
-        $customer = ['name' => $conversation->name, 'phone' => $conversation->phone, 'email' => $conversation->email];
+        // On WhatsApp the number is the customer's own, verified by WhatsApp (21.5).
+        $customer = ['name' => $conversation->name, 'phone' => $conversation->phone, 'email' => $conversation->email, 'verified' => $conversation->channel === WhatsAppChats::CHANNEL];
         $context = ['conversation' => $conversation->id, 'channel' => $conversation->channel, 'customer' => $customer];
         $trying = $conversation->channel === self::TRY;
         $run = function (string $name, array $arguments) use ($byName, $context, $trying): array {
@@ -171,7 +172,7 @@ final readonly class Receptionist
         };
 
         try {
-            $result = $this->ai->converse('receptionist', $this->system($s, $conversation->channel, $closed), $this->history($conversation),
+            $result = $this->ai->converse('receptionist', $this->system($s, $conversation->channel, $closed, $conversation->phone), $this->history($conversation),
                 array_map(fn (ReceptionistTool $t) => new ChatTool($t->name(), $t->description(), $t->parameters()), $tools), $run, $this->context->id(), maxSteps: 6, maxTokens: 800);
         } catch (AiUnavailable) {
             $this->wallet->refund($chargeKey, 'AI receptionist: not answered');
@@ -249,7 +250,7 @@ final readonly class Receptionist
     }
 
     /** @param array{enabled: bool, whatsapp: bool, may: list<string>, tone: string, greeting: string, monthly_cap: int, languages: list<string>, person_hours: string, away: string} $s */
-    private function system(array $s, string $channel = 'web', bool $closed = false): string
+    private function system(array $s, string $channel = 'web', bool $closed = false, ?string $phone = null): string
     {
         $business = $this->context->current()->displayName();
         $tone = $s['tone'] === 'formal' ? 'polite and professional' : 'warm, friendly and brief';
@@ -263,9 +264,8 @@ final readonly class Receptionist
         }
 
         $where = $channel === WhatsAppChats::CHANNEL ? 'WhatsApp' : 'website chat';
-        $whatsapp = $channel !== WhatsAppChats::CHANNEL ? '' : <<<'TXT'
+        $whatsapp = $channel !== WhatsAppChats::CHANNEL ? '' : "\n\nOn WhatsApp:\n- The customer's number is {$phone}, verified by WhatsApp: use it as their phone number for bookings and orders, without asking for it, and find_booking can look up their bookings straight away.".<<<'TXT'
 
-On WhatsApp:
 - Free times, services, classes or products a tool returned are shown to the customer as buttons or a list to tap. Don't list them all: say what they're choosing from (and mention two or three if it helps).
 - Voice notes arrive as their words. "[Voice note, unclear] …" means the words may be wrong: say what you understood and ask them to confirm or type it. "[Voice note]" alone, or one "too long to listen to", couldn't be heard: ask them to type it or send a shorter one.
 - Messages like [Photo] or [Document] are files you can't see. Say so kindly, and ask them to type it or offer a person.

@@ -46,5 +46,6 @@ Route::tenant(function (): void {
         Route::post('/connect', [WhatsAppConnectionController::class, 'connect'])->middleware('throttle:10,1,whatsapp-connect')->name('.connect');
         Route::post('/refresh', [WhatsAppConnectionController::class, 'refresh'])->middleware('throttle:10,1,whatsapp-refresh')->name('.refresh');
         Route::delete('/', [WhatsAppConnectionController::class, 'disconnect'])->name('.disconnect');
+        Route::put('/chat-link', [WhatsAppConnectionController::class, 'chatLink'])->name('.chat-link'); // 21.5
     });
 });

@@ -18,6 +18,7 @@ use Wurk\Crm\Contracts\ContactRemembered;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Messaging\Events\WhatsAppReceived;
+use Wurk\Messaging\Events\WhatsAppSent;
 use Wurk\Messaging\Events\WhatsAppStatusChanged;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Plans\Contracts\UsageMeter;
@@ -146,6 +147,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         // WhatsApp conversations in Chats (21.2): the webhook dispatches these inside the business's context.
         Event::listen(WhatsAppReceived::class, fn (WhatsAppReceived $e) => app(WhatsAppChats::class)->received($e));
         Event::listen(WhatsAppStatusChanged::class, fn (WhatsAppStatusChanged $e) => app(WhatsAppChats::class)->status($e));
+        Event::listen(WhatsAppSent::class, fn (WhatsAppSent $e) => app(WhatsAppChats::class)->sent($e)); // 21.5
         Event::listen(ContactRemembered::class, function (ContactRemembered $e): void {
             $host = strtolower(request()->getHost());
             $root = strtolower((string) config('wurk.domains.root'));

@@ -17,6 +17,7 @@ use Wurk\Messaging\Contracts\WhatsAppActions;
 use Wurk\Messaging\Contracts\WhatsAppAnswer;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Events\WhatsAppReceived;
+use Wurk\Messaging\Events\WhatsAppSent;
 use Wurk\Messaging\Events\WhatsAppStatusChanged;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Jobs\AnswerOnWhatsApp;
@@ -90,6 +91,27 @@ final readonly class WhatsAppChats
         }
 
         return $conversation;
+    }
+
+    /**
+     * A message another module sent from the business's number (a reminder, a payment confirmation — 21.5), shown in
+     * the customer's conversation. Starts one if there's none; the assistant (when on) answers their reply.
+     */
+    public function sent(WhatsAppSent $e): void
+    {
+        if ($e->messageId !== null && ReceptionistMessage::query()->where('external_id', $e->messageId)->exists()) {
+            return;
+        }
+        $phone = '+'.$e->to;
+        $c = ReceptionistConversation::query()->where('channel', self::CHANNEL)->where('phone', $phone)->where('status', '!=', 'closed')->latest('last_message_at')->first();
+        if ($c === null) {
+            $contact = $this->contacts->find($phone);
+            $c = ReceptionistConversation::query()->create(['channel' => self::CHANNEL, 'visitor' => hash('sha256', 'wa:'.$e->to),
+                'status' => app(WhatsAppReceptionist::class)->on() ? 'ai' : 'person', 'name' => $contact['name'] ?? null, 'phone' => $phone,
+                'contact_id' => $contact['id'] ?? null, 'last_message_at' => now(), 'keep' => true]);
+        }
+        $this->append($c, 'assistant', $e->text, $e->messageId, 'sent', ['notice' => true]);
+        $c->update(['last_message_at' => now()]);
     }
 
     public function status(WhatsAppStatusChanged $e): void

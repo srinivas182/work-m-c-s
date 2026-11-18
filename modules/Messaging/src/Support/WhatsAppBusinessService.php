@@ -15,6 +15,7 @@ use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Messaging\Contracts\SendResult;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Drivers\WhatsApp\MetaCloudWhatsApp;
+use Wurk\Messaging\Events\WhatsAppSent;
 use Wurk\Messaging\Models\WhatsAppConnection;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -29,6 +30,21 @@ final readonly class WhatsAppBusinessService implements WhatsAppBusiness
     public function connected(): bool
     {
         return $this->connection() !== null;
+    }
+
+    /** What a customer's chat starts with unless the owner changes it. */
+    public const CHAT_TEXT = 'Hi! I’d like to book.';
+
+    public function number(): ?string
+    {
+        $digits = (string) preg_replace('/\D/', '', (string) $this->connection()?->display_phone);
+
+        return $digits === '' ? null : (str_starts_with($digits, '0') ? '27'.substr($digits, 1) : $digits);
+    }
+
+    public function chatText(): string
+    {
+        return trim((string) $this->connection()?->chat_text) ?: self::CHAT_TEXT;
     }
 
     public function sendText(string $to, string $text): SendResult
@@ -98,7 +114,13 @@ final readonly class WhatsAppBusinessService implements WhatsAppBusiness
             $components[] = ['type' => 'button', 'sub_type' => 'quick_reply', 'index' => (string) $i, 'parameters' => [['type' => 'payload', 'payload' => $payload]]];
         }
 
-        return $this->send($to, ['type' => 'template', 'template' => ['name' => $name, 'language' => ['code' => WhatsAppGraph::FOLLOW_UP_LANGUAGE], 'components' => $components]], 'Template');
+        $result = $this->send($to, ['type' => 'template', 'template' => ['name' => $name, 'language' => ['code' => WhatsAppGraph::FOLLOW_UP_LANGUAGE], 'components' => $components]], 'Template');
+        if ($result->ok && isset(WhatsAppGraph::TEMPLATES[$name])) { // Chats shows it in the customer's conversation (21.5)
+            $text = (string) preg_replace_callback('/\{\{(\d+)\}\}/', fn (array $m) => $parameters[(int) $m[1] - 1] ?? '', WhatsAppGraph::TEMPLATES[$name]['body']);
+            event(new WhatsAppSent($this->context->id(), (string) preg_replace('/\D/', '', $to), $text, $result->providerId));
+        }
+
+        return $result;
     }
 
     public function followUpReady(): bool

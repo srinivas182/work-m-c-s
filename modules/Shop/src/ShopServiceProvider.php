@@ -32,6 +32,7 @@ use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Receptionist\CartLinkTool;
 use Wurk\Shop\Receptionist\ProductsTool;
+use Wurk\Shop\Receptionist\ReorderTool;
 use Wurk\Shop\Reports\SalesSection;
 use Wurk\Shop\Reports\StockSection;
 use Wurk\Shop\Support\DeletedCatalog;
@@ -79,6 +80,7 @@ final class ShopServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(ReceptionistTools::class, function (ReceptionistTools $t): void {
             $t->register(ProductsTool::class);
             $t->register(CartLinkTool::class);
+            $t->register(ReorderTool::class); // 21.5: "same as last time?" on WhatsApp
         });
         $this->callAfterResolving(RecentlyDeleted::class, function (RecentlyDeleted $d): void {
             $d->register('products', 'Products', 'shop.manage',
