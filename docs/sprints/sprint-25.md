@@ -1,6 +1,6 @@
 # Sprint 25 — Reach & trust
 
-**Status:** proposed 19 Nov 2026, waiting for approval of decisions A–H.
+**Status:** approved 19 Nov 2026 (decisions A–H as recommended).
 
 ## Why
 
