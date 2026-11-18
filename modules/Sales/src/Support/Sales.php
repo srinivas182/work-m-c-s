@@ -12,6 +12,7 @@ use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Payments\Contracts\RefundWindow;
+use Wurk\Sales\Contracts\SalesTotals;
 use Wurk\Sales\Models\Sale;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -20,7 +21,7 @@ use Wurk\Tenancy\Contracts\TenantContext;
  * approval (unless the person recording can approve). A recorded sale is a purchase — rewards, final once the return
  * window from the sale closes — and the customer gets an email receipt if they have an email. Refunds only within the window.
  */
-final readonly class Sales
+final readonly class Sales implements SalesTotals
 {
     public const METHODS = ['cash' => 'Cash', 'card' => 'Card', 'eft' => 'EFT', 'account' => 'On account (pays later)']; // account: 23.5a
 
@@ -79,6 +80,14 @@ final readonly class Sales
     public function decline(Sale $sale, string $byId, string $byName): void
     {
         $this->decide($sale, 'declined', $byId, $byName);
+    }
+
+    public function totals(\DateTimeInterface $from, \DateTimeInterface $to, ?string $branchId = null): array
+    {
+        return Sale::query()->where('status', 'recorded')->where('recorded_at', '>=', $from)->where('recorded_at', '<', $to)
+            ->when($branchId !== null, fn ($q) => $q->where('branch_id', $branchId))
+            ->get(['method', 'amount_cents', 'refunded_cents'])->groupBy('method')
+            ->map(fn ($g) => (int) $g->sum(fn (Sale $s) => $s->amount_cents - $s->refunded_cents))->all();
     }
 
     /**

@@ -15,7 +15,7 @@ final readonly class AiSettings
 {
     public const PROVIDERS = ['anthropic' => 'Anthropic (Claude)', 'google' => 'Google (Gemini)', 'openai' => 'OpenAI', 'simulated' => 'Simulated (development only)'];
 
-    public const TASKS = ['site_generation' => 'Write a website', 'rewrite' => 'Rewrite a section', 'assistant' => 'Ask WURK (assistant)', 'watchtower' => 'Watchtower (explains platform problems)', 'receptionist' => 'AI receptionist (answers and books for a business)', 'sales' => 'WURK’s sales assistant (wurk.co.za)'];
+    public const TASKS = ['site_generation' => 'Write a website', 'rewrite' => 'Rewrite a section', 'assistant' => 'Ask WURK (assistant)', 'watchtower' => 'Watchtower (explains platform problems)', 'receptionist' => 'AI receptionist (answers and books for a business)', 'sales' => 'WURK’s sales assistant (wurk.co.za)', 'slip' => 'Reads expense slips (photos)'];
 
     /** Image providers (Google is added once WURK's key lets us verify its API). */
     public const IMAGE_PROVIDERS = ['openai' => 'OpenAI', 'simulated' => 'Simulated (development only)'];
@@ -33,6 +33,7 @@ final readonly class AiSettings
             // Sprint 19 (decision A): strong tool use for booking; OpenAI is next in the fallback order.
             'receptionist' => ['provider' => 'anthropic', 'model' => 'claude-sonnet-5-5'],
             'sales' => ['provider' => 'anthropic', 'model' => 'claude-haiku-5-5'],
+            'slip' => ['provider' => 'anthropic', 'model' => 'claude-haiku-5-5'], // 23.5b
         ],
         'fallback' => [['provider' => 'google', 'model' => 'gemini-3.8-flash'], ['provider' => 'openai', 'model' => 'gpt-6-sol']],
         // US dollars per million tokens (input, output) — from each provider's pricing page; keep current.

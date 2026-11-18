@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Wurk\Ai\Contracts\ChatTool;
 
 /** Anthropic Messages API (POST /v1/messages). */
-final class AnthropicDriver implements AiDriver, ChatDriver
+final class AnthropicDriver implements AiDriver, ChatDriver, VisionDriver
 {
     public function name(): string
     {
@@ -33,6 +33,28 @@ final class AnthropicDriver implements AiDriver, ChatDriver
         $text = collect((array) $r->json('content'))->where('type', 'text')->pluck('text')->implode('');
 
         return ['text' => (string) $text, 'input_tokens' => (int) $r->json('usage.input_tokens'), 'output_tokens' => (int) $r->json('usage.output_tokens')];
+    }
+
+    public function see(string $model, string $system, string $prompt, string $image, string $mime, int $maxTokens, string $apiKey): array
+    {
+        try {
+            $r = Http::timeout(60)->acceptJson()->withHeaders(['x-api-key' => $apiKey, 'anthropic-version' => '2023-06-01'])
+                ->post('https://api.anthropic.com/v1/messages', [
+                    'model' => $model, 'max_tokens' => $maxTokens, 'system' => $system,
+                    'messages' => [['role' => 'user', 'content' => [
+                        ['type' => 'image', 'source' => ['type' => 'base64', 'media_type' => $mime, 'data' => base64_encode($image)]],
+                        ['type' => 'text', 'text' => $prompt],
+                    ]]],
+                ]);
+        } catch (ConnectionException $e) {
+            throw new ProviderFailed('Anthropic unreachable');
+        }
+        if (! $r->successful()) {
+            throw new ProviderFailed('Anthropic: '.($r->json('error.message') ?? 'HTTP '.$r->status()));
+        }
+
+        return ['text' => (string) collect((array) $r->json('content'))->where('type', 'text')->pluck('text')->implode(''),
+            'input_tokens' => (int) $r->json('usage.input_tokens'), 'output_tokens' => (int) $r->json('usage.output_tokens')];
     }
 
     public function chat(string $model, string $system, array $items, array $tools, int $maxTokens, string $apiKey): array

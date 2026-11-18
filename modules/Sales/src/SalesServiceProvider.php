@@ -9,6 +9,7 @@ use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Sales\Contracts\SalesTotals;
 use Wurk\Sales\Digest\SalesDigest;
 use Wurk\Sales\Models\Sale;
 use Wurk\Sales\Support\Sales;
@@ -18,6 +19,7 @@ final class SalesServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         parent::register();
+        $this->app->bind(SalesTotals::class, Sales::class); // 23.5b
         $this->callAfterResolving(MessageTemplates::class, fn (MessageTemplates $t) => $t->define('sale.receipt', Sales::RECEIPT)); // Settings → Messages
         $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(SalesDigest::class)); // the owner's evening WhatsApp summary (21.6)
         // Who owes me (23.5): sales on account, not yet paid.
