@@ -31,6 +31,7 @@ import { useTheme } from '@/design-system/theme/use-theme';
 import { type ThemePreference } from '@/design-system/theme/theme';
 import { AskWurk } from '@/components/AskWurk';
 import { HelpPanel } from '@/components/HelpPanel';
+import { OfflineBar } from '@/components/OfflineBar';
 import { icon } from '@/design-system/icons';
 import type { NavigationItem, SharedProps } from '@/types/global';
 import { __ } from '@/i18n';
@@ -397,6 +398,7 @@ export default function AppShell({ title, user: userProp, children }: AppShellPr
               )}
             </div>
           )}
+          <OfflineBar />
           <main id="main" className="flex-1 px-4 pt-6 pb-28 sm:px-6 md:pb-10 lg:px-10 lg:pt-10">
             <div className="mx-auto w-full max-w-7xl">{children}</div>
           </main>

@@ -4,6 +4,7 @@ import type { ComponentType } from 'react';
 import { reportCrash, watchForErrors } from '@/lib/recent-error';
 import { resolvePage } from '@/lib/resolve-page';
 import { startLite } from '@/lite';
+import { startOffline } from '@/offline';
 
 type PageModule = { default: ComponentType };
 
@@ -21,6 +22,7 @@ void createInertiaApp({
   setup({ el, App, props }) {
     watchForErrors(); // for "Contact support" (16.3) and Watchtower (18.0)
     startLite(); // lite mode and the data counter (24.4)
+    startOffline(); // saved now, sent later (24.5)
     // A screen that crashes while drawing is reported to Watchtower (18.0).
     const onUncaughtError = (error: unknown) => {
       if (error instanceof Error) reportCrash(error.message, error.stack, 'render');

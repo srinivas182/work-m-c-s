@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Wurk\Platform\I18n\IdempotentRequests;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -26,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SessionGuardian::class,
             SetLocale::class, // the person's language (24.1)
+            IdempotentRequests::class, // offline changes are sent once (24.5)
             HandleInertiaRequests::class,
         ]);
         // The referral cookie holds only a public code, and is read on routes with and without the web stack (Sprint 13.2).
