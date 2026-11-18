@@ -77,7 +77,7 @@ it('connects the owner’s number with Embedded Signup, keeping the WhatsApp Bus
     // The follow-up message for after the 24-hour window goes to Meta for review on the business's own account.
     Http::assertSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/waba-1/message_templates') && $r['name'] === 'wurk_follow_up'
         && $r['category'] === 'UTILITY' && str_contains($r['components'][0]['text'], 'following up on your message'));
-    expect($c->templates)->toBe(['wurk_follow_up' => 'PENDING', 'wurk_reminder' => 'PENDING']);
+    expect($c->templates)->toEqual(['wurk_follow_up' => 'PENDING', 'wurk_reminder' => 'PENDING']); // JSON: MySQL keeps keys in its own order
     // Reminders carry Confirm / Move / Cancel quick-reply buttons (21.5).
     Http::assertSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/waba-1/message_templates') && $r['name'] === 'wurk_reminder'
         && $r['components'][1] === ['type' => 'BUTTONS', 'buttons' => [['type' => 'QUICK_REPLY', 'text' => 'Confirm'], ['type' => 'QUICK_REPLY', 'text' => 'Move'], ['type' => 'QUICK_REPLY', 'text' => 'Cancel']]]);
@@ -145,7 +145,7 @@ it('checks the number with Meta again, and disconnects (forgetting the token)', 
         GRAPH.'/waba-1/message_templates*' => Http::response(['data' => [['name' => 'wurk_follow_up', 'status' => 'APPROVED', 'language' => 'en'],
             ['name' => 'wurk_reminder', 'status' => 'REJECTED', 'language' => 'en'], ['name' => 'someone_elses', 'status' => 'APPROVED', 'language' => 'en']]])]);
     $this->actingAs($this->owner)->post("{$this->base}/refresh")->assertSessionHas('status', 'Checked with Meta just now.');
-    expect(WhatsAppConnection::query()->sole()->only(['quality', 'messaging_limit', 'templates']))->toBe(['quality' => 'YELLOW', 'messaging_limit' => 'TIER_10K', 'templates' => ['wurk_follow_up' => 'APPROVED', 'wurk_reminder' => 'REJECTED']]);
+    expect(WhatsAppConnection::query()->sole()->only(['quality', 'messaging_limit', 'templates']))->toEqual(['quality' => 'YELLOW', 'messaging_limit' => 'TIER_10K', 'templates' => ['wurk_follow_up' => 'APPROVED', 'wurk_reminder' => 'REJECTED']]);
     Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_contains($r->url(), 'message_templates')); // already there: not submitted twice
     $this->actingAs($this->owner)->get($this->base)->assertInertia(fn (Assert $p) => $p->where('connection.follow_up_status', 'APPROVED'));
 
@@ -177,6 +177,6 @@ it('hears Meta’s template reviews by webhook, and checks every account hourly 
     ($this->meta)([GRAPH.'/waba-1/message_templates*' => fn ($r) => $r->method() === 'POST' ? Http::response(['id' => 't', 'status' => 'PENDING'])
         : Http::response(['data' => [['name' => 'wurk_follow_up', 'status' => 'APPROVED', 'language' => 'en']]])]);
     $this->artisan('messaging:sync-whatsapp-templates')->expectsOutput('Accounts checked: 1. Failed: 0.')->assertSuccessful();
-    expect(WhatsAppConnection::query()->sole()->templates)->toBe(['wurk_follow_up' => 'APPROVED', 'wurk_reminder' => 'PENDING']);
+    expect(WhatsAppConnection::query()->sole()->templates)->toEqual(['wurk_follow_up' => 'APPROVED', 'wurk_reminder' => 'PENDING']);
     Http::assertSent(fn ($r) => $r->method() === 'POST' && str_contains($r->url(), 'message_templates') && $r['name'] === 'wurk_reminder');
 });
