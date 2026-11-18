@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Payments — Sprint 22.2 (mobile money, direct)
+- **M-Pesa** (Daraja STK push to the business's Paybill or Till), **MTN MoMo** (Request to Pay) and **Airtel Money** (USSD push), with the business's own keys in Settings → Payments. Keys are tested when saved.
+- **The customer:** types their number on the business's payment page (prefilled when known), gets a prompt on their phone, and approves it with their PIN. The page waits and confirms, or says plainly what went wrong: declined, timed out, not enough money, or wrong PIN.
+- **Reliable:** every result is read back from the provider, whether it comes from the page, the provider's callback or a job that keeps asking every 20 seconds. Prompts expire after 3 minutes. A phone gets at most 5 prompts per payment, 30 seconds apart. Trying again first re-checks the earlier prompt, so money is never taken twice.
+- **Only where each provider works:** M-Pesa in Kenya; MTN in Ghana, Uganda, Zambia, Cameroon, Côte d'Ivoire and Rwanda; Airtel in Kenya, Uganda, Tanzania, Zambia, Malawi and Rwanda. South African businesses don't see them. They switch on with the country packs (Sprint 25).
+
 ### Payments — Sprint 22.1 (Paystack: SnapScan, Capitec Pay, card and EFT)
 - **Settings → Payments → Paystack:** a business can connect its own Paystack account. The key is tested when saved and kept encrypted.
 - In South Africa, Paystack's checkout offers card, EFT, **Capitec Pay** and **SnapScan (QR)**. The owner picks which appear; leaving them all unticked offers every way the account allows.

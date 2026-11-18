@@ -22,12 +22,18 @@ use Wurk\Payments\Models\PlatformPaymentAttempt;
 final class GatewayRouter
 {
     /**
-     * @param  array{name: string, email?: string|null}  $customer
+     * @param  array{name: string, email?: string|null, phone?: string|null}  $customer
      * @param  array{return: string, cancel: string, notify: string}  $urls
      * @param  Closure(): string  $handOff  the business's or WURK's hand-off page for form-posting providers
      */
     public function start(PaymentAccount|PlatformPaymentAccount $account, PaymentAttempt|PlatformPaymentAttempt $attempt, string $description, array $customer, array $urls, Closure $handOff): ?string
     {
+        if (in_array($account->provider, PlatformMethods::MOBILE, true)) {
+            // Mobile money: the business's page asks for the number (prefilled when known) and waits for the approval.
+            $attempt->update(['provider_id' => null, 'form' => ['mobile' => true, 'return' => $urls['return'], 'cancel' => $urls['cancel'], 'phone' => $customer['phone'] ?? null]]);
+
+            return $handOff();
+        }
         if (in_array($account->provider, ['yoco', 'peach', 'paystack'], true)) { // hosted pages: redirect
             $started = match ($account->provider) {
                 'yoco' => Yoco::start($account, $attempt, $urls),
@@ -50,6 +56,11 @@ final class GatewayRouter
     /** @return array{paid: bool, amount_cents: int} */
     public function verify(PaymentAccount|PlatformPaymentAccount $account, PaymentAttempt|PlatformPaymentAttempt $attempt): array
     {
+        if (in_array($attempt->provider, PlatformMethods::MOBILE, true)) { // read back from the provider (businesses only)
+            $result = $attempt instanceof PaymentAttempt ? app(MobileMoney::class)->check($attempt) : null;
+
+            return ['paid' => $result?->state === 'paid', 'amount_cents' => $result?->state === 'paid' ? $result->amountCents : 0];
+        }
         if ($attempt->provider === 'payfast') { // confirmed only by a notification that passed every check
             return ['paid' => $attempt->status === 'paid', 'amount_cents' => $attempt->status === 'paid' ? $attempt->amount_cents : 0];
         }
@@ -73,7 +84,7 @@ final class GatewayRouter
             'peach' => Peach::refund($account, $attempt, $cents),
             'paystack' => Paystack::refund($account, $attempt, $cents),
             'payfast' => PayFast::refund($account, $attempt, $cents),
-            default => false, // Ozow: refunded in Ozow's portal, then recorded by the owner
+            default => false, // Ozow and mobile money: refunded in the provider's portal, then recorded by the owner
         };
         if ($ok && $cents === $attempt->amount_cents) {
             $attempt->update(['status' => 'refunded']);
@@ -115,6 +126,13 @@ final class GatewayRouter
             case 'peach':
                 $reference = Peach::notification($account, $posted);
                 $attempt = $reference === null ? null : $byReference($reference);
+                break;
+            case 'mpesa':
+            case 'mtn_momo':
+            case 'airtel_money':
+                // Unsigned callbacks: only a hint of which prompt to check (the result is read back from the provider).
+                $id = MobileMoney::gateway($account->provider)->callbackId((array) json_decode($body, true));
+                $attempt = $id === null ? null : ($byProviderId($id) ?? $byReference($id));
                 break;
             case 'paystack':
                 $reference = Paystack::notification($account, $body, $headers);

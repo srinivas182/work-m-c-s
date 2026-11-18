@@ -13,7 +13,16 @@ import {
 } from '@/design-system';
 
 export interface Method {
-  provider: 'yoco' | 'payfast' | 'ozow' | 'peach' | 'paystack' | 'eft';
+  provider:
+    | 'yoco'
+    | 'payfast'
+    | 'ozow'
+    | 'peach'
+    | 'paystack'
+    | 'mpesa'
+    | 'mtn_momo'
+    | 'airtel_money'
+    | 'eft';
   name: string;
   allowed?: boolean; // business: has WURK switched it on?
   available?: boolean; // admin: may businesses offer it?
@@ -22,6 +31,8 @@ export interface Method {
   wurk?: Account | null;
   channels?: { key: string; label: string }[] | null; // Paystack: the ways to pay it offers here
   webhook?: string | null; // Paystack: the address to paste into Paystack
+  wurk_account?: boolean; // admin: can WURK itself take payments with it?
+  countries?: string[] | null; // admin: where it works (mobile money)
 }
 interface Account {
   active: boolean;
@@ -53,6 +64,23 @@ const FIELDS: Record<Method['provider'], [string, string, boolean][]> = {
     ['secret_token', 'Webhook secret token', true],
   ],
   paystack: [['secret_key', 'Secret key', true]],
+  mpesa: [
+    ['shortcode', 'Paybill or store number (shortcode)', false],
+    ['till', 'Till number (Buy Goods only)', false],
+    ['passkey', 'Lipa na M-Pesa passkey', true],
+    ['consumer_key', 'Daraja consumer key', false],
+    ['consumer_secret', 'Daraja consumer secret', true],
+  ],
+  mtn_momo: [
+    ['api_user', 'API user', false],
+    ['api_key', 'API key', true],
+    ['subscription_key', 'Collections subscription key', true],
+    ['environment', 'Market (live only, e.g. mtnghana)', false],
+  ],
+  airtel_money: [
+    ['client_id', 'Client ID', false],
+    ['client_secret', 'Client secret', true],
+  ],
   eft: [['instructions', 'How to pay (bank, account number, branch code)', false]],
 };
 
@@ -231,7 +259,13 @@ export function MethodCard({
             Businesses may offer {m.name}
           </label>
         )}
-        {blocked ? (
+        {admin && m.countries && (
+          <p className="text-fg-muted">
+            For businesses in {m.countries.join(', ')}, with their own {m.name} account. Switched on
+            per country with the country packs.
+          </p>
+        )}
+        {admin && m.wurk_account === false ? null : blocked ? (
           <p className="text-fg-muted">
             WURK has switched {m.name} off for now — customers can’t pay with it.
           </p>
