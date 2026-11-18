@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Website\Support;
 
 use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\UriResolver;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
@@ -27,6 +28,10 @@ use Wurk\Website\Models\SetupInterview;
 final class OnlineImport
 {
     public const MAX_BYTES = 1_048_576;
+
+    public const MAX_PHOTOS = 6;
+
+    public const MAX_PHOTO_BYTES = 15_728_640;
 
     /** @var (\Closure(string): list<string>)|null Tests: resolve a host name without DNS. */
     public static ?\Closure $resolver = null;
@@ -51,6 +56,12 @@ final class OnlineImport
         $answered = [];
         $brief = $i->brief;
         $answers = $i->answers;
+        foreach (['photos', 'reviews_url'] as $extra) { // offered to the owner; not an answer to a question
+            if (isset($found[$extra])) {
+                $brief[$extra] = $found[$extra][$extra];
+                unset($found[$extra]);
+            }
+        }
         foreach ($found as $key => $part) {
             $brief = [...$brief, ...$part];
             $answers[$key] = "From {$source}";
@@ -78,7 +89,7 @@ final class OnlineImport
         }
         try {
             $r = Http::timeout(15)->withHeaders(['X-Goog-Api-Key' => $key,
-                'X-Goog-FieldMask' => 'places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.regularOpeningHours,places.primaryTypeDisplayName,places.editorialSummary,places.addressComponents'])
+                'X-Goog-FieldMask' => 'places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.regularOpeningHours,places.primaryTypeDisplayName,places.editorialSummary,places.addressComponents,places.googleMapsUri,places.photos'])
                 ->post('https://places.googleapis.com/v1/places:searchText', ['textQuery' => $query, 'maxResultCount' => 1, 'regionCode' => strtolower($this->context->current()->countryCode())]);
         } catch (Throwable) {
             throw ValidationException::withMessages(['link' => 'Google didn’t answer. Try again in a minute.']);
@@ -99,6 +110,35 @@ final class OnlineImport
         $hours = self::hoursFromPeriods((array) ($p['regularOpeningHours']['periods'] ?? []));
         if ($hours !== null) {
             $found['hours'] = ['hours' => $hours];
+        }
+        // Reviews stay on Google: the site links to them, never copies them in.
+        $maps = (string) ($p['googleMapsUri'] ?? '');
+        if (str_starts_with($maps, 'https://')) {
+            $found['reviews_url'] = ['reviews_url' => mb_substr($maps, 0, 300)];
+        }
+        // Only the business's own photos (added by the listing itself), never customers' photos.
+        $own = mb_strtolower((string) ($p['displayName']['text'] ?? ''));
+        $photos = [];
+        foreach (array_slice((array) ($p['photos'] ?? []), 0, 20) as $photo) {
+            $authors = array_map(fn ($a) => mb_strtolower((string) ($a['displayName'] ?? '')), (array) ($photo['authorAttributions'] ?? []));
+            if ($own === '' || ! in_array($own, $authors, true) || preg_match('#^places/[A-Za-z0-9_-]+/photos/[A-Za-z0-9_-]+$#', (string) ($photo['name'] ?? '')) !== 1) {
+                continue;
+            }
+            try {
+                $uri = (string) Http::timeout(10)->withHeaders(['X-Goog-Api-Key' => $key])
+                    ->get('https://places.googleapis.com/v1/'.$photo['name'].'/media', ['maxWidthPx' => 1600, 'skipHttpRedirect' => 'true'])->json('photoUri');
+            } catch (Throwable) {
+                continue;
+            }
+            if (str_starts_with($uri, 'https://')) {
+                $photos[] = ['url' => $uri, 'source' => 'your Google listing', 'chosen' => false];
+            }
+            if (count($photos) === self::MAX_PHOTOS) {
+                break;
+            }
+        }
+        if ($photos !== []) {
+            $found['photos'] = ['photos' => $photos];
         }
 
         return array_filter($found, fn ($part) => array_filter($part) !== []);
@@ -164,8 +204,12 @@ final class OnlineImport
         $page = 'Title: '.($meta('og:title') ?: (preg_match('#<title>(.*?)</title>#si', $html, $t) === 1 ? html_entity_decode(trim($t[1])) : ''))
             ."\nDescription: ".($meta('og:description') ?: $meta('description'))."\nText: ".mb_substr($text, 0, 6000);
         $read = $this->talk->readPage($page);
+        // The page's own preview image (its owner's), offered as a photo the owner may choose to use.
+        $image = html_entity_decode($meta('og:image'));
+        $image = $image === '' ? '' : (string) UriResolver::resolve(new Uri((string) ($r->effectiveUri() ?? $url)), new Uri($image));
 
         return array_filter([
+            'photos' => str_starts_with($image, 'https://') ? ['photos' => [['url' => mb_substr($image, 0, 1000), 'source' => (string) parse_url($url, PHP_URL_HOST), 'chosen' => false]]] : null,
             'business' => array_filter(['name' => $read['name'], 'what' => $read['what'], 'category' => $read['category']]) === [] ? null : ['name' => $read['name'], 'what' => $read['what'], 'category' => $read['category']],
             'area' => $read['area'] === '' && $read['address'] === '' ? null : ['area' => $read['area'], 'address' => $read['address']],
             'offer' => $read['services'] === [] && $read['products'] === [] ? null : ['services' => $read['services'], 'products' => $read['products']],
@@ -175,11 +219,32 @@ final class OnlineImport
     }
 
     /**
+     * One of the photos found (for its thumbnail, and to keep it once the owner chooses it): a public https JPEG, PNG
+     * or WebP of at most 15 MB.
+     *
+     * @return array{body: string, type: string}
+     */
+    public function photo(string $url): array
+    {
+        try {
+            $r = $this->get($url, fn (string $host) => true, 'image/*');
+        } catch (Throwable) {
+            throw ValidationException::withMessages(['photos' => 'That photo couldn’t be opened.']);
+        }
+        $type = strtolower((string) strtok((string) $r->header('Content-Type'), ';'));
+        if (! $r->successful() || ! in_array($type, ['image/jpeg', 'image/png', 'image/webp'], true) || strlen($r->body()) > self::MAX_PHOTO_BYTES) {
+            throw ValidationException::withMessages(['photos' => 'That photo couldn’t be opened.']);
+        }
+
+        return ['body' => $r->body(), 'type' => $type];
+    }
+
+    /**
      * GET a public https page: every address it leads to (redirects too) must be public, and allowed by $host.
      *
      * @param  callable(string): bool  $host
      */
-    private function get(string $url, callable $host): Response
+    private function get(string $url, callable $host, string $accept = 'text/html'): Response
     {
         $check = function (string $u) use ($host): void {
             $parts = parse_url($u);
@@ -190,7 +255,7 @@ final class OnlineImport
         };
         $check($url);
 
-        return Http::timeout(10)->withHeaders(['User-Agent' => 'WURK setup (+https://wurk.co.za)', 'Accept' => 'text/html'])
+        return Http::timeout(10)->withHeaders(['User-Agent' => 'WURK setup (+https://wurk.co.za)', 'Accept' => $accept])
             ->withOptions(['allow_redirects' => ['max' => 4, 'protocols' => ['https'], 'track_redirects' => true,
                 'on_redirect' => function (RequestInterface $request, $response, UriInterface $uri) use ($check): void {
                     $check((string) $uri);

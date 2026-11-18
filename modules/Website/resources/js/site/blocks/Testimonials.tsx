@@ -13,6 +13,9 @@ export interface Testimonial {
 export interface TestimonialsProps extends Record<string, unknown> {
   heading: string;
   items: Testimonial[];
+  /** A link to the business's reviews elsewhere (e.g. its Google listing), never copied in (Sprint 23.2). */
+  moreLabel?: string;
+  moreHref?: string;
 }
 
 function Stars({ rating }: { rating: number }) {
@@ -59,12 +62,40 @@ export const Testimonials: BlockDefinition<TestimonialsProps> = {
         },
       },
     },
+    moreLabel: {
+      kind: 'text',
+      label: 'Link to more reviews (e.g. “Read our reviews on Google”)',
+      max: 60,
+    },
+    moreHref: { kind: 'link', label: 'Reviews link goes to' },
   },
-  isEmpty: (p) => p.items.length === 0,
-  defaults: { heading: 'What our customers say', items: [] },
+  isEmpty: (p) => p.items.length === 0 && !p.moreHref,
+  defaults: { heading: 'What our customers say', items: [], moreLabel: '', moreHref: '' },
   render: (p, site) => {
     const [featured, ...rest] = p.items;
+    const more =
+      p.moreHref && p.moreLabel ? (
+        <a
+          href={site.editing ? undefined : p.moreHref}
+          className="mt-8 inline-block font-semibold text-[var(--s-brand-text)] underline underline-offset-4"
+          rel="noopener"
+        >
+          {p.moreLabel}
+        </a>
+      ) : null;
     if (!featured) {
+      if (more) {
+        return (
+          <section className="px-5 py-16 sm:px-8 sm:py-24">
+            <div className="mx-auto max-w-6xl">
+              <SectionTitle className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] sm:text-4xl">
+                {p.heading}
+              </SectionTitle>
+              {more}
+            </div>
+          </section>
+        );
+      }
       return site.editing ? (
         <section className="px-5 py-16 text-center text-[var(--s-fg-muted)] sm:px-8">
           Add a testimonial from a real customer.
@@ -113,6 +144,7 @@ export const Testimonials: BlockDefinition<TestimonialsProps> = {
               </div>
             )}
           </div>
+          {more}
         </div>
       </section>
     );

@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Setup — Sprint 23.2 (set up from what you already have online)
+- **Set up by talking → Already online? Start from there:** paste a Google Maps link, a business name and area, or a link to a Facebook page, Instagram profile or old website. WURK fills in the answers it finds (name, area and address, phone, hours, services and prices) for the owner to check and change. Nothing is set up until they confirm.
+- **Google listings** are read through the Google Places API, with the key in **Admin → Providers → Google Places**. **Pages** are read from their public preview and text by WURK AI, fetched only from public https addresses (every redirect is checked too).
+- **Photos:** only the business's own photos are offered (from its listing or its page's preview), and the owner ticks which to use. Chosen photos go through the same checks as an upload, then into the opening banner and the gallery.
+- **Reviews stay on Google:** the website's reviews section links to them ("Read our reviews on Google") and never copies them. The Testimonials section has a new optional link for this.
+
 ### Setup — Sprint 23.1 (set up by talking)
 - **Website → Set up by talking:** six short questions (the business, the area, what it sells and for how much, hours, contact, online booking or a shop), answered by typing or a voice note. WURK AI reads each answer and shows what it understood; every value is checked (prices, times, email, category) before it's kept.
 - **Nothing is set up until the owner confirms.** One tap then makes the website (the first one is free), fills in the contact and opening-hours sections, adds bookable services and hours when the business has bookings, and adds products with prices when it has a shop.

@@ -133,7 +133,8 @@ final readonly class SetupTalk
     public static function emptyBrief(): array
     {
         return ['name' => '', 'what' => '', 'category' => '', 'area' => '', 'address' => '', 'services' => [], 'products' => [],
-            'hours' => array_fill(0, 7, ['opens' => '', 'closes' => '']), 'phone' => '', 'whatsapp' => '', 'email' => '', 'bookings' => false, 'shop' => false];
+            'hours' => array_fill(0, 7, ['opens' => '', 'closes' => '']), 'phone' => '', 'whatsapp' => '', 'email' => '', 'bookings' => false, 'shop' => false,
+            'photos' => [], 'reviews_url' => ''];
     }
 
     /**

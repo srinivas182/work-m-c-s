@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Wurk\Website\Models\SetupInterview;
 use Wurk\Website\Models\SiteCategory;
 use Wurk\Website\Setup\WebsiteSetupStep;
@@ -31,6 +32,8 @@ final class SetupTalkController
             'next' => $next,
             'preview' => $next === null ? $this->talk->preview($i) : null,
             'started' => $i->answers !== [],
+            'photos' => array_map(fn (array $p) => ['source' => $p['source'], 'chosen' => $p['chosen']], array_values((array) ($i->brief['photos'] ?? []))),
+            'reviews' => ($i->brief['reviews_url'] ?? '') !== '',
         ]);
     }
 
@@ -58,6 +61,31 @@ final class SetupTalkController
         $answered = $import->import($this->current($request), $link);
 
         return back()->with('status', 'Filled in '.count($answered).' of '.count(SetupTalk::QUESTIONS).' answers. Check each one, change anything that’s wrong, and answer the rest.');
+    }
+
+    /** 23.2: a found photo's thumbnail, fetched through WURK (the business's pages aren't trusted to load in the app). */
+    public function photo(Request $request, OnlineImport $import, int $n): SymfonyResponse
+    {
+        $url = (string) ($this->current($request)->brief['photos'][$n]['url'] ?? '');
+        abort_if($url === '', 404);
+        ['body' => $body, 'type' => $type] = $import->photo($url);
+
+        return response($body, 200, ['Content-Type' => $type, 'Cache-Control' => 'private, max-age=600', 'X-Content-Type-Options' => 'nosniff',
+            'Content-Security-Policy' => "default-src 'none'; sandbox"]);
+    }
+
+    /** 23.2: which of the photos found the owner wants on their website (only theirs are ever offered). */
+    public function photos(Request $request): RedirectResponse
+    {
+        $i = $this->current($request);
+        $photos = array_values((array) ($i->brief['photos'] ?? []));
+        $chosen = array_map('intval', (array) $request->validate(['chosen' => ['present', 'array', 'max:'.OnlineImport::MAX_PHOTOS], 'chosen.*' => ['integer', 'min:0', 'max:'.max(0, count($photos) - 1)]])['chosen']);
+        foreach ($photos as $n => $photo) {
+            $photos[$n]['chosen'] = in_array($n, $chosen, true);
+        }
+        $i->update(['brief' => [...$i->brief, 'photos' => $photos]]);
+
+        return back();
     }
 
     public function apply(Request $request): RedirectResponse

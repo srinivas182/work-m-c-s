@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
@@ -13,7 +14,9 @@ use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Models\Page;
 use Wurk\Website\Models\SetupInterview;
+use Wurk\Website\Models\SiteAsset;
 use Wurk\Website\Support\OnlineImport;
 
 /*
@@ -81,7 +84,7 @@ it('fills the answers from the Google listing, with no review text, for the owne
 
 it('reads a public page’s preview and text with WURK AI, and fetches only public https addresses', function () {
     Http::fake([
-        'www.facebook.com/glowsalon' => Http::response('<html><head><meta property="og:title" content="Glow Salon"><meta property="og:description" content="Braids &amp; nails in Soweto. Knotless braids R450."></head><body>Call 082 555 0101</body></html>'),
+        'www.facebook.com/glowsalon' => Http::response('<html><head><meta property="og:title" content="Glow Salon"><meta property="og:description" content="Braids &amp; nails in Soweto. Knotless braids R450."><meta property="og:image" content="/img/cover.jpg"></head><body>Call 082 555 0101</body></html>'),
         'evil.example/*' => Http::response('secret'),
         'redirector.example/*' => Http::response('', 302, ['Location' => 'https://intranet.glow.test/admin']),
     ]);
@@ -90,12 +93,57 @@ it('reads a public page’s preview and text with WURK AI, and fetches only publ
     ($this->import)('https://www.facebook.com/glowsalon')->assertSessionHas('status', 'Filled in 4 of 6 answers. Check each one, change anything that’s wrong, and answer the rest.');
     $brief = ($this->in)(fn () => SetupInterview::query()->sole()->brief);
     expect($brief['services'])->toEqual([['name' => 'Knotless braids', 'price_cents' => 45000, 'minutes' => 60]])
-        ->and($brief['category'])->toBe('salon-beauty');
+        ->and($brief['category'])->toBe('salon-beauty')
+        ->and($brief['photos'])->toEqual([['url' => 'https://www.facebook.com/img/cover.jpg', 'source' => 'www.facebook.com', 'chosen' => false]]); // offered, not used until picked
 
     ($this->import)('http://www.facebook.com/glowsalon')->assertSessionHasErrors(['link' => 'Paste a public https link to your page.']);
     ($this->import)('https://evil.example/x')->assertSessionHasErrors(['link' => 'Paste a public https link to your page.']);
     ($this->import)('https://redirector.example/go')->assertSessionHasErrors('link');
     Http::assertNotSent(fn (Request $r) => str_contains($r->url(), 'evil.example') || str_contains($r->url(), 'intranet.glow.test'));
+});
+
+it('offers only the business’s own photos, uses the ones the owner picks, and links to Google reviews without copying them', function () {
+    Storage::fake((string) config('wurk.site_assets_disk'));
+    $img = imagecreatetruecolor(1200, 800);
+    imagefilledrectangle($img, 0, 0, 1199, 799, (int) imagecolorallocate($img, 200, 120, 90));
+    ob_start();
+    imagejpeg($img);
+    $jpeg = (string) ob_get_clean();
+    app(ProviderSettings::class)->save('places.google', 'google', ['api_key' => 'places-key'], [], true, null);
+    Http::fake([
+        'places.googleapis.com/v1/places:searchText' => Http::response(['places' => [[
+            'displayName' => ['text' => 'Glow Salon'], 'formattedAddress' => '12 Vilakazi St, Soweto', 'googleMapsUri' => 'https://maps.google.com/?cid=123',
+            'photos' => [
+                ['name' => 'places/abc/photos/own1', 'authorAttributions' => [['displayName' => 'Glow Salon']]],
+                ['name' => 'places/abc/photos/customer', 'authorAttributions' => [['displayName' => 'Thandi M']]],
+            ],
+        ]]]),
+        'places.googleapis.com/v1/places/abc/photos/own1/media*' => Http::response(['photoUri' => 'https://lh3.googleusercontent.com/own1']),
+        'lh3.googleusercontent.com/*' => Http::response($jpeg, 200, ['Content-Type' => 'image/jpeg']),
+    ]);
+    ($this->import)('Glow Salon Soweto')->assertSessionHasNoErrors();
+    Http::assertNotSent(fn (Request $r) => str_contains($r->url(), 'photos/customer'));
+    $this->actingAs($this->owner)->get($this->app('/glow-salon/website/set-up'))->assertInertia(fn ($p) => $p->where('photos', [['source' => 'your Google listing', 'chosen' => false]])->where('reviews', true));
+    $this->actingAs($this->owner)->get($this->app('/glow-salon/website/set-up/photo/0'))->assertOk()->assertHeader('Content-Type', 'image/jpeg');
+    $this->actingAs($this->owner)->get($this->app('/glow-salon/website/set-up/photo/1'))->assertNotFound();
+    $this->actingAs($this->owner)->post($this->app('/glow-salon/website/set-up/photos'), ['chosen' => [3]])->assertSessionHasErrors('chosen.0');
+    $this->actingAs($this->owner)->post($this->app('/glow-salon/website/set-up/photos'), ['chosen' => [0]])->assertSessionHasNoErrors();
+
+    ($this->in)(function () {
+        $i = SetupInterview::query()->sole();
+        $i->update(['answers' => [...$i->answers, 'offer' => 'Braids', 'hours' => 'Mon 9-5', 'contact' => 'none', 'online' => 'Website only'], 'brief' => [...$i->brief, 'category' => 'salon-beauty']]);
+    });
+    $this->actingAs($this->owner)->get($this->app('/glow-salon/website/set-up'))->assertInertia(fn ($p) => $p->where('preview', fn ($lines) => collect($lines)->contains('Use 1 of your own photo in the opening banner and gallery')
+        && collect($lines)->contains('Link to your reviews on Google (they stay on Google; nothing is copied)')));
+    $this->actingAs($this->owner)->post($this->app('/glow-salon/website/set-up/apply'))->assertSessionHas('status', fn (string $s) => str_contains($s, '1 of your photos added') && str_contains($s, 'Linked to your Google reviews'));
+    ($this->in)(function () {
+        $asset = SiteAsset::query()->sole();
+        $home = collect(json_decode(Page::query()->where('is_home', true)->sole()->draft, true)['blocks'])->keyBy('type');
+        expect($asset->ai_generated)->toBeFalse()
+            ->and($home['Hero']['props']['images'][0]['asset'])->toBe($asset->id)
+            ->and($home['Gallery']['props']['images'])->toHaveCount(1)
+            ->and($home['Testimonials']['props']['moreHref'])->toBe('https://maps.google.com/?cid=123');
+    });
 });
 
 it('reads Google’s opening periods Monday first', function () {

@@ -25,6 +25,8 @@ interface Props {
   next: string | null;
   preview: string[] | null;
   started: boolean;
+  /** 23.2: the business's own photos found online; only chosen ones are used. */
+  photos: { source: string; chosen: boolean }[];
 }
 
 const base = () => window.location.pathname.replace(/\/$/, '');
@@ -152,7 +154,38 @@ function ImportForm() {
   );
 }
 
-export default function SetupTalk({ questions, next, preview, started }: Props) {
+/** Pick which of the photos found online go on the website (thumbnails come through WURK). */
+function PhotoPicker({ photos }: { photos: Props['photos'] }) {
+  const chosen = photos.flatMap((p, i) => (p.chosen ? [i] : []));
+  const toggle = (i: number) =>
+    router.post(
+      `${base()}/photos`,
+      { chosen: chosen.includes(i) ? chosen.filter((c) => c !== i) : [...chosen, i] },
+      { preserveScroll: true },
+    );
+  return (
+    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {photos.map((p, i) => (
+        <li key={i}>
+          <label className="border-border has-[:checked]:border-brand grid cursor-pointer gap-2 rounded-md border p-2 text-xs">
+            <img
+              src={`${base()}/photo/${i}`}
+              alt={`Photo ${i + 1} from ${p.source}`}
+              className="aspect-[4/3] w-full rounded object-cover"
+              loading="lazy"
+            />
+            <span className="flex items-center gap-2">
+              <input type="checkbox" checked={p.chosen} onChange={() => toggle(i)} />
+              Use photo {i + 1}
+            </span>
+          </label>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default function SetupTalk({ questions, next, preview, started, photos }: Props) {
   const [changing, setChanging] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
   const answered = questions.filter((q) => q.answer !== null);
@@ -207,6 +240,20 @@ export default function SetupTalk({ questions, next, preview, started }: Props) 
                   </li>
                 ))}
               </ol>
+            </CardContent>
+          </Card>
+        )}
+        {photos.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Your photos</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 text-sm">
+              <p className="text-fg-muted">
+                These are photos you put online yourself. Tick the ones to use on your website —
+                only use photos of your own business and work.
+              </p>
+              <PhotoPicker photos={photos} />
             </CardContent>
           </Card>
         )}
