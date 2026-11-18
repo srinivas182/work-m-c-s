@@ -38,6 +38,16 @@ interface BusinessPayments
     public function refund(string $reference, ?int $amountCents = null): bool;
 
     /** The business's EFT / bank transfer instructions — only if EFT is enabled, allowed by WURK and saved for its mode. */
+    /** Mobile money providers (Sprint 22.2): the customer approves a prompt on their phone. */
+    public const MOBILE_MONEY = ['mpesa', 'mtn_momo', 'airtel_money'];
+
+    /**
+     * Mobile money (Sprint 22.2): send the payment prompt straight to this phone, e.g. the customer's own WhatsApp number.
+     * Returns null when it's on its way; otherwise why not: "not_mobile" (the payment isn't by mobile money), "number",
+     * or a failure reason.
+     */
+    public function promptMobileMoney(string $reference, string $phone): ?string;
+
     public function eftInstructions(?string $branchId = null): ?string;
 
     /** Switch on EFT / bank transfer with these instructions (demo shops, onboarding). */

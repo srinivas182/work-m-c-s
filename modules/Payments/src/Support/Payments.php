@@ -121,6 +121,16 @@ final readonly class Payments implements BusinessPayments
         return true;
     }
 
+    public function promptMobileMoney(string $reference, string $phone): ?string
+    {
+        $attempt = PaymentAttempt::query()->find($reference);
+        if ($attempt === null || ! in_array($attempt->provider, PlatformMethods::MOBILE, true)) {
+            return 'not_mobile';
+        }
+
+        return app(MobileMoney::class)->prompt($attempt, $phone);
+    }
+
     public function eftInstructions(?string $branchId = null): ?string
     {
         if ($this->isDemo()) {

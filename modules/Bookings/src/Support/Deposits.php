@@ -132,7 +132,7 @@ final readonly class Deposits
         // The return address carries the reference (Yoco and PayFast don't add it).
         $branch = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id; // the branch's own account, if it has one
 
-        return $this->payments->start($reference, $amountCents, $what, ['name' => $name, 'email' => $email],
+        return $this->payments->start($reference, $amountCents, $what, ['name' => $name, 'email' => $email, 'phone' => $booking->customer_phone],
             ['return' => $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference), 'cancel' => (string) preg_replace('#/book/return.*$#', '/', $returnUrl)], branchId: $branch); // cancelling goes back to the home page
     }
 
@@ -171,6 +171,12 @@ final readonly class Deposits
 
             return $booking->refresh();
         });
+    }
+
+    /** Mobile money (22.2): the deposit prompt straight to the customer's phone; null when it's on its way. */
+    public function promptOnPhone(Booking|ClassAttendee $booking, string $phone): ?string
+    {
+        return $booking->payment_reference === null ? 'not_mobile' : $this->payments->promptMobileMoney($booking->payment_reference, $phone);
     }
 
     /** A paid deposit: confirmed, the cash recorded, rewards on the full deposit (decision E). */

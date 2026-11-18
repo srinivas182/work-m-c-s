@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved by WURK (18 Nov 2026: "All approved", with Sprints 19–25 in sequence) |
+| **Status** | ✅ Done — v0.23.0 (approved 18 Nov 2026: "All approved", with Sprints 19–25 in sequence) |
 | **Release** | v0.23.0 |
 | **Depends on** | v0.22.0. Builds on: Payments (businesses' own merchant accounts, Sprint 10), Billing (WURK's invoices, card, DebiCheck and cash, Sprint 3), Credits (wallet and rate card), Sales (cash at the till), WhatsApp (Sprint 21) |
 | **Next** | Sprint 23 — Easy setup & money tools |
@@ -120,8 +120,34 @@ WURK runs in South African rand today. **Country packs** (currency, VAT, phone f
 
 | Part | PR | Notes |
 |---|---|---|
-| 22.1 | | Paystack on the business's own account: key tested on saving, channels the owner picks (card, EFT, Capitec Pay, SnapScan), webhook address shown, signed webhooks, verified before counting (amount and currency), refunds. WURK can take payments through its own Paystack account too (Admin → Payment methods) |
+| 22.1 | #230 | Paystack on the business's own account: key tested on saving, channels the owner picks (card, EFT, Capitec Pay, SnapScan), webhook address shown, signed webhooks, verified before counting (amount and currency), refunds. WURK can take payments through its own Paystack account too (Admin → Payment methods) |
 | 22.2 | | M-Pesa (Daraja STK push, Paybill or Till), MTN MoMo (Request to Pay) and Airtel Money (USSD push) on the business's own account, offered only where each provider works. The customer types their number on the business's payment page, approves on their phone, and the page waits (no script; it refreshes itself). Results are always read back from the provider: on the page, from the (unsigned) callback, and by a job every 20 s. Plain reasons (declined, timed out, not enough funds, wrong PIN); prompts expire after 3 minutes; at most 5 prompts per payment, 30 s apart; a retry first re-checks the earlier prompt so money is never taken twice |
 | 22.3 | | Calendar → **Paid in person** on a booking: cash, card machine or SnapScan / Zapper at the counter, the amount (the deposit or what's left of the price) and who took it. A booking awaiting its deposit is confirmed. Shop orders paid later say how they were paid (EFT, cash, card machine or QR). Both are audited, counted in the takings, and kept in a ledger by method and day. The evening summary's cash line follows once Sprint 21.6 is in |
 | 22.4 | | WURK's invoices and credit packs: through WURK's Paystack account with every channel it allows (shown to owners as "Capitec Pay, SnapScan, EFT or card"), and **Flutterwave** as WURK's second gateway (Admin → Payment methods; key tested, webhook secret hash checked, verified before it counts, refunds by Flutterwave's transaction id). Flutterwave is never offered by businesses |
 | 22.5 | | Admin → Packages: **Pay as you go** (versioned like prices). Prepaid packages are never invoiced; `billing:charge-prepaid` (00:10 SAST) takes the monthly price ÷ the month's days from credits, at the best credit pack's price per credit, once a day. Warnings by email and SMS at 7, 3 and 1 day(s) left; when credits run out, a grace period (Admin → Invoice settings, default 3 days), then the usual dunning. A top-up of any amount from R20 pays today and restores the business at once. Billing and Home show about how many days the credits last |
+| 22.6 | | In WhatsApp, the deposit's mobile money prompt goes straight to the customer's own number (no email needed; the link still works). The evening summary counts money taken in person on bookings. Pay-as-you-go warnings go by WhatsApp first (`wurk_credits_low`, `wurk_credits_out`), then SMS. End-to-end tests for cash and card-machine payments on a booking, cash on collection for an order, and Paystack's settings. Release v0.23.0 |
+
+## Verification (before closing)
+
+Every spec item and acceptance criterion, checked against the code and its tests. Verified 18 Nov 2026.
+
+| Item | Where | Status |
+|---|---|---|
+| 22.1 The business's own Paystack account; key tested on saving, encrypted | Gateways/Paystack, PaymentSettingsController::keys; PaystackTest | ✅ |
+| 22.1 Owner picks channels (card, EFT, Capitec Pay, SnapScan); only those Paystack offers in the country | PaymentSettingsController::channels, MethodCard; PaystackTest | ✅ |
+| 22.1 Deposits, class places, shop orders pay through it; signed webhook, then verified; refunds | GatewayRouter, Paystack::notification / verify / refund; PaystackTest | ✅ It also checks the amount and that the currency is ZAR. |
+| 22.2 M-Pesa (STK push), MTN MoMo (Request to Pay), Airtel Money (USSD push) with the business's own keys, tested on saving | Gateways/MobileMoney/*, KeyFields; MobileMoneyTest | ✅ |
+| 22.2 Number (prefilled), prompt, waiting page, plain reasons (declined, timed out, not enough funds, wrong PIN) | PublicPaymentsController::mobile / prompt, mobile-money view; MobileMoneyTest | ✅ The page needs no script. |
+| 22.2 Callback and status query; unanswered prompts re-checked by a job; duplicate callbacks ignored | MobileMoney::check (one transition to paid), CheckMobileMoneyPayment; MobileMoneyTest | ✅ |
+| 22.2 In WhatsApp, the assistant sends the prompt itself | BookAppointmentTool, Deposits::promptOnPhone, Payments::promptMobileMoney; ReceptionistBookingToolsTest | ✅ |
+| 22.2 Only where each provider works | PlatformMethods::COUNTRIES; MobileMoneyTest | ✅ |
+| 22.3 Paid in cash, card machine or SnapScan / Zapper on a booking (deposit or full), with who took it; audited; in reports | CalendarController::paid, Deposits::paidInPerson, InPersonLedger; CalendarTest, e2e/payments | ✅ |
+| 22.3 Shop order paid in cash at collection or on delivery | OrderManager::advance (how); ProductsTest, e2e/shop-orders | ✅ |
+| 22.3 The day's cash in the evening summary and in Reports | BookingsDigest, Takings (PurchaseMade); CalendarTest | ✅ |
+| 22.4 WURK's invoices and credit packs through Paystack with every channel WURK's account allows | WurkPayments (paystack); WurkMobileMoneyAndQrTest | ✅ |
+| 22.4 Flutterwave as WURK's second gateway; keys in Admin; verified; signed (secret hash) | Gateways/Flutterwave, PaymentMethodsController; WurkMobileMoneyAndQrTest | ✅ The keys are in Admin → Payment methods, next to WURK's other methods. |
+| 22.5 Pay-as-you-go packages charged daily from credits; top-ups from R20 | PrepaidPlans, ChargePrepaidCommand, BillingController::buyCredits; PrepaidPlansTest | ✅ |
+| 22.5 Warnings at 7, 3, 1 day(s) by WhatsApp, SMS and email; grace period (Admin setting), then the usual dunning; nothing deleted; restored at once on top-up | PrepaidPlans::run / ranOut / notify, BillingSettings; PrepaidPlansTest | ✅ |
+| 22.5 "Paid until …, about N days left" on Home and in Billing | Billing tile (DashboardTiles), Billing.tsx; PrepaidPlansTest | ✅ |
+| 22.6 Payment journeys in the end-to-end tests | e2e/payments.spec.ts, e2e/shop-orders.spec.ts; providers against recorded sandbox responses in feature tests | ✅ |
+| Acceptance 1–6 | the tests above | ✅ Live mobile money and Flutterwave need WURK's accounts (see "Waiting on WURK"). |

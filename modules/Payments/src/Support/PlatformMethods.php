@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Wurk\Payments\Support;
 
 use Illuminate\Support\Facades\DB;
+use Wurk\Payments\Contracts\BusinessPayments;
 
 /** Super admin: which payment methods businesses may offer (platform-wide; on unless switched off). */
 final class PlatformMethods
 {
     /** Mobile money, direct (Sprint 22.2): a prompt on the customer's phone, money to the business's own till or wallet. */
-    public const MOBILE = ['mpesa', 'mtn_momo', 'airtel_money'];
+    public const MOBILE = BusinessPayments::MOBILE_MONEY;
 
     /** Card, instant-EFT, QR and mobile money providers (paid online), then manual EFT. */
     public const ONLINE = ['yoco', 'payfast', 'ozow', 'peach', 'paystack', ...self::MOBILE];
