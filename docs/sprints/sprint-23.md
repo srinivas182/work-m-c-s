@@ -45,6 +45,7 @@ Sources:
 ## Scope
 
 ### 23.1 Set up by talking (voice note or WhatsApp)
+- *Delivery note:* 23.1 brings the conversation to the back office (typed or as voice notes recorded in the browser). The same questions on **WhatsApp** use the owner-instructions channel built in Sprint 26.1, so they arrive there, on the same engine (`SetupTalk`).
 - **On WhatsApp or in the app, a short conversation.** The owner answers in text or voice notes, in any language WURK's speech-to-text understands. The setup assistant asks:
   - what the business is called and does
   - where it is, or the areas it serves
