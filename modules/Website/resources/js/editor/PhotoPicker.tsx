@@ -12,8 +12,15 @@ export interface PhotoValue {
   asset?: string;
 }
 
+/** A photo from the design (a stand-in or HQ's demo photo), not the business's own — mirrors TemplatePhotos::DEMO. */
+export function isDemoPhoto(src: string): boolean {
+  return /\/(?:images\/)?templates\/[a-z0-9-]+\/[a-z0-9-]+-\d+\.webp/i.test(src);
+}
+
 interface Library {
   photos: (PhotoValue & { name: string; ai?: boolean })[];
+  /** The design's demo photos (20.3): one per place, to swap a demo for one that fits better. */
+  demo?: (PhotoValue & { name: string })[];
   used_mb: number;
   limit_mb: number;
 }
@@ -110,8 +117,20 @@ export function PhotoPicker({
           key={`${photo.src}-${i}`}
           className="grid grid-cols-[72px_1fr] gap-3 rounded-lg border border-[#d9d6e8] p-2"
         >
-          <img src={photo.src} alt="" className="size-[72px] rounded-md object-cover" />
+          <div className="relative">
+            <img src={photo.src} alt="" className="size-[72px] rounded-md object-cover" />
+            {isDemoPhoto(photo.src) && (
+              <span className="absolute inset-x-0 bottom-0 rounded-b-md bg-[#7a4b00] px-1 py-0.5 text-center text-[10px] font-semibold text-white">
+                Demo
+              </span>
+            )}
+          </div>
           <div className="grid gap-1.5">
+            {isDemoPhoto(photo.src) && (
+              <p className="text-[#7a4b00]">
+                Demo photo — replace it with one of your own business.
+              </p>
+            )}
             {withAlt && (
               <label className="grid gap-1">
                 <span className="font-medium">Describe this photo</span>
@@ -252,6 +271,30 @@ export function PhotoPicker({
             <p className="text-[#5b5776]">
               {library.used_mb} MB of {library.limit_mb} MB used
             </p>
+          )}
+          {(library.demo?.length ?? 0) > 0 && (
+            <details className="text-[#5b5776]">
+              <summary className="cursor-pointer font-medium">
+                Or another demo photo from your design
+              </summary>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {(library.demo ?? []).map((p) => (
+                  <button
+                    key={p.src}
+                    type="button"
+                    onClick={() => {
+                      const chosen: PhotoValue = { src: p.src, alt: value[0]?.alt ?? '' };
+                      onChange(max === 1 ? [chosen] : [...value, chosen].slice(0, max));
+                      setLibrary(null);
+                    }}
+                    className="overflow-hidden rounded-md ring-[#5b3df5] hover:ring-2"
+                    aria-label={`Use the demo photo: ${p.name}`}
+                  >
+                    <img src={p.src} alt="" className="aspect-square w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </details>
           )}
           {library.photos.filter((p) => allowAi || !p.ai).length === 0 ? (
             <p>No photos yet — upload one.</p>

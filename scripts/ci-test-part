@@ -11,7 +11,7 @@ PART3=(Bookings Access Plans Features)
 PART7=(Ai Security Marketing) # 19.2: part 3 passed 12 min on a slow runner; the receptionist adds Ai tests
 # Website's slowest files run in part 8 (20.1): Website alone takes ~8.5 min on MySQL, and part 1 with all of it was
 # cancelled at 12 min. Website's other files stay in part 1 (~4.5 min with the rest of part 1).
-WEBSITE_PART8=(QuoteFormTest SiteModelTest PhotoUploadTest ChatBotTest ReceptionistTest VideoUploadTest)
+WEBSITE_PART8=(QuoteFormTest SiteModelTest PhotoUploadTest ChatBotTest ReceptionistTest VideoUploadTest TemplatePhotosTest)
 website_files() { # $1 = in | out (of WEBSITE_PART8)
   find modules/Website/tests -name '*Test.php' | sort | while read -r f; do
     b="$(basename "$f" .php)"

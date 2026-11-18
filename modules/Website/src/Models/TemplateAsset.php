@@ -6,6 +6,7 @@ namespace Wurk\Website\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Wurk\Tenancy\Contracts\CentralModel;
 
 /**
@@ -16,6 +17,13 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property int $height
  * @property int $bytes
  * @property array<int, string> $variants
+ * @property string|null $slot the design's photo slot this fills (Sprint 20.3), e.g. "hero"
+ * @property string|null $source_url
+ * @property string|null $photographer
+ * @property string|null $licence
+ * @property bool $ai_generated
+ * @property string|null $added_by
+ * @property Carbon $created_at
  */
 final class TemplateAsset extends Model implements CentralModel
 {
@@ -27,6 +35,6 @@ final class TemplateAsset extends Model implements CentralModel
 
     protected function casts(): array
     {
-        return ['variants' => 'array', 'width' => 'integer', 'height' => 'integer', 'bytes' => 'integer'];
+        return ['variants' => 'array', 'width' => 'integer', 'height' => 'integer', 'bytes' => 'integer', 'ai_generated' => 'boolean', 'created_at' => 'datetime'];
     }
 }

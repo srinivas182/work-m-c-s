@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Wurk\Website\Http\Controllers\Admin\LaunchTimesController;
+use Wurk\Website\Http\Controllers\Admin\TemplatePhotosController;
 use Wurk\Website\Http\Controllers\Admin\TemplatesController;
 use Wurk\Website\Http\Controllers\AiImageController;
 use Wurk\Website\Http\Controllers\AiWriterController;
@@ -98,6 +99,8 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
     Route::post('/{template}/versions/{version}/restore', [TemplatesController::class, 'restoreVersion'])->name('.versions.restore');
     Route::get('/{template}/photos', [TemplatesController::class, 'photos'])->name('.photos');
     Route::post('/{template}/photos', [TemplatesController::class, 'uploadPhoto'])->middleware('throttle:60,1,template-photos')->name('.photos.store');
+    Route::post('/{template}/demo-photos/{slot}', [TemplatePhotosController::class, 'store'])->middleware('throttle:30,1,template-demo-photos')->name('.demo-photos.store');
+    Route::delete('/{template}/demo-photos/{slot}', [TemplatePhotosController::class, 'destroy'])->name('.demo-photos.destroy');
     Route::get('/{template}/pages/{page}/edit', [TemplatesController::class, 'editPage'])->name('.pages.edit');
     Route::put('/{template}/pages/{page}/draft', [TemplatesController::class, 'saveDraft'])->middleware('throttle:120,1,template-draft')->name('.pages.draft');
 });
