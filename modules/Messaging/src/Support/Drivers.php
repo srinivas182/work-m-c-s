@@ -48,6 +48,8 @@ final class Drivers
                 'meta' => ['name' => 'Meta WhatsApp Cloud API', 'class' => MetaCloudWhatsApp::class, 'fields' => MetaCloudWhatsApp::fields(), 'settings' => [
                     'phone_number_id' => 'Phone number ID', 'api_version' => 'Graph API version (default '.MetaCloudWhatsApp::DEFAULT_VERSION.')',
                     'verify_token' => 'Webhook verify token', 'otp_template' => 'Sign-in code template name', 'otp_language' => 'Template language (e.g. en)',
+                    // Sprint 21.1: businesses connect their own numbers through Embedded Signup (WURK as Tech Provider).
+                    'app_id' => 'Meta app ID (businesses connect their own numbers)', 'signup_config_id' => 'Embedded Signup configuration ID',
                 ]],
             ],
             'email' => [
