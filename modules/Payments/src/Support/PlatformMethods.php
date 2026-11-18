@@ -17,11 +17,14 @@ final class PlatformMethods
 
     public const ALL = [...self::ONLINE, 'eft'];
 
-    /** Methods WURK itself can take payments with (mobile money for WURK goes through Flutterwave, Sprint 22.4). */
-    public const WURK = ['yoco', 'payfast', 'ozow', 'peach', 'paystack', 'eft'];
+    /** Methods WURK itself can take payments with: Flutterwave is WURK's own (mobile money and cards outside South Africa). */
+    public const WURK = ['yoco', 'payfast', 'ozow', 'peach', 'paystack', 'flutterwave', 'eft'];
+
+    /** WURK's own methods that businesses never offer. */
+    public const WURK_ONLY = ['flutterwave'];
 
     public const NAMES = ['yoco' => 'Yoco', 'payfast' => 'PayFast', 'ozow' => 'Ozow', 'peach' => 'Peach Payments', 'paystack' => 'Paystack',
-        'mpesa' => 'M-Pesa', 'mtn_momo' => 'MTN MoMo', 'airtel_money' => 'Airtel Money', 'eft' => 'EFT / bank transfer'];
+        'mpesa' => 'M-Pesa', 'mtn_momo' => 'MTN MoMo', 'airtel_money' => 'Airtel Money', 'flutterwave' => 'Flutterwave', 'eft' => 'EFT / bank transfer'];
 
     /** Where each mobile money provider works; the others work wherever WURK does. */
     public const COUNTRIES = ['mpesa' => ['KE'], 'mtn_momo' => ['GH', 'UG', 'ZM', 'CM', 'CI', 'RW'], 'airtel_money' => ['KE', 'UG', 'TZ', 'ZM', 'MW', 'RW']];

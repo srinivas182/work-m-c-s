@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Payments\Support;
 
 use Closure;
+use Wurk\Payments\Gateways\Flutterwave;
 use Wurk\Payments\Gateways\Ozow;
 use Wurk\Payments\Gateways\PayFast;
 use Wurk\Payments\Gateways\Paystack;
@@ -34,10 +35,11 @@ final class GatewayRouter
 
             return $handOff();
         }
-        if (in_array($account->provider, ['yoco', 'peach', 'paystack'], true)) { // hosted pages: redirect
+        if (in_array($account->provider, ['yoco', 'peach', 'paystack', 'flutterwave'], true)) { // hosted pages: redirect
             $started = match ($account->provider) {
                 'yoco' => Yoco::start($account, $attempt, $urls),
                 'peach' => Peach::start($account, $attempt, $urls),
+                'flutterwave' => Flutterwave::start($account, $attempt, $customer, $urls),
                 default => Paystack::start($account, $attempt, $customer, $urls),
             };
             if ($started === null) {
@@ -64,6 +66,14 @@ final class GatewayRouter
         if ($attempt->provider === 'payfast') { // confirmed only by a notification that passed every check
             return ['paid' => $attempt->status === 'paid', 'amount_cents' => $attempt->status === 'paid' ? $attempt->amount_cents : 0];
         }
+        if ($attempt->provider === 'flutterwave') { // its refunds need Flutterwave's own transaction id
+            $flw = Flutterwave::verify($account, $attempt);
+            if ($flw['paid'] && $flw['amount_cents'] >= $attempt->amount_cents && $attempt->status === 'pending') {
+                $attempt->update(['status' => 'paid', 'paid_at' => now(), 'provider_id' => $flw['id']]);
+            }
+
+            return ['paid' => $flw['paid'], 'amount_cents' => $flw['amount_cents']];
+        }
         $result = match ($attempt->provider) {
             'ozow' => Ozow::verify($account, $attempt),
             'peach' => Peach::verify($account, $attempt),
@@ -83,6 +93,7 @@ final class GatewayRouter
             'yoco' => Yoco::refund($account, $attempt, $cents),
             'peach' => Peach::refund($account, $attempt, $cents),
             'paystack' => Paystack::refund($account, $attempt, $cents),
+            'flutterwave' => Flutterwave::refund($account, $attempt, $cents),
             'payfast' => PayFast::refund($account, $attempt, $cents),
             default => false, // Ozow and mobile money: refunded in the provider's portal, then recorded by the owner
         };
@@ -133,6 +144,10 @@ final class GatewayRouter
                 // Unsigned callbacks: only a hint of which prompt to check (the result is read back from the provider).
                 $id = MobileMoney::gateway($account->provider)->callbackId((array) json_decode($body, true));
                 $attempt = $id === null ? null : ($byProviderId($id) ?? $byReference($id));
+                break;
+            case 'flutterwave':
+                $reference = Flutterwave::notification($account, $body, $headers);
+                $attempt = $reference === null ? null : $byReference($reference);
                 break;
             case 'paystack':
                 $reference = Paystack::notification($account, $body, $headers);

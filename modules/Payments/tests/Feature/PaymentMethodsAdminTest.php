@@ -27,7 +27,7 @@ beforeEach(function () {
 it('lets only staff who manage providers change payment methods', function () {
     $this->actingAs($this->staffWithRole('finance', 'money@wurk.co.za'))->get($this->base)->assertForbidden();
     $this->actingAs($this->boss)->get($this->base)->assertInertia(fn (Assert $p) => $p->component('Payments::Admin/PaymentMethods')
-        ->where('methods.0', ['provider' => 'yoco', 'name' => 'Yoco', 'available' => true, 'wurk_account' => true, 'countries' => null, 'wurk' => null])->has('methods', 9)
+        ->where('methods.0', ['provider' => 'yoco', 'name' => 'Yoco', 'available' => true, 'wurk_account' => true, 'countries' => null, 'business_offer' => true, 'wurk' => null])->has('methods', 10)
         ->where('methods.5', fn ($m) => $m['provider'] === 'mpesa' && $m['wurk_account'] === false && $m['countries'] === ['KE']));
 });
 
