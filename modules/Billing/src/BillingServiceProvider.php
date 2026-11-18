@@ -11,6 +11,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Wurk\Billing\Console\ChargePrepaidCommand;
 use Wurk\Billing\Console\DunningCommand;
 use Wurk\Billing\Console\RenewSubscriptionsCommand;
 use Wurk\Billing\Console\UsageSummariesCommand;
@@ -38,12 +39,15 @@ use Wurk\Billing\Support\Invoices;
 use Wurk\Billing\Support\PackCreditPricing;
 use Wurk\Billing\Support\PaidSubscriptions;
 use Wurk\Billing\Support\Payments;
+use Wurk\Billing\Support\PrepaidPlans;
 use Wurk\Credits\Events\LowCreditBalance;
 use Wurk\Payments\Contracts\PlatformPaymentReceived;
 use Wurk\Plans\Contracts\CreditPricing;
+use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 final class BillingServiceProvider extends ModuleServiceProvider
 {
@@ -116,15 +120,37 @@ final class BillingServiceProvider extends ModuleServiceProvider
         // Any failed subscription payment (card now, debit order days later) makes an active subscription past due.
         Event::listen(PaymentFailed::class, DunningNotices::class);
         Event::listen(PaymentSucceeded::class, fn (PaymentSucceeded $e) => $this->app->make(Invoices::class)->forPayment(Payment::query()->findOrFail($e->paymentId)));
+        // Pay as you go (22.5): Home shows how long the credits last.
+        $this->callAfterResolving(DashboardTiles::class, function (DashboardTiles $tiles): void {
+            $tiles->register('billing.prepaid', 5, function (): ?array {
+                $context = app(TenantContext::class);
+                $status = $context->has() && Gate::allows('billing.manage') ? app(PrepaidPlans::class)->status($context->id()) : null;
+                if ($status === null) {
+                    return null;
+                }
+
+                return ['label' => 'Your plan (pay as you go)', 'href' => route('tenant.billing', ['tenant' => $context->current()->handle()]),
+                    'value' => $status['ran_out_on'] !== null ? 'Credits used up' : 'About '.$status['days_left'].' '.($status['days_left'] === 1 ? 'day' : 'days').' left',
+                    'hint' => $status['ran_out_on'] !== null ? 'Top up from R20 to keep going' : 'Paid until today; top up from R20 any time'];
+            });
+        });
+        // Pay as you go (22.5): a top-up pays today's plan straight away, which restores a business that had run out.
+        Event::listen(PaymentSucceeded::class, function (PaymentSucceeded $e): void {
+            $payment = Payment::query()->find($e->paymentId);
+            if ($payment !== null && $payment->purpose === 'credits') {
+                $this->app->make(PrepaidPlans::class)->run($payment->tenant_id);
+            }
+        });
         $this->app->make(Router::class)->pushMiddlewareToGroup('tenant.back-office', RequirePayment::class);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('billing:renew')->hourly()->onOneServer()->withoutOverlapping();
             $schedule->command('billing:dunning')->dailyAt('08:00')->timezone('Africa/Johannesburg')->onOneServer()->withoutOverlapping();
+            $schedule->command('billing:charge-prepaid')->dailyAt('00:10')->timezone('Africa/Johannesburg')->onOneServer()->withoutOverlapping();
         });
 
         if ($this->app->runningInConsole()) {
-            $this->commands([UsageSummariesCommand::class, RenewSubscriptionsCommand::class, DunningCommand::class]);
+            $this->commands([ChargePrepaidCommand::class, UsageSummariesCommand::class, RenewSubscriptionsCommand::class, DunningCommand::class]);
         }
     }
 }

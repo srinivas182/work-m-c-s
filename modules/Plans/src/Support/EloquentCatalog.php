@@ -57,6 +57,8 @@ final readonly class EloquentCatalog implements Catalog
             'period' => $s->billing_period,
             'period_cents' => $s->billing_period === 'yearly' ? $s->version->yearly_price_cents : $s->version->monthly_price_cents,
             'monthly_credits' => $s->version->monthly_credits,
+            'prepaid' => (bool) $s->version->prepaid, // pay as you go (Sprint 22.5)
+            'monthly_cents' => $s->version->monthly_price_cents,
             'trial_ends_at' => $s->trial_ends_at?->toIso8601String(),
             'current_period_start' => $s->current_period_start?->toIso8601String(),
             'current_period_end' => $s->current_period_end?->toIso8601String(),
@@ -136,7 +138,15 @@ final readonly class EloquentCatalog implements Catalog
     public function dueForRenewal(\DateTimeInterface $before): array
     {
         return array_values(array_map('strval', TenantSubscription::query()->where('status', 'active')
-            ->whereNotNull('current_period_end')->where('current_period_end', '<=', $before)->pluck('tenant_id')->all()));
+            ->whereNotNull('current_period_end')->where('current_period_end', '<=', $before)
+            ->whereHas('version', fn ($q) => $q->where('prepaid', false)) // pay as you go is taken daily from credits, never invoiced
+            ->pluck('tenant_id')->all()));
+    }
+
+    public function prepaidSubscribers(): array
+    {
+        return array_values(array_map('strval', TenantSubscription::query()->whereIn('status', ['active', 'past_due', 'suspended'])
+            ->whereHas('version', fn ($q) => $q->where('prepaid', true))->pluck('tenant_id')->all()));
     }
 
     public function subscribe(string $tenantId, string $packageId, string $period, bool $allowTrial): array

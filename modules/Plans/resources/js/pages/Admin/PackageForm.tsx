@@ -132,6 +132,7 @@ export default function PackageForm({
     custom_domain: t?.custom_domain ?? false,
     monthly_credits: t?.monthly_credits ?? 100,
     credit_packs_allowed: t?.credit_packs_allowed ?? true,
+    prepaid: t?.prepaid ?? false,
     referral_max_levels: t?.referral_max_levels ?? 7,
     referral_max_commission: t?.referral_max_commission ?? 30,
     managed_fee: t?.managed_fee ?? '',
@@ -305,6 +306,16 @@ export default function PackageForm({
                   onCheckedChange={(v) => form.setData('credit_packs_allowed', v)}
                 />
                 <Label htmlFor="packs">Can buy credit packs</Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="prepaid"
+                  checked={form.data.prepaid}
+                  onCheckedChange={(v) => form.setData('prepaid', v)}
+                />
+                <Label htmlFor="prepaid">
+                  Pay as you go: the monthly price comes out of WURK credits each day (no invoice)
+                </Label>
               </div>
               <div className="flex items-center gap-3">
                 <Switch

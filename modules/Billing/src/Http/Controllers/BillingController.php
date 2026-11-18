@@ -23,6 +23,7 @@ use Wurk\Billing\Support\AutoTopUp;
 use Wurk\Billing\Support\BillingStatus;
 use Wurk\Billing\Support\Dunning;
 use Wurk\Billing\Support\Payments;
+use Wurk\Billing\Support\PrepaidPlans;
 use Wurk\Billing\Support\SaBanking;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Payments\Contracts\PlatformPayments;
@@ -34,6 +35,9 @@ use Wurk\Tenancy\Contracts\TenantContext;
 /** Business owners: Settings → Billing (PRD §7.14). */
 final class BillingController
 {
+    /** The smallest top-up, in rand including VAT (Sprint 22.5). */
+    public const MIN_TOP_UP_RAND = 20;
+
     public function __construct(private readonly TenantContext $context, private readonly Payments $payments, private readonly Catalog $catalog, private readonly Entitlements $entitlements) {}
 
     /** A package can switch off credit packs (upgrading is then the way to get more credits). */
@@ -79,6 +83,8 @@ final class BillingController
             'wurkEft' => app(PlatformPayments::class)->eftInstructions(),
             'reference' => $this->context->current()->handle(),
             'stage' => app(Dunning::class)->stage($tenantId),
+            'prepaid' => app(PrepaidPlans::class)->status($tenantId), // pay as you go: about how many days the credits last
+            'minTopUp' => self::MIN_TOP_UP_RAND,
             'packagesOnSale' => array_map(fn (array $p) => ['id' => $p['id'], 'name' => $p['name'], 'monthly_total_cents' => $withVat($p['monthly_cents']), 'yearly_total_cents' => $withVat($p['yearly_cents'])], $this->catalog->onSale()),
             'invoices' => Invoice::query()->where('tenant_id', $tenantId)->latest('issued_at')->limit(24)->get()
                 ->map(fn (Invoice $i) => ['id' => $i->id, 'number' => $i->number, 'issued_at' => $i->issued_at->toIso8601String(), 'total_cents' => $i->total_cents, 'credited_cents' => $i->credited_cents])->all(),
@@ -121,8 +127,23 @@ final class BillingController
         if (! $this->packsAllowed()) {
             throw ValidationException::withMessages(['pack_id' => 'Your package doesn’t include buying credit packs. Upgrade for more monthly credits.']);
         }
-        $data = $request->validate(['pack_id' => ['required', 'exists:credit_packs,id'], 'saved_card' => ['boolean']]);
-        $pack = CreditPack::query()->whereKey($data['pack_id'])->where('active', true)->firstOrFail();
+        $data = $request->validate([
+            'pack_id' => ['required_without:amount', 'nullable', 'exists:credit_packs,id'], 'saved_card' => ['boolean'],
+            // Any amount from R20, VAT included (Sprint 22.5): small, frequent top-ups for pay as you go.
+            'amount' => ['required_without:pack_id', 'nullable', 'numeric', 'min:'.self::MIN_TOP_UP_RAND, 'max:50000'],
+        ], ['amount.min' => 'Top up at least R'.self::MIN_TOP_UP_RAND.'.']);
+        if (($data['pack_id'] ?? null) === null) {
+            $perCredit = app(PrepaidPlans::class)->centsPerCredit();
+            $vatBp = (int) (app(Countries::class)->find($this->context->current()->countryCode())['vat_bp'] ?? 1500);
+            $excl = (int) floor((float) $data['amount'] * 100 * 10000 / (10000 + $vatBp));
+            $credits = $perCredit === null ? 0 : (int) floor($excl / $perCredit);
+            if ($credits < 1) {
+                throw ValidationException::withMessages(['amount' => 'Credits aren’t on sale right now. Try again later.']);
+            }
+            $pack = new CreditPack(['name' => 'Top-up', 'credits' => $credits, 'price_cents' => $excl]);
+        } else {
+            $pack = CreditPack::query()->whereKey($data['pack_id'])->where('active', true)->firstOrFail();
+        }
         $details = ['pack' => $pack->name, 'credits' => $pack->credits];
 
         if (($data['saved_card'] ?? false) && $this->payments->defaultMethod($this->context->id()) !== null) {

@@ -22,6 +22,9 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property int|null $auto_top_up_cap_cents
  * @property bool $usage_summary
  * @property string|null $usage_summary_for
+ * @property string|null $prepaid_charged_on pay as you go: the last day taken from credits (Y-m-d)
+ * @property string|null $prepaid_ran_out_on the day credits ran out (Y-m-d)
+ * @property int|null $prepaid_warned_days the last "N days left" warning sent
  */
 final class BillingAccount extends Model implements CentralModel
 {
@@ -35,6 +38,6 @@ final class BillingAccount extends Model implements CentralModel
 
     protected function casts(): array
     {
-        return ['auto_top_up' => 'boolean', 'auto_top_up_cap_cents' => 'integer', 'usage_summary' => 'boolean'];
+        return ['auto_top_up' => 'boolean', 'auto_top_up_cap_cents' => 'integer', 'usage_summary' => 'boolean', 'prepaid_warned_days' => 'integer'];
     }
 }
