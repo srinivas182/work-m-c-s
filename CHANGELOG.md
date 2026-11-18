@@ -6,6 +6,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [0.25.0] — 2026-11-19 — Sprint 24: Languages & light on data
 
+### Fixed
+- **Late-evening sales are counted on their own day.**
+  - Between 22:00 and midnight in South Africa, a sale or payment was missing from that day's cash-up, evening summary, shop and money figures.
+  - The cause: dates in database queries were compared in UTC, while times are stored in the app's time zone. Every date in a query is now converted first.
+  - This affected v0.23.0–v0.24.0. Late-evening figures from those versions may have been too low.
+- **The production Docker image builds again.** The data-budget check runs during the build, and its script is now included in the image.
+
 ### Release — Sprint 24.6
 - End-to-end tests (desktop and mobile):
   - an owner picks their language;
