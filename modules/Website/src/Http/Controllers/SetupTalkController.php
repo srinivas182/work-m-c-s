@@ -12,6 +12,7 @@ use Inertia\Response;
 use Wurk\Website\Models\SetupInterview;
 use Wurk\Website\Models\SiteCategory;
 use Wurk\Website\Setup\WebsiteSetupStep;
+use Wurk\Website\Support\OnlineImport;
 use Wurk\Website\Support\SetupTalk;
 
 /** Owners: Website → Set up by talking (23.1). Six questions, typed or spoken; then one confirmed set-up. */
@@ -29,6 +30,7 @@ final class SetupTalkController
                 'understood' => array_key_exists($key, $i->answers) ? self::understood($key, $i->brief) : null], array_keys(SetupTalk::QUESTIONS)),
             'next' => $next,
             'preview' => $next === null ? $this->talk->preview($i) : null,
+            'started' => $i->answers !== [],
         ]);
     }
 
@@ -47,6 +49,15 @@ final class SetupTalkController
         $this->talk->answerVoice($this->current($request), $data['key'], $data['audio']);
 
         return back();
+    }
+
+    /** 23.2: start from a Google listing, Facebook page, Instagram profile or website (or a business name and area). */
+    public function import(Request $request, OnlineImport $import): RedirectResponse
+    {
+        $link = (string) $request->validate(['link' => ['required', 'string', 'max:500']])['link'];
+        $answered = $import->import($this->current($request), $link);
+
+        return back()->with('status', 'Filled in '.count($answered).' of '.count(SetupTalk::QUESTIONS).' answers. Check each one, change anything that’s wrong, and answer the rest.');
     }
 
     public function apply(Request $request): RedirectResponse

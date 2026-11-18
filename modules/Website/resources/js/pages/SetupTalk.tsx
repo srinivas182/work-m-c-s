@@ -1,5 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Check, Mic, Square } from 'lucide-react';
+import { Check, Link2, Mic, Square } from 'lucide-react';
 import { useRef, useState } from 'react';
 import {
   Button,
@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
   Field,
+  Input,
   PageHeader,
   Textarea,
 } from '@/design-system';
@@ -23,6 +24,7 @@ interface Props {
   questions: Question[];
   next: string | null;
   preview: string[] | null;
+  started: boolean;
 }
 
 const base = () => window.location.pathname.replace(/\/$/, '');
@@ -116,7 +118,41 @@ function AnswerForm({
   );
 }
 
-export default function SetupTalk({ questions, next, preview }: Props) {
+/** 23.2: start from a Google listing, Facebook page, Instagram profile or website. */
+function ImportForm() {
+  const form = useForm({ link: '' });
+  return (
+    <form
+      aria-label="Start from what you already have online"
+      className="grid gap-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.post(`${base()}/import`, { preserveScroll: true, onSuccess: () => form.reset() });
+      }}
+    >
+      <Field
+        label="Your Google listing, Facebook page, Instagram or website — or your business name and area"
+        error={form.errors.link}
+      >
+        <Input
+          value={form.data.link}
+          onChange={(e) => form.setData('link', e.target.value)}
+          placeholder="e.g. https://facebook.com/glowsalon or Glow Salon Soweto"
+        />
+      </Field>
+      <Button
+        type="submit"
+        variant="secondary"
+        className="justify-self-start"
+        loading={form.processing}
+      >
+        <Link2 aria-hidden /> Fill in from there
+      </Button>
+    </form>
+  );
+}
+
+export default function SetupTalk({ questions, next, preview, started }: Props) {
   const [changing, setChanging] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
   const answered = questions.filter((q) => q.answer !== null);
@@ -129,6 +165,20 @@ export default function SetupTalk({ questions, next, preview }: Props) {
           title="Set up by talking"
           description="Answer six short questions, typed or as voice notes, in any language. WURK sets up your website, services and hours from exactly what you say — nothing is invented, and nothing goes live until you publish."
         />
+        {!started && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Already online? Start from there</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 text-sm">
+              <p className="text-fg-muted">
+                WURK reads only what’s public, and you check every answer before anything is set up.
+                Reviews aren’t copied.
+              </p>
+              <ImportForm />
+            </CardContent>
+          </Card>
+        )}
         {answered.length > 0 && (
           <Card>
             <CardHeader>
