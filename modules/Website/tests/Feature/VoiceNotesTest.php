@@ -114,7 +114,7 @@ it('transcribes a voice note, charges for it, shows it in Chats with a player, a
         ->and(($this->replies)()->sole()['text']['body'])->toBe('Yebo! Ngingakubhukela ngoMgqibelo. Iyiphi isikhathi esikufanelayo?');
     [$id, $voice] = ($this->in)(function () {
         $m = ReceptionistMessage::query()->where('external_id', 'wamid.v1')->sole();
-        expect($m->content['voice'])->toBe(['language' => 'zu', 'confidence' => 0.91, 'unclear' => false])
+        expect($m->content['voice'])->toEqual(['language' => 'zu', 'confidence' => 0.91, 'unclear' => false]) // MySQL keeps JSON keys in its own order
             ->and($m->attachment['seconds'])->toBe(15)->and($m->attachment['kind'])->toBe('audio')
             ->and(collect(app(CreditWallet::class)->usageThisMonth())->toJson())->toContain('ai.transcribe');
 
