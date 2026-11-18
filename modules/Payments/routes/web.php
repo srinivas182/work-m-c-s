@@ -25,6 +25,7 @@ Route::tenant(function (): void {
     Route::middleware(['permission:payments.manage'])->prefix('settings/payments')->name('tenant.payments.')->group(function (): void {
         Route::get('/', [PaymentSettingsController::class, 'show'])->name('settings');
         Route::put('/refunds', [PaymentSettingsController::class, 'refunds'])->name('refunds'); // the return window
+        Route::put('/paystack/channels', [PaymentSettingsController::class, 'channels'])->name('paystack.channels');
         Route::put('/{provider}/keys/{mode}', [PaymentSettingsController::class, 'keys'])->whereIn('provider', PlatformMethods::ALL)->whereIn('mode', ['test', 'live'])->middleware('throttle:20,1,payments-keys')->name('keys');
         Route::put('/{provider}', [PaymentSettingsController::class, 'settings'])->whereIn('provider', PlatformMethods::ALL)->name('method');
         Route::delete('/{provider}', [PaymentSettingsController::class, 'disconnect'])->whereIn('provider', PlatformMethods::ALL)->name('disconnect');

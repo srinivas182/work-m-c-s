@@ -7,6 +7,7 @@ namespace Wurk\Payments\Support;
 use Closure;
 use Wurk\Payments\Gateways\Ozow;
 use Wurk\Payments\Gateways\PayFast;
+use Wurk\Payments\Gateways\Paystack;
 use Wurk\Payments\Gateways\Peach;
 use Wurk\Payments\Gateways\Yoco;
 use Wurk\Payments\Models\PaymentAccount;
@@ -27,8 +28,12 @@ final class GatewayRouter
      */
     public function start(PaymentAccount|PlatformPaymentAccount $account, PaymentAttempt|PlatformPaymentAttempt $attempt, string $description, array $customer, array $urls, Closure $handOff): ?string
     {
-        if (in_array($account->provider, ['yoco', 'peach'], true)) { // hosted pages: redirect
-            $started = $account->provider === 'yoco' ? Yoco::start($account, $attempt, $urls) : Peach::start($account, $attempt, $urls);
+        if (in_array($account->provider, ['yoco', 'peach', 'paystack'], true)) { // hosted pages: redirect
+            $started = match ($account->provider) {
+                'yoco' => Yoco::start($account, $attempt, $urls),
+                'peach' => Peach::start($account, $attempt, $urls),
+                default => Paystack::start($account, $attempt, $customer, $urls),
+            };
             if ($started === null) {
                 return null;
             }
@@ -51,6 +56,7 @@ final class GatewayRouter
         $result = match ($attempt->provider) {
             'ozow' => Ozow::verify($account, $attempt),
             'peach' => Peach::verify($account, $attempt),
+            'paystack' => Paystack::verify($account, $attempt),
             default => Yoco::verify($account, $attempt),
         };
         if ($result['paid'] && $result['amount_cents'] >= $attempt->amount_cents && $attempt->status === 'pending') {
@@ -65,6 +71,7 @@ final class GatewayRouter
         $ok = match ($attempt->provider) {
             'yoco' => Yoco::refund($account, $attempt, $cents),
             'peach' => Peach::refund($account, $attempt, $cents),
+            'paystack' => Paystack::refund($account, $attempt, $cents),
             'payfast' => PayFast::refund($account, $attempt, $cents),
             default => false, // Ozow: refunded in Ozow's portal, then recorded by the owner
         };
@@ -107,6 +114,10 @@ final class GatewayRouter
                 break;
             case 'peach':
                 $reference = Peach::notification($account, $posted);
+                $attempt = $reference === null ? null : $byReference($reference);
+                break;
+            case 'paystack':
+                $reference = Paystack::notification($account, $body, $headers);
                 $attempt = $reference === null ? null : $byReference($reference);
                 break;
             default:

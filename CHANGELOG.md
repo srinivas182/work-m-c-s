@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Payments — Sprint 22.1 (Paystack: SnapScan, Capitec Pay, card and EFT)
+- **Settings → Payments → Paystack:** a business can connect its own Paystack account. The key is tested when saved and kept encrypted.
+- In South Africa, Paystack's checkout offers card, EFT, **Capitec Pay** and **SnapScan (QR)**. The owner picks which appear; leaving them all unticked offers every way the account allows.
+- Deposits, class places and shop orders can be paid this way, and refunds go back through Paystack.
+- A payment counts only after WURK has verified it with Paystack (paid, in rand, the full amount). Webhooks must carry Paystack's signature.
+- Settings shows the webhook address to paste into Paystack.
+- **Admin → Payment methods:** WURK can take payments through its own Paystack account too.
+
 ## [0.22.0] — 2026-11-18 — Sprint 21: WhatsApp both ways
 
 ### WhatsApp — Sprint 21.6 (the owner's evening summary)
