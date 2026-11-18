@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### WhatsApp — Sprint 21.5b (paying, reordering and click-to-chat)
+- **Deposits paid by the link the assistant sent are confirmed in the chat** straight away. The diary shows **Booked on WhatsApp**.
+- **"Same as last time?"** The assistant offers the customer's last order again, at today's prices and stock, with a **Check out** button. Collection or delivery is chosen at checkout. This only works on WhatsApp, where the number is verified.
+- **Verified number:** on WhatsApp the assistant uses the customer's WhatsApp number for bookings without asking for it, and finds their bookings without a code.
+- **Click-to-chat:** the website's WhatsApp button opens the business's connected number with a message ready to send ("Hi! I'd like to book."). The owner can change the message in **Settings → WhatsApp**, which also has a QR code to print.
+- Reminders and payment confirmations sent from the business's number appear in the customer's conversation in Chats.
+
 ### WhatsApp — Sprint 21.5a (reminders with Confirm, Move and Cancel)
 - **Appointment reminders come from the business's own WhatsApp number** with **Confirm**, **Move** and **Cancel** buttons, once Meta approves the reminder message on its account. Until then, and without a connected number, reminders go out as before.
 - **A tap is handled straight away:**

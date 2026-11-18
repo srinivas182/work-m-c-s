@@ -6,6 +6,7 @@ use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Tests\Support\InteractsWithShards;
+use Wurk\Messaging\Models\WhatsAppConnection;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Models\Tenant;
 use Wurk\Website\Models\Page;
@@ -160,4 +161,11 @@ it('shows a WhatsApp chat button on every page once a WhatsApp number is publish
         $pages->publish($contact->refresh(), null, null);
     });
     $this->get($this->site)->assertSee('href="https://wa.me/27825550101"', false)->assertSee('aria-label="Chat on WhatsApp"', false); // on the home page too
+});
+
+it('opens the business’s connected WhatsApp number with its chat message, even without a number on the site (21.5)', function () {
+    Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Hi</h1>', 'fonts' => []]))]);
+    ($this->publish)();
+    WhatsAppConnection::query()->create(['tenant_id' => $this->glow->id, 'waba_id' => 'w', 'phone_number_id' => 'p', 'display_phone' => '+27 82 555 0199', 'token' => 't', 'status' => 'connected']);
+    $this->get($this->site)->assertSee('href="https://wa.me/27825550199?text=Hi%21%20I%E2%80%99d%20like%20to%20book."', false);
 });

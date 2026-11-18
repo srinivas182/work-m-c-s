@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Bookings\Mail\BookingMessageMail;
 use Wurk\Bookings\Models\Booking;
+use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Support\BookingMessages;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\InsufficientCredits;
@@ -29,7 +30,7 @@ final readonly class FindBookingTool implements ReceptionistTool
     /** Codes sent per chat per hour: each SMS costs the business credits. */
     private const SENDS_PER_HOUR = 3;
 
-    public function __construct(private TenantContext $context, private Messenger $messenger, private CreditWallet $wallet) {}
+    public function __construct(private TenantContext $context, private Messenger $messenger, private CreditWallet $wallet, private ChatBookings $chat) {}
 
     public function name(): string
     {
@@ -38,7 +39,7 @@ final readonly class FindBookingTool implements ReceptionistTool
 
     public function description(): string
     {
-        return 'When a customer wants to change or cancel a booking NOT made in this chat: send a 6-digit code to the mobile number or email on their booking. Then ask them for the code and call confirm_booking_code.';
+        return 'When a customer wants to change or cancel a booking NOT made in this chat: send a 6-digit code to the mobile number or email on their booking, then ask them for the code and call confirm_booking_code. On WhatsApp it returns their own bookings straight away (their number is verified).';
     }
 
     public function parameters(): array
@@ -61,6 +62,18 @@ final readonly class FindBookingTool implements ReceptionistTool
 
     public function run(array $arguments, array $context): array
     {
+        // On WhatsApp the customer's number is verified by WhatsApp itself (21.5): their own bookings, without a code.
+        $verified = ($context['customer']['verified'] ?? false) === true ? BookingMessages::international((string) ($context['customer']['phone'] ?? '')) : '';
+        if (strlen($verified) >= 10) {
+            $mine = self::upcoming()->filter(fn (Booking $b) => BookingMessages::international((string) $b->customer_phone) === $verified)->take(10);
+            $names = BookingService::withTrashed()->whereKey($mine->pluck('service_id'))->pluck('name', 'id');
+
+            return ['verified' => true, 'bookings' => $mine->map(function (Booking $b) use ($context, $names) {
+                $this->chat->remember($context['conversation'], 'booking', (string) $b->id);
+
+                return ['booking_id' => $b->id, 'service' => $names[$b->service_id] ?? 'Appointment', 'when' => $this->chat->local($b->starts_at)->format('l j F, H:i')];
+            })->values()->all()];
+        }
         $phone = BookingMessages::international((string) ($arguments['phone'] ?? ''));
         $email = mb_strtolower(trim((string) ($arguments['email'] ?? '')));
         if (strlen($phone) < 10 && filter_var($email, FILTER_VALIDATE_EMAIL) === false) {

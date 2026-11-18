@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import {
   Badge,
@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
   EmptyState,
+  Field,
+  Input,
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
@@ -30,6 +32,8 @@ interface Props {
   available: boolean;
   connection: Connection | null;
   base: string;
+  /** Click-to-chat (21.5): the link the website's WhatsApp button uses, and its QR code (SVG). */
+  chat?: { text: string; link: string; qr: string } | null;
 }
 
 const QUALITY: Record<string, { label: string; tone: 'success' | 'warning' | 'danger' }> = {
@@ -52,7 +56,7 @@ const FOLLOW_UP: Record<string, { label: string; tone: 'success' | 'warning' | '
 };
 
 /** Settings → WhatsApp (Sprint 21.1): connect the business's own number, usually keeping the WhatsApp Business app. */
-export default function WhatsApp({ available, connection, base }: Props) {
+export default function WhatsApp({ available, connection, base, chat = null }: Props) {
   const [busy, setBusy] = useState(false);
   const quality = connection?.quality ? QUALITY[connection.quality] : undefined;
   const connect = (coexistence: boolean) => {
@@ -166,7 +170,62 @@ export default function WhatsApp({ available, connection, base }: Props) {
             </CardContent>
           </Card>
         )}
+        {chat && <ChatLink chat={chat} base={base} />}
       </div>
     </AppShell>
+  );
+}
+
+/** Click-to-chat (21.5): the website's WhatsApp button opens this; the QR code goes on counters, flyers and vans. */
+function ChatLink({ chat, base }: { chat: NonNullable<Props['chat']>; base: string }) {
+  const form = useForm({ text: chat.text });
+  const qr = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(chat.qr)}`;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Your WhatsApp link</CardTitle>
+        <CardDescription>
+          Your website’s WhatsApp button opens a chat with this message ready to send. Print the QR
+          code for your counter, flyers or car.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-start">
+        <img src={qr} alt="QR code that opens a WhatsApp chat with you" width={160} height={160} />
+        <div className="grid gap-3">
+          <form
+            aria-label="The message customers start with"
+            className="grid gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.put(`${base}/chat-link`, { preserveScroll: true });
+            }}
+          >
+            <Field label="The message customers start with" error={form.errors.text}>
+              <Input
+                value={form.data.text}
+                maxLength={160}
+                onChange={(e) => form.setData('text', e.target.value)}
+              />
+            </Field>
+            <Button
+              type="submit"
+              size="sm"
+              className="justify-self-start"
+              loading={form.processing}
+            >
+              Save
+            </Button>
+          </form>
+          <p className="text-sm break-all">
+            <a className="underline" href={chat.link} target="_blank" rel="noopener noreferrer">
+              {chat.link}
+            </a>
+          </p>
+          <a className="text-sm underline" href={qr} download="whatsapp-qr-code.svg">
+            Download the QR code
+          </a>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

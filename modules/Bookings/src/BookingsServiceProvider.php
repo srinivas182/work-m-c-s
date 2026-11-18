@@ -25,6 +25,7 @@ use Wurk\Bookings\Events\ClassJoined;
 use Wurk\Bookings\Events\ClassLeft;
 use Wurk\Bookings\Events\ReservationCancelled;
 use Wurk\Bookings\Events\ReservationConfirmed;
+use Wurk\Bookings\Listeners\ConfirmPaymentOnWhatsApp;
 use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
@@ -186,6 +187,7 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         });
         Event::listen(BusinessPaymentReceived::class, fn (BusinessPaymentReceived $e) => str_starts_with($e->reference, 'dep_') ? $this->app->make(Deposits::class)->confirm($e->reference) : null);
         Event::listen([BookingConfirmed::class, BookingMoved::class, BookingCancelled::class, ReservationConfirmed::class, ReservationCancelled::class, ClassJoined::class, ClassLeft::class], SendBookingMessages::class);
+        Event::listen([BookingConfirmed::class, ClassJoined::class], ConfirmPaymentOnWhatsApp::class); // 21.5
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('bookings:expire-holds')->everyMinute()->onOneServer()->withoutOverlapping();
             $schedule->command('bookings:send-reminders')->everyFiveMinutes()->onOneServer()->withoutOverlapping();

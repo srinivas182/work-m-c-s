@@ -57,7 +57,7 @@ final readonly class JoinClassTool implements ReceptionistTool
         $price = $this->deposits->amountForClass($class);
         $customer = $this->chat->customer($arguments, $price > 0, 'the class');
         try {
-            $place = $this->booker->attend($class, $customer, 'chat', $price > 0 ? 'pending_payment' : 'confirmed');
+            $place = $this->booker->attend($class, $customer, ChatBookings::source($context), $price > 0 ? 'pending_payment' : 'confirmed');
         } catch (ClassFull) {
             throw new ReceptionistRefused('That class is full (or has started). Offer another one from the classes tool.');
         }

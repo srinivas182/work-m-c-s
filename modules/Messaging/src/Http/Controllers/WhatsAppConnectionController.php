@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Wurk\Messaging\Http\Controllers;
 
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -13,6 +17,7 @@ use Inertia\Response;
 use RuntimeException;
 use Throwable;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Models\WhatsAppConnection;
 use Wurk\Messaging\Support\WhatsAppGraph;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -38,6 +43,12 @@ final class WhatsAppConnectionController
                 'name_status' => $c->name_status, 'quality' => $c->quality, 'messaging_limit' => $c->messaging_limit,
                 'follow_up_status' => $c->templates[WhatsAppGraph::FOLLOW_UP] ?? null,
                 'connected_at' => $c->connected_at?->toIso8601String(), 'checked_at' => $c->checked_at?->toIso8601String(),
+            ],
+            // Click-to-chat (21.5): the link the website's WhatsApp button uses, and a QR code to print.
+            'chat' => $c === null || ! $c->active() || ($number = app(WhatsAppBusiness::class)->number()) === null ? null : [
+                'text' => app(WhatsAppBusiness::class)->chatText(),
+                'link' => $link = 'https://wa.me/'.$number.'?text='.rawurlencode(app(WhatsAppBusiness::class)->chatText()),
+                'qr' => (new Writer(new ImageRenderer(new RendererStyle(240, 1), new SvgImageBackEnd)))->writeString($link),
             ],
             'base' => route('tenant.whatsapp', [], false),
         ]);
@@ -135,6 +146,15 @@ final class WhatsAppConnectionController
             'templates' => $this->templates($c->waba_id, $c->token) ?? $c->templates]);
 
         return back()->with('status', 'Checked with Meta just now.');
+    }
+
+    /** The message customers' chats start with from the website's button and the QR code. */
+    public function chatLink(Request $request, TenantContext $context): RedirectResponse
+    {
+        $text = trim((string) $request->validate(['text' => ['nullable', 'string', 'max:160']])['text']);
+        WhatsAppConnection::query()->where('tenant_id', $context->id())->where('status', 'connected')->firstOrFail()->update(['chat_text' => $text !== '' ? $text : null]);
+
+        return back()->with('status', 'Saved. Your website’s WhatsApp button and QR code use it now.');
     }
 
     public function disconnect(TenantContext $context): RedirectResponse

@@ -74,6 +74,16 @@ final readonly class ChatBookings
         ];
     }
 
+    /**
+     * Where the booking was made, for the diary: the website chat, or WhatsApp (21.5).
+     *
+     * @param  array<string, mixed>  $context
+     */
+    public static function source(array $context): string
+    {
+        return ($context['channel'] ?? '') === 'whatsapp' ? 'whatsapp' : 'chat';
+    }
+
     public function money(?int $cents): ?string
     {
         return $cents === null ? null : 'R'.number_format($cents / 100, 2, '.', ' ');

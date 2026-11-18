@@ -20,6 +20,12 @@ interface WhatsAppBusiness
     /** Whether the current business has connected its own number. */
     public function connected(): bool;
 
+    /** The connected number in international digits (for wa.me links), or null. */
+    public function number(): ?string;
+
+    /** The message a customer's chat starts with from the website's button or the QR code (21.5). */
+    public function chatText(): string;
+
     /** Sends a free-form text reply (only inside the 24-hour window; WhatsApp refuses it outside). Costs credits. */
     public function sendText(string $to, string $text): SendResult;
 

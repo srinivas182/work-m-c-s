@@ -180,3 +180,13 @@ it('hears Meta’s template reviews by webhook, and checks every account hourly 
     expect(WhatsAppConnection::query()->sole()->templates)->toEqual(['wurk_follow_up' => 'APPROVED', 'wurk_reminder' => 'PENDING']);
     Http::assertSent(fn ($r) => $r->method() === 'POST' && str_contains($r->url(), 'message_templates') && $r['name'] === 'wurk_reminder');
 });
+
+it('gives the owner a click-to-chat link and QR code, with their own opening message', function () {
+    ($this->switchOn)();
+    WhatsAppConnection::query()->create(['tenant_id' => $this->glow->id, 'waba_id' => 'waba-1', 'phone_number_id' => 'pn-1', 'display_phone' => '+27 82 555 0101', 'token' => 'biz-token', 'status' => 'connected']);
+    $this->actingAs($this->owner)->get($this->base)->assertInertia(fn (Assert $p) => $p
+        ->where('chat.link', 'https://wa.me/27825550101?text=Hi%21%20I%E2%80%99d%20like%20to%20book.')->where('chat.text', 'Hi! I’d like to book.')
+        ->where('chat.qr', fn (string $svg) => str_starts_with($svg, '<?xml') && str_contains($svg, '<svg')));
+    $this->actingAs($this->owner)->put("{$this->base}/chat-link", ['text' => 'Sawubona! I’d like to book braids.'])->assertSessionHas('status');
+    $this->actingAs($this->owner)->get($this->base)->assertInertia(fn (Assert $p) => $p->where('chat.link', 'https://wa.me/27825550101?text='.rawurlencode('Sawubona! I’d like to book braids.')));
+});
