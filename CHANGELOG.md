@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Website — Sprint 23.3 (share kit)
+- **Website → Share:** share the website, the booking page, the shop and each product, current specials and the WhatsApp chat link in one tap. Only what's published is offered.
+  - **WhatsApp Status:** a 9:16 image in the business's colours, with its logo, what's shared, a QR code and the link. On a phone it goes straight to the share sheet; elsewhere it downloads.
+  - **WhatsApp chat, Facebook, Instagram,** or any app through the phone's share sheet, and copy link.
+- **Posters and table cards** as PDFs: A4, A5, and a table card that folds in half. Each has "Scan to book", "Scan to order", "Scan to chat on WhatsApp" or "Scan to visit us", with the business's QR code, logo and colours.
+- **Every link is tagged** with where it was shared (`utm_source`: status, whatsapp, facebook, instagram, share, poster). Reports → Website shows which brought visitors and bookings.
+
 ### Setup — Sprint 23.2 (set up from what you already have online)
 - **Set up by talking → Already online? Start from there:** paste a Google Maps link, a business name and area, or a link to a Facebook page, Instagram profile or old website. WURK fills in the answers it finds (name, area and address, phone, hours, services and prices) for the owner to check and change. Nothing is set up until they confirm.
 - **Google listings** are read through the Google Places API, with the key in **Admin → Providers → Google Places**. **Pages** are read from their public preview and text by WURK AI, fetched only from public https addresses (every redirect is checked too).

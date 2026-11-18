@@ -1,6 +1,7 @@
 import {
   BookOpen,
   Mic,
+  Share2,
   Trash2,
   Database,
   LifeBuoy,
@@ -72,6 +73,7 @@ export const icons: Record<string, LucideIcon> = {
   image: Image,
   sparkles: Sparkles,
   mic: Mic,
+  'share-2': Share2,
   inbox: Inbox,
   menu: Menu,
   'layout-template': LayoutTemplate,

@@ -23,6 +23,7 @@ use Wurk\Website\Http\Controllers\PublicSeoController;
 use Wurk\Website\Http\Controllers\PublicSiteController;
 use Wurk\Website\Http\Controllers\QuoteFormController;
 use Wurk\Website\Http\Controllers\SetupTalkController;
+use Wurk\Website\Http\Controllers\ShareKitController;
 use Wurk\Website\Http\Controllers\TemplatePreviewController;
 use Wurk\Website\Http\Controllers\VideosController;
 use Wurk\Website\Http\Controllers\WebsiteChatController;
@@ -52,6 +53,10 @@ Route::tenant(function (): void {
         Route::post('/set-up/photos', [SetupTalkController::class, 'photos'])->name('setup.photos');
         Route::post('/set-up/apply', [SetupTalkController::class, 'apply'])->middleware('throttle:5,1,website-setup-apply')->name('setup.apply');
         Route::post('/set-up/restart', [SetupTalkController::class, 'restart'])->name('setup.restart');
+        // Share kit (23.3): tagged links, WhatsApp Status images, posters and table cards.
+        Route::get('/share', [ShareKitController::class, 'show'])->name('share');
+        Route::get('/share/status/{key}', [ShareKitController::class, 'status'])->where('key', '[a-z0-9-]{1,40}')->middleware('throttle:30,1,website-share-status')->name('share.status');
+        Route::get('/share/poster', [ShareKitController::class, 'poster'])->middleware('throttle:20,1,website-share-poster')->name('share.poster');
 
         Route::get('/pages/{page}/edit', EditorController::class)->name('editor');
         Route::get('/pages/{page}/draft', [DraftController::class, 'show'])->name('draft');
