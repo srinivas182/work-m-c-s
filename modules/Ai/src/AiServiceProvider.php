@@ -49,12 +49,19 @@ final class AiServiceProvider extends ModuleServiceProvider
     /** @return list<array{key: string, label: string, scope?: string}> */
     public function permissions(): array
     {
-        return [['key' => 'ai.manage', 'label' => 'Manage WURK AI (providers’ models, prices, margin, caps)', 'scope' => 'platform']];
+        return [
+            ['key' => 'ai.manage', 'label' => 'Manage WURK AI (providers’ models, prices, margin, caps)', 'scope' => 'platform'],
+            ['key' => 'languages.manage', 'label' => 'Languages: draft with WURK AI, offer or withdraw a language, glossary', 'scope' => 'platform'],
+            ['key' => 'languages.review', 'label' => 'Languages: review and correct translations', 'scope' => 'platform'],
+        ];
     }
 
     /** @return list<array<string, mixed>> */
     public function menu(): array
     {
-        return [['label' => 'WURK AI', 'route' => 'admin.ai', 'icon' => 'sparkles', 'section' => 'Settings', 'permission' => 'ai.manage', 'order' => 35]];
+        return [
+            ['label' => 'WURK AI', 'route' => 'admin.ai', 'icon' => 'sparkles', 'section' => 'Settings', 'permission' => 'ai.manage', 'order' => 35],
+            ['label' => 'Languages', 'route' => 'admin.languages', 'icon' => 'globe', 'section' => 'Settings', 'permission' => 'languages.review', 'order' => 36],
+        ];
     }
 }

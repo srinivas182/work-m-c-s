@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Languages — Sprint 24.2a (drafts and reviews)
+- **Admin → Settings → Languages:** each language's progress (drafted and reviewed). **Draft the missing texts with WURK AI** runs in the background, using the language's glossary. Each language can be offered or withdrawn.
+- **Reviewers** (the new permission `languages.review`) correct texts in context, one at a time, and save them as reviewed. A review takes effect at once in PHP and the browser, with no release needed.
+- **Drafts and reviews stay safe:** a draft never replaces a review, and a text whose :placeholders don't match the English is refused.
+- **Preview:** a language is marked "preview" in the language picker until 95% of its texts are reviewed (decision A).
+
 ### Languages — Sprint 24.1b (the back office's texts)
 - **Every fixed text on the back-office screens is marked for translation, about 2,400 in all.** That covers labels, buttons, headings, hints, placeholders and accessible names, plus the menu and fixed flash messages. They show in each person's language as translations arrive, and in English until then.
 - `scripts/i18n-codemod.mjs` marks texts in React files; it was run here for every back-office page. Pages use `__()`, because many already have a local variable called `t`.

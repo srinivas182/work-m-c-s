@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Wurk\Ai\Http\Controllers\AiAdminController;
 use Wurk\Ai\Http\Controllers\AssistantController;
+use Wurk\Ai\Http\Controllers\LanguagesController;
 use Wurk\Ai\Http\Controllers\SalesChatController;
 
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])->prefix('settings/ai')->name('admin.ai')->group(function (): void {
@@ -29,4 +30,14 @@ Route::tenant(function (): void {
         Route::post('/actions/{action}/undo', [AssistantController::class, 'undo'])->middleware('throttle:30,1,assistant-act')->name('.undo');
         Route::post('/actions/{action}/cancel', [AssistantController::class, 'cancel'])->name('.cancel');
     });
+});
+
+// Admin → Languages (24.2): progress, WURK AI drafts and reviewing. Reviewers need languages.review; the rest languages.manage.
+Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff', 'permission:languages.review'])->prefix('settings/languages')->name('admin.languages')->group(function (): void {
+    Route::get('/', [LanguagesController::class, 'index']);
+    Route::get('/{locale}', [LanguagesController::class, 'show'])->where('locale', '[a-z]{2}')->name('.show');
+    Route::put('/{locale}', [LanguagesController::class, 'save'])->where('locale', '[a-z]{2}')->name('.save');
+    Route::post('/{locale}/draft', [LanguagesController::class, 'draft'])->where('locale', '[a-z]{2}')->middleware('throttle:5,10,languages-draft')->name('.draft');
+    Route::put('/{locale}/offered', [LanguagesController::class, 'toggle'])->where('locale', '[a-z]{2}')->name('.toggle');
+    Route::post('/{locale}/glossary', [LanguagesController::class, 'glossary'])->where('locale', '[a-z]{2}')->name('.glossary');
 });

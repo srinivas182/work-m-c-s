@@ -144,6 +144,7 @@ final class ScreensCommand extends Command
                 $p === 'slug' && $route->getName() === 'help.article' => $ids['help_article_slug'] ?? throw new \RuntimeException('No help article'),
                 $p === 'slug' && $route->getName() === 'help.category' => $ids['help_category_slug'] ?? throw new \RuntimeException('No help category'),
                 $p === 'number' => $ids['ticket_number'],
+                $p === 'locale' => 'zu', // Admin → Languages → a language (24.2)
                 isset($ids[$p]) => $ids[$p],
                 default => throw new \RuntimeException("No value for {{$p}}"),
             };
