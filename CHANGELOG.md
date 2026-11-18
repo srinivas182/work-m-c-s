@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Money — Sprint 23.5b (cash-up, expenses, profit, Monday summary)
+- **Money → Cash-up:** at the end of the day the owner or a cashier counts the till against what it should hold. That expected amount comes from the day's money taken in person (bookings, orders, invoices, sales on account paid) and in-store cash and card sales. A cash difference above an amount the owner sets (default R20) needs a reason. Each cash-up is locked and audited; only an owner can reopen it. Counting is a new permission, `money.cashup`, so cashiers can do it without seeing the rest of Money.
+- **Money → Expenses and profit:**
+  - Add an expense in seconds (amount, category and note), or take a **photo of the slip**. WURK AI reads the amount, date and what it was for (1 credit); the owner checks it before it's added, and the photo is kept privately with the expense.
+  - Categories: stock, rent, wages, transport, data and airtime, other.
+  - "This month you took R…, spent R…, so you made about R…" on this page, on Home, and as a new Profit section in Reports.
+- **WURK AI reads photos:** new `Ai::see()`, through providers that can read images (Anthropic, OpenAI). There's a new task, "Reads expense slips", in Admin → AI.
+- **Monday "how did I do" on WhatsApp** (`money:weekly-summaries`, 08:20 SAST), from WURK's number with the new template `wurk_weekly_summary`. It goes to each owner's verified mobile and covers last week's takings against the week before, the best seller, new and returning customers, who owes, and one tip. On by default; STOP turns it off, and switching it back on in Money → Expenses undoes STOP.
+
 ### Money — Sprint 23.5a (who owes me, invoices, reminders)
 - **New module: Money → Who owes me.** One list of what customers still owe, and the total: unpaid deposits (Bookings), pay-later orders (Shop), sales on account (Sales) and invoices. Each module adds its own items through the new Platform contract `MoneyOwed`. Items can be marked paid in person (cash, card machine, QR) or by EFT, straight from the list.
 - **Simple invoices:**

@@ -44,6 +44,11 @@ function fakeWatchtowerAi(?array ...$answers): object
             return 'Here you go: '.json_encode($next);
         }
 
+        public function see(string $task, string $system, string $prompt, string $image, string $mime, int $maxTokens = 1000, ?string $tenantId = null): string
+        {
+            return '';
+        }
+
         public function image(string $prompt, ?string $tenantId = null): string
         {
             return '';

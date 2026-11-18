@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Wurk\Messaging\Events\WhatsAppReceived;
 use Wurk\Messaging\Events\WhatsAppStatusChanged;
+use Wurk\Messaging\Events\WurkWhatsAppReceived;
 use Wurk\Messaging\Models\MessageDelivery;
 use Wurk\Messaging\Models\WhatsAppConnection;
 use Wurk\Messaging\Support\OwnerSummaries;
@@ -91,7 +92,10 @@ final readonly class DeliveryWebhooks
                 foreach ((array) ($value['messages'] ?? []) as $m) {
                     $text = (string) ($m['text']['body'] ?? $m['button']['text'] ?? $m['interactive']['button_reply']['title'] ?? '');
                     $from = (string) preg_replace('/\D/', '', (string) ($m['from'] ?? ''));
-                    if ($from !== '' && $text !== '' && ($answer = app(OwnerSummaries::class)->reply($from, $text)) !== null) {
+                    if ($from !== '' && $text !== '') {
+                        event(new WurkWhatsAppReceived($from, $text)); // e.g. STOP to the Monday summary (23.5b)
+                    }
+                    if ($from !== '' && $text !== '' && strtoupper(trim($text)) !== 'STOP' && ($answer = app(OwnerSummaries::class)->reply($from, $text)) !== null) {
                         app(OwnerSummaries::class)->answer($from, $answer);
                     }
                 }

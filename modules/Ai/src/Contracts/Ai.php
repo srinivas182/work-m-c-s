@@ -15,6 +15,13 @@ interface Ai
      *
      * @throws AiUnavailable
      */
+    /**
+     * Read a photo with the prompt (Sprint 23.5b: a slip), through the providers that can see images. Charged like run().
+     *
+     * @throws AiUnavailable when no provider could answer
+     */
+    public function see(string $task, string $system, string $prompt, string $image, string $mime, int $maxTokens = 1000, ?string $tenantId = null): string;
+
     public function image(string $prompt, ?string $tenantId = null): string;
 
     /**

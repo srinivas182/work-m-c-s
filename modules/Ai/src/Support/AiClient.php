@@ -21,6 +21,7 @@ use Wurk\Ai\Drivers\ProviderFailed;
 use Wurk\Ai\Drivers\SimulatedDriver;
 use Wurk\Ai\Drivers\SimulatedImageDriver;
 use Wurk\Ai\Drivers\SimulatedSpeechDriver;
+use Wurk\Ai\Drivers\VisionDriver;
 use Wurk\Ai\Models\AiRequest;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 
@@ -45,6 +46,32 @@ final readonly class AiClient implements Ai, AiConversations
             $started = microtime(true);
             try {
                 $result = $this->driver($step['provider'])->complete($step['model'], $system, $prompt, $maxTokens, (string) $this->key($step['provider']));
+                $this->log($tenantId, $task, $step, $result['input_tokens'], $result['output_tokens'], 'succeeded', null, $i > 0, $started);
+
+                return $result['text'];
+            } catch (ProviderFailed $e) {
+                $this->log($tenantId, $task, $step, 0, 0, 'failed', $e->getMessage(), $i > 0, $started);
+            }
+        }
+
+        throw new AiUnavailable('WURK AI is busy right now. Please try again in a few minutes.');
+    }
+
+    public function see(string $task, string $system, string $prompt, string $image, string $mime, int $maxTokens = 1000, ?string $tenantId = null): string
+    {
+        $this->checkCaps($tenantId);
+        $chain = array_values(array_filter($this->settings->chain($task), fn (array $step) => $this->key($step['provider']) !== null && $this->driver($step['provider']) instanceof VisionDriver));
+        if ($chain === [] && ! app()->environment('production')) {
+            $chain = [['provider' => 'simulated', 'model' => 'simulated']];
+        }
+        foreach ($chain as $i => $step) {
+            $started = microtime(true);
+            $driver = $this->driver($step['provider']);
+            if (! $driver instanceof VisionDriver) {
+                continue;
+            }
+            try {
+                $result = $driver->see($step['model'], $system, $prompt, $image, $mime, $maxTokens, (string) $this->key($step['provider']));
                 $this->log($tenantId, $task, $step, $result['input_tokens'], $result['output_tokens'], 'succeeded', null, $i > 0, $started);
 
                 return $result['text'];

@@ -88,5 +88,5 @@ it('shows the referral tiles on the home page to the owner only, and only with r
     ], null);
     app(Catalog::class)->changePackage($this->glow->id, $p->id, 'monthly');
     app(Entitlements::class)->flush();
-    $this->actingAs($this->owner)->get($this->app('/glow-salon'))->assertInertia(fn (Assert $p) => $p->where('tiles', []));
+    $this->actingAs($this->owner)->get($this->app('/glow-salon'))->assertInertia(fn (Assert $p) => $p->where('tiles', fn ($tiles) => collect($tiles)->filter(fn ($t) => str_starts_with($t['key'], 'referrals.'))->isEmpty())); // other modules' tiles (e.g. Money's profit) may show
 });

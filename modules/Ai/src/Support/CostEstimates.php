@@ -18,10 +18,10 @@ use Wurk\Plans\Contracts\CreditCostEstimates;
 final readonly class CostEstimates implements CreditCostEstimates
 {
     /** Typical tokens per action before real usage exists. */
-    private const ESTIMATE_TOKENS = ['generate_site' => [6000, 6000], 'rewrite' => [1500, 300]];
+    private const ESTIMATE_TOKENS = ['generate_site' => [6000, 6000], 'rewrite' => [1500, 300], 'read_slip' => [1800, 120]];
 
     /** How each reads in the cost tip ("Cheapest: all spent on AI rewrites"). */
-    private const LABELS = ['generate_site' => 'AI website writing', 'rewrite' => 'AI rewrites', 'image' => 'AI images'];
+    private const LABELS = ['generate_site' => 'AI website writing', 'rewrite' => 'AI rewrites', 'image' => 'AI images', 'read_slip' => 'AI slip reading'];
 
     public function __construct(private AiSettings $settings, private RateCard $rates, private ProviderCredentials $providers) {}
 
