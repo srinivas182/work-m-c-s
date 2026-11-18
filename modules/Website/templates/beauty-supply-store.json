@@ -1,0 +1,288 @@
+{
+  "category": "beauty-supplies",
+  "key": "beauty-supply-store",
+  "name": "Beauty supply store",
+  "position": 1,
+  "description": "Bright and stocked: hair, braids, wigs and skin care, with what’s new up front.",
+  "definition": {
+    "branding": {
+      "primary": "#BE185D",
+      "secondary": "#7C3AED",
+      "font_pairing": "modern",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Shop",
+          "type": "page",
+          "page": "shop"
+        },
+        {
+          "label": "Visit",
+          "type": "page",
+          "page": "visit"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Beauty supply store — braiding hair, wigs and hair care",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop now",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "promo",
+              "type": "PromotionBanner",
+              "version": 1,
+              "props": {
+                "text": "New stock every Friday — braiding hair, wigs and edge control",
+                "linkLabel": "See what’s new",
+                "linkHref": "/shop",
+                "tone": "brand",
+                "starts": "",
+                "ends": ""
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Hair, wigs and beauty — all in one place",
+                "text": "Braiding hair, wigs, hair care and skin care at good prices, with advice from people who use them.",
+                "primaryLabel": "Shop now",
+                "primaryHref": "/shop",
+                "secondaryLabel": "Visit the store",
+                "secondaryHref": "/visit",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/beauty-supply-store/hero-1600.webp",
+                    "alt": "Shelves of hair and beauty products"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "New this week",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-6"
+              }
+            },
+            {
+              "id": "ranges",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Shop by range",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/beauty-supply-store/braids-1600.webp",
+                    "alt": "Packs of braiding hair in many colours"
+                  },
+                  {
+                    "src": "/images/templates/beauty-supply-store/wigs-1600.webp",
+                    "alt": "Wigs on display stands"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why shop here",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "star",
+                    "title": "Real brands",
+                    "text": "Stock you can trust, straight from distributors."
+                  },
+                  {
+                    "icon": "heart",
+                    "title": "Advice that helps",
+                    "text": "Ask us what will work for your hair or skin."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Salon prices",
+                    "text": "Salon owners: ask about bulk prices."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What customers say",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "shop",
+        "title": "Shop",
+        "slug": "shop",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop now",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Shop",
+                "text": "Order online and collect in store, or ask about delivery."
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "All products",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-12"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "visit",
+        "title": "Visit",
+        "slug": "visit",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop now",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Please confirm public holiday hours with us."
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the store",
+                "address": "",
+                "landmark": "Tell people which centre or street you’re in.",
+                "showMap": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Ask if we have it before you come in.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

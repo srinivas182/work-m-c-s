@@ -17,6 +17,9 @@ import {
   Sparkles,
   Droplets,
   ChefHat,
+  Store,
+  Shirt,
+  Sprout,
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
@@ -413,6 +416,9 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   sparkles: Sparkles,
   droplets: Droplets,
   'chef-hat': ChefHat,
+  store: Store,
+  shirt: Shirt,
+  sprout: Sprout,
 };
 
 function CategoryStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {

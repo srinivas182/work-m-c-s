@@ -1,0 +1,355 @@
+{
+  "category": "spaza-grocery",
+  "key": "spaza-corner-shop",
+  "name": "Corner shop",
+  "position": 1,
+  "description": "Friendly and local: what’s in stock, opening hours and airtime at the counter.",
+  "definition": {
+    "branding": {
+      "primary": "#B91C1C",
+      "secondary": "#FACC15",
+      "font_pairing": "friendly",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "What we stock",
+          "type": "page",
+          "page": "stock"
+        },
+        {
+          "label": "Order",
+          "type": "page",
+          "page": "order"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Corner shop — groceries, airtime and electricity",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "WhatsApp an order",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "promo",
+              "type": "PromotionBanner",
+              "version": 1,
+              "props": {
+                "text": "Bread and milk delivered fresh every morning",
+                "linkLabel": "Order on WhatsApp",
+                "linkHref": "/order",
+                "tone": "brand",
+                "starts": "",
+                "ends": ""
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Everything you need, around the corner",
+                "text": "Bread, milk, airtime, electricity and the groceries you run out of — open early, open late.",
+                "primaryLabel": "WhatsApp an order",
+                "primaryHref": "/order",
+                "secondaryLabel": "What we stock",
+                "secondaryHref": "/stock",
+                "facts": [
+                  {
+                    "text": "Open 06:00–21:00"
+                  },
+                  {
+                    "text": "Airtime and electricity"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/spaza-corner-shop/hero-1600.webp",
+                    "alt": "The shop counter with shelves behind"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "At the counter",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "clock",
+                    "title": "Open early and late",
+                    "text": "Before work and after — every day."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Airtime, data and electricity",
+                    "text": "All networks and prepaid electricity."
+                  },
+                  {
+                    "icon": "heart",
+                    "title": "Order on WhatsApp",
+                    "text": "Send your list; collect it packed, or ask about delivery nearby."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "Specials this week",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-6"
+              }
+            },
+            {
+              "id": "stock",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Stocked for the neighbourhood",
+                "text": "Tell people what you always have: fresh bread, cold drinks, maize meal, paraffin, household basics — and anything special you bring in.",
+                "image": "/images/templates/spaza-corner-shop/shelves-1600.webp",
+                "imageAlt": "Shelves stocked with groceries",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Open every day, including public holidays."
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the shop",
+                "address": "",
+                "landmark": "Tell people what the shop is next to — a school, a church or a taxi stop.",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "stock",
+        "title": "What we stock",
+        "slug": "stock",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "WhatsApp an order",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "stock",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Always in stock",
+                "intro": "",
+                "note": "Prices change with our suppliers; ask in the shop.",
+                "items": [
+                  {
+                    "name": "Bread & milk",
+                    "description": "Delivered fresh every morning",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Maize meal, rice & flour",
+                    "description": "All the main sizes",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Cold drinks & snacks",
+                    "description": "From the fridge",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Household",
+                    "description": "Soap, paraffin, candles, matches",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Airtime & data",
+                    "description": "All networks",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Prepaid electricity",
+                    "description": "Bring your meter number",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "Specials",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-9"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "order",
+        "title": "Order",
+        "slug": "order",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "WhatsApp an order",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Send your order",
+                "intro": "Type your list; we’ll confirm the total and when it’s ready.",
+                "services": [
+                  {
+                    "name": "Collect"
+                  },
+                  {
+                    "name": "Deliver nearby"
+                  }
+                ],
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Send my order",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Your list",
+                    "type": "long",
+                    "choices": "",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the shop",
+                "intro": "WhatsApp is quickest.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

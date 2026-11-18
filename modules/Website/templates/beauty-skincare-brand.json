@@ -1,0 +1,333 @@
+{
+  "category": "beauty-supplies",
+  "key": "beauty-skincare-brand",
+  "name": "Skin care brand",
+  "position": 2,
+  "description": "Calm and premium: a small range of natural skin and hair products, sold online.",
+  "definition": {
+    "branding": {
+      "primary": "#7C2D12",
+      "secondary": "#65A30D",
+      "font_pairing": "elegant",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Shop",
+          "type": "page",
+          "page": "shop"
+        },
+        {
+          "label": "Our story",
+          "type": "page",
+          "page": "story"
+        },
+        {
+          "label": "Contact",
+          "type": "page",
+          "page": "contact"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Natural skin and hair care, made locally",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Made for our skin, from what grows here",
+                "text": "Small-batch skin and hair care with marula, baobab and shea — gentle, honest and made locally.",
+                "primaryLabel": "Shop the range",
+                "primaryHref": "/shop",
+                "secondaryLabel": "Our story",
+                "secondaryHref": "/story",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/beauty-skincare-brand/hero-1600.webp",
+                    "alt": "Skin care bottles on a stone surface"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "Best sellers",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-3"
+              }
+            },
+            {
+              "id": "ingredients",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "What goes in",
+                "text": "List your key ingredients, where they come from and what they do. Say what you leave out.",
+                "image": "/images/templates/beauty-skincare-brand/ingredients-1600.webp",
+                "imageAlt": "Shea butter and marula oil",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "routine",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "A simple routine",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Cleanse",
+                    "text": "Gentle, every morning and night."
+                  },
+                  {
+                    "title": "Treat",
+                    "text": "Serum or oil where you need it."
+                  },
+                  {
+                    "title": "Protect",
+                    "text": "Moisturise; sunscreen by day."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What customers say",
+                "items": []
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Are your products tested on animals?",
+                    "answer": "Tell customers how you test your products."
+                  },
+                  {
+                    "question": "How long does delivery take?",
+                    "answer": "Say how long delivery takes to main centres and elsewhere."
+                  },
+                  {
+                    "question": "Can I return a product?",
+                    "answer": "Explain your returns policy for unopened products."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "shop",
+        "title": "Shop",
+        "slug": "shop",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "The range",
+                "text": "Every product, with what’s in it and how to use it."
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "Products",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-12"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "story",
+        "title": "Our story",
+        "slug": "story",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "How it started",
+                "text": "Tell your story: what you couldn’t find, who you made the first batch for, and how you make every product now.",
+                "image": "/images/templates/beauty-skincare-brand/founder-1600.webp",
+                "imageAlt": "The founder in her studio",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Certified",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Add a certification",
+                    "logo": "",
+                    "detail": "For example, organic or cruelty-free, if you have it"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "contact",
+        "title": "Contact",
+        "slug": "contact",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Shop",
+                "buttonHref": "/shop",
+                "sticky": true
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Questions about a product or an order? Message us.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

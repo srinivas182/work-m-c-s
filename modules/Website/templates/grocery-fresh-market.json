@@ -1,0 +1,357 @@
+{
+  "category": "spaza-grocery",
+  "key": "grocery-fresh-market",
+  "name": "Fresh produce market",
+  "position": 2,
+  "description": "Fresh and colourful: fruit, vegetables and the day’s specials, with order-ahead boxes.",
+  "definition": {
+    "branding": {
+      "primary": "#15803D",
+      "secondary": "#F97316",
+      "font_pairing": "editorial",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Specials",
+          "type": "page",
+          "page": "specials"
+        },
+        {
+          "label": "Order a box",
+          "type": "page",
+          "page": "boxes"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Fresh produce — fruit and vegetables, weekly boxes",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order a box",
+                "buttonHref": "/boxes",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "collage",
+                "heading": "Fresh from the farm this morning",
+                "text": "Fruit and vegetables bought fresh every day — choose in store, or order a box for the week.",
+                "primaryLabel": "Order a box",
+                "primaryHref": "/boxes",
+                "secondaryLabel": "Today’s specials",
+                "secondaryHref": "/specials",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/grocery-fresh-market/produce-1600.webp",
+                    "alt": "Crates of fresh vegetables"
+                  },
+                  {
+                    "src": "/images/templates/grocery-fresh-market/stall-1600.webp",
+                    "alt": "The market stall with customers"
+                  },
+                  {
+                    "src": "/images/templates/grocery-fresh-market/box-1600.webp",
+                    "alt": "A box of mixed vegetables"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Weekly boxes, simply",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Choose a box",
+                    "text": "Small, family or the big one."
+                  },
+                  {
+                    "title": "Order by Thursday",
+                    "text": "On WhatsApp or here."
+                  },
+                  {
+                    "title": "Collect on Saturday",
+                    "text": "Or we deliver nearby."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "boxes",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Weekly boxes",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Small box",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "For one or two: seasonal fruit and veg",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Order",
+                    "buttonHref": "/boxes"
+                  },
+                  {
+                    "name": "Family box",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "For four: the week’s fruit, veg and potatoes",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Order",
+                    "buttonHref": "/boxes"
+                  },
+                  {
+                    "name": "Big box",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Bigger families and spaza owners",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Order",
+                    "buttonHref": "/boxes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "Today’s specials",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-6"
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why shop with us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "heart",
+                    "title": "Fresh every day",
+                    "text": "We buy at the market each morning."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Local farmers",
+                    "text": "We buy from small farmers where we can."
+                  },
+                  {
+                    "icon": "check",
+                    "title": "Fair prices",
+                    "text": "Prices on every crate."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Market hours change in winter; check here first."
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the market",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "specials",
+        "title": "Specials",
+        "slug": "specials",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order a box",
+                "buttonHref": "/boxes",
+                "sticky": true
+              }
+            },
+            {
+              "id": "intro",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "This week’s specials",
+                "text": "Fresh deals every week — come in early for the best choice."
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "Specials",
+                "intro": "Prices for this week; while stocks last.",
+                "category": "",
+                "limit": "up-to-12"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "boxes",
+        "title": "Order a box",
+        "slug": "boxes",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order a box",
+                "buttonHref": "/boxes",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Order a box",
+                "intro": "Choose a box and when to collect.",
+                "services": [
+                  {
+                    "name": "Small box"
+                  },
+                  {
+                    "name": "Family box"
+                  },
+                  {
+                    "name": "Big box"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Order my box",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Collect or deliver?",
+                    "type": "choice",
+                    "choices": "Collect, Deliver nearby",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Date",
+                    "type": "date",
+                    "choices": "",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "WhatsApp us your order any time.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

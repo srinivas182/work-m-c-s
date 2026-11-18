@@ -1,0 +1,380 @@
+{
+  "category": "spaza-grocery",
+  "key": "grocery-wholesale",
+  "name": "Wholesale & bulk",
+  "position": 3,
+  "description": "Practical and price-led: bulk buying for spaza owners, schools, churches and events.",
+  "definition": {
+    "branding": {
+      "primary": "#1E40AF",
+      "secondary": "#F59E0B",
+      "font_pairing": "technical",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Delivery",
+          "type": "page",
+          "page": "delivery"
+        },
+        {
+          "label": "Order",
+          "type": "page",
+          "page": "order"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Wholesale groceries — bulk buying for shops, schools and events",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a price list",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Buy in bulk. Save every month.",
+                "text": "Maize meal, rice, oil, sugar, cold drinks and cleaning — at wholesale prices for shops, schools and events.",
+                "primaryLabel": "Get a price list",
+                "primaryHref": "/order",
+                "secondaryLabel": "Delivery",
+                "secondaryHref": "/delivery",
+                "facts": [
+                  {
+                    "text": "Cash, card or EFT"
+                  },
+                  {
+                    "text": "Delivery on orders over a minimum"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/grocery-wholesale/hero-1600.webp",
+                    "alt": "Pallets of bulk groceries in a warehouse"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "numbers",
+              "type": "Stats",
+              "version": 1,
+              "props": {
+                "heading": "Buying with us",
+                "note": "Change these to your own.",
+                "items": [
+                  {
+                    "value": "6 days",
+                    "label": "a week"
+                  },
+                  {
+                    "value": "Same day",
+                    "label": "collection"
+                  },
+                  {
+                    "value": "48 h",
+                    "label": "delivery in our area"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "ranges",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Ranges",
+                "intro": "Prices change weekly with our suppliers — ask for this week’s list.",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Staples",
+                    "description": "Maize meal, rice, flour, sugar, oil",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Drinks",
+                    "description": "Cold drinks, juice and water by the case",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Cleaning",
+                    "description": "Soap, bleach, washing powder",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Snacks",
+                    "description": "Chips, sweets and biscuits by the box",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "products",
+              "type": "ProductGrid",
+              "version": 1,
+              "props": {
+                "heading": "Bulk specials",
+                "intro": "",
+                "category": "",
+                "limit": "up-to-6"
+              }
+            },
+            {
+              "id": "brands",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Brands we stock",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Stocking a shop or an event?",
+                "text": "Send your list for a quote, or ask for this week’s price list.",
+                "buttonLabel": "Get a price list",
+                "buttonHref": "/order"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "delivery",
+        "title": "Delivery",
+        "slug": "delivery",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a price list",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "delivery",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Delivered to your door",
+                "text": "Explain your delivery days, areas and the minimum order — and that drivers help offload.",
+                "image": "/images/templates/grocery-wholesale/loading-1600.webp",
+                "imageAlt": "Stock being loaded onto a bakkie",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Delivery areas",
+                "intro": "",
+                "areas": [],
+                "note": "Outside these areas, ask us about a fee.",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Do you sell to the public?",
+                    "answer": "Yes — anyone can buy, but prices are for full cases and bags."
+                  },
+                  {
+                    "question": "Can I open an account?",
+                    "answer": "Registered businesses can apply for 30-day accounts."
+                  },
+                  {
+                    "question": "How do I pay?",
+                    "answer": "Cash, card or EFT before delivery."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "order",
+        "title": "Order",
+        "slug": "order",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a price list",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Get a price list or quote",
+                "intro": "Tell us what you buy each month.",
+                "services": [
+                  {
+                    "name": "Spaza / shop"
+                  },
+                  {
+                    "name": "School"
+                  },
+                  {
+                    "name": "Church or NGO"
+                  },
+                  {
+                    "name": "Event"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Send",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Business or organisation",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "What do you need?",
+                    "type": "long",
+                    "choices": "",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the warehouse",
+                "intro": "Call or WhatsApp.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Please confirm public holiday hours with us."
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the warehouse",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
