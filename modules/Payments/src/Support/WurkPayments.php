@@ -19,7 +19,7 @@ final readonly class WurkPayments implements PlatformPayments
     {
         $ready = PlatformPaymentAccount::query()->where('active', true)->get()->filter(fn (PlatformPaymentAccount $a) => $a->hasKeys($a->mode))->pluck('provider')->all();
 
-        return array_values(array_filter(array_intersect(PlatformMethods::ONLINE, PlatformMethods::WURK), fn (string $p) => in_array($p, $ready, true)));
+        return array_values(array_filter(array_values(array_diff(PlatformMethods::WURK, ['eft'])), fn (string $p) => in_array($p, $ready, true)));
     }
 
     public function handles(string $reference): bool
@@ -29,7 +29,12 @@ final readonly class WurkPayments implements PlatformPayments
 
     public function name(string $provider): string
     {
-        return PlatformMethods::NAMES[$provider] ?? $provider;
+        // What owners see when paying WURK: the ways to pay, not only the provider's name.
+        return match ($provider) {
+            'paystack' => 'Capitec Pay, SnapScan, EFT or card',
+            'flutterwave' => 'Mobile money or card (Flutterwave)',
+            default => PlatformMethods::NAMES[$provider] ?? $provider,
+        };
     }
 
     public function eftInstructions(): ?string

@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Payments\Gateways\Flutterwave;
 use Wurk\Payments\Gateways\Paystack;
 use Wurk\Payments\Gateways\Yoco;
 use Wurk\Payments\Models\PlatformPaymentAccount;
@@ -34,10 +35,11 @@ final class PaymentMethodsController
             'provider' => $p, 'name' => PlatformMethods::NAMES[$p], 'available' => $this->platform->available($p),
             // Mobile money is only for businesses' own tills and wallets; WURK's own is Flutterwave (Sprint 22.4).
             'wurk_account' => in_array($p, PlatformMethods::WURK, true), 'countries' => PlatformMethods::COUNTRIES[$p] ?? null,
+            'business_offer' => ! in_array($p, PlatformMethods::WURK_ONLY, true),
             'wurk' => ($a = $accounts[$p] ?? null) === null ? null : [
                 'active' => $a->active, 'mode' => $a->mode, 'label' => $a->label, 'has_test' => $a->hasKeys('test'), 'has_live' => $a->hasKeys('live'),
             ],
-        ], PlatformMethods::ALL)]);
+        ], [...PlatformMethods::ALL, ...PlatformMethods::WURK_ONLY])]);
     }
 
     /** Whether businesses may offer this method (platform-wide). */
@@ -57,6 +59,9 @@ final class PaymentMethodsController
         Gate::authorize('providers.manage');
         $keys = array_map(fn ($v) => trim((string) $v), $request->validate(KeyFields::rules($provider, $mode), KeyFields::messages($mode, $provider)));
         $account = PlatformPaymentAccount::query()->find($provider) ?? new PlatformPaymentAccount(['provider' => $provider, 'mode' => $mode]);
+        if ($provider === 'flutterwave' && ! Flutterwave::check(new PlatformPaymentAccount(['provider' => 'flutterwave', 'mode' => $mode, $mode.'_credentials' => $keys]))) {
+            throw ValidationException::withMessages(['secret_key' => 'Flutterwave didn’t accept that key. Check it and try again.']);
+        }
         if ($provider === 'paystack' && ! Paystack::check(new PlatformPaymentAccount(['provider' => 'paystack', 'mode' => $mode, $mode.'_credentials' => $keys]))) {
             throw ValidationException::withMessages(['secret_key' => 'Paystack didn’t accept that key. Check it (Settings → API Keys & Webhooks in Paystack) and try again.']);
         }

@@ -22,6 +22,7 @@ export interface Method {
     | 'mpesa'
     | 'mtn_momo'
     | 'airtel_money'
+    | 'flutterwave'
     | 'eft';
   name: string;
   allowed?: boolean; // business: has WURK switched it on?
@@ -33,6 +34,7 @@ export interface Method {
   webhook?: string | null; // Paystack: the address to paste into Paystack
   wurk_account?: boolean; // admin: can WURK itself take payments with it?
   countries?: string[] | null; // admin: where it works (mobile money)
+  business_offer?: boolean; // admin: can businesses offer it (not WURK-only gateways)?
 }
 interface Account {
   active: boolean;
@@ -64,6 +66,10 @@ const FIELDS: Record<Method['provider'], [string, string, boolean][]> = {
     ['secret_token', 'Webhook secret token', true],
   ],
   paystack: [['secret_key', 'Secret key', true]],
+  flutterwave: [
+    ['secret_key', 'Secret key', true],
+    ['secret_hash', 'Webhook secret hash', true],
+  ],
   mpesa: [
     ['shortcode', 'Paybill or store number (shortcode)', false],
     ['till', 'Till number (Buy Goods only)', false],
@@ -244,7 +250,7 @@ export function MethodCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 text-sm">
-        {admin && (
+        {admin && m.business_offer !== false && (
           <label className="flex items-center gap-2 font-medium">
             <Checkbox
               checked={m.available ?? true}

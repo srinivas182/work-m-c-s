@@ -4,6 +4,10 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Payments — Sprint 22.4 (businesses pay WURK by QR and mobile money)
+- **Settings → Billing:** owners can pay WURK's invoices and credit packs by **Capitec Pay, SnapScan, EFT or card** through WURK's Paystack account. Every channel WURK's account allows is offered.
+- **Flutterwave, WURK's second gateway,** takes mobile money and cards. HQ adds its keys and webhook secret hash in **Admin → Payment methods**, and the key is tested when saved. A payment counts only once Flutterwave confirms it, and refunds go back through Flutterwave. Businesses never offer it to their own customers.
+
 ### Payments — Sprint 22.3 (cash and in-person payments, recorded)
 - **Bookings → Calendar → Paid in person:** record a deposit or the full price paid in cash, by card machine, or by SnapScan / Zapper at the counter. The amount is suggested, and WURK notes who took it. A booking awaiting its deposit is confirmed straight away.
 - **Shop → an order → Mark as paid:** say how a pay-later order was paid (EFT, cash, card machine or QR at the counter).
