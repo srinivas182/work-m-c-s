@@ -254,7 +254,7 @@ jobs:
           CLAMAV_HOST: 127.0.0.1
           FFMPEG_LIVE: '1'
         # --fail-on-skipped: if a test ever skips here, the job fails — so a pass means a real scan and a real encode.
-        run: vendor/bin/pest --group=clamav,video --fail-on-skipped --compact
+        run: vendor/bin/pest --group=clamav --group=video --fail-on-skipped --compact
 
   backend-tests-mysql:
     name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 8)
