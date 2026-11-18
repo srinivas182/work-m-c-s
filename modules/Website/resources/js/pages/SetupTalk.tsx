@@ -27,6 +27,8 @@ interface Props {
   started: boolean;
   /** 23.2: the business's own photos found online; only chosen ones are used. */
   photos: { source: string; chosen: boolean }[];
+  /** 23.4: back to the agent's setup flow afterwards. */
+  return: string | null;
 }
 
 const base = () => window.location.pathname.replace(/\/$/, '');
@@ -167,7 +169,7 @@ function PhotoPicker({ photos }: { photos: Props['photos'] }) {
     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {photos.map((p, i) => (
         <li key={i}>
-          <label className="border-border has-[:checked]:border-brand grid cursor-pointer gap-2 rounded-md border p-2 text-xs">
+          <label className="border-border has-[:checked]:border-brand-9 grid cursor-pointer gap-2 rounded-md border p-2 text-xs">
             <img
               src={`${base()}/photo/${i}`}
               alt={`Photo ${i + 1} from ${p.source}`}
@@ -185,7 +187,14 @@ function PhotoPicker({ photos }: { photos: Props['photos'] }) {
   );
 }
 
-export default function SetupTalk({ questions, next, preview, started, photos }: Props) {
+export default function SetupTalk({
+  questions,
+  next,
+  preview,
+  started,
+  photos,
+  return: back,
+}: Props) {
   const [changing, setChanging] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
   const answered = questions.filter((q) => q.answer !== null);
@@ -286,7 +295,9 @@ export default function SetupTalk({ questions, next, preview, started, photos }:
                   loading={applying}
                   onClick={() => {
                     setApplying(true);
-                    router.post(`${base()}/apply`, {}, { onFinish: () => setApplying(false) });
+                    router.post(`${base()}/apply`, back ? { return: back } : {}, {
+                      onFinish: () => setApplying(false),
+                    });
                   }}
                 >
                   Set it up

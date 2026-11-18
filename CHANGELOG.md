@@ -4,6 +4,16 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Agents — Sprint 23.4 (a business set up in 15 minutes, on the agent's phone)
+- **Agent area → Set up a business,** one guided flow with a clock:
+  1. The owner's name, business and mobile. A one-time code goes to the owner's phone, and the owner reads it out.
+  2. A package. The business is created, owned by the owner, and credited to the agent under the usual commission rules. A demo the agent made earlier can become the business.
+  3. Set up by talking or from a link (23.1, 23.2), with the owner beside the agent. The agent helps as a team member until hand-over.
+  4. The first top-up from R20: online (WURK's methods, such as Capitec Pay, SnapScan or card) or cash to the agent with a receipt number. Cash counts once a WURK approver confirms it. The top-up can also be left for later.
+  5. Hand-over: the owner gets their sign-in link and share kit on WhatsApp (new template `wurk_agent_handover`; SMS until it's approved), and the agent's access ends.
+- The agent's recent setups show how long each took and whether the site is live yet ("set up, not yet live" until the owner publishes).
+- Billing has a new `CreditTopUps` contract, so other modules can top up without reading Billing's tables. Website has a new `SiteLaunches` contract.
+
 ### Website — Sprint 23.3 (share kit)
 - **Website → Share:** share the website, the booking page, the shop and each product, current specials and the WhatsApp chat link in one tap. Only what's published is offered.
   - **WhatsApp Status:** a 9:16 image in the business's colours, with its logo, what's shared, a QR code and the link. On a phone it goes straight to the share sheet; elsewhere it downloads.

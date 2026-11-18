@@ -9,6 +9,7 @@ use Wurk\Agents\Http\Controllers\Admin\CommissionController;
 use Wurk\Agents\Http\Controllers\Admin\PayoutsController;
 use Wurk\Agents\Http\Controllers\AgentAreaController;
 use Wurk\Agents\Http\Controllers\AgentLinkController;
+use Wurk\Agents\Http\Controllers\AgentOnboardingController;
 
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])->name('admin.')->group(function (): void {
     Route::get('/agents/commission', [CommissionController::class, 'show'])->name('agents.commission');
@@ -40,6 +41,19 @@ Route::domain((string) config('wurk.domains.app'))->middleware(['web', 'auth'])-
     Route::get('/team', [AgentAreaController::class, 'team'])->name('team');
     Route::get('/payouts', [AgentAreaController::class, 'payouts'])->name('payouts');
     Route::get('/kit', [AgentAreaController::class, 'kit'])->name('kit');
+    // Set up a business on the agent's phone (23.4).
+    Route::get('/onboard', [AgentOnboardingController::class, 'index'])->name('onboard');
+    Route::post('/onboard', [AgentOnboardingController::class, 'start'])->middleware('throttle:10,10,agent-onboard')->name('onboard.start');
+    Route::prefix('/onboard/{onboarding}')->whereUlid('onboarding')->name('onboard.')->group(function (): void {
+        Route::get('/', [AgentOnboardingController::class, 'show'])->name('show');
+        Route::post('/resend', [AgentOnboardingController::class, 'resend'])->middleware('throttle:5,10,agent-onboard-resend')->name('resend');
+        Route::post('/verify', [AgentOnboardingController::class, 'verify'])->middleware('throttle:10,10,agent-onboard-verify')->name('verify');
+        Route::post('/package', [AgentOnboardingController::class, 'package'])->name('package');
+        Route::post('/setup-done', [AgentOnboardingController::class, 'setupDone'])->name('setup-done');
+        Route::post('/top-up', [AgentOnboardingController::class, 'topUp'])->middleware('throttle:10,10,agent-onboard-topup')->name('top-up');
+        Route::get('/paid', [AgentOnboardingController::class, 'paid'])->name('paid');
+        Route::post('/hand-over', [AgentOnboardingController::class, 'handOver'])->name('hand-over');
+    });
     Route::get('/demo', [AgentAreaController::class, 'demo'])->name('demo');
     Route::post('/demo', [AgentAreaController::class, 'createDemo'])->middleware('throttle:5,10,agent-demo')->name('demo.create');
     Route::post('/demo/delete', [AgentAreaController::class, 'deleteDemo'])->name('demo.delete');
