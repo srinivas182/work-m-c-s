@@ -23,11 +23,6 @@ use Wurk\Website\Models\ReceptionistMessage;
  */
 final readonly class WhatsAppReceptionist
 {
-    /** WhatsApp's limits for interactive messages. */
-    public const BUTTONS = 3;
-
-    public const ROWS = 10;
-
     public const PASSED_ON = 'Thanks for your message — someone from the team will reply as soon as they can.';
 
     public function __construct(private Receptionist $receptionist, private WhatsAppBusiness $whatsapp, private SiteFacts $facts, private TenantContext $context) {}
@@ -87,27 +82,7 @@ final readonly class WhatsAppReceptionist
      */
     public function send(string $to, string $text, array $choices): SendResult
     {
-        if ($choices === []) {
-            return $this->whatsapp->sendText($to, $text);
-        }
-        $body = $text;
-        if (mb_strlen($text) > 1024) { // too long for an interactive message's body: the text first, then the choices
-            $first = $this->whatsapp->sendText($to, $text);
-            if (! $first->ok) {
-                return $first;
-            }
-            $body = 'Tap one to choose:';
-        }
-        $choices = array_slice($choices, 0, self::ROWS);
-        $unique = count(array_unique(array_map(fn (array $c) => mb_substr($c['title'], 0, 20), $choices))) === count($choices);
-        $interactive = count($choices) <= self::BUTTONS && $unique
-            ? ['type' => 'button', 'body' => ['text' => $body], 'action' => ['buttons' => array_map(fn (array $c, int $i) => [
-                'type' => 'reply', 'reply' => ['id' => 'choice:'.$i, 'title' => mb_substr($c['title'], 0, 20)]], $choices, array_keys($choices))]]
-            : ['type' => 'list', 'body' => ['text' => $body], 'action' => ['button' => 'Choose', 'sections' => [['title' => 'Options', 'rows' => array_map(
-                fn (array $c, int $i) => ['id' => 'choice:'.$i, 'title' => mb_substr($c['title'], 0, 24)] + ($c['description'] !== '' ? ['description' => mb_substr($c['description'], 0, 72)] : []),
-                $choices, array_keys($choices))]]]];
-
-        return $this->whatsapp->sendInteractive($to, $interactive);
+        return $this->whatsapp->sendChoices($to, $text, array_map(fn (array $c, int $i) => ['id' => 'choice:'.$i] + $c, $choices, array_keys($choices)));
     }
 
     /**

@@ -15,11 +15,13 @@ use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Models\Reservation;
+use Wurk\Bookings\WhatsApp\ReminderButtons;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\InsufficientCredits;
 use Wurk\Credits\Contracts\SpendingLimitReached;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Messaging\Contracts\Messenger;
+use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -56,7 +58,13 @@ final readonly class BookingMessages
         $phone = self::international((string) $booking->customer_phone);
 
         $outcome = ['channel' => null, 'status' => 'failed', 'detail' => null];
-        if (in_array($channel, ['sms', 'whatsapp'], true) && $phone !== '' && $this->messenger->channelActive($channel)) {
+        // 21.5: an appointment's reminder comes from the business's own WhatsApp number, with Confirm / Move / Cancel,
+        // once Meta has approved the template on its account (charged there; any failure falls back as below).
+        $own = app(WhatsAppBusiness::class);
+        if ($kind === 'reminder' && $booking instanceof Booking && $phone !== '' && $own->templateReady(WhatsAppBusiness::REMINDER)
+            && $own->sendTemplate($phone, WhatsAppBusiness::REMINDER, [$vars['client'], $vars['service'], $vars['business'], $vars['when']], ReminderButtons::payloads($booking))->ok) {
+            $outcome = ['channel' => 'whatsapp', 'status' => 'sent', 'detail' => 'From your WhatsApp number, with Confirm, Move and Cancel'];
+        } elseif (in_array($channel, ['sms', 'whatsapp'], true) && $phone !== '' && $this->messenger->channelActive($channel)) {
             $charge = "booking-message:{$booking->id}:{$key}";
             try {
                 $this->wallet->charge($channel, $charge, "Booking {$kind} ({$channel})");
