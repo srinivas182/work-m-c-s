@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\InteractsWithShards;
+use Wurk\Bookings\Digest\BookingsDigest;
 use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Listeners\ConfirmPaymentOnWhatsApp;
 use Wurk\Bookings\Mail\BookingMessageMail;
@@ -174,4 +175,13 @@ it('finds a WhatsApp customer’s own bookings straight away — their number is
     expect($r['verified'])->toBeTrue()->and($r['bookings'])->toHaveCount(1)->and($r['bookings'][0]['booking_id'])->toBe($this->booking->id);
     // Without verification (a website chat), it still sends a code.
     expect(($this->in)(fn () => app(FindBookingTool::class)->run(['phone' => '082 555 0101'], ['conversation' => 'conv-2', 'channel' => 'web', 'customer' => []])))->toHaveKey('code_sent_if_booked');
+});
+
+it('counts tomorrow’s bookings and today’s deposits for the owner’s evening summary (21.6)', function () {
+    $this->travelTo(CarbonImmutable::parse('2027-05-02 19:00', 'Africa/Johannesburg'));
+    ($this->in)(function () {
+        Booking::query()->whereKey($this->booking->id)->update(['deposit_cents' => 20000, 'paid_at' => now()]);
+        expect(app(BookingsDigest::class)->figures(CarbonImmutable::now('Africa/Johannesburg')->startOfDay()))->toBe(['tomorrow_bookings' => 1, 'received_cents' => 20000])
+            ->and(app(BookingsDigest::class)->figures(CarbonImmutable::parse('2027-05-03', 'Africa/Johannesburg'))['tomorrow_bookings'])->toBe(0);
+    });
 });

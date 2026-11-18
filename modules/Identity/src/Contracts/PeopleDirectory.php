@@ -20,6 +20,9 @@ interface PeopleDirectory
      */
     public function contacts(array $ids): array;
 
+    /** The person's mobile number, only once they've proved it's theirs with a code (21.6), in international form. */
+    public function verifiedPhone(string $identityId): ?string;
+
     /** Whether the person has a confirmed authenticator app. */
     public function hasMfa(string $identityId): bool;
 

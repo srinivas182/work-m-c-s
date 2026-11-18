@@ -39,6 +39,13 @@ final class EloquentPeopleDirectory implements PeopleDirectory
         ])->all();
     }
 
+    public function verifiedPhone(string $identityId): ?string
+    {
+        $i = Identity::query()->find($identityId);
+
+        return $i !== null && $i->phone !== null && $i->phone !== '' && $i->phone_verified_at !== null ? $i->phone : null;
+    }
+
     public function hasMfa(string $identityId): bool
     {
         return Identity::query()->find($identityId)?->hasMfa() ?? false;

@@ -19,6 +19,7 @@ use Throwable;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Models\WhatsAppConnection;
+use Wurk\Messaging\Support\OwnerSummaries;
 use Wurk\Messaging\Support\WhatsAppGraph;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -32,8 +33,9 @@ final class WhatsAppConnectionController
 {
     public function __construct(private WhatsAppGraph $graph, private AuditLog $audit) {}
 
-    public function index(TenantContext $context): Response
+    public function index(Request $request, TenantContext $context, OwnerSummaries $summaries): Response
     {
+        $me = (string) $request->user()?->getAuthIdentifier();
         $c = WhatsAppConnection::query()->where('tenant_id', $context->id())->first();
 
         return Inertia::render('Messaging::WhatsApp', [
@@ -51,6 +53,8 @@ final class WhatsAppConnectionController
                 'qr' => (new Writer(new ImageRenderer(new RendererStyle(240, 1), new SvgImageBackEnd)))->writeString($link),
             ],
             'base' => route('tenant.whatsapp', [], false),
+            // The owner's evening summary (21.6): from WURK's number to the owner's verified mobile — owners only.
+            'summary' => $summaries->isOwner($me) ? $summaries->settings($me) : null,
         ]);
     }
 
@@ -146,6 +150,20 @@ final class WhatsAppConnectionController
             'templates' => $this->templates($c->waba_id, $c->token) ?? $c->templates]);
 
         return back()->with('status', 'Checked with Meta just now.');
+    }
+
+    /** The owner's evening WhatsApp summary: on or off, and when. */
+    public function summary(Request $request, OwnerSummaries $summaries): RedirectResponse
+    {
+        $me = (string) $request->user()?->getAuthIdentifier();
+        abort_unless($summaries->isOwner($me), 403);
+        $d = $request->validate(['enabled' => ['required', 'boolean'], 'send_at' => ['required', 'date_format:H:i']]);
+        if ($d['enabled'] && $summaries->settings($me)['phone'] === null) {
+            return back()->withErrors(['enabled' => 'The summary only goes to a mobile number proven to be yours, and your WURK ID doesn’t have one yet. Ask WURK support to add it (Account & security).']);
+        }
+        $summaries->save($me, (bool) $d['enabled'], $d['send_at']);
+
+        return back()->with('status', $d['enabled'] ? 'Your evening summary is on: it comes to your WhatsApp at '.$d['send_at'].'.' : 'Your evening summary is off.');
     }
 
     /** The message customers' chats start with from the website's button and the QR code. */

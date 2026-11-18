@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
@@ -13,9 +14,11 @@ use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Platform\Contracts\OwnerDigestRefused;
 use Wurk\Referrals\Models\ReferralProgramme;
 use Wurk\Referrals\Support\Attribution;
 use Wurk\Referrals\Support\Commissions;
+use Wurk\Sales\Digest\SalesDigest;
 use Wurk\Sales\Models\Sale;
 use Wurk\Tenancy\Contracts\BranchDirectory;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -142,4 +145,19 @@ it('records a sale for a customer proven by their portal code — no phone neede
     $this->travel(6)->minutes();
     $this->actingAs($this->people['till'])->postJson("{$this->url}/identify", ['code' => $code])->assertStatus(422);
     expect(($this->in)(fn () => Sale::query()->count()))->toBe(1); // nothing else saved
+});
+
+it('puts sales waiting for approval in the owner’s evening summary, answerable from WhatsApp (21.6)', function () {
+    $this->actingAs($this->people['owner'])->put($this->app('/glow-salon/settings/sales'), ['amount' => '1000']);
+    $this->actingAs($this->people['till'])->post($this->url, [...$this->sale, 'amount' => '1500', 'branch_id' => $this->main]);
+    $this->actingAs($this->people['till'])->post($this->url, [...$this->sale, 'amount' => '2000', 'branch_id' => $this->main]);
+    ($this->in)(function () {
+        $digest = app(SalesDigest::class);
+        $requests = $digest->requests();
+        expect(array_column($requests, 'label'))->toHaveCount(2)->and($requests[0]['label'])->toStartWith('Approve ')->toContain('R1 500.00');
+        expect($digest->decide($requests[0]['id'], true, $this->people['owner']->id, 'Thandi'))->toBe('The R1 500.00 sale is approved.')
+            ->and($digest->decide($requests[1]['id'], false, $this->people['owner']->id, 'Thandi'))->toBe('The R2 000.00 sale is declined.')
+            ->and(fn () => $digest->decide($requests[0]['id'], false, $this->people['owner']->id, 'Thandi'))->toThrow(OwnerDigestRefused::class, 'already been decided')
+            ->and($digest->figures(CarbonImmutable::now()->startOfDay())['received_cents'])->toBe(150000);
+    });
 });

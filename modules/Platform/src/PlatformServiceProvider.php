@@ -13,6 +13,7 @@ use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
+use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
@@ -28,6 +29,7 @@ use Wurk\Platform\Support\ExportRegistry;
 use Wurk\Platform\Support\HealthRegistry;
 use Wurk\Platform\Support\MetricsRegistry;
 use Wurk\Platform\Support\NoSupportSessions;
+use Wurk\Platform\Support\OwnerDigestRegistry;
 use Wurk\Platform\Support\ReceptionistRegistry;
 use Wurk\Platform\Support\ReportRegistry;
 use Wurk\Platform\Support\SalesRegistry;
@@ -49,6 +51,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(AudienceSegments::class, AudienceRegistry::class);
         $this->app->singleton(AssistantTools::class, AssistantRegistry::class);
         $this->app->singleton(ReceptionistTools::class, ReceptionistRegistry::class); // 19.2
+        $this->app->singleton(OwnerDigest::class, OwnerDigestRegistry::class); // 21.6
         $this->app->singleton(SalesTools::class, SalesRegistry::class); // 19.5
         $this->app->singleton(HealthSignals::class, HealthRegistry::class);
         $this->app->singleton(DataExports::class, ExportRegistry::class);

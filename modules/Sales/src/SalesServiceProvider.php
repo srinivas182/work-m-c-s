@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Wurk\Sales;
 
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Sales\Digest\SalesDigest;
 use Wurk\Sales\Support\Sales;
 
 final class SalesServiceProvider extends ModuleServiceProvider
@@ -14,6 +16,7 @@ final class SalesServiceProvider extends ModuleServiceProvider
     {
         parent::register();
         $this->callAfterResolving(MessageTemplates::class, fn (MessageTemplates $t) => $t->define('sale.receipt', Sales::RECEIPT)); // Settings → Messages
+        $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(SalesDigest::class)); // the owner's evening WhatsApp summary (21.6)
     }
 
     public function menu(): array
