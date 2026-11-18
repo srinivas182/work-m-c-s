@@ -14,6 +14,10 @@
                 } catch (e) {}
             })();
         </script>
+        @if (app()->getLocale() !== 'en')
+            {{-- This language's translations (24.1), before the app so the first paint is already translated. --}}
+            <script src="/i18n/{{ app()->getLocale() }}.{{ \Wurk\Platform\I18n\Locales::version(app()->getLocale()) }}.js" nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}"></script>
+        @endif
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx'])
         {{-- A title from the first byte; each page's own title replaces it (Inertia <Head>). --}}

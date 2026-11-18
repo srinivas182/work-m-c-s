@@ -35,7 +35,7 @@ final class ScreensCommand extends Command
     public const NOT_SCREENS = [
         'agents.link' => 'redirects to signup with the agent', 'referrals.link' => 'redirects to the site with the referrer',
         'campaigns.link' => 'redirects to the campaign link', 'campaigns.open' => 'tracking pixel', 'my.open' => 'redirects to the business',
-        'website.public.robots' => 'text', 'website.public.sitemap' => 'XML', 'website.public.llms' => 'text',
+        'website.public.robots' => 'text', 'platform.i18n' => 'script: a language’s translations (24.1)', 'website.public.sitemap' => 'XML', 'website.public.llms' => 'text',
         'portal.handoff' => 'redirect', 'portal.id-qr' => 'image', 'portal.qr' => 'image', 'portal.my-data' => 'JSON download', 'portal.wallet-pass' => 'wallet file',
         'agent.demo.qr' => 'image', 'agent.qr' => 'image', 'admin.agents.qr' => 'image', 'tenant.referrals.qr' => 'image',
         'admin.agents.payouts.csv' => 'CSV', 'admin.metrics.export' => 'CSV', 'admin.reconciliation.export' => 'CSV', 'admin.health.export' => 'CSV',

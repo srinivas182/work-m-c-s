@@ -23,6 +23,7 @@ use Wurk\Identity\Models\IdentitySession;
 use Wurk\Identity\Support\DeviceName;
 use Wurk\Identity\Support\PasswordPolicy;
 use Wurk\Identity\Support\Surface;
+use Wurk\Platform\I18n\Locales;
 
 final class AccountController
 {
@@ -39,6 +40,7 @@ final class AccountController
                 'last_name' => $identity->last_name,
                 'email' => $identity->email,
                 'phone' => $identity->phone,
+                'locale' => $identity->locale ?? 'en',
             ],
             'hasPassword' => $identity->password !== null,
             'mfaEnabled' => $identity->hasMfa(),
@@ -69,6 +71,16 @@ final class AccountController
         $identity->update(['first_name' => $data['first_name'], 'last_name' => $data['last_name'] ?? '']);
 
         return back()->with('status', 'Profile saved.');
+    }
+
+    /** The person's language for WURK's screens and their own messages (24.1). */
+    public function updateLanguage(Request $request): RedirectResponse
+    {
+        $code = (string) $request->validate(['locale' => ['required', 'string', 'in:'.implode(',', array_keys(Locales::SUPPORTED))]])['locale'];
+        $this->identity($request)->update(['locale' => $code]);
+        app()->setLocale($code);
+
+        return back()->with('status', __('Language saved.'));
     }
 
     public function updatePassword(Request $request): RedirectResponse
