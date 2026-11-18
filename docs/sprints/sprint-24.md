@@ -119,3 +119,37 @@ The gap WURK can fill is a whole small-business tool, back office and customer p
 
 | Part | PR | Notes |
 |---|---|---|
+| 24.1a | #249 | Language per person (Account & security); visitors by `?lang=`, cookie, browser. Translations as a versioned script before the app; `t()` / `__()` fall back to English; rand formatted the same on server and browser; `scripts/i18n-extract.mjs` + check in `pnpm lint` |
+| 24.1b | #250 | Codemod marked ~2,400 back-office texts (`__('…')`); menus and fixed flash messages translated where shown |
+| 24.2a | #251 | Translation store over `lang/*.json` (PHP loader + browser script); Admin → Languages (progress, WURK AI drafts with glossary, review in context, offer/withdraw); a draft never replaces a review; placeholders checked; preview until 95% reviewed |
+| 24.2b | | Customer messages (booking messages, reminders, receipts, invoice messages) in the customer's language; `contacts.locale` |
+| 24.3a | | Customer pages on business addresses in the customer's language (invoice, booking, order, payment pages); signed links ignore `lang` / `utm_source` |
+| 24.4 | | Lite mode (Save-Data, slow connection, per-phone choice); site: no web fonts, no autoplaying slides; data counter; build fails over the data budget (first load ceiling 225 KB, pages 60 KB); tests no longer shipped |
+| 24.5 | | Service worker (last-seen pages offline), web app manifest; six actions saved offline and sent once (`Idempotency-Key`), conflicts reported; sign-out clears the phone |
+| 24.6 | | End-to-end tests; v0.25.0 |
+
+## Verification (before closing)
+
+Every spec item and acceptance criterion, checked against the code and its tests. Verified 19 Nov 2026.
+
+| Item | Where | Status |
+|---|---|---|
+| 24.1 Every fixed text translatable, falling back to English | i18n.ts, Locales, SetLocale, codemod; LanguagesTest, i18n.test | ✅ Back office and customer pages; the business's site blocks and wurk.co.za pages are not yet marked |
+| 24.1 Each person picks their language; a business default for new members | Account & security → Language | ✅ / ⚠️ The business default for new members is not built |
+| 24.1 Money and dates per language, the same on server and browser | Locales::money, i18n.ts money | ✅ Money / ⚠️ dates in messages are still English |
+| 24.1 CI check for unmarked texts | `pnpm lint` (extraction up to date) | ⚠️ It checks that the list is current, not that every new text is marked |
+| 24.2 Nine languages drafted by WURK AI with a glossary, reviewed by people, preview until reviewed | TranslationDrafts, LanguagesController; LanguagesAdminTest | ✅ Drafting runs in production once AI keys are set |
+| 24.2 Customer messages in the customer's language; remembered per customer | Templates (locale), Contacts::locale; CustomerLanguageTest | ✅ / ⚠️ WhatsApp templates in other languages not yet submitted |
+| 24.3 Customer pages follow the customer's language | CustomerLocale, Blade views; WhoOwesMeTest | ✅ Invoice, booking, order, payment pages |
+| 24.3 Owner translations of their own site text, `/zu/…`, hreflang | — | ❌ Not built (open item) |
+| 24.4 Lite mode automatic and per person; smaller images, no autoplay, no web fonts | Lite, page.blade, HeroSlideshow; LiteModeTest, e2e | ✅ / ⚠️ smaller images not yet swapped in |
+| 24.4 Data budgets in CI | scripts/bundle-budget.mjs via `pnpm build` | ⚠️ Per page ✅ (≤ 60 KB); first load 220 KB against the 170 KB target — ceiling 225 KB, decision pending |
+| 24.4 Data counter | lite.ts, Account & security | ✅ |
+| 24.5 Installs; opens without a signal showing last-seen pages | sw.js, manifest | ✅ |
+| 24.5 Six actions saved offline, sent once, conflicts told | offline.ts, IdempotentRequests; CashUpAndProfitTest, offline.test, e2e | ✅ |
+| 24.5 Customer pages on a weak signal (booking form keeps what was typed) | — | ❌ Not built (open item) |
+| Acceptance 1 (isiZulu every daily screen) | — | ⏳ Needs the AI drafts and reviews in production |
+| Acceptance 2 (French booking messages) | CustomerLanguageTest | ✅ once French is drafted |
+| Acceptance 3 (3G bookings screen < 5 s after first visit) | sw.js caches the app | ⏳ To measure on a device |
+| Acceptance 4, 6 | e2e, LiteModeTest | ✅ |
+| Acceptance 5 (offline booking conflict) | offline.ts reports the server's reason | ✅ (by design; not yet an e2e) |
