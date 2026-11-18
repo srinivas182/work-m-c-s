@@ -11,6 +11,12 @@ namespace Wurk\Messaging\Contracts;
  */
 interface WhatsAppBusiness
 {
+    /** WURK's templates on every connected account (submitted for Meta's review on connect). */
+    public const FOLLOW_UP = 'wurk_follow_up';
+
+    /** A booking reminder with Confirm / Move / Cancel buttons (21.5): customer's first name, service, business, when. */
+    public const REMINDER = 'wurk_reminder';
+
     /** Whether the current business has connected its own number. */
     public function connected(): bool;
 
@@ -31,6 +37,26 @@ interface WhatsAppBusiness
      * @param  array<string, mixed>  $interactive
      */
     public function sendInteractive(string $to, array $interactive): SendResult;
+
+    /**
+     * The reply with things to tap: up to 3 as reply buttons, up to 10 as a list (more are left out). Each choice's
+     * `id` comes back with the customer's tap (21.5). Costs credits.
+     *
+     * @param  list<array{id: string, title: string, description?: string}>  $choices
+     */
+    public function sendChoices(string $to, string $text, array $choices): SendResult;
+
+    /** Whether Meta has approved one of WURK's templates (above) on the business's account. */
+    public function templateReady(string $name): bool;
+
+    /**
+     * Sends one of WURK's approved templates, with its body's values and, for each quick-reply button, the payload that
+     * comes back when it's tapped (21.5). Costs credits.
+     *
+     * @param  list<string>  $parameters
+     * @param  list<string>  $buttonPayloads
+     */
+    public function sendTemplate(string $to, string $name, array $parameters, array $buttonPayloads = []): SendResult;
 
     /** Whether Meta has approved the business's follow-up template, for reaching a customer after the 24-hour window. */
     public function followUpReady(): bool;

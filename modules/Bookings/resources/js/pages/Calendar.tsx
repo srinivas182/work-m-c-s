@@ -24,6 +24,8 @@ interface BookingRow {
   notes: string | null;
   status: string;
   source: string;
+  /** Tapped Confirm on their WhatsApp reminder (21.5). */
+  customer_confirmed?: boolean;
   starts_at: string;
   ends_at: string;
 }
@@ -79,6 +81,7 @@ function BookingItem({
         <span className="flex gap-1">
           {b.source === 'website' && <Badge tone="info">Booked online</Badge>}
           {b.source === 'chat' && <Badge tone="info">Booked by the AI assistant</Badge>}
+          {b.customer_confirmed && <Badge tone="success">Confirmed by the customer</Badge>}
           {STATUS[b.status] && <Badge tone="neutral">{STATUS[b.status]}</Badge>}
         </span>
       </div>

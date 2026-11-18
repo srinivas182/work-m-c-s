@@ -12,6 +12,7 @@ use Wurk\Messaging\Events\WhatsAppStatusChanged;
 use Wurk\Messaging\Models\MessageDelivery;
 use Wurk\Messaging\Models\WhatsAppConnection;
 use Wurk\Messaging\Support\ProviderSettings;
+use Wurk\Messaging\Support\WhatsAppGraph;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -71,6 +72,11 @@ final readonly class DeliveryWebhooks
         foreach ((array) $request->input('entry', []) as $entry) {
             foreach ((array) ($entry['changes'] ?? []) as $change) {
                 $value = (array) ($change['value'] ?? []);
+                if (($change['field'] ?? '') === 'message_template_status_update') { // Meta reviewed one of WURK's templates (21.5)
+                    $this->templateReviewed((string) ($entry['id'] ?? ''), $value);
+
+                    continue;
+                }
                 // A business's own number (Sprint 21.2): hand messages and statuses to that business, inside its context.
                 $connection = WhatsAppConnection::query()->where('phone_number_id', (string) ($value['metadata']['phone_number_id'] ?? ''))
                     ->where('status', 'connected')->first();
@@ -89,6 +95,18 @@ final readonly class DeliveryWebhooks
         }
 
         return new Response('', 200);
+    }
+
+    /** @param  array<string, mixed>  $value */
+    private function templateReviewed(string $wabaId, array $value): void
+    {
+        $name = (string) ($value['message_template_name'] ?? '');
+        if (! isset(WhatsAppGraph::TEMPLATES[$name]) || ($value['message_template_language'] ?? WhatsAppGraph::FOLLOW_UP_LANGUAGE) !== WhatsAppGraph::FOLLOW_UP_LANGUAGE) {
+            return;
+        }
+        foreach (WhatsAppConnection::query()->where('waba_id', $wabaId)->where('status', 'connected')->get() as $c) {
+            $c->update(['templates' => [...(array) $c->templates, $name => strtoupper((string) ($value['event'] ?? 'PENDING'))]]);
+        }
     }
 
     /** @param  array<string, mixed>  $value */

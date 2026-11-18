@@ -9,9 +9,12 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Crm\Contracts\Audiences;
 use Wurk\Crm\Contracts\ContactBook;
+use Wurk\Messaging\Contracts\WhatsAppActions;
+use Wurk\Messaging\Contracts\WhatsAppAnswer;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Events\WhatsAppReceived;
 use Wurk\Messaging\Events\WhatsAppStatusChanged;
@@ -40,7 +43,7 @@ final readonly class WhatsAppChats
     /** "STOP" and its everyday equivalents opt the customer out of marketing messages. */
     private const STOP = ['stop', 'unsubscribe', 'yima', 'misa', 'stop asseblief', 'hamba', 'acha', 'arrête'];
 
-    public function __construct(private TenantContext $context, private ContactBook $contacts, private Audiences $audiences, private AuditLog $audit) {}
+    public function __construct(private TenantContext $context, private ContactBook $contacts, private Audiences $audiences, private AuditLog $audit, private WhatsAppActions $actions) {}
 
     public function received(WhatsAppReceived $e): ?ReceptionistConversation
     {
@@ -74,6 +77,9 @@ final readonly class WhatsAppChats
         if ($e->mediaId !== null) {
             FetchWhatsAppMedia::dispatch($this->context->id(), $message->id, $e->mediaId, $e->mime, $e->filename);
         }
+        if ($this->tapped($conversation, $e)) {
+            return $conversation; // a button WURK sent (a reminder's Confirm, Move or Cancel…): its module answered
+        }
         if (in_array(mb_strtolower(trim($e->text)), self::STOP, true) && $conversation->contact_id !== null) {
             $this->audiences->withdrawConsent($conversation->contact_id, 'Replied "'.mb_substr(trim($e->text), 0, 20).'" on WhatsApp');
             $this->append($conversation, 'person', 'You won’t get marketing messages from us any more. You can still message us any time.', null);
@@ -94,6 +100,36 @@ final readonly class WhatsAppChats
         if ($m !== null && ($rank[$e->status] ?? 0) > ($rank[$m->delivery] ?? 0)) {
             $m->update(['delivery' => $e->status, 'delivery_error' => $e->status === 'failed' ? mb_substr((string) $e->error, 0, 300) : null]);
         }
+    }
+
+    /**
+     * A tap on a button a module sent (21.5), answered by that module straight away; the assistant stays out of it.
+     * The receptionist's own choices ("choice:…") are ordinary messages it answers itself.
+     */
+    private function tapped(ReceptionistConversation $c, WhatsAppReceived $e): bool
+    {
+        $payload = $e->extra['reply_id'] ?? null;
+        if (! is_string($payload) || $payload === '' || str_starts_with($payload, 'choice:')) {
+            return false;
+        }
+        try {
+            $answer = $this->actions->handle($payload, $e->from);
+        } catch (Throwable $x) {
+            report($x);
+            $answer = new WhatsAppAnswer('Sorry — that didn’t work just now. Someone from the team will help you.');
+            $c->update(['status' => 'waiting', 'keep' => true]);
+        }
+        if ($answer === null) {
+            return false;
+        }
+        $sent = app(WhatsAppBusiness::class)->sendChoices((string) $c->phone, $answer->text, $answer->choices);
+        $m = $this->append($c, 'assistant', $answer->text, $sent->ok ? $sent->providerId : null, $sent->ok ? 'sent' : 'failed', ['action' => true]);
+        if (! $sent->ok) {
+            $m->update(['delivery_error' => mb_substr((string) $sent->error, 0, 300)]);
+        }
+        $c->update(['last_message_at' => now()]);
+
+        return true;
     }
 
     /** The assistant answers this message now, if it has the chat and nothing newer came in (voice notes — 21.4). */
@@ -198,7 +234,7 @@ final readonly class WhatsAppChats
             $position = (int) ReceptionistMessage::query()->where('conversation_id', $c->id)->lockForUpdate()->max('position') + 1;
 
             return ReceptionistMessage::query()->create(['conversation_id' => $c->id, 'position' => $position, 'role' => $role,
-                'content' => ['role' => $role === 'person' ? 'assistant' : 'user', 'content' => mb_substr($text, 0, 4096)] + ($role === 'person' ? ['person' => true] : []) + $extra,
+                'content' => ['role' => $role === 'user' ? 'user' : 'assistant', 'content' => mb_substr($text, 0, 4096)] + ($role === 'person' ? ['person' => true] : []) + $extra,
                 'external_id' => $externalId, 'delivery' => $delivery, 'created_at' => now()]);
         });
     }

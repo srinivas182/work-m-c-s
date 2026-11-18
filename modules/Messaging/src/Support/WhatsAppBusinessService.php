@@ -58,9 +58,52 @@ final readonly class WhatsAppBusinessService implements WhatsAppBusiness
         return $this->send($to, ['type' => 'interactive', 'interactive' => $interactive], 'Reply');
     }
 
+    public function sendChoices(string $to, string $text, array $choices): SendResult
+    {
+        if ($choices === []) {
+            return $this->sendText($to, $text);
+        }
+        $body = $text;
+        if (mb_strlen($text) > 1024) { // too long for an interactive message's body: the text first, then the choices
+            $first = $this->sendText($to, $text);
+            if (! $first->ok) {
+                return $first;
+            }
+            $body = 'Tap one to choose:';
+        }
+        $choices = array_slice($choices, 0, 10);
+        $titles = array_map(fn (array $c) => mb_substr($c['title'], 0, 20), $choices);
+        $interactive = count($choices) <= 3 && count(array_unique($titles)) === count($titles)
+            ? ['type' => 'button', 'body' => ['text' => $body], 'action' => ['buttons' => array_map(fn (array $c) => [
+                'type' => 'reply', 'reply' => ['id' => mb_substr($c['id'], 0, 256), 'title' => mb_substr($c['title'], 0, 20)]], $choices)]]
+            : ['type' => 'list', 'body' => ['text' => $body], 'action' => ['button' => 'Choose', 'sections' => [['title' => 'Options', 'rows' => array_map(
+                fn (array $c) => ['id' => mb_substr($c['id'], 0, 200), 'title' => mb_substr($c['title'], 0, 24)] + (($c['description'] ?? '') !== '' ? ['description' => mb_substr((string) $c['description'], 0, 72)] : []),
+                $choices)]]]];
+
+        return $this->sendInteractive($to, $interactive);
+    }
+
+    public function templateReady(string $name): bool
+    {
+        return ($this->connection()?->templates[$name] ?? null) === 'APPROVED';
+    }
+
+    public function sendTemplate(string $to, string $name, array $parameters, array $buttonPayloads = []): SendResult
+    {
+        if (! $this->templateReady($name)) {
+            return SendResult::failed('Meta hasn’t approved this message yet. Check Settings → WhatsApp.');
+        }
+        $components = [['type' => 'body', 'parameters' => array_map(fn (string $p) => ['type' => 'text', 'text' => mb_substr($p, 0, 200)], $parameters)]];
+        foreach (array_values($buttonPayloads) as $i => $payload) {
+            $components[] = ['type' => 'button', 'sub_type' => 'quick_reply', 'index' => (string) $i, 'parameters' => [['type' => 'payload', 'payload' => $payload]]];
+        }
+
+        return $this->send($to, ['type' => 'template', 'template' => ['name' => $name, 'language' => ['code' => WhatsAppGraph::FOLLOW_UP_LANGUAGE], 'components' => $components]], 'Template');
+    }
+
     public function followUpReady(): bool
     {
-        return ($this->connection()?->templates[WhatsAppGraph::FOLLOW_UP] ?? null) === 'APPROVED';
+        return $this->templateReady(self::FOLLOW_UP);
     }
 
     public function sendFollowUp(string $to, string $name): SendResult

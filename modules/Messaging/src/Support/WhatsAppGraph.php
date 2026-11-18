@@ -8,6 +8,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 use Wurk\Messaging\Contracts\ProviderCredentials;
+use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Drivers\WhatsApp\MetaCloudWhatsApp;
 
 /**
@@ -17,7 +18,7 @@ use Wurk\Messaging\Drivers\WhatsApp\MetaCloudWhatsApp;
 final readonly class WhatsAppGraph
 {
     /** The template a business uses to follow up after the 24-hour window. */
-    public const FOLLOW_UP = 'wurk_follow_up';
+    public const FOLLOW_UP = WhatsAppBusiness::FOLLOW_UP;
 
     public const FOLLOW_UP_LANGUAGE = 'en';
 
@@ -27,10 +28,12 @@ final readonly class WhatsAppGraph
     /**
      * The templates WURK submits on every connected account for Meta's review (utility messages, in English for now).
      *
-     * @var array<string, array{body: string, example: list<string>}>
+     * @var array<string, array{body: string, example: list<string>, buttons?: list<string>}>
      */
     public const TEMPLATES = [
         self::FOLLOW_UP => ['body' => self::FOLLOW_UP_BODY, 'example' => ['Thandi', 'Glow Salon']],
+        WhatsAppBusiness::REMINDER => ['body' => 'Hi {{1}}, a reminder of your {{2}} at {{3}} on {{4}}. Tap below to confirm, move or cancel.',
+            'example' => ['Thandi', 'Box braids', 'Glow Salon', 'Sat 21 Nov, 14:00'], 'buttons' => ['Confirm', 'Move', 'Cancel']],
     ];
 
     public function __construct(private ProviderCredentials $providers) {}
@@ -138,6 +141,9 @@ final readonly class WhatsAppGraph
                 continue;
             }
             $components = [['type' => 'BODY', 'text' => $t['body'], 'example' => ['body_text' => [$t['example']]]]];
+            if (isset($t['buttons'])) {
+                $components[] = ['type' => 'BUTTONS', 'buttons' => array_map(fn (string $b) => ['type' => 'QUICK_REPLY', 'text' => $b], $t['buttons'])];
+            }
             $response = $this->ok(Http::withToken($token)->timeout(15)->post($this->url($wabaId.'/message_templates'), [
                 'name' => $name, 'language' => self::FOLLOW_UP_LANGUAGE, 'category' => 'UTILITY', 'components' => $components,
             ]));

@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### WhatsApp — Sprint 21.5a (reminders with Confirm, Move and Cancel)
+- **Appointment reminders come from the business's own WhatsApp number** with **Confirm**, **Move** and **Cancel** buttons, once Meta approves the reminder message on its account. Until then, and without a connected number, reminders go out as before.
+- **A tap is handled straight away:**
+  - **Confirm** marks the booking "Confirmed by the customer" in the diary.
+  - **Move** offers the next free times as a list, and a tap moves the booking.
+  - **Cancel** frees the time. If the deposit wouldn't be refunded, it asks first.
+- Only the booking's own customer, by WhatsApp number, can act on it. The taps and answers show in Chats.
+- **Meta's reviews** of WURK's messages arrive by webhook and are checked every hour. New messages that come with updates are submitted to each connected account automatically.
+
 ### Templates — demo photos installed by default
 - **Every design now comes with real photos.** WURK has chosen a Pexels photo for each of the 215 photo places in the 78 designs, matched to what the place shows (a dentist with a patient, foam on a car in the wash bay, solar panels on a roof…). `website:install-templates` imports them with the designs, so a new installation looks finished, like a Wix or WordPress demo.
 - Photos already in place are skipped. A photo that can't be fetched keeps its stand-in and is reported, without failing the install. HQ can still change any photo in **Admin → Templates → Demo photos**.

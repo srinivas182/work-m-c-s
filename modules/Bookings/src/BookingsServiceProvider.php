@@ -45,9 +45,11 @@ use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\MessageWording;
+use Wurk\Bookings\WhatsApp\ReminderButtons;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Messaging\Contracts\WhatsAppActions;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\AssistantTools;
@@ -148,6 +150,8 @@ final class BookingsServiceProvider extends ModuleServiceProvider
                 $t->register($tool);
             }
         });
+        // 21.5: the Confirm / Move / Cancel buttons on reminders from the business's WhatsApp number.
+        $this->callAfterResolving(WhatsAppActions::class, fn (WhatsAppActions $a) => $a->register(ReminderButtons::class));
         $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
             $t->register(BookingsOnDayTool::class);
             $t->register(AddBookingHoursTool::class);
