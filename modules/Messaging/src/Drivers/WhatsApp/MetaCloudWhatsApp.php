@@ -55,4 +55,27 @@ final class MetaCloudWhatsApp
             ? SendResult::sent((string) ($response->json('messages.0.id') ?? ''))
             : SendResult::failed('WhatsApp: '.($response->json('error.message') ?? 'HTTP '.$response->status()));
     }
+
+    /**
+     * A free-form text from WURK's own number — only inside the 24-hour window after the person wrote (21.6: answering
+     * an owner's reply to their summary).
+     *
+     * @param  array<string, string>  $credentials
+     * @param  array<string, string>  $settings
+     */
+    public function sendText(string $to, string $text, array $credentials, array $settings): SendResult
+    {
+        try {
+            $response = Http::timeout(10)->acceptJson()->withToken($credentials['access_token'] ?? '')
+                ->post(sprintf(self::ENDPOINT, $settings['api_version'] ?? self::DEFAULT_VERSION, $settings['phone_number_id'] ?? ''), [
+                    'messaging_product' => 'whatsapp', 'to' => ltrim($to, '+'), 'type' => 'text', 'text' => ['body' => mb_substr($text, 0, 4096), 'preview_url' => false],
+                ]);
+        } catch (ConnectionException $e) {
+            return SendResult::failed('WhatsApp unreachable: '.$e->getMessage());
+        }
+
+        return $response->successful()
+            ? SendResult::sent((string) ($response->json('messages.0.id') ?? ''))
+            : SendResult::failed('WhatsApp: '.($response->json('error.message') ?? 'HTTP '.$response->status()));
+    }
 }

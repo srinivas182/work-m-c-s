@@ -18,6 +18,7 @@ use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
 use Wurk\Bookings\Console\SendRemindersCommand;
 use Wurk\Bookings\Contracts\HealthPracticeStatus;
+use Wurk\Bookings\Digest\BookingsDigest;
 use Wurk\Bookings\Events\BookingCancelled;
 use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Events\BookingMoved;
@@ -57,6 +58,7 @@ use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\CannotRestore;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -97,6 +99,7 @@ final class BookingsServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(BookingsDigest::class)); // the owner's evening WhatsApp summary (21.6)
         // Recently deleted (16.6b): services. One with bookings is kept (hidden) after 30 days, so those bookings keep its name.
         $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('services', 'Booking services', 'bookings.settings',
             fn (\DateTimeInterface $since) => BookingService::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()

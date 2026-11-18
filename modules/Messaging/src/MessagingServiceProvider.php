@@ -6,6 +6,7 @@ namespace Wurk\Messaging;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Wurk\Identity\Contracts\TextMessenger;
+use Wurk\Messaging\Console\SendOwnerSummariesCommand;
 use Wurk\Messaging\Console\SyncWhatsAppTemplatesCommand;
 use Wurk\Messaging\Contracts\DeliveryLog;
 use Wurk\Messaging\Contracts\MessageTemplates;
@@ -67,9 +68,12 @@ final class MessagingServiceProvider extends ModuleServiceProvider
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'messaging');
         if ($this->app->runningInConsole()) {
-            $this->commands([SyncWhatsAppTemplatesCommand::class]);
+            $this->commands([SyncWhatsAppTemplatesCommand::class, SendOwnerSummariesCommand::class]);
         }
-        $this->callAfterResolving(Schedule::class, fn (Schedule $s) => $s->command('messaging:sync-whatsapp-templates')->hourlyAt(17)->onOneServer()->withoutOverlapping()); // 21.5
+        $this->callAfterResolving(Schedule::class, function (Schedule $s): void {
+            $s->command('messaging:sync-whatsapp-templates')->hourlyAt(17)->onOneServer()->withoutOverlapping(); // 21.5
+            $s->command('messaging:owner-summaries')->everyFifteenMinutes()->onOneServer()->withoutOverlapping(); // 21.6
+        });
         // Sign-in codes to mobile numbers go through the active WhatsApp / SMS provider.
         config(['wurk.identity.otp.channels.phone' => PhoneOtpChannel::class]);
 

@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Checkbox,
   EmptyState,
   Field,
   Input,
@@ -34,6 +35,8 @@ interface Props {
   base: string;
   /** Click-to-chat (21.5): the link the website's WhatsApp button uses, and its QR code (SVG). */
   chat?: { text: string; link: string; qr: string } | null;
+  /** The owner's evening summary (21.6); only owners see it. */
+  summary?: { enabled: boolean; send_at: string; phone: string | null } | null;
 }
 
 const QUALITY: Record<string, { label: string; tone: 'success' | 'warning' | 'danger' }> = {
@@ -56,7 +59,13 @@ const FOLLOW_UP: Record<string, { label: string; tone: 'success' | 'warning' | '
 };
 
 /** Settings → WhatsApp (Sprint 21.1): connect the business's own number, usually keeping the WhatsApp Business app. */
-export default function WhatsApp({ available, connection, base, chat = null }: Props) {
+export default function WhatsApp({
+  available,
+  connection,
+  base,
+  chat = null,
+  summary = null,
+}: Props) {
   const [busy, setBusy] = useState(false);
   const quality = connection?.quality ? QUALITY[connection.quality] : undefined;
   const connect = (coexistence: boolean) => {
@@ -171,6 +180,7 @@ export default function WhatsApp({ available, connection, base, chat = null }: P
           </Card>
         )}
         {chat && <ChatLink chat={chat} base={base} />}
+        {summary && <EveningSummary summary={summary} base={base} />}
       </div>
     </AppShell>
   );
@@ -225,6 +235,67 @@ function ChatLink({ chat, base }: { chat: NonNullable<Props['chat']>; base: stri
             Download the QR code
           </a>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * The owner's evening summary (21.6): tomorrow's bookings, today's orders and money, chats waiting, and requests to
+ * answer by replying with a number — from WURK's WhatsApp number to the owner's own, verified mobile.
+ */
+function EveningSummary({
+  summary,
+  base,
+}: {
+  summary: NonNullable<Props['summary']>;
+  base: string;
+}) {
+  const form = useForm({ enabled: summary.enabled, send_at: summary.send_at });
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Your evening summary</CardTitle>
+        <CardDescription>
+          Every evening on WhatsApp: tomorrow’s bookings, today’s orders and payments, chats
+          waiting, and anything that needs your yes or no. Reply with a number to say yes, or N and
+          the number to say no. It comes from WURK’s WhatsApp number and costs one message in
+          credits.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          aria-label="Your evening summary"
+          className="grid gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.put(`${base}/summary`, { preserveScroll: true });
+          }}
+        >
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={form.data.enabled}
+              onCheckedChange={(on) => form.setData('enabled', on === true)}
+            />
+            Send me the summary{summary.phone ? ` on ${summary.phone}` : ''}
+          </label>
+          {form.errors.enabled && (
+            <p role="alert" className="text-danger-11 text-sm">
+              {form.errors.enabled}
+            </p>
+          )}
+          <Field label="At" error={form.errors.send_at}>
+            <Input
+              type="time"
+              className="max-w-40"
+              value={form.data.send_at}
+              onChange={(e) => form.setData('send_at', e.target.value)}
+            />
+          </Field>
+          <Button type="submit" size="sm" className="justify-self-start" loading={form.processing}>
+            Save
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );

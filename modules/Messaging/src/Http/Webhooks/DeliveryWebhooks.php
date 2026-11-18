@@ -11,6 +11,7 @@ use Wurk\Messaging\Events\WhatsAppReceived;
 use Wurk\Messaging\Events\WhatsAppStatusChanged;
 use Wurk\Messaging\Models\MessageDelivery;
 use Wurk\Messaging\Models\WhatsAppConnection;
+use Wurk\Messaging\Support\OwnerSummaries;
 use Wurk\Messaging\Support\ProviderSettings;
 use Wurk\Messaging\Support\WhatsAppGraph;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -85,6 +86,14 @@ final readonly class DeliveryWebhooks
                     $this->context->run($tenant, fn () => $this->business($tenant->tenantId(), $value));
 
                     continue;
+                }
+                // Messages to WURK's own number: owners answering their evening summary (21.6).
+                foreach ((array) ($value['messages'] ?? []) as $m) {
+                    $text = (string) ($m['text']['body'] ?? $m['button']['text'] ?? $m['interactive']['button_reply']['title'] ?? '');
+                    $from = (string) preg_replace('/\D/', '', (string) ($m['from'] ?? ''));
+                    if ($from !== '' && $text !== '' && ($answer = app(OwnerSummaries::class)->reply($from, $text)) !== null) {
+                        app(OwnerSummaries::class)->answer($from, $answer);
+                    }
                 }
                 foreach ((array) ($value['statuses'] ?? []) as $status) {
                     $this->update((string) ($status['id'] ?? ''), match ($status['status'] ?? '') {

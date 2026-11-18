@@ -25,6 +25,7 @@ use Wurk\Plans\Contracts\UsageMeter;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
+use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
@@ -44,6 +45,7 @@ use Wurk\Website\Contracts\CatalogChanged;
 use Wurk\Website\Contracts\MediaLibrary;
 use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Contracts\SiteTemplates;
+use Wurk\Website\Digest\ChatsDigest;
 use Wurk\Website\Listeners\RerenderShopPages;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Models\Page;
@@ -116,6 +118,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(ChatsDigest::class)); // the owner's evening WhatsApp summary (21.6)
         // Recently deleted (16.6b): pages.
         $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('pages', 'Website pages', 'website.edit',
             fn (\DateTimeInterface $since) => Page::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()

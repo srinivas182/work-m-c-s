@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.22.0] — 2026-11-18 — Sprint 21: WhatsApp both ways
+
+### WhatsApp — Sprint 21.6 (the owner's evening summary)
+- **Settings → WhatsApp → Your evening summary:** owners can get one WhatsApp each evening, at a time they choose. It covers tomorrow's bookings, today's orders and money in, chats waiting, and up to five things that need a yes or no.
+- **Reply to answer:** "1" says yes to item 1 and "N1" says no. Each answer is applied as the owner, audited and confirmed by reply. Answerable items today are EFT orders waiting to be marked paid and large in-store sales waiting for approval. Other modules can add their own.
+- **Who can use it:** only the business's owner, and only from a mobile number they've proven is theirs with a code. Answers from any other number are ignored. The summary comes from WURK's own WhatsApp number and costs one message in credits.
+- **Evaluation set:** the AI receptionist's evaluation set has 130 conversations. It now includes ten WhatsApp journeys: choices as buttons, booking by tap, voice notes in isiZulu and Afrikaans, unclear, unheard and too-long voice notes, the customer's own booking without a code, never someone else's, and prompt injection.
+
 ### WhatsApp — Sprint 21.5b (paying, reordering and click-to-chat)
 - **Deposits paid by the link the assistant sent are confirmed in the chat** straight away. The diary shows **Booked on WhatsApp**.
 - **"Same as last time?"** The assistant offers the customer's last order again, at today's prices and stock, with a **Check out** button. Collection or delivery is chosen at checkout. This only works on WhatsApp, where the number is verified.
