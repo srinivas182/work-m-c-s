@@ -180,7 +180,7 @@ it('finds a WhatsApp customer’s own bookings straight away — their number is
 it('counts tomorrow’s bookings and today’s deposits for the owner’s evening summary (21.6)', function () {
     $this->travelTo(CarbonImmutable::parse('2027-05-02 19:00', 'Africa/Johannesburg'));
     ($this->in)(function () {
-        Booking::query()->whereKey($this->booking->id)->update(['deposit_cents' => 20000, 'paid_at' => now()]);
+        Booking::query()->whereKey($this->booking->id)->update(['deposit_cents' => 20000, 'paid_at' => now(), 'payment_reference' => 'dep_online']); // paid online
         expect(app(BookingsDigest::class)->figures(CarbonImmutable::now('Africa/Johannesburg')->startOfDay()))->toBe(['tomorrow_bookings' => 1, 'received_cents' => 20000])
             ->and(app(BookingsDigest::class)->figures(CarbonImmutable::parse('2027-05-03', 'Africa/Johannesburg'))['tomorrow_bookings'])->toBe(0);
     });

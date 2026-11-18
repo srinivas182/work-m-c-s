@@ -17,6 +17,7 @@ use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\CouponCustomer;
 use Wurk\Payments\Contracts\Coupons;
+use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Team\Contracts\BranchLedger;
@@ -131,7 +132,7 @@ final readonly class Deposits
         // The return address carries the reference (Yoco and PayFast don't add it).
         $branch = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id; // the branch's own account, if it has one
 
-        return $this->payments->start($reference, $amountCents, $what, ['name' => $name, 'email' => $email],
+        return $this->payments->start($reference, $amountCents, $what, ['name' => $name, 'email' => $email, 'phone' => $booking->customer_phone],
             ['return' => $returnUrl.(str_contains($returnUrl, '?') ? '&' : '?').'reference='.rawurlencode($reference), 'cancel' => (string) preg_replace('#/book/return.*$#', '/', $returnUrl)], branchId: $branch); // cancelling goes back to the home page
     }
 
@@ -172,6 +173,12 @@ final readonly class Deposits
         });
     }
 
+    /** Mobile money (22.2): the deposit prompt straight to the customer's phone; null when it's on its way. */
+    public function promptOnPhone(Booking|ClassAttendee $booking, string $phone): ?string
+    {
+        return $booking->payment_reference === null ? 'not_mobile' : $this->payments->promptMobileMoney($booking->payment_reference, $phone);
+    }
+
     /** A paid deposit: confirmed, the cash recorded, rewards on the full deposit (decision E). */
     private function settle(Booking|ClassAttendee $booking, string $reference): void
     {
@@ -186,6 +193,28 @@ final readonly class Deposits
         event(new PurchaseMade($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $booking->deposit_cents, $booking->deposit_cents, $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id,
             app(RefundWindow::class)->finalAt($booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at))); // final: the appointment + the window
 
+    }
+
+    /**
+     * Money taken in person (Sprint 22.3) — the deposit or the full price, in cash, by card machine or a QR code at the
+     * counter — with who took it. A booking still awaiting its deposit is confirmed. It counts in the takings.
+     */
+    public function paidInPerson(Booking $booking, string $method, int $cents, ?string $by, string $byName): void
+    {
+        // A deposit already paid online (before this): it counts towards what this booking has paid.
+        $online = $booking->payment_reference !== null && $booking->paid_at !== null && $booking->refunded_at === null ? $booking->deposit_cents - (int) $booking->wallet_cents : 0;
+        $ledger = app(InPersonPayments::class);
+        $ledger->record('booking', $booking->id, $method, $cents, $by, $byName, $booking->branch_id);
+        if ($booking->status === 'pending_payment') {
+            if ($booking->payment_reference !== null) {
+                BookingHold::query()->whereKey($booking->payment_reference)->delete();
+            }
+            // Paid at the counter, not online: nothing to verify or refund through a provider.
+            $booking->update(['status' => 'confirmed', 'paid_at' => Instant::db(now()), 'hold_expires_at' => null, 'payment_reference' => null]);
+            event(new BookingConfirmed($this->context->id(), $booking->id));
+        }
+        $paid = $online + $ledger->takenFor('booking', $booking->id); // everything paid for this booking so far
+        event(new PurchaseMade('booking', $booking->id, $paid, $paid, $booking->branch_id, app(RefundWindow::class)->finalAt($booking->starts_at)));
     }
 
     public static function source(Booking|ClassAttendee $booking): string

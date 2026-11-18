@@ -16,7 +16,12 @@ import AppShell from '@/layouts/AppShell';
 interface Props {
   issuer: { name: string; address: string; vat_number: string; registration: string };
   placeholder: boolean;
-  dunning: { retry_days: number[]; restrict_from_day: number; suspend_on_day: number };
+  dunning: {
+    retry_days: number[];
+    restrict_from_day: number;
+    suspend_on_day: number;
+    prepaid_grace_days: number;
+  };
   refundDays: number;
 }
 
@@ -26,6 +31,7 @@ export default function InvoiceSettings({ issuer, placeholder, dunning, refundDa
     retry_days: dunning.retry_days.join(', '),
     restrict_from_day: dunning.restrict_from_day,
     suspend_on_day: dunning.suspend_on_day,
+    prepaid_grace_days: dunning.prepaid_grace_days,
     refund_days: refundDays,
   });
   const submit = (e: FormEvent) => {
@@ -124,6 +130,17 @@ export default function InvoiceSettings({ issuer, placeholder, dunning, refundDa
                 type="number"
                 value={form.data.suspend_on_day}
                 onChange={(e) => form.setData('suspend_on_day', Number(e.target.value))}
+              />
+            </Field>
+            <Field
+              label="Pay as you go: days a business keeps working with no credits"
+              error={(errors as Record<string, string | undefined>).prepaid_grace_days}
+            >
+              <Input
+                type="number"
+                min="0"
+                value={form.data.prepaid_grace_days}
+                onChange={(e) => form.setData('prepaid_grace_days', Number(e.target.value))}
               />
             </Field>
             <Field

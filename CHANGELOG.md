@@ -4,6 +4,43 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.23.0] — 2026-11-18 — Sprint 22: Mobile money & payments
+
+### Payments — Sprint 22.6 (in the chat, in the summary, and release)
+- **On WhatsApp, the mobile money prompt goes straight to the customer's phone.** When a business takes mobile money, the assistant's deposit request pops up on the customer's own WhatsApp number. They approve it with their PIN without leaving the chat. No email is needed, and the payment link still works as a fallback.
+- **The owner's evening summary counts money taken in person.** Cash, card machine and QR payments recorded on bookings are added to today's money; shop orders paid in cash were already counted.
+- **Pay-as-you-go warnings go by WhatsApp first,** on WURK's number with two new templates, `wurk_credits_low` and `wurk_credits_out`. They fall back to SMS until those are approved.
+- End-to-end tests for recording cash and card-machine payments on a booking, cash on collection for an order, and Paystack's settings.
+
+### Billing — Sprint 22.5 (pay as you go)
+- **Admin → Packages → Pay as you go:** a package's price is taken from the business's WURK credits each day (the monthly price ÷ the days in the month) instead of an invoice. This makes low-entry packages practical without a card.
+- **Top up any amount from R20** in Settings → Billing, by any of WURK's methods, including Capitec Pay and SnapScan.
+- **Warnings** by email and SMS at 7, 3 and 1 day(s) left. When credits run out, the business keeps working for a grace period (Admin → Invoice settings, default 3 days), then the usual reminders and suspension apply. Nothing is deleted, and a top-up restores the business at once.
+- **Home and Billing** show about how many days the credits last.
+
+### Payments — Sprint 22.4 (businesses pay WURK by QR and mobile money)
+- **Settings → Billing:** owners can pay WURK's invoices and credit packs by **Capitec Pay, SnapScan, EFT or card** through WURK's Paystack account. Every channel WURK's account allows is offered.
+- **Flutterwave, WURK's second gateway,** takes mobile money and cards. HQ adds its keys and webhook secret hash in **Admin → Payment methods**, and the key is tested when saved. A payment counts only once Flutterwave confirms it, and refunds go back through Flutterwave. Businesses never offer it to their own customers.
+
+### Payments — Sprint 22.3 (cash and in-person payments, recorded)
+- **Bookings → Calendar → Paid in person:** record a deposit or the full price paid in cash, by card machine, or by SnapScan / Zapper at the counter. The amount is suggested, and WURK notes who took it. A booking awaiting its deposit is confirmed straight away.
+- **Shop → an order → Mark as paid:** say how a pay-later order was paid (EFT, cash, card machine or QR at the counter).
+- Every payment is audited, counts in **Reports → Takings**, and is kept by method and day.
+
+### Payments — Sprint 22.2 (mobile money, direct)
+- **M-Pesa** (Daraja STK push to the business's Paybill or Till), **MTN MoMo** (Request to Pay) and **Airtel Money** (USSD push), with the business's own keys in Settings → Payments. Keys are tested when saved.
+- **The customer:** types their number on the business's payment page (prefilled when known), gets a prompt on their phone, and approves it with their PIN. The page waits and confirms, or says plainly what went wrong: declined, timed out, not enough money, or wrong PIN.
+- **Reliable:** every result is read back from the provider, whether it comes from the page, the provider's callback or a job that keeps asking every 20 seconds. Prompts expire after 3 minutes. A phone gets at most 5 prompts per payment, 30 seconds apart. Trying again first re-checks the earlier prompt, so money is never taken twice.
+- **Only where each provider works:** M-Pesa in Kenya; MTN in Ghana, Uganda, Zambia, Cameroon, Côte d'Ivoire and Rwanda; Airtel in Kenya, Uganda, Tanzania, Zambia, Malawi and Rwanda. South African businesses don't see them. They switch on with the country packs (Sprint 25).
+
+### Payments — Sprint 22.1 (Paystack: SnapScan, Capitec Pay, card and EFT)
+- **Settings → Payments → Paystack:** a business can connect its own Paystack account. The key is tested when saved and kept encrypted.
+- In South Africa, Paystack's checkout offers card, EFT, **Capitec Pay** and **SnapScan (QR)**. The owner picks which appear; leaving them all unticked offers every way the account allows.
+- Deposits, class places and shop orders can be paid this way, and refunds go back through Paystack.
+- A payment counts only after WURK has verified it with Paystack (paid, in rand, the full amount). Webhooks must carry Paystack's signature.
+- Settings shows the webhook address to paste into Paystack.
+- **Admin → Payment methods:** WURK can take payments through its own Paystack account too.
+
 ## [0.22.0] — 2026-11-18 — Sprint 21: WhatsApp both ways
 
 ### WhatsApp — Sprint 21.6 (the owner's evening summary)

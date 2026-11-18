@@ -48,6 +48,7 @@ final class BillingAdminController
             'retry_days.*' => ['integer', 'between:1,30'],
             'restrict_from_day' => ['required', 'integer', 'between:1,30'],
             'suspend_on_day' => ['required', 'integer', 'between:2,60', 'gt:restrict_from_day'],
+            'prepaid_grace_days' => ['sometimes', 'integer', 'between:0,30'], // unchanged when not sent
             'refund_days' => ['sometimes', 'integer', 'between:0,365'], // unchanged when not sent
         ], ['vat_number.regex' => 'South African VAT numbers have 10 digits and start with 4.']);
         $by = (string) $request->user()?->getAuthIdentifier();
@@ -55,7 +56,8 @@ final class BillingAdminController
         $this->settings->setIssuer(['name' => $data['name'], 'address' => $data['address'], 'vat_number' => $data['vat_number'], 'registration' => (string) ($data['registration'] ?? '')], $by);
         $days = array_values(array_unique(array_map('intval', $data['retry_days'])));
         sort($days);
-        $this->settings->setDunning(['retry_days' => $days, 'restrict_from_day' => (int) $data['restrict_from_day'], 'suspend_on_day' => (int) $data['suspend_on_day']], $by);
+        $this->settings->setDunning(['retry_days' => $days, 'restrict_from_day' => (int) $data['restrict_from_day'], 'suspend_on_day' => (int) $data['suspend_on_day'],
+            'prepaid_grace_days' => (int) ($data['prepaid_grace_days'] ?? $this->settings->dunning()['prepaid_grace_days'])], $by);
         if (array_key_exists('refund_days', $data)) {
             $this->settings->setRefundDays((int) $data['refund_days'], $by); // WURK's refund window (14.4)
         }

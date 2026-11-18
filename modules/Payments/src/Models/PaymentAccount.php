@@ -20,6 +20,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string|null $label
  * @property bool $active
  * @property string|null $branch_id
+ * @property array<string, mixed>|null $options settings that aren't secret (Paystack: the channels customers see)
  */
 final class PaymentAccount extends Model
 {
@@ -33,6 +34,6 @@ final class PaymentAccount extends Model
 
     protected function casts(): array
     {
-        return ['test_credentials' => 'encrypted:array', 'live_credentials' => 'encrypted:array', 'webhook_secret' => 'encrypted', 'active' => 'boolean'];
+        return ['test_credentials' => 'encrypted:array', 'live_credentials' => 'encrypted:array', 'webhook_secret' => 'encrypted', 'active' => 'boolean', 'options' => 'array'];
     }
 }

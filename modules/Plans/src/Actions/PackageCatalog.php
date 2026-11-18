@@ -97,7 +97,7 @@ final readonly class PackageCatalog
         foreach (PackageVersion::COMMERCIAL as $field) {
             $value = $data[$field] ?? null;
             $terms[$field] = match ($field) {
-                'multi_branch', 'custom_domain' => (bool) $value,
+                'multi_branch', 'custom_domain', 'prepaid' => (bool) $value,
                 // Absent means allowed: a missing value must never quietly block credit purchases.
                 'credit_packs_allowed' => array_key_exists($field, $data) ? (bool) $value : true,
                 'modules' => $modules,

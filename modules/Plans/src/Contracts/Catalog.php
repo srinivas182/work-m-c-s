@@ -26,7 +26,7 @@ interface Catalog
     /**
      * A business's subscription (package type: self_managed | managed) with the price of one billing period (cents, excl. VAT).
      *
-     * @return array{package_id: string, package: string, package_key: string, package_type: string, version: int, status: string, period: string, period_cents: int, monthly_credits: int, trial_ends_at: string|null, current_period_start: string|null, current_period_end: string|null, past_due_since: string|null, pending: array{package: string, period: string}|null}|null
+     * @return array{package_id: string, package: string, package_key: string, package_type: string, version: int, status: string, period: string, period_cents: int, monthly_credits: int, prepaid: bool, monthly_cents: int, trial_ends_at: string|null, current_period_start: string|null, current_period_end: string|null, past_due_since: string|null, pending: array{package: string, period: string}|null}|null
      */
     public function subscriptionOf(string $tenantId): ?array;
 
@@ -60,4 +60,11 @@ interface Catalog
 
     /** @return list<string> ids of active businesses whose paid period ends before $before */
     public function dueForRenewal(\DateTimeInterface $before): array;
+
+    /**
+     * Businesses on a pay-as-you-go package (Sprint 22.5), whatever their payment state.
+     *
+     * @return list<string>
+     */
+    public function prepaidSubscribers(): array;
 }

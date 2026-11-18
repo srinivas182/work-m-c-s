@@ -72,6 +72,14 @@ interface Props {
   wurkEft: string | null;
   reference: string;
   stage: 'none' | 'grace' | 'restricted' | 'suspended';
+  /** Pay as you go: the plan is paid day by day from credits (Sprint 22.5). */
+  prepaid: {
+    daily_milli: number;
+    days_left: number;
+    ran_out_on: string | null;
+    grace_days: number;
+  } | null;
+  minTopUp: number;
   packagesOnSale: {
     id: string;
     name: string;
@@ -579,6 +587,8 @@ export default function Billing({
   reference,
   debitOrders,
   stage,
+  prepaid,
+  minTopUp,
   packagesOnSale,
   invoices,
   creditNotes,
@@ -587,6 +597,7 @@ export default function Billing({
     gatewayReady ? '' : (payMethods[0]?.provider ?? ''),
   );
   const canPay = (gatewayReady || payMethods.length > 0) && account.saved;
+  const [topUp, setTopUp] = useState('');
   const post = (url: string, data: Record<string, unknown> = {}) =>
     router.post(url, { ...data, method: payWith || null } as never, { preserveScroll: true });
 
@@ -753,6 +764,56 @@ export default function Billing({
                 Your package doesn’t include buying credit packs. Upgrade for more monthly credits.
               </CardDescription>
             </CardHeader>
+          </Card>
+        )}
+
+        {prepaid && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Pay as you go</CardTitle>
+              <CardDescription>
+                Your plan is paid day by day from your WURK credits:{' '}
+                {(prepaid.daily_milli / 1000).toLocaleString(undefined, {
+                  maximumFractionDigits: 1,
+                })}{' '}
+                credits a day.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3 text-sm">
+              {prepaid.ran_out_on ? (
+                <p role="alert" className="text-danger">
+                  Your credits ran out on {prepaid.ran_out_on}. Everything keeps working for{' '}
+                  {prepaid.grace_days} days from then. Top up to carry on.
+                </p>
+              ) : (
+                <p>
+                  Your plan is paid until today, with credits for about{' '}
+                  <strong>
+                    {prepaid.days_left} more {prepaid.days_left === 1 ? 'day' : 'days'}
+                  </strong>
+                  .
+                </p>
+              )}
+              <form
+                className="flex flex-wrap items-end gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  post('billing/credits', { amount: topUp });
+                }}
+              >
+                <Field label={`Top up any amount (from R${minTopUp})`}>
+                  <Input
+                    inputMode="decimal"
+                    value={topUp}
+                    onChange={(e) => setTopUp(e.target.value)}
+                    placeholder={String(minTopUp)}
+                  />
+                </Field>
+                <Button type="submit" disabled={!canPay || Number(topUp) < minTopUp}>
+                  Top up
+                </Button>
+              </form>
+            </CardContent>
           </Card>
         )}
 

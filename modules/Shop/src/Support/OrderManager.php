@@ -10,6 +10,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Shipping\Contracts\Couriers;
@@ -41,8 +42,11 @@ final readonly class OrderManager
 
     public function __construct(private TenantContext $context, private BusinessPayments $payments, private OrderPlacer $placer, private AuditLog $audit) {}
 
-    /** Move an order along its journey. */
-    public function advance(Order $order, string $to, string $by): void
+    /**
+     * Move an order along its journey. Marking a pay-later order paid says how (Sprint 22.3): by EFT, or in person —
+     * cash, card machine or a QR code at the counter — recorded with who took it.
+     */
+    public function advance(Order $order, string $to, string $by, string $how = 'eft', ?string $byId = null): void
     {
         if (! in_array($order->status, self::FROM[$to] ?? [], true)) {
             throw new CheckoutProblem('That step doesn’t follow from where this order is.');
@@ -53,17 +57,24 @@ final readonly class OrderManager
         if ($to === 'paid' && $order->payment_method !== 'offline') {
             throw new CheckoutProblem('Card payments are marked paid automatically once the payment is confirmed.');
         }
-        DB::connection($this->context->connectionName())->transaction(function () use ($order, $to, $by): void {
+        $inPerson = $to === 'paid' && isset(InPersonPayments::METHODS[$how]);
+        DB::connection($this->context->connectionName())->transaction(function () use ($order, $to, $by, $how, $byId, $inPerson): void {
             $order->update(['status' => $to, ...($to === 'paid' ? ['paid_at' => now(), 'hold_expires_at' => null] : [])]);
-            $this->log($order, $to, $by);
+            $this->log($order, $to, $by, null, $inPerson ? 'Paid in person: '.InPersonPayments::METHODS[$how] : null);
+            if ($inPerson) {
+                app(InPersonPayments::class)->record('order', $order->id, $how, $order->dueCents(), $byId, $by, $order->branch_id);
+            }
         });
         if ($to === 'paid') {
             DB::table('shop_holds')->where('order_id', $order->id)->delete(); // the stock is theirs now
             event(new PurchaseMade('order', $order->id, $order->total_cents, $order->subtotal_cents - (int) $order->discount_cents, $order->branch_id, app(RefundWindow::class)->finalAt($order->paid_at ?? now()))); // rewards on the items, not delivery
             // Paid by EFT into the account whose details the customer was given (the branch's own, or the business's).
-            app(BranchLedger::class)->record($this->payments->accountBranch('eft', $order->branch_id), $order->branch_id, $order->dueCents(), 'order', 'shop-'.$order->id, "Order #{$order->number} (EFT)");
+            // Money taken in person is the branch's own: nothing passes between branches.
+            if (! $inPerson) {
+                app(BranchLedger::class)->record($this->payments->accountBranch('eft', $order->branch_id), $order->branch_id, $order->dueCents(), 'order', 'shop-'.$order->id, "Order #{$order->number} (EFT)");
+            }
         }
-        $this->audit->record('shop.order_'.$to, 'order', $order->id, ['by' => $by]);
+        $this->audit->record('shop.order_'.$to, 'order', $order->id, ['by' => $by, ...($to === 'paid' ? ['how' => $how] : [])]);
         event(new OrderStatusChanged($this->context->id(), $order->id, $to));
     }
 

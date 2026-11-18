@@ -18,6 +18,7 @@ Route::domain((string) config('wurk.domains.app'))->withoutMiddleware(['web'])->
 // On the business's own address: PayFast's hand-off page (signed link) and provider notifications.
 Route::domain('{handle}.'.config('wurk.domains.root'))->withoutMiddleware(['web'])->name('payments.public.')->group(function (): void {
     Route::get('/pay/{reference}', [PublicPaymentsController::class, 'pay'])->middleware(['signed', 'throttle:payments-handoff'])->name('pay');
+    Route::post('/pay/{reference}', [PublicPaymentsController::class, 'prompt'])->middleware(['signed', 'throttle:payments-handoff'])->name('prompt'); // mobile money
     Route::post('/payments/notify/{provider}', [PublicPaymentsController::class, 'notify'])->middleware('throttle:payments-notify')->name('notify');
 });
 
@@ -25,6 +26,7 @@ Route::tenant(function (): void {
     Route::middleware(['permission:payments.manage'])->prefix('settings/payments')->name('tenant.payments.')->group(function (): void {
         Route::get('/', [PaymentSettingsController::class, 'show'])->name('settings');
         Route::put('/refunds', [PaymentSettingsController::class, 'refunds'])->name('refunds'); // the return window
+        Route::put('/paystack/channels', [PaymentSettingsController::class, 'channels'])->name('paystack.channels');
         Route::put('/{provider}/keys/{mode}', [PaymentSettingsController::class, 'keys'])->whereIn('provider', PlatformMethods::ALL)->whereIn('mode', ['test', 'live'])->middleware('throttle:20,1,payments-keys')->name('keys');
         Route::put('/{provider}', [PaymentSettingsController::class, 'settings'])->whereIn('provider', PlatformMethods::ALL)->name('method');
         Route::delete('/{provider}', [PaymentSettingsController::class, 'disconnect'])->whereIn('provider', PlatformMethods::ALL)->name('disconnect');
@@ -35,6 +37,6 @@ Route::tenant(function (): void {
 Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff'])->prefix('payment-methods')->name('admin.payment-methods')->group(function (): void {
     Route::get('/', [PaymentMethodsController::class, 'index']);
     Route::put('/{provider}/available', [PaymentMethodsController::class, 'availability'])->whereIn('provider', PlatformMethods::ALL)->name('.available');
-    Route::put('/{provider}/keys/{mode}', [PaymentMethodsController::class, 'keys'])->whereIn('provider', PlatformMethods::ALL)->whereIn('mode', ['test', 'live'])->middleware('throttle:20,1,admin-payment-keys')->name('.keys');
-    Route::put('/{provider}', [PaymentMethodsController::class, 'settings'])->whereIn('provider', PlatformMethods::ALL)->name('.settings');
+    Route::put('/{provider}/keys/{mode}', [PaymentMethodsController::class, 'keys'])->whereIn('provider', PlatformMethods::WURK)->whereIn('mode', ['test', 'live'])->middleware('throttle:20,1,admin-payment-keys')->name('.keys');
+    Route::put('/{provider}', [PaymentMethodsController::class, 'settings'])->whereIn('provider', PlatformMethods::WURK)->name('.settings');
 });

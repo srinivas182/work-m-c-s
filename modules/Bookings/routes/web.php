@@ -21,6 +21,7 @@ Route::tenant(function (): void {
             Route::post('/', [CalendarController::class, 'store'])->name('store');
             Route::put('/{booking}/move', [CalendarController::class, 'move'])->name('move');
             Route::post('/{booking}/status', [CalendarController::class, 'status'])->name('status');
+            Route::post('/{booking}/paid', [CalendarController::class, 'paid'])->name('paid'); // taken in person (Sprint 22.3)
         });
     });
     Route::middleware(['entitled:bookings', 'permission:bookings.manage'])->prefix('bookings')->name('tenant.bookings.')->group(function (): void {

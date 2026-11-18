@@ -18,6 +18,14 @@ interface CreditWallet
      */
     public function charge(string $channel, string $key, string $description, ?string $by = null): int;
 
+    /**
+     * Take an exact amount (Sprint 22.5: a pay-as-you-go package's daily price), outside the rate card and the
+     * owner's spending limits. Idempotent by key.
+     *
+     * @throws InsufficientCredits
+     */
+    public function chargeAmount(int $amountMilli, string $channel, string $key, string $description): void;
+
     /** Net credits spent this calendar month (debits less refunds), in thousandths; optionally by one staff member. */
     public function spentThisMonth(?string $by = null): int;
 

@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Access\Actions\Team;
+use Wurk\Bookings\Digest\BookingsDigest;
+use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
+use Wurk\Crm\Contracts\Takings;
+use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
@@ -76,4 +81,45 @@ it('frees the time when a booking is cancelled', function () {
     $id = $this->ctx->run($this->glow, fn () => Booking::query()->sole()->id);
     $this->actingAs($this->owner)->post("{$this->base}/{$id}/status", ['status' => 'cancelled'])->assertSessionHas('status', 'Booking cancelled.');
     ($this->add)('15:00', 'Lerato')->assertSessionHas('status', 'Booking added.');
+});
+
+it('records money taken in person — confirming a booking that awaited its deposit — and counts it in the takings (Sprint 22.3)', function () {
+    Event::fake([BookingConfirmed::class]);
+    $this->ctx->run($this->glow, fn () => $this->service->update(['price_cents' => 45000]));
+    ($this->add)('11:00', 'Lerato');
+    $booking = $this->ctx->run($this->glow, function () {
+        $b = Booking::query()->sole();
+        $b->update(['status' => 'pending_payment', 'deposit_cents' => 10000, 'payment_reference' => 'dep_x']);
+
+        return $b;
+    });
+
+    $this->actingAs($this->owner)->post("{$this->base}/{$booking->id}/paid", ['method' => 'cheque', 'amount' => '100'])->assertSessionHasErrors('method');
+    $this->actingAs($this->owner)->post("{$this->base}/{$booking->id}/paid", ['method' => 'cash', 'amount' => '0'])->assertSessionHasErrors('amount');
+    $this->actingAs($this->owner)->post("{$this->base}/{$booking->id}/paid", ['method' => 'cash', 'amount' => '100'])->assertSessionHas('status', 'R100.00 recorded: cash.');
+    $this->ctx->run($this->glow, fn () => expect($booking->refresh()->status)->toBe('confirmed'));
+    Event::assertDispatched(BookingConfirmed::class);
+
+    // The rest at the end of the appointment, by card machine.
+    $this->actingAs($this->owner)->post("{$this->base}/{$booking->id}/paid", ['method' => 'card_machine', 'amount' => '350'])->assertSessionHas('status', 'R350.00 recorded: card machine.');
+    $this->actingAs($this->owner)->get("{$this->base}?date=2027-05-03")->assertInertia(fn (Assert $p) => $p
+        ->where('bookings.0.price_cents', 45000)->where('bookings.0.in_person_cents', 45000)->where('bookings.0.deposit_paid', false));
+    $this->ctx->run($this->glow, function () {
+        expect(app(InPersonPayments::class)->totals(now()->startOfDay(), now()->endOfDay()))->toEqual(['cash' => 10000, 'card_machine' => 35000])
+            ->and(app(Takings::class)->net(now()->subDay(), now()->addDay(), null))->toBe(45000)
+            ->and(app(BookingsDigest::class)->figures(CarbonImmutable::now('Africa/Johannesburg')->startOfDay())['received_cents'])->toBe(45000) // the evening summary
+            ->and(DB::connection(app(TenantContext::class)->connectionName())->table('audit_events')->where('action', 'payments.taken_in_person')->count())->toBe(2);
+    });
+});
+
+it('lets only people who manage bookings record a payment, and never on a cancelled booking', function () {
+    ($this->add)('11:00', 'Lerato');
+    $booking = $this->ctx->run($this->glow, fn () => Booking::query()->sole());
+    $viewer = $this->person(['first_name' => 'Sipho', 'email' => 'sipho@glow.co.za', 'phone' => '+27825550101']);
+    $this->member($viewer, $this->glow);
+    $this->ctx->run($this->glow, fn () => app(Team::class)->add($viewer->id, 'Sipho', 'staff'));
+    expect($this->actingAs($viewer)->post("{$this->base}/{$booking->id}/paid", ['method' => 'cash', 'amount' => '100'])->status())->toBeIn([403, 404]);
+    $this->ctx->run($this->glow, fn () => expect(app(InPersonPayments::class)->takenFor('booking', $booking->id))->toBe(0));
+    $this->ctx->run($this->glow, fn () => $booking->update(['status' => 'cancelled']));
+    $this->actingAs($this->owner)->post("{$this->base}/{$booking->id}/paid", ['method' => 'cash', 'amount' => '100'])->assertStatus(422);
 });

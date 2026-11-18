@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Support\CheckoutProblem;
@@ -94,10 +95,12 @@ final class OrdersController
 
     public function advance(Request $request, string $order): RedirectResponse
     {
-        $to = (string) $request->validate(['to' => ['required', 'in:paid,packed,ready,out_for_delivery,done']])['to'];
+        $data = $request->validate(['to' => ['required', 'in:paid,packed,ready,out_for_delivery,done'], 'how' => ['nullable', 'in:eft,cash,card_machine,qr']]);
+        $to = (string) $data['to'];
+        $how = (string) ($data['how'] ?? 'eft');
 
-        return $this->attempt(fn () => $this->orders->advance($this->find($order), $to, $this->who($request)),
-            ['paid' => 'Marked as paid.', 'packed' => 'Marked as packed.', 'ready' => 'Marked ready — the customer has been told.', 'out_for_delivery' => 'Marked as on its way — the customer has been told.', 'done' => 'Marked as done.'][$to]);
+        return $this->attempt(fn () => $this->orders->advance($this->find($order), $to, $this->who($request), $how, (string) $request->user()?->getAuthIdentifier()),
+            ['paid' => $how === 'eft' ? 'Marked as paid.' : 'Marked as paid: '.strtolower(InPersonPayments::METHODS[$how]).'.', 'packed' => 'Marked as packed.', 'ready' => 'Marked ready — the customer has been told.', 'out_for_delivery' => 'Marked as on its way — the customer has been told.', 'done' => 'Marked as done.'][$to]);
     }
 
     /** Create the courier shipment (Bob Go or Pargo) for a paid order; it goes out for delivery. */

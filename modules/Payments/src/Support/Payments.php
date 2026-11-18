@@ -28,6 +28,9 @@ final readonly class Payments implements BusinessPayments
         if (! app(PlatformMethods::class)->available($provider)) {
             return null; // WURK has switched it off
         }
+        if (! PlatformMethods::servesCountry($provider, $this->context->current()->countryCode())) {
+            return null; // mobile money only where its provider works
+        }
         $ready = fn (?PaymentAccount $a) => $a !== null && $a->active && $a->hasKeys($a->mode) ? $a : null;
         $own = $branchId === null ? null : $ready(PaymentAccount::query()->where('provider', $provider)->where('branch_id', $branchId)->first());
 
@@ -111,9 +114,21 @@ final readonly class Payments implements BusinessPayments
         if ($attempt === null) {
             return false;
         }
-        event(new BusinessPaymentReceived($this->context->id(), $attempt->reference));
+        if (! in_array($provider, PlatformMethods::MOBILE, true)) { // mobile money announces it as it settles (MobileMoney::check)
+            event(new BusinessPaymentReceived($this->context->id(), $attempt->reference));
+        }
 
         return true;
+    }
+
+    public function promptMobileMoney(string $reference, string $phone): ?string
+    {
+        $attempt = PaymentAttempt::query()->find($reference);
+        if ($attempt === null || ! in_array($attempt->provider, PlatformMethods::MOBILE, true)) {
+            return 'not_mobile';
+        }
+
+        return app(MobileMoney::class)->prompt($attempt, $phone);
     }
 
     public function eftInstructions(?string $branchId = null): ?string
