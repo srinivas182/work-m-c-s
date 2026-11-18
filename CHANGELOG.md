@@ -4,6 +4,14 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Premium templates — Sprint 20.2a (new sections and motion)
+- **Four new sections:**
+  - **Numbers:** years open, customers served, a rating.
+  - **How it works:** numbered steps from first contact to done.
+  - **Logos:** brands you stock, clients, medical aids, press.
+  - **Map and directions:** address, a "how to find us" landmark, and buttons for Google Maps, Waze and Apple Maps. Optionally a map that loads only when the visitor taps "Show the map", so the page spends no data on it and no map provider learns of the visit until then.
+- **Motion:** sections rise gently into place as they scroll into view, and a full-photo hero settles with a slow zoom. It's off in the editor and for visitors who've asked for less motion, and nothing ever fades, so text stays readable.
+
 ### Premium templates — Sprint 20.1 (three styles for every design)
 - **Every design now comes in three styles: Luxury, Modern minimal and Bold.** A style sets the type, spacing, headings, buttons, corners and the look of alternate sections:
   - **Luxury:** refined serif type and generous space; alternate sections become deep, quiet bands.

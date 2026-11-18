@@ -206,7 +206,7 @@ export const Hero: BlockDefinition<HeroProps> = {
               sizes="100vw"
               alt={photo.alt}
               fetchPriority="high"
-              className="absolute inset-0 -z-20 size-full object-cover"
+              className="s-kenburns absolute inset-0 -z-20 size-full object-cover"
             />
           ) : (
             <AddPhotos

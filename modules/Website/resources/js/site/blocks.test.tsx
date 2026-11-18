@@ -32,8 +32,8 @@ const render = (blocks: ContentDocument['blocks'], editing = false) =>
   );
 
 describe('block library', () => {
-  it('has 27 blocks whose types and versions the server accepts', () => {
-    expect(Object.keys(BLOCKS)).toHaveLength(27); // + Book online (Sprint 8.2), Products (Sprint 10.1), Form (Sprint 12.3)
+  it('has 31 blocks whose types and versions the server accepts', () => {
+    expect(Object.keys(BLOCKS)).toHaveLength(31); // + Book online (8.2), Products (10.1), Form (12.3), Numbers, How it works, Logos, Map and directions (20.2)
     for (const [type, def] of Object.entries(BLOCKS)) {
       expect(type).toMatch(/^[A-Z][A-Za-z0-9]{1,40}$/);
       expect(def.type).toBe(type);
@@ -130,7 +130,7 @@ describe('block library', () => {
 
   it('scopes each site’s theme to its own root', () => {
     const html = render([]);
-    expect(html).toMatch(/class="wurk-site" data-style="minimal" style="--s-bg:/);
+    expect(html).toMatch(/class="wurk-site" data-style="minimal" data-motion="" style="--s-bg:/);
   });
 });
 
@@ -285,5 +285,78 @@ describe('general form', () => {
     expect(html).toContain('name="form" value="waiting_list"');
     expect(html).toContain('name="answers[0][q]" value="Which class?"');
     expect(html).not.toMatch(/name="message"[^>]*required/);
+  });
+});
+
+describe('sections added in Sprint 20.2', () => {
+  const block = (type: string, props: Record<string, unknown>) => ({
+    id: type.toLowerCase(),
+    type,
+    version: 1,
+    props,
+  });
+
+  it('shows numbers as a description list, and steps in order', () => {
+    const html = render([
+      block('Stats', {
+        heading: 'In numbers',
+        items: [
+          { value: '12', label: 'years open' },
+          { value: '4.9', label: 'average rating' },
+        ],
+        note: '',
+      }),
+      block('Steps', {
+        heading: 'How it works',
+        intro: '',
+        items: [
+          { title: 'Book', text: 'Choose a time.' },
+          { title: 'Arrive', text: 'We start on time.' },
+        ],
+      }),
+    ]);
+    expect(html).toContain('<dt class="sr-only">years open</dt>');
+    expect(html).toMatch(/<ol[^>]*>.*01.*Book.*02.*Arrive/s);
+  });
+
+  it('opens the map apps people use, and loads no map until asked', () => {
+    const html = render([
+      block('Directions', {
+        heading: 'Find us',
+        address: '12 Vilakazi St\nOrlando West, Soweto',
+        landmark: 'Opposite the Shell garage.',
+        showMap: true,
+      }),
+    ]);
+    expect(html).toContain(
+      'https://www.google.com/maps/search/?api=1&amp;query=12%20Vilakazi%20St%20Orlando%20West%2C%20Soweto',
+    );
+    expect(html).toContain('https://waze.com/ul?q=12%20Vilakazi%20St%20Orlando%20West%2C%20Soweto');
+    expect(html).toContain('data-island="map"');
+    expect(html).not.toContain('<iframe');
+    expect(
+      render([
+        block('Directions', {
+          heading: 'Find us',
+          address: '1 Main Rd',
+          landmark: '',
+          showMap: false,
+        }),
+      ]),
+    ).not.toContain('data-island');
+  });
+
+  it('shows logos with their names for screen readers, and nothing until one is added', () => {
+    expect(
+      render([
+        block('Logos', {
+          heading: 'We stock',
+          items: [{ image: '/a.png', name: 'Dark and Lovely' }],
+        }),
+      ]),
+    ).toContain('alt="Dark and Lovely"');
+    expect(
+      render([block('Logos', { heading: 'We stock', items: [{ image: '', name: 'x' }] })]),
+    ).not.toContain('We stock'); // empty: hidden live
   });
 });

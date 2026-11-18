@@ -1566,8 +1566,30 @@ async function checkout(root: HTMLElement): Promise<void> {
   redraw();
 }
 
+/**
+ * Map and directions (Sprint 20.2): the map loads only when the visitor taps for it, so a page costs no map data and
+ * tells no map provider about the visit until then. Focus moves to the map, which has a title for screen readers.
+ */
+export function map(root: HTMLElement): void {
+  const show = root.querySelector<HTMLButtonElement>('[data-map-show]');
+  const query = (root.dataset.query ?? '').trim();
+  if (!show || query === '') return;
+  show.addEventListener('click', () => {
+    const frame = document.createElement('iframe');
+    frame.src = `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+    frame.title = `Map: ${query}`;
+    frame.loading = 'lazy';
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.className = 'size-full rounded-[var(--s-radius)] border-0';
+    frame.tabIndex = 0;
+    root.replaceChildren(frame);
+    frame.focus();
+  });
+}
+
 const ISLANDS: Record<string, (root: HTMLElement) => void> = {
   'before-after': beforeAfter,
+  map,
   slideshow,
   promotion,
   booking: (root) => void booking(root),

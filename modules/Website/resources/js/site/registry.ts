@@ -25,6 +25,10 @@ import { QuoteForm } from './blocks/QuoteForm';
 import { BookOnline } from './blocks/BookOnline';
 import { ProductGrid } from './blocks/ProductGrid';
 import { PromotionBanner } from './blocks/PromotionBanner';
+import { Directions } from './blocks/Directions';
+import { Logos } from './blocks/Logos';
+import { Stats } from './blocks/Stats';
+import { Steps } from './blocks/Steps';
 import type { BlockDefinition } from './types';
 
 type AnyBlock = BlockDefinition<Record<string, unknown>>;
@@ -57,6 +61,10 @@ export const BLOCKS: Record<string, AnyBlock> = Object.fromEntries(
     BookOnline,
     ProductGrid,
     PromotionBanner,
+    Stats,
+    Steps,
+    Logos,
+    Directions,
     Text,
     CallToAction,
     Footer,

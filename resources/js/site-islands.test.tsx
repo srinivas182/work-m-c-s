@@ -801,3 +801,21 @@ describe('cart links from the AI receptionist', () => {
     expect(addFromLink()).toBe(0);
   });
 });
+
+describe('map (Sprint 20.2)', () => {
+  it('loads the map only when the visitor taps, and moves focus to it', async () => {
+    const { map } = await import('./site-islands');
+    document.body.innerHTML =
+      '<div data-island="map" data-query="12 Vilakazi St, Soweto"><button data-map-show>Show the map</button></div>';
+    const root = document.querySelector<HTMLElement>('[data-island="map"]')!;
+    map(root);
+    expect(document.querySelector('iframe')).toBeNull();
+    root.querySelector<HTMLButtonElement>('[data-map-show]')!.click();
+    const frame = document.querySelector('iframe')!;
+    expect(frame.src).toBe(
+      'https://www.google.com/maps?q=12%20Vilakazi%20St%2C%20Soweto&output=embed',
+    );
+    expect(frame.title).toBe('Map: 12 Vilakazi St, Soweto');
+    expect(document.activeElement).toBe(frame);
+  });
+});
