@@ -10,6 +10,7 @@ use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Sales\Models\Sale;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -21,7 +22,7 @@ use Wurk\Tenancy\Contracts\TenantContext;
  */
 final readonly class Sales
 {
-    public const METHODS = ['cash' => 'Cash', 'card' => 'Card', 'eft' => 'EFT'];
+    public const METHODS = ['cash' => 'Cash', 'card' => 'Card', 'eft' => 'EFT', 'account' => 'On account (pays later)']; // account: 23.5a
 
     /** The receipt (Settings → Messages): standard wording. */
     public const RECEIPT = [
@@ -78,6 +79,27 @@ final readonly class Sales
     public function decline(Sale $sale, string $byId, string $byName): void
     {
         $this->decide($sale, 'declined', $byId, $byName);
+    }
+
+    /**
+     * A sale on account is paid (23.5a): in person (cash, card machine, QR at the counter, counted in the day's takings)
+     * or by EFT.
+     */
+    public function settle(Sale $sale, string $how, string $byId, string $byName): void
+    {
+        if ($sale->method !== 'account' || $sale->settled_at !== null || $sale->status !== 'recorded') {
+            throw new SaleProblem('This sale isn’t waiting to be paid.');
+        }
+        if (! isset(InPersonPayments::METHODS[$how]) && $how !== 'eft') {
+            throw new SaleProblem('Choose how it was paid.');
+        }
+        DB::connection($this->context->connectionName())->transaction(function () use ($sale, $how, $byId, $byName): void {
+            $sale->update(['settled_at' => now(), 'settled_how' => $how]);
+            if (isset(InPersonPayments::METHODS[$how])) {
+                app(InPersonPayments::class)->record('sale', $sale->id, $how, $sale->amount_cents - $sale->refunded_cents, $byId, $byName, $sale->branch_id);
+            }
+        });
+        $this->audit->record('sales.settled', 'sale', $sale->id, ['how' => $how, 'by' => $byName]);
     }
 
     /** A refund in store — only within the return window (decision D), never more than was paid. */

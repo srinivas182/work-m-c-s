@@ -17,6 +17,9 @@ interface WhatsAppBusiness
     /** A booking reminder with Confirm / Move / Cancel buttons (21.5): customer's first name, service, business, when. */
     public const REMINDER = 'wurk_reminder';
 
+    /** A request to pay, and its reminders (23.5a): customer's first name, business, amount, what for, the pay link. */
+    public const PAYMENT_REQUEST = 'wurk_payment_request';
+
     /** Whether the current business has connected its own number. */
     public function connected(): bool;
 

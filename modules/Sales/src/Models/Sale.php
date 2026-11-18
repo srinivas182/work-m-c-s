@@ -24,6 +24,8 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property int $refunded_cents
  * @property Carbon $recorded_at
  * @property Carbon|null $decided_at
+ * @property Carbon|null $settled_at a sale on account, paid (23.5a)
+ * @property string|null $settled_how
  */
 final class Sale extends Model
 {
@@ -35,6 +37,6 @@ final class Sale extends Model
 
     protected function casts(): array
     {
-        return ['amount_cents' => 'integer', 'refunded_cents' => 'integer', 'recorded_at' => 'datetime', 'decided_at' => 'datetime'];
+        return ['amount_cents' => 'integer', 'refunded_cents' => 'integer', 'recorded_at' => 'datetime', 'decided_at' => 'datetime', 'settled_at' => 'datetime'];
     }
 }
