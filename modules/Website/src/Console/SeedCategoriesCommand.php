@@ -33,6 +33,11 @@ final class SeedCategoriesCommand extends Command
         ['beauty-supplies', 'Beauty supplies', 'Beauty stores, skin care brands and salon wholesale', 'shopping-bag'],
         ['tailoring-fashion', 'Tailoring & fashion', 'Tailors, fashion labels and alterations', 'shirt'],
         ['agriculture', 'Agriculture', 'Farms, agri supplies and co-operatives', 'sprout'],
+        // Sprint 20.4c
+        ['church-ngo', 'Church & NGO', 'Churches, ministries, charities and NGOs', 'church'],
+        ['school', 'School', 'Schools, colleges and skills academies', 'school'],
+        ['funeral-services', 'Funeral services', 'Funeral homes, funeral cover and memorials', 'flower-2'],
+        ['security', 'Security', 'Armed response, guarding and installations', 'shield-check'],
     ];
 
     protected $signature = 'website:seed-categories';

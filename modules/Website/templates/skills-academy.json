@@ -1,0 +1,397 @@
+{
+  "category": "school",
+  "key": "skills-academy",
+  "name": "Skills academy & training centre",
+  "position": 3,
+  "description": "Career-focused: accredited short courses and learnerships, with intakes and outcomes.",
+  "definition": {
+    "branding": {
+      "primary": "#0E7490",
+      "secondary": "#84CC16",
+      "font_pairing": "technical",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Courses",
+          "type": "page",
+          "page": "courses"
+        },
+        {
+          "label": "Enrol",
+          "type": "page",
+          "page": "enrol"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Skills academy — accredited courses and learnerships",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Enrol",
+                "buttonHref": "/enrol",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Skills that get you hired",
+                "text": "Accredited short courses and learnerships — practical, affordable and taught by people from the industry.",
+                "primaryLabel": "Enrol",
+                "primaryHref": "/enrol",
+                "secondaryLabel": "Courses",
+                "secondaryHref": "/courses",
+                "facts": [
+                  {
+                    "text": "Next intake: add the date"
+                  },
+                  {
+                    "text": "Certificates on completion"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/skills-academy/hero-1600.webp",
+                    "alt": "Students in a practical workshop"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "courses",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Popular courses",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "IT end-user",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Computer skills for the office — 4 weeks",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Enrol",
+                    "buttonHref": "/enrol"
+                  },
+                  {
+                    "name": "Electrical basics",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Practical and theory — 3 months",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Enrol",
+                    "buttonHref": "/enrol"
+                  },
+                  {
+                    "name": "Business skills",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Start and run a small business — 6 weeks",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Enrol",
+                    "buttonHref": "/enrol"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How it works",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Choose a course",
+                    "text": "See dates, fees and requirements."
+                  },
+                  {
+                    "title": "Enrol",
+                    "text": "Apply online and bring your documents."
+                  },
+                  {
+                    "title": "Learn by doing",
+                    "text": "Practical classes with real equipment."
+                  },
+                  {
+                    "title": "Get certified",
+                    "text": "Assessment and a certificate."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Accredited",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "QCTO",
+                    "logo": "",
+                    "detail": "Add your accreditation number"
+                  },
+                  {
+                    "name": "SETA",
+                    "logo": "",
+                    "detail": "Add the SETA and programme"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "class",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Learn from people who do the work",
+                "text": "Introduce your trainers and the employers you work with.",
+                "image": "/images/templates/skills-academy/class-1600.webp",
+                "imageAlt": "A trainer with students at computers",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "employers",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Where our graduates work",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "courses",
+        "title": "Courses",
+        "slug": "courses",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Enrol",
+                "buttonHref": "/enrol",
+                "sticky": true
+              }
+            },
+            {
+              "id": "courses",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Courses and fees",
+                "intro": "",
+                "note": "Ask about learnerships and bursaries.",
+                "items": [
+                  {
+                    "name": "IT end-user",
+                    "description": "Office computer skills",
+                    "duration": "4 weeks",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Electrical basics",
+                    "description": "Practical and theory",
+                    "duration": "3 months",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Welding",
+                    "description": "Practical",
+                    "duration": "8 weeks",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Business skills",
+                    "description": "Start a small business",
+                    "duration": "6 weeks",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Hospitality",
+                    "description": "Food and service",
+                    "duration": "3 months",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "What do I need to enrol?",
+                    "answer": "ID, highest qualification and proof of address."
+                  },
+                  {
+                    "question": "Can I pay in instalments?",
+                    "answer": "Explain your payment options."
+                  },
+                  {
+                    "question": "Do you help find work?",
+                    "answer": "Describe job placement support."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "enrol",
+        "title": "Enrol",
+        "slug": "enrol",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Enrol",
+                "buttonHref": "/enrol",
+                "sticky": true
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "waiting_list",
+                "heading": "Enrol for the next intake",
+                "intro": "Choose a course and leave your details.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Enrol",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Course",
+                    "type": "choice",
+                    "choices": "IT end-user, Electrical basics, Welding, Business skills, Hospitality",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Highest qualification",
+                    "type": "choice",
+                    "choices": "Grade 9, Grade 12, Diploma or degree",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the academy",
+                "intro": "Companies: ask about training your staff.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the campus",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

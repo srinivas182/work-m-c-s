@@ -663,5 +663,150 @@
       "shows": "Members in a training session outdoors",
       "search": "farmers training group Africa"
     }
+  },
+  "church-community": {
+    "hero": {
+      "shows": "The congregation worshipping together on a Sunday",
+      "search": "African church congregation worship"
+    },
+    "choir": {
+      "shows": "The choir or worship team singing",
+      "search": "African church choir"
+    },
+    "kids": {
+      "shows": "Children’s ministry: children in Sunday school with a teacher",
+      "search": "Sunday school children Africa"
+    }
+  },
+  "ngo-impact": {
+    "hero": {
+      "shows": "Volunteers working with people in the community (with consent)",
+      "search": "NGO volunteers community Africa"
+    },
+    "programme": {
+      "shows": "A programme in action: a food garden, feeding scheme or class",
+      "search": "community garden Africa"
+    },
+    "volunteers": {
+      "shows": "A group of volunteers ready to work",
+      "search": "volunteers group smiling"
+    }
+  },
+  "ministry-outreach": {
+    "hero": {
+      "shows": "A youth event or crusade: people worshipping under stage lights",
+      "search": "youth worship concert Africa"
+    },
+    "outreach": {
+      "shows": "An outreach: volunteers handing out food parcels or blankets",
+      "search": "outreach food parcels volunteers"
+    }
+  },
+  "school-primary": {
+    "hero": {
+      "shows": "Learners working together in a bright classroom",
+      "search": "African primary school classroom"
+    },
+    "playground": {
+      "shows": "Children playing sport or games on the school field",
+      "search": "school children playing field Africa"
+    },
+    "reading": {
+      "shows": "A teacher reading with a small group of learners",
+      "search": "teacher reading children"
+    }
+  },
+  "school-high": {
+    "hero": {
+      "shows": "High-school learners on campus, confident and smiling",
+      "search": "African high school students campus"
+    },
+    "lab": {
+      "shows": "Learners in a science lab or computer room",
+      "search": "students science lab Africa"
+    },
+    "matric": {
+      "shows": "Matric learners celebrating results or a prize-giving",
+      "search": "students celebrating graduation Africa"
+    }
+  },
+  "skills-academy": {
+    "hero": {
+      "shows": "Students in a hands-on workshop (welding, electrical, IT or hospitality)",
+      "search": "vocational training students Africa"
+    },
+    "class": {
+      "shows": "A trainer helping students at computers",
+      "search": "computer training class Africa"
+    }
+  },
+  "funeral-home": {
+    "hero": {
+      "shows": "Calm, respectful imagery: flowers, candles or the chapel in soft light",
+      "search": "white lilies soft light",
+      "decorative": true
+    },
+    "chapel": {
+      "shows": "The chapel or memorial room set for a service",
+      "search": "funeral chapel interior"
+    }
+  },
+  "funeral-cover-society": {
+    "hero": {
+      "shows": "A family together at home, warm and calm",
+      "search": "African family home together"
+    }
+  },
+  "memorials-tombstones": {
+    "hero": {
+      "shows": "A finished granite headstone in a peaceful setting",
+      "search": "granite headstone memorial"
+    },
+    "design-1": {
+      "shows": "A black granite headstone with gold lettering",
+      "search": "black granite headstone"
+    },
+    "design-2": {
+      "shows": "A double headstone",
+      "search": "double headstone granite"
+    },
+    "workshop": {
+      "shows": "Lettering being engraved in the workshop",
+      "search": "stone engraving workshop"
+    }
+  },
+  "security-armed-response": {
+    "hero": {
+      "shows": "A branded response vehicle on patrol",
+      "search": "security patrol vehicle night"
+    },
+    "control": {
+      "shows": "Operators monitoring screens in a control room",
+      "search": "security control room operators"
+    }
+  },
+  "security-guarding": {
+    "hero": {
+      "shows": "A uniformed guard at an access point",
+      "search": "security guard uniform Africa"
+    },
+    "events": {
+      "shows": "Security staff managing an event crowd",
+      "search": "event security staff"
+    }
+  },
+  "security-installations": {
+    "hero": {
+      "shows": "A technician installing a security camera",
+      "search": "technician installing CCTV camera"
+    },
+    "fence": {
+      "shows": "Electric fencing installed on a boundary wall",
+      "search": "electric fence wall"
+    },
+    "app": {
+      "shows": "Live camera view on a phone app",
+      "search": "CCTV phone app view"
+    }
   }
 }

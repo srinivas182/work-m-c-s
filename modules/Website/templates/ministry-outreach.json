@@ -1,0 +1,302 @@
+{
+  "category": "church-ngo",
+  "key": "ministry-outreach",
+  "name": "Ministry & outreach",
+  "position": 3,
+  "description": "Bold and energetic: a ministry, youth movement or outreach with events and media.",
+  "definition": {
+    "branding": {
+      "primary": "#B91C1C",
+      "secondary": "#1F2937",
+      "font_pairing": "bold",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Events",
+          "type": "page",
+          "page": "events"
+        },
+        {
+          "label": "Get involved",
+          "type": "page",
+          "page": "connect"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Ministry and outreach — events, media and community",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get involved",
+                "buttonHref": "/connect",
+                "sticky": true
+              }
+            },
+            {
+              "id": "promo",
+              "type": "PromotionBanner",
+              "version": 1,
+              "props": {
+                "text": "Youth conference this winter — registration opens soon",
+                "linkLabel": "Find out more",
+                "linkHref": "/events",
+                "tone": "dark",
+                "starts": "",
+                "ends": ""
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "centered",
+                "heading": "Faith that moves",
+                "text": "Worship, teaching and outreach that takes the message to the streets.",
+                "primaryLabel": "Get involved",
+                "primaryHref": "/connect",
+                "secondaryLabel": "Events",
+                "secondaryHref": "/events",
+                "facts": [],
+                "images": [],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "video",
+              "type": "Video",
+              "version": 1,
+              "props": {
+                "heading": "Watch",
+                "text": "Messages, worship and stories from our outreach.",
+                "video": {
+                  "src": "",
+                  "poster": ""
+                },
+                "description": "Highlights from our latest event"
+              }
+            },
+            {
+              "id": "weekly",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Every week",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "clock",
+                    "title": "Friday 18:00",
+                    "text": "Youth night"
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Saturday 09:00",
+                    "text": "Street outreach"
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Sunday 14:00",
+                    "text": "Worship gathering"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "outreach",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Out in the community",
+                "text": "Describe your outreach: where you go, what you do and how people can join.",
+                "image": "/images/templates/ministry-outreach/outreach-1600.webp",
+                "imageAlt": "Volunteers handing out food parcels",
+                "imageSide": "right",
+                "buttonLabel": "Join the team",
+                "buttonHref": "/connect"
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Leaders",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "give",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Fuel the mission",
+                "text": "Every gift sends us further.",
+                "buttonLabel": "Give",
+                "buttonHref": "/connect"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "events",
+        "title": "Events",
+        "slug": "events",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get involved",
+                "buttonHref": "/connect",
+                "sticky": true
+              }
+            },
+            {
+              "id": "events",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Upcoming events",
+                "text": "List conferences, camps and outreaches with dates, venues and how to register."
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Event questions",
+                "items": [
+                  {
+                    "question": "Is there a cost?",
+                    "answer": "Say whether events are free or the registration fee."
+                  },
+                  {
+                    "question": "Can I bring my youth group?",
+                    "answer": "Yes — register as a group so we can plan."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "connect",
+        "title": "Get involved",
+        "slug": "connect",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get involved",
+                "buttonHref": "/connect",
+                "sticky": true
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "interest",
+                "heading": "Get involved",
+                "intro": "Volunteer, partner or join a team.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Send",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "I’d like to",
+                    "type": "choice",
+                    "choices": "Volunteer, Join the worship team, Partner or give, Invite you to speak",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Bookings and partnerships.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

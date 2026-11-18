@@ -108,7 +108,7 @@ it('ships complete designs: every photo exists in both sizes, no invented review
         }
     }
     // Sprint 20.4 categories start with three designs each (20.5 brings the first twelve to three).
-    foreach (['barbershop', 'cleaning', 'car-wash', 'catering', 'spaza-grocery', 'beauty-supplies', 'tailoring-fashion', 'agriculture'] as $category) {
+    foreach (['barbershop', 'cleaning', 'car-wash', 'catering', 'spaza-grocery', 'beauty-supplies', 'tailoring-fashion', 'agriculture', 'church-ngo', 'school', 'funeral-services', 'security'] as $category) {
         expect($perCategory[$category] ?? 0)->toBeGreaterThanOrEqual(3, "{$category} needs three designs");
     }
     expect(min($perCategory))->toBeGreaterThanOrEqual(2);

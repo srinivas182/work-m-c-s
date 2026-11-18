@@ -1,0 +1,400 @@
+{
+  "category": "security",
+  "key": "security-installations",
+  "name": "Alarms, CCTV & fencing",
+  "position": 3,
+  "description": "Technical and tidy: alarms, cameras, electric fencing and gate motors, installed and serviced.",
+  "definition": {
+    "branding": {
+      "primary": "#155E75",
+      "secondary": "#F97316",
+      "font_pairing": "technical",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "Free site quote",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Alarms, CCTV, electric fencing and gate motors",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Free site quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "collage",
+                "heading": "See it. Secure it.",
+                "text": "Alarms, CCTV, electric fencing and gate motors — installed neatly, explained clearly, serviced when you need us.",
+                "primaryLabel": "Free site quote",
+                "primaryHref": "/quote",
+                "secondaryLabel": "What we install",
+                "secondaryHref": "/services",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/security-installations/hero-1600.webp",
+                    "alt": "A technician installing a CCTV camera"
+                  },
+                  {
+                    "src": "/images/templates/security-installations/fence-1600.webp",
+                    "alt": "Electric fencing on a boundary wall"
+                  },
+                  {
+                    "src": "/images/templates/security-installations/app-1600.webp",
+                    "alt": "Camera view on a phone"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "What we install",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "CCTV",
+                    "description": "HD cameras with phone viewing",
+                    "duration": "1–2 days",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Alarms",
+                    "description": "Wireless or wired, with panic buttons",
+                    "duration": "1 day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Electric fencing",
+                    "description": "Compliant installations with certificates",
+                    "duration": "1–3 days",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Gate motors",
+                    "description": "Supply, install and repair",
+                    "duration": "1 day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Intercoms & access",
+                    "description": "Video intercoms and keypads",
+                    "duration": "1 day",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Our installations",
+                "intro": "Neat cabling and tidy finishes.",
+                "layout": "side-by-side",
+                "items": []
+              }
+            },
+            {
+              "id": "projects",
+              "type": "Portfolio",
+              "version": 1,
+              "props": {
+                "heading": "Recent projects",
+                "intro": "Homes, shops and estates.",
+                "projects": []
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "check",
+                    "title": "Certified installers",
+                    "text": "Electric fence certificates issued."
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Fast call-outs",
+                    "text": "Repairs and services when you need them."
+                  },
+                  {
+                    "icon": "shield",
+                    "title": "Warranty",
+                    "text": "On parts and workmanship."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we cover",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Free site quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Prices",
+                "intro": "",
+                "note": "We quote after a free site visit.",
+                "items": [
+                  {
+                    "name": "4-camera CCTV kit",
+                    "description": "Installed",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "8-camera CCTV kit",
+                    "description": "Installed",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Alarm system",
+                    "description": "Installed",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Electric fencing",
+                    "description": "Per metre",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Gate motor",
+                    "description": "Supply and install",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Call-out",
+                    "description": "Repairs",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Do I get an electric fence certificate?",
+                    "answer": "Yes, on every compliant installation."
+                  },
+                  {
+                    "question": "Can I see cameras on my phone?",
+                    "answer": "Yes, we set up the app and show you how."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Free site quote",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Free site quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Free site quote",
+                "intro": "Tell us what you need.",
+                "services": [
+                  {
+                    "name": "CCTV"
+                  },
+                  {
+                    "name": "Alarm"
+                  },
+                  {
+                    "name": "Electric fencing"
+                  },
+                  {
+                    "name": "Gate motor"
+                  },
+                  {
+                    "name": "Intercom"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Book a site visit",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Address / area",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Photos (optional)",
+                    "type": "file",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Service and repairs: WhatsApp us.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
