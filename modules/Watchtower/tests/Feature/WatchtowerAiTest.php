@@ -11,6 +11,7 @@ use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
 use Wurk\Ai\Contracts\Ai;
 use Wurk\Ai\Contracts\AiUnavailable;
+use Wurk\Ai\Contracts\Transcript;
 use Wurk\Watchtower\Jobs\AnalyseIncident;
 use Wurk\Watchtower\Mail\IncidentMail;
 use Wurk\Watchtower\Models\Incident;
@@ -46,6 +47,11 @@ function fakeWatchtowerAi(?array ...$answers): object
         public function image(string $prompt, ?string $tenantId = null): string
         {
             return '';
+        }
+
+        public function transcribe(string $audio, string $mime, ?float $seconds = null, ?string $tenantId = null): Transcript
+        {
+            throw new AiUnavailable('Not used here.');
         }
     };
     $ai->answers = $answers;

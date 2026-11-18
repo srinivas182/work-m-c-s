@@ -25,10 +25,12 @@ test('the owner switches the AI assistant on and tries it; a visitor is told it�
 
   const ai = page.getByRole('form', { name: 'AI assistant settings' });
   await expect(page.getByText(/Each reply costs 0\.2 credits/)).toBeVisible(); // the price before switching it on
-  const aiOn = ai.getByRole('checkbox', { name: 'Let the AI assistant answer in my chat' });
+  const aiOn = ai.getByRole('checkbox', { name: 'Let the AI assistant answer in my website chat' });
   if (!(await aiOn.isChecked())) await aiOn.click();
   await ai.getByRole('button', { name: 'Save the assistant' }).click();
-  await expect(page.getByText('AI assistant saved — it’s answering in your chat.')).toBeVisible();
+  await expect(
+    page.getByText('AI assistant saved — it’s answering in your website chat.'),
+  ).toBeVisible();
 
   // Try it: a test chat, where nothing is booked.
   const tryIt = page.getByRole('form', { name: 'Try the assistant' });

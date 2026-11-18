@@ -48,6 +48,7 @@ final class CalendarController
                 ->where('status', '!=', 'cancelled')->orderBy('starts_at')->get()->map(fn (Booking $b) => [
                     'id' => $b->id, 'member_id' => $b->member_id, 'service' => (string) ($names[$b->service_id] ?? 'Service'),
                     'customer' => $b->customer_name, 'phone' => $b->customer_phone, 'notes' => $b->notes, 'status' => $b->status, 'source' => $b->source,
+                    'customer_confirmed' => $b->customer_confirmed_at !== null,
                     'starts_at' => $b->starts_at->setTimezone($tz)->toIso8601String(), 'ends_at' => $b->ends_at->setTimezone($tz)->toIso8601String(),
                 ])->all(),
             'canManage' => $request->user()?->can('bookings.manage') ?? false,

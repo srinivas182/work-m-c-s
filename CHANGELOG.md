@@ -4,6 +4,62 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.22.0] — 2026-11-18 — Sprint 21: WhatsApp both ways
+
+### WhatsApp — Sprint 21.6 (the owner's evening summary)
+- **Settings → WhatsApp → Your evening summary:** owners can get one WhatsApp each evening, at a time they choose. It covers tomorrow's bookings, today's orders and money in, chats waiting, and up to five things that need a yes or no.
+- **Reply to answer:** "1" says yes to item 1 and "N1" says no. Each answer is applied as the owner, audited and confirmed by reply. Answerable items today are EFT orders waiting to be marked paid and large in-store sales waiting for approval. Other modules can add their own.
+- **Who can use it:** only the business's owner, and only from a mobile number they've proven is theirs with a code. Answers from any other number are ignored. The summary comes from WURK's own WhatsApp number and costs one message in credits.
+- **Evaluation set:** the AI receptionist's evaluation set has 130 conversations. It now includes ten WhatsApp journeys: choices as buttons, booking by tap, voice notes in isiZulu and Afrikaans, unclear, unheard and too-long voice notes, the customer's own booking without a code, never someone else's, and prompt injection.
+
+### WhatsApp — Sprint 21.5b (paying, reordering and click-to-chat)
+- **Deposits paid by the link the assistant sent are confirmed in the chat** straight away. The diary shows **Booked on WhatsApp**.
+- **"Same as last time?"** The assistant offers the customer's last order again, at today's prices and stock, with a **Check out** button. Collection or delivery is chosen at checkout. This only works on WhatsApp, where the number is verified.
+- **Verified number:** on WhatsApp the assistant uses the customer's WhatsApp number for bookings without asking for it, and finds their bookings without a code.
+- **Click-to-chat:** the website's WhatsApp button opens the business's connected number with a message ready to send ("Hi! I'd like to book."). The owner can change the message in **Settings → WhatsApp**, which also has a QR code to print.
+- Reminders and payment confirmations sent from the business's number appear in the customer's conversation in Chats.
+
+### WhatsApp — Sprint 21.5a (reminders with Confirm, Move and Cancel)
+- **Appointment reminders come from the business's own WhatsApp number** with **Confirm**, **Move** and **Cancel** buttons, once Meta approves the reminder message on its account. Until then, and without a connected number, reminders go out as before.
+- **A tap is handled straight away:**
+  - **Confirm** marks the booking "Confirmed by the customer" in the diary.
+  - **Move** offers the next free times as a list, and a tap moves the booking.
+  - **Cancel** frees the time. If the deposit wouldn't be refunded, it asks first.
+- Only the booking's own customer, by WhatsApp number, can act on it. The taps and answers show in Chats.
+- **Meta's reviews** of WURK's messages arrive by webhook and are checked every hour. New messages that come with updates are submitted to each connected account automatically.
+
+### Templates — demo photos installed by default
+- **Every design now comes with real photos.** WURK has chosen a Pexels photo for each of the 215 photo places in the 78 designs, matched to what the place shows (a dentist with a patient, foam on a car in the wash bay, solar panels on a roof…). `website:install-templates` imports them with the designs, so a new installation looks finished, like a Wix or WordPress demo.
+- Photos already in place are skipped. A photo that can't be fetched keeps its stand-in and is reported, without failing the install. HQ can still change any photo in **Admin → Templates → Demo photos**.
+- Turn it off with `--no-photos` or `WURK_TEMPLATE_DEMO_PHOTOS=false`.
+
+### WhatsApp — Sprint 21.4 (voice notes understood)
+- **Voice notes are transcribed** as they arrive. Chats shows the words with a player, the length and the language. The assistant answers them as if typed.
+- **When WURK AI isn't sure** of the words, Chats marks them, and the assistant says what it understood and asks the customer to confirm or type it. Notes longer than 2 minutes, or ones that can't be heard, get a polite request to type or send a shorter one.
+- **Costs:** each voice note costs 0.1 credits (refunded if it can't be transcribed). Without credits, the team can still play it.
+- **Privacy:** the audio is deleted after 30 days (`WURK_VOICE_NOTE_DAYS`); the words stay with the chat. WhatsApp conversations are now kept like the chats in the WhatsApp app, not swept after 30 days like the website assistant's.
+- **For HQ:** **Admin → AI** has a speech-to-text model (OpenAI `gpt-4o-transcribe` by default), a fallback (Gemini) and per-minute prices. Anthropic has no speech-to-text. The AI receptionist and voice notes no longer count towards a business's daily WURK AI request limit; they have their own monthly limit and credits.
+
+### WhatsApp — Sprint 21.3 (the AI assistant on WhatsApp)
+- **Website → Chat → AI assistant:** a separate switch lets the assistant answer on the business's WhatsApp number too, with the same answers, booking tools, limits and hand-over as the website chat.
+- **Customers tap instead of type:** free times, services, classes and products come as WhatsApp reply buttons (up to 3) or a list (up to 10). A booking's **Pay the deposit** or **Change or cancel** link comes as a button.
+- **Out of hours:** outside the opening hours on the website, customers first get the owner's away message (once a day), and the assistant still answers and books.
+- It waits a few seconds so a customer can finish typing, then answers all their messages at once.
+- **Never silence:** when the assistant is switched off, over its monthly limit or out of credits, the chat goes to the team in Chats and the customer is told someone will reply. **Take over** and **Hand back** work as on the website.
+
+### WhatsApp — Sprint 21.2 (two-way WhatsApp in Chats)
+- **Customers → Chats → WhatsApp:** customers' messages to the business's own number arrive in Chats, one thread per customer, matched to a contact (or a new one is added). Text, photos, documents, locations and voice notes all come in; files are virus-checked and kept privately.
+- **Reply from Chats** with text, a photo or a PDF. The thread shows how long you can still reply freely (WhatsApp's 24-hour window) and sent, delivered and read ticks. The reply box says what each message costs in credits, since Meta now charges replies too. When WhatsApp refuses a message, the reason is in plain words and the credits come back.
+- **After 24 hours:** a **Send follow-up** button sends the business's approved follow-up message ("Hi Zodwa, this is Glow Salon following up on your message…"), once per silence. WURK submits it to Meta for each business when the number is connected; **Settings → WhatsApp** shows Meta's review.
+- **STOP** (and "unsubscribe", "yima", "hamba", "stop asseblief"…) stops marketing messages to that customer, with a confirmation.
+- **Security:** Meta's webhooks must carry WURK's app signature and are routed to the business by its number. Files are fetched only from Meta's own servers, never followed elsewhere, and are stored encrypted. Repeated deliveries from Meta are ignored.
+
+### WhatsApp — Sprint 21.1 (connect the business's own number)
+- **Settings → WhatsApp:** an owner connects their own WhatsApp number through Meta's sign-up, in about five minutes. By default they keep using the WhatsApp Business app on their phone, and WURK sees the same chats. A new number works too.
+- The page shows the number's display-name review, quality rating and daily messaging limit in plain words, with **Check with Meta** and **Disconnect**.
+- **Security:** the business's token from Meta is encrypted and never shown. The return from Meta must match the owner's own session, user and business, and a number can belong to only one business on WURK.
+- **For HQ:** the Meta app ID and Embedded Signup configuration ID are set in **Admin → Providers → WhatsApp**, next to the app secret. Until they're set, owners see "Coming soon".
+
 ## [0.21.0] — 2026-11-18 — Sprint 20: Premium templates
 
 ### Premium templates — Sprint 20.6 (quality bar and release)

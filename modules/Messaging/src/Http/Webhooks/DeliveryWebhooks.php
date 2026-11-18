@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace Wurk\Messaging\Http\Webhooks;
 
+use DateTimeImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Wurk\Messaging\Events\WhatsAppReceived;
+use Wurk\Messaging\Events\WhatsAppStatusChanged;
 use Wurk\Messaging\Models\MessageDelivery;
+use Wurk\Messaging\Models\WhatsAppConnection;
+use Wurk\Messaging\Support\OwnerSummaries;
 use Wurk\Messaging\Support\ProviderSettings;
+use Wurk\Messaging\Support\WhatsAppGraph;
+use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Tenancy\Contracts\TenantDirectory;
 
 /**
  * Delivery receipts. Both endpoints verify the provider's signature with the
@@ -15,7 +23,7 @@ use Wurk\Messaging\Support\ProviderSettings;
  */
 final readonly class DeliveryWebhooks
 {
-    public function __construct(private ProviderSettings $providers) {}
+    public function __construct(private ProviderSettings $providers, private TenantDirectory $tenants, private TenantContext $context) {}
 
     /** Twilio status callback: X-Twilio-Signature = base64(HMAC-SHA1(url + sorted params, auth token)). */
     public function twilio(Request $request): Response
@@ -64,7 +72,30 @@ final readonly class DeliveryWebhooks
 
         foreach ((array) $request->input('entry', []) as $entry) {
             foreach ((array) ($entry['changes'] ?? []) as $change) {
-                foreach ((array) ($change['value']['statuses'] ?? []) as $status) {
+                $value = (array) ($change['value'] ?? []);
+                if (($change['field'] ?? '') === 'message_template_status_update') { // Meta reviewed one of WURK's templates (21.5)
+                    $this->templateReviewed((string) ($entry['id'] ?? ''), $value);
+
+                    continue;
+                }
+                // A business's own number (Sprint 21.2): hand messages and statuses to that business, inside its context.
+                $connection = WhatsAppConnection::query()->where('phone_number_id', (string) ($value['metadata']['phone_number_id'] ?? ''))
+                    ->where('status', 'connected')->first();
+                $tenant = $connection !== null ? $this->tenants->find($connection->tenant_id) : null;
+                if ($tenant !== null) {
+                    $this->context->run($tenant, fn () => $this->business($tenant->tenantId(), $value));
+
+                    continue;
+                }
+                // Messages to WURK's own number: owners answering their evening summary (21.6).
+                foreach ((array) ($value['messages'] ?? []) as $m) {
+                    $text = (string) ($m['text']['body'] ?? $m['button']['text'] ?? $m['interactive']['button_reply']['title'] ?? '');
+                    $from = (string) preg_replace('/\D/', '', (string) ($m['from'] ?? ''));
+                    if ($from !== '' && $text !== '' && ($answer = app(OwnerSummaries::class)->reply($from, $text)) !== null) {
+                        app(OwnerSummaries::class)->answer($from, $answer);
+                    }
+                }
+                foreach ((array) ($value['statuses'] ?? []) as $status) {
                     $this->update((string) ($status['id'] ?? ''), match ($status['status'] ?? '') {
                         'delivered', 'read' => 'delivered', 'failed' => 'failed', default => null,
                     }, $status['errors'][0]['title'] ?? null);
@@ -73,6 +104,54 @@ final readonly class DeliveryWebhooks
         }
 
         return new Response('', 200);
+    }
+
+    /** @param  array<string, mixed>  $value */
+    private function templateReviewed(string $wabaId, array $value): void
+    {
+        $name = (string) ($value['message_template_name'] ?? '');
+        if (! isset(WhatsAppGraph::TEMPLATES[$name]) || ($value['message_template_language'] ?? WhatsAppGraph::FOLLOW_UP_LANGUAGE) !== WhatsAppGraph::FOLLOW_UP_LANGUAGE) {
+            return;
+        }
+        foreach (WhatsAppConnection::query()->where('waba_id', $wabaId)->where('status', 'connected')->get() as $c) {
+            $c->update(['templates' => [...(array) $c->templates, $name => strtoupper((string) ($value['event'] ?? 'PENDING'))]]);
+        }
+    }
+
+    /** @param  array<string, mixed>  $value */
+    private function business(string $tenantId, array $value): void
+    {
+        $names = [];
+        foreach ((array) ($value['contacts'] ?? []) as $contact) {
+            $names[(string) ($contact['wa_id'] ?? '')] = $contact['profile']['name'] ?? null;
+        }
+        foreach ((array) ($value['messages'] ?? []) as $m) {
+            if (! is_array($m) || ! isset($m['id'], $m['from'])) {
+                continue;
+            }
+            $type = (string) ($m['type'] ?? 'unsupported');
+            $part = is_array($m[$type] ?? null) ? $m[$type] : [];
+            $interactive = (array) ($part['button_reply'] ?? $part['list_reply'] ?? []);
+            [$text, $extra] = match ($type) {
+                'text' => [(string) ($part['body'] ?? ''), []],
+                'image', 'video', 'document' => [(string) ($part['caption'] ?? ''), []],
+                // A tapped list row reads as its title and description ("10:00 — Saturday 22 November"), as the customer saw it.
+                'interactive' => [trim(($interactive['title'] ?? '').(($interactive['description'] ?? '') !== '' ? ' — '.$interactive['description'] : '')), ['reply_id' => $interactive['id'] ?? null]],
+                'button' => [(string) ($part['text'] ?? ''), ['reply_id' => $part['payload'] ?? null]],
+                'location' => [trim(($part['name'] ?? '').' '.($part['address'] ?? '')), ['latitude' => $part['latitude'] ?? null, 'longitude' => $part['longitude'] ?? null]],
+                'reaction' => [(string) ($part['emoji'] ?? ''), ['reacted_to' => $part['message_id'] ?? null]],
+                default => ['', []],
+            };
+            event(new WhatsAppReceived($tenantId, preg_replace('/\D/', '', (string) $m['from']) ?? '', $names[(string) $m['from']] ?? null, (string) $m['id'], $type,
+                mb_substr($text, 0, 4096), isset($part['id']) && in_array($type, ['image', 'video', 'document', 'audio', 'sticker'], true) ? (string) $part['id'] : null,
+                $part['mime_type'] ?? null, $part['filename'] ?? null,
+                (new DateTimeImmutable)->setTimestamp((int) ($m['timestamp'] ?? time())), array_filter($extra, fn ($v) => $v !== null) + (isset($m['context']['id']) ? ['in_reply_to' => (string) $m['context']['id']] : [])));
+        }
+        foreach ((array) ($value['statuses'] ?? []) as $status) {
+            if (is_array($status) && isset($status['id'], $status['status'])) {
+                event(new WhatsAppStatusChanged($tenantId, (string) $status['id'], (string) $status['status'], $status['errors'][0]['title'] ?? null));
+            }
+        }
     }
 
     private function update(string $providerId, ?string $status, ?string $error): void

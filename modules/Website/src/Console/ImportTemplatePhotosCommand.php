@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Website\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Validation\ValidationException;
 use Wurk\Website\Models\SiteTemplate;
 use Wurk\Website\Support\TemplatePhotoImporter;
@@ -14,11 +15,12 @@ use Wurk\Website\Support\TemplatePhotos;
  * Fills designs' photo slots from a list (Sprint 20.3), on a server that can reach Nappy, Pexels and Unsplash:
  * a JSON list of {"template", "slot", "link", "source"?, "photographer"?, "licence"} (source: the photo's page when the link is
  * its image file). Slots that already have the same link are
- * skipped, so it is safe to run again; problems are listed and the rest still import.
+ * skipped, so it is safe to run again; problems are listed and the rest still import. `website:install-templates` runs it
+ * with WURK's own list (templates/photos/photos.json), limited to the designs it installed.
  */
 final class ImportTemplatePhotosCommand extends Command
 {
-    protected $signature = 'website:import-template-photos {file : JSON list of {template, slot, link, source?, photographer?, licence}} {--dry-run : Only check the list}';
+    protected $signature = 'website:import-template-photos {file : JSON list of {template, slot, link, source?, photographer?, licence}} {--dry-run : Only check the list} {--templates=* : Only rows for these template keys}';
 
     protected $description = 'Import demo photos for templates’ photo slots from Nappy, Pexels or Unsplash links';
 
@@ -38,7 +40,11 @@ final class ImportTemplatePhotosCommand extends Command
         }
         $done = $skipped = 0;
         $problems = [];
+        $only = (array) $this->option('templates');
         foreach ($rows as $n => $row) {
+            if ($only !== [] && ! in_array(is_array($row) ? ($row['template'] ?? null) : null, $only, true)) {
+                continue;
+            }
             $where = '#'.($n + 1).' '.(is_array($row) ? ($row['template'] ?? '?').'/'.($row['slot'] ?? '?') : '');
             $template = is_array($row) ? SiteTemplate::query()->where('key', (string) ($row['template'] ?? ''))->first() : null;
             if ($template === null) {
@@ -64,6 +70,8 @@ final class ImportTemplatePhotosCommand extends Command
                     $done++;
                 } catch (ValidationException $e) {
                     $problems[] = "{$where}: ".collect($e->errors())->flatten()->first();
+                } catch (ConnectionException) {
+                    $problems[] = "{$where}: the photo site couldn’t be reached";
                 }
             }
         }

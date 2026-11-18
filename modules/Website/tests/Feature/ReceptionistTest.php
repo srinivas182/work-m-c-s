@@ -215,7 +215,7 @@ it('deletes conversations that led nowhere after 30 days, keeping the ones that 
     $idle = ($this->say)('Hi');
     $kept = ($this->say)('Get me a person', null, 'another-visitor-0123456789');
     $this->travel(31)->days();
-    $this->artisan('website:sweep-conversations')->expectsOutput('Conversations deleted: 1.')->assertSuccessful();
+    $this->artisan('website:sweep-conversations')->expectsOutput("Conversations deleted: 1. Voice notes' audio deleted: 0.")->assertSuccessful();
     ($this->in)(fn () => expect(ReceptionistConversation::query()->pluck('id')->all())->toBe([$kept['conversation']])
         ->and(ReceptionistMessage::query()->where('conversation_id', $idle['conversation'])->count())->toBe(0));
 });

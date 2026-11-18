@@ -14,12 +14,14 @@ use Wurk\Website\Support\Templates;
 /**
  * Installs WURK's templates from modules/Website/templates/*.json. Creates missing ones
  * and publishes a new version only when a file has changed (fingerprint), so it is safe
- * to run on every deploy. Never deletes or retires anything.
+ * to run on every deploy. Never deletes or retires anything. Then fills the designs' photo places with WURK's chosen
+ * demo photos (templates/photos/photos.json; photos already there are skipped), so a new installation looks finished.
+ * A photo that can't be fetched is reported and its place keeps its stand-in; the install itself never fails for it.
  */
 final class InstallTemplatesCommand extends Command
 {
     // --only=key (repeatable): install just those designs — tests use it; deploys install everything.
-    protected $signature = 'website:install-templates {--only=* : Install only these template keys}';
+    protected $signature = 'website:install-templates {--only=* : Install only these template keys} {--no-photos : Don’t import the demo photos}';
 
     protected $description = 'Install or update WURK’s website templates from the repository';
 
@@ -55,7 +57,21 @@ final class InstallTemplatesCommand extends Command
             $template->forceFill(['source_hash' => $hash, 'position' => (int) ($source['position'] ?? $template->position)])->save();
         }
         $this->components->info("{$created} templates created, {$updated} updated.");
+        $this->importPhotos();
 
         return self::SUCCESS;
+    }
+
+    /** WURK's demo photos for the installed designs (off with --no-photos or WURK_TEMPLATE_DEMO_PHOTOS=false). */
+    private function importPhotos(): void
+    {
+        $list = base_path('modules/Website/templates/photos/photos.json');
+        if ($this->option('no-photos') || ! (bool) config('wurk.template_demo_photos') || ! is_file($list)) {
+            return;
+        }
+        $this->components->info('Importing demo photos (photos already there are skipped)…');
+        if ($this->call('website:import-template-photos', ['file' => $list, '--templates' => (array) $this->option('only')]) !== self::SUCCESS) {
+            $this->components->warn('Some demo photos weren’t imported; their places keep the stand-in. Run the install again later, or add them in Admin → Templates.');
+        }
     }
 }

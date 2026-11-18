@@ -18,6 +18,7 @@ use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -25,6 +26,7 @@ use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Shipping\Contracts\ShipmentUpdated;
 use Wurk\Shop\Console\DemoShopCommand;
 use Wurk\Shop\Console\ExpireOrdersCommand;
+use Wurk\Shop\Digest\ShopDigest;
 use Wurk\Shop\Listeners\MarkDeliveredOrders;
 use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Order;
@@ -32,6 +34,7 @@ use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopCategory;
 use Wurk\Shop\Receptionist\CartLinkTool;
 use Wurk\Shop\Receptionist\ProductsTool;
+use Wurk\Shop\Receptionist\ReorderTool;
 use Wurk\Shop\Reports\SalesSection;
 use Wurk\Shop\Reports\StockSection;
 use Wurk\Shop\Support\DeletedCatalog;
@@ -74,11 +77,13 @@ final class ShopServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(ShopDigest::class)); // the owner's evening WhatsApp summary (21.6)
         // Recently deleted (16.6b): products and categories.
         // The AI receptionist (19.2c): find products, and a link that fills the cart on the website.
         $this->callAfterResolving(ReceptionistTools::class, function (ReceptionistTools $t): void {
             $t->register(ProductsTool::class);
             $t->register(CartLinkTool::class);
+            $t->register(ReorderTool::class); // 21.5: "same as last time?" on WhatsApp
         });
         $this->callAfterResolving(RecentlyDeleted::class, function (RecentlyDeleted $d): void {
             $d->register('products', 'Products', 'shop.manage',

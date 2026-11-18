@@ -11,14 +11,14 @@ use Wurk\Ai\Support\AiSettings;
 uses(InteractsWithShards::class);
 
 /**
- * Sprint 19.7: the AI receptionist's 120-conversation evaluation set, with the model's behaviour scripted. It checks
+ * Sprint 19.7: the AI receptionist's 130-conversation evaluation set (WhatsApp journeys added in 21.6), with the model's behaviour scripted. It checks
  * WURK's guardrails around any model: real bookings only, no invented times or prices, the owner's permissions,
  * and nothing reaching another customer. The same set runs against the real model by hand (wurk:eval-receptionist).
  */
-it('has 120 conversations across every category in the spec', function () {
+it('has 130 conversations across every category in the spec', function () {
     $by = collect(ReceptionistEval::cases())->countBy('category')->all();
-    expect(count(ReceptionistEval::cases()))->toBe(120)
-        ->and(array_keys($by))->toEqualCanonicalizing(['booking', 'moving', 'cancelling', 'prices', 'hours', 'out_of_scope', 'abuse', 'injection', 'languages', 'no_free_time', 'closed_days'])
+    expect(count(ReceptionistEval::cases()))->toBe(130)
+        ->and(array_keys($by))->toEqualCanonicalizing(['booking', 'moving', 'cancelling', 'prices', 'hours', 'out_of_scope', 'abuse', 'injection', 'languages', 'no_free_time', 'closed_days', 'whatsapp'])
         ->and(collect(ReceptionistEval::cases())->pluck('id')->duplicates()->all())->toBe([])
         ->and(collect(ReceptionistEval::cases())->pluck('language')->unique()->sort()->values()->all())->toBe(['af', 'en', 'fr', 'pt', 'st', 'sw', 'xh', 'zu']);
 });
@@ -27,7 +27,7 @@ it('passes every conversation with the model scripted', function () {
     Mail::fake();
     $this->travelTo(CarbonImmutable::parse('2027-05-05 10:00', 'Africa/Johannesburg')); // a Wednesday
     $this->createShards(1);
-    $ai = app(AiSettings::class); // one salon having 120 conversations in a day: above a business's normal daily cap
+    $ai = app(AiSettings::class); // one salon having 130 conversations in a day: above a business's normal daily cap
     $ai->save([...$ai->all(), 'caps' => [...$ai->all()['caps'], 'tenant_daily_requests' => 10000]], null);
     $eval = app(ReceptionistEval::class);
     $salon = $eval->fixture();

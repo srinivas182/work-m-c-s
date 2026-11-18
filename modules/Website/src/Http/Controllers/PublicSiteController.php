@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Vite;
+use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Tenancy\Contracts\CurrentTenant;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -126,8 +127,10 @@ final class PublicSiteController
             'image' => ($img = $stored['image'] ?? null) ? request()->getSchemeAndHttpHost().$img : null,
             'siteName' => $tenant->displayName(),
             // WhatsApp chat button from the published contact details: digits, a leading 0 becomes 27
-            // (as the Contact section does). A plain link — no third-party script.
-            'whatsapp' => ($wa = preg_replace('/\D/', '', $facts['contact']['whatsapp']) ?? '') === '' ? null : (str_starts_with($wa, '0') ? '27'.substr($wa, 1) : $wa),
+            // (as the Contact section does), or the business's connected number. A plain link — no third-party script.
+            // With a connected number, the chat starts with the owner's message (click-to-chat, 21.5).
+            'whatsapp' => ($wa = preg_replace('/\D/', '', $facts['contact']['whatsapp']) ?? '') === '' ? app(WhatsAppBusiness::class)->number() : (str_starts_with($wa, '0') ? '27'.substr($wa, 1) : $wa),
+            'whatsappText' => app(WhatsAppBusiness::class)->connected() ? app(WhatsAppBusiness::class)->chatText() : null,
             'favicon' => $site?->branding['favicon'] ?? null,
             'jsonLd' => $home ? json_encode(app(SiteSeo::class)->localBusiness($facts, request()->getSchemeAndHttpHost()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
         ])->render();

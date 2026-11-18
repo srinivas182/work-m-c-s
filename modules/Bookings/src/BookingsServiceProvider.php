@@ -18,6 +18,7 @@ use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
 use Wurk\Bookings\Console\SendRemindersCommand;
 use Wurk\Bookings\Contracts\HealthPracticeStatus;
+use Wurk\Bookings\Digest\BookingsDigest;
 use Wurk\Bookings\Events\BookingCancelled;
 use Wurk\Bookings\Events\BookingConfirmed;
 use Wurk\Bookings\Events\BookingMoved;
@@ -25,6 +26,7 @@ use Wurk\Bookings\Events\ClassJoined;
 use Wurk\Bookings\Events\ClassLeft;
 use Wurk\Bookings\Events\ReservationCancelled;
 use Wurk\Bookings\Events\ReservationConfirmed;
+use Wurk\Bookings\Listeners\ConfirmPaymentOnWhatsApp;
 use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
@@ -45,15 +47,18 @@ use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\MessageWording;
+use Wurk\Bookings\WhatsApp\ReminderButtons;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Messaging\Contracts\WhatsAppActions;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\CannotRestore;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -94,6 +99,7 @@ final class BookingsServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(BookingsDigest::class)); // the owner's evening WhatsApp summary (21.6)
         // Recently deleted (16.6b): services. One with bookings is kept (hidden) after 30 days, so those bookings keep its name.
         $this->callAfterResolving(RecentlyDeleted::class, fn (RecentlyDeleted $d) => $d->register('services', 'Booking services', 'bookings.settings',
             fn (\DateTimeInterface $since) => BookingService::onlyTrashed()->where('deleted_at', '>', $since)->orderByDesc('deleted_at')->get()
@@ -148,6 +154,8 @@ final class BookingsServiceProvider extends ModuleServiceProvider
                 $t->register($tool);
             }
         });
+        // 21.5: the Confirm / Move / Cancel buttons on reminders from the business's WhatsApp number.
+        $this->callAfterResolving(WhatsAppActions::class, fn (WhatsAppActions $a) => $a->register(ReminderButtons::class));
         $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
             $t->register(BookingsOnDayTool::class);
             $t->register(AddBookingHoursTool::class);
@@ -182,6 +190,7 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         });
         Event::listen(BusinessPaymentReceived::class, fn (BusinessPaymentReceived $e) => str_starts_with($e->reference, 'dep_') ? $this->app->make(Deposits::class)->confirm($e->reference) : null);
         Event::listen([BookingConfirmed::class, BookingMoved::class, BookingCancelled::class, ReservationConfirmed::class, ReservationCancelled::class, ClassJoined::class, ClassLeft::class], SendBookingMessages::class);
+        Event::listen([BookingConfirmed::class, ClassJoined::class], ConfirmPaymentOnWhatsApp::class); // 21.5
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('bookings:expire-holds')->everyMinute()->onOneServer()->withoutOverlapping();
             $schedule->command('bookings:send-reminders')->everyFiveMinutes()->onOneServer()->withoutOverlapping();

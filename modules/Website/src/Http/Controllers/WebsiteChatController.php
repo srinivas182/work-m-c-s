@@ -7,6 +7,7 @@ namespace Wurk\Website\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -16,6 +17,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Credits\Contracts\CreditWallet;
+use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\ChatAnswer;
@@ -26,6 +28,8 @@ use Wurk\Website\Models\Site;
 use Wurk\Website\Support\ChatBot;
 use Wurk\Website\Support\Receptionist;
 use Wurk\Website\Support\SiteFacts;
+use Wurk\Website\Support\Uploads\VirusScanner;
+use Wurk\Website\Support\WhatsAppChats;
 
 /** Website → Chat (the designer, the AI receptionist and "Try it") and Customers → Chats (hand-offs). */
 final class WebsiteChatController
@@ -75,6 +79,7 @@ final class WebsiteChatController
             'languages' => Receptionist::LANGUAGES,
             'credits_per_reply' => app(CreditWallet::class)->rateFor(Receptionist::CHANNEL) / 1000,
             'replies_this_month' => $this->receptionist->repliesThisMonth(),
+            'whatsapp_connected' => app(WhatsAppBusiness::class)->connected(),
         ];
     }
 
@@ -82,6 +87,8 @@ final class WebsiteChatController
     {
         $d = $request->validate([
             'enabled' => ['required', 'boolean'],
+            'whatsapp' => ['sometimes', 'boolean'],
+            'away' => ['nullable', 'string', 'max:300'],
             'may' => ['present', 'array'], 'may.*' => ['string', Rule::in(['book', 'change', 'order'])],
             'tone' => ['required', Rule::in(['friendly', 'formal'])],
             'greeting' => ['required', 'string', 'max:200'],
@@ -92,13 +99,18 @@ final class WebsiteChatController
         if ($d['enabled'] && ! $this->bot->settings()['enabled']) {
             throw ValidationException::withMessages(['enabled' => 'Switch the chat on first (Settings above): the assistant answers in it.']);
         }
+        if (($d['whatsapp'] ?? false) && ! app(WhatsAppBusiness::class)->connected()) {
+            throw ValidationException::withMessages(['whatsapp' => 'Connect your WhatsApp number first (Settings → WhatsApp).']);
+        }
         $this->receptionist->save([
-            'enabled' => (bool) $d['enabled'], 'may' => array_values(array_unique($d['may'])), 'tone' => $d['tone'], 'greeting' => trim($d['greeting']),
+            'enabled' => (bool) $d['enabled'], 'whatsapp' => (bool) ($d['whatsapp'] ?? false), 'away' => trim((string) ($d['away'] ?? '')), 'may' => array_values(array_unique($d['may'])), 'tone' => $d['tone'], 'greeting' => trim($d['greeting']),
             'languages' => array_values(array_unique($d['languages'])), 'person_hours' => trim((string) ($d['person_hours'] ?? '')), 'monthly_cap' => (int) $d['monthly_cap'],
         ]);
-        $this->audit->record('website.receptionist_settings', 'site', $this->context->id(), ['enabled' => (bool) $d['enabled'], 'may' => $d['may'], 'monthly_cap' => (int) $d['monthly_cap']]);
+        $this->audit->record('website.receptionist_settings', 'site', $this->context->id(), ['enabled' => (bool) $d['enabled'], 'whatsapp' => (bool) ($d['whatsapp'] ?? false), 'may' => $d['may'], 'monthly_cap' => (int) $d['monthly_cap']]);
 
-        return back()->with('status', $d['enabled'] ? 'AI assistant saved — it’s answering in your chat.' : 'AI assistant saved — it’s off.');
+        $where = array_keys(array_filter(['in your website chat' => (bool) $d['enabled'], 'on WhatsApp' => (bool) ($d['whatsapp'] ?? false)]));
+
+        return back()->with('status', $where !== [] ? 'AI assistant saved — it’s answering '.implode(' and ', $where).'.' : 'AI assistant saved — it’s off.');
     }
 
     /** "Try it": a test chat with the real facts and free times, where nothing is booked, changed or ordered. */
@@ -169,44 +181,95 @@ final class WebsiteChatController
         return back()->with('status', 'Answers saved.');
     }
 
-    public function chats(Request $request): Response
+    public function chats(Request $request, WhatsAppBusiness $whatsapp): Response
     {
         $tz = $this->context->current()->timezone();
-        $show = in_array($request->query('show'), ['archived', 'ai'], true) ? (string) $request->query('show') : 'open';
+        $show = in_array($request->query('show'), ['archived', 'ai', 'whatsapp'], true) ? (string) $request->query('show') : 'open';
 
         return Inertia::render('Website::Chats', [
             'show' => $show,
-            'assistant' => $this->receptionist->settings()['enabled'] || ReceptionistConversation::query()->where('channel', '!=', Receptionist::TRY)->exists(),
-            'chats' => $show === 'ai' ? [] : ChatHandoff::query()->when($show === 'archived', fn ($q) => $q->where('status', 'archived'), fn ($q) => $q->where('status', '!=', 'archived'))
+            'assistant' => $this->receptionist->settings()['enabled'] || ReceptionistConversation::query()->whereNotIn('channel', [Receptionist::TRY, WhatsAppChats::CHANNEL])->exists(),
+            'whatsapp' => $whatsapp->connected() || ReceptionistConversation::query()->where('channel', WhatsAppChats::CHANNEL)->exists(),
+            'follow_up' => $show === 'whatsapp' && $whatsapp->followUpReady(),
+            // Meta charges replies too (from 1 Oct 2026): the team sees the cost before sending.
+            'reply_credits' => $show === 'whatsapp' ? rtrim(rtrim(number_format(app(CreditWallet::class)->rateFor('whatsapp') / 1000, 2, '.', ''), '0'), '.') : null,
+            'chats' => in_array($show, ['ai', 'whatsapp'], true) ? [] : ChatHandoff::query()->when($show === 'archived', fn ($q) => $q->where('status', 'archived'), fn ($q) => $q->where('status', '!=', 'archived'))
                 ->orderByDesc('created_at')->limit(200)->get()->map(fn (ChatHandoff $c) => [
                     'id' => $c->id, 'name' => $c->name, 'phone' => $c->phone, 'email' => $c->email, 'message' => $c->message, 'transcript' => $c->transcript, 'status' => $c->status,
                     'at' => $c->created_at->setTimezone($tz)->format('j M Y, H:i'),
                     'contact_id' => Gate::allows('contacts.view') ? $c->contact_id : null, 'lead_id' => Gate::allows('leads.view') ? $c->lead_id : null,
                 ])->all(),
-            'conversations' => $show === 'ai' ? $this->conversations($tz) : [],
+            'conversations' => in_array($show, ['ai', 'whatsapp'], true) ? $this->conversations($tz, $show === 'whatsapp') : [],
         ]);
     }
 
     /**
-     * The AI assistant's conversations with customers (19.4b), newest first: who (when known), the outcome, and what was
-     * said by the customer, the assistant and any person (tool steps are left out).
+     * The AI assistant's conversations with customers (19.4b), or WhatsApp conversations (21.2), newest first: who (when
+     * known), the outcome, and what was said by the customer, the assistant and any person (tool steps are left out).
      *
      * @return list<array<string, mixed>>
      */
-    private function conversations(string $tz): array
+    private function conversations(string $tz, bool $whatsapp = false): array
     {
-        $rows = ReceptionistConversation::query()->where('channel', '!=', Receptionist::TRY)->orderByDesc('last_message_at')->limit(100)->get();
+        $rows = ReceptionistConversation::query()->when($whatsapp, fn ($q) => $q->where('channel', WhatsAppChats::CHANNEL),
+            fn ($q) => $q->whereNotIn('channel', [Receptionist::TRY, WhatsAppChats::CHANNEL]))->orderByDesc('last_message_at')->limit(100)->get();
         $messages = ReceptionistMessage::query()->whereIn('conversation_id', $rows->pluck('id'))->whereIn('role', ['user', 'assistant', 'person'])
             ->orderBy('position')->get()->groupBy('conversation_id');
+        $base = route('tenant.website.chats', [], false);
 
         return array_values($rows->map(fn (ReceptionistConversation $c) => [
             'id' => $c->id, 'name' => $c->name, 'phone' => $c->phone, 'email' => $c->email, 'status' => $c->status, 'outcome' => $c->outcome,
-            'at' => $c->last_message_at->setTimezone($tz)->format('j M Y, H:i'), 'replies' => $c->replies,
+            'at' => $c->last_message_at->setTimezone($tz)->format('j M Y, H:i'), 'replies' => $c->replies, 'channel' => $c->channel,
+            'window_open' => $c->channel === WhatsAppChats::CHANNEL ? WhatsAppChats::windowOpen($c) : null,
+            'window_ends' => $c->channel === WhatsAppChats::CHANNEL && WhatsAppChats::windowOpen($c)
+                ? $c->last_inbound_at?->copy()->addHours(WhatsAppChats::WINDOW_HOURS)->setTimezone($tz)->format('j M, H:i') : null,
             'contact_id' => Gate::allows('contacts.view') ? $c->contact_id : null,
             'lines' => ($messages[$c->id] ?? collect())->map(fn (ReceptionistMessage $m) => [
                 'from' => ['user' => 'customer', 'assistant' => 'assistant', 'person' => 'person'][$m->role], 'text' => trim((string) ($m->content['content'] ?? '')),
-            ])->filter(fn (array $l) => $l['text'] !== '')->values()->all(),
+            ] + ($c->channel !== WhatsAppChats::CHANNEL ? [] : [ // ticks and files are WhatsApp's
+                'delivery' => $m->delivery, 'error' => $m->delivery_error,
+                'file' => isset($m->attachment['path']) ? ['url' => $base.'/ai/'.$c->id.'/files/'.$m->id, 'name' => $m->attachment['name'] ?? 'file', 'kind' => $m->attachment['kind'] ?? 'document']
+                    : (isset($m->attachment['blocked']) ? ['blocked' => $m->attachment['blocked']] : (($m->attachment['expired'] ?? false) ? ['blocked' => 'expired'] : null)),
+                // Voice notes (21.4): their words are the text; this says how sure WURK AI was, and in which language.
+                'voice' => ($m->attachment['kind'] ?? null) !== 'audio' ? null : [
+                    'seconds' => $m->attachment['seconds'] ?? null, 'unclear' => (bool) ($m->content['voice']['unclear'] ?? false),
+                    'language' => Receptionist::LANGUAGES[$m->content['voice']['language'] ?? ''] ?? null,
+                    'transcribed' => isset($m->content['voice']) && ! isset($m->content['voice']['too_long']),
+                ],
+            ]))->filter(fn (array $l) => $l['text'] !== '')->values()->all(),
         ])->all());
+    }
+
+    /** A reply on WhatsApp from the business's team: text, a photo or a PDF (21.2). */
+    public function reply(Request $request, string $conversation, WhatsAppChats $chats, WhatsAppBusiness $whatsapp, VirusScanner $scanner): RedirectResponse
+    {
+        $c = ReceptionistConversation::query()->where('channel', WhatsAppChats::CHANNEL)->whereKey($conversation)->firstOrFail();
+        $d = $request->validate(['text' => ['nullable', 'required_without:file', 'string', 'max:4096'], 'file' => ['nullable', 'file', 'max:16384']],
+            ['text.required_without' => 'Write a message, or attach a photo or PDF.', 'file.max' => 'Files can be up to 16 MB.']);
+        $chats->reply($c, trim((string) ($d['text'] ?? '')), $request->file('file'), (string) $request->user()?->getAuthIdentifier(), $whatsapp, $scanner);
+
+        return back()->with('status', 'Sent on WhatsApp.');
+    }
+
+    /** After the 24-hour window: the business's approved follow-up message (21.2). */
+    public function followUp(Request $request, string $conversation, WhatsAppChats $chats, WhatsAppBusiness $whatsapp): RedirectResponse
+    {
+        $c = ReceptionistConversation::query()->where('channel', WhatsAppChats::CHANNEL)->whereKey($conversation)->firstOrFail();
+        $chats->followUp($c, (string) $request->user()?->getAuthIdentifier(), $whatsapp);
+
+        return back()->with('status', 'Follow-up sent. When they reply, you can write freely again for 24 hours.');
+    }
+
+    /** A file from a WhatsApp conversation, for the business's team only (scanned before it was kept). */
+    public function file(string $conversation, string $message): HttpResponse
+    {
+        $m = ReceptionistMessage::query()->where('conversation_id', $conversation)->whereKey($message)->firstOrFail();
+        $path = $m->attachment['path'] ?? abort(404);
+        $contents = WhatsAppChats::read((string) $path) ?? abort(404);
+        $name = preg_replace('/[^\w.\- ]+/u', '_', (string) ($m->attachment['name'] ?? 'file')) ?: 'file';
+
+        return new HttpResponse($contents, 200, ['Content-Type' => (string) ($m->attachment['mime'] ?? 'application/octet-stream'),
+            'Content-Disposition' => 'attachment; filename="'.$name.'"', 'X-Content-Type-Options' => 'nosniff', 'Cache-Control' => 'private, no-store']);
     }
 
     /** Take over (the assistant stops for this chat), hand it back, or close it. */

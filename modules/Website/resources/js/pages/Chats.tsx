@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Badge, Button, EmptyState, Field, Input, PageHeader, Textarea } from '@/design-system';
@@ -28,9 +28,40 @@ interface Conversation {
   at: string;
   replies: number;
   contact_id: string | null;
-  lines: { from: 'customer' | 'assistant' | 'person'; text: string }[];
+  /** 'whatsapp' for WhatsApp conversations (21.2); web chats otherwise. */
+  channel?: string;
+  /** WhatsApp: free-form replies are allowed until 24 hours after the customer's last message. */
+  window_open?: boolean | null;
+  window_ends?: string | null;
+  lines: {
+    from: 'customer' | 'assistant' | 'person';
+    text: string;
+    delivery?: 'sent' | 'delivered' | 'read' | 'failed' | null;
+    error?: string | null;
+    file?: { url: string; name: string; kind: string } | { blocked: string } | null;
+    /** A voice note (21.4): its words are `text`. */
+    voice?: {
+      seconds: number | null;
+      unclear: boolean;
+      language: string | null;
+      transcribed: boolean;
+    } | null;
+  }[];
 }
-type Show = 'open' | 'archived' | 'ai';
+type Show = 'open' | 'archived' | 'ai' | 'whatsapp';
+
+const DELIVERY: Record<string, string> = {
+  sent: 'Sent',
+  delivered: 'Delivered',
+  read: 'Read',
+  failed: 'Not delivered',
+};
+const BLOCKED: Record<string, string> = {
+  infected: 'A file that failed the virus check (not kept)',
+  too_large: 'A file too large to keep',
+  unavailable: 'A file WhatsApp no longer has',
+  expired: 'The recording was deleted after 30 days; its words are kept',
+};
 
 const OUTCOME: Record<string, [string, 'success' | 'info' | 'warning' | 'neutral']> = {
   booked: ['Booked', 'success'],
@@ -49,11 +80,13 @@ export default function Chats({
   chats,
   show,
   assistant = false,
+  whatsapp = false,
   conversations = [],
 }: {
   chats: ChatRow[];
   show: Show;
   assistant?: boolean;
+  whatsapp?: boolean;
   conversations?: Conversation[];
 }) {
   const base = window.location.pathname.replace(/\/$/, '');
@@ -72,6 +105,7 @@ export default function Chats({
           {(
             [
               ['open', 'Asked for a person', base],
+              ...(whatsapp ? [['whatsapp', 'WhatsApp', `${base}?show=whatsapp`] as const] : []),
               ...(assistant
                 ? [['ai', 'AI assistant conversations', `${base}?show=ai`] as const]
                 : []),
@@ -88,15 +122,24 @@ export default function Chats({
             </Link>
           ))}
         </nav>
-        {show === 'ai' ? (
+        {show === 'ai' || show === 'whatsapp' ? (
           conversations.length === 0 ? (
             <EmptyState
               icon={MessageCircle}
               title="No conversations yet"
-              description="When customers chat with your AI assistant, the conversations appear here."
+              description={
+                show === 'whatsapp'
+                  ? 'When customers message your WhatsApp number, the conversations appear here.'
+                  : 'When customers chat with your AI assistant, the conversations appear here.'
+              }
             />
           ) : (
-            <ul aria-label="AI assistant conversations" className="grid gap-4">
+            <ul
+              aria-label={
+                show === 'whatsapp' ? 'WhatsApp conversations' : 'AI assistant conversations'
+              }
+              className="grid gap-4"
+            >
               {conversations.map((c) => (
                 <ConversationItem key={c.id} c={c} base={base} appBase={appBase} />
               ))}
@@ -210,7 +253,32 @@ function ConversationItem({
             <strong>
               {l.from === 'customer' ? who : l.from === 'assistant' ? 'Assistant' : 'You'}:
             </strong>{' '}
-            {l.text}
+            {l.voice ? <VoiceNote line={l} /> : l.text}
+            {l.file && 'url' in l.file && l.file.kind !== 'audio' && (
+              <>
+                {' '}
+                <a className="underline" href={l.file.url}>
+                  Download {l.file.kind === 'image' ? 'photo' : l.file.kind}
+                  <span className="sr-only">: {l.file.name}</span>
+                </a>
+              </>
+            )}
+            {l.file && 'blocked' in l.file && (
+              <span className="text-fg-muted">
+                {' '}
+                ({BLOCKED[l.file.blocked] ?? 'A file not kept'})
+              </span>
+            )}
+            {l.delivery && (
+              <span
+                className={l.delivery === 'failed' ? 'text-danger-11' : 'text-fg-muted'}
+                title={l.error ?? undefined}
+              >
+                {' '}
+                · {DELIVERY[l.delivery]}
+                {l.delivery === 'failed' && l.error ? `: ${l.error}` : ''}
+              </span>
+            )}
           </li>
         ))}
       </ol>
@@ -220,6 +288,7 @@ function ConversationItem({
             Contact
           </a>
         )}
+        {c.channel === 'whatsapp' && <Badge tone="info">WhatsApp</Badge>}
         {c.status === 'ai' || c.status === 'waiting' ? (
           <Button size="sm" variant="secondary" onClick={() => act('take_over')}>
             Take over
@@ -243,6 +312,7 @@ function ConversationItem({
           Teach it
         </Button>
       </div>
+      {c.channel === 'whatsapp' && c.status !== 'closed' && <WhatsAppReply c={c} base={base} />}
       {teaching && (
         <form
           aria-label={`Teach the assistant an answer, from the chat with ${who}`}
@@ -283,5 +353,115 @@ function ConversationItem({
         </form>
       )}
     </li>
+  );
+}
+
+/** A customer's voice note (21.4): its words (when WURK AI could make them out) and a player. */
+function VoiceNote({ line }: { line: Conversation['lines'][number] }) {
+  const v = line.voice;
+  if (!v) return null;
+  const length = v.seconds
+    ? ` · ${Math.floor(v.seconds / 60)}:${String(v.seconds % 60).padStart(2, '0')}`
+    : '';
+  return (
+    <span className="inline-grid gap-1 align-top">
+      <span>
+        <Badge tone={v.unclear ? 'warning' : 'neutral'}>
+          Voice note{length}
+          {v.language ? ` · ${v.language}` : ''}
+          {v.unclear ? ' · words may be wrong' : ''}
+        </Badge>{' '}
+        {v.transcribed ? line.text.replace(/^\[Voice note, unclear\] /, '') : line.text}
+      </span>
+      {line.file && 'url' in line.file && (
+        <audio controls preload="none" src={line.file.url} className="h-8 max-w-xs">
+          <a href={line.file.url}>Download the voice note</a>
+        </audio>
+      )}
+    </span>
+  );
+}
+
+/** Reply on WhatsApp from Chats (21.2): text, a photo or a PDF, inside WhatsApp's 24-hour window. */
+function WhatsAppReply({ c, base }: { c: Conversation; base: string }) {
+  const form = useForm<{ text: string; file: File | null }>({ text: '', file: null });
+  const page = usePage<{ follow_up?: boolean; reply_credits?: string | null }>().props;
+  const followUp = page.follow_up === true;
+  const cost = page.reply_credits
+    ? ` Each message uses ${page.reply_credits} credit${page.reply_credits === '1' ? '' : 's'}.`
+    : '';
+  const nudge = useForm<{ text: string }>({ text: '' });
+  if (!c.window_open) {
+    return (
+      <div className="grid gap-2">
+        <p className="text-fg-muted text-sm">
+          More than 24 hours since {c.name ?? 'the customer'} last wrote, so WhatsApp only allows an
+          approved message.{' '}
+          {followUp
+            ? `Send your follow-up: when they reply, you can write freely again.${cost}`
+            : `Your follow-up message is waiting for Meta’s approval (Settings → WhatsApp)${c.phone ? '. Or call ' + c.phone : ''}.`}
+        </p>
+        {followUp && (
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              size="sm"
+              variant="secondary"
+              loading={nudge.processing}
+              onClick={() => nudge.post(`${base}/ai/${c.id}/follow-up`, { preserveScroll: true })}
+            >
+              Send follow-up
+            </Button>
+            {nudge.errors.text && (
+              <p role="alert" className="text-danger-11 text-sm">
+                {nudge.errors.text}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+  return (
+    <form
+      aria-label={`Reply to ${c.name ?? 'the customer'} on WhatsApp`}
+      className="grid gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.post(`${base}/ai/${c.id}/reply`, {
+          preserveScroll: true,
+          forceFormData: true,
+          onSuccess: () => form.reset(),
+        });
+      }}
+    >
+      <Field
+        label="Your reply"
+        hint={
+          c.window_ends
+            ? `You can reply freely until ${c.window_ends}.${cost}`
+            : cost.trim() || undefined
+        }
+        error={form.errors.text ?? form.errors.file}
+      >
+        <Textarea
+          rows={2}
+          maxLength={4096}
+          value={form.data.text}
+          onChange={(e) => form.setData('text', e.target.value)}
+        />
+      </Field>
+      <div className="flex flex-wrap items-center gap-3">
+        <Input
+          type="file"
+          accept="image/jpeg,image/png,application/pdf"
+          aria-label="Attach a photo or PDF"
+          className="max-w-xs"
+          onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)}
+        />
+        <Button type="submit" size="sm" loading={form.processing}>
+          Send on WhatsApp
+        </Button>
+      </div>
+    </form>
   );
 }

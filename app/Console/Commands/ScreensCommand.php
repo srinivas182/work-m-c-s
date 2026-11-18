@@ -50,7 +50,7 @@ final class ScreensCommand extends Command
         'bookings.public.services' => 'JSON for the booking widget', 'bookings.public.times' => 'JSON for the booking widget', 'bookings.public.tables.times' => 'JSON for the booking widget',
         'bookings.public.classes' => 'JSON for the booking widget', 'tenant.website.chat' => 'JSON for the chat widget',
         'tenant.billing.return' => 'redirect back from the payment provider', 'bookings.public.paid' => 'redirect back from the payment provider',
-        'bookings.video.callback' => 'OAuth callback', 'tenant.bookings.video.connect' => 'redirect to Google/Microsoft/Zoom',
+        'bookings.video.callback' => 'OAuth callback', 'whatsapp.connected' => 'Meta Embedded Signup callback (21.1)', 'tenant.website.chats.file' => 'a WhatsApp file download (21.2)', 'tenant.bookings.video.connect' => 'redirect to Google/Microsoft/Zoom',
         'payments.wurk.pay' => 'hands over to the payment provider (auto-submitting form)', 'payments.public.pay' => 'hands over to the payment provider (auto-submitting form)',
         'webhooks.meta.verify' => 'webhook', 'health.live' => 'health check', 'health.ready' => 'health check', 'health.heartbeat' => 'health check',
         'website.block-board' => 'internal design board', 'platform.design' => 'internal design showcase', 'tenant.website.preview' => 'the business’s own site (covered by the public site)',

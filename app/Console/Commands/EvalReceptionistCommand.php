@@ -16,7 +16,7 @@ use Wurk\Ai\Support\AiSettings;
 final class EvalReceptionistCommand extends Command
 {
     protected $signature = 'wurk:eval-receptionist
-        {--category= : Only this category (booking, moving, cancelling, prices, hours, out_of_scope, abuse, injection, languages, no_free_time, closed_days)}
+        {--category= : Only this category (booking, moving, cancelling, prices, hours, out_of_scope, abuse, injection, languages, no_free_time, closed_days, whatsapp)}
         {--min=0.9 : The pass rate needed (0–1); below it, the command fails}
         {--json= : Also write the results to this file}';
 

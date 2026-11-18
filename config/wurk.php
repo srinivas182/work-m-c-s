@@ -40,6 +40,11 @@ return [
         'probe' => env('WURK_FFPROBE', 'ffprobe'),
     ],
 
+    // Customers' WhatsApp voice notes (Sprint 21.4): the audio is deleted after this many days; the transcript stays.
+    'whatsapp' => [
+        'voice_note_days' => (int) env('WURK_VOICE_NOTE_DAYS', 30),
+    ],
+
     'domains' => [
         'root' => $root,
         'admin' => env('WURK_ADMIN_DOMAIN', 'admin.'.$root),
@@ -54,7 +59,7 @@ return [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
             '.well-known', 'help', 'login', 'logout', 'mail', 'my', 'agent', 'partners', 'register', 'signup', 'static',
             'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
-            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'templates', 'forms', 'settings', 'webhooks', 'signup', 'oauth',
+            'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'templates', 'forms', 'settings', 'webhooks', 'whatsapp', 'signup', 'oauth',
             'pay',
             'payments',
         ],
@@ -141,6 +146,9 @@ return [
     'site_pages_disk' => env('WURK_SITE_PAGES_DISK', 'local'),
 
     'site_assets_disk' => env('WURK_SITE_ASSETS_DISK', 'public'),
+    // Install WURK's chosen demo photos (modules/Website/templates/photos/photos.json) with the templates, so a new
+    // installation's designs show real photos at once. Off where the server can't reach Pexels (tests, offline e2e).
+    'template_demo_photos' => (bool) env('WURK_TEMPLATE_DEMO_PHOTOS', true),
     // Agents' demo sites (Sprint 14.8): how long a demo stays up, and how long its claim link works.
     'demo_days' => 14,
     // Support tickets (Sprint 16.3): WURK's support inbox email — new tickets and replies are sent here.

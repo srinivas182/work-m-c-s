@@ -68,6 +68,9 @@ Route::tenant(function (): void {
         Route::get('/chats', [WebsiteChatController::class, 'chats'])->name('chats');
         Route::put('/chats/ai/{conversation}', [WebsiteChatController::class, 'conversation'])->name('chats.ai'); // 19.4b
         Route::post('/chats/ai/{conversation}/teach', [WebsiteChatController::class, 'teach'])->name('chats.teach');
+        Route::post('/chats/ai/{conversation}/reply', [WebsiteChatController::class, 'reply'])->middleware('throttle:60,1,whatsapp-replies')->name('chats.reply'); // 21.2
+        Route::post('/chats/ai/{conversation}/follow-up', [WebsiteChatController::class, 'followUp'])->middleware('throttle:30,1,whatsapp-replies')->name('chats.followup');
+        Route::get('/chats/ai/{conversation}/files/{message}', [WebsiteChatController::class, 'file'])->name('chats.file');
         Route::put('/chats/{chat}', [WebsiteChatController::class, 'status'])->name('chats.status');
         Route::get('/enquiries', [EnquiriesController::class, 'index'])->name('enquiries');
         Route::put('/enquiries/settings', [EnquiriesController::class, 'settings'])->name('enquiries.settings');

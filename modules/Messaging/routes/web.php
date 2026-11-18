@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Wurk\Messaging\Http\Controllers\MessagesController;
 use Wurk\Messaging\Http\Controllers\ProvidersController;
+use Wurk\Messaging\Http\Controllers\WhatsAppConnectionController;
 use Wurk\Messaging\Http\Webhooks\DeliveryWebhooks;
 
 Route::domain((string) config('wurk.domains.admin'))
@@ -26,6 +27,10 @@ Route::domain((string) config('wurk.domains.app'))
         Route::post('/meta', [DeliveryWebhooks::class, 'meta'])->name('webhooks.meta');
     });
 
+// Meta sends owners back here after Embedded Signup (one fixed address, registered with Meta; Sprint 21.1).
+Route::domain((string) config('wurk.domains.app'))->middleware(['web', 'auth'])
+    ->get('/whatsapp/connected', [WhatsAppConnectionController::class, 'callback'])->name('whatsapp.connected');
+
 // Settings → Messages: the business's customer messages (owners: messages.manage).
 Route::tenant(function (): void {
     Route::middleware(['permission:messages.manage'])->prefix('settings/messages')->name('tenant.messages')->group(function (): void {
@@ -34,5 +39,14 @@ Route::tenant(function (): void {
         Route::delete('/{key}/{channel}', [MessagesController::class, 'reset'])->name('.reset');
         Route::put('/{key}', [MessagesController::class, 'enabled'])->name('.enabled');
         Route::post('/{key}/{channel}/test', [MessagesController::class, 'test'])->middleware('throttle:10,1,message-tests')->name('.test');
+    });
+    // Settings → WhatsApp: the business's own number (Sprint 21.1).
+    Route::middleware(['permission:messages.manage'])->prefix('settings/whatsapp')->name('tenant.whatsapp')->group(function (): void {
+        Route::get('/', [WhatsAppConnectionController::class, 'index']);
+        Route::post('/connect', [WhatsAppConnectionController::class, 'connect'])->middleware('throttle:10,1,whatsapp-connect')->name('.connect');
+        Route::post('/refresh', [WhatsAppConnectionController::class, 'refresh'])->middleware('throttle:10,1,whatsapp-refresh')->name('.refresh');
+        Route::delete('/', [WhatsAppConnectionController::class, 'disconnect'])->name('.disconnect');
+        Route::put('/chat-link', [WhatsAppConnectionController::class, 'chatLink'])->name('.chat-link'); // 21.5
+        Route::put('/summary', [WhatsAppConnectionController::class, 'summary'])->name('.summary'); // 21.6
     });
 });

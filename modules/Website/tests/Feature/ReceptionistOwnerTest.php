@@ -105,11 +105,11 @@ it('shows the price of a reply, what the package allows, and saves the owner’s
     ($this->in)(fn () => Site::query()->firstOrFail()->update(['settings' => ['chat' => ['enabled' => true]]]));
     $this->actingAs($this->owner)->put("{$this->base}/receptionist", [...$this->settings, 'languages' => []])->assertSessionHasErrors(['languages' => 'Choose at least one language.']);
     $this->actingAs($this->owner)->put("{$this->base}/receptionist", [...$this->settings, 'may' => ['steal']])->assertSessionHasErrors('may.0');
-    $this->actingAs($this->owner)->put("{$this->base}/receptionist", $this->settings)->assertSessionHas('status', 'AI assistant saved — it’s answering in your chat.');
+    $this->actingAs($this->owner)->put("{$this->base}/receptionist", $this->settings)->assertSessionHas('status', 'AI assistant saved — it’s answering in your website chat.');
 
     ($this->in)(fn () => expect(app(Receptionist::class)->settings())->toBe([
-        'enabled' => true, 'may' => ['book', 'change'], 'tone' => 'formal', 'greeting' => 'Good day! I’m Glow’s AI assistant.',
-        'monthly_cap' => 150, 'languages' => ['en', 'zu'], 'person_hours' => 'Mon–Fri 8:00–17:00',
+        'enabled' => true, 'whatsapp' => false, 'may' => ['book', 'change'], 'tone' => 'formal', 'greeting' => 'Good day! I’m Glow’s AI assistant.',
+        'monthly_cap' => 150, 'languages' => ['en', 'zu'], 'person_hours' => 'Mon–Fri 8:00–17:00', 'away' => Receptionist::AWAY,
     ]));
     // The owner's choices reach the assistant's instructions.
     SimulatedDriver::$script = [['text' => 'Sawubona!']];

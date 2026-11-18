@@ -16,4 +16,11 @@ interface Ai
      * @throws AiUnavailable
      */
     public function image(string $prompt, ?string $tenantId = null): string;
+
+    /**
+     * What a voice note says (Sprint 21.4), with the provider chosen in Admin → AI. `$seconds` is its length, for costs.
+     *
+     * @throws AiUnavailable
+     */
+    public function transcribe(string $audio, string $mime, ?float $seconds = null, ?string $tenantId = null): Transcript;
 }

@@ -10,9 +10,12 @@ use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\ReceptionistRefused;
 use Wurk\Platform\Contracts\ReceptionistTool;
 use Wurk\Platform\Contracts\ReceptionistTools;
+use Wurk\Shop\Models\Order;
+use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Models\Product;
 use Wurk\Shop\Models\ShopSettings;
 use Wurk\Shop\Models\Variant;
+use Wurk\Shop\Receptionist\ReorderTool;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 uses(InteractsWithShards::class);
@@ -68,4 +71,25 @@ it('makes a cart link only when the shop takes orders, for real products in stoc
     expect(fn () => ($this->run)('cart_link', ['items' => [['variant_id' => $this->small->id, 'quantity' => 4]]]))->toThrow(ReceptionistRefused::class, 'Only 3');
     expect(fn () => ($this->run)('cart_link', ['items' => [['variant_id' => $this->oil->id, 'quantity' => 1]]]))->toThrow(ReceptionistRefused::class, 'isn’t in the shop');
     expect(fn () => ($this->run)('cart_link', ['items' => []]))->toThrow(ReceptionistRefused::class, 'which products');
+});
+
+it('offers "same as last time" on WhatsApp only, from the customer’s last paid order at today’s prices and stock', function () {
+    ($this->in)(function () {
+        ShopSettings::query()->create(['tenant_id' => app(TenantContext::class)->id()]);
+        app(BusinessPayments::class)->setUpEft('FNB');
+        $order = Order::query()->create(['number' => 1, 'status' => 'done', 'payment_method' => 'online', 'fulfilment' => 'delivery', 'customer_name' => 'Zodwa',
+            'customer_phone' => '082 555 0101', 'subtotal_cents' => 77500, 'total_cents' => 77500, 'paid_at' => now()->subWeek()]);
+        foreach ([[$this->small, 'Small', 5], [$this->large, 'Large', 1]] as [$v, $label, $qty]) {
+            OrderItem::query()->create(['order_id' => $order->id, 'variant_id' => $v->id, 'product_name' => 'Kasi T-shirt', 'variant_label' => $label,
+                'unit_cents' => 25000, 'quantity' => $qty, 'stock_tracked' => true, 'line_cents' => 25000 * $qty]);
+        }
+    });
+    $reorder = fn (array $customer) => ($this->in)(fn () => app(ReorderTool::class)->run([], ['conversation' => 'c', 'channel' => 'whatsapp', 'customer' => $customer]));
+
+    $r = $reorder(['phone' => '+27825550101', 'verified' => true]);
+    expect($r['items'])->toBe(['3 × Kasi T-shirt Small']) // only 3 left; the Large is sold out
+        ->and($r['not_available'])->toBe(['Kasi T-shirt Large'])->and($r['last_time'])->toBe('delivered')->and($r['subtotal_today'])->toBe('R750.00')
+        ->and($r['card']['action'])->toMatchArray(['label' => 'Check out'])->and($r['card']['action']['url'])->toEndWith("/cart?add={$this->small->id}:3");
+    expect($reorder(['phone' => '+27820000000', 'verified' => true])['found'])->toBeFalse()
+        ->and(fn () => $reorder(['phone' => '+27825550101']))->toThrow(ReceptionistRefused::class, 'Reordering works on WhatsApp'); // a typed number in a web chat proves nothing
 });
