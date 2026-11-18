@@ -6,7 +6,7 @@ import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
-import { __ } from '@/i18n';
+import { __, currencySymbol, money } from '@/i18n';
 
 interface Owed {
   key: string;
@@ -47,7 +47,7 @@ interface Props {
 }
 
 /** Rand as WURK writes it everywhere: R1 380.00 (the server's own format). */
-const rand = (c: number) => `R${(c / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
+const rand = (c: number) => money(c); // the business's currency (25.1b)
 const tenantBase = () => '/' + window.location.pathname.split('/')[1];
 const KIND: Record<Owed['kind'], string> = {
   invoice: 'Invoice',
@@ -171,7 +171,10 @@ function NewInvoice({ today, tax }: { today: string; tax: Props['tax'] }) {
               onChange={(e) => setLine(i, 'quantity', e.target.value)}
             />
             <Input
-              aria-label={`Line ${i + 1}: price each (R)`}
+              aria-label={__('Line :n: price each (:currency)', {
+                n: i + 1,
+                currency: currencySymbol(),
+              })}
               inputMode="decimal"
               placeholder={__('R')}
               value={String(l.unit)}

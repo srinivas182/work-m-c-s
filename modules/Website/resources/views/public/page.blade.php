@@ -1,6 +1,6 @@
 <!doctype html>
 @php($lite = \Wurk\Platform\I18n\Lite::on(request()))
-<html lang="en-ZA"@if ($lite) data-lite="1"@endif>
+<html lang="en-ZA" data-currency="{{ json_encode(\Wurk\Platform\Money\Money::business()->toArray()) }}"@if ($lite) data-lite="1"@endif>
 <head>
 @if (!empty($demo))
 <meta name="robots" content="noindex, nofollow">

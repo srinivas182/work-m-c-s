@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Regions;
 
+use Wurk\Platform\Contracts\BusinessCurrency;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Regions\Contracts\Countries;
 
@@ -12,6 +13,7 @@ final class RegionsServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         $this->app->singleton(Countries::class, EloquentCountries::class);
+        $this->app->scoped(BusinessCurrency::class, PackCurrency::class); // 25.1b: per request (Octane-safe)
     }
 
     /**

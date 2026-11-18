@@ -7,6 +7,7 @@ namespace Wurk\Sales\Digest;
 use Carbon\CarbonImmutable;
 use Wurk\Platform\Contracts\OwnerDigestRefused;
 use Wurk\Platform\Contracts\OwnerDigestSource;
+use Wurk\Platform\Money\Money;
 use Wurk\Sales\Models\Sale;
 use Wurk\Sales\Support\SaleProblem;
 use Wurk\Sales\Support\Sales;
@@ -29,7 +30,7 @@ final readonly class SalesDigest implements OwnerDigestSource
     public function requests(): array
     {
         return array_values(Sale::query()->where('status', 'pending')->orderBy('recorded_at')->limit(5)->get()->map(fn (Sale $s) => [
-            'id' => $s->id, 'label' => 'Approve '.$s->recorded_by_name.'’s R'.number_format($s->amount_cents / 100, 2, '.', ' ').' '.(Sales::METHODS[$s->method] ?? $s->method).' sale?',
+            'id' => $s->id, 'label' => 'Approve '.$s->recorded_by_name.'’s '.Money::format((int) $s->amount_cents).' '.(Sales::METHODS[$s->method] ?? $s->method).' sale?',
         ])->all());
     }
 
@@ -45,6 +46,6 @@ final readonly class SalesDigest implements OwnerDigestSource
             throw new OwnerDigestRefused($e->getMessage());
         }
 
-        return 'The R'.number_format($sale->amount_cents / 100, 2, '.', ' ').' sale is '.($yes ? 'approved' : 'declined').'.';
+        return 'The '.Money::format((int) $sale->amount_cents).' sale is '.($yes ? 'approved' : 'declined').'.';
     }
 }

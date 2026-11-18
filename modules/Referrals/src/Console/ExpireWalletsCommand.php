@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Referrals\Console;
 
 use Illuminate\Console\Command;
+use Wurk\Platform\Money\Money;
 use Wurk\Referrals\Support\Wallets;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
@@ -25,7 +26,7 @@ final class ExpireWalletsCommand extends Command
                 $total += (int) $context->run($tenant, fn () => app(Wallets::class)->expire());
             }
         }
-        $this->info('Expired: R'.number_format($total / 100, 2).'.');
+        $this->info('Expired: '.Money::format((int) $total).'.');
 
         return self::SUCCESS;
     }

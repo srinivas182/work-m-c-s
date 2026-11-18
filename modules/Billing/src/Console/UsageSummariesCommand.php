@@ -12,6 +12,7 @@ use Wurk\Billing\Mail\CreditsMail;
 use Wurk\Billing\Models\BillingAccount;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\UsageHistory;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -55,7 +56,7 @@ final class UsageSummariesCommand extends Command
             $lines[] = '';
             $lines[] = 'Credits left now: '.number_format($balance / 1000, 0, '.', ' ').'.';
             if ((int) ($topUps->n ?? 0) > 0) {
-                $lines[] = 'Automatic top-ups: '.(int) ($topUps->n ?? 0).' (R'.number_format(((int) ($topUps->cents ?? 0)) / 100, 2).' excl. VAT).';
+                $lines[] = 'Automatic top-ups: '.(int) ($topUps->n ?? 0).' ('.Money::zar(((int) ($topUps->cents ?? 0))).' excl. VAT).';
             }
             $lines[] = '';
             $lines[] = 'You can stop this email on your Billing page.';

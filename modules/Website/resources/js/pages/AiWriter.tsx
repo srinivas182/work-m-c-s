@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/design-system/components/select';
 import AppShell from '@/layouts/AppShell';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface Props {
   business: string;
@@ -120,7 +120,10 @@ export default function AiWriter({ business, base }: Props) {
                       }
                     />
                   </Field>
-                  <Field label={__('Price (R)')} className="w-32">
+                  <Field
+                    label={__('Price (:currency)', { currency: currencySymbol() })}
+                    className="w-32"
+                  >
                     <Input
                       inputMode="numeric"
                       value={s.price === null ? '' : String(s.price / 100)}

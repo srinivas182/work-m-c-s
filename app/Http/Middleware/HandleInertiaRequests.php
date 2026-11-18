@@ -11,6 +11,7 @@ use Wurk\Identity\Models\Identity;
 use Wurk\Identity\Support\Surface;
 use Wurk\Platform\I18n\Lite;
 use Wurk\Platform\I18n\Locales;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Navigation\NavigationBuilder;
 
 final class HandleInertiaRequests extends Middleware
@@ -58,6 +59,7 @@ final class HandleInertiaRequests extends Middleware
             ],
             // The language (24.1): its translations load as a script before the app (resources/views/app.blade.php).
             'i18n' => fn () => ['locale' => app()->getLocale(), 'languages' => Locales::offered()],
+            'currency' => fn () => Money::business()->toArray(), // 25.1b: how the business's money is written
             'lite' => fn () => ['on' => Lite::on($request), 'choice' => in_array($request->cookie(Lite::COOKIE), ['on', 'off'], true) ? $request->cookie(Lite::COOKIE) : 'auto'], // 24.4
             'flash' => fn () => ['status' => self::translated($request->session()->get('status')), 'warning' => self::translated($request->session()->get('warning'))],
             // A page-wide notice a module attached to this request (e.g. Billing's payment reminder).

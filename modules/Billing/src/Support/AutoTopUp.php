@@ -11,6 +11,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Billing\Mail\CreditsMail;
 use Wurk\Billing\Models\BillingAccount;
 use Wurk\Billing\Models\CreditPack;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
 /**
@@ -52,7 +53,7 @@ final readonly class AutoTopUp
             $payment = $this->payments->chargeSaved($tenantId, 'credits', $pack->price_cents, ['pack' => $pack->name, 'credits' => $pack->credits, 'auto' => true]);
             $outcome = $payment->status === 'succeeded' ? 'topped_up' : 'declined';
         }
-        $rand = fn (int $c) => 'R'.number_format($c / 100, 2);
+        $rand = fn (int $c) => Money::zar((int) $c);
         [$subject, $lines] = match ($outcome) {
             'topped_up' => ['Credits topped up', ["Your credits ran low, so we added {$pack->credits} credits ({$pack->name}) for {$rand($pack->price_cents)} excl. VAT, charged to your saved card.",
                 'Automatic top-ups this month: '.$rand($spent + $pack->price_cents).($account->auto_top_up_cap_cents !== null ? ' of your '.$rand($account->auto_top_up_cap_cents).' limit.' : '.')]],

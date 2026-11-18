@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 use Wurk\Ai\Contracts\AiActionRefused;
 use Wurk\Platform\Contracts\SetupStep;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Ai\SiteGenerator;
 use Wurk\Website\Contracts\SiteTemplates;
@@ -49,7 +50,7 @@ final readonly class WebsiteSetupStep implements SetupStep
             $lines[] = 'Opening hours: '.$hours;
         }
         if ($brief['services'] !== []) {
-            $lines[] = 'Services and prices on your website: '.implode(', ', array_map(fn ($s) => $s['name'].($s['price_cents'] > 0 ? ' R'.number_format($s['price_cents'] / 100, 2) : ''), $brief['services']));
+            $lines[] = 'Services and prices on your website: '.implode(', ', array_map(fn ($s) => $s['name'].($s['price_cents'] > 0 ? ' '.Money::format((int) $s['price_cents']) : ''), $brief['services']));
         }
         $photos = count(self::chosen($brief));
         if ($photos > 0) {

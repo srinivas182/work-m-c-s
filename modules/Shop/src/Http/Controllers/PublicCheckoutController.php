@@ -14,6 +14,7 @@ use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\CouponCustomer;
 use Wurk\Payments\Contracts\Coupons;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Platform\Money\Money;
 use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Mail\OrderPlacedMail;
@@ -127,7 +128,7 @@ final class PublicCheckoutController
                 return new JsonResponse(['placed' => true, 'number' => $order->number, 'total_cents' => $order->total_cents, 'pay_url' => $pay, 'order_url' => $url], 201);
             }
             if ($order->customer_email !== null) {
-                $rand = fn (int $c) => 'R'.number_format($c / 100, 2);
+                $rand = fn (int $c) => Money::format((int) $c);
                 $lines = array_values(OrderItem::query()->where('order_id', $order->id)->get()->map(fn (OrderItem $i) => "{$i->quantity} × {$i->product_name}".($i->variant_label ? " ({$i->variant_label})" : '').' — '.$rand($i->line_cents))->all());
                 Mail::to($order->customer_email)->send(new OrderPlacedMail($tenant->displayName(), app(MessageTemplates::class)->subject('order.placed', $placedVars = ['business' => $tenant->displayName(), 'number' => (string) $order->number]), app(MessageTemplates::class)->text('order.placed', 'email', $placedVars), $order->number, $lines, $rand($order->total_cents),
                     app(BusinessPayments::class)->eftInstructions($order->branch_id), $url));

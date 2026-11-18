@@ -15,7 +15,7 @@ import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 import { CalendarClock } from 'lucide-react';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface Service {
   id: string;
@@ -222,7 +222,11 @@ function ServiceForm({
         )}
         {form.data.deposit_type !== 'none' && form.data.deposit_type !== 'full' && (
           <Field
-            label={form.data.deposit_type === 'percent' ? 'Deposit (%)' : 'Deposit (R)'}
+            label={
+              form.data.deposit_type === 'percent'
+                ? __('Deposit (%)')
+                : __('Deposit (:currency)', { currency: currencySymbol() })
+            }
             error={form.errors.deposit_value}
           >
             <Input
@@ -247,7 +251,7 @@ function ServiceForm({
         )}
       </div>
       <Field
-        label={__('Price (R)')}
+        label={__('Price (:currency)', { currency: currencySymbol() })}
         hint={__('0 shows “Ask us”.')}
         error={(form.errors as Record<string, string | undefined>).price_cents}
       >

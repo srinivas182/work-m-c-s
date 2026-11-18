@@ -10,6 +10,7 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\StoreCredit;
+use Wurk\Platform\Money\Money;
 use Wurk\Referrals\Contracts\CustomerRewards;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -62,7 +63,7 @@ final readonly class DataRequests
         }
         $left = app(StoreCredit::class)->available($request->contact_id);
         if ($left > 0) {
-            throw new \DomainException('Pay out or refund their wallet first (R'.number_format($left / 100, 2).').');
+            throw new \DomainException('Pay out or refund their wallet first ('.Money::format((int) $left).').');
         }
         $this->tell($request, 'portal.deletion_done', []);                       // while their address is still known
         app(CustomerRewards::class)->close($request->contact_id);               // pending forfeited (decision I); link stops working

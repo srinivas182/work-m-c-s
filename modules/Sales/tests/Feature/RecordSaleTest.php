@@ -84,9 +84,9 @@ it('records a sale at the till: the customer, a receipt by email, and their refe
 });
 
 it('holds sales over the threshold for approval — rewards only once approved; declined earns nothing', function () {
-    $this->actingAs($this->people['owner'])->put($this->app('/glow-salon/settings/sales'), ['amount' => '1000'])->assertSessionHas('status', 'Sales over R1,000.00 now need approval.');
+    $this->actingAs($this->people['owner'])->put($this->app('/glow-salon/settings/sales'), ['amount' => '1000'])->assertSessionHas('status', 'Sales over R1 000.00 now need approval.');
     $this->actingAs($this->people['till'])->post($this->url, [...$this->sale, 'amount' => '1500', 'branch_id' => $this->main])
-        ->assertSessionHas('status', 'Sale saved — it needs a manager’s approval (over R1,000.00).');
+        ->assertSessionHas('status', 'Sale saved — it needs a manager’s approval (over R1 000.00).');
     $this->actingAs($this->people['till'])->post($this->url, [...$this->sale, 'amount' => '2000', 'branch_id' => $this->main]);
     [$first, $second] = ($this->in)(fn () => Sale::query()->orderBy('amount_cents')->get()->all());
     expect($first->status)->toBe('pending')->and(($this->in)(fn () => app(Commissions::class)->balance($this->thandi->id)['pending']))->toBe(0);

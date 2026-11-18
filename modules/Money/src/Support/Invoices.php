@@ -20,6 +20,7 @@ use Wurk\Money\Mail\InvoiceMail;
 use Wurk\Money\Models\Invoice;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Platform\Money\Money;
 use Wurk\Regions\Contracts\Countries;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -281,7 +282,7 @@ final readonly class Invoices
 
     public static function rand(int $cents): string
     {
-        return 'R'.number_format($cents / 100, 2, '.', ' ');
+        return Money::format((int) $cents);
     }
 
     private static function first(string $name): string

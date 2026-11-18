@@ -8,7 +8,7 @@ import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface SaleRow {
   id: string;
@@ -232,7 +232,10 @@ export default function RecordSale({
                     onChange={(e) => form.setData('email', e.target.value)}
                   />
                 </Field>
-                <Field label={__('Amount paid (R)')} error={form.errors.amount}>
+                <Field
+                  label={__('Amount paid (:currency)', { currency: currencySymbol() })}
+                  error={form.errors.amount}
+                >
                   <Input
                     type="number"
                     inputMode="decimal"
@@ -345,7 +348,7 @@ export default function RecordSale({
                           );
                         }}
                       >
-                        <Field label={__('Refund (R)')}>
+                        <Field label={__('Refund (:currency)', { currency: currencySymbol() })}>
                           <Input
                             type="number"
                             inputMode="decimal"

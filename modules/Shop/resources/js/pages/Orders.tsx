@@ -3,7 +3,7 @@ import { Badge } from '@/design-system/components/badge';
 import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { ShoppingBag } from 'lucide-react';
-import { __ } from '@/i18n';
+import { __, money } from '@/i18n';
 
 export const STATUS: Record<string, string> = {
   awaiting_payment: 'Awaiting payment',
@@ -15,7 +15,7 @@ export const STATUS: Record<string, string> = {
   cancelled: 'Cancelled',
   expired: 'Expired',
 };
-export const rand = (c: number) => `R${(c / 100).toFixed(2)}`;
+export const rand = (c: number) => money(c); // the business's currency (25.1b)
 
 interface Row {
   id: string;

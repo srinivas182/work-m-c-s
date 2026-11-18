@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/compon
 import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { ArrowLeftRight } from 'lucide-react';
-import { __ } from '@/i18n';
+import { __, money } from '@/i18n';
 
 interface Pair {
   from: string;
@@ -17,7 +17,7 @@ interface Pair {
   entries: { kind: string; reference: string; note: string; amount_cents: number; at: string }[];
 }
 
-const rand = (c: number) => `${c < 0 ? '−' : ''}R${(Math.abs(c) / 100).toFixed(2)}`;
+const rand = (c: number) => money(c); // the business's currency (25.1b)
 
 export default function Settlements({
   month,

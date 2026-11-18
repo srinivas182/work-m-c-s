@@ -8,7 +8,7 @@ import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface Row {
   id: string;
@@ -109,7 +109,7 @@ function RequestRow({ r, base }: { r: Row; base: string }) {
                 {__('First pay out or refund their wallet:')} {rand(r.wallet_cents)}.
               </p>
               <div className="flex flex-wrap items-end gap-2">
-                <Field label={__('Amount paid (R)')}>
+                <Field label={__('Amount paid (:currency)', { currency: currencySymbol() })}>
                   <Input
                     type="number"
                     inputMode="decimal"

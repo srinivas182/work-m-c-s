@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Payments\Contracts\StoreCredit;
+use Wurk\Platform\Money\Money;
 use Wurk\Referrals\Models\ReferralMember;
 use Wurk\Referrals\Models\ReferralProgramme;
 use Wurk\Team\Contracts\BranchLedger;
@@ -61,7 +62,7 @@ final readonly class Wallets implements StoreCredit
             $this->db()->table('referral_members')->where('tenant_id', $this->context->id())->where('id', $member->id)->lockForUpdate()->first(); // one spend at a time
             $usable = min($this->balance($member->id), intdiv($orderTotalCents * $this->rules()['max_wallet_bp'], 10000));
             if ($cents > $usable) {
-                throw new \DomainException('Only R'.number_format($usable / 100, 2).' of the wallet can be used on this order.');
+                throw new \DomainException('Only '.Money::format((int) $usable).' of the wallet can be used on this order.');
             }
             $this->line($member->id, 'spent', -$cents, $sourceType, $sourceId);
             $this->settleBranches($member->id, $cents, $sourceType, $sourceId, $branchId);

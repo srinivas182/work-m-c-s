@@ -15,7 +15,7 @@ import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { PhotoPicker } from '@modules/Website/resources/js/editor/PhotoPicker';
 import { Package } from 'lucide-react';
-import { __ } from '@/i18n';
+import { __, currencySymbol, moneyShort } from '@/i18n';
 
 interface VariantRow {
   id?: string;
@@ -56,7 +56,7 @@ interface Props {
 
 const base = () => window.location.pathname.replace(/\/products\/?$/, '');
 const selectClass = 'h-10 w-full rounded-md border border-border bg-bg px-3 text-sm';
-const rand = (c: number) => `R${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
+const rand = (c: number) => moneyShort(c); // the business's currency (25.1b)
 const blankVariant = (options: string[]): VariantRow => ({
   values: Object.fromEntries(options.map((o) => [o, ''])),
   sku: '',
@@ -336,7 +336,10 @@ function Editor({
                     />
                   </Field>
                 ))}
-                <Field label={__('Price (R)')} error={errors[`variants.${i}.price_cents`]}>
+                <Field
+                  label={__('Price (:currency)', { currency: currencySymbol() })}
+                  error={errors[`variants.${i}.price_cents`]}
+                >
                   <Input
                     type="number"
                     min={0}
@@ -345,7 +348,10 @@ function Editor({
                     onChange={(e) => setVariant(i, { price_cents: cents(e.target.value) ?? 0 })}
                   />
                 </Field>
-                <Field label={__('Was (R)')} error={errors[`variants.${i}.compare_at_cents`]}>
+                <Field
+                  label={__('Was (:currency)', { currency: currencySymbol() })}
+                  error={errors[`variants.${i}.compare_at_cents`]}
+                >
                   <Input
                     type="number"
                     min={0}

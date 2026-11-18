@@ -60,7 +60,7 @@ it('shows WURK’s MRR, businesses, churn, LTV and trial conversion — compared
         'Trial conversion' => 100.0,            // C
         'Lifetime value (estimate)' => 113150,  // R565.75 ÷ 50% a month
     ])->and($s['rows']['data'])->toContain(['Pro', '1', 'R832.50'])->toContain(['Starter', '1', 'R299.00'])
-        ->and($s['extra']['data'])->toBe([['ZA', '2', 'R1,131.50']])
+        ->and($s['extra']['data'])->toBe([['ZA', '2', 'R1 131.50']])
         ->and($s['highlights'])->toContain('1 new paying business, 1 lost.');
 });
 

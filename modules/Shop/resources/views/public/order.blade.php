@@ -47,12 +47,12 @@
       <thead><tr><th scope="col">{{ __('Item') }}</th><th scope="col">{{ __('Price') }}</th></tr></thead>
       <tbody>
       @foreach ($items as $item)
-        <tr><td>{{ $item->quantity }} × {{ $item->product_name }}@if ($item->variant_label) ({{ $item->variant_label }})@endif</td><td>R{{ number_format($item->line_cents / 100, 2) }}</td></tr>
+        <tr><td>{{ $item->quantity }} × {{ $item->product_name }}@if ($item->variant_label) ({{ $item->variant_label }})@endif</td><td>{{ \Wurk\Platform\Money\Money::format((int) ($item->line_cents)) }}</td></tr>
       @endforeach
       @if ($order->delivery_cents > 0)
-        <tr><td>{{ __('Delivery') }}</td><td>R{{ number_format($order->delivery_cents / 100, 2) }}</td></tr>
+        <tr><td>{{ __('Delivery') }}</td><td>{{ \Wurk\Platform\Money\Money::format((int) ($order->delivery_cents)) }}</td></tr>
       @endif
-        <tr><th scope="row">{{ __('Total (incl. VAT)') }}</th><th>R{{ number_format($order->total_cents / 100, 2) }}</th></tr>
+        <tr><th scope="row">{{ __('Total (incl. VAT)') }}</th><th>{{ \Wurk\Platform\Money\Money::format((int) ($order->total_cents)) }}</th></tr>
       </tbody>
     </table>
   </section>

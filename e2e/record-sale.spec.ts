@@ -41,6 +41,6 @@ test('the owner records an in-store sale for a new customer, refunds part of it 
   const limit = page.getByRole('form', { name: 'Approval limit' });
   await limit.getByLabel(/Sales over this amount need a manager/).fill('1000');
   await limit.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByText('Sales over R1,000.00 now need approval.')).toBeVisible();
+  await expect(page.getByText('Sales over R1 000.00 now need approval.')).toBeVisible();
   await expectAccessible(page);
 });

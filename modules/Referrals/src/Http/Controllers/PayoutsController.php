@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Platform\Money\Money;
 use Wurk\Referrals\Models\ReferralMember;
 use Wurk\Referrals\Models\ReferralPayout;
 use Wurk\Referrals\Support\Payouts;
@@ -86,7 +87,7 @@ final class PayoutsController
         $email = $this->contacts->emails([$contact])[$contact] ?? null;
         if ($email !== null) {
             app(MessageTemplates::class)->email($template, $email, ['client' => explode(' ', $this->contacts->names([$contact])[$contact] ?? 'there')[0],
-                'business' => $this->context->current()->displayName(), 'amount' => 'R'.number_format($p->cents / 100, 2), ...$extra]);
+                'business' => $this->context->current()->displayName(), 'amount' => Money::format((int) $p->cents), ...$extra]);
         }
     }
 

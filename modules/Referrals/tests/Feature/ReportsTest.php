@@ -76,7 +76,7 @@ it('works out every figure from this business alone (hand-checked)', function ()
 
 it('shows the referral tiles on the home page to the owner only, and only with referrals in the package', function () {
     $this->actingAs($this->owner)->get($this->app('/glow-salon'))->assertInertia(fn (Assert $p) => $p->component('Identity::Workspace')
-        ->where('tiles.0.label', 'Referral sales (this month)')->where('tiles.0.value', 'R1,400.00')
+        ->where('tiles.0.label', 'Referral sales (this month)')->where('tiles.0.value', 'R1 400.00')
         ->where('tiles.1.label', 'Wallet liability')->where('tiles.1.value', 'R150.00')->where('tiles.1.hint', 'R80.00 on its way'));
     $this->actingAs($this->staff)->get($this->app('/glow-salon'))->assertInertia(fn (Assert $p) => $p->where('tiles', []));
     // A package without referrals: no tiles, even for the owner.

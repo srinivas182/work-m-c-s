@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Wurk\Billing\Models\CreditNote;
+use Wurk\Platform\Money\Money;
 
 final class CreditNoteMail extends Mailable
 {
@@ -21,7 +22,7 @@ final class CreditNoteMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(text: 'billing::mail.credit-note', with: ['number' => $this->note->number, 'total' => 'R'.number_format($this->note->total_cents / 100, 2, '.', ' ')]);
+        return new Content(text: 'billing::mail.credit-note', with: ['number' => $this->note->number, 'total' => Money::zar((int) $this->note->total_cents)]);
     }
 
     /** @return list<Attachment> */
