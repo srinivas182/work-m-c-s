@@ -8,7 +8,14 @@ import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/
 import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/design-system/components/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 import { __ } from '@/i18n';

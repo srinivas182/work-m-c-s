@@ -2,7 +2,14 @@ import { Head, Link } from '@inertiajs/react';
 import { CircleCheck } from 'lucide-react';
 import { Badge } from '@/design-system/components/badge';
 import { EmptyState, PageHeader } from '@/design-system/components/feedback';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/design-system/components/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

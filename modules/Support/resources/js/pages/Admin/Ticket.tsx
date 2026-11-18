@@ -5,7 +5,13 @@ import { Button } from '@/design-system/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
 import { Field } from '@/design-system/components/field';
 import { PageHeader } from '@/design-system/components/feedback';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/design-system/components/select';
 import { Textarea } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { StatusBadge, Thread, type ThreadMessage } from '../../components/Thread';

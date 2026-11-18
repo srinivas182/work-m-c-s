@@ -2,11 +2,23 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/design-system/components/badge';
 import { Button } from '@/design-system/components/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/design-system/components/card';
 import { Field } from '@/design-system/components/field';
 import { Input, Textarea } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/design-system/components/select';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 import { __ } from '@/i18n';

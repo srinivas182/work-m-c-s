@@ -2,7 +2,13 @@ import { Head, useForm } from '@inertiajs/react';
 import { Check, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Button } from '@/design-system/components/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/design-system/components/card';
 import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';

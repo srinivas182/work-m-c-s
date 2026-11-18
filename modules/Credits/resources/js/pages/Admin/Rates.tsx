@@ -1,11 +1,30 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Button } from '@/design-system/components/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system/components/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/design-system/components/card';
 import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/design-system/components/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/design-system/components/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/design-system/components/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
 import { credits } from '../Summary';
 import { __ } from '@/i18n';
