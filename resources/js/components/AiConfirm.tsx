@@ -1,7 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Button, Dialog, DialogContent, DialogFooter } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/dialog';
 import { __ } from '@/i18n';
 
 export interface AiQuote {

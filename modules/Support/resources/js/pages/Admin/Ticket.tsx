@@ -1,21 +1,18 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { PageHeader } from '@/design-system/components/feedback';
 import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Field,
-  PageHeader,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Textarea,
-} from '@/design-system';
+} from '@/design-system/components/select';
+import { Textarea } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { StatusBadge, Thread, type ThreadMessage } from '../../components/Thread';
 import { __ } from '@/i18n';

@@ -1,7 +1,8 @@
 import { ActionBar, usePuck, type Overrides } from '@puckeditor/core';
 import { ArrowDown, ArrowUp, Plus } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Button, Dialog, DialogContent } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Dialog, DialogContent } from '@/design-system/components/dialog';
 import { __ } from '@/i18n';
 
 /**

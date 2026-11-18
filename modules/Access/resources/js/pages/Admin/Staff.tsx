@@ -1,39 +1,42 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { MailPlus, MoreHorizontal, ShieldCheck, ShieldOff, UserCog } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import { Avatar } from '@/design-system/components/avatar';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Avatar,
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogFooter,
+} from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  Field,
-  Input,
-  Label,
-  PageHeader,
+} from '@/design-system/components/dropdown-menu';
+import { Field, Label } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+} from '@/design-system/components/select';
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

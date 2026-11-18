@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
 import { rand } from '@/lib/money';
 import { MyWurkLayout } from '../../components/MyWurkLayout';
 import { __ } from '@/i18n';

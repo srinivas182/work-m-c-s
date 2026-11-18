@@ -1,16 +1,14 @@
 import { Head, Link } from '@inertiajs/react';
 import { Activity, Building2, Database, Plus, UserCog } from 'lucide-react';
+import { Button } from '@/design-system/components/button';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  EmptyState,
-  PageHeader,
-  StatCard,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { EmptyState, PageHeader, StatCard } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { auditLabel } from '@/lib/audit-labels';
 import { __ } from '@/i18n';

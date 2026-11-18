@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { Copy, Download } from 'lucide-react';
-import { Button, toast } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { toast } from '@/design-system/components/toast';
 import AuthLayout from '@/layouts/AuthLayout';
 import { __ } from '@/i18n';
 

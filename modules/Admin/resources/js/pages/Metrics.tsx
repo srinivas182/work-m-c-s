@@ -2,7 +2,8 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { BarChart3 } from 'lucide-react';
 import { type Section, SectionCard } from '@/components/ReportSections';
-import { Card, CardContent, CardHeader, CardTitle, EmptyState, PageHeader } from '@/design-system';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

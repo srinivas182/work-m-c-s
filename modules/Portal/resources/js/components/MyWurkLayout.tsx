@@ -1,6 +1,6 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { Button } from '@/design-system';
+import { Button } from '@/design-system/components/button';
 import { __ } from '@/i18n';
 
 /** My WURK's own simple layout (not a business's, not the back office). */

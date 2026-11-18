@@ -1,31 +1,34 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { CreditCard, Receipt } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Checkbox,
-  EmptyState,
-  Field,
-  Input,
-  PageHeader,
+} from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+} from '@/design-system/components/select';
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
 import { HelpTip } from '@/components/HelpTip';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';

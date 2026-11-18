@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { Button } from '@/design-system';
+import { Button } from '@/design-system/components/button';
 import { __ } from '@/i18n';
 
 /** The agent area's own layout (no business around it). */

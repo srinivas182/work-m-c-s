@@ -1,23 +1,24 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { KeyRound, Laptop, ShieldCheck, Smartphone } from 'lucide-react';
-import type { FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
-  OtpInput,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { OtpInput } from '@/design-system/components/otp-input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { MfaEnrolment } from './MfaSetup';
 import { RecoveryCodeList } from './RecoveryCodes';
 import { __ } from '@/i18n';
+import { dataThisMonth, setLiteChoice } from '@/lite';
 
 interface Session {
   id: string;
@@ -350,6 +351,50 @@ function LanguageCard({ current }: { current: string }) {
   );
 }
 
+/** Lite mode for this phone (24.4), and about how much data WURK used on it this month. */
+function LiteCard() {
+  const lite = (usePage().props.lite as { on: boolean; choice: 'auto' | 'on' | 'off' }) ?? {
+    on: false,
+    choice: 'auto',
+  };
+  const [mb] = useState(() => dataThisMonth()); // this phone's own count (the page renders only in the browser)
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{__('Lite mode')}</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-3 text-sm">
+        <p className="text-fg-muted">
+          {__(
+            'Lighter pages for prepaid data and a weak signal: smaller pictures, no moving slides, fewer refreshes.',
+          )}
+        </p>
+        <label className="grid gap-1">
+          <span>{__('On this phone')}</span>
+          <select
+            className="border-border bg-bg min-h-10 rounded-md border px-3"
+            value={lite.choice}
+            onChange={(e) => {
+              setLiteChoice(e.target.value as 'auto' | 'on' | 'off');
+              window.location.reload();
+            }}
+          >
+            <option value="auto">
+              {__('Automatic (when data saver is on or the signal is slow)')}
+            </option>
+            <option value="on">{__('Always on')}</option>
+            <option value="off">{__('Off')}</option>
+          </select>
+        </label>
+        <p>
+          {lite.on ? __('Lite mode is on now.') : __('Lite mode is off now.')}{' '}
+          {__('WURK used about :mb MB on this phone this month.', { mb: mb.toFixed(1) })}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Security(props: Props) {
   return (
     <AppShell title="Account & security">
@@ -363,6 +408,7 @@ export default function Security(props: Props) {
           <div className="grid content-start gap-6">
             <ProfileCard profile={props.profile} />
             <LanguageCard current={props.profile.locale} />
+            <LiteCard />
             <PasswordCard hasPassword={props.hasPassword} />
           </div>
           <div className="grid content-start gap-6">

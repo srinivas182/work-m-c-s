@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
-import { Button, Checkbox } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Checkbox } from '@/design-system/components/choice';
 import { PortalLayout } from '../components/PortalLayout';
 import { __ } from '@/i18n';
 

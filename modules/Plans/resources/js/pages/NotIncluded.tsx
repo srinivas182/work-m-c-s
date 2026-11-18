@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
-import { EmptyState } from '@/design-system';
+import { EmptyState } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

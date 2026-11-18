@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Button, Card, CardContent } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent } from '@/design-system/components/card';
 import { AgentLayout } from '../../components/AgentLayout';
 import { __ } from '@/i18n';
 

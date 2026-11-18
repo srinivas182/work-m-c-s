@@ -12,28 +12,23 @@ import {
   User,
 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
+import { Avatar } from '@/design-system/components/avatar';
+import { Button } from '@/design-system/components/button';
+import { cn } from '@/design-system/lib/cn';
+import { Dialog, DialogContent, Sheet, SheetContent } from '@/design-system/components/dialog';
 import {
-  Avatar,
-  Button,
-  cn,
-  Dialog,
-  DialogContent,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Input,
-  Sheet,
-  SheetContent,
-  Toaster,
-  toast,
-  Tooltip,
-  TooltipProvider,
-  useTheme,
-  type ThemePreference,
-} from '@/design-system';
+} from '@/design-system/components/dropdown-menu';
+import { Input } from '@/design-system/components/input';
+import { Toaster, toast } from '@/design-system/components/toast';
+import { Tooltip, TooltipProvider } from '@/design-system/components/tooltip';
+import { useTheme } from '@/design-system/theme/use-theme';
+import { type ThemePreference } from '@/design-system/theme/theme';
 import { AskWurk } from '@/components/AskWurk';
 import { HelpPanel } from '@/components/HelpPanel';
 import { icon } from '@/design-system/icons';

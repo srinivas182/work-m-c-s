@@ -2,20 +2,18 @@ import { Head, useForm } from '@inertiajs/react';
 import { Plus, Sparkles, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { AiConfirm } from '@/components/AiConfirm';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import {
-  Button,
-  Card,
-  CardContent,
-  Field,
-  Input,
-  PageHeader,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Textarea,
-} from '@/design-system';
+} from '@/design-system/components/select';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

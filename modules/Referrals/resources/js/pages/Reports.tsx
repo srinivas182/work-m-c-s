@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from '@/design-system';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 import { __ } from '@/i18n';

@@ -1,7 +1,10 @@
 import { usePage } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { Button, Sheet, SheetContent, Textarea, Tooltip } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Sheet, SheetContent } from '@/design-system/components/dialog';
+import { Textarea } from '@/design-system/components/input';
+import { Tooltip } from '@/design-system/components/tooltip';
 import { __ } from '@/i18n';
 
 interface Source {

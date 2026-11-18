@@ -1,25 +1,26 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Building2, Plus, Search } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import {
-  Badge,
-  Button,
-  EmptyState,
-  Field,
-  Input,
-  PageHeader,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+} from '@/design-system/components/select';
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

@@ -6,9 +6,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  EmptyState,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

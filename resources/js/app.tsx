@@ -3,12 +3,16 @@ import { createRoot, hydrateRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
 import { reportCrash, watchForErrors } from '@/lib/recent-error';
 import { resolvePage } from '@/lib/resolve-page';
+import { startLite } from '@/lite';
 
 type PageModule = { default: ComponentType };
 
 const pages = {
-  ...import.meta.glob<PageModule>('./pages/**/*.tsx'),
-  ...import.meta.glob<PageModule>('../../modules/*/resources/js/pages/**/*.tsx'),
+  ...import.meta.glob<PageModule>(['./pages/**/*.tsx', '!**/*.test.tsx']),
+  ...import.meta.glob<PageModule>([
+    '../../modules/*/resources/js/pages/**/*.tsx',
+    '!**/*.test.tsx',
+  ]), // tests are never shipped
 };
 
 void createInertiaApp({
@@ -16,6 +20,7 @@ void createInertiaApp({
   resolve: async (name) => (await resolvePage(name, pages)).default,
   setup({ el, App, props }) {
     watchForErrors(); // for "Contact support" (16.3) and Watchtower (18.0)
+    startLite(); // lite mode and the data counter (24.4)
     // A screen that crashes while drawing is reported to Watchtower (18.0).
     const onUncaughtError = (error: unknown) => {
       if (error instanceof Error) reportCrash(error.message, error.stack, 'render');

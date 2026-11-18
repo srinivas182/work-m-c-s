@@ -1,5 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Button, Card, CardContent, Field, PageHeader } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
 

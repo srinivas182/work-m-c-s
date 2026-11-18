@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { Badge, EmptyState, PageHeader } from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { ShoppingBag } from 'lucide-react';
 import { __ } from '@/i18n';
