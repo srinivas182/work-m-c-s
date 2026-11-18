@@ -19,7 +19,7 @@ final readonly class WurkPayments implements PlatformPayments
     {
         $ready = PlatformPaymentAccount::query()->where('active', true)->get()->filter(fn (PlatformPaymentAccount $a) => $a->hasKeys($a->mode))->pluck('provider')->all();
 
-        return array_values(array_filter(PlatformMethods::ONLINE, fn (string $p) => in_array($p, $ready, true)));
+        return array_values(array_filter(array_intersect(PlatformMethods::ONLINE, PlatformMethods::WURK), fn (string $p) => in_array($p, $ready, true)));
     }
 
     public function handles(string $reference): bool

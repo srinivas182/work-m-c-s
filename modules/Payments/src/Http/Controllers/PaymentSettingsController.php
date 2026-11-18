@@ -16,6 +16,7 @@ use Wurk\Payments\Gateways\Paystack;
 use Wurk\Payments\Gateways\Yoco;
 use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Support\KeyFields;
+use Wurk\Payments\Support\MobileMoney;
 use Wurk\Payments\Support\PlatformMethods;
 use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Tenancy\Contracts\BranchDirectory;
@@ -47,7 +48,7 @@ final class PaymentSettingsController
                 'account' => $summary($all->first(fn (PaymentAccount $a) => $a->provider === $p && $a->branch_id === null)),
                 // Several branches: a branch's own account (otherwise it uses the business's).
                 'branches' => count($branches) > 1 ? (object) collect($branches)->mapWithKeys(fn (array $b) => [$b['id'] => $summary($all->first(fn (PaymentAccount $a) => $a->provider === $p && $a->branch_id === $b['id']))])->all() : (object) [],
-            ], PlatformMethods::ALL),
+            ], PlatformMethods::forCountry($this->context->current()->countryCode())),
             'branches' => count($branches) > 1 ? array_map(fn (array $b) => ['id' => $b['id'], 'name' => $b['name']], $branches) : [],
         ]);
     }
@@ -55,8 +56,11 @@ final class PaymentSettingsController
     /** Keys for one mode (test or live). */
     public function keys(Request $request, string $provider, string $mode): RedirectResponse
     {
-        abort_unless($this->platform->available($provider), 404);
+        abort_unless($this->platform->available($provider) && $this->serves($provider), 404);
         $keys = array_map(fn ($v) => trim((string) $v), $request->validate(KeyFields::rules($provider, $mode), KeyFields::messages($mode, $provider)));
+        if (in_array($provider, PlatformMethods::MOBILE, true) && ! MobileMoney::gateway($provider)->check(new PaymentAccount(['provider' => $provider, 'mode' => $mode, $mode.'_credentials' => $keys]))) {
+            throw ValidationException::withMessages([array_key_first($keys) => PlatformMethods::NAMES[$provider].' didn’t accept those keys. Check them and try again.']);
+        }
         if ($provider === 'paystack' && ! Paystack::check(new PaymentAccount(['provider' => 'paystack', 'mode' => $mode, $mode.'_credentials' => $keys]))) {
             throw ValidationException::withMessages(['secret_key' => 'Paystack didn’t accept that key. Check it (Settings → API Keys & Webhooks in Paystack) and try again.']);
         }
@@ -97,6 +101,7 @@ final class PaymentSettingsController
     /** On or off, and test or live (live only with live keys). */
     public function settings(Request $request, string $provider): RedirectResponse
     {
+        abort_unless($this->serves($provider), 404);
         $data = $request->validate(['active' => ['required', 'boolean'], 'mode' => ['required', 'in:test,live']]);
         $account = $this->find($provider, $this->branch($request));
 
@@ -134,6 +139,12 @@ final class PaymentSettingsController
     }
 
     /** The branch a setting is for (?branch=…), or null for the whole business. Only open branches. */
+    /** Mobile money only where its provider works (Sprint 22.2). */
+    private function serves(string $provider): bool
+    {
+        return PlatformMethods::servesCountry($provider, $this->context->current()->countryCode());
+    }
+
     private function branch(Request $request): ?string
     {
         $branch = $request->query('branch');

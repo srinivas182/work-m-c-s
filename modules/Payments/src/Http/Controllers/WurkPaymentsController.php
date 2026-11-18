@@ -26,7 +26,7 @@ final class WurkPaymentsController
 
     public function notify(Request $request, string $provider, WurkPayments $payments): Response
     {
-        if (! in_array($provider, PlatformMethods::ONLINE, true)) {
+        if (! in_array($provider, PlatformMethods::ONLINE, true) || ! in_array($provider, PlatformMethods::WURK, true)) {
             return new Response('', 404);
         }
         $posted = [];

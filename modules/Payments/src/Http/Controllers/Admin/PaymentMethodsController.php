@@ -32,6 +32,8 @@ final class PaymentMethodsController
 
         return Inertia::render('Payments::Admin/PaymentMethods', ['methods' => array_map(fn (string $p) => [
             'provider' => $p, 'name' => PlatformMethods::NAMES[$p], 'available' => $this->platform->available($p),
+            // Mobile money is only for businesses' own tills and wallets; WURK's own is Flutterwave (Sprint 22.4).
+            'wurk_account' => in_array($p, PlatformMethods::WURK, true), 'countries' => PlatformMethods::COUNTRIES[$p] ?? null,
             'wurk' => ($a = $accounts[$p] ?? null) === null ? null : [
                 'active' => $a->active, 'mode' => $a->mode, 'label' => $a->label, 'has_test' => $a->hasKeys('test'), 'has_live' => $a->hasKeys('live'),
             ],
