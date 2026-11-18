@@ -1,7 +1,10 @@
 import { useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Button, Field, Input } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import { PortalLayout } from '../components/PortalLayout';
+import { __ } from '@/i18n';
 
 export default function SignIn({
   business,
@@ -18,20 +21,20 @@ export default function SignIn({
   const ask = useForm({ contact: '' });
   const verify = useForm({ code: '', name: '' });
   return (
-    <PortalLayout business={business} title="Your account">
+    <PortalLayout business={business} title={__('Your account')}>
       <p className="text-fg-muted text-sm">
-        Sign in to see your rewards, referral link, orders and bookings with {business}.
+        {__('Sign in to see your rewards, referral link, orders and bookings with')} {business}.
       </p>
       {!sent ? (
         <form
-          aria-label="Get a sign-in code"
+          aria-label={__('Get a sign-in code')}
           className="grid gap-3"
           onSubmit={(e) => {
             e.preventDefault();
             ask.post('/account/code');
           }}
         >
-          <Field label="Phone number or email" error={ask.errors.contact}>
+          <Field label={__('Phone number or email')} error={ask.errors.contact}>
             <Input
               autoComplete="username"
               value={ask.data.contact}
@@ -39,12 +42,12 @@ export default function SignIn({
             />
           </Field>
           <Button type="submit" className="justify-self-start" loading={ask.processing}>
-            Send me a code
+            {__('Send me a code')}
           </Button>
         </form>
       ) : (
         <form
-          aria-label="Enter your code"
+          aria-label={__('Enter your code')}
           className="grid gap-3"
           onSubmit={(e) => {
             e.preventDefault();
@@ -60,7 +63,7 @@ export default function SignIn({
             />
           </Field>
           {(errors.name || verify.errors.name) && (
-            <Field label="Your name" error={verify.errors.name ?? errors.name}>
+            <Field label={__('Your name')} error={verify.errors.name ?? errors.name}>
               <Input
                 autoComplete="name"
                 value={verify.data.name}
@@ -69,7 +72,7 @@ export default function SignIn({
             </Field>
           )}
           <Button type="submit" className="justify-self-start" loading={verify.processing}>
-            Sign in
+            {__('Sign in')}
           </Button>
         </form>
       )}
@@ -82,25 +85,25 @@ export default function SignIn({
               className="justify-self-start"
               onClick={() => setWithPassword(true)}
             >
-              Sign in with a password instead
+              {__('Sign in with a password instead')}
             </Button>
           ) : (
             <form
-              aria-label="Sign in with a password"
+              aria-label={__('Sign in with a password')}
               className="grid gap-3"
               onSubmit={(e) => {
                 e.preventDefault();
                 pwd.post('/account/password');
               }}
             >
-              <Field label="Phone number or email" error={pwd.errors.identifier}>
+              <Field label={__('Phone number or email')} error={pwd.errors.identifier}>
                 <Input
                   autoComplete="username"
                   value={pwd.data.identifier}
                   onChange={(e) => pwd.setData('identifier', e.target.value)}
                 />
               </Field>
-              <Field label="Password" error={pwd.errors.password}>
+              <Field label={__('Password')} error={pwd.errors.password}>
                 <Input
                   type="password"
                   autoComplete="current-password"
@@ -109,7 +112,7 @@ export default function SignIn({
                 />
               </Field>
               <Button type="submit" className="justify-self-start" loading={pwd.processing}>
-                Sign in
+                {__('Sign in')}
               </Button>
             </form>
           )}

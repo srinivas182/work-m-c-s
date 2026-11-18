@@ -1,17 +1,13 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Data {
   id: string;
@@ -79,12 +75,12 @@ export default function Contact({
         />
         <p>
           <Link href={list} className="underline">
-            ← All contacts
+            {__('← All contacts')}
           </Link>
         </p>
         <Card>
           <CardHeader>
-            <CardTitle>Details</CardTitle>
+            <CardTitle>{__('Details')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm">
             <p className="flex flex-wrap gap-1">
@@ -95,7 +91,7 @@ export default function Contact({
                   </Badge>
                 ))
               ) : (
-                <span className="text-fg-muted">No tags</span>
+                <span className="text-fg-muted">{__('No tags')}</span>
               )}
             </p>
             <p>
@@ -111,7 +107,7 @@ export default function Contact({
                 className="justify-self-start"
                 onClick={() => setEditing(true)}
               >
-                Edit
+                {__('Edit')}
               </Button>
             )}
             {canManage && !editing && (
@@ -128,12 +124,12 @@ export default function Contact({
                     router.delete(window.location.pathname);
                 }}
               >
-                Delete customer
+                {__('Delete customer')}
               </Button>
             )}
             {editing && (
               <form
-                aria-label="Edit contact"
+                aria-label={__('Edit contact')}
                 className="grid gap-3 sm:grid-cols-2"
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -147,33 +143,33 @@ export default function Contact({
                   form.put(base, { preserveScroll: true, onSuccess: () => setEditing(false) });
                 }}
               >
-                <Field label="Name" error={form.errors.name}>
+                <Field label={__('Name')} error={form.errors.name}>
                   <Input
                     value={form.data.name}
                     onChange={(e) => form.setData('name', e.target.value)}
                   />
                 </Field>
-                <Field label="Phone" error={form.errors.phone}>
+                <Field label={__('Phone')} error={form.errors.phone}>
                   <Input
                     type="tel"
                     value={form.data.phone}
                     onChange={(e) => form.setData('phone', e.target.value)}
                   />
                 </Field>
-                <Field label="Email" error={form.errors.email}>
+                <Field label={__('Email')} error={form.errors.email}>
                   <Input
                     type="email"
                     value={form.data.email}
                     onChange={(e) => form.setData('email', e.target.value)}
                   />
                 </Field>
-                <Field label="Tags (separated by commas)">
+                <Field label={__('Tags (separated by commas)')}>
                   <Input
                     value={form.data.tags}
                     onChange={(e) => form.setData('tags', e.target.value)}
                   />
                 </Field>
-                <Field label="Notes">
+                <Field label={__('Notes')}>
                   <textarea
                     className="border-border bg-bg min-h-24 rounded-md border p-2 text-sm"
                     value={form.data.notes}
@@ -185,7 +181,7 @@ export default function Contact({
                   className="self-end justify-self-start"
                   loading={form.processing}
                 >
-                  Save contact
+                  {__('Save contact')}
                 </Button>
               </form>
             )}
@@ -194,24 +190,24 @@ export default function Contact({
         {canManage && (
           <Card>
             <CardHeader>
-              <CardTitle>New lead</CardTitle>
+              <CardTitle>{__('New lead')}</CardTitle>
             </CardHeader>
             <CardContent>
               <form
-                aria-label="New lead"
+                aria-label={__('New lead')}
                 className="flex flex-wrap items-end gap-3"
                 onSubmit={(e) => {
                   e.preventDefault();
                   lead.post(list.replace(/\/contacts$/, '/leads'), { preserveScroll: true });
                 }}
               >
-                <Field label="What it’s about" error={lead.errors.title}>
+                <Field label={__('What it’s about')} error={lead.errors.title}>
                   <Input
                     value={lead.data.title}
                     onChange={(e) => lead.setData('title', e.target.value)}
                   />
                 </Field>
-                <Field label="Value (R, optional)" error={lead.errors.value}>
+                <Field label={__('Value (R, optional)')} error={lead.errors.value}>
                   <Input
                     type="number"
                     min={0}
@@ -222,7 +218,7 @@ export default function Contact({
                   />
                 </Field>
                 <Button type="submit" variant="secondary" loading={lead.processing}>
-                  Add lead
+                  {__('Add lead')}
                 </Button>
               </form>
             </CardContent>
@@ -230,10 +226,10 @@ export default function Contact({
         )}
         <Card>
           <CardHeader>
-            <CardTitle>History</CardTitle>
+            <CardTitle>{__('History')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul aria-label="History" className="grid gap-2 text-sm">
+            <ul aria-label={__('History')} className="grid gap-2 text-sm">
               {history.map((h, k) => (
                 <li key={k} className="flex flex-wrap gap-2">
                   <Badge tone="neutral">{KIND[h.type] ?? h.type}</Badge>
@@ -250,12 +246,12 @@ export default function Contact({
         {canManage && (
           <Card>
             <CardHeader>
-              <CardTitle>Same person?</CardTitle>
+              <CardTitle>{__('Same person?')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 text-sm">
               {merged.map((m) => (
                 <p key={m.id} className="flex flex-wrap items-center gap-2">
-                  Merged in: {m.name}
+                  {__('Merged in:')} {m.name}
                   <Button
                     size="sm"
                     variant="ghost"
@@ -264,28 +260,30 @@ export default function Contact({
                       router.post(`${base}/split/${m.id}`, {}, { preserveScroll: true })
                     }
                   >
-                    Split
+                    {__('Split')}
                   </Button>
                 </p>
               ))}
               <form
-                aria-label="Find a contact to merge"
+                aria-label={__('Find a contact to merge')}
                 className="flex flex-wrap items-end gap-3"
                 onSubmit={(e) => {
                   e.preventDefault();
                   void find();
                 }}
               >
-                <Field label="Find a contact to merge in">
+                <Field label={__('Find a contact to merge in')}>
                   <Input value={mergeQ} onChange={(e) => setMergeQ(e.target.value)} />
                 </Field>
                 <Button type="submit" variant="secondary">
-                  Find
+                  {__('Find')}
                 </Button>
               </form>
               {found && (
-                <ul aria-label="Contacts to merge" className="grid gap-2">
-                  {found.length === 0 && <li className="text-fg-muted">No one else matches.</li>}
+                <ul aria-label={__('Contacts to merge')} className="grid gap-2">
+                  {found.length === 0 && (
+                    <li className="text-fg-muted">{__('No one else matches.')}</li>
+                  )}
                   {found.map((f) => (
                     <li key={f.id} className="flex flex-wrap items-center gap-2">
                       {f.name} {[f.phone, f.email].filter(Boolean).join(' · ')}
@@ -306,7 +304,7 @@ export default function Contact({
                             );
                         }}
                       >
-                        Merge
+                        {__('Merge')}
                       </Button>
                     </li>
                   ))}

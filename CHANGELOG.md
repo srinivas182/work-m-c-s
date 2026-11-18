@@ -4,6 +4,75 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.25.0] — 2026-11-19 — Sprint 24: Languages & light on data
+
+### Fixed
+- **Late-evening sales are counted on their own day.**
+  - Between 22:00 and midnight in South Africa, a sale or payment was missing from that day's cash-up, evening summary, shop and money figures.
+  - The cause: dates in database queries were compared in UTC, while times are stored in the app's time zone. Every date in a query is now converted first.
+  - This affected v0.23.0–v0.24.0. Late-evening figures from those versions may have been too low.
+- **The production Docker image builds again.** The data-budget check runs during the build, and its script is now included in the image.
+
+### Release — Sprint 24.6
+- End-to-end tests (desktop and mobile):
+  - an owner picks their language;
+  - lite mode follows the choice for the phone;
+  - an expense recorded with no signal waits and is sent once when the signal returns.
+- Covered by feature tests instead: translations and reviews, customer messages and pages in the customer's language, Data Saver, and the "sent once" rule.
+
+### Offline — Sprint 24.5 (keep working with a weak signal, catch up later)
+- **WURK opens without a signal:**
+  - A service worker keeps the app's files on the phone and shows the last-seen pages, with a bar that says you're offline.
+  - The app can be added to the home screen (a web app manifest), which is the base for Sprint 26's app.
+- **Saved now, sent later**, for six everyday changes only (decision E): record a sale, money taken in person, add a booking, add an expense, a cash-up count, and a chat reply.
+  - Offline, or when the signal drops mid-way, the change is kept on the phone and shown as "waiting to send". It's sent when the signal returns.
+  - If something changed meanwhile (for example, the time was taken), the person is told plainly what wasn't recorded.
+  - Nothing that moves money online is queued.
+- **Sent once:** each change carries its own `Idempotency-Key`. The server records the first that succeeds and answers any repeat "Already sent" (`IdempotentRequests` middleware).
+- **Signing out** clears the phone's saved pages and anything waiting to send.
+
+### Lite mode — Sprint 24.4 (light on data)
+- **Lite mode switches on by itself** when the browser's Data Saver is on (`Save-Data`) or the connection is 2G/3G. A person can set it to Automatic, Always on or Off for their phone in Account & security, which also shows about how much data WURK used on that phone this month.
+- **What lite mode changes:**
+  - On the business's site: web fonts aren't preloaded and system fonts are used; the hero slideshow doesn't move by itself; pages `Vary` on Save-Data.
+  - In the back office: the page is marked lite, for the next steps to build on.
+- **Data budget, checked on every build** (`scripts/bundle-budget.mjs`, run by `pnpm build`):
+  - Each page's own code must stay within 60 KB compressed; the heaviest today is about 30 KB. The page editor, branding and the design showcase have their own larger limits.
+  - The first load must stay within 225 KB compressed. That is a ceiling that only comes down: it's 219 KB today, and the approved target is 170 KB.
+- **Lighter:** test files are no longer shipped in the app, and pages import design-system components directly.
+
+### Languages — Sprint 24.3a (customer pages in the customer's language)
+- **On a business's own address, pages follow the customer's language.** It comes from `?lang=` (remembered), then the cookie, then the browser. The pages say which language they're in (`<html lang>`, `Content-Language`), and the customer's language is remembered with their contact for their messages.
+- **Translated so far:** the invoice page, the booking confirmations and manage pages, class and table pages, the shop order page, the mobile money and payment hand-off pages, and the enquiry thank-you page. The invoice page has language links.
+- **Signed links stay valid** when `lang` or `utm_source` is added.
+- `scripts/i18n-blade.py` marks plain texts in Blade views; sentences with values are written by hand with placeholders.
+
+### Languages — Sprint 24.2b (messages in the customer's language)
+- **Messages to customers follow the customer's language.** Booking messages, reminders, receipts, invoice messages and invoice reminders use the standard wording translated. A business's own wording is used exactly as they wrote it.
+- **Each customer's language is remembered** from the customer page they used (24.3 turns this on), or set by the business. It's kept on the contact as `contacts.locale`, through `ContactBook::locale()` / `setLocale()`.
+- Template placeholders (`{client}`) are protected in translations, like `:name`.
+- Still to come: WhatsApp templates in each reviewed language, and dates spelt out in the customer's language.
+
+### Languages — Sprint 24.2a (drafts and reviews)
+- **Admin → Settings → Languages:** each language's progress (drafted and reviewed). **Draft the missing texts with WURK AI** runs in the background, using the language's glossary. Each language can be offered or withdrawn.
+- **Reviewers** (the new permission `languages.review`) correct texts in context, one at a time, and save them as reviewed. A review takes effect at once in PHP and the browser, with no release needed.
+- **Drafts and reviews stay safe:** a draft never replaces a review, and a text whose :placeholders don't match the English is refused.
+- **Preview:** a language is marked "preview" in the language picker until 95% of its texts are reviewed (decision A).
+
+### Languages — Sprint 24.1b (the back office's texts)
+- **Every fixed text on the back-office screens is marked for translation, about 2,400 in all.** That covers labels, buttons, headings, hints, placeholders and accessible names, plus the menu and fixed flash messages. They show in each person's language as translations arrive, and in English until then.
+- `scripts/i18n-codemod.mjs` marks texts in React files; it was run here for every back-office page. Pages use `__()`, because many already have a local variable called `t`.
+- Not yet included: the business's public site and the wurk.co.za marketing pages, which come with customer pages in 24.3.
+
+### Languages — Sprint 24.1a (the foundation)
+- **Account & security → Language:** each person picks the language WURK uses for them, from English, isiZulu, isiXhosa, Afrikaans, Sesotho, Swahili, French, Portuguese, Hausa and Yoruba. Visitors get theirs from `?lang=` (remembered), then their browser.
+- **How translations work:**
+  - Texts are written in English and marked for translation (`t()` in React, `__()` in PHP).
+  - Each language's translations load as a small cached script before the app, so pages draw in the right language from the start.
+  - Anything not yet translated shows in English.
+- **Money is written the same way on the server and in the browser:** R1 380.00, or 1 380,00 R in French and Portuguese.
+- **The translation list is kept up to date:** `node scripts/i18n-extract.mjs` collects every marked text into `lang/_source.json`. `pnpm lint` fails when that list is out of date, and prints each language's coverage.
+
 ## [0.24.0] — 2026-11-18 — Sprint 23: Easy setup & money tools
 
 ### Release — Sprint 23.6

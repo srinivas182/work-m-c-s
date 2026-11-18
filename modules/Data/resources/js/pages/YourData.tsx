@@ -1,17 +1,17 @@
 import { Head, router } from '@inertiajs/react';
 import { Database } from 'lucide-react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  EmptyState,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Export {
   id: string;
@@ -47,48 +47,50 @@ function size(bytes: number): string {
 export default function YourData({ hours, exports }: Props) {
   const base = window.location.pathname.replace(/\/$/, '');
   return (
-    <AppShell title="Your data">
-      <Head title="Your data" />
+    <AppShell title={__('Your data')}>
+      <Head title={__('Your data')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Your data"
-          description="It’s yours. Download everything you keep in WURK, any time."
+          title={__('Your data')}
+          description={__('It’s yours. Download everything you keep in WURK, any time.')}
         />
         <Card>
           <CardHeader>
-            <CardTitle>Export everything</CardTitle>
+            <CardTitle>{__('Export everything')}</CardTitle>
             <CardDescription>
-              A ZIP with a spreadsheet (CSV) for each part of your business — customers, orders,
-              products, bookings, campaigns, website pages and more — and your files. We build it in
-              the background and email you a link that works for {hours} hours.
+              {__(
+                'A ZIP with a spreadsheet (CSV) for each part of your business — customers, orders, products, bookings, campaigns, website pages and more — and your files. We build it in the background and email you a link that works for',
+              )}{' '}
+              {hours} {__('hours.')}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm">
             <p className="text-fg-muted">
-              It holds your customers’ personal information — keep it somewhere safe. Patient
-              records are only included for people allowed to see them.
+              {__(
+                'It holds your customers’ personal information — keep it somewhere safe. Patient records are only included for people allowed to see them.',
+              )}
             </p>
             <Button
               className="justify-self-start"
               onClick={() => router.post(`${base}/export`, {}, { preserveScroll: true })}
             >
-              Export everything
+              {__('Export everything')}
             </Button>
           </CardContent>
         </Card>
         {exports.length === 0 ? (
           <EmptyState
             icon={Database}
-            title="No exports yet"
-            description="Your exports appear here while they can be downloaded."
+            title={__('No exports yet')}
+            description={__('Your exports appear here while they can be downloaded.')}
           />
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle>Your exports</CardTitle>
+              <CardTitle>{__('Your exports')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul aria-label="Your exports" className="divide-border grid divide-y text-sm">
+              <ul aria-label={__('Your exports')} className="divide-border grid divide-y text-sm">
                 {exports.map((e) => (
                   <li key={e.id} className="grid gap-1 py-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -99,7 +101,7 @@ export default function YourData({ hours, exports }: Props) {
                       )}
                       {e.download && (
                         <a className="ml-auto underline" href={e.download}>
-                          Download
+                          {__('Download')}
                         </a>
                       )}
                     </div>
@@ -111,7 +113,9 @@ export default function YourData({ hours, exports }: Props) {
                       </p>
                     )}
                     {e.status === 'ready' && e.expires && (
-                      <p className="text-fg-muted">Until {when.format(new Date(e.expires))}</p>
+                      <p className="text-fg-muted">
+                        {__('Until')} {when.format(new Date(e.expires))}
+                      </p>
                     )}
                   </li>
                 ))}

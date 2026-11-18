@@ -1,22 +1,25 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { ArrowDown, ArrowUp, CornerDownRight, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '@/design-system/components/button';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
-  PageHeader,
+} from '@/design-system/components/card';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/design-system';
+} from '@/design-system/components/select';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Item {
   label: string;
@@ -59,28 +62,28 @@ function ItemRow({
       className={`border-border grid gap-2 rounded-xl border p-3 sm:grid-cols-[1fr_9rem_1.3fr_auto] sm:items-center ${nested ? 'bg-sunken ml-6' : ''}`}
     >
       <Input
-        aria-label="Menu label"
+        aria-label={__('Menu label')}
         value={item.label}
         maxLength={40}
-        placeholder="Label"
+        placeholder={__('Label')}
         onChange={(e) => onChange({ ...item, label: e.target.value })}
       />
       <Select
         value={item.type}
         onValueChange={(v) => onChange({ ...item, type: v as Item['type'] })}
       >
-        <SelectTrigger aria-label="Links to">
+        <SelectTrigger aria-label={__('Links to')}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="page">A page</SelectItem>
-          <SelectItem value="link">A web address</SelectItem>
+          <SelectItem value="page">{__('A page')}</SelectItem>
+          <SelectItem value="link">{__('A web address')}</SelectItem>
         </SelectContent>
       </Select>
       {item.type === 'page' ? (
         <Select value={item.page_id ?? ''} onValueChange={(v) => onChange({ ...item, page_id: v })}>
-          <SelectTrigger aria-label="Page">
-            <SelectValue placeholder="Choose a page" />
+          <SelectTrigger aria-label={__('Page')}>
+            <SelectValue placeholder={__('Choose a page')} />
           </SelectTrigger>
           <SelectContent>
             {pages.map((p) => (
@@ -92,7 +95,7 @@ function ItemRow({
         </Select>
       ) : (
         <Input
-          aria-label="Web address"
+          aria-label={__('Web address')}
           value={item.href ?? ''}
           placeholder="https://…, #section, mailto: or tel:"
           onChange={(e) => onChange({ ...item, href: e.target.value })}
@@ -154,7 +157,7 @@ export default function Menus({ menus, pages, limits, base }: Props) {
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">
-          {items.length === 0 && <p className="text-fg-muted text-sm">No links yet.</p>}
+          {items.length === 0 && <p className="text-fg-muted text-sm">{__('No links yet.')}</p>}
           {items.map((item, i) => (
             <div key={i} className="grid gap-2">
               <ItemRow
@@ -227,7 +230,7 @@ export default function Menus({ menus, pages, limits, base }: Props) {
                     )
                   }
                 >
-                  <CornerDownRight /> Add a sub-item
+                  <CornerDownRight /> {__('Add a sub-item')}
                 </Button>
               )}
             </div>
@@ -243,7 +246,7 @@ export default function Menus({ menus, pages, limits, base }: Props) {
               className="w-fit"
               onClick={() => update(where, [...items, fresh()])}
             >
-              <Plus /> Add a link
+              <Plus /> {__('Add a link')}
             </Button>
           )}
         </CardContent>
@@ -252,12 +255,14 @@ export default function Menus({ menus, pages, limits, base }: Props) {
   };
 
   return (
-    <AppShell title="Menus">
-      <Head title="Menus" />
+    <AppShell title={__('Menus')}>
+      <Head title={__('Menus')} />
       <div className="grid max-w-4xl gap-8">
         <PageHeader
-          title="Menus"
-          description="What visitors see at the top and bottom of every page. Links to your pages update themselves if you change a page’s address."
+          title={__('Menus')}
+          description={__(
+            'What visitors see at the top and bottom of every page. Links to your pages update themselves if you change a page’s address.',
+          )}
           actions={
             <Button
               loading={saving}
@@ -269,7 +274,7 @@ export default function Menus({ menus, pages, limits, base }: Props) {
                 })
               }
             >
-              Save menus
+              {__('Save menus')}
             </Button>
           }
         />

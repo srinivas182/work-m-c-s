@@ -1,16 +1,12 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Owed {
   key: string;
@@ -77,7 +73,7 @@ function PaidButton({
         aria-label={`Mark paid: ${label}`}
         onClick={() => setOpen(true)}
       >
-        Mark paid
+        {__('Mark paid')}
       </Button>
     );
   }
@@ -134,21 +130,21 @@ function NewInvoice({ today }: { today: string }) {
         });
       }}
     >
-      <Field label="Customer’s name" error={form.errors.customer_name}>
+      <Field label={__('Customer’s name')} error={form.errors.customer_name}>
         <Input
           value={form.data.customer_name}
           onChange={(e) => form.setData('customer_name', e.target.value)}
         />
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Mobile (for WhatsApp or SMS)" error={form.errors.customer_phone}>
+        <Field label={__('Mobile (for WhatsApp or SMS)')} error={form.errors.customer_phone}>
           <Input
             type="tel"
             value={form.data.customer_phone}
             onChange={(e) => form.setData('customer_phone', e.target.value)}
           />
         </Field>
-        <Field label="Email" error={form.errors.customer_email}>
+        <Field label={__('Email')} error={form.errors.customer_email}>
           <Input
             type="email"
             value={form.data.customer_email}
@@ -157,12 +153,12 @@ function NewInvoice({ today }: { today: string }) {
         </Field>
       </div>
       <fieldset className="grid gap-2">
-        <legend className="mb-1 text-sm font-medium">What it’s for</legend>
+        <legend className="mb-1 text-sm font-medium">{__('What it’s for')}</legend>
         {form.data.lines.map((l, i) => (
           <div key={i} className="grid grid-cols-[1fr_4.5rem_6.5rem] gap-2">
             <Input
               aria-label={`Line ${i + 1}: description`}
-              placeholder="e.g. Wedding hair, 3 people"
+              placeholder={__('e.g. Wedding hair, 3 people')}
               value={l.description}
               onChange={(e) => setLine(i, 'description', e.target.value)}
             />
@@ -175,7 +171,7 @@ function NewInvoice({ today }: { today: string }) {
             <Input
               aria-label={`Line ${i + 1}: price each (R)`}
               inputMode="decimal"
-              placeholder="R"
+              placeholder={__('R')}
               value={String(l.unit)}
               onChange={(e) => setLine(i, 'unit', e.target.value)}
             />
@@ -194,11 +190,11 @@ function NewInvoice({ today }: { today: string }) {
             form.setData('lines', [...form.data.lines, { description: '', quantity: 1, unit: '' }])
           }
         >
-          Add a line
+          {__('Add a line')}
         </Button>
       </fieldset>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Due on" error={form.errors.due_on}>
+        <Field label={__('Due on')} error={form.errors.due_on}>
           <Input
             type="date"
             value={form.data.due_on}
@@ -212,25 +208,27 @@ function NewInvoice({ today }: { today: string }) {
               checked={form.data.vat}
               onChange={(e) => form.setData('vat', e.target.checked)}
             />
-            Add VAT (15%) — I’m VAT-registered
+            {__('Add VAT (15%) — I’m VAT-registered')}
           </label>
         </div>
       </div>
       {form.data.vat && (
-        <Field label="Your VAT number" error={form.errors.vat_number}>
+        <Field label={__('Your VAT number')} error={form.errors.vat_number}>
           <Input
             value={form.data.vat_number}
             onChange={(e) => form.setData('vat_number', e.target.value)}
           />
         </Field>
       )}
-      <p className="text-sm font-medium">Total: {rand(Math.round(total * 100))}</p>
+      <p className="text-sm font-medium">
+        {__('Total:')} {rand(Math.round(total * 100))}
+      </p>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" loading={form.processing} onClick={() => form.setData('send', true)}>
-          Save and send
+          {__('Save and send')}
         </Button>
         <Button type="submit" variant="secondary" onClick={() => form.setData('send', false)}>
-          Save as a draft
+          {__('Save as a draft')}
         </Button>
       </div>
     </form>
@@ -242,12 +240,14 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
   const post = (path: string, data: Record<string, string> = {}) =>
     router.post(`${tenantBase()}${path}`, data, { preserveScroll: true });
   return (
-    <AppShell title="Who owes me">
-      <Head title="Who owes me" />
+    <AppShell title={__('Who owes me')}>
+      <Head title={__('Who owes me')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Who owes me"
-          description="Money customers still owe you: deposits, pay-later orders, sales on account and invoices — in one list."
+          title={__('Who owes me')}
+          description={__(
+            'Money customers still owe you: deposits, pay-later orders, sales on account and invoices — in one list.',
+          )}
         />
         {warning && (
           <p role="alert" className="text-danger text-sm">
@@ -286,7 +286,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
                           href={`${tenantBase()}${o.link}`}
                           aria-label={`Open: ${o.title}, ${o.customer}`}
                         >
-                          Open
+                          {__('Open')}
                         </a>
                       </Button>
                       {o.settle && (
@@ -305,7 +305,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>New invoice</CardTitle>
+            <CardTitle>{__('New invoice')}</CardTitle>
           </CardHeader>
           <CardContent>
             <NewInvoice today={today} />
@@ -314,7 +314,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
         {invoices.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Invoices</CardTitle>
+              <CardTitle>{__('Invoices')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="grid gap-3 text-sm">
@@ -346,7 +346,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
                             aria-label={`Send ${i.label}`}
                             onClick={() => post(`/money/invoices/${i.id}/send`)}
                           >
-                            Send
+                            {__('Send')}
                           </Button>
                         ) : (
                           <Button
@@ -355,7 +355,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
                             aria-label={`Send a reminder for ${i.label}`}
                             onClick={() => post(`/money/invoices/${i.id}/remind`)}
                           >
-                            Send a reminder
+                            {__('Send a reminder')}
                           </Button>
                         )}
                         {i.has_phone && (
@@ -366,7 +366,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
                               rel="noopener noreferrer"
                               aria-label={`Share on WhatsApp: ${i.label}`}
                             >
-                              Share on WhatsApp
+                              {__('Share on WhatsApp')}
                             </a>
                           </Button>
                         )}
@@ -376,7 +376,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
                           aria-label={`Copy link: ${i.label}`}
                           onClick={() => void navigator.clipboard?.writeText(i.link)}
                         >
-                          Copy link
+                          {__('Copy link')}
                         </Button>
                         <PaidButton
                           path={`/money/invoices/${i.id}/paid`}
@@ -396,7 +396,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
                                 )
                               }
                             />
-                            Automatic reminders
+                            {__('Automatic reminders')}
                           </label>
                         )}
                         <Button
@@ -405,7 +405,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
                           aria-label={`Cancel invoice ${i.label}`}
                           onClick={() => post(`/money/invoices/${i.id}/void`)}
                         >
-                          Cancel invoice
+                          {__('Cancel invoice')}
                         </Button>
                       </div>
                     )}

@@ -1,18 +1,19 @@
 import { Head, useForm } from '@inertiajs/react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import { Switch } from '@/design-system/components/choice';
 import {
-  Badge,
-  Button,
-  Input,
-  PageHeader,
-  Switch,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Country {
   code: string;
@@ -53,7 +54,11 @@ function Row({ country }: { country: Country }) {
             checked={form.data.enabled}
             onCheckedChange={(v) => form.setData('enabled', v)}
           />
-          {country.enabled ? <Badge tone="success">Live</Badge> : <Badge>Off</Badge>}
+          {country.enabled ? (
+            <Badge tone="success">{__('Live')}</Badge>
+          ) : (
+            <Badge>{__('Off')}</Badge>
+          )}
         </span>
       </TableCell>
       <TableCell>
@@ -64,7 +69,7 @@ function Row({ country }: { country: Country }) {
           loading={form.processing}
           onClick={() => form.put(`/countries/${country.code}`, { preserveScroll: true })}
         >
-          Save
+          {__('Save')}
         </Button>
       </TableCell>
     </TableRow>
@@ -73,24 +78,26 @@ function Row({ country }: { country: Country }) {
 
 export default function Countries({ countries }: { countries: Country[] }) {
   return (
-    <AppShell title="Countries">
-      <Head title="Countries" />
+    <AppShell title={__('Countries')}>
+      <Head title={__('Countries')} />
       <div className="grid gap-8">
         <PageHeader
-          title="Countries"
-          description="Where businesses can sign up, with each country’s currency and VAT. Confirm the VAT rate with a tax adviser before switching a country on."
+          title={__('Countries')}
+          description={__(
+            'Where businesses can sign up, with each country’s currency and VAT. Confirm the VAT rate with a tax adviser before switching a country on.',
+          )}
         />
-        <Table label="Countries">
+        <Table label={__('Countries')}>
           <TableHeader>
             <TableRow>
-              <TableHead>Country</TableHead>
-              <TableHead>Currency</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Time zone</TableHead>
-              <TableHead>VAT (%)</TableHead>
-              <TableHead>Open for sign-up</TableHead>
+              <TableHead>{__('Country')}</TableHead>
+              <TableHead>{__('Currency')}</TableHead>
+              <TableHead>{__('Phone')}</TableHead>
+              <TableHead>{__('Time zone')}</TableHead>
+              <TableHead>{__('VAT (%)')}</TableHead>
+              <TableHead>{__('Open for sign-up')}</TableHead>
               <TableHead>
-                <span className="sr-only">Save</span>
+                <span className="sr-only">{__('Save')}</span>
               </TableHead>
             </TableRow>
           </TableHeader>

@@ -1,21 +1,15 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { HeartPulse } from 'lucide-react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  Field,
-  Input,
-  PageHeader,
-  StatCard,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, PageHeader, StatCard } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Signal {
   key: string;
@@ -72,15 +66,15 @@ export default function Health({
   const digest = useForm({ digest_email: digest_email ?? '' });
   const atRisk = (summary.at_risk?.mrr_cents ?? 0) + (summary.watch?.mrr_cents ?? 0);
   return (
-    <AppShell title="Business health">
-      <Head title="Business health" />
+    <AppShell title={__('Business health')}>
+      <Head title={__('Business health')} />
       <div className="grid max-w-6xl gap-6">
         <PageHeader
-          title="Business health"
+          title={__('Business health')}
           description={`Every business scored nightly from what WURK sees — with why, and what to do. ${computed_at ? `Last worked out ${when.format(new Date(computed_at))}.` : 'Not worked out yet — it runs nightly.'}`}
           actions={
             <Button asChild variant="secondary">
-              <a href={href({}).replace(base, `${base}/export`)}>Export CSV</a>
+              <a href={href({}).replace(base, `${base}/export`)}>{__('Export CSV')}</a>
             </Button>
           }
         />
@@ -93,9 +87,9 @@ export default function Health({
               hint={`${rand(summary[g]?.mrr_cents ?? 0)} MRR`}
             />
           ))}
-          <StatCard label="MRR at risk (watch + at risk)" value={rand(atRisk)} />
+          <StatCard label={__('MRR at risk (watch + at risk)')} value={rand(atRisk)} />
         </div>
-        <nav aria-label="Filter" className="flex flex-wrap items-end gap-2">
+        <nav aria-label={__('Filter')} className="flex flex-wrap items-end gap-2">
           {[['', 'Needs attention'], ...Object.entries(grades)].map(([g, label]) => (
             <Button
               key={g || 'attention'}
@@ -111,7 +105,7 @@ export default function Health({
               </Link>
             </Button>
           ))}
-          <span className="text-fg-muted self-center px-1 text-sm">Sort:</span>
+          <span className="text-fg-muted self-center px-1 text-sm">{__('Sort:')}</span>
           {Object.entries(sorts).map(([s, label]) => (
             <Button key={s} asChild size="sm" variant={filters.sort === s ? 'soft' : 'ghost'}>
               <Link href={href({ sort: s })} aria-current={filters.sort === s ? 'page' : undefined}>
@@ -128,11 +122,11 @@ export default function Health({
             window.location.href = href({ q });
           }}
         >
-          <Field label="Business name">
+          <Field label={__('Business name')}>
             <Input value={q} onChange={(e) => setQ(e.target.value)} />
           </Field>
           {packages.length > 0 && (
-            <nav aria-label="Package" className="flex flex-wrap gap-1">
+            <nav aria-label={__('Package')} className="flex flex-wrap gap-1">
               {['', ...packages].map((p) => (
                 <Button
                   key={p || 'all'}
@@ -146,17 +140,17 @@ export default function Health({
             </nav>
           )}
           <Button type="submit" variant="secondary">
-            Search
+            {__('Search')}
           </Button>
         </form>
         {rows.data.length === 0 ? (
           <EmptyState
             icon={HeartPulse}
-            title="Nothing to show"
-            description="No businesses match — or scores haven’t been worked out yet."
+            title={__('Nothing to show')}
+            description={__('No businesses match — or scores haven’t been worked out yet.')}
           />
         ) : (
-          <ul aria-label="Businesses" className="grid gap-3">
+          <ul aria-label={__('Businesses')} className="grid gap-3">
             {rows.data.map((r) => (
               <li key={r.tenant_id}>
                 <Card>
@@ -170,15 +164,16 @@ export default function Health({
                         <span
                           className={r.score < r.previous ? 'text-danger-11' : 'text-success-11'}
                         >
-                          {r.score < r.previous ? '▼' : '▲'} from {r.previous}
+                          {r.score < r.previous ? '▼' : '▲'} {__('from')} {r.previous}
                         </span>
                       )}
                       <span className="text-fg-muted">
-                        {r.package ?? 'No package'} · {rand(r.mrr_cents)}/month
+                        {r.package ?? 'No package'} · {rand(r.mrr_cents)}
+                        {__('/month')}
                       </span>
                     </div>
                     {r.signals.length === 0 ? (
-                      <p className="text-fg-muted">Nothing worrying.</p>
+                      <p className="text-fg-muted">{__('Nothing worrying.')}</p>
                     ) : (
                       <ul className="grid gap-1">
                         {r.signals.map((s) => (
@@ -196,26 +191,26 @@ export default function Health({
           </ul>
         )}
         {(rows.prev || rows.next) && (
-          <nav aria-label="Pages" className="flex gap-2">
+          <nav aria-label={__('Pages')} className="flex gap-2">
             {rows.prev && (
               <Button asChild variant="secondary" size="sm">
-                <Link href={rows.prev}>Previous</Link>
+                <Link href={rows.prev}>{__('Previous')}</Link>
               </Button>
             )}
             {rows.next && (
               <Button asChild variant="secondary" size="sm">
-                <Link href={rows.next}>Next</Link>
+                <Link href={rows.next}>{__('Next')}</Link>
               </Button>
             )}
           </nav>
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Weekly digest</CardTitle>
+            <CardTitle>{__('Weekly digest')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form
-              aria-label="Weekly digest"
+              aria-label={__('Weekly digest')}
               className="flex flex-wrap items-end gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -223,9 +218,9 @@ export default function Health({
               }}
             >
               <Field
-                label="Send Monday’s digest to"
+                label={__('Send Monday’s digest to')}
                 error={digest.errors.digest_email}
-                hint="Empty: WURK’s support inbox email."
+                hint={__('Empty: WURK’s support inbox email.')}
               >
                 <Input
                   type="email"
@@ -234,7 +229,7 @@ export default function Health({
                 />
               </Field>
               <Button type="submit" variant="secondary" loading={digest.processing}>
-                Save
+                {__('Save')}
               </Button>
             </form>
           </CardContent>

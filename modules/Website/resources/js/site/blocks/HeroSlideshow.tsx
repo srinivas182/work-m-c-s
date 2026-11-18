@@ -42,7 +42,9 @@ export function HeroSlideshow({
   const [paused, setPaused] = useState(false);
   const [held, setHeld] = useState(false);
   const reduced = useReducedMotion();
-  const playing = autoplay && !reduced && !paused && photos.length > 1;
+  // Lite mode (24.4): no automatic slides, so photos load only when someone moves to them.
+  const lite = typeof document !== 'undefined' && document.documentElement.dataset.lite === '1';
+  const playing = autoplay && !reduced && !lite && !paused && photos.length > 1;
 
   const go = (to: number) => {
     const next = (to + photos.length) % photos.length;

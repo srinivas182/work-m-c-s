@@ -1,26 +1,33 @@
 import { Head, useForm } from '@inertiajs/react';
-import { Card, CardContent, Label, PageHeader, Switch } from '@/design-system';
+import { Card, CardContent } from '@/design-system/components/card';
+import { Label } from '@/design-system/components/field';
+import { PageHeader } from '@/design-system/components/feedback';
+import { Switch } from '@/design-system/components/choice';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 export default function Business({ requireMfa }: { requireMfa: boolean }) {
   const form = useForm({ require_mfa: requireMfa });
   return (
-    <AppShell title="Team security">
-      <Head title="Team security" />
+    <AppShell title={__('Team security')}>
+      <Head title={__('Team security')} />
       <div className="grid max-w-3xl gap-8">
         <PageHeader
-          title="Team security"
-          description="Protect your business by asking everyone on the team to use an authenticator app when they sign in."
+          title={__('Team security')}
+          description={__(
+            'Protect your business by asking everyone on the team to use an authenticator app when they sign in.',
+          )}
         />
         <Card>
           <CardContent className="flex items-start justify-between gap-6 p-6">
             <div>
               <Label htmlFor="require-mfa" className="text-base">
-                Require an authenticator app
+                {__('Require an authenticator app')}
               </Label>
               <p className="text-fg-muted mt-1 text-sm">
-                Team members without one are asked to set it up before they can continue. Set up
-                your own first.
+                {__(
+                  'Team members without one are asked to set it up before they can continue. Set up your own first.',
+                )}
               </p>
               {form.errors.require_mfa && (
                 <p className="text-danger-11 mt-2 text-sm" role="alert">

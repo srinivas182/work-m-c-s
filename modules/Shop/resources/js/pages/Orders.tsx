@@ -1,7 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
-import { Badge, EmptyState, PageHeader } from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { ShoppingBag } from 'lucide-react';
+import { __ } from '@/i18n';
 
 export const STATUS: Record<string, string> = {
   awaiting_payment: 'Awaiting payment',
@@ -47,14 +49,16 @@ export default function Orders({
 }) {
   const base = window.location.pathname.replace(/\/$/, '');
   return (
-    <AppShell title="Orders">
-      <Head title="Orders" />
+    <AppShell title={__('Orders')}>
+      <Head title={__('Orders')} />
       <div className="grid max-w-5xl gap-6">
         <PageHeader
-          title="Orders"
-          description="Orders from your website. Card payments are confirmed automatically; mark EFT orders paid when the money arrives."
+          title={__('Orders')}
+          description={__(
+            'Orders from your website. Card payments are confirmed automatically; mark EFT orders paid when the money arrives.',
+          )}
         />
-        <nav aria-label="Show orders" className="flex flex-wrap gap-2">
+        <nav aria-label={__('Show orders')} className="flex flex-wrap gap-2">
           {TABS.map(([key, label]) => (
             <Link
               key={key}
@@ -70,11 +74,11 @@ export default function Orders({
         {orders.length === 0 ? (
           <EmptyState
             icon={ShoppingBag}
-            title="No orders here"
-            description="Orders appear as soon as customers place them on your website."
+            title={__('No orders here')}
+            description={__('Orders appear as soon as customers place them on your website.')}
           />
         ) : (
-          <ul className="grid gap-2" aria-label="Orders">
+          <ul className="grid gap-2" aria-label={__('Orders')}>
             {orders.map((o) => (
               <li key={o.id}>
                 <Link

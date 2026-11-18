@@ -1,8 +1,12 @@
 import { Link, useForm } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 import type { FormEvent } from 'react';
-import { Button, Checkbox, Field, Input, Label } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Checkbox } from '@/design-system/components/choice';
+import { Field, Label } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AuthLayout from '@/layouts/AuthLayout';
+import { __ } from '@/i18n';
 
 interface Props {
   surface: 'admin' | 'app';
@@ -21,24 +25,24 @@ export default function SignIn({ surface, identifier }: Props) {
   return (
     <AuthLayout
       title={staff ? 'WURK staff sign in' : 'Sign in to WURK'}
-      description="We’ll send a 6-digit code to your email or phone. No password needed."
+      description={__('We’ll send a 6-digit code to your email or phone. No password needed.')}
       footer={
         <>
-          Prefer a password?{' '}
+          {__('Prefer a password?')}{' '}
           <Link href="/sign-in/password" className="text-accent-fg font-medium hover:underline">
-            Sign in with your password
+            {__('Sign in with your password')}
           </Link>
         </>
       }
     >
       <form onSubmit={submit} className="grid gap-5" noValidate>
-        <Field label="Email or mobile number" error={form.errors.identifier} required>
+        <Field label={__('Email or mobile number')} error={form.errors.identifier} required>
           <Input
             value={form.data.identifier}
             onChange={(e) => form.setData('identifier', e.target.value)}
             autoComplete="username"
             autoFocus
-            placeholder="you@business.co.za or 082 123 4567"
+            placeholder={__('you@business.co.za or 082 123 4567')}
             className="h-12 text-base"
           />
         </Field>
@@ -50,12 +54,12 @@ export default function SignIn({ surface, identifier }: Props) {
               onCheckedChange={(v) => form.setData('remember', v === true)}
             />
             <Label htmlFor="remember" className="text-fg-muted font-normal">
-              Keep me signed in on this device for 30 days
+              {__('Keep me signed in on this device for 30 days')}
             </Label>
           </div>
         )}
         <Button type="submit" size="lg" loading={form.processing} className="w-full">
-          Send me a code <ArrowRight />
+          {__('Send me a code')} <ArrowRight />
         </Button>
       </form>
     </AuthLayout>

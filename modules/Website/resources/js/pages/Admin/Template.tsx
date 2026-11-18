@@ -11,29 +11,29 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  Field,
-  Input,
-  PageHeader,
+} from '@/design-system/components/card';
+import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/dialog';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Textarea,
-} from '@/design-system';
+} from '@/design-system/components/select';
 import AppShell from '@/layouts/AppShell';
 import { DemoPhotos, type DemoPhotoSlot } from '../../admin/DemoPhotos';
+import { __ } from '@/i18n';
 
 interface PageRow {
   key: string;
@@ -110,7 +110,7 @@ export default function Template({
       {form.data.menus[where].map((item, i) => (
         <div key={i} className="grid gap-2 sm:grid-cols-[1fr_8rem_1fr_auto]">
           <Input
-            aria-label="Menu label"
+            aria-label={__('Menu label')}
             value={item.label}
             onChange={(e) =>
               set('menus', {
@@ -132,12 +132,12 @@ export default function Template({
               })
             }
           >
-            <SelectTrigger aria-label="Links to">
+            <SelectTrigger aria-label={__('Links to')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="page">A page</SelectItem>
-              <SelectItem value="link">A web address</SelectItem>
+              <SelectItem value="page">{__('A page')}</SelectItem>
+              <SelectItem value="link">{__('A web address')}</SelectItem>
             </SelectContent>
           </Select>
           {item.type === 'page' ? (
@@ -150,8 +150,8 @@ export default function Template({
                 })
               }
             >
-              <SelectTrigger aria-label="Page">
-                <SelectValue placeholder="Choose a page" />
+              <SelectTrigger aria-label={__('Page')}>
+                <SelectValue placeholder={__('Choose a page')} />
               </SelectTrigger>
               <SelectContent>
                 {form.data.pages.map((p) => (
@@ -163,7 +163,7 @@ export default function Template({
             </Select>
           ) : (
             <Input
-              aria-label="Web address"
+              aria-label={__('Web address')}
               value={item.href ?? ''}
               placeholder="https://…, #section"
               onChange={(e) =>
@@ -205,7 +205,7 @@ export default function Template({
           })
         }
       >
-        <Plus /> Add a link
+        <Plus /> {__('Add a link')}
       </Button>
     </div>
   );
@@ -218,7 +218,7 @@ export default function Template({
           href="/templates"
           className="text-fg-muted hover:text-fg inline-flex w-fit items-center gap-1.5 text-sm font-medium"
         >
-          <ArrowLeft className="size-4" aria-hidden /> Templates
+          <ArrowLeft className="size-4" aria-hidden /> {__('Templates')}
         </Link>
         <PageHeader
           title={template.name}
@@ -227,7 +227,7 @@ export default function Template({
             <div className="flex flex-wrap gap-2">
               <Button variant="ghost" asChild>
                 <a href={`${base}/preview`} target="_blank" rel="noopener">
-                  <ExternalLink /> Preview draft
+                  <ExternalLink /> {__('Preview draft')}
                 </a>
               </Button>
               <Button
@@ -236,7 +236,7 @@ export default function Template({
                 loading={form.processing}
                 onClick={() => setPublishing(true)}
               >
-                <Rocket /> Publish
+                <Rocket /> {__('Publish')}
               </Button>
             </div>
           }
@@ -254,22 +254,26 @@ export default function Template({
             {template.status.charAt(0).toUpperCase() + template.status.slice(1)}
           </Badge>
           {template.version !== null && (
-            <span className="text-fg-muted">Businesses get version {template.version}</span>
+            <span className="text-fg-muted">
+              {__('Businesses get version')} {template.version}
+            </span>
           )}
           {dirty && (
-            <span className="text-fg-muted">· Unsaved changes — save before publishing</span>
+            <span className="text-fg-muted">
+              {__('· Unsaved changes — save before publishing')}
+            </span>
           )}
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Details</CardTitle>
+            <CardTitle>{__('Details')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Field label="Name" error={errors.name} required>
+            <Field label={__('Name')} error={errors.name} required>
               <Input value={form.data.name} onChange={(e) => set('name', e.target.value)} />
             </Field>
-            <Field label="Short description" error={errors.description}>
+            <Field label={__('Short description')} error={errors.description}>
               <Textarea
                 rows={2}
                 value={form.data.description}
@@ -281,10 +285,11 @@ export default function Template({
 
         <Card>
           <CardHeader>
-            <CardTitle>Pages</CardTitle>
+            <CardTitle>{__('Pages')}</CardTitle>
             <CardDescription>
-              Edit each page in the visual editor. Save here after adding, removing or renaming
-              pages.
+              {__(
+                'Edit each page in the visual editor. Save here after adding, removing or renaming pages.',
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-2">
@@ -294,7 +299,7 @@ export default function Template({
                 className="border-border grid items-center gap-2 rounded-xl border p-2 sm:grid-cols-[1fr_1fr_auto]"
               >
                 <Input
-                  aria-label="Page title"
+                  aria-label={__('Page title')}
                   value={p.title}
                   onChange={(e) =>
                     set(
@@ -306,7 +311,7 @@ export default function Template({
                   }
                 />
                 <Input
-                  aria-label="Web address"
+                  aria-label={__('Web address')}
                   value={p.slug}
                   disabled={p.is_home}
                   onChange={(e) =>
@@ -318,7 +323,7 @@ export default function Template({
                 />
                 <div className="flex items-center justify-end gap-0.5">
                   {p.is_home ? (
-                    <Badge tone="brand">Home</Badge>
+                    <Badge tone="brand">{__('Home')}</Badge>
                   ) : (
                     <Button
                       variant="ghost"
@@ -370,10 +375,10 @@ export default function Template({
                   {pages.some((saved) => saved.key === p.key) && (
                     <Button size="sm" variant="secondary" disabled={dirty} asChild={!dirty}>
                       {dirty ? (
-                        <span>Edit</span>
+                        <span>{__('Edit')}</span>
                       ) : (
                         <Link href={`${base}/pages/${p.key}/edit`} aria-label={`Edit ${p.title}`}>
-                          <PencilLine /> Edit
+                          <PencilLine /> {__('Edit')}
                         </Link>
                       )}
                     </Button>
@@ -393,21 +398,22 @@ export default function Template({
                 ]);
               }}
             >
-              <Plus /> Add a page
+              <Plus /> {__('Add a page')}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Branding</CardTitle>
+            <CardTitle>{__('Branding')}</CardTitle>
             <CardDescription>
-              Owners keep their own colours and logo when they switch designs; fonts and corners
-              come from the design.
+              {__(
+                'Owners keep their own colours and logo when they switch designs; fonts and corners come from the design.',
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <Field label="Main colour" error={errors['branding.primary']}>
+            <Field label={__('Main colour')} error={errors['branding.primary']}>
               <Input
                 value={form.data.branding.primary}
                 onChange={(e) =>
@@ -416,7 +422,7 @@ export default function Template({
                 className="font-mono uppercase"
               />
             </Field>
-            <Field label="Second colour (optional)">
+            <Field label={__('Second colour (optional)')}>
               <Input
                 value={form.data.branding.secondary ?? ''}
                 onChange={(e) =>
@@ -425,7 +431,7 @@ export default function Template({
                 className="font-mono uppercase"
               />
             </Field>
-            <Field label="Fonts">
+            <Field label={__('Fonts')}>
               {(control) => (
                 <Select
                   value={form.data.branding.font_pairing}
@@ -444,7 +450,7 @@ export default function Template({
                 </Select>
               )}
             </Field>
-            <Field label="Corners">
+            <Field label={__('Corners')}>
               {(control) => (
                 <Select
                   value={form.data.branding.corners}
@@ -468,7 +474,7 @@ export default function Template({
 
         <Card>
           <CardHeader>
-            <CardTitle>Menus</CardTitle>
+            <CardTitle>{__('Menus')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6">
             {menuEditor('header')}
@@ -487,14 +493,14 @@ export default function Template({
             disabled={!dirty}
             onClick={() => form.put(base, { preserveScroll: true })}
           >
-            Save template
+            {__('Save template')}
           </Button>
           {template.status !== 'retired' && (
             <Button
               variant="ghost"
               onClick={() => router.post(`${base}/retire`, {}, { preserveScroll: true })}
             >
-              Retire template
+              {__('Retire template')}
             </Button>
           )}
         </div>
@@ -504,13 +510,15 @@ export default function Template({
         {versions.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Published versions</CardTitle>
+              <CardTitle>{__('Published versions')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="divide-border divide-y">
                 {versions.map((v) => (
                   <li key={v.id} className="py-2.5 text-sm">
-                    <span className="font-semibold">Version {v.number}</span>{' '}
+                    <span className="font-semibold">
+                      {__('Version')} {v.number}
+                    </span>{' '}
                     <span className="text-fg-muted">
                       · {new Date(v.created_at).toLocaleString()}
                       {v.note ? ` · ${v.note}` : ''}
@@ -527,7 +535,9 @@ export default function Template({
         <Dialog open onOpenChange={(o) => !o && setPublishing(false)}>
           <DialogContent
             title={`Publish ${template.name}`}
-            description="New businesses receive this version straight away. Businesses already using the design keep their sites."
+            description={__(
+              'New businesses receive this version straight away. Businesses already using the design keep their sites.',
+            )}
           >
             <form
               className="grid gap-4"
@@ -540,11 +550,11 @@ export default function Template({
                 );
               }}
             >
-              <Field label="What changed? (optional)">
+              <Field label={__('What changed? (optional)')}>
                 <Input value={note} maxLength={255} onChange={(e) => setNote(e.target.value)} />
               </Field>
               <DialogFooter>
-                <Button type="submit">Publish now</Button>
+                <Button type="submit">{__('Publish now')}</Button>
               </DialogFooter>
             </form>
           </DialogContent>

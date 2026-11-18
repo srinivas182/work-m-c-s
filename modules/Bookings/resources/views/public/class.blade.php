@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-ZA">
+<html lang="{{ app()->getLocale() }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,7 +17,7 @@
 <body>
 <main>
   <p>{{ $business }}</p>
-  <h1>Your class</h1>
+  <h1>{{ __('Your class') }}</h1>
   @if ($notice)
   <p class="card" role="status">{{ $notice }}</p>
   @endif
@@ -25,14 +25,14 @@
     <p><strong>{{ $title }}</strong> — {{ $customer }}</p>
     <p>{{ $when }}</p>
     @if (! empty($health))
-      <p>Your practitioner: <strong>{{ $health['practitioner'] }}</strong></p>
+      <p>{{ __('Your practitioner:') }} <strong>{{ $health['practitioner'] }}</strong></p>
       <p>You agreed to the video-consultation terms on {{ $health['agreed'] }}. Please be somewhere private when you join.</p>
     @endif
     @if ($online)
       @if ($joinUrl)
-      <p><a href="{{ $joinUrl }}" rel="noopener noreferrer"><strong>Join online now</strong></a></p>
+      <p><a href="{{ $joinUrl }}" rel="noopener noreferrer"><strong>{{ __('Join online now') }}</strong></a></p>
       @else
-      <p>This is an online class. Your joining link appears here 15 minutes before it starts.</p>
+      <p>{{ __('This is an online class. Your joining link appears here 15 minutes before it starts.') }}</p>
       @endif
     @endif
     @if (! $changeable)
@@ -41,11 +41,11 @@
   </section>
   @if ($changeable)
   <form class="card" method="post" action="{{ $cancelUrl }}" aria-label="Cancel">
-    <p>Can’t make it? Let us know so someone else can have your place.</p>
-    <p><button type="submit">Cancel my place</button></p>
+    <p>{{ __('Can’t make it? Let us know so someone else can have your place.') }}</p>
+    <p><button type="submit">{{ __('Cancel my place') }}</button></p>
   </form>
   @endif
-  <p><a href="/">Back to the website</a></p>
+  <p><a href="/">{{ __('Back to the website') }}</a></p>
 </main>
 </body>
 </html>

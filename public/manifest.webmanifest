@@ -1,0 +1,9 @@
+{
+  "name": "WURK",
+  "short_name": "WURK",
+  "start_url": "/businesses",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6D4AFF",
+  "icons": [{ "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }]
+}

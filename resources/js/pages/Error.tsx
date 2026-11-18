@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { __ } from '@/i18n';
 
 /**
  * Errors met while moving around WURK (Sprint 18.6a): the same plain words as the error pages a browser gets
@@ -47,7 +48,9 @@ export default function Error({ status, message }: { status: number; message?: s
     <main className="bg-canvas text-fg grid min-h-dvh place-items-center px-4 py-6">
       <Head title={m.title} />
       <div className="border-border bg-surface w-full max-w-lg rounded-2xl border p-7 shadow-sm">
-        <p className="text-fg-muted text-sm font-semibold tracking-wide">Error {status}</p>
+        <p className="text-fg-muted text-sm font-semibold tracking-wide">
+          {__('Error')} {status}
+        </p>
         <h1 className="font-display mt-2 text-2xl font-semibold tracking-tight">{m.title}</h1>
         {text.map((t) => (
           <p key={t} className="text-fg-muted mt-3">
@@ -56,14 +59,14 @@ export default function Error({ status, message }: { status: number; message?: s
         ))}
         <div className="mt-6 flex flex-wrap gap-3">
           {status === 419 || status === 503 ? (
-            <Button onClick={() => window.location.reload()}>Try again</Button>
+            <Button onClick={() => window.location.reload()}>{__('Try again')}</Button>
           ) : (
             <Button asChild>
-              <Link href="/">Go to the home page</Link>
+              <Link href="/">{__('Go to the home page')}</Link>
             </Button>
           )}
           <Button variant="secondary" onClick={() => window.history.back()}>
-            Go back
+            {__('Go back')}
           </Button>
         </div>
       </div>

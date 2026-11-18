@@ -1,8 +1,11 @@
 import { Head } from '@inertiajs/react';
 import { Copy, Download, Image as ImageIcon, Share2 } from 'lucide-react';
 import { useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 type Source = 'status' | 'whatsapp' | 'facebook' | 'instagram' | 'share' | 'poster';
 interface Item {
@@ -75,7 +78,7 @@ function ItemRow({ item }: { item: Item }) {
           onClick={() => void shareStatus(item)}
           aria-label={`WhatsApp Status image: ${item.title}`}
         >
-          <ImageIcon aria-hidden className="size-4" /> WhatsApp Status
+          <ImageIcon aria-hidden className="size-4" /> {__('WhatsApp Status')}
         </Button>
         {item.kind !== 'chat' && (
           <>
@@ -86,7 +89,7 @@ function ItemRow({ item }: { item: Item }) {
                 rel="noopener noreferrer"
                 aria-label={`WhatsApp chat: ${item.title}`}
               >
-                WhatsApp chat
+                {__('WhatsApp chat')}
               </a>
             </Button>
             <Button size="sm" variant="secondary" asChild>
@@ -96,7 +99,7 @@ function ItemRow({ item }: { item: Item }) {
                 rel="noopener noreferrer"
                 aria-label={`Facebook: ${item.title}`}
               >
-                Facebook
+                {__('Facebook')}
               </a>
             </Button>
             <Button
@@ -105,7 +108,7 @@ function ItemRow({ item }: { item: Item }) {
               aria-label={`Instagram: ${item.title}`}
               onClick={() => void shareLink(item.title, item.links.instagram, done)}
             >
-              Instagram
+              {__('Instagram')}
             </Button>
           </>
         )}
@@ -115,7 +118,7 @@ function ItemRow({ item }: { item: Item }) {
           aria-label={`More ways to share: ${item.title}`}
           onClick={() => void shareLink(item.title, item.links.share, done)}
         >
-          <Share2 aria-hidden className="size-4" /> More ways to share
+          <Share2 aria-hidden className="size-4" /> {__('More ways to share')}
         </Button>
         <Button
           size="sm"
@@ -132,21 +135,23 @@ function ItemRow({ item }: { item: Item }) {
 
 export default function ShareKit({ items, posters, sizes }: Props) {
   return (
-    <AppShell title="Share">
-      <Head title="Share" />
+    <AppShell title={__('Share')}>
+      <Head title={__('Share')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Share"
-          description="Share your website, booking page, products and specials in one tap. Each link remembers where it was shared, so Reports → Website shows what brought customers."
+          title={__('Share')}
+          description={__(
+            'Share your website, booking page, products and specials in one tap. Each link remembers where it was shared, so Reports → Website shows what brought customers.',
+          )}
         />
         <Card>
           <CardHeader>
-            <CardTitle>Share a link</CardTitle>
+            <CardTitle>{__('Share a link')}</CardTitle>
           </CardHeader>
           <CardContent>
             {items.length === 0 ? (
               <p className="text-fg-muted text-sm">
-                Publish your website first — then you can share it from here.
+                {__('Publish your website first — then you can share it from here.')}
               </p>
             ) : (
               <ul className="grid gap-4">
@@ -160,12 +165,13 @@ export default function ShareKit({ items, posters, sizes }: Props) {
         {posters.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Posters and table cards</CardTitle>
+              <CardTitle>{__('Posters and table cards')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 text-sm">
               <p className="text-fg-muted">
-                Print these for your counter, window or tables. The QR code uses your colours and
-                logo, and visits from it show as “Poster” in Reports.
+                {__(
+                  'Print these for your counter, window or tables. The QR code uses your colours and logo, and visits from it show as “Poster” in Reports.',
+                )}
               </p>
               <ul className="grid gap-3">
                 {posters.map((p) => (

@@ -1,24 +1,26 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Flag } from 'lucide-react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  EmptyState,
-  Field,
-  Input,
-  PageHeader,
+} from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/design-system';
+} from '@/design-system/components/select';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Feature {
   key: string;
@@ -71,7 +73,7 @@ function FeatureCard({ feature, windowDays }: { feature: Feature; windowDays: nu
           }}
           className="grid grid-cols-1 items-end gap-4 sm:grid-cols-[1.5fr_1fr_auto]"
         >
-          <Field label="Rollout">
+          <Field label={__('Rollout')}>
             {(control) => (
               <Select
                 value={form.data.mode}
@@ -91,7 +93,7 @@ function FeatureCard({ feature, windowDays }: { feature: Feature; windowDays: nu
             )}
           </Field>
           {form.data.mode === 'percentage' ? (
-            <Field label="Businesses (%)" error={form.errors.percentage}>
+            <Field label={__('Businesses (%)')} error={form.errors.percentage}>
               <Input
                 type="number"
                 min={0}
@@ -110,7 +112,7 @@ function FeatureCard({ feature, windowDays }: { feature: Feature; windowDays: nu
             </p>
           )}
           <Button type="submit" loading={form.processing}>
-            Save
+            {__('Save')}
           </Button>
         </form>
       </CardContent>
@@ -126,18 +128,22 @@ export default function Admin({
   windowDays: number;
 }) {
   return (
-    <AppShell title="Feature rollouts">
-      <Head title="Feature rollouts" />
+    <AppShell title={__('Feature rollouts')}>
+      <Head title={__('Feature rollouts')} />
       <div className="grid gap-8">
         <PageHeader
-          title="Feature rollouts"
-          description="Release new features safely: let businesses opt in, roll out to a percentage, or switch off instantly."
+          title={__('Feature rollouts')}
+          description={__(
+            'Release new features safely: let businesses opt in, roll out to a percentage, or switch off instantly.',
+          )}
         />
         {features.length === 0 ? (
           <EmptyState
             icon={Flag}
-            title="No features to roll out yet"
-            description="Modules declare new features as they’re built; they appear here, off by default."
+            title={__('No features to roll out yet')}
+            description={__(
+              'Modules declare new features as they’re built; they appear here, off by default.',
+            )}
           />
         ) : (
           <div className="grid gap-6">

@@ -1,7 +1,9 @@
 import { ActionBar, usePuck, type Overrides } from '@puckeditor/core';
 import { ArrowDown, ArrowUp, Plus } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Button, Dialog, DialogContent } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Dialog, DialogContent } from '@/design-system/components/dialog';
+import { __ } from '@/i18n';
 
 /**
  * WCAG 2.2 "Dragging movements" (2.5.7), Sprint 18.5b: everything the page editor does by dragging can also be done
@@ -33,10 +35,18 @@ function MoveButtons() {
   const last = getItemBySelector({ index: selector.index + 1, zone }) === undefined;
   return (
     <>
-      <ActionBar.Action label="Move up" disabled={first} onClick={() => move(selector.index - 1)}>
+      <ActionBar.Action
+        label={__('Move up')}
+        disabled={first}
+        onClick={() => move(selector.index - 1)}
+      >
         <ArrowUp size={16} aria-hidden />
       </ActionBar.Action>
-      <ActionBar.Action label="Move down" disabled={last} onClick={() => move(selector.index + 1)}>
+      <ActionBar.Action
+        label={__('Move down')}
+        disabled={last}
+        onClick={() => move(selector.index + 1)}
+      >
         <ArrowDown size={16} aria-hidden />
       </ActionBar.Action>
     </>
@@ -85,18 +95,18 @@ export function AddSection() {
   return (
     <>
       <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
-        <Plus aria-hidden /> Add section
+        <Plus aria-hidden /> {__('Add section')}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
-          title="Add a section"
+          title={__('Add a section')}
           description={
             appState.ui.itemSelector
               ? 'It goes in after the selected section.'
               : 'It goes in at the end of the page.'
           }
         >
-          <ul aria-label="Sections" className="grid max-h-[60dvh] gap-1 overflow-y-auto">
+          <ul aria-label={__('Sections')} className="grid max-h-[60dvh] gap-1 overflow-y-auto">
             {Object.entries(config.components).map(([name, c]) => (
               <li key={name}>
                 <Button variant="ghost" className="w-full justify-start" onClick={() => add(name)}>
@@ -130,7 +140,7 @@ function SectionTools() {
   return (
     <div
       role="group"
-      aria-label="Move this section"
+      aria-label={__('Move this section')}
       className="flex gap-2 border-b border-[#e6e3f0] px-4 py-3"
     >
       <Button
@@ -139,7 +149,7 @@ function SectionTools() {
         disabled={selector.index === 0}
         onClick={() => move(selector.index - 1)}
       >
-        <ArrowUp aria-hidden /> Move up
+        <ArrowUp aria-hidden /> {__('Move up')}
       </Button>
       <Button
         size="sm"
@@ -147,7 +157,7 @@ function SectionTools() {
         disabled={last}
         onClick={() => move(selector.index + 1)}
       >
-        <ArrowDown aria-hidden /> Move down
+        <ArrowDown aria-hidden /> {__('Move down')}
       </Button>
     </div>
   );

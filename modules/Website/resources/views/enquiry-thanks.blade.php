@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,9 +14,9 @@
 </head>
 <body>
 <main>
-  <h1>Thank you — your request was sent</h1>
+  <h1>{{ __('Thank you — your request was sent') }}</h1>
   <p>{{ $business }} will get back to you soon.</p>
-  <p><a href="/">Back to the website</a></p>
+  <p><a href="/">{{ __('Back to the website') }}</a></p>
 </main>
 </body>
 </html>

@@ -1,8 +1,13 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { MessageCircle } from 'lucide-react';
 import { useState } from 'react';
-import { Badge, Button, EmptyState, Field, Input, PageHeader, Textarea } from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface ChatRow {
   id: string;
@@ -94,14 +99,16 @@ export default function Chats({
   const status = (c: ChatRow, to: ChatRow['status']) =>
     router.put(`${base}/${c.id}`, { status: to }, { preserveScroll: true });
   return (
-    <AppShell title="Chats">
-      <Head title="Chats" />
+    <AppShell title={__('Chats')}>
+      <Head title={__('Chats')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Chats"
-          description="People who asked, in your website chat, for you to get back to them — with the conversation."
+          title={__('Chats')}
+          description={__(
+            'People who asked, in your website chat, for you to get back to them — with the conversation.',
+          )}
         />
-        <nav aria-label="Which chats" className="flex flex-wrap gap-4 text-sm">
+        <nav aria-label={__('Which chats')} className="flex flex-wrap gap-4 text-sm">
           {(
             [
               ['open', 'Asked for a person', base],
@@ -126,7 +133,7 @@ export default function Chats({
           conversations.length === 0 ? (
             <EmptyState
               icon={MessageCircle}
-              title="No conversations yet"
+              title={__('No conversations yet')}
               description={
                 show === 'whatsapp'
                   ? 'When customers message your WhatsApp number, the conversations appear here.'
@@ -148,16 +155,18 @@ export default function Chats({
         ) : chats.length === 0 ? (
           <EmptyState
             icon={MessageCircle}
-            title="No chats yet"
-            description="When someone in your website chat asks for a person, it appears here."
+            title={__('No chats yet')}
+            description={__(
+              'When someone in your website chat asks for a person, it appears here.',
+            )}
           />
         ) : (
-          <ul aria-label="Chats" className="grid gap-4">
+          <ul aria-label={__('Chats')} className="grid gap-4">
             {chats.map((c) => (
               <li key={c.id} className="border-border grid gap-3 rounded-lg border p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <strong>{c.name}</strong>
-                  {c.status === 'new' && <Badge tone="warning">New</Badge>}
+                  {c.status === 'new' && <Badge tone="warning">{__('New')}</Badge>}
                   <span className="text-fg-muted text-sm">{c.at}</span>
                 </div>
                 <p className="text-sm">{[c.phone, c.email].filter(Boolean).join(' · ')}</p>
@@ -175,26 +184,26 @@ export default function Chats({
                 <div className="flex flex-wrap gap-3 text-sm">
                   {c.contact_id && (
                     <a className="underline" href={`${appBase}/contacts/${c.contact_id}`}>
-                      Contact
+                      {__('Contact')}
                     </a>
                   )}
                   {c.lead_id && (
                     <a className="underline" href={`${appBase}/leads/${c.lead_id}`}>
-                      Lead
+                      {__('Lead')}
                     </a>
                   )}
                   {c.status === 'new' && (
                     <Button size="sm" variant="ghost" onClick={() => status(c, 'read')}>
-                      Mark as read
+                      {__('Mark as read')}
                     </Button>
                   )}
                   {c.status !== 'archived' ? (
                     <Button size="sm" variant="ghost" onClick={() => status(c, 'archived')}>
-                      Archive
+                      {__('Archive')}
                     </Button>
                   ) : (
                     <Button size="sm" variant="ghost" onClick={() => status(c, 'read')}>
-                      Restore
+                      {__('Restore')}
                     </Button>
                   )}
                 </div>
@@ -258,7 +267,7 @@ function ConversationItem({
               <>
                 {' '}
                 <a className="underline" href={l.file.url}>
-                  Download {l.file.kind === 'image' ? 'photo' : l.file.kind}
+                  {__('Download')} {l.file.kind === 'image' ? 'photo' : l.file.kind}
                   <span className="sr-only">: {l.file.name}</span>
                 </a>
               </>
@@ -285,22 +294,22 @@ function ConversationItem({
       <div className="flex flex-wrap gap-3 text-sm">
         {c.contact_id && (
           <a className="underline" href={`${appBase}/contacts/${c.contact_id}`}>
-            Contact
+            {__('Contact')}
           </a>
         )}
-        {c.channel === 'whatsapp' && <Badge tone="info">WhatsApp</Badge>}
+        {c.channel === 'whatsapp' && <Badge tone="info">{__('WhatsApp')}</Badge>}
         {c.status === 'ai' || c.status === 'waiting' ? (
           <Button size="sm" variant="secondary" onClick={() => act('take_over')}>
-            Take over
+            {__('Take over')}
           </Button>
         ) : c.status === 'person' ? (
           <Button size="sm" variant="ghost" onClick={() => act('hand_back')}>
-            Hand back to the assistant
+            {__('Hand back to the assistant')}
           </Button>
         ) : null}
         {c.status !== 'closed' && (
           <Button size="sm" variant="ghost" onClick={() => act('close')}>
-            Close
+            {__('Close')}
           </Button>
         )}
         <Button
@@ -309,7 +318,7 @@ function ConversationItem({
           aria-expanded={teaching}
           onClick={() => setTeaching(!teaching)}
         >
-          Teach it
+          {__('Teach it')}
         </Button>
       </div>
       {c.channel === 'whatsapp' && c.status !== 'closed' && <WhatsAppReply c={c} base={base} />}
@@ -326,12 +335,13 @@ function ConversationItem({
           }}
         >
           <p className="text-fg-muted text-sm">
-            Your answer is added to your chat’s answers (Website → Chat). The assistant uses it from
-            now on.
+            {__(
+              'Your answer is added to your chat’s answers (Website → Chat). The assistant uses it from now on.',
+            )}
           </p>
           <Field
-            label="Words people use when they ask this"
-            hint="Separate with commas."
+            label={__('Words people use when they ask this')}
+            hint={__('Separate with commas.')}
             error={teach.errors.keywords}
           >
             <Input
@@ -339,7 +349,7 @@ function ConversationItem({
               onChange={(e) => teach.setData('keywords', e.target.value)}
             />
           </Field>
-          <Field label="Your answer" error={teach.errors.answer}>
+          <Field label={__('Your answer')} error={teach.errors.answer}>
             <Textarea
               rows={3}
               maxLength={600}
@@ -348,7 +358,7 @@ function ConversationItem({
             />
           </Field>
           <Button type="submit" size="sm" className="justify-self-start" loading={teach.processing}>
-            Save the answer
+            {__('Save the answer')}
           </Button>
         </form>
       )}
@@ -367,7 +377,8 @@ function VoiceNote({ line }: { line: Conversation['lines'][number] }) {
     <span className="inline-grid gap-1 align-top">
       <span>
         <Badge tone={v.unclear ? 'warning' : 'neutral'}>
-          Voice note{length}
+          {__('Voice note')}
+          {length}
           {v.language ? ` · ${v.language}` : ''}
           {v.unclear ? ' · words may be wrong' : ''}
         </Badge>{' '}
@@ -375,7 +386,7 @@ function VoiceNote({ line }: { line: Conversation['lines'][number] }) {
       </span>
       {line.file && 'url' in line.file && (
         <audio controls preload="none" src={line.file.url} className="h-8 max-w-xs">
-          <a href={line.file.url}>Download the voice note</a>
+          <a href={line.file.url}>{__('Download the voice note')}</a>
         </audio>
       )}
     </span>
@@ -395,8 +406,8 @@ function WhatsAppReply({ c, base }: { c: Conversation; base: string }) {
     return (
       <div className="grid gap-2">
         <p className="text-fg-muted text-sm">
-          More than 24 hours since {c.name ?? 'the customer'} last wrote, so WhatsApp only allows an
-          approved message.{' '}
+          {__('More than 24 hours since')} {c.name ?? 'the customer'}{' '}
+          {__('last wrote, so WhatsApp only allows an approved message.')}{' '}
           {followUp
             ? `Send your follow-up: when they reply, you can write freely again.${cost}`
             : `Your follow-up message is waiting for Meta’s approval (Settings → WhatsApp)${c.phone ? '. Or call ' + c.phone : ''}.`}
@@ -409,7 +420,7 @@ function WhatsAppReply({ c, base }: { c: Conversation; base: string }) {
               loading={nudge.processing}
               onClick={() => nudge.post(`${base}/ai/${c.id}/follow-up`, { preserveScroll: true })}
             >
-              Send follow-up
+              {__('Send follow-up')}
             </Button>
             {nudge.errors.text && (
               <p role="alert" className="text-danger-11 text-sm">
@@ -435,7 +446,7 @@ function WhatsAppReply({ c, base }: { c: Conversation; base: string }) {
       }}
     >
       <Field
-        label="Your reply"
+        label={__('Your reply')}
         hint={
           c.window_ends
             ? `You can reply freely until ${c.window_ends}.${cost}`
@@ -454,12 +465,12 @@ function WhatsAppReply({ c, base }: { c: Conversation; base: string }) {
         <Input
           type="file"
           accept="image/jpeg,image/png,application/pdf"
-          aria-label="Attach a photo or PDF"
+          aria-label={__('Attach a photo or PDF')}
           className="max-w-xs"
           onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)}
         />
         <Button type="submit" size="sm" loading={form.processing}>
-          Send on WhatsApp
+          {__('Send on WhatsApp')}
         </Button>
       </div>
     </form>

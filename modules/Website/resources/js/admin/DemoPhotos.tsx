@@ -1,22 +1,25 @@
 import { router, useForm } from '@inertiajs/react';
 import { ExternalLink, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
+} from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/design-system';
+} from '@/design-system/components/select';
+import { __ } from '@/i18n';
 
 export interface DemoPhotoSlot {
   slot: string;
@@ -66,21 +69,23 @@ function SlotRow({
         />
         {!slot.chosen && (
           <Badge tone="warning" className="absolute top-2 left-2">
-            Stand-in
+            {__('Stand-in')}
           </Badge>
         )}
         {slot.chosen?.ai && (
           <Badge tone="info" className="absolute top-2 left-2">
-            AI image
+            {__('AI image')}
           </Badge>
         )}
       </div>
       <div className="grid content-start gap-2 text-sm">
         <p>
           <span className="font-semibold capitalize">{slot.slot.replace(/-/g, ' ')}</span>
-          {slot.decorative && <span className="text-fg-muted"> · decorative</span>}
+          {slot.decorative && <span className="text-fg-muted"> {__('· decorative')}</span>}
         </p>
-        <p className="text-fg-muted">Shows: {slot.shows}</p>
+        <p className="text-fg-muted">
+          {__('Shows:')} {slot.shows}
+        </p>
         {slot.chosen && (
           <p>
             {slot.chosen.photographer ? `Photo by ${slot.chosen.photographer} · ` : ''}
@@ -94,14 +99,15 @@ function SlotRow({
                   rel="noopener noreferrer"
                   className="underline"
                 >
-                  source<span className="sr-only"> (opens in a new tab)</span>
+                  {__('source')}
+                  <span className="sr-only"> {__('(opens in a new tab)')}</span>
                 </a>
               </>
             )}
           </p>
         )}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-fg-muted">Find one:</span>
+          <span className="text-fg-muted">{__('Find one:')}</span>
           {slot.find.map((f) => (
             <a
               key={f.site}
@@ -112,7 +118,7 @@ function SlotRow({
             >
               {f.site}
               <ExternalLink className="size-3.5" aria-hidden />
-              <span className="sr-only"> (opens in a new tab)</span>
+              <span className="sr-only"> {__('(opens in a new tab)')}</span>
             </a>
           ))}
         </div>
@@ -131,7 +137,7 @@ function SlotRow({
               variant="ghost"
               onClick={() => router.delete(url, { preserveScroll: true })}
             >
-              <RotateCcw /> Back to the stand-in
+              <RotateCcw /> {__('Back to the stand-in')}
             </Button>
           )}
         </div>
@@ -151,8 +157,10 @@ function SlotRow({
             }}
           >
             <Field
-              label="Link to the photo"
-              hint="A photo’s page or image on Nappy, Pexels or Unsplash. The server downloads it."
+              label={__('Link to the photo')}
+              hint={__(
+                'A photo’s page or image on Nappy, Pexels or Unsplash. The server downloads it.',
+              )}
               error={form.errors.link}
             >
               <Input
@@ -163,7 +171,7 @@ function SlotRow({
                 onChange={(e) => form.setData('link', e.target.value)}
               />
             </Field>
-            <Field label="Or upload a photo" error={form.errors.photo}>
+            <Field label={__('Or upload a photo')} error={form.errors.photo}>
               <Input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -172,8 +180,8 @@ function SlotRow({
             </Field>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field
-                label="Photographer"
-                hint="Filled in from the photo’s page when it says."
+                label={__('Photographer')}
+                hint={__('Filled in from the photo’s page when it says.')}
                 error={form.errors.photographer}
               >
                 <Input
@@ -182,10 +190,10 @@ function SlotRow({
                   onChange={(e) => form.setData('photographer', e.target.value)}
                 />
               </Field>
-              <Field label="Licence" error={form.errors.licence}>
+              <Field label={__('Licence')} error={form.errors.licence}>
                 <Select value={form.data.licence} onValueChange={(v) => form.setData('licence', v)}>
-                  <SelectTrigger aria-label="Licence">
-                    <SelectValue placeholder="Choose…" />
+                  <SelectTrigger aria-label={__('Licence')}>
+                    <SelectValue placeholder={__('Choose…')} />
                   </SelectTrigger>
                   <SelectContent>
                     {allowed.map((l) => (
@@ -199,7 +207,7 @@ function SlotRow({
             </div>
             <div>
               <Button type="submit" size="sm" loading={form.processing}>
-                Save demo photo
+                {__('Save demo photo')}
               </Button>
             </div>
           </form>
@@ -226,10 +234,11 @@ export function DemoPhotos({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Demo photos</CardTitle>
+        <CardTitle>{__('Demo photos')}</CardTitle>
         <CardDescription>
-          Sharp, real photos make the design look finished. People and work come from licensed
-          libraries (Nappy, Pexels, Unsplash); WURK AI only for decorative places.{' '}
+          {__(
+            'Sharp, real photos make the design look finished. People and work come from licensed libraries (Nappy, Pexels, Unsplash); WURK AI only for decorative places.',
+          )}{' '}
           {left > 0
             ? `${left} of ${slots.length} places still show a stand-in.`
             : 'Every place has a photo.'}

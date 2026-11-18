@@ -2,6 +2,7 @@ import { Dialog as DialogPrimitive } from 'radix-ui';
 import { X } from 'lucide-react';
 import { useRef, type ComponentProps, type ReactNode } from 'react';
 import { cn } from '../lib/cn';
+import { __ } from '@/i18n';
 
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
@@ -17,7 +18,7 @@ function CloseButton() {
   return (
     <DialogPrimitive.Close className="text-fg-muted hover:bg-neutral-4 hover:text-fg absolute top-4 right-4 grid size-8 cursor-pointer place-items-center rounded-lg transition-colors">
       <X className="size-4" aria-hidden />
-      <span className="sr-only">Close</span>
+      <span className="sr-only">{__('Close')}</span>
     </DialogPrimitive.Close>
   );
 }

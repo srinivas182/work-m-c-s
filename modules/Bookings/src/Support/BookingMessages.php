@@ -19,6 +19,7 @@ use Wurk\Bookings\WhatsApp\ReminderButtons;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\InsufficientCredits;
 use Wurk\Credits\Contracts\SpendingLimitReached;
+use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
@@ -56,6 +57,7 @@ final readonly class BookingMessages
         $channel = $settings === null ? 'email' : $settings->message_channel;
         $vars = $this->vars($booking, $kind);
         $phone = self::international((string) $booking->customer_phone);
+        $locale = app(ContactBook::class)->locale($booking->customer_phone, $booking->customer_email); // the customer's language (24.2)
 
         $outcome = ['channel' => null, 'status' => 'failed', 'detail' => null];
         // 21.5: an appointment's reminder comes from the business's own WhatsApp number, with Confirm / Move / Cancel,
@@ -69,7 +71,7 @@ final readonly class BookingMessages
             try {
                 $this->wallet->charge($channel, $charge, "Booking {$kind} ({$channel})");
                 $result = $channel === 'sms'
-                    ? $this->messenger->sms($phone, app(MessageTemplates::class)->text('booking.'.$kind, 'sms', $vars), 'booking')
+                    ? $this->messenger->sms($phone, app(MessageTemplates::class)->text('booking.'.$kind, 'sms', $vars, $locale), 'booking')
                     : $this->messenger->whatsappTemplate($phone, 'wurk_booking_'.$kind, MessageWording::whatsappParameters($kind, $vars), 'booking');
                 if ($result->ok) {
                     $outcome = ['channel' => $channel, 'status' => 'sent', 'detail' => null];
@@ -87,7 +89,7 @@ final readonly class BookingMessages
         if ($outcome['status'] !== 'sent') {
             if (filter_var($booking->customer_email, FILTER_VALIDATE_EMAIL) !== false) {
                 try {
-                    $text = app(MessageTemplates::class)->text('booking.'.$kind, 'email', $vars);
+                    $text = app(MessageTemplates::class)->text('booking.'.$kind, 'email', $vars, $locale);
                     $join = match (true) {
                         $booking instanceof Booking && $booking->online => $booking->meeting_url,
                         $booking instanceof ClassAttendee && $booking->session()->location_type === 'online' => $booking->session()->meeting_url,
@@ -96,7 +98,7 @@ final readonly class BookingMessages
                     if ($join !== null && $kind !== 'cancelled') {
                         $text .= "\n\nJoin online: {$join}"; // email only — WhatsApp's approved templates can't carry it
                     }
-                    Mail::to((string) $booking->customer_email)->send(new BookingMessageMail(app(MessageTemplates::class)->subject('booking.'.$kind, $vars), $text, $vars['link'] ?: null));
+                    Mail::to((string) $booking->customer_email)->send(new BookingMessageMail(app(MessageTemplates::class)->subject('booking.'.$kind, $vars, $locale), $text, $vars['link'] ?: null));
                     $outcome = ['channel' => 'email', 'status' => 'sent', 'detail' => $outcome['detail']];
                 } catch (Throwable) {
                     $outcome['detail'] = trim(($outcome['detail'] ?? '').' Email didn’t send.');

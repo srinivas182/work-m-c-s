@@ -1,22 +1,23 @@
 import '../site/fonts';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { Button } from '@/design-system/components/button';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import { generatePalette } from '@/design-system/brand/palette';
 import AppShell from '@/layouts/AppShell';
 import { PhotoPicker } from '../editor/PhotoPicker';
 import { SiteRenderer } from '../site/SiteRenderer';
 import { FONT_PAIRINGS, STYLES } from '../site/theme';
 import type { Branding as BrandingValue, ContentDocument, SiteStyle } from '../site/types';
+import { __ } from '@/i18n';
 
 interface Props {
   branding: BrandingValue;
@@ -93,7 +94,7 @@ function ColourField({
               onChange(null);
             }}
           >
-            Remove
+            {__('Remove')}
           </Button>
         )}
       </div>
@@ -128,12 +129,14 @@ export default function Branding({
   const dirty = JSON.stringify(data) !== JSON.stringify(branding);
 
   return (
-    <AppShell title="Branding">
-      <Head title="Branding" />
+    <AppShell title={__('Branding')}>
+      <Head title={__('Branding')} />
       <div className="grid gap-8">
         <PageHeader
-          title="Branding"
-          description="Your logo, colours and fonts on every page. Colours are adjusted automatically so text always stays readable."
+          title={__('Branding')}
+          description={__(
+            'Your logo, colours and fonts on every page. Colours are adjusted automatically so text always stays readable.',
+          )}
           actions={
             <Button
               disabled={!dirty}
@@ -146,7 +149,7 @@ export default function Branding({
                 })
               }
             >
-              Save branding
+              {__('Save branding')}
             </Button>
           }
         />
@@ -154,14 +157,14 @@ export default function Branding({
           <div className="grid gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Logo and icon</CardTitle>
+                <CardTitle>{__('Logo and icon')}</CardTitle>
                 <CardDescription>
-                  A wide logo works best. The icon shows in browser tabs.
+                  {__('A wide logo works best. The icon shows in browser tabs.')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-5">
                 <div className="grid gap-1.5">
-                  <span className="text-sm font-medium">Logo</span>
+                  <span className="text-sm font-medium">{__('Logo')}</span>
                   <PhotoPicker
                     max={1}
                     withAlt={false}
@@ -176,7 +179,7 @@ export default function Branding({
                   )}
                 </div>
                 <div className="grid gap-1.5">
-                  <span className="text-sm font-medium">Browser icon</span>
+                  <span className="text-sm font-medium">{__('Browser icon')}</span>
                   <PhotoPicker
                     max={1}
                     withAlt={false}
@@ -189,13 +192,13 @@ export default function Branding({
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Style</CardTitle>
+                <CardTitle>{__('Style')}</CardTitle>
                 <CardDescription>
-                  One design, three looks. Your words and photos stay as they are.
+                  {__('One design, three looks. Your words and photos stay as they are.')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div role="radiogroup" aria-label="Style" className="grid gap-3">
+                <div role="radiogroup" aria-label={__('Style')} className="grid gap-3">
                   {(Object.entries(STYLES) as [SiteStyle, (typeof STYLES)[SiteStyle]][]).map(
                     ([key, style]) => {
                       const selected = (data.style ?? 'minimal') === key;
@@ -231,22 +234,23 @@ export default function Branding({
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Colours</CardTitle>
+                <CardTitle>{__('Colours')}</CardTitle>
                 <CardDescription>
-                  Your main colour drives buttons and accents; we create the lighter and darker
-                  shades.
+                  {__(
+                    'Your main colour drives buttons and accents; we create the lighter and darker shades.',
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-5">
                 <ColourField
-                  label="Main colour"
+                  label={__('Main colour')}
                   value={data.primary}
                   onChange={(v) => v && set('primary', v)}
                 />
                 <Swatches colour={data.primary} />
                 {data.secondary ? (
                   <ColourField
-                    label="Second colour"
+                    label={__('Second colour')}
                     optional
                     value={data.secondary}
                     onChange={(v) => set('secondary', v)}
@@ -258,7 +262,7 @@ export default function Branding({
                     className="w-fit"
                     onClick={() => set('secondary', '#F59E0B')}
                   >
-                    Add a second colour
+                    {__('Add a second colour')}
                   </Button>
                 )}
                 {data.secondary && <Swatches colour={data.secondary} />}
@@ -271,10 +275,14 @@ export default function Branding({
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Fonts</CardTitle>
+                <CardTitle>{__('Fonts')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div role="radiogroup" aria-label="Font pairing" className="grid grid-cols-2 gap-3">
+                <div
+                  role="radiogroup"
+                  aria-label={__('Font pairing')}
+                  className="grid grid-cols-2 gap-3"
+                >
                   {Object.entries(font_pairings).map(([key, pairing]) => {
                     const fonts = FONT_PAIRINGS[key];
                     const selected = data.font_pairing === key;
@@ -291,7 +299,7 @@ export default function Branding({
                           className="text-2xl leading-none font-bold"
                           style={{ fontFamily: fonts?.display }}
                         >
-                          Aa
+                          {__('Aa')}
                         </span>
                         <span className="text-sm" style={{ fontFamily: fonts?.body }}>
                           {pairing.label.split(' — ')[0]}
@@ -304,10 +312,10 @@ export default function Branding({
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Corners</CardTitle>
+                <CardTitle>{__('Corners')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div role="radiogroup" aria-label="Corners" className="flex gap-3">
+                <div role="radiogroup" aria-label={__('Corners')} className="flex gap-3">
                   {corner_styles.map((c) => (
                     <button
                       key={c}
@@ -326,7 +334,8 @@ export default function Branding({
           </div>
           <div className="lg:sticky lg:top-6">
             <p className="text-fg-muted mb-2 text-sm font-medium">
-              Live preview{dirty ? ' — not saved yet' : ''}
+              {__('Live preview')}
+              {dirty ? ' — not saved yet' : ''}
             </p>
             <div className="border-border overflow-hidden rounded-2xl border shadow-sm">
               <SiteRenderer

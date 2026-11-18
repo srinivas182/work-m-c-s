@@ -1,7 +1,11 @@
 import { Head, router } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
-import { Card, CardContent, EmptyState, Label, PageHeader, Switch } from '@/design-system';
+import { Card, CardContent } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Label } from '@/design-system/components/field';
+import { Switch } from '@/design-system/components/choice';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Feature {
   key: string;
@@ -13,18 +17,20 @@ interface Feature {
 
 export default function Business({ features }: { features: Feature[] }) {
   return (
-    <AppShell title="New features">
-      <Head title="New features" />
+    <AppShell title={__('New features')}>
+      <Head title={__('New features')} />
       <div className="grid max-w-3xl gap-8">
         <PageHeader
-          title="New features"
-          description="Try improvements before they become standard. You can switch them off again until then."
+          title={__('New features')}
+          description={__(
+            'Try improvements before they become standard. You can switch them off again until then.',
+          )}
         />
         {features.length === 0 ? (
           <EmptyState
             icon={Sparkles}
-            title="Nothing new to try right now"
-            description="When WURK releases an optional improvement, it appears here first."
+            title={__('Nothing new to try right now')}
+            description={__('When WURK releases an optional improvement, it appears here first.')}
           />
         ) : (
           <Card>
@@ -38,7 +44,8 @@ export default function Business({ features }: { features: Feature[] }) {
                     <p className="text-fg-muted mt-1 text-sm">{f.description}</p>
                     {f.default_on_at && (
                       <p className="text-fg-muted mt-1 text-xs">
-                        Standard for everyone from {new Date(f.default_on_at).toLocaleDateString()}.
+                        {__('Standard for everyone from')}{' '}
+                        {new Date(f.default_on_at).toLocaleDateString()}.
                       </p>
                     )}
                   </div>

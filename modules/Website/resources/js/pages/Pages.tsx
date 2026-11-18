@@ -12,27 +12,27 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  Dialog,
-  DialogContent,
-  DialogFooter,
+  CardDescription,
+} from '@/design-system/components/card';
+import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  Field,
-  Input,
-  PageHeader,
-  Textarea,
-  CardDescription,
-} from '@/design-system';
+} from '@/design-system/components/dropdown-menu';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface PageRow {
   id: string;
@@ -71,25 +71,32 @@ function AddPage({ base, onClose }: { base: string; onClose: () => void }) {
   };
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent title="Add a page" description="Start empty; add sections in the editor.">
+      <DialogContent
+        title={__('Add a page')}
+        description={__('Start empty; add sections in the editor.')}
+      >
         <form onSubmit={submit} className="grid gap-4" noValidate>
-          <Field label="Page title" error={form.errors.title} required>
+          <Field label={__('Page title')} error={form.errors.title} required>
             <Input
               value={form.data.title}
               onChange={(e) => form.setData('title', e.target.value)}
               autoFocus
             />
           </Field>
-          <Field label="Web address" hint="Leave empty to use the title" error={form.errors.slug}>
+          <Field
+            label={__('Web address')}
+            hint={__('Leave empty to use the title')}
+            error={form.errors.slug}
+          >
             <Input
               value={form.data.slug}
               onChange={(e) => form.setData('slug', e.target.value)}
-              placeholder="services"
+              placeholder={__('services')}
             />
           </Field>
           <DialogFooter>
             <Button type="submit" loading={form.processing}>
-              Add page
+              {__('Add page')}
             </Button>
           </DialogFooter>
         </form>
@@ -116,17 +123,17 @@ function PageSettings({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent
         title={`${page.title} — settings`}
-        description="Search engines show the SEO title and description."
+        description={__('Search engines show the SEO title and description.')}
       >
         <form onSubmit={submit} className="grid gap-4" noValidate>
-          <Field label="Page title" error={form.errors.title} required>
+          <Field label={__('Page title')} error={form.errors.title} required>
             <Input
               value={form.data.title}
               onChange={(e) => form.setData('title', e.target.value)}
             />
           </Field>
           <Field
-            label="Web address"
+            label={__('Web address')}
             hint={page.is_home ? 'The home page always lives at your main address' : undefined}
             error={form.errors.slug}
           >
@@ -136,7 +143,11 @@ function PageSettings({
               disabled={page.is_home}
             />
           </Field>
-          <Field label="SEO title" hint="Up to 70 characters" error={form.errors.seo_title}>
+          <Field
+            label={__('SEO title')}
+            hint={__('Up to 70 characters')}
+            error={form.errors.seo_title}
+          >
             <Input
               value={form.data.seo_title}
               onChange={(e) => form.setData('seo_title', e.target.value)}
@@ -144,8 +155,8 @@ function PageSettings({
             />
           </Field>
           <Field
-            label="SEO description"
-            hint="Up to 170 characters"
+            label={__('SEO description')}
+            hint={__('Up to 170 characters')}
             error={form.errors.seo_description}
           >
             <Textarea
@@ -157,7 +168,7 @@ function PageSettings({
           </Field>
           <DialogFooter>
             <Button type="submit" loading={form.processing}>
-              Save
+              {__('Save')}
             </Button>
           </DialogFooter>
         </form>
@@ -173,17 +184,18 @@ function DesignCard({ base, design }: { base: string; design: NonNullable<Props[
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Design</CardTitle>
+        <CardTitle>{__('Design')}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3">
         <p className="text-fg-muted text-sm">
           {current ? (
             <>
-              You’re using <strong className="text-fg">{current.name}</strong>.{' '}
+              {__('You’re using')} <strong className="text-fg">{current.name}</strong>.{' '}
             </>
           ) : null}
-          Switching keeps all your text, photos, prices and menus. Your live website only changes
-          when you publish.
+          {__(
+            'Switching keeps all your text, photos, prices and menus. Your live website only changes when you publish.',
+          )}
         </p>
         {others.map((o) => (
           <div
@@ -197,7 +209,11 @@ function DesignCard({ base, design }: { base: string; design: NonNullable<Props[
             <span className="flex gap-2">
               <Button variant="ghost" size="sm" asChild>
                 <a href={`/templates/${o.key}/preview`} target="_blank" rel="noopener">
-                  Preview<span className="sr-only"> {o.name} (opens in a new tab)</span>
+                  {__('Preview')}
+                  <span className="sr-only">
+                    {' '}
+                    {o.name} {__('(opens in a new tab)')}
+                  </span>
                 </a>
               </Button>
               <Button
@@ -212,7 +228,7 @@ function DesignCard({ base, design }: { base: string; design: NonNullable<Props[
                   )
                 }
               >
-                Use this design
+                {__('Use this design')}
               </Button>
             </span>
           </div>
@@ -238,8 +254,8 @@ function LaunchChecklist({
         role="status"
         className="bg-success-3 text-success-11 flex items-center gap-2 rounded-xl px-4 py-3 font-medium"
       >
-        <CheckCircle2 className="size-5" aria-hidden /> Your website is launched. Keep it fresh —
-        edit any page whenever you like.
+        <CheckCircle2 className="size-5" aria-hidden />{' '}
+        {__('Your website is launched. Keep it fresh — edit any page whenever you like.')}
       </p>
     );
   }
@@ -247,13 +263,13 @@ function LaunchChecklist({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Launch your website</CardTitle>
+        <CardTitle>{__('Launch your website')}</CardTitle>
         <CardDescription>
-          {done} of {steps.length} done. Each step takes a few minutes.
+          {done} {__('of')} {steps.length} {__('done. Each step takes a few minutes.')}
         </CardDescription>
         <div
           role="progressbar"
-          aria-label="Launch progress"
+          aria-label={__('Launch progress')}
           aria-valuenow={pct}
           aria-valuemin={0}
           aria-valuemax={100}
@@ -263,7 +279,7 @@ function LaunchChecklist({
         </div>
       </CardHeader>
       <CardContent>
-        <ol className="grid gap-3" aria-label="Launch steps">
+        <ol className="grid gap-3" aria-label={__('Launch steps')}>
           {steps.map((s) => (
             <li key={s.key} className="flex items-start gap-3">
               {s.done ? (
@@ -294,7 +310,7 @@ function LaunchChecklist({
                     )
                   }
                 >
-                  Mark as done
+                  {__('Mark as done')}
                 </Button>
               )}
             </li>
@@ -317,20 +333,20 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
   };
 
   return (
-    <AppShell title="Website">
-      <Head title="Website" />
+    <AppShell title={__('Website')}>
+      <Head title={__('Website')} />
       <div className="grid max-w-4xl gap-8">
         <PageHeader
-          title="Website pages"
-          description="Add pages, choose your home page and put them in order."
+          title={__('Website pages')}
+          description={__('Add pages, choose your home page and put them in order.')}
           actions={
             <div className="flex gap-2">
               <Button variant="secondary" asChild>
-                <a href={`${base.replace(/\/pages$/, '')}/preview`}>Preview site</a>
+                <a href={`${base.replace(/\/pages$/, '')}/preview`}>{__('Preview site')}</a>
               </Button>
               <Button onClick={() => setAdding(true)}>
                 <FilePlus2 />
-                Add page
+                {__('Add page')}
               </Button>
             </div>
           }
@@ -338,7 +354,7 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
         <LaunchChecklist steps={checklist} base={base} />
         <Card>
           <CardContent className="p-0">
-            <ul className="divide-border divide-y" aria-label="Pages">
+            <ul className="divide-border divide-y" aria-label={__('Pages')}>
               {pages.map((p, i) => (
                 <li
                   key={p.id}
@@ -346,7 +362,9 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
                 >
                   <div className="min-w-0">
                     <p className="flex items-center gap-2 font-medium">
-                      {p.is_home && <Home className="text-primary size-4" aria-label="Home page" />}
+                      {p.is_home && (
+                        <Home className="text-primary size-4" aria-label={__('Home page')} />
+                      )}
                       {p.title}
                     </p>
                     <p className="text-fg-muted truncate text-sm">/{p.is_home ? '' : p.slug}</p>
@@ -354,7 +372,7 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
                   <div className="flex items-center gap-1">
                     <Button size="sm" variant="secondary" asChild>
                       <Link href={`${base}/${p.id}/edit`} aria-label={`Edit ${p.title}`}>
-                        <PencilLine /> Edit
+                        <PencilLine /> {__('Edit')}
                       </Link>
                     </Button>
                     <Badge tone={p.published ? 'success' : 'neutral'} dot>
@@ -389,14 +407,16 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => setEditing(p)}>Settings</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => setEditing(p)}>
+                          {__('Settings')}
+                        </DropdownMenuItem>
                         {!p.is_home && (
                           <DropdownMenuItem
                             onSelect={() =>
                               router.post(`${base}/${p.id}/home`, {}, { preserveScroll: true })
                             }
                           >
-                            <Home /> Make home page
+                            <Home /> {__('Make home page')}
                           </DropdownMenuItem>
                         )}
                         {!p.is_home && (
@@ -406,7 +426,7 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
                               router.delete(`${base}/${p.id}`, { preserveScroll: true })
                             }
                           >
-                            <Trash2 /> Delete
+                            <Trash2 /> {__('Delete')}
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
@@ -421,7 +441,7 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
         {deleted.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Recently deleted</CardTitle>
+              <CardTitle>{__('Recently deleted')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="divide-border divide-y">
@@ -430,7 +450,8 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
                     <span>
                       {d.title}{' '}
                       <span className="text-fg-muted text-sm">
-                        · deleted {d.deleted_at ? new Date(d.deleted_at).toLocaleDateString() : ''}
+                        {__('· deleted')}{' '}
+                        {d.deleted_at ? new Date(d.deleted_at).toLocaleDateString() : ''}
                       </span>
                     </span>
                     <Button
@@ -440,7 +461,7 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
                         router.post(`${base}/${d.id}/restore`, {}, { preserveScroll: true })
                       }
                     >
-                      <RotateCcw /> Restore
+                      <RotateCcw /> {__('Restore')}
                     </Button>
                   </li>
                 ))}

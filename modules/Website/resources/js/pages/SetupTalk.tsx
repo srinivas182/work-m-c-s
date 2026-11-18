@@ -1,18 +1,13 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { Check, Link2, Mic, Square } from 'lucide-react';
 import { useRef, useState } from 'react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-  Textarea,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Question {
   key: string;
@@ -67,11 +62,11 @@ function VoiceButton({ question }: { question: string }) {
   };
   return recording ? (
     <Button type="button" variant="secondary" onClick={stop}>
-      <Square aria-hidden /> Stop and send
+      <Square aria-hidden /> {__('Stop and send')}
     </Button>
   ) : (
     <Button type="button" variant="secondary" onClick={start} loading={sending}>
-      <Mic aria-hidden /> Answer with a voice note
+      <Mic aria-hidden /> {__('Answer with a voice note')}
     </Button>
   );
 }
@@ -109,7 +104,7 @@ function AnswerForm({
           rows={3}
           value={form.data.text}
           onChange={(e) => form.setData('text', e.target.value)}
-          placeholder="Type it the way you'd say it"
+          placeholder={__("Type it the way you'd say it")}
         />
       </Field>
       <div className="flex flex-wrap gap-2">
@@ -127,7 +122,7 @@ function ImportForm() {
   const form = useForm({ link: '' });
   return (
     <form
-      aria-label="Start from what you already have online"
+      aria-label={__('Start from what you already have online')}
       className="grid gap-3"
       onSubmit={(e) => {
         e.preventDefault();
@@ -135,13 +130,15 @@ function ImportForm() {
       }}
     >
       <Field
-        label="Your Google listing, Facebook page, Instagram or website — or your business name and area"
+        label={__(
+          'Your Google listing, Facebook page, Instagram or website — or your business name and area',
+        )}
         error={form.errors.link}
       >
         <Input
           value={form.data.link}
           onChange={(e) => form.setData('link', e.target.value)}
-          placeholder="e.g. https://facebook.com/glowsalon or Glow Salon Soweto"
+          placeholder={__('e.g. https://facebook.com/glowsalon or Glow Salon Soweto')}
         />
       </Field>
       <Button
@@ -150,7 +147,7 @@ function ImportForm() {
         className="justify-self-start"
         loading={form.processing}
       >
-        <Link2 aria-hidden /> Fill in from there
+        <Link2 aria-hidden /> {__('Fill in from there')}
       </Button>
     </form>
   );
@@ -178,7 +175,7 @@ function PhotoPicker({ photos }: { photos: Props['photos'] }) {
             />
             <span className="flex items-center gap-2">
               <input type="checkbox" checked={p.chosen} onChange={() => toggle(i)} />
-              Use photo {i + 1}
+              {__('Use photo')} {i + 1}
             </span>
           </label>
         </li>
@@ -200,22 +197,25 @@ export default function SetupTalk({
   const answered = questions.filter((q) => q.answer !== null);
   const current = questions.find((q) => q.key === next);
   return (
-    <AppShell title="Set up by talking">
-      <Head title="Set up by talking" />
+    <AppShell title={__('Set up by talking')}>
+      <Head title={__('Set up by talking')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Set up by talking"
-          description="Answer six short questions, typed or as voice notes, in any language. WURK sets up your website, services and hours from exactly what you say — nothing is invented, and nothing goes live until you publish."
+          title={__('Set up by talking')}
+          description={__(
+            'Answer six short questions, typed or as voice notes, in any language. WURK sets up your website, services and hours from exactly what you say — nothing is invented, and nothing goes live until you publish.',
+          )}
         />
         {!started && (
           <Card>
             <CardHeader>
-              <CardTitle>Already online? Start from there</CardTitle>
+              <CardTitle>{__('Already online? Start from there')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2 text-sm">
               <p className="text-fg-muted">
-                WURK reads only what’s public, and you check every answer before anything is set up.
-                Reviews aren’t copied.
+                {__(
+                  'WURK reads only what’s public, and you check every answer before anything is set up. Reviews aren’t copied.',
+                )}
               </p>
               <ImportForm />
             </CardContent>
@@ -224,7 +224,7 @@ export default function SetupTalk({
         {answered.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>What WURK understood</CardTitle>
+              <CardTitle>{__('What WURK understood')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ol className="grid gap-3 text-sm">
@@ -240,7 +240,7 @@ export default function SetupTalk({
                         aria-label={`Change: ${q.question}`}
                         onClick={() => setChanging(changing === q.key ? null : q.key)}
                       >
-                        Change
+                        {__('Change')}
                       </Button>
                     </p>
                     {changing === q.key && (
@@ -255,12 +255,13 @@ export default function SetupTalk({
         {photos.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Your photos</CardTitle>
+              <CardTitle>{__('Your photos')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 text-sm">
               <p className="text-fg-muted">
-                These are photos you put online yourself. Tick the ones to use on your website —
-                only use photos of your own business and work.
+                {__(
+                  'These are photos you put online yourself. Tick the ones to use on your website — only use photos of your own business and work.',
+                )}
               </p>
               <PhotoPicker photos={photos} />
             </CardContent>
@@ -270,7 +271,7 @@ export default function SetupTalk({
           <Card>
             <CardHeader>
               <CardTitle>
-                Question {answered.length + 1} of {questions.length}
+                {__('Question')} {answered.length + 1} {__('of')} {questions.length}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -281,10 +282,10 @@ export default function SetupTalk({
         {preview && (
           <Card>
             <CardHeader>
-              <CardTitle>Ready to set up</CardTitle>
+              <CardTitle>{__('Ready to set up')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 text-sm">
-              <p>This is exactly what will happen:</p>
+              <p>{__('This is exactly what will happen:')}</p>
               <ul className="list-disc space-y-1 pl-5">
                 {preview.map((line) => (
                   <li key={line}>{line}</li>
@@ -300,13 +301,13 @@ export default function SetupTalk({
                     });
                   }}
                 >
-                  Set it up
+                  {__('Set it up')}
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => router.post(`${base()}/restart`, {}, { preserveScroll: true })}
                 >
-                  Start again
+                  {__('Start again')}
                 </Button>
               </div>
             </CardContent>

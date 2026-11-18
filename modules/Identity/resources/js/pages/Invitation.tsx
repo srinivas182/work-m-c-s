@@ -1,7 +1,10 @@
 import { Link, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
-import { Button, Field, Input } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AuthLayout from '@/layouts/AuthLayout';
+import { __ } from '@/i18n';
 
 interface Props {
   valid: boolean;
@@ -27,11 +30,13 @@ export default function Invitation({
   if (!valid) {
     return (
       <AuthLayout
-        title="This invitation can’t be used"
-        description="It may have expired, been used already, or been replaced by a newer invitation. Ask the person who invited you to send a new one."
+        title={__('This invitation can’t be used')}
+        description={__(
+          'It may have expired, been used already, or been replaced by a newer invitation. Ask the person who invited you to send a new one.',
+        )}
         footer={
           <Link href="/sign-in" className="text-accent-fg font-medium hover:underline">
-            Go to sign in
+            {__('Go to sign in')}
           </Link>
         }
       >
@@ -50,8 +55,8 @@ export default function Invitation({
       title={`Join ${joining}`}
       description={
         <>
-          You’re invited as{' '}
-          <strong className="text-fg font-semibold">{role?.replace('-', ' ')}</strong> with{' '}
+          {__('You’re invited as')}{' '}
+          <strong className="text-fg font-semibold">{role?.replace('-', ' ')}</strong> {__('with')}{' '}
           <strong className="text-fg font-semibold">{email}</strong>.
         </>
       }
@@ -59,7 +64,7 @@ export default function Invitation({
       <form onSubmit={submit} className="grid gap-5" noValidate>
         {needsName && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="First name" error={form.errors.first_name} required>
+            <Field label={__('First name')} error={form.errors.first_name} required>
               <Input
                 value={form.data.first_name}
                 onChange={(e) => form.setData('first_name', e.target.value)}
@@ -68,7 +73,7 @@ export default function Invitation({
                 className="h-12 text-base"
               />
             </Field>
-            <Field label="Last name" error={form.errors.last_name}>
+            <Field label={__('Last name')} error={form.errors.last_name}>
               <Input
                 value={form.data.last_name}
                 onChange={(e) => form.setData('last_name', e.target.value)}
@@ -79,7 +84,7 @@ export default function Invitation({
           </div>
         )}
         <Button type="submit" size="lg" loading={form.processing} className="w-full">
-          Accept and continue
+          {__('Accept and continue')}
         </Button>
       </form>
     </AuthLayout>

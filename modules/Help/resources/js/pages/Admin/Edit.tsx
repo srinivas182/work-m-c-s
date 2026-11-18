@@ -1,7 +1,13 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import { Button, Card, CardContent, Checkbox, Field, Input, PageHeader } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent } from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Article {
   id: string;
@@ -82,7 +88,7 @@ export default function Edit({ article, categories, screens }: Props) {
         <Card>
           <CardContent className="pt-6">
             <form
-              aria-label="Article"
+              aria-label={__('Article')}
               className="grid gap-3 text-sm"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -90,7 +96,7 @@ export default function Edit({ article, categories, screens }: Props) {
               }}
             >
               <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="Category" error={errors.category_id}>
+                <Field label={__('Category')} error={errors.category_id}>
                   <select
                     className="border-border bg-bg h-10 w-full rounded-md border px-3"
                     value={form.data.category_id}
@@ -103,30 +109,30 @@ export default function Edit({ article, categories, screens }: Props) {
                     ))}
                   </select>
                 </Field>
-                <Field label="Status">
+                <Field label={__('Status')}>
                   <select
                     className="border-border bg-bg h-10 w-full rounded-md border px-3"
                     value={form.data.status}
                     onChange={(e) => form.setData('status', e.target.value)}
                   >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
+                    <option value="draft">{__('Draft')}</option>
+                    <option value="published">{__('Published')}</option>
                   </select>
                 </Field>
               </div>
-              <Field label="Title" error={errors.title}>
+              <Field label={__('Title')} error={errors.title}>
                 <Input
                   value={form.data.title}
                   onChange={(e) => form.setData('title', e.target.value)}
                 />
               </Field>
-              <Field label="Summary (shown in search)" error={errors.summary}>
+              <Field label={__('Summary (shown in search)')} error={errors.summary}>
                 <Input
                   value={form.data.summary}
                   onChange={(e) => form.setData('summary', e.target.value)}
                 />
               </Field>
-              <Field label="Article (Markdown)" error={errors.body}>
+              <Field label={__('Article (Markdown)')} error={errors.body}>
                 <textarea
                   className="border-border bg-bg min-h-64 w-full rounded-md border p-3 font-mono"
                   value={form.data.body}
@@ -134,7 +140,7 @@ export default function Edit({ article, categories, screens }: Props) {
                 />
               </Field>
               {article && (
-                <Field label="Insert an image">
+                <Field label={__('Insert an image')}>
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
@@ -143,14 +149,17 @@ export default function Edit({ article, categories, screens }: Props) {
                 </Field>
               )}
               <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="30-second video (MP4 or WebM, up to 40 MB)" error={errors.video}>
+                <Field
+                  label={__('30-second video (MP4 or WebM, up to 40 MB)')}
+                  error={errors.video}
+                >
                   <input
                     type="file"
                     accept="video/mp4,video/webm"
                     onChange={(e) => form.setData('video', e.target.files?.[0] ?? null)}
                   />
                 </Field>
-                <Field label="Video poster image" error={errors.poster}>
+                <Field label={__('Video poster image')} error={errors.poster}>
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
@@ -164,14 +173,16 @@ export default function Edit({ article, categories, screens }: Props) {
                     checked={form.data.remove_video}
                     onCheckedChange={(on) => form.setData('remove_video', on === true)}
                   />
-                  Remove the video
+                  {__('Remove the video')}
                 </label>
               )}
               <fieldset className="grid gap-2">
-                <legend className="font-medium">Screens this helps with (its “?” help)</legend>
+                <legend className="font-medium">
+                  {__('Screens this helps with (its “?” help)')}
+                </legend>
                 <Input
-                  aria-label="Find a screen"
-                  placeholder="Find a screen, e.g. Billing"
+                  aria-label={__('Find a screen')}
+                  placeholder={__('Find a screen, e.g. Billing')}
                   value={find}
                   onChange={(e) => setFind(e.target.value)}
                 />
@@ -179,7 +190,7 @@ export default function Edit({ article, categories, screens }: Props) {
                   className="border-border grid max-h-56 gap-1 overflow-y-auto rounded-md border p-2"
                   tabIndex={0}
                   role="region"
-                  aria-label="Screens"
+                  aria-label={__('Screens')}
                 >
                   {screens
                     .filter((s) => s.toLowerCase().includes(find.toLowerCase()))
@@ -203,7 +214,7 @@ export default function Edit({ article, categories, screens }: Props) {
                 {errors['screens.0'] && <p className="text-danger">{errors['screens.0']}</p>}
               </fieldset>
               <Button type="submit" className="justify-self-start" loading={form.processing}>
-                Save
+                {__('Save')}
               </Button>
             </form>
           </CardContent>

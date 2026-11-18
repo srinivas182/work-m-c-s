@@ -1,32 +1,36 @@
 import { Head, useForm } from '@inertiajs/react';
 import { CheckCircle2, CircleAlert, Send } from 'lucide-react';
 import type { FormEvent } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
-  Label,
-  PageHeader,
+} from '@/design-system/components/card';
+import { Field, Label } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Switch,
+} from '@/design-system/components/select';
+import { Switch } from '@/design-system/components/choice';
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Driver {
   key: string;
@@ -98,17 +102,17 @@ function ChannelCard({ channel }: { channel: Channel }) {
           </div>
           {channel.current?.active ? (
             <Badge tone="success" dot>
-              On
+              {__('On')}
             </Badge>
           ) : (
-            <Badge>Off</Badge>
+            <Badge>{__('Off')}</Badge>
           )}
         </div>
       </CardHeader>
       <CardContent className="grid gap-6">
         <form onSubmit={save} className="grid gap-5" noValidate>
           {channel.drivers.length > 1 && (
-            <Field label="Provider" className="sm:max-w-xs">
+            <Field label={__('Provider')} className="sm:max-w-xs">
               {(control) => (
                 <Select
                   value={form.data.driver}
@@ -180,10 +184,10 @@ function ChannelCard({ channel }: { channel: Channel }) {
                 checked={form.data.active}
                 onCheckedChange={(v) => form.setData('active', v)}
               />
-              <Label htmlFor={`active-${channel.channel}`}>Use this provider</Label>
+              <Label htmlFor={`active-${channel.channel}`}>{__('Use this provider')}</Label>
             </div>
             <Button type="submit" loading={form.processing}>
-              Save
+              {__('Save')}
             </Button>
           </div>
         </form>
@@ -254,29 +258,33 @@ export default function Providers({ channels, recent }: Props) {
   const payments = channels.filter((c) => c.channel.startsWith('payments.'));
 
   return (
-    <AppShell title="Providers">
-      <Head title="Providers" />
+    <AppShell title={__('Providers')}>
+      <Head title={__('Providers')} />
       <div className="grid max-w-4xl gap-8">
         <PageHeader
-          title="Providers"
-          description="The services WURK uses to send messages and collect payments. Secrets are stored encrypted and never shown again."
+          title={__('Providers')}
+          description={__(
+            'The services WURK uses to send messages and collect payments. Secrets are stored encrypted and never shown again.',
+          )}
         />
         {messaging.map((c) => (
           <ChannelCard key={c.channel} channel={c} />
         ))}
-        <h2 className="font-display mt-4 text-xl font-semibold tracking-tight">Payment gateways</h2>
+        <h2 className="font-display mt-4 text-xl font-semibold tracking-tight">
+          {__('Payment gateways')}
+        </h2>
         {payments.map((c) => (
           <ChannelCard key={c.channel} channel={c} />
         ))}
         {recent.length > 0 && (
-          <Table label="Recent platform messages">
+          <Table label={__('Recent platform messages')}>
             <TableHeader>
               <TableRow>
-                <TableHead>When</TableHead>
-                <TableHead>Channel</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead>Purpose</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{__('When')}</TableHead>
+                <TableHead>{__('Channel')}</TableHead>
+                <TableHead>{__('To')}</TableHead>
+                <TableHead>{__('Purpose')}</TableHead>
+                <TableHead>{__('Status')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

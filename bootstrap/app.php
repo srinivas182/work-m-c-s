@@ -13,6 +13,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Wurk\Identity\Auth\SignInFlow;
 use Wurk\Identity\Http\Middleware\SessionGuardian;
 use Wurk\Identity\Support\Surface;
+use Wurk\Platform\I18n\CustomerLocale;
+use Wurk\Platform\I18n\IdempotentRequests;
+use Wurk\Platform\I18n\SetLocale;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,12 +23,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(CustomerLocale::class); // customer pages in the customer's language (24.3)
         $middleware->web(append: [
             SessionGuardian::class,
+            SetLocale::class, // the person's language (24.1)
+            IdempotentRequests::class, // offline changes are sent once (24.5)
             HandleInertiaRequests::class,
         ]);
         // The referral cookie holds only a public code, and is read on routes with and without the web stack (Sprint 13.2).
-        $middleware->encryptCookies(except: ['wurk_ref', 'wurk_agent']); // public codes only (Sprints 13.2, 14.2)
+        $middleware->encryptCookies(except: ['wurk_ref', 'wurk_agent', 'wurk_lang', 'wurk_lite', 'wurk_slow']); // public codes only (Sprints 13.2, 14.2)
         $middleware->redirectGuestsTo(fn () => route('identity.sign-in'));
         $middleware->redirectUsersTo(fn (Request $request) => SignInFlow::home(Surface::of($request)));
     })

@@ -1,40 +1,44 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { MailPlus, MoreHorizontal, ShieldCheck, ShieldOff, UserCog } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import { Avatar } from '@/design-system/components/avatar';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Avatar,
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogFooter,
+} from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  Field,
-  Input,
-  Label,
-  PageHeader,
+} from '@/design-system/components/dropdown-menu';
+import { Field, Label } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+} from '@/design-system/components/select';
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Person {
   id: string;
@@ -61,9 +65,9 @@ function InviteCard({ roles }: Pick<Props, 'roles'>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Invite a colleague</CardTitle>
+        <CardTitle>{__('Invite a colleague')}</CardTitle>
         <CardDescription>
-          They’ll set up an authenticator app the first time they sign in.
+          {__('They’ll set up an authenticator app the first time they sign in.')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -71,20 +75,20 @@ function InviteCard({ roles }: Pick<Props, 'roles'>) {
           onSubmit={submit}
           className="grid grid-cols-1 items-end gap-4 sm:grid-cols-[2fr_1.2fr_1.2fr_auto]"
         >
-          <Field label="Email" error={form.errors.email} required>
+          <Field label={__('Email')} error={form.errors.email} required>
             <Input
               type="email"
               value={form.data.email}
               onChange={(e) => form.setData('email', e.target.value)}
             />
           </Field>
-          <Field label="First name">
+          <Field label={__('First name')}>
             <Input
               value={form.data.first_name}
               onChange={(e) => form.setData('first_name', e.target.value)}
             />
           </Field>
-          <Field label="Role" error={form.errors.role}>
+          <Field label={__('Role')} error={form.errors.role}>
             {(control) => (
               <Select value={form.data.role} onValueChange={(v) => form.setData('role', v)}>
                 <SelectTrigger {...control}>
@@ -101,7 +105,7 @@ function InviteCard({ roles }: Pick<Props, 'roles'>) {
             )}
           </Field>
           <Button type="submit" loading={form.processing}>
-            <MailPlus /> Send invitation
+            <MailPlus /> {__('Send invitation')}
           </Button>
         </form>
       </CardContent>
@@ -128,7 +132,7 @@ function RolesDialog({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent
         title={`Roles for ${person.name}`}
-        description="Permissions come from roles. Changes take effect on their next click."
+        description={__('Permissions come from roles. Changes take effect on their next click.')}
       >
         <form
           onSubmit={(e) => {
@@ -155,7 +159,7 @@ function RolesDialog({
           )}
           <DialogFooter>
             <Button type="submit" loading={form.processing} disabled={form.data.roles.length === 0}>
-              Save roles
+              {__('Save roles')}
             </Button>
           </DialogFooter>
         </form>
@@ -169,23 +173,25 @@ export default function Staff({ staff, pending, roles }: Props) {
   const name = (key: string) => roles.find((r) => r.key === key)?.name ?? key;
 
   return (
-    <AppShell title="WURK staff">
-      <Head title="WURK staff" />
+    <AppShell title={__('WURK staff')}>
+      <Head title={__('WURK staff')} />
       <div className="grid gap-8">
         <PageHeader
-          title="WURK staff"
-          description="People who can sign in to the WURK admin. Everyone uses an authenticator app."
+          title={__('WURK staff')}
+          description={__(
+            'People who can sign in to the WURK admin. Everyone uses an authenticator app.',
+          )}
         />
         <InviteCard roles={roles} />
-        <Table label="WURK staff">
+        <Table label={__('WURK staff')}>
           <TableHeader>
             <TableRow>
-              <TableHead>Person</TableHead>
-              <TableHead>Roles</TableHead>
-              <TableHead>Security</TableHead>
-              <TableHead>Last sign-in</TableHead>
+              <TableHead>{__('Person')}</TableHead>
+              <TableHead>{__('Roles')}</TableHead>
+              <TableHead>{__('Security')}</TableHead>
+              <TableHead>{__('Last sign-in')}</TableHead>
               <TableHead className="w-12">
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">{__('Actions')}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -208,17 +214,17 @@ export default function Staff({ staff, pending, roles }: Props) {
                         {name(r)}
                       </Badge>
                     ))}
-                    {!p.active && <Badge tone="danger">Deactivated</Badge>}
+                    {!p.active && <Badge tone="danger">{__('Deactivated')}</Badge>}
                   </span>
                 </TableCell>
                 <TableCell>
                   {p.mfa ? (
                     <Badge tone="success">
-                      <ShieldCheck /> Authenticator on
+                      <ShieldCheck /> {__('Authenticator on')}
                     </Badge>
                   ) : (
                     <Badge tone="warning">
-                      <ShieldOff /> Set up on first sign-in
+                      <ShieldOff /> {__('Set up on first sign-in')}
                     </Badge>
                   )}
                 </TableCell>
@@ -234,7 +240,7 @@ export default function Staff({ staff, pending, roles }: Props) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onSelect={() => setEditing(p)}>
-                        <UserCog /> Change roles
+                        <UserCog /> {__('Change roles')}
                       </DropdownMenuItem>
                       {p.active ? (
                         <DropdownMenuItem
@@ -243,7 +249,7 @@ export default function Staff({ staff, pending, roles }: Props) {
                             router.post(`/staff/${p.id}/deactivate`, {}, { preserveScroll: true })
                           }
                         >
-                          <ShieldOff /> Deactivate
+                          <ShieldOff /> {__('Deactivate')}
                         </DropdownMenuItem>
                       ) : (
                         <DropdownMenuItem
@@ -251,7 +257,7 @@ export default function Staff({ staff, pending, roles }: Props) {
                             router.post(`/staff/${p.id}/reactivate`, {}, { preserveScroll: true })
                           }
                         >
-                          <ShieldCheck /> Reactivate
+                          <ShieldCheck /> {__('Reactivate')}
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
@@ -264,7 +270,7 @@ export default function Staff({ staff, pending, roles }: Props) {
         {pending.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Waiting to accept</CardTitle>
+              <CardTitle>{__('Waiting to accept')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="divide-border divide-y">
@@ -273,7 +279,8 @@ export default function Staff({ staff, pending, roles }: Props) {
                     <span>
                       <span className="font-medium">{i.email}</span>{' '}
                       <span className="text-fg-muted">
-                        · {name(i.role)} · expires {new Date(i.expires_at).toLocaleDateString()}
+                        · {name(i.role)} {__('· expires')}{' '}
+                        {new Date(i.expires_at).toLocaleDateString()}
                       </span>
                     </span>
                     <Button
@@ -283,7 +290,7 @@ export default function Staff({ staff, pending, roles }: Props) {
                         router.delete(`/staff/invitations/${i.id}`, { preserveScroll: true })
                       }
                     >
-                      Cancel
+                      {__('Cancel')}
                     </Button>
                   </li>
                 ))}

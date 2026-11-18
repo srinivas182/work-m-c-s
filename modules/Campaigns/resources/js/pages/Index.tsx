@@ -1,17 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
 import { Megaphone } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Campaign {
   id: string;
@@ -44,21 +39,23 @@ export default function Index({
 }) {
   const base = window.location.pathname.replace(/\/$/, '');
   return (
-    <AppShell title="Campaigns">
-      <Head title="Campaigns" />
+    <AppShell title={__('Campaigns')}>
+      <Head title={__('Campaigns')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Campaigns"
-          description="Email or SMS to customers who agreed to hear from you. Every message has an opt-out."
+          title={__('Campaigns')}
+          description={__(
+            'Email or SMS to customers who agreed to hear from you. Every message has an opt-out.',
+          )}
           actions={
             <Button asChild>
-              <Link href={`${base}/new`}>New campaign</Link>
+              <Link href={`${base}/new`}>{__('New campaign')}</Link>
             </Button>
           }
         />
         <Card>
           <CardHeader>
-            <CardTitle>Ready-made</CardTitle>
+            <CardTitle>{__('Ready-made')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
             {Object.entries(readyMade).map(([key, r]) => (
@@ -77,11 +74,11 @@ export default function Index({
         {campaigns.length === 0 ? (
           <EmptyState
             icon={Megaphone}
-            title="No campaigns yet"
-            description="Start with a ready-made one above."
+            title={__('No campaigns yet')}
+            description={__('Start with a ready-made one above.')}
           />
         ) : (
-          <ul aria-label="Campaigns" className="grid gap-2">
+          <ul aria-label={__('Campaigns')} className="grid gap-2">
             {campaigns.map((c) => (
               <li
                 key={c.id}
@@ -117,8 +114,10 @@ export default function Index({
                 )}
                 {c.status === 'sent' && (
                   <span className="text-fg-muted">
-                    {c.sent} sent{c.failed > 0 ? ` · ${c.failed} failed` : ''}
-                    {c.channel === 'email' ? ` · ${c.opened} opened` : ''} · {c.clicked} clicked
+                    {c.sent} {__('sent')}
+                    {c.failed > 0 ? ` · ${c.failed} failed` : ''}
+                    {c.channel === 'email' ? ` · ${c.opened} opened` : ''} · {c.clicked}{' '}
+                    {__('clicked')}
                     {c.redeemed > 0
                       ? ` · ${c.redeemed} redeemed · ${rand(c.sales_cents)} in sales`
                       : ''}

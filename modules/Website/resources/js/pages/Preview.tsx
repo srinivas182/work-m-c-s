@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, PencilLine } from 'lucide-react';
 import { SiteRenderer } from '../site/SiteRenderer';
 import type { Branding, ContentDocument, MenuItem } from '../site/types';
+import { __ } from '@/i18n';
 
 interface Props {
   mode: 'draft' | 'published';
@@ -36,10 +37,10 @@ export default function Preview({
           href={urls.pages}
           className="inline-flex items-center gap-1 font-medium text-white/80 hover:text-white"
         >
-          <ArrowLeft className="size-4" aria-hidden /> Pages
+          <ArrowLeft className="size-4" aria-hidden /> {__('Pages')}
         </Link>
         <label className="inline-flex items-center gap-2">
-          <span className="text-white/70">Page</span>
+          <span className="text-white/70">{__('Page')}</span>
           <select
             className="rounded-md bg-white/10 px-2 py-1 text-white"
             value={page.slug}
@@ -52,7 +53,11 @@ export default function Preview({
             ))}
           </select>
         </label>
-        <div role="group" aria-label="Version" className="inline-flex rounded-md bg-white/10 p-0.5">
+        <div
+          role="group"
+          aria-label={__('Version')}
+          className="inline-flex rounded-md bg-white/10 p-0.5"
+        >
           {(['draft', 'published'] as const).map((m) => (
             <a
               key={m}
@@ -68,7 +73,7 @@ export default function Preview({
           href={urls.editor}
           className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 font-semibold text-[#1B1640]"
         >
-          <PencilLine className="size-4" aria-hidden /> Edit this page
+          <PencilLine className="size-4" aria-hidden /> {__('Edit this page')}
         </Link>
       </div>
       {content ? (
@@ -81,15 +86,18 @@ export default function Preview({
       ) : (
         <main className="grid min-h-[60vh] place-items-center p-8 text-center">
           <div>
-            <p className="text-lg font-semibold">“{page.title}” hasn’t been published yet.</p>
+            <p className="text-lg font-semibold">
+              “{page.title}
+              {__('” hasn’t been published yet.')}
+            </p>
             <p className="text-fg-muted mt-2">
-              Visitors won’t see it until you publish it from the editor.
+              {__('Visitors won’t see it until you publish it from the editor.')}
             </p>
             <a
               href={to(page.slug, 'draft')}
               className="text-primary mt-4 inline-block font-semibold underline-offset-4 hover:underline"
             >
-              See the latest changes
+              {__('See the latest changes')}
             </a>
           </div>
         </main>

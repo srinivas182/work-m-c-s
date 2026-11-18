@@ -1,17 +1,13 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Branch {
   id: string;
@@ -35,16 +31,16 @@ function BranchForm({ b, base, done }: { b?: Branch; base: string; done: () => v
         else form.post(base, options);
       }}
     >
-      <Field label="Name" error={form.errors.name}>
+      <Field label={__('Name')} error={form.errors.name}>
         <Input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
       </Field>
-      <Field label="Address" error={form.errors.address}>
+      <Field label={__('Address')} error={form.errors.address}>
         <Input
           value={form.data.address}
           onChange={(e) => form.setData('address', e.target.value)}
         />
       </Field>
-      <Field label="Phone" error={form.errors.phone}>
+      <Field label={__('Phone')} error={form.errors.phone}>
         <Input
           type="tel"
           value={form.data.phone}
@@ -73,11 +69,11 @@ export default function Branches({
   const [editing, setEditing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   return (
-    <AppShell title="Branches">
-      <Head title="Branches" />
+    <AppShell title={__('Branches')}>
+      <Head title={__('Branches')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Branches"
+          title={__('Branches')}
           description={`${open} of ${limit} ${limit === 1 ? 'branch' : 'branches'} open on your package. Each branch can have its own team, hours, stock and payment accounts.`}
         />
         {open > 1 && (
@@ -86,7 +82,7 @@ export default function Branches({
               className="underline"
               href={`${window.location.pathname.replace(/\/$/, '')}/settlements`}
             >
-              Between branches — what one branch owes another
+              {__('Between branches — what one branch owes another')}
             </a>
           </p>
         )}
@@ -95,15 +91,15 @@ export default function Branches({
             {error}
           </p>
         )}
-        <ul className="grid gap-3" aria-label="Branches">
+        <ul className="grid gap-3" aria-label={__('Branches')}>
           {branches.map((b) => (
             <li key={b.id}>
               <Card>
                 <CardHeader>
                   <CardTitle className="flex flex-wrap items-center gap-2">
                     {b.name}
-                    {b.main && <Badge tone="neutral">Main</Badge>}
-                    {b.closed && <Badge tone="warning">Closed</Badge>}
+                    {b.main && <Badge tone="neutral">{__('Main')}</Badge>}
+                    {b.closed && <Badge tone="warning">{__('Closed')}</Badge>}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-3 text-sm">
@@ -117,7 +113,7 @@ export default function Branches({
                         size="sm"
                         onClick={() => setEditing(editing === b.id ? null : b.id)}
                       >
-                        Edit
+                        {__('Edit')}
                       </Button>
                       {!b.main && (
                         <Button
@@ -151,7 +147,7 @@ export default function Branches({
         {canManage && (
           <Card>
             <CardHeader>
-              <CardTitle>Add a branch</CardTitle>
+              <CardTitle>{__('Add a branch')}</CardTitle>
             </CardHeader>
             <CardContent>
               <BranchForm base={base} done={() => undefined} />

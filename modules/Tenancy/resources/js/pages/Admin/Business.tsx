@@ -10,24 +10,27 @@ import {
   Users,
 } from 'lucide-react';
 import type { FormEvent } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+} from '@/design-system/components/card';
+import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogTrigger,
-  Field,
-  PageHeader,
-  Textarea,
-} from '@/design-system';
+} from '@/design-system/components/dialog';
+import { Field } from '@/design-system/components/field';
+import { PageHeader } from '@/design-system/components/feedback';
+import { Textarea } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { statusTone, type BusinessSummary } from './Businesses';
+import { __ } from '@/i18n';
 
 interface Props {
   business: BusinessSummary & {
@@ -64,7 +67,11 @@ function StatusChange({ business }: { business: Props['business'] }) {
         }
       >
         <form onSubmit={submit}>
-          <Field label="Reason (recorded in the audit log)" error={form.errors.reason} required>
+          <Field
+            label={__('Reason (recorded in the audit log)')}
+            error={form.errors.reason}
+            required
+          >
             <Textarea
               value={form.data.reason}
               onChange={(e) => form.setData('reason', e.target.value)}
@@ -101,7 +108,7 @@ export default function Business({ business, canManage, auditUrl }: Props) {
           href="/businesses"
           className="text-fg-muted hover:text-fg inline-flex w-fit items-center gap-1.5 text-sm font-medium"
         >
-          <ArrowLeft className="size-4" aria-hidden /> Businesses
+          <ArrowLeft className="size-4" aria-hidden /> {__('Businesses')}
         </Link>
         <PageHeader
           title={business.name}
@@ -120,7 +127,7 @@ export default function Business({ business, canManage, auditUrl }: Props) {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Details</CardTitle>
+              <CardTitle>{__('Details')}</CardTitle>
             </CardHeader>
             <CardContent>
               <dl className="grid grid-cols-[8rem_1fr] gap-y-3 text-sm">
@@ -135,9 +142,9 @@ export default function Business({ business, canManage, auditUrl }: Props) {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Web addresses</CardTitle>
+              <CardTitle>{__('Web addresses')}</CardTitle>
               <CardDescription>
-                Custom domains arrive with the website engine (Sprint 5).
+                {__('Custom domains arrive with the website engine (Sprint 5).')}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3">
@@ -147,7 +154,7 @@ export default function Business({ business, canManage, auditUrl }: Props) {
                     {d.host} <ExternalLink className="text-fg-muted size-3.5" aria-hidden />
                   </span>
                   <span className="flex gap-2">
-                    {d.primary && <Badge tone="brand">Primary</Badge>}
+                    {d.primary && <Badge tone="brand">{__('Primary')}</Badge>}
                     <Badge tone={d.verified ? 'success' : 'warning'}>
                       {d.verified ? 'Verified' : 'Pending'}
                     </Badge>
@@ -160,32 +167,32 @@ export default function Business({ business, canManage, auditUrl }: Props) {
         <div className="flex flex-wrap gap-3">
           <Button variant="secondary" asChild>
             <Link href={`/businesses/${business.id}/plan`}>
-              <Package /> Plan and modules
+              <Package /> {__('Plan and modules')}
             </Link>
           </Button>
           <Button variant="secondary" asChild>
             <Link href={`/businesses/${business.id}/credits`}>
-              <Coins /> WURK Credits
+              <Coins /> {__('WURK Credits')}
             </Link>
           </Button>
           <Button variant="secondary" asChild>
             <Link href={`/businesses/${business.id}/agent`}>
-              <Users /> Agent
+              <Users /> {__('Agent')}
             </Link>
           </Button>
           <Button variant="secondary" asChild>
             <Link href={`/businesses/${business.id}/cash`}>
-              <Banknote /> Cash payment
+              <Banknote /> {__('Cash payment')}
             </Link>
           </Button>
           <Button variant="secondary" asChild>
             <Link href={`/businesses/${business.id}/billing`}>
-              <Receipt /> Invoices and payments
+              <Receipt /> {__('Invoices and payments')}
             </Link>
           </Button>
           <Button variant="secondary" asChild>
             <a href={auditUrl}>
-              <ShieldCheck /> View this business in the audit log
+              <ShieldCheck /> {__('View this business in the audit log')}
             </a>
           </Button>
         </div>

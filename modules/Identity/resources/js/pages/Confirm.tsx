@@ -1,7 +1,11 @@
 import { Link, router, useForm } from '@inertiajs/react';
 import { type FormEvent } from 'react';
-import { Button, Field, Input, OtpInput } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { OtpInput } from '@/design-system/components/otp-input';
 import AuthLayout from '@/layouts/AuthLayout';
+import { __ } from '@/i18n';
 
 interface Props {
   to: string;
@@ -31,11 +35,11 @@ export default function Confirm({ to, hasPassword, destination, codeSent }: Prop
 
   return (
     <AuthLayout
-      title="Confirm it’s you"
-      description="This needs a quick check that it’s really you. It lasts 15 minutes."
+      title={__('Confirm it’s you')}
+      description={__('This needs a quick check that it’s really you. It lasts 15 minutes.')}
       footer={
         <Link href={to} className="text-accent-fg font-medium hover:underline">
-          Go back
+          {__('Go back')}
         </Link>
       }
     >
@@ -44,10 +48,10 @@ export default function Confirm({ to, hasPassword, destination, codeSent }: Prop
           <form
             onSubmit={submitPassword}
             className="grid gap-4"
-            aria-label="Confirm with your password"
+            aria-label={__('Confirm with your password')}
             noValidate
           >
-            <Field label="Your password" error={password.errors.password} required>
+            <Field label={__('Your password')} error={password.errors.password} required>
               <Input
                 type="password"
                 value={password.data.password}
@@ -58,7 +62,7 @@ export default function Confirm({ to, hasPassword, destination, codeSent }: Prop
               />
             </Field>
             <Button type="submit" size="lg" loading={password.processing} className="w-full">
-              Confirm
+              {__('Confirm')}
             </Button>
           </form>
         )}
@@ -80,11 +84,12 @@ export default function Confirm({ to, hasPassword, destination, codeSent }: Prop
                   verify();
                 }}
                 className="grid gap-4"
-                aria-label="Confirm with a code"
+                aria-label={__('Confirm with a code')}
                 noValidate
               >
                 <p className="text-fg-muted text-sm">
-                  We sent a 6-digit code to <strong className="text-fg">{destination}</strong>.
+                  {__('We sent a 6-digit code to')}{' '}
+                  <strong className="text-fg">{destination}</strong>.
                 </p>
                 <OtpInput
                   value={code.data.code}
@@ -106,14 +111,14 @@ export default function Confirm({ to, hasPassword, destination, codeSent }: Prop
                   loading={code.processing}
                   disabled={code.data.code.length !== 6}
                 >
-                  Confirm
+                  {__('Confirm')}
                 </Button>
                 <button
                   type="button"
                   onClick={send}
                   className="text-accent-fg cursor-pointer text-sm font-medium hover:underline"
                 >
-                  Send a new code
+                  {__('Send a new code')}
                 </button>
               </form>
             )}

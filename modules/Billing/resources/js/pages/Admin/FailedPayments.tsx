@@ -1,17 +1,17 @@
 import { Head, Link } from '@inertiajs/react';
 import { CircleCheck } from 'lucide-react';
+import { Badge } from '@/design-system/components/badge';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import {
-  Badge,
-  EmptyState,
-  PageHeader,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   rows: {
@@ -32,27 +32,29 @@ const STAGE: Record<string, [string, 'warning' | 'danger']> = {
 
 export default function FailedPayments({ rows }: Props) {
   return (
-    <AppShell title="Failed payments">
-      <Head title="Failed payments" />
+    <AppShell title={__('Failed payments')}>
+      <Head title={__('Failed payments')} />
       <div className="grid gap-8">
         <PageHeader
-          title="Failed payments"
-          description="Businesses whose subscription payment failed, oldest first. Retries run automatically on the scheduled days."
+          title={__('Failed payments')}
+          description={__(
+            'Businesses whose subscription payment failed, oldest first. Retries run automatically on the scheduled days.',
+          )}
         />
         {rows.length === 0 ? (
           <EmptyState
             icon={CircleCheck}
-            title="Everyone is paid up"
-            description="Businesses appear here when a payment fails."
+            title={__('Everyone is paid up')}
+            description={__('Businesses appear here when a payment fails.')}
           />
         ) : (
-          <Table label="Failed payments">
+          <Table label={__('Failed payments')}>
             <TableHeader>
               <TableRow>
-                <TableHead>Business</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead className="text-right">Day</TableHead>
-                <TableHead>Last failure</TableHead>
+                <TableHead>{__('Business')}</TableHead>
+                <TableHead>{__('Stage')}</TableHead>
+                <TableHead className="text-right">{__('Day')}</TableHead>
+                <TableHead>{__('Last failure')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -1,9 +1,14 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
-import { Badge, Button, EmptyState, Field, Input, PageHeader } from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Row {
   id: string;
@@ -22,12 +27,14 @@ export default function DataRequests({ requests }: { requests: Row[] }) {
   const base = window.location.pathname.replace(/\/$/, '');
   const errors = (usePage().props.errors ?? {}) as Record<string, string | undefined>;
   return (
-    <AppShell title="Data requests">
-      <Head title="Data requests" />
+    <AppShell title={__('Data requests')}>
+      <Head title={__('Data requests')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Data requests"
-          description="Customers asking you to delete their information (POPIA). Pay out their wallet first; records the law requires (such as invoices) are kept."
+          title={__('Data requests')}
+          description={__(
+            'Customers asking you to delete their information (POPIA). Pay out their wallet first; records the law requires (such as invoices) are kept.',
+          )}
         />
         {errors.request && (
           <p role="alert" className="text-danger text-sm">
@@ -37,11 +44,13 @@ export default function DataRequests({ requests }: { requests: Row[] }) {
         {requests.length === 0 ? (
           <EmptyState
             icon={ShieldCheck}
-            title="No requests"
-            description="When a customer asks you to delete their information from their account, it appears here."
+            title={__('No requests')}
+            description={__(
+              'When a customer asks you to delete their information from their account, it appears here.',
+            )}
           />
         ) : (
-          <ul aria-label="Data requests" className="grid gap-3">
+          <ul aria-label={__('Data requests')} className="grid gap-3">
             {requests.map((r) => (
               <RequestRow key={r.id} r={r} base={base} />
             ))}
@@ -65,14 +74,14 @@ function RequestRow({ r, base }: { r: Row; base: string }) {
   return (
     <li className="border-border grid gap-3 rounded-lg border p-4 text-sm">
       <div className="flex flex-wrap items-center gap-2">
-        <strong>{r.customer}</strong> asked to be deleted on {r.asked}
+        <strong>{r.customer}</strong> {__('asked to be deleted on')} {r.asked}
         {r.status === 'open' && (
           <Badge tone={r.days_open !== null && r.days_open > 7 ? 'warning' : 'neutral'}>
-            Open {r.days_open} days
+            {__('Open')} {r.days_open} {__('days')}
           </Badge>
         )}
-        {r.status === 'completed' && <Badge tone="success">Deleted</Badge>}
-        {r.status === 'declined' && <Badge tone="neutral">Declined</Badge>}
+        {r.status === 'completed' && <Badge tone="success">{__('Deleted')}</Badge>}
+        {r.status === 'declined' && <Badge tone="neutral">{__('Declined')}</Badge>}
       </div>
       {r.decided && (
         <p className="text-fg-muted">
@@ -84,7 +93,7 @@ function RequestRow({ r, base }: { r: Row; base: string }) {
         <>
           {r.pending_cents > 0 && (
             <p className="text-fg-muted">
-              {rand(r.pending_cents)} in rewards not yet available will be cancelled.
+              {rand(r.pending_cents)} {__('in rewards not yet available will be cancelled.')}
             </p>
           )}
           {r.wallet_cents > 0 ? (
@@ -96,9 +105,11 @@ function RequestRow({ r, base }: { r: Row; base: string }) {
                 post('settle', settle);
               }}
             >
-              <p>First pay out or refund their wallet: {rand(r.wallet_cents)}.</p>
+              <p>
+                {__('First pay out or refund their wallet:')} {rand(r.wallet_cents)}.
+              </p>
               <div className="flex flex-wrap items-end gap-2">
-                <Field label="Amount paid (R)">
+                <Field label={__('Amount paid (R)')}>
                   <Input
                     type="number"
                     inputMode="decimal"
@@ -108,17 +119,17 @@ function RequestRow({ r, base }: { r: Row; base: string }) {
                     onChange={(e) => setSettle({ ...settle, amount: e.target.value })}
                   />
                 </Field>
-                <Field label="How">
+                <Field label={__('How')}>
                   <select
                     className="border-border bg-bg h-10 rounded-md border px-3"
                     value={settle.method}
                     onChange={(e) => setSettle({ ...settle, method: e.target.value })}
                   >
-                    <option value="eft">EFT</option>
-                    <option value="cash">Cash</option>
+                    <option value="eft">{__('EFT')}</option>
+                    <option value="cash">{__('Cash')}</option>
                   </select>
                 </Field>
-                <Field label="Reference (optional)">
+                <Field label={__('Reference (optional)')}>
                   <Input
                     value={settle.reference}
                     maxLength={80}
@@ -126,17 +137,17 @@ function RequestRow({ r, base }: { r: Row; base: string }) {
                   />
                 </Field>
                 <Button size="sm" type="submit">
-                  Record payout
+                  {__('Record payout')}
                 </Button>
               </div>
             </form>
           ) : (
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={() => post('approve', {})}>
-                Delete their information
+                {__('Delete their information')}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setDeclining(true)}>
-                Decline…
+                {__('Decline…')}
               </Button>
             </div>
           )}
@@ -149,11 +160,11 @@ function RequestRow({ r, base }: { r: Row; base: string }) {
                 post('decline', { reason });
               }}
             >
-              <Field label="Why (sent to the customer)">
+              <Field label={__('Why (sent to the customer)')}>
                 <Input value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} />
               </Field>
               <Button size="sm" type="submit">
-                Decline
+                {__('Decline')}
               </Button>
             </form>
           )}

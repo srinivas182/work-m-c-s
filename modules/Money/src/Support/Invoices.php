@@ -13,6 +13,7 @@ use Throwable;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\InsufficientCredits;
+use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Money\Mail\InvoiceMail;
@@ -207,10 +208,22 @@ final readonly class Invoices
     /** The message's words: the same for WhatsApp's template values, SMS and email. */
     public function words(Invoice $invoice, bool $reminder): string
     {
-        $what = $invoice->label().($reminder ? ', due '.$invoice->due_on->format('j M') : '');
+        $locale = $this->customerLocale($invoice); // the customer's language (24.2)
+        $what = $invoice->label().($reminder ? ', '.__('due :date', ['date' => $invoice->due_on->format('j M')], $locale) : '');
 
-        return 'Hi '.self::first($invoice->customer_name).', '.$this->context->current()->displayName().' has sent you a request to pay '.self::rand($invoice->total_cents).' for '.$what
-            .'. You can view and pay it here: '.$this->link($invoice).' Thank you.'.($reminder ? ' Reply STOP to stop these reminders.' : '');
+        return __('Hi :name, :business has sent you a request to pay :amount for :what. You can view and pay it here: :link Thank you.', [
+            'name' => self::first($invoice->customer_name), 'business' => $this->context->current()->displayName(), 'amount' => self::rand($invoice->total_cents),
+            'what' => $what, 'link' => $this->link($invoice),
+        ], $locale).($reminder ? ' '.__('Reply STOP to stop these reminders.', [], $locale) : '');
+    }
+
+    private function customerLocale(Invoice $invoice): ?string
+    {
+        try {
+            return app(ContactBook::class)->locale($invoice->customer_phone, $invoice->customer_email);
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     private function deliver(Invoice $invoice, bool $reminder): string

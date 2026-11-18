@@ -1,7 +1,10 @@
 import { Link, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
-import { Button, Field, Input } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AuthLayout from '@/layouts/AuthLayout';
+import { __ } from '@/i18n';
 
 export default function ForgotPassword({ identifier }: { identifier: string }) {
   const form = useForm({ identifier });
@@ -12,16 +15,16 @@ export default function ForgotPassword({ identifier }: { identifier: string }) {
 
   return (
     <AuthLayout
-      title="Reset your password"
-      description="We’ll send a code to confirm it’s you, then you can choose a new password."
+      title={__('Reset your password')}
+      description={__('We’ll send a code to confirm it’s you, then you can choose a new password.')}
       footer={
         <Link href="/sign-in" className="text-accent-fg font-medium hover:underline">
-          Back to sign in
+          {__('Back to sign in')}
         </Link>
       }
     >
       <form onSubmit={submit} className="grid gap-5" noValidate>
-        <Field label="Email or mobile number" error={form.errors.identifier} required>
+        <Field label={__('Email or mobile number')} error={form.errors.identifier} required>
           <Input
             value={form.data.identifier}
             onChange={(e) => form.setData('identifier', e.target.value)}
@@ -31,7 +34,7 @@ export default function ForgotPassword({ identifier }: { identifier: string }) {
           />
         </Field>
         <Button type="submit" size="lg" loading={form.processing} className="w-full">
-          Send code
+          {__('Send code')}
         </Button>
       </form>
     </AuthLayout>

@@ -1,15 +1,10 @@
 import { Head, router } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  PageHeader,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   days: number;
@@ -28,17 +23,17 @@ export default function RecentlyDeleted({ days, groups }: Props) {
   const base = window.location.pathname.replace(/\/$/, '');
   const any = groups.some((g) => g.items.length > 0);
   return (
-    <AppShell title="Recently deleted">
-      <Head title="Recently deleted" />
+    <AppShell title={__('Recently deleted')}>
+      <Head title={__('Recently deleted')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Recently deleted"
+          title={__('Recently deleted')}
           description={`Deleted something by mistake? Put it back within ${days} days. After that it’s gone for good.`}
         />
         {!any && (
           <EmptyState
             icon={Trash2}
-            title="Nothing deleted lately"
+            title={__('Nothing deleted lately')}
             description={`Anything you delete stays here for ${days} days.`}
           />
         )}
@@ -55,8 +50,8 @@ export default function RecentlyDeleted({ days, groups }: Props) {
                     <li key={i.id} className="flex flex-wrap items-center gap-3 py-3">
                       <strong>{i.name}</strong>
                       <span className="text-fg-muted">
-                        Deleted {when.format(new Date(i.deleted_at))} · gone for good{' '}
-                        {day.format(new Date(i.gone_at))}
+                        {__('Deleted')} {when.format(new Date(i.deleted_at))}{' '}
+                        {__('· gone for good')} {day.format(new Date(i.gone_at))}
                       </span>
                       <Button
                         size="sm"
@@ -67,7 +62,7 @@ export default function RecentlyDeleted({ days, groups }: Props) {
                           router.post(`${base}/${g.type}/${i.id}`, {}, { preserveScroll: true })
                         }
                       >
-                        Restore
+                        {__('Restore')}
                       </Button>
                     </li>
                   ))}

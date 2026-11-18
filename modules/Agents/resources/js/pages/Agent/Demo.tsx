@@ -1,6 +1,10 @@
 import { router, useForm } from '@inertiajs/react';
-import { Button, Card, CardContent, CardHeader, CardTitle, Field, Input } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import { AgentLayout } from '../../components/AgentLayout';
+import { __ } from '@/i18n';
 
 interface Category {
   key: string;
@@ -29,7 +33,7 @@ export default function AgentDemo({
   const form = useForm({ business: '', category: '', template: '' });
   const category = catalogue.find((c) => c.key === form.data.category);
   return (
-    <AgentLayout title="Demo site">
+    <AgentLayout title={__('Demo site')}>
       {demo ? (
         <Card>
           <CardHeader>
@@ -48,22 +52,22 @@ export default function AgentDemo({
             </p>
             {demo.claim && (
               <p>
-                Their “Make it yours” link:{' '}
+                {__('Their “Make it yours” link:')}{' '}
                 <span className="font-mono break-all">{demo.claim}</span>
               </p>
             )}
             <p>
-              Closes on {demo.expires_at} (
-              {demo.days_left === 1 ? '1 day left' : `${demo.days_left} days left`}). Payments and
-              messages are switched off, and search engines don’t list it.
+              {__('Closes on')} {demo.expires_at} (
+              {demo.days_left === 1 ? '1 day left' : `${demo.days_left} days left`}
+              {__('). Payments and messages are switched off, and search engines don’t list it.')}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" asChild>
-                <a href={demo.backOffice}>Edit it in the back office</a>
+                <a href={demo.backOffice}>{__('Edit it in the back office')}</a>
               </Button>
               <Button size="sm" variant="secondary" asChild>
                 <a href="/agent/demo/qr.svg" target="_blank" rel="noopener noreferrer">
-                  QR code for their phone
+                  {__('QR code for their phone')}
                 </a>
               </Button>
               {demo.claim && (
@@ -73,7 +77,7 @@ export default function AgentDemo({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Send “Make it yours” on WhatsApp
+                    {__('Send “Make it yours” on WhatsApp')}
                   </a>
                 </Button>
               )}
@@ -86,14 +90,14 @@ export default function AgentDemo({
                   }
                 }}
               >
-                Delete demo
+                {__('Delete demo')}
               </Button>
             </div>
           </CardContent>
         </Card>
       ) : (
         <form
-          aria-label="Make a demo site"
+          aria-label={__('Make a demo site')}
           className="grid gap-3"
           onSubmit={(e) => {
             e.preventDefault();
@@ -101,16 +105,18 @@ export default function AgentDemo({
           }}
         >
           <p className="text-fg-muted text-sm">
-            Build a prospect a real site in seconds from a template for their trade. It stays up for{' '}
-            {days} days.
+            {__(
+              'Build a prospect a real site in seconds from a template for their trade. It stays up for',
+            )}{' '}
+            {days} {__('days.')}
           </p>
-          <Field label="Business name" error={form.errors.business}>
+          <Field label={__('Business name')} error={form.errors.business}>
             <Input
               value={form.data.business}
               onChange={(e) => form.setData('business', e.target.value)}
             />
           </Field>
-          <Field label="Industry">
+          <Field label={__('Industry')}>
             <select
               className="border-border bg-bg h-10 w-full rounded-md border px-3"
               value={form.data.category}
@@ -118,7 +124,7 @@ export default function AgentDemo({
                 form.setData((d) => ({ ...d, category: e.target.value, template: '' }))
               }
             >
-              <option value="">Choose an industry</option>
+              <option value="">{__('Choose an industry')}</option>
               {catalogue.map((c) => (
                 <option key={c.key} value={c.key}>
                   {c.name}
@@ -126,14 +132,14 @@ export default function AgentDemo({
               ))}
             </select>
           </Field>
-          <Field label="Template" error={form.errors.template}>
+          <Field label={__('Template')} error={form.errors.template}>
             <select
               className="border-border bg-bg h-10 w-full rounded-md border px-3"
               value={form.data.template}
               disabled={!category}
               onChange={(e) => form.setData('template', e.target.value)}
             >
-              <option value="">Choose a template</option>
+              <option value="">{__('Choose a template')}</option>
               {category?.templates.map((t) => (
                 <option key={t.key} value={t.key}>
                   {t.name}
@@ -142,7 +148,7 @@ export default function AgentDemo({
             </select>
           </Field>
           <Button type="submit" className="justify-self-start" loading={form.processing}>
-            Make the demo
+            {__('Make the demo')}
           </Button>
         </form>
       )}

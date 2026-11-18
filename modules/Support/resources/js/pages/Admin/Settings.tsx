@@ -1,17 +1,17 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Button } from '@/design-system/components/button';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
-  PageHeader,
-  Textarea,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Settings {
   targets: Record<string, number>;
@@ -45,7 +45,7 @@ function CannedForm({ base, reply }: { base: string; reply?: Props['canned'][num
         });
       }}
     >
-      <Field label="Title" error={form.errors.title}>
+      <Field label={__('Title')} error={form.errors.title}>
         <Input
           maxLength={80}
           value={form.data.title}
@@ -53,8 +53,8 @@ function CannedForm({ base, reply }: { base: string; reply?: Props['canned'][num
         />
       </Field>
       <Field
-        label="Reply"
-        hint="{name} becomes the person’s first name, {business} the business’s name."
+        label={__('Reply')}
+        hint={__('{name} becomes the person’s first name, {business} the business’s name.')}
         error={form.errors.body}
       >
         <Textarea
@@ -80,9 +80,11 @@ function CannedForm({ base, reply }: { base: string; reply?: Props['canned'][num
               variant="ghost"
               onClick={() => router.delete(`${base}/canned/${reply.id}`, { preserveScroll: true })}
             >
-              Delete
+              {__('Delete')}
             </Button>
-            <span className="text-fg-muted text-sm">Used {reply.uses} times</span>
+            <span className="text-fg-muted text-sm">
+              {__('Used')} {reply.uses} {__('times')}
+            </span>
           </>
         )}
       </div>
@@ -104,15 +106,17 @@ export default function SupportSettings({ settings, fallbackEmail, canned }: Pro
     </Field>
   );
   return (
-    <AppShell title="Support settings">
-      <Head title="Support settings" />
+    <AppShell title={__('Support settings')}>
+      <Head title={__('Support settings')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Support settings"
-          description="How soon WURK replies first, when the clock runs, and ready-written replies."
+          title={__('Support settings')}
+          description={__(
+            'How soon WURK replies first, when the clock runs, and ready-written replies.',
+          )}
           actions={
             <Button asChild variant="secondary">
-              <Link href={base}>Inbox</Link>
+              <Link href={base}>{__('Inbox')}</Link>
             </Button>
           }
         />
@@ -125,10 +129,11 @@ export default function SupportSettings({ settings, fallbackEmail, canned }: Pro
         >
           <Card>
             <CardHeader>
-              <CardTitle>First-reply targets (business hours)</CardTitle>
+              <CardTitle>{__('First-reply targets (business hours)')}</CardTitle>
               <CardDescription>
-                Shown to businesses when they contact support. New tickets use these; open ones keep
-                theirs.
+                {__(
+                  'Shown to businesses when they contact support. New tickets use these; open ones keep theirs.',
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-3">
@@ -156,9 +161,10 @@ export default function SupportSettings({ settings, fallbackEmail, canned }: Pro
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Business hours</CardTitle>
+              <CardTitle>{__('Business hours')}</CardTitle>
               <CardDescription>
-                The target clock only runs in these hours ({settings.business_hours.tz}).
+                {__('The target clock only runs in these hours (')}
+                {settings.business_hours.tz}).
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
@@ -174,7 +180,7 @@ export default function SupportSettings({ settings, fallbackEmail, canned }: Pro
                 )}
               </div>
               <fieldset className="flex flex-wrap gap-3 text-sm">
-                <legend className="mb-2 font-medium">Days</legend>
+                <legend className="mb-2 font-medium">{__('Days')}</legend>
                 {DAYS.map((d, i) => {
                   const day = i + 1;
                   const on = form.data.business_hours.days.includes(day);
@@ -201,15 +207,16 @@ export default function SupportSettings({ settings, fallbackEmail, canned }: Pro
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Support inbox email</CardTitle>
+              <CardTitle>{__('Support inbox email')}</CardTitle>
               <CardDescription>
-                New tickets and business replies are emailed here, and to whoever a ticket is
-                assigned to.
+                {__(
+                  'New tickets and business replies are emailed here, and to whoever a ticket is assigned to.',
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Field
-                label="Email"
+                label={__('Email')}
                 hint={`Leave empty to use ${fallbackEmail ?? 'the server’s setting'}.`}
                 error={form.errors.inbox_email}
               >
@@ -222,14 +229,16 @@ export default function SupportSettings({ settings, fallbackEmail, canned }: Pro
             </CardContent>
           </Card>
           <Button type="submit" className="justify-self-start" loading={form.processing}>
-            Save support settings
+            {__('Save support settings')}
           </Button>
         </form>
         <Card>
           <CardHeader>
-            <CardTitle>Canned replies</CardTitle>
+            <CardTitle>{__('Canned replies')}</CardTitle>
             <CardDescription>
-              Ready-written replies for common questions; the most used come first in the inbox.
+              {__(
+                'Ready-written replies for common questions; the most used come first in the inbox.',
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">

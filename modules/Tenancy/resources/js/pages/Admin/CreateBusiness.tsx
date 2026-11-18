@@ -1,18 +1,19 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Check, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
+import { Button } from '@/design-system/components/button';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 const slug = (s: string) =>
   s
@@ -55,21 +56,23 @@ export default function CreateBusiness({ rootDomain }: { rootDomain: string }) {
   };
 
   return (
-    <AppShell title="New business">
-      <Head title="New business" />
+    <AppShell title={__('New business')}>
+      <Head title={__('New business')} />
       <div className="grid max-w-3xl gap-8">
         <PageHeader
-          title="New business"
-          description="For businesses signing up with help from WURK. Self-service signup arrives in Sprint 3."
+          title={__('New business')}
+          description={__(
+            'For businesses signing up with help from WURK. Self-service signup arrives in Sprint 3.',
+          )}
         />
         <form onSubmit={submit} className="grid gap-6" noValidate>
           <Card>
             <CardHeader>
-              <CardTitle>Business</CardTitle>
+              <CardTitle>{__('Business')}</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <Field
-                label="Business name"
+                label={__('Business name')}
                 error={form.errors.name}
                 required
                 className="sm:col-span-2"
@@ -83,11 +86,11 @@ export default function CreateBusiness({ rootDomain }: { rootDomain: string }) {
                       handle: touchedHandle ? d.handle : slug(e.target.value),
                     }));
                   }}
-                  placeholder="Glow Salon"
+                  placeholder={__('Glow Salon')}
                 />
               </Field>
               <Field
-                label="Web address"
+                label={__('Web address')}
                 error={
                   form.errors.handle ??
                   (shown && !shown.available ? (shown.problem ?? undefined) : undefined)
@@ -113,9 +116,9 @@ export default function CreateBusiness({ rootDomain }: { rootDomain: string }) {
                         aria-live="polite"
                       >
                         {shown.available ? (
-                          <Check className="text-success-11 size-4" aria-label="Available" />
+                          <Check className="text-success-11 size-4" aria-label={__('Available')} />
                         ) : (
-                          <X className="text-danger-11 size-4" aria-label="Not available" />
+                          <X className="text-danger-11 size-4" aria-label={__('Not available')} />
                         )}
                       </span>
                     )}
@@ -126,29 +129,30 @@ export default function CreateBusiness({ rootDomain }: { rootDomain: string }) {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Owner</CardTitle>
+              <CardTitle>{__('Owner')}</CardTitle>
               <CardDescription>
-                We’ll send them an invitation by email or SMS. They sign in and land straight in
-                their business.
+                {__(
+                  'We’ll send them an invitation by email or SMS. They sign in and land straight in their business.',
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="First name" error={form.errors.owner_first_name} required>
+              <Field label={__('First name')} error={form.errors.owner_first_name} required>
                 <Input
                   value={form.data.owner_first_name}
                   onChange={(e) => form.setData('owner_first_name', e.target.value)}
                 />
               </Field>
-              <Field label="Last name" error={form.errors.owner_last_name}>
+              <Field label={__('Last name')} error={form.errors.owner_last_name}>
                 <Input
                   value={form.data.owner_last_name}
                   onChange={(e) => form.setData('owner_last_name', e.target.value)}
                 />
               </Field>
               <Field
-                label="Email or mobile number"
+                label={__('Email or mobile number')}
                 error={form.errors.owner_contact}
-                hint="Mobile numbers get the invitation by SMS"
+                hint={__('Mobile numbers get the invitation by SMS')}
                 required
                 className="sm:col-span-2"
               >
@@ -161,7 +165,7 @@ export default function CreateBusiness({ rootDomain }: { rootDomain: string }) {
           </Card>
           <div className="flex gap-3">
             <Button type="submit" size="lg" loading={form.processing}>
-              Create business and invite owner
+              {__('Create business and invite owner')}
             </Button>
           </div>
         </form>

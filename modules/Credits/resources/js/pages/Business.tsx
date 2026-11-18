@@ -1,19 +1,20 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Download } from 'lucide-react';
+import { Button } from '@/design-system/components/button';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 import { CreditOverview, type CreditSummary } from './Summary';
+import { __ } from '@/i18n';
 
 const day = (iso: string) =>
   new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -73,23 +74,25 @@ export default function Business(summary: CreditSummary) {
       <div className="grid max-w-5xl gap-8">
         <PageHeader
           title="Plan & usage"
-          description="What your package includes, what you’ve used this month, and what things cost."
+          description={__(
+            'What your package includes, what you’ve used this month, and what things cost.',
+          )}
         />
 
         <Card>
           <CardHeader>
-            <CardTitle>Your plan this month</CardTitle>
+            <CardTitle>{__('Your plan this month')}</CardTitle>
             {summary.nextPayment && (
               <CardDescription>
-                Renews on {day(summary.nextPayment.date)} — {rand(summary.nextPayment.total_cents)}{' '}
-                including VAT.
+                {__('Renews on')} {day(summary.nextPayment.date)} —{' '}
+                {rand(summary.nextPayment.total_cents)} {__('including VAT.')}
               </CardDescription>
             )}
           </CardHeader>
           <CardContent className="grid gap-5">
             {summary.included ? (
               <Meter
-                label="Monthly WURK Credits"
+                label={__('Monthly WURK Credits')}
                 used={summary.spentThisMonth ?? 0}
                 included={summary.included}
                 unit="credits"
@@ -104,7 +107,8 @@ export default function Business(summary: CreditSummary) {
         <Card>
           <CardHeader>
             <CardTitle>
-              {num(summary.balance)} credits{value}
+              {num(summary.balance)} {__('credits')}
+              {value}
             </CardTitle>
             <CardDescription>
               {summary.allowance > 0 && summary.allowanceExpires
@@ -115,7 +119,7 @@ export default function Business(summary: CreditSummary) {
           <CardContent>
             <Button variant="secondary" size="sm" asChild>
               <a href={`${base}/statement.csv`}>
-                <Download /> Download statement (CSV)
+                <Download /> {__('Download statement (CSV)')}
               </a>
             </Button>
           </CardContent>
@@ -126,10 +130,11 @@ export default function Business(summary: CreditSummary) {
         {summary.canManage && (
           <Card>
             <CardHeader>
-              <CardTitle>Monthly spending limit</CardTitle>
+              <CardTitle>{__('Monthly spending limit')}</CardTitle>
               <CardDescription>
-                Stops spending once this many credits are used in a month — including messages to
-                customers. Leave empty for no limit.
+                {__(
+                  'Stops spending once this many credits are used in a month — including messages to customers. Leave empty for no limit.',
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -142,7 +147,7 @@ export default function Business(summary: CreditSummary) {
                 className="flex flex-col gap-3 sm:flex-row sm:items-end"
               >
                 <Field
-                  label="Limit (credits per month)"
+                  label={__('Limit (credits per month)')}
                   error={limit.errors.monthly}
                   className="sm:w-56"
                 >
@@ -156,7 +161,7 @@ export default function Business(summary: CreditSummary) {
                   />
                 </Field>
                 <Button type="submit" loading={limit.processing}>
-                  Save
+                  {__('Save')}
                 </Button>
               </form>
             </CardContent>
@@ -165,9 +170,11 @@ export default function Business(summary: CreditSummary) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Low-balance alert</CardTitle>
+            <CardTitle>{__('Low-balance alert')}</CardTitle>
             <CardDescription>
-              We’ll let you know when your balance drops below this, so you can buy more in time.
+              {__(
+                'We’ll let you know when your balance drops below this, so you can buy more in time.',
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -179,7 +186,7 @@ export default function Business(summary: CreditSummary) {
               className="flex flex-col gap-3 sm:flex-row sm:items-end"
             >
               <Field
-                label="Alert below (credits)"
+                label={__('Alert below (credits)')}
                 error={alert.errors.low_balance}
                 className="sm:w-56"
               >
@@ -191,7 +198,7 @@ export default function Business(summary: CreditSummary) {
                 />
               </Field>
               <Button type="submit" loading={alert.processing}>
-                Save
+                {__('Save')}
               </Button>
             </form>
           </CardContent>

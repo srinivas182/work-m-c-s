@@ -1,16 +1,12 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Result {
   matchedBy: string;
@@ -90,25 +86,27 @@ export default function Reconciliation({ drivers, upload, result }: Props) {
     </Field>
   );
   return (
-    <AppShell title="Reconciliation">
-      <Head title="Reconciliation" />
+    <AppShell title={__('Reconciliation')}>
+      <Head title={__('Reconciliation')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Reconciliation"
-          description="Check a provider’s statement against what WURK sent. The statement is kept for 30 minutes at most, encrypted, and never stored — clear it when you’re done."
+          title={__('Reconciliation')}
+          description={__(
+            'Check a provider’s statement against what WURK sent. The statement is kept for 30 minutes at most, encrypted, and never stored — clear it when you’re done.',
+          )}
         />
         {upload === null ? (
           <Card>
             <CardContent className="pt-6">
               <form
-                aria-label="Upload a statement"
+                aria-label={__('Upload a statement')}
                 className="grid gap-3 text-sm"
                 onSubmit={(e) => {
                   e.preventDefault();
                   file.post(base, { forceFormData: true });
                 }}
               >
-                <Field label="Provider statement (CSV)" error={file.errors.statement}>
+                <Field label={__('Provider statement (CSV)')} error={file.errors.statement}>
                   <input
                     type="file"
                     accept=".csv,text/csv"
@@ -116,7 +114,7 @@ export default function Reconciliation({ drivers, upload, result }: Props) {
                   />
                 </Field>
                 <Button type="submit" className="justify-self-start" loading={file.processing}>
-                  Upload
+                  {__('Upload')}
                 </Button>
               </form>
             </CardContent>
@@ -125,20 +123,20 @@ export default function Reconciliation({ drivers, upload, result }: Props) {
           <Card>
             <CardHeader>
               <CardTitle>
-                {upload.name} — {upload.rows} lines
+                {upload.name} — {upload.rows} {__('lines')}
               </CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 text-sm">
               {table('First lines of the statement', upload.columns, upload.sample)}
               <form
-                aria-label="Match the statement"
+                aria-label={__('Match the statement')}
                 className="grid gap-3 sm:grid-cols-2"
                 onSubmit={(e) => {
                   e.preventDefault();
                   map.post(`${base}/run`, { preserveScroll: true });
                 }}
               >
-                <Field label="Provider" error={map.errors.driver}>
+                <Field label={__('Provider')} error={map.errors.driver}>
                   <select
                     className="border-border bg-bg h-10 w-full rounded-md border px-3"
                     value={map.data.driver}
@@ -152,14 +150,14 @@ export default function Reconciliation({ drivers, upload, result }: Props) {
                   </select>
                 </Field>
                 <div className="grid grid-cols-2 gap-2">
-                  <Field label="From" error={map.errors.from}>
+                  <Field label={__('From')} error={map.errors.from}>
                     <Input
                       type="date"
                       value={map.data.from}
                       onChange={(e) => map.setData('from', e.target.value)}
                     />
                   </Field>
-                  <Field label="To" error={map.errors.to}>
+                  <Field label={__('To')} error={map.errors.to}>
                     <Input
                       type="date"
                       value={map.data.to}
@@ -173,14 +171,14 @@ export default function Reconciliation({ drivers, upload, result }: Props) {
                 {select('date', 'and date column')}
                 <div className="flex gap-2 sm:col-span-2">
                   <Button type="submit" loading={map.processing}>
-                    Check
+                    {__('Check')}
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => router.post(`${base}/clear`)}
                   >
-                    Clear the statement
+                    {__('Clear the statement')}
                   </Button>
                 </div>
               </form>
@@ -191,22 +189,32 @@ export default function Reconciliation({ drivers, upload, result }: Props) {
           <Card>
             <CardHeader>
               <CardTitle>
-                {result.driver}, {result.from} to {result.to} (matched by {result.matchedBy})
+                {result.driver}, {result.from} {__('to')} {result.to} {__('(matched by')}{' '}
+                {result.matchedBy})
               </CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 text-sm">
-              <ul aria-label="Reconciliation result" className="grid gap-1">
+              <ul aria-label={__('Reconciliation result')} className="grid gap-1">
                 <li>
-                  Statement lines: {result.statement}; WURK sent: {result.wurk}; matched:{' '}
-                  {result.matched}.
+                  {__('Statement lines:')} {result.statement}
+                  {__('; WURK sent:')} {result.wurk}
+                  {__('; matched:')} {result.matched}.
                 </li>
-                <li>On the statement only (billed, not in WURK): {result.statementOnly}.</li>
-                <li>In WURK only (sent, not billed): {result.wurkOnly}.</li>
+                <li>
+                  {__('On the statement only (billed, not in WURK):')} {result.statementOnly}.
+                </li>
+                <li>
+                  {__('In WURK only (sent, not billed):')} {result.wurkOnly}.
+                </li>
                 {result.unreadable > 0 && (
-                  <li>Lines that couldn’t be read: {result.unreadable}.</li>
+                  <li>
+                    {__('Lines that couldn’t be read:')} {result.unreadable}.
+                  </li>
                 )}
                 {result.statementCents !== null && (
-                  <li>Statement total: {rand(result.statementCents)}.</li>
+                  <li>
+                    {__('Statement total:')} {rand(result.statementCents)}.
+                  </li>
                 )}
                 <li>
                   {result.expectedCents === null
@@ -215,7 +223,7 @@ export default function Reconciliation({ drivers, upload, result }: Props) {
                 </li>
                 {result.differenceCents !== null && (
                   <li>
-                    Difference:{' '}
+                    {__('Difference:')}{' '}
                     {(result.differenceCents >= 0 ? '+' : '') + rand(result.differenceCents)}.
                   </li>
                 )}
@@ -234,7 +242,7 @@ export default function Reconciliation({ drivers, upload, result }: Props) {
                 )}
               {(result.statementOnly > 0 || result.wurkOnly > 0) && (
                 <a className="justify-self-start underline" href={`${base}/export.csv`}>
-                  Download unmatched (CSV)
+                  {__('Download unmatched (CSV)')}
                 </a>
               )}
             </CardContent>

@@ -7,7 +7,7 @@ const page = {
 };
 vi.mock('@inertiajs/react', () => ({ usePage: () => page }));
 
-import { TooltipProvider } from '@/design-system';
+import { TooltipProvider } from '@/design-system/components/tooltip';
 import { AskWurk } from './AskWurk';
 
 const usage = { used: 50, free: 50, free_left: 0, cap: 500, credits_each: 1, balance: 9 };

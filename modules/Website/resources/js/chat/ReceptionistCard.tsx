@@ -1,20 +1,13 @@
 import { useForm } from '@inertiajs/react';
 import { useId, useRef, useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Field,
-  Input,
-  RadioGroup,
-  RadioGroupItem,
-  Textarea,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Checkbox, RadioGroup, RadioGroupItem } from '@/design-system/components/choice';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
 import { firstError, request } from '../editor/http';
+import { __ } from '@/i18n';
 
 type May = 'book' | 'change' | 'order';
 export interface ReceptionistProps {
@@ -59,23 +52,23 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          AI assistant{' '}
+          {__('AI assistant')}{' '}
           {r.settings.enabled || r.settings.whatsapp ? (
-            <Badge tone="success">On</Badge>
+            <Badge tone="success">{__('On')}</Badge>
           ) : (
-            <Badge tone="neutral">Off</Badge>
+            <Badge tone="neutral">{__('Off')}</Badge>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-6">
         <p className="text-fg-muted text-sm">
-          Answers your customers’ typed questions from your own website and answers, any time of
-          day, and books them in. It says it’s an AI, never invents prices or times, and passes the
-          chat to you when it can’t help. Each reply costs {credits(r.credits_per_reply)} —{' '}
-          {r.replies_this_month} replies so far this month.
+          {__(
+            'Answers your customers’ typed questions from your own website and answers, any time of day, and books them in. It says it’s an AI, never invents prices or times, and passes the chat to you when it can’t help. Each reply costs',
+          )}{' '}
+          {credits(r.credits_per_reply)} — {r.replies_this_month} {__('replies so far this month.')}
         </p>
         <form
-          aria-label="AI assistant settings"
+          aria-label={__('AI assistant settings')}
           className="grid gap-4"
           onSubmit={(e) => {
             e.preventDefault();
@@ -87,7 +80,7 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
               checked={f.data.enabled}
               onCheckedChange={(on) => f.setData('enabled', on === true)}
             />
-            Let the AI assistant answer in my website chat
+            {__('Let the AI assistant answer in my website chat')}
           </label>
           {f.errors.enabled && (
             <p role="alert" className="text-danger text-sm">
@@ -102,7 +95,7 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
               onCheckedChange={(on) => f.setData('whatsapp', on === true)}
             />
             <span>
-              Let it answer on WhatsApp too
+              {__('Let it answer on WhatsApp too')}
               <span className="text-fg-muted block">
                 {r.whatsapp_connected
                   ? 'Customers tap buttons and lists to choose services and times. Take over any chat in Customers → Chats.'
@@ -116,7 +109,9 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
             </p>
           )}
           <fieldset className="grid gap-2">
-            <legend className="text-sm font-medium">Besides answering questions, it may</legend>
+            <legend className="text-sm font-medium">
+              {__('Besides answering questions, it may')}
+            </legend>
             {MAY.map(([key, label, hint]) => (
               <label key={key} className="flex items-start gap-2 text-sm">
                 <Checkbox
@@ -140,12 +135,12 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
             ))}
           </fieldset>
           <fieldset className="grid gap-2">
-            <legend className="text-sm font-medium">How it sounds</legend>
+            <legend className="text-sm font-medium">{__('How it sounds')}</legend>
             <RadioGroup
               value={f.data.tone}
               onValueChange={(v) => f.setData('tone', v as 'friendly' | 'formal')}
               className="flex flex-wrap gap-4"
-              aria-label="How it sounds"
+              aria-label={__('How it sounds')}
             >
               {(
                 [
@@ -160,7 +155,7 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
               ))}
             </RadioGroup>
           </fieldset>
-          <Field label="Greeting" error={f.errors.greeting}>
+          <Field label={__('Greeting')} error={f.errors.greeting}>
             <Input
               value={f.data.greeting}
               maxLength={200}
@@ -168,10 +163,11 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
             />
           </Field>
           <fieldset className="grid gap-2">
-            <legend className="text-sm font-medium">Languages it replies in</legend>
+            <legend className="text-sm font-medium">{__('Languages it replies in')}</legend>
             <p className="text-fg-muted text-sm">
-              It replies in the customer’s language when it’s one of these, and in English
-              otherwise.
+              {__(
+                'It replies in the customer’s language when it’s one of these, and in English otherwise.',
+              )}
             </p>
             <div className="flex flex-wrap gap-x-6 gap-y-3">
               {Object.entries(r.languages).map(([code, name]) => (
@@ -198,8 +194,8 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
             )}
           </fieldset>
           <Field
-            label="When a person can take over (optional)"
-            hint="For example: Mon–Fri 8:00–17:00. The assistant tells customers."
+            label={__('When a person can take over (optional)')}
+            hint={__('For example: Mon–Fri 8:00–17:00. The assistant tells customers.')}
             error={f.errors.person_hours}
           >
             <Input
@@ -210,8 +206,10 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
           </Field>
           {f.data.whatsapp && (
             <Field
-              label="When you’re closed, WhatsApp customers first get"
-              hint="Sent once a day, outside the opening hours on your website. The assistant then carries on and can book them in."
+              label={__('When you’re closed, WhatsApp customers first get')}
+              hint={__(
+                'Sent once a day, outside the opening hours on your website. The assistant then carries on and can book them in.',
+              )}
               error={f.errors.away}
             >
               <Textarea
@@ -223,7 +221,7 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
             </Field>
           )}
           <Field
-            label="Most replies a month"
+            label={__('Most replies a month')}
             hint={`At ${credits(r.credits_per_reply)} a reply, ${f.data.monthly_cap} replies cost up to ${credits(f.data.monthly_cap * r.credits_per_reply)}. After that, your own answers take over.`}
             error={f.errors.monthly_cap}
           >
@@ -236,7 +234,7 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
             />
           </Field>
           <Button type="submit" className="justify-self-start" loading={f.processing}>
-            Save the assistant
+            {__('Save the assistant')}
           </Button>
         </form>
         <TryIt base={base} />
@@ -260,13 +258,14 @@ function TryIt({ base }: { base: string }) {
       className="border-border grid gap-3 rounded-lg border p-4"
     >
       <h3 id="try-it-title" className="font-semibold">
-        Try it
+        {__('Try it')}
       </h3>
       <p className="text-fg-muted text-sm">
-        Chat with the assistant as a customer would. It uses your real answers and free times, but
-        nothing is booked, changed or ordered. Each reply costs the same as a real one.
+        {__(
+          'Chat with the assistant as a customer would. It uses your real answers and free times, but nothing is booked, changed or ordered. Each reply costs the same as a real one.',
+        )}
       </p>
-      <ol aria-label="Test chat" aria-live="polite" className="grid gap-2">
+      <ol aria-label={__('Test chat')} aria-live="polite" className="grid gap-2">
         {lines.map((l, i) => (
           <li
             key={i}
@@ -290,7 +289,7 @@ function TryIt({ base }: { base: string }) {
         </p>
       )}
       <form
-        aria-label="Try the assistant"
+        aria-label={__('Try the assistant')}
         className="flex gap-2"
         onSubmit={async (e) => {
           e.preventDefault();
@@ -318,14 +317,14 @@ function TryIt({ base }: { base: string }) {
         }}
       >
         <Input
-          aria-label="Your test message"
-          placeholder="e.g. Can I book braids on Saturday?"
+          aria-label={__('Your test message')}
+          placeholder={__('e.g. Can I book braids on Saturday?')}
           value={text}
           maxLength={2000}
           onChange={(e) => setText(e.target.value)}
         />
         <Button type="submit" loading={busy}>
-          Send
+          {__('Send')}
         </Button>
         {lines.length > 0 && (
           <Button
@@ -336,7 +335,7 @@ function TryIt({ base }: { base: string }) {
               conversation.current = null;
             }}
           >
-            Start again
+            {__('Start again')}
           </Button>
         )}
       </form>

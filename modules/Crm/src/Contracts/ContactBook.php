@@ -66,4 +66,10 @@ interface ContactBook
      * summaries blanked. Orders, bookings and sales stay (records the law requires).
      */
     public function erase(string $contactId): void;
+
+    /** The customer's language (24.2), found by number or email; null when not known (messages then use English). */
+    public function locale(?string $phone, ?string $email = null): ?string;
+
+    /** Set a customer's language (the business knows it, or the customer chose it on a page). */
+    public function setLocale(string $contactId, ?string $locale): void;
 }

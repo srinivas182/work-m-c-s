@@ -1,7 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import { Inbox as InboxIcon } from 'lucide-react';
-import { Badge, Button, Card, CardContent, EmptyState, PageHeader } from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   status: string;
@@ -45,27 +49,29 @@ export default function Inbox({
   const href = (over: Record<string, string>) =>
     `${base}?${new URLSearchParams({ status, view, ...(priority ? { priority } : {}), ...over }).toString()}`;
   return (
-    <AppShell title="Support inbox">
-      <Head title="Support inbox" />
+    <AppShell title={__('Support inbox')}>
+      <Head title={__('Support inbox')} />
       <div className="grid max-w-5xl gap-6">
         <PageHeader
-          title="Support inbox"
-          description="Tickets from every business — urgent first, then soonest due. First replies are due within each package’s target, in business hours."
+          title={__('Support inbox')}
+          description={__(
+            'Tickets from every business — urgent first, then soonest due. First replies are due within each package’s target, in business hours.',
+          )}
           actions={
             <Button asChild variant="secondary">
-              <Link href={`${base}/settings`}>Targets and canned replies</Link>
+              <Link href={`${base}/settings`}>{__('Targets and canned replies')}</Link>
             </Button>
           }
         />
         {late > 0 && (
           <p role="status" className="text-danger-11 text-sm font-medium">
-            {late} {late === 1 ? 'ticket is' : 'tickets are'} past the first-reply target.{' '}
+            {late} {late === 1 ? 'ticket is' : 'tickets are'} {__('past the first-reply target.')}{' '}
             <Link className="underline" href={href({ status: 'open', view: 'late' })}>
-              Show them
+              {__('Show them')}
             </Link>
           </p>
         )}
-        <nav aria-label="Ticket status" className="flex flex-wrap gap-2">
+        <nav aria-label={__('Ticket status')} className="flex flex-wrap gap-2">
           {Object.entries(statuses).map(([key, label]) => (
             <Button key={key} asChild size="sm" variant={key === status ? 'primary' : 'secondary'}>
               <Link href={href({ status: key })} aria-current={key === status ? 'page' : undefined}>
@@ -74,7 +80,7 @@ export default function Inbox({
             </Button>
           ))}
         </nav>
-        <nav aria-label="Show" className="flex flex-wrap gap-2">
+        <nav aria-label={__('Show')} className="flex flex-wrap gap-2">
           {Object.entries(views).map(([key, label]) => (
             <Button key={key} asChild size="sm" variant={key === view ? 'soft' : 'ghost'}>
               <Link href={href({ view: key })} aria-current={key === view ? 'page' : undefined}>
@@ -104,13 +110,13 @@ export default function Inbox({
         {tickets.length === 0 ? (
           <EmptyState
             icon={InboxIcon}
-            title="Nothing here"
-            description="No tickets in this list."
+            title={__('Nothing here')}
+            description={__('No tickets in this list.')}
           />
         ) : (
           <Card>
             <CardContent>
-              <ul aria-label="Tickets" className="divide-border grid divide-y text-sm">
+              <ul aria-label={__('Tickets')} className="divide-border grid divide-y text-sm">
                 {tickets.map((t) => (
                   <li key={t.number} className="flex flex-wrap items-center gap-3 py-3">
                     <Link className="font-semibold underline" href={`${base}/${t.number}`}>
@@ -118,7 +124,7 @@ export default function Inbox({
                     </Link>
                     <span className="text-fg-muted">
                       {t.business}
-                      {t.package ? ` · ${t.package}` : ''} · {t.target_hours} h target
+                      {t.package ? ` · ${t.package}` : ''} · {t.target_hours} {__('h target')}
                     </span>
                     {t.priority !== 'normal' && (
                       <Badge
@@ -133,11 +139,11 @@ export default function Inbox({
                         {priorities[t.priority] ?? t.priority}
                       </Badge>
                     )}
-                    {t.late && <Badge tone="danger">First reply late</Badge>}
+                    {t.late && <Badge tone="danger">{__('First reply late')}</Badge>}
                     <span className="text-fg-muted">{t.assignee ?? 'Unassigned'}</span>
                     {t.rating && (
                       <Badge tone={t.rating === 'good' ? 'success' : 'danger'}>
-                        Rated {t.rating}
+                        {__('Rated')} {t.rating}
                       </Badge>
                     )}
                     <span className="text-fg-muted ml-auto">

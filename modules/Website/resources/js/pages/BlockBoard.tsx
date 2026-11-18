@@ -2,6 +2,7 @@ import '../site/fonts';
 import { Head } from '@inertiajs/react';
 import { SiteRenderer } from '../site/SiteRenderer';
 import type { Branding, ContentDocument, MenuItem } from '../site/types';
+import { __ } from '@/i18n';
 
 /* Sample businesses for the design board — illustrative content and abstract stand-in images, not real customers. */
 const img = (name: string) => `/images/board-standins/${name}.jpg`;
@@ -709,7 +710,9 @@ export default function BlockBoard({ business }: { business: 'salon' | 'dental' 
     <>
       <Head title={`Block board — ${sample.name}`} />
       <p className="bg-[#1B1640] px-5 py-2 text-center text-xs font-medium text-white">
-        Design board · sample business, content and abstract stand-in photos · not a real customer
+        {__(
+          'Design board · sample business, content and abstract stand-in photos · not a real customer',
+        )}
       </p>
       <SiteRenderer
         document={sample.document}

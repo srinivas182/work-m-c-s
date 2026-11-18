@@ -1,18 +1,14 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import { HelpTip } from '@/components/HelpTip';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Pkg {
   id: string;
@@ -48,20 +44,22 @@ export default function Profitability(p: Props) {
     Object.fromEntries(p.packages.map((k) => [k.id, toRand(k.monthly_cents)])),
   );
   return (
-    <AppShell title="Profitability">
-      <Head title="Profitability" />
+    <AppShell title={__('Profitability')}>
+      <Head title={__('Profitability')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Profitability"
-          description="What things cost WURK — profit in Metrics uses these. Leave a field empty if you don’t know it yet: it’s reported as not set, never guessed."
+          title={__('Profitability')}
+          description={__(
+            'What things cost WURK — profit in Metrics uses these. Leave a field empty if you don’t know it yet: it’s reported as not set, never guessed.',
+          )}
         />
         <Card>
           <CardHeader>
-            <CardTitle>Costs</CardTitle>
+            <CardTitle>{__('Costs')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form
-              aria-label="Costs"
+              aria-label={__('Costs')}
               className="grid gap-3 text-sm sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -85,14 +83,15 @@ export default function Profitability(p: Props) {
                 </Field>
               ))}
               <p className="text-fg-muted flex items-center gap-1 sm:col-span-2">
-                Running cost{' '}
+                {__('Running cost')}{' '}
                 <HelpTip>
-                  Your monthly cost per business: hosting, storage, backups and support time,
-                  divided by how many businesses you serve. Trials count too.
+                  {__(
+                    'Your monthly cost per business: hosting, storage, backups and support time, divided by how many businesses you serve. Trials count too.',
+                  )}
                 </HelpTip>
               </p>
               <Field
-                label="Running cost per business per month (R) — hosting, storage, support"
+                label={__('Running cost per business per month (R) — hosting, storage, support')}
                 error={form.errors.running}
               >
                 <Input
@@ -119,7 +118,7 @@ export default function Profitability(p: Props) {
               ))}
               {p.canEdit && (
                 <Button type="submit" className="justify-self-start" loading={form.processing}>
-                  Save costs
+                  {__('Save costs')}
                 </Button>
               )}
             </form>
@@ -127,28 +126,29 @@ export default function Profitability(p: Props) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Pricing “what if”</CardTitle>
+            <CardTitle>{__('Pricing “what if”')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm">
             <p className="text-fg-muted">
-              Change a monthly price to see MRR if today’s paying businesses stayed (yearly plans
-              scale with it). Nothing is changed.
+              {__(
+                'Change a monthly price to see MRR if today’s paying businesses stayed (yearly plans scale with it). Nothing is changed.',
+              )}
             </p>
             <div
               className="overflow-x-auto"
               tabIndex={0}
               role="region"
-              aria-label="Pricing what if"
+              aria-label={__('Pricing what if')}
             >
               <table className="w-full text-left">
                 <thead>
                   <tr>
-                    <th scope="col">Package</th>
-                    <th scope="col">Paying</th>
-                    <th scope="col">MRR now</th>
-                    <th scope="col">Monthly price (R)</th>
-                    <th scope="col">MRR at that price</th>
-                    <th scope="col">Difference</th>
+                    <th scope="col">{__('Package')}</th>
+                    <th scope="col">{__('Paying')}</th>
+                    <th scope="col">{__('MRR now')}</th>
+                    <th scope="col">{__('Monthly price (R)')}</th>
+                    <th scope="col">{__('MRR at that price')}</th>
+                    <th scope="col">{__('Difference')}</th>
                   </tr>
                 </thead>
                 <tbody>

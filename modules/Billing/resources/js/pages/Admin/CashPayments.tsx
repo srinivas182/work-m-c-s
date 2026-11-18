@@ -1,25 +1,27 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
-  PageHeader,
+} from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Textarea,
-} from '@/design-system';
+} from '@/design-system/components/select';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Cash {
   id: string;
@@ -50,7 +52,7 @@ function Approve({ businessId, item }: { businessId: string; item: Cash }) {
       }}
       className="flex flex-wrap items-end gap-3"
     >
-      <Field label="Approval code" error={form.errors.code} className="w-40">
+      <Field label={__('Approval code')} error={form.errors.code} className="w-40">
         <Input
           value={form.data.code}
           onChange={(e) => form.setData('code', e.target.value)}
@@ -59,21 +61,21 @@ function Approve({ businessId, item }: { businessId: string; item: Cash }) {
         />
       </Field>
       <Button type="submit" loading={form.processing}>
-        Confirm payment
+        {__('Confirm payment')}
       </Button>
       <Button
         type="button"
         variant="ghost"
         onClick={() => router.post(`${base}/resend`, {}, { preserveScroll: true })}
       >
-        Send new code
+        {__('Send new code')}
       </Button>
       <Button
         type="button"
         variant="ghost"
         onClick={() => router.post(`${base}/cancel`, {}, { preserveScroll: true })}
       >
-        Cancel
+        {__('Cancel')}
       </Button>
     </form>
   );
@@ -98,13 +100,15 @@ export default function CashPayments({ business, subscription, packs, canRecord,
           <ArrowLeft className="size-4" aria-hidden /> {business.name}
         </Link>
         <PageHeader
-          title="Cash payments"
+          title={__('Cash payments')}
           eyebrow={business.name}
-          description="Record cash paid at a WURK office. It counts only once another approver confirms it with the code we send them."
+          description={__(
+            'Record cash paid at a WURK office. It counts only once another approver confirms it with the code we send them.',
+          )}
         />
         <Card>
           <CardHeader>
-            <CardTitle>Record cash</CardTitle>
+            <CardTitle>{__('Record cash')}</CardTitle>
             <CardDescription>
               {subscription
                 ? `${subscription.package}, ${subscription.period}: ${rand(subscription.period_cents)} excl. VAT.`
@@ -114,11 +118,11 @@ export default function CashPayments({ business, subscription, packs, canRecord,
           <CardContent>
             {!canRecord ? (
               <p role="alert" className="text-danger-11 text-sm">
-                Add an approver other than yourself in{' '}
+                {__('Add an approver other than yourself in')}{' '}
                 <Link href="/security" className="font-semibold underline underline-offset-4">
-                  Settings → Security
+                  {__('Settings → Security')}
                 </Link>{' '}
-                before recording cash.
+                {__('before recording cash.')}
               </p>
             ) : (
               <form
@@ -132,7 +136,7 @@ export default function CashPayments({ business, subscription, packs, canRecord,
                 className="grid gap-5 sm:grid-cols-2"
                 noValidate
               >
-                <Field label="Paying for" error={form.errors.purpose}>
+                <Field label={__('Paying for')} error={form.errors.purpose}>
                   {(control) => (
                     <Select
                       value={form.data.purpose}
@@ -142,14 +146,16 @@ export default function CashPayments({ business, subscription, packs, canRecord,
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="subscription">Subscription</SelectItem>
-                        {packs.length > 0 && <SelectItem value="credits">WURK Credits</SelectItem>}
+                        <SelectItem value="subscription">{__('Subscription')}</SelectItem>
+                        {packs.length > 0 && (
+                          <SelectItem value="credits">{__('WURK Credits')}</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   )}
                 </Field>
                 {form.data.purpose === 'credits' && (
-                  <Field label="Credit pack" error={form.errors.pack_id}>
+                  <Field label={__('Credit pack')} error={form.errors.pack_id}>
                     {(control) => (
                       <Select
                         value={form.data.pack_id}
@@ -170,19 +176,23 @@ export default function CashPayments({ business, subscription, packs, canRecord,
                     )}
                   </Field>
                 )}
-                <Field label="Paid by" error={form.errors.payer_name} required>
+                <Field label={__('Paid by')} error={form.errors.payer_name} required>
                   <Input
                     value={form.data.payer_name}
                     onChange={(e) => form.setData('payer_name', e.target.value)}
                   />
                 </Field>
-                <Field label="Receipt book number" error={form.errors.receipt_number} required>
+                <Field
+                  label={__('Receipt book number')}
+                  error={form.errors.receipt_number}
+                  required
+                >
                   <Input
                     value={form.data.receipt_number}
                     onChange={(e) => form.setData('receipt_number', e.target.value)}
                   />
                 </Field>
-                <Field label="Notes" error={form.errors.notes} className="sm:col-span-2">
+                <Field label={__('Notes')} error={form.errors.notes} className="sm:col-span-2">
                   <Textarea
                     rows={2}
                     value={form.data.notes}
@@ -195,7 +205,7 @@ export default function CashPayments({ business, subscription, packs, canRecord,
                   </p>
                 )}
                 <Button type="submit" className="w-fit" loading={form.processing}>
-                  Record and send approval code
+                  {__('Record and send approval code')}
                 </Button>
               </form>
             )}
@@ -210,8 +220,8 @@ export default function CashPayments({ business, subscription, packs, canRecord,
                     {c.total_cents !== null ? rand(c.total_cents) : ''}
                   </span>{' '}
                   <span className="text-fg-muted">
-                    · {c.purpose === 'credits' ? 'WURK Credits' : 'Subscription'} · paid by{' '}
-                    {c.payer} · receipt {c.receipt} · {new Date(c.at).toLocaleString()}
+                    · {c.purpose === 'credits' ? 'WURK Credits' : 'Subscription'} {__('· paid by')}{' '}
+                    {c.payer} {__('· receipt')} {c.receipt} · {new Date(c.at).toLocaleString()}
                   </span>
                 </p>
                 <Badge

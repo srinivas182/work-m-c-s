@@ -2,6 +2,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { SharedProps } from '@/types/global';
+import { __ } from '@/i18n';
 
 interface AuthLayoutProps {
   title: string;
@@ -32,21 +33,21 @@ export default function AuthLayout({ title, description, children, footer }: Aut
           />
           <div className="relative flex items-center gap-2.5">
             <span className="from-brand-8 to-brand-10 font-display text-primary-fg grid size-9 place-items-center rounded-lg bg-gradient-to-br text-base font-bold">
-              W
+              {__('W')}
             </span>
-            <span className="font-display text-xl font-bold tracking-tight">WURK</span>
+            <span className="font-display text-xl font-bold tracking-tight">{__('WURK')}</span>
           </div>
           <div className="relative max-w-md">
             <p className="font-display text-display-sm font-bold text-balance">
-              Everything your business needs, in one place.
+              {__('Everything your business needs, in one place.')}
             </p>
             <p className="mt-4 text-lg text-pretty opacity-75">
-              Website, bookings, shop, customers and referrals — run it all from your phone.
+              {__('Website, bookings, shop, customers and referrals — run it all from your phone.')}
             </p>
           </div>
           <p className="relative flex items-center gap-2 text-sm opacity-70">
-            <ShieldCheck className="size-4" aria-hidden /> Your data is protected and stored in
-            South Africa.
+            <ShieldCheck className="size-4" aria-hidden />{' '}
+            {__('Your data is protected and stored in South Africa.')}
           </p>
         </aside>
 
@@ -54,9 +55,9 @@ export default function AuthLayout({ title, description, children, footer }: Aut
           <div className="w-full max-w-md">
             <div className="mb-8 flex items-center gap-2.5 lg:hidden">
               <span className="from-brand-8 to-brand-10 font-display text-primary-fg grid size-9 place-items-center rounded-lg bg-gradient-to-br text-base font-bold">
-                W
+                {__('W')}
               </span>
-              <span className="font-display text-xl font-bold tracking-tight">WURK</span>
+              <span className="font-display text-xl font-bold tracking-tight">{__('WURK')}</span>
             </div>
             {flash.status && (
               <div

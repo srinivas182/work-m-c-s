@@ -1,17 +1,18 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Doc {
   id: string;
@@ -74,11 +75,13 @@ export default function RecordsPatient({
           description={
             [patient.email, patient.phone].filter(Boolean).join(' · ') || 'No contact details'
           }
-          actions={patient.flagged ? <Badge tone="warning">Due for removal</Badge> : undefined}
+          actions={
+            patient.flagged ? <Badge tone="warning">{__('Due for removal')}</Badge> : undefined
+          }
         />
         <p>
           <Link href={base.replace(/\/[^/]+$/, '')} className="underline">
-            ← All patients
+            {__('← All patients')}
           </Link>
         </p>
         <div className="flex flex-wrap gap-2">
@@ -86,7 +89,7 @@ export default function RecordsPatient({
             variant="secondary"
             onClick={() => router.post(`${base}/link`, {}, { preserveScroll: true })}
           >
-            Send private link
+            {__('Send private link')}
           </Button>
           {canRemove && patient.flagged && (
             <Button
@@ -100,24 +103,24 @@ export default function RecordsPatient({
                   router.delete(`${base}/remove`);
               }}
             >
-              Remove records
+              {__('Remove records')}
             </Button>
           )}
         </div>
         {patient.keptUntil && (
           <p className="text-fg-muted text-sm">
-            Kept until {patient.keptUntil} (from the most recent document).
+            {__('Kept until')} {patient.keptUntil} {__('(from the most recent document).')}
           </p>
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Documents</CardTitle>
+            <CardTitle>{__('Documents')}</CardTitle>
           </CardHeader>
           <CardContent>
             {originals.length === 0 ? (
-              <p className="text-fg-muted text-sm">No documents yet.</p>
+              <p className="text-fg-muted text-sm">{__('No documents yet.')}</p>
             ) : (
-              <ul className="grid gap-3" aria-label="Documents">
+              <ul className="grid gap-3" aria-label={__('Documents')}>
                 {originals.map((d) => (
                   <li key={d.id} className="border-border grid gap-1 rounded-lg border p-3 text-sm">
                     <span>
@@ -128,12 +131,12 @@ export default function RecordsPatient({
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Open
+                        {__('Open')}
                       </a>
                     </span>
                     {versionsOf(d.id).map((v) => (
                       <span key={v.id} className="ml-4">
-                        Version {v.version} · {v.date} · {v.by}
+                        {__('Version')} {v.version} · {v.date} · {v.by}
                         {v.note ? ` — ${v.note}` : ''} ·{' '}
                         <a
                           className="underline"
@@ -141,7 +144,7 @@ export default function RecordsPatient({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Open
+                          {__('Open')}
                         </a>
                       </span>
                     ))}
@@ -153,14 +156,14 @@ export default function RecordsPatient({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Add a document or a correction</CardTitle>
+            <CardTitle>{__('Add a document or a correction')}</CardTitle>
             <CardDescription>
-              A correction adds a new version; the original is always kept.
+              {__('A correction adds a new version; the original is always kept.')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form
-              aria-label="Add a document"
+              aria-label={__('Add a document')}
               className="grid gap-3 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -171,19 +174,19 @@ export default function RecordsPatient({
                 });
               }}
             >
-              <Field label="Title" error={errors.title}>
+              <Field label={__('Title')} error={errors.title}>
                 <Input
                   value={up.data.title}
                   onChange={(e) => up.setData('title', e.target.value)}
                 />
               </Field>
-              <Field label="This corrects (optional)" error={errors.corrects}>
+              <Field label={__('This corrects (optional)')} error={errors.corrects}>
                 <select
                   className="border-border bg-bg h-10 w-full rounded-md border px-3 text-sm"
                   value={up.data.corrects}
                   onChange={(e) => up.setData('corrects', e.target.value)}
                 >
-                  <option value="">Nothing — a new document</option>
+                  <option value="">{__('Nothing — a new document')}</option>
                   {originals.map((d) => (
                     <option key={d.id} value={d.id}>
                       {d.title} ({d.date})
@@ -191,14 +194,14 @@ export default function RecordsPatient({
                   ))}
                 </select>
               </Field>
-              <Field label="What changed (for corrections)" error={errors.note}>
+              <Field label={__('What changed (for corrections)')} error={errors.note}>
                 <Input
                   value={up.data.note}
                   maxLength={500}
                   onChange={(e) => up.setData('note', e.target.value)}
                 />
               </Field>
-              <Field label="File (PDF, photo, Word or text, up to 20 MB)" error={errors.file}>
+              <Field label={__('File (PDF, photo, Word or text, up to 20 MB)')} error={errors.file}>
                 <input
                   type="file"
                   className="text-sm"
@@ -207,20 +210,20 @@ export default function RecordsPatient({
                 />
               </Field>
               <Button type="submit" className="justify-self-start" loading={up.processing}>
-                Add
+                {__('Add')}
               </Button>
             </form>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Access log</CardTitle>
+            <CardTitle>{__('Access log')}</CardTitle>
             <CardDescription>
-              Every time these records were added to, opened, or shared.
+              {__('Every time these records were added to, opened, or shared.')}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ol className="grid gap-1 text-sm" aria-label="Access log">
+            <ol className="grid gap-1 text-sm" aria-label={__('Access log')}>
               {log.map((l, k) => (
                 <li key={k}>
                   <strong>{ACTION[l.action] ?? l.action}</strong> · {l.who} · {l.at}

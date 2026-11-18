@@ -1,19 +1,15 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { STATUS, rand } from './Orders';
+import { __ } from '@/i18n';
 
 interface OrderData {
   id: string;
@@ -92,12 +88,12 @@ export default function Order({ order: o }: { order: OrderData }) {
         />
         <p>
           <Link href={base.replace(/\/[^/]+$/, '')} className="underline">
-            ← All orders
+            {__('← All orders')}
           </Link>
         </p>
         {o.shipping && (
           <section
-            aria-label="Shipping"
+            aria-label={__('Shipping')}
             className="border-border grid gap-2 rounded-lg border p-4 text-sm"
           >
             <p>
@@ -115,20 +111,24 @@ export default function Order({ order: o }: { order: OrderData }) {
                 o.shipping.parcel.box &&
                 o.shipping.parcel.size_cm && (
                   <p>
-                    Pack in: {o.shipping.parcel.box} ({o.shipping.parcel.size_cm.length} ×{' '}
-                    {o.shipping.parcel.size_cm.width} × {o.shipping.parcel.size_cm.height} cm) ·{' '}
-                    {o.shipping.parcel.weight_kg} kg
+                    {__('Pack in:')} {o.shipping.parcel.box} ({o.shipping.parcel.size_cm.length} ×{' '}
+                    {o.shipping.parcel.size_cm.width} × {o.shipping.parcel.size_cm.height}{' '}
+                    {__('cm) ·')} {o.shipping.parcel.weight_kg} {__('kg')}
                   </p>
                 )
               ) : (
                 <p role="note" className="text-warning-11 font-medium">
-                  None of your boxes fits this order — it may need more than one parcel. Charged as{' '}
-                  {o.shipping.parcel.weight_kg} kg by size.
+                  {__(
+                    'None of your boxes fits this order — it may need more than one parcel. Charged as',
+                  )}{' '}
+                  {o.shipping.parcel.weight_kg} {__('kg by size.')}
                 </p>
               ))}
             {o.shipping.tracking_reference ? (
               <p className="flex flex-wrap gap-3">
-                <span>Tracking: {o.shipping.tracking_reference}</span>
+                <span>
+                  {__('Tracking:')} {o.shipping.tracking_reference}
+                </span>
                 {o.shipping.tracking_url && (
                   <a
                     className="underline"
@@ -136,7 +136,7 @@ export default function Order({ order: o }: { order: OrderData }) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Track it
+                    {__('Track it')}
                   </a>
                 )}
                 {o.shipping.label_url && (
@@ -146,7 +146,7 @@ export default function Order({ order: o }: { order: OrderData }) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Print the label
+                    {__('Print the label')}
                   </a>
                 )}
               </p>
@@ -156,7 +156,7 @@ export default function Order({ order: o }: { order: OrderData }) {
                   className="justify-self-start"
                   onClick={() => router.post(`${base}/ship`, {}, { preserveScroll: true })}
                 >
-                  Create shipment
+                  {__('Create shipment')}
                 </Button>
               )
             )}
@@ -171,17 +171,17 @@ export default function Order({ order: o }: { order: OrderData }) {
           <div className="flex flex-wrap items-center gap-2">
             {o.next.includes('paid') && (
               <label className="flex items-center gap-2 text-sm">
-                Paid by
+                {__('Paid by')}
                 <select
-                  aria-label="How the order was paid"
+                  aria-label={__('How the order was paid')}
                   className="border-border bg-bg h-9 rounded-md border px-2"
                   value={how}
                   onChange={(e) => setHow(e.target.value)}
                 >
-                  <option value="eft">EFT / bank transfer</option>
-                  <option value="cash">Cash</option>
-                  <option value="card_machine">Card machine</option>
-                  <option value="qr">SnapScan / Zapper at the counter</option>
+                  <option value="eft">{__('EFT / bank transfer')}</option>
+                  <option value="cash">{__('Cash')}</option>
+                  <option value="card_machine">{__('Card machine')}</option>
+                  <option value="qr">{__('SnapScan / Zapper at the counter')}</option>
                 </select>
               </label>
             )}
@@ -201,18 +201,18 @@ export default function Order({ order: o }: { order: OrderData }) {
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Items</CardTitle>
+            <CardTitle>{__('Items')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Items, quantities and prices</caption>
+              <caption className="sr-only">{__('Items, quantities and prices')}</caption>
               <thead>
                 <tr className="border-border border-b">
                   <th scope="col" className="py-2">
-                    Item
+                    {__('Item')}
                   </th>
                   <th scope="col" className="py-2 text-right">
-                    Price
+                    {__('Price')}
                   </th>
                 </tr>
               </thead>
@@ -228,19 +228,19 @@ export default function Order({ order: o }: { order: OrderData }) {
                 ))}
                 {o.delivery_cents > 0 && (
                   <tr>
-                    <td className="py-2">Delivery</td>
+                    <td className="py-2">{__('Delivery')}</td>
                     <td className="py-2 text-right">{rand(o.delivery_cents)}</td>
                   </tr>
                 )}
                 <tr>
                   <th scope="row" className="py-2">
-                    Total (incl. VAT)
+                    {__('Total (incl. VAT)')}
                   </th>
                   <td className="py-2 text-right font-semibold">{rand(o.total_cents)}</td>
                 </tr>
                 {o.refunded_cents > 0 && (
                   <tr>
-                    <td className="py-2">Refunded</td>
+                    <td className="py-2">{__('Refunded')}</td>
                     <td className="py-2 text-right">−{rand(o.refunded_cents)}</td>
                   </tr>
                 )}
@@ -250,7 +250,7 @@ export default function Order({ order: o }: { order: OrderData }) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Customer</CardTitle>
+            <CardTitle>{__('Customer')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-1 text-sm">
             <p className="font-medium">{o.customer.name}</p>
@@ -268,25 +268,29 @@ export default function Order({ order: o }: { order: OrderData }) {
               )}
             </p>
             <p>{o.fulfilment === 'delivery' ? `Deliver to: ${o.address ?? ''}` : 'Collecting'}</p>
-            {o.notes && <p>Notes: {o.notes}</p>}
+            {o.notes && (
+              <p>
+                {__('Notes:')} {o.notes}
+              </p>
+            )}
           </CardContent>
         </Card>
         {(o.can_cancel || o.can_refund) && (
           <Card>
             <CardHeader>
-              <CardTitle>Cancel or refund</CardTitle>
+              <CardTitle>{__('Cancel or refund')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-6">
               {o.can_cancel && (
                 <form
-                  aria-label="Cancel this order"
+                  aria-label={__('Cancel this order')}
                   className="flex flex-wrap items-end gap-2"
                   onSubmit={(e) => {
                     e.preventDefault();
                     cancel.post(`${base}/cancel`, { preserveScroll: true });
                   }}
                 >
-                  <Field label="Reason (optional)">
+                  <Field label={__('Reason (optional)')}>
                     <Input
                       value={cancel.data.reason}
                       maxLength={300}
@@ -294,13 +298,13 @@ export default function Order({ order: o }: { order: OrderData }) {
                     />
                   </Field>
                   <Button type="submit" variant="secondary" loading={cancel.processing}>
-                    Cancel order
+                    {__('Cancel order')}
                   </Button>
                 </form>
               )}
               {o.can_refund && (
                 <form
-                  aria-label="Refund"
+                  aria-label={__('Refund')}
                   className="grid gap-3 sm:grid-cols-2 sm:items-end"
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -316,7 +320,7 @@ export default function Order({ order: o }: { order: OrderData }) {
                   }}
                 >
                   <Field
-                    label="Amount (R)"
+                    label={__('Amount (R)')}
                     hint={`Leave empty to refund all that’s left (${rand(left)}).${o.payment === 'offline' ? ' For EFT orders, pay the customer back yourself — this records it.' : ''}`}
                   >
                     <Input
@@ -327,7 +331,7 @@ export default function Order({ order: o }: { order: OrderData }) {
                       onChange={(e) => refund.setData('amount', e.target.value)}
                     />
                   </Field>
-                  <Field label="Note (optional)">
+                  <Field label={__('Note (optional)')}>
                     <Input
                       value={refund.data.note}
                       maxLength={300}
@@ -339,7 +343,7 @@ export default function Order({ order: o }: { order: OrderData }) {
                       checked={refund.data.restock}
                       onCheckedChange={(on) => refund.setData('restock', on === true)}
                     />
-                    Put the items back in stock
+                    {__('Put the items back in stock')}
                   </label>
                   <Button
                     type="submit"
@@ -347,7 +351,7 @@ export default function Order({ order: o }: { order: OrderData }) {
                     className="justify-self-start"
                     loading={refund.processing}
                   >
-                    Refund
+                    {__('Refund')}
                   </Button>
                 </form>
               )}
@@ -356,10 +360,10 @@ export default function Order({ order: o }: { order: OrderData }) {
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Timeline</CardTitle>
+            <CardTitle>{__('Timeline')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="grid gap-2 text-sm" aria-label="What happened">
+            <ol className="grid gap-2 text-sm" aria-label={__('What happened')}>
               {o.timeline.map((t, k) => (
                 <li key={k}>
                   <strong>{EVENT[t.event] ?? t.event}</strong>

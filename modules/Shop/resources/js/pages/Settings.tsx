@@ -1,17 +1,18 @@
 import { Head, useForm } from '@inertiajs/react';
+import { Button } from '@/design-system/components/button';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Checkbox,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Settings {
   collection_enabled: boolean;
@@ -35,10 +36,10 @@ export default function ShopSettings({
   const form = useForm<Settings>({ ...settings });
   const errors = form.errors as Record<string, string | undefined>;
   return (
-    <AppShell title="Shop settings">
-      <Head title="Shop settings" />
+    <AppShell title={__('Shop settings')}>
+      <Head title={__('Shop settings')} />
       <form
-        aria-label="Shop settings"
+        aria-label={__('Shop settings')}
         className="grid max-w-3xl gap-6"
         onSubmit={(e) => {
           e.preventDefault();
@@ -46,12 +47,14 @@ export default function ShopSettings({
         }}
       >
         <PageHeader
-          title="Shop settings"
-          description="How customers get their orders and how they pay. Prices include VAT; WURK takes no fee on your sales."
+          title={__('Shop settings')}
+          description={__(
+            'How customers get their orders and how they pay. Prices include VAT; WURK takes no fee on your sales.',
+          )}
         />
         <Card>
           <CardHeader>
-            <CardTitle>Collection and delivery</CardTitle>
+            <CardTitle>{__('Collection and delivery')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
             <label className="flex items-center gap-2 text-sm font-medium">
@@ -59,13 +62,13 @@ export default function ShopSettings({
                 checked={form.data.collection_enabled}
                 onCheckedChange={(on) => form.setData('collection_enabled', on === true)}
               />
-              Customers can collect
+              {__('Customers can collect')}
             </label>
             {errors.collection_enabled && (
               <p className="text-danger text-sm">{errors.collection_enabled}</p>
             )}
             {form.data.collection_enabled && (
-              <Field label="Collection address" error={errors.collection_address}>
+              <Field label={__('Collection address')} error={errors.collection_address}>
                 <textarea
                   className={area}
                   maxLength={300}
@@ -79,10 +82,10 @@ export default function ShopSettings({
                 checked={form.data.delivery_enabled}
                 onCheckedChange={(on) => form.setData('delivery_enabled', on === true)}
               />
-              We deliver
+              {__('We deliver')}
             </label>
             {form.data.delivery_enabled && branches.length > 1 && (
-              <Field label="Deliveries ship from">
+              <Field label={__('Deliveries ship from')}>
                 <select
                   className="border-border bg-bg h-10 w-full rounded-md border px-3 text-sm"
                   value={form.data.ships_from_branch_id ?? ''}
@@ -98,7 +101,7 @@ export default function ShopSettings({
             )}
             {form.data.delivery_enabled && (
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Delivery fee (R)" error={errors.delivery_fee_cents}>
+                <Field label={__('Delivery fee (R)')} error={errors.delivery_fee_cents}>
                   <Input
                     type="number"
                     min={0}
@@ -110,8 +113,8 @@ export default function ShopSettings({
                   />
                 </Field>
                 <Field
-                  label="Where you deliver (optional)"
-                  hint="e.g. Soweto and Johannesburg CBD"
+                  label={__('Where you deliver (optional)')}
+                  hint={__('e.g. Soweto and Johannesburg CBD')}
                   error={errors.delivery_note}
                 >
                   <Input
@@ -126,21 +129,25 @@ export default function ShopSettings({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Unpaid orders</CardTitle>
+            <CardTitle>{__('Unpaid orders')}</CardTitle>
             <CardDescription>
-              How customers pay — card, instant EFT or bank transfer — is set under{' '}
+              {__('How customers pay — card, instant EFT or bank transfer — is set under')}{' '}
               <a
                 className="underline"
                 href={`${window.location.pathname.split('/').slice(0, 2).join('/')}/settings/payments`}
               >
-                Settings → Payments
+                {__('Settings → Payments')}
               </a>
-              . Stock is kept for an order paid by bank transfer until you mark it paid, or for the
-              time below.
+              {__(
+                '. Stock is kept for an order paid by bank transfer until you mark it paid, or for the time below.',
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Field label="Keep stock for unpaid orders (hours)" error={errors.offline_hold_hours}>
+            <Field
+              label={__('Keep stock for unpaid orders (hours)')}
+              error={errors.offline_hold_hours}
+            >
               <Input
                 type="number"
                 min={1}
@@ -153,7 +160,7 @@ export default function ShopSettings({
           </CardContent>
         </Card>
         <Button type="submit" className="justify-self-start" loading={form.processing}>
-          Save shop settings
+          {__('Save shop settings')}
         </Button>
       </form>
     </AppShell>

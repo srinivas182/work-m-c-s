@@ -1,6 +1,7 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { Button } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { __ } from '@/i18n';
 
 /** My WURK's own simple layout (not a business's, not the back office). */
 export function MyWurkLayout({
@@ -17,10 +18,10 @@ export function MyWurkLayout({
     <div className="bg-bg text-fg min-h-screen">
       <Head title={`${title} — My WURK`} />
       <header className="border-border flex items-center justify-between border-b px-4 py-3">
-        <span className="font-semibold">My WURK</span>
+        <span className="font-semibold">{__('My WURK')}</span>
         {signedIn && (
           <Button size="sm" variant="ghost" onClick={() => router.post('/sign-out')}>
-            Sign out
+            {__('Sign out')}
           </Button>
         )}
       </header>

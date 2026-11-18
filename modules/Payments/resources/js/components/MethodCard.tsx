@@ -1,16 +1,12 @@
 import { router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Field,
-  Input,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { __ } from '@/i18n';
 
 export interface Method {
   provider:
@@ -140,7 +136,7 @@ function KeysForm({
         ),
       )}
       <Button type="submit" className="justify-self-start" loading={form.processing}>
-        Save {mode} {m.provider === 'eft' ? 'details' : 'keys'}
+        {__('Save')} {mode} {m.provider === 'eft' ? 'details' : 'keys'}
       </Button>
     </form>
   );
@@ -157,16 +153,16 @@ function PaystackOptions({ m, a, base, q }: { m: Method; a: Account; base: strin
   return (
     <div className="border-border grid gap-3 rounded-md border p-3">
       <form
-        aria-label="Paystack ways to pay"
+        aria-label={__('Paystack ways to pay')}
         className="grid gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           form.put(`${base}/paystack/channels${q}`, { preserveScroll: true });
         }}
       >
-        <p className="font-medium">Ways customers can pay</p>
+        <p className="font-medium">{__('Ways customers can pay')}</p>
         <p className="text-fg-muted">
-          Leave all unticked to offer every way your Paystack account allows.
+          {__('Leave all unticked to offer every way your Paystack account allows.')}
         </p>
         <div className="flex flex-wrap gap-4">
           {(m.channels ?? []).map((c) => (
@@ -191,12 +187,12 @@ function PaystackOptions({ m, a, base, q }: { m: Method; a: Account; base: strin
           className="justify-self-start"
           loading={form.processing}
         >
-          Save ways to pay
+          {__('Save ways to pay')}
         </Button>
       </form>
       {m.webhook && (
         <div className="grid gap-1">
-          <p className="font-medium">Webhook address</p>
+          <p className="font-medium">{__('Webhook address')}</p>
           <p className="text-fg-muted">
             In Paystack, open Settings → API Keys &amp; Webhooks and paste this as the webhook URL,
             so payments are confirmed even if a customer closes the page.
@@ -245,7 +241,7 @@ export function MethodCard({
               {a.mode === 'live' ? 'Live' : 'Test mode — no real money moves'}
             </Badge>
           ) : (
-            <Badge tone="neutral">Off</Badge>
+            <Badge tone="neutral">{__('Off')}</Badge>
           )}
         </CardTitle>
       </CardHeader>
@@ -262,18 +258,19 @@ export function MethodCard({
                 )
               }
             />
-            Businesses may offer {m.name}
+            {__('Businesses may offer')} {m.name}
           </label>
         )}
         {admin && m.countries && (
           <p className="text-fg-muted">
-            For businesses in {m.countries.join(', ')}, with their own {m.name} account. Switched on
-            per country with the country packs.
+            {__('For businesses in')} {m.countries.join(', ')}
+            {__(', with their own')} {m.name}{' '}
+            {__('account. Switched on per country with the country packs.')}
           </p>
         )}
         {admin && m.wurk_account === false ? null : blocked ? (
           <p className="text-fg-muted">
-            WURK has switched {m.name} off for now — customers can’t pay with it.
+            {__('WURK has switched')} {m.name} {__('off for now — customers can’t pay with it.')}
           </p>
         ) : (
           <>
@@ -288,14 +285,14 @@ export function MethodCard({
               </label>
               {m.provider !== 'eft' && (
                 <label className="flex items-center gap-2">
-                  Mode
+                  {__('Mode')}
                   <select
                     className="border-border bg-bg h-9 rounded-md border px-2"
                     value={a?.mode ?? 'test'}
                     onChange={(e) => save(a?.active ?? false, e.target.value as 'test' | 'live')}
                   >
-                    <option value="test">Test (no real money)</option>
-                    <option value="live">Live</option>
+                    <option value="test">{__('Test (no real money)')}</option>
+                    <option value="live">{__('Live')}</option>
                   </select>
                 </label>
               )}
@@ -328,7 +325,7 @@ export function MethodCard({
                     router.delete(`${base}/${m.provider}${q}`, { preserveScroll: true })
                   }
                 >
-                  Disconnect
+                  {__('Disconnect')}
                 </Button>
               )}
             </div>

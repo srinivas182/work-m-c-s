@@ -1,18 +1,18 @@
 import { Head, router } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  EmptyState,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Grant {
   id: string;
@@ -39,10 +39,11 @@ function Request({ grant, minutes, base }: { grant: Grant; minutes: number[]; ba
   const [level, setLevel] = useState<'view' | 'full'>('view');
   const [mins, setMins] = useState(60);
   return (
-    <Card aria-label="Access request">
+    <Card aria-label={__('Access request')}>
       <CardHeader>
         <CardTitle>
-          {grant.staff} asks for {grant.requested_level === 'full' ? 'full' : 'view-only'} access
+          {grant.staff} {__('asks for')} {grant.requested_level === 'full' ? 'full' : 'view-only'}{' '}
+          {__('access')}
         </CardTitle>
         <CardDescription>
           {grant.ticket ? `For ticket #${grant.ticket}: ` : ''}
@@ -51,7 +52,7 @@ function Request({ grant, minutes, base }: { grant: Grant; minutes: number[]; ba
       </CardHeader>
       <CardContent className="grid gap-4 text-sm">
         <fieldset className="grid gap-2">
-          <legend className="mb-1 font-medium">How much access?</legend>
+          <legend className="mb-1 font-medium">{__('How much access?')}</legend>
           <label className="flex items-start gap-2">
             <input
               type="radio"
@@ -60,7 +61,8 @@ function Request({ grant, minutes, base }: { grant: Grant; minutes: number[]; ba
               onChange={() => setLevel('view')}
             />
             <span>
-              <strong>View only</strong> (recommended) — they can look, but can’t change anything.
+              <strong>{__('View only')}</strong>{' '}
+              {__('(recommended) — they can look, but can’t change anything.')}
             </span>
           </label>
           <label className="flex items-start gap-2">
@@ -71,13 +73,15 @@ function Request({ grant, minutes, base }: { grant: Grant; minutes: number[]; ba
               onChange={() => setLevel('full')}
             />
             <span>
-              <strong>Full</strong> — they can make changes to fix things. Payouts, bank and payment
-              details, billing, your team and security settings are always off-limits.
+              <strong>{__('Full')}</strong>{' '}
+              {__(
+                '— they can make changes to fix things. Payouts, bank and payment details, billing, your team and security settings are always off-limits.',
+              )}
             </span>
           </label>
         </fieldset>
         <fieldset className="flex flex-wrap items-center gap-2">
-          <legend className="mb-1 font-medium">For how long?</legend>
+          <legend className="mb-1 font-medium">{__('For how long?')}</legend>
           {minutes.map((m) => (
             <Button
               key={m}
@@ -92,8 +96,9 @@ function Request({ grant, minutes, base }: { grant: Grant; minutes: number[]; ba
           ))}
         </fieldset>
         <p className="text-fg-muted">
-          Everything they do is recorded in your audit log as WURK staff. You can end access at any
-          time.
+          {__(
+            'Everything they do is recorded in your audit log as WURK staff. You can end access at any time.',
+          )}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -105,13 +110,13 @@ function Request({ grant, minutes, base }: { grant: Grant; minutes: number[]; ba
               )
             }
           >
-            Approve
+            {__('Approve')}
           </Button>
           <Button
             variant="secondary"
             onClick={() => router.post(`${base}/${grant.id}/decline`, {}, { preserveScroll: true })}
           >
-            Decline
+            {__('Decline')}
           </Button>
         </div>
       </CardContent>
@@ -125,31 +130,33 @@ export default function Access({ grants, minutes }: Props) {
   const open = grants.filter((g) => g.status === 'requested' || g.status === 'active');
   const past = grants.filter((g) => g.status !== 'requested' && g.status !== 'active');
   return (
-    <AppShell title="Support access">
-      <Head title="Support access" />
+    <AppShell title={__('Support access')}>
+      <Head title={__('Support access')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Support access"
-          description="WURK support can only see your back office if you say so — view-only unless you choose more, for a set time."
+          title={__('Support access')}
+          description={__(
+            'WURK support can only see your back office if you say so — view-only unless you choose more, for a set time.',
+          )}
         />
         {open.length === 0 && (
           <EmptyState
             icon={ShieldCheck}
-            title="No one from WURK has access"
-            description="If support needs to look, they’ll ask here first."
+            title={__('No one from WURK has access')}
+            description={__('If support needs to look, they’ll ask here first.')}
           />
         )}
         {open.map((g) =>
           g.status === 'requested' ? (
             <Request key={g.id} grant={g} minutes={minutes} base={base} />
           ) : (
-            <Card key={g.id} aria-label="Access now">
+            <Card key={g.id} aria-label={__('Access now')}>
               <CardHeader>
                 <CardTitle>
-                  {g.staff} has {g.level === 'full' ? 'full' : 'view-only'} access
+                  {g.staff} {__('has')} {g.level === 'full' ? 'full' : 'view-only'} {__('access')}
                 </CardTitle>
                 <CardDescription>
-                  Until {g.ends_at ? time.format(new Date(g.ends_at)) : '—'}
+                  {__('Until')} {g.ends_at ? time.format(new Date(g.ends_at)) : '—'}
                   {g.ticket ? ` · ticket #${g.ticket}` : ''}
                 </CardDescription>
               </CardHeader>
@@ -158,7 +165,7 @@ export default function Access({ grants, minutes }: Props) {
                   variant="danger"
                   onClick={() => router.post(`${base}/${g.id}/end`, {}, { preserveScroll: true })}
                 >
-                  End access now
+                  {__('End access now')}
                 </Button>
               </CardContent>
             </Card>
@@ -167,10 +174,10 @@ export default function Access({ grants, minutes }: Props) {
         {past.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Earlier</CardTitle>
+              <CardTitle>{__('Earlier')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul aria-label="Earlier access" className="grid gap-2 text-sm">
+              <ul aria-label={__('Earlier access')} className="grid gap-2 text-sm">
                 {past.map((g) => (
                   <li key={g.id} className="flex flex-wrap items-center gap-2">
                     <span>{g.asked_at ? when.format(new Date(g.asked_at)) : ''}</span>

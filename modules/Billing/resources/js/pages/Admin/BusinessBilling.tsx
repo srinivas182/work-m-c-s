@@ -1,28 +1,24 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/dialog';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  Field,
-  Input,
-  PageHeader,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface InvoiceRow {
   id: string;
@@ -91,8 +87,8 @@ function CreditDialog({
           className="grid gap-4"
         >
           <Field
-            label="Amount excl. VAT (R)"
-            hint="Leave empty to credit everything that’s left"
+            label={__('Amount excl. VAT (R)')}
+            hint={__('Leave empty to credit everything that’s left')}
             error={form.errors.amount}
           >
             <Input
@@ -102,7 +98,11 @@ function CreditDialog({
               onChange={(e) => form.setData('amount', e.target.value)}
             />
           </Field>
-          <Field label="Reason (printed on the credit note)" error={form.errors.reason} required>
+          <Field
+            label={__('Reason (printed on the credit note)')}
+            error={form.errors.reason}
+            required
+          >
             <Input
               value={form.data.reason}
               onChange={(e) => form.setData('reason', e.target.value)}
@@ -110,7 +110,7 @@ function CreditDialog({
           </Field>
           <DialogFooter>
             <Button type="submit" loading={form.processing}>
-              Issue credit note
+              {__('Issue credit note')}
             </Button>
           </DialogFooter>
         </form>
@@ -140,7 +140,7 @@ export default function BusinessBilling({
           <ArrowLeft className="size-4" aria-hidden /> {business.name}
         </Link>
         <PageHeader
-          title="Invoices and payments"
+          title={__('Invoices and payments')}
           eyebrow={business.name}
           actions={
             <Badge
@@ -169,22 +169,22 @@ export default function BusinessBilling({
                       )
                     }
                   >
-                    Retry payment now
+                    {__('Retry payment now')}
                   </Button>
                 )}
               </div>
             </CardHeader>
           </Card>
         )}
-        <Table label="Tax invoices">
+        <Table label={__('Tax invoices')}>
           <TableHeader>
             <TableRow>
-              <TableHead>Invoice</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-              <TableHead>Credit notes</TableHead>
+              <TableHead>{__('Invoice')}</TableHead>
+              <TableHead>{__('Date')}</TableHead>
+              <TableHead className="text-right">{__('Total')}</TableHead>
+              <TableHead>{__('Credit notes')}</TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">{__('Actions')}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -192,7 +192,7 @@ export default function BusinessBilling({
             {invoices.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-fg-muted">
-                  No invoices yet.
+                  {__('No invoices yet.')}
                 </TableCell>
               </TableRow>
             )}
@@ -244,7 +244,7 @@ export default function BusinessBilling({
                               )
                             }
                           >
-                            Mark EFT paid
+                            {__('Mark EFT paid')}
                           </Button>
                         )}
                       </span>
@@ -254,7 +254,7 @@ export default function BusinessBilling({
                 <TableCell className="text-right">
                   {canManage && i.credited_cents < i.total_cents && (
                     <Button size="sm" variant="secondary" onClick={() => setCrediting(i)}>
-                      Credit
+                      {__('Credit')}
                     </Button>
                   )}
                 </TableCell>
@@ -264,7 +264,7 @@ export default function BusinessBilling({
         </Table>
         <Card>
           <CardHeader>
-            <CardTitle>Payments</CardTitle>
+            <CardTitle>{__('Payments')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="divide-border divide-y">
@@ -308,7 +308,7 @@ export default function BusinessBilling({
                           }
                         }}
                       >
-                        Record a chargeback
+                        {__('Record a chargeback')}
                       </Button>
                     )}
                   </span>

@@ -1,18 +1,18 @@
 import { Head, Link } from '@inertiajs/react';
 import { Check, Package as PackageIcon, Plus } from 'lucide-react';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  EmptyState,
-  PageHeader,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { rand as money } from '@/lib/money';
+import { __ } from '@/i18n';
 
 export interface Terms {
   monthly_price: number;
@@ -57,17 +57,19 @@ interface Props {
 
 export default function Packages({ packages, modules, canManage }: Props) {
   return (
-    <AppShell title="Packages">
-      <Head title="Packages" />
+    <AppShell title={__('Packages')}>
+      <Head title={__('Packages')} />
       <div className="grid gap-8">
         <PageHeader
-          title="Packages"
-          description="What businesses can buy. Price changes create a new version — existing businesses keep their terms."
+          title={__('Packages')}
+          description={__(
+            'What businesses can buy. Price changes create a new version — existing businesses keep their terms.',
+          )}
           actions={
             canManage && (
               <Button asChild>
                 <Link href="/packages/new">
-                  <Plus /> New package
+                  <Plus /> {__('New package')}
                 </Link>
               </Button>
             )
@@ -76,12 +78,12 @@ export default function Packages({ packages, modules, canManage }: Props) {
         {packages.length === 0 ? (
           <EmptyState
             icon={PackageIcon}
-            title="No packages yet"
-            description="Create the first package so businesses can sign up."
+            title={__('No packages yet')}
+            description={__('Create the first package so businesses can sign up.')}
             action={
               canManage && (
                 <Button asChild>
-                  <Link href="/packages/new">New package</Link>
+                  <Link href="/packages/new">{__('New package')}</Link>
                 </Button>
               )
             }
@@ -95,18 +97,19 @@ export default function Packages({ packages, modules, canManage }: Props) {
                     <div>
                       <CardTitle>{p.name}</CardTitle>
                       <CardDescription>
-                        {p.type === 'managed' ? 'Managed by WURK' : 'Self-managed'} · v{p.version}
+                        {p.type === 'managed' ? 'Managed by WURK' : 'Self-managed'} {__('· v')}
+                        {p.version}
                       </CardDescription>
                     </div>
                     <span className="flex flex-col items-end gap-1">
                       {p.status === 'archived' ? (
-                        <Badge tone="warning">Archived</Badge>
+                        <Badge tone="warning">{__('Archived')}</Badge>
                       ) : (
                         <Badge tone="success" dot>
-                          On sale
+                          {__('On sale')}
                         </Badge>
                       )}
-                      {p.visibility === 'private' && <Badge>Private</Badge>}
+                      {p.visibility === 'private' && <Badge>{__('Private')}</Badge>}
                     </span>
                   </div>
                 </CardHeader>
@@ -116,9 +119,9 @@ export default function Packages({ packages, modules, canManage }: Props) {
                       <span className="font-display text-3xl font-semibold tracking-tight">
                         {rand(p.terms.monthly_price)}
                       </span>
-                      <span className="text-fg-muted"> / month + VAT</span>
+                      <span className="text-fg-muted"> {__('/ month + VAT')}</span>
                       <span className="text-fg-muted block text-sm">
-                        or {rand(p.terms.yearly_price)} / year
+                        {__('or')} {rand(p.terms.yearly_price)} {__('/ year')}
                         {p.terms.trial_days > 0 ? ` · ${p.terms.trial_days}-day free trial` : ''}
                       </span>
                     </p>
@@ -132,7 +135,9 @@ export default function Packages({ packages, modules, canManage }: Props) {
                     ))}
                   </ul>
                   <div className="border-border flex items-center justify-between border-t pt-4 text-sm">
-                    <span className="text-fg-muted">{p.subscribers ?? 0} businesses</span>
+                    <span className="text-fg-muted">
+                      {p.subscribers ?? 0} {__('businesses')}
+                    </span>
                     <Button variant="secondary" size="sm" asChild>
                       <Link
                         href={`/packages/${p.id}`}

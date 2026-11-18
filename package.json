@@ -7,9 +7,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build --ssr && vite build --ssr resources/js/site-render.tsx --outDir bootstrap/site-render",
+    "build": "vite build && vite build --ssr && vite build --ssr resources/js/site-render.tsx --outDir bootstrap/site-render && node scripts/bundle-budget.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . && node scripts/i18n-extract.mjs --check",
     "format": "prettier --write \"resources/**/*.{ts,tsx,css}\" \"modules/**/*.{ts,tsx}\" \"e2e/**/*.ts\"",
     "format:check": "prettier --check \"resources/**/*.{ts,tsx,css}\" \"modules/**/*.{ts,tsx}\" \"e2e/**/*.ts\"",
     "test": "vitest run",

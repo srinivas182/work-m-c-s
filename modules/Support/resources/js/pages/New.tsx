@@ -1,19 +1,19 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { Button } from '@/design-system/components/button';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
-  PageHeader,
-  Textarea,
-} from '@/design-system';
+} from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { forgetRecentError, recentError } from '@/lib/recent-error';
+import { __ } from '@/i18n';
 
 interface Props {
   target: string;
@@ -72,10 +72,13 @@ export default function New({ target, from }: Props) {
   };
 
   return (
-    <AppShell title="Contact support">
-      <Head title="Contact support" />
+    <AppShell title={__('Contact support')}>
+      <Head title={__('Contact support')} />
       <div className="grid max-w-3xl gap-6">
-        <PageHeader title="Contact support" description={`We aim to reply within ${target}.`} />
+        <PageHeader
+          title={__('Contact support')}
+          description={`We aim to reply within ${target}.`}
+        />
         <form
           className="grid gap-6"
           onSubmit={(e) => {
@@ -89,7 +92,7 @@ export default function New({ target, from }: Props) {
         >
           <Card>
             <CardContent className="grid gap-4 pt-6">
-              <Field label="What do you need help with?" error={form.errors.subject}>
+              <Field label={__('What do you need help with?')} error={form.errors.subject}>
                 <Input
                   maxLength={150}
                   value={form.data.subject}
@@ -97,8 +100,8 @@ export default function New({ target, from }: Props) {
                 />
               </Field>
               <Field
-                label="Tell us more"
-                hint="What were you trying to do, and what happened?"
+                label={__('Tell us more')}
+                hint={__('What were you trying to do, and what happened?')}
                 error={form.errors.body}
               >
                 <Textarea
@@ -112,17 +115,17 @@ export default function New({ target, from }: Props) {
           </Card>
 
           {step === 'suggest' && suggestion && (
-            <Card aria-label="This might help">
+            <Card aria-label={__('This might help')}>
               <CardHeader>
-                <CardTitle>This might help</CardTitle>
+                <CardTitle>{__('This might help')}</CardTitle>
                 <CardDescription>
-                  From our help centre — if it answers your question, you’re done.
+                  {__('From our help centre — if it answers your question, you’re done.')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-3 text-sm">
                 {suggestion.answer && <p className="whitespace-pre-line">{suggestion.answer}</p>}
                 {suggestion.sources.length > 0 && (
-                  <ul aria-label="Help articles" className="grid gap-1">
+                  <ul aria-label={__('Help articles')} className="grid gap-1">
                     {suggestion.sources.map((s) => (
                       <li key={s.url}>
                         <a className="underline" href={s.url} target="_blank" rel="noreferrer">
@@ -134,10 +137,10 @@ export default function New({ target, from }: Props) {
                 )}
                 <div className="flex flex-wrap gap-2">
                   <Button type="button" variant="secondary" onClick={() => window.history.back()}>
-                    That answered it
+                    {__('That answered it')}
                   </Button>
                   <Button type="button" onClick={() => setStep('send')}>
-                    I still need help
+                    {__('I still need help')}
                   </Button>
                 </div>
               </CardContent>
@@ -147,13 +150,15 @@ export default function New({ target, from }: Props) {
           {step === 'send' && (
             <Card>
               <CardHeader>
-                <CardTitle>Send to WURK</CardTitle>
+                <CardTitle>{__('Send to WURK')}</CardTitle>
                 <CardDescription>
-                  We include these to save you explaining. Remove anything you’d rather not send.
+                  {__(
+                    'We include these to save you explaining. Remove anything you’d rather not send.',
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <Field label="Page you were on" error={form.errors.page}>
+                <Field label={__('Page you were on')} error={form.errors.page}>
                   <Input
                     value={form.data.page}
                     onChange={(e) => form.setData('page', e.target.value)}
@@ -161,7 +166,7 @@ export default function New({ target, from }: Props) {
                 </Field>
                 {form.data.last_error && (
                   <div className="grid gap-1 text-sm">
-                    <span className="font-medium">What went wrong last</span>
+                    <span className="font-medium">{__('What went wrong last')}</span>
                     <p className="text-fg-muted">{form.data.last_error}</p>
                     <Button
                       type="button"
@@ -170,16 +175,16 @@ export default function New({ target, from }: Props) {
                       className="justify-self-start"
                       onClick={() => form.setData('last_error', '')}
                     >
-                      Don’t include this
+                      {__('Don’t include this')}
                     </Button>
                   </div>
                 )}
                 <p className="text-fg-muted text-sm">
-                  Your browser’s name and version are included too.
+                  {__('Your browser’s name and version are included too.')}
                 </p>
                 <Field
-                  label="Screenshots (optional)"
-                  hint="Up to 3 — PNG, JPG or WebP, 5 MB each."
+                  label={__('Screenshots (optional)')}
+                  hint={__('Up to 3 — PNG, JPG or WebP, 5 MB each.')}
                   error={
                     form.errors.screenshots ??
                     Object.entries(form.errors).find(([k]) => k.startsWith('screenshots.'))?.[1]

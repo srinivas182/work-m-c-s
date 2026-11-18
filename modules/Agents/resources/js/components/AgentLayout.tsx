@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { Button } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { __ } from '@/i18n';
 
 /** The agent area's own layout (no business around it). */
 export function AgentLayout({ title, children }: { title: string; children: ReactNode }) {
@@ -9,19 +10,19 @@ export function AgentLayout({ title, children }: { title: string; children: Reac
     <div className="bg-bg text-fg min-h-screen">
       <Head title={`${title} — WURK agents`} />
       <header className="border-border flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
-        <span className="font-semibold">WURK agents</span>
-        <nav aria-label="Agent area" className="flex flex-wrap items-center gap-3 text-sm">
-          <Link href="/agent">Home</Link>
-          <Link href="/agent/onboard">Set up a business</Link>
-          <Link href="/agent/businesses">My businesses</Link>
-          <Link href="/agent/earnings">Earnings</Link>
-          <Link href="/agent/team">Team</Link>
-          <Link href="/agent/payouts">Payouts</Link>
-          <Link href="/agent/kit">Marketing kit</Link>
-          <Link href="/agent/demo">Demo site</Link>
-          <Link href="/agent/bank">Banking details</Link>
+        <span className="font-semibold">{__('WURK agents')}</span>
+        <nav aria-label={__('Agent area')} className="flex flex-wrap items-center gap-3 text-sm">
+          <Link href="/agent">{__('Home')}</Link>
+          <Link href="/agent/onboard">{__('Set up a business')}</Link>
+          <Link href="/agent/businesses">{__('My businesses')}</Link>
+          <Link href="/agent/earnings">{__('Earnings')}</Link>
+          <Link href="/agent/team">{__('Team')}</Link>
+          <Link href="/agent/payouts">{__('Payouts')}</Link>
+          <Link href="/agent/kit">{__('Marketing kit')}</Link>
+          <Link href="/agent/demo">{__('Demo site')}</Link>
+          <Link href="/agent/bank">{__('Banking details')}</Link>
           <Button size="sm" variant="ghost" onClick={() => router.post('/sign-out')}>
-            Sign out
+            {__('Sign out')}
           </Button>
         </nav>
       </header>

@@ -159,6 +159,7 @@ final class PublicSiteController
             'Referrer-Policy' => 'strict-origin-when-cross-origin',
             'X-Frame-Options' => 'DENY',
             'Permissions-Policy' => 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+            'Vary' => 'Save-Data, Cookie', // lite mode (24.4) changes the page
         ];
         // frame-src: the "Map and directions" section's map, loaded only when a visitor taps "Show the map" (20.2).
         if (! Vite::isRunningHot()) { // the development server lives on another origin

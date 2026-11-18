@@ -1,20 +1,15 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Users } from 'lucide-react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Agent {
   id: string;
@@ -38,12 +33,14 @@ export default function Agents({ agents, canManage }: { agents: Agent[]; canMana
   const errors = (usePage().props.errors ?? {}) as Record<string, string | undefined>;
   const add = useForm({ first_name: '', last_name: '', contact: '', sponsor_id: '', months: '' });
   return (
-    <AppShell title="Agents">
-      <Head title="Agents" />
+    <AppShell title={__('Agents')}>
+      <Head title={__('Agents')} />
       <div className="grid max-w-5xl gap-6">
         <PageHeader
-          title="Agents"
-          description="People who sell WURK packages, in their sponsor hierarchy. Commission runs for life, or for a set number of months from each business’s start."
+          title={__('Agents')}
+          description={__(
+            'People who sell WURK packages, in their sponsor hierarchy. Commission runs for life, or for a set number of months from each business’s start.',
+          )}
         />
         {errors.agent && (
           <p role="alert" className="text-danger text-sm">
@@ -53,31 +50,31 @@ export default function Agents({ agents, canManage }: { agents: Agent[]; canMana
         {canManage && (
           <Card>
             <CardHeader>
-              <CardTitle>Add an agent</CardTitle>
+              <CardTitle>{__('Add an agent')}</CardTitle>
             </CardHeader>
             <CardContent>
               <form
-                aria-label="Add an agent"
+                aria-label={__('Add an agent')}
                 className="grid gap-3 sm:grid-cols-2"
                 onSubmit={(e) => {
                   e.preventDefault();
                   add.post('/agents', { preserveScroll: true, onSuccess: () => add.reset() });
                 }}
               >
-                <Field label="First name" error={add.errors.first_name}>
+                <Field label={__('First name')} error={add.errors.first_name}>
                   <Input
                     value={add.data.first_name}
                     onChange={(e) => add.setData('first_name', e.target.value)}
                   />
                 </Field>
-                <Field label="Last name" error={add.errors.last_name}>
+                <Field label={__('Last name')} error={add.errors.last_name}>
                   <Input
                     value={add.data.last_name}
                     onChange={(e) => add.setData('last_name', e.target.value)}
                   />
                 </Field>
                 <Field
-                  label="Phone number or email (they sign in with it)"
+                  label={__('Phone number or email (they sign in with it)')}
                   error={add.errors.contact}
                 >
                   <Input
@@ -90,7 +87,10 @@ export default function Agents({ agents, canManage }: { agents: Agent[]; canMana
                   value={add.data.sponsor_id}
                   onChange={(v) => add.setData('sponsor_id', v)}
                 />
-                <Field label="Commission for (months; empty = lifetime)" error={add.errors.months}>
+                <Field
+                  label={__('Commission for (months; empty = lifetime)')}
+                  error={add.errors.months}
+                >
                   <Input
                     type="number"
                     inputMode="numeric"
@@ -104,7 +104,7 @@ export default function Agents({ agents, canManage }: { agents: Agent[]; canMana
                   className="self-end justify-self-start"
                   loading={add.processing}
                 >
-                  Add agent
+                  {__('Add agent')}
                 </Button>
               </form>
             </CardContent>
@@ -113,11 +113,11 @@ export default function Agents({ agents, canManage }: { agents: Agent[]; canMana
         {agents.length === 0 ? (
           <EmptyState
             icon={Users}
-            title="No agents yet"
-            description="Add your first agent above."
+            title={__('No agents yet')}
+            description={__('Add your first agent above.')}
           />
         ) : (
-          <ul aria-label="Agents" className="grid gap-3">
+          <ul aria-label={__('Agents')} className="grid gap-3">
             {agents.map((a) => (
               <AgentRow key={a.id} a={a} agents={agents} canManage={canManage} />
             ))}
@@ -140,13 +140,13 @@ function SponsorSelect({
   except?: string;
 }) {
   return (
-    <Field label="Sponsor (the agent above them)">
+    <Field label={__('Sponsor (the agent above them)')}>
       <select
         className="border-border bg-bg h-10 w-full rounded-md border px-3 text-sm"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
-        <option value="">No sponsor (top of a team)</option>
+        <option value="">{__('No sponsor (top of a team)')}</option>
         {agents
           .filter((x) => x.id !== except)
           .map((x) => (
@@ -171,7 +171,7 @@ function AgentRow({ a, agents, canManage }: { a: Agent; agents: Agent[]; canMana
       <div className="flex flex-wrap items-center gap-2">
         <strong>{a.name}</strong>
         <span className="font-mono">{a.code}</span>
-        {a.status === 'suspended' && <Badge tone="warning">Suspended</Badge>}
+        {a.status === 'suspended' && <Badge tone="warning">{__('Suspended')}</Badge>}
         {a.owes_since && (
           <Badge tone={a.owes_flag ? 'danger' : 'warning'}>
             {a.owes_flag
@@ -181,18 +181,19 @@ function AgentRow({ a, agents, canManage }: { a: Agent; agents: Agent[]; canMana
         )}
       </div>
       <p className="text-fg-muted">
-        {a.sponsor ? `Sponsor: ${a.sponsor}` : 'No sponsor'} · {a.direct} direct · {a.team} in their
-        team · {a.businesses === 1 ? '1 business' : `${a.businesses} businesses`} · commission{' '}
-        {a.months === null ? 'for life' : `for ${a.months} months`}
+        {a.sponsor ? `Sponsor: ${a.sponsor}` : 'No sponsor'} · {a.direct} {__('direct ·')} {a.team}{' '}
+        {__('in their team ·')} {a.businesses === 1 ? '1 business' : `${a.businesses} businesses`}{' '}
+        {__('· commission')} {a.months === null ? 'for life' : `for ${a.months} months`}
       </p>
       <p>
-        Commission: {rand(a.commission.available)} available · {rand(a.commission.pending)} pending
-        · {rand(a.commission.paid_out)} paid out
+        {__('Commission:')} {rand(a.commission.available)} {__('available ·')}{' '}
+        {rand(a.commission.pending)} {__('pending ·')} {rand(a.commission.paid_out)}{' '}
+        {__('paid out')}
       </p>
       <p className="break-all">
         <span className="font-mono">{a.link}</span> ·{' '}
         <a className="underline" href={`/agents/${a.id}/qr.svg`} download>
-          QR code
+          {__('QR code')}
         </a>
       </p>
       {canManage &&
@@ -214,17 +215,17 @@ function AgentRow({ a, agents, canManage }: { a: Agent; agents: Agent[]; canMana
               onChange={(v) => setForm({ ...form, sponsor_id: v })}
               except={a.id}
             />
-            <Field label="Status">
+            <Field label={__('Status')}>
               <select
                 className="border-border bg-bg h-10 w-full rounded-md border px-3"
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value as Agent['status'] })}
               >
-                <option value="active">Active</option>
-                <option value="suspended">Suspended</option>
+                <option value="active">{__('Active')}</option>
+                <option value="suspended">{__('Suspended')}</option>
               </select>
             </Field>
-            <Field label="Commission for (months; empty = lifetime)">
+            <Field label={__('Commission for (months; empty = lifetime)')}>
               <Input
                 type="number"
                 inputMode="numeric"
@@ -234,7 +235,7 @@ function AgentRow({ a, agents, canManage }: { a: Agent; agents: Agent[]; canMana
               />
             </Field>
             <Button size="sm" type="submit" className="justify-self-start">
-              Save
+              {__('Save')}
             </Button>
           </form>
         ) : (
@@ -244,7 +245,7 @@ function AgentRow({ a, agents, canManage }: { a: Agent; agents: Agent[]; canMana
             className="justify-self-start"
             onClick={() => setEditing(true)}
           >
-            Change…
+            {__('Change…')}
           </Button>
         ))}
     </li>

@@ -1,17 +1,12 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Field,
-  Input,
-  PageHeader,
-  Textarea,
-} from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { StatusBadge, Thread, type ThreadMessage } from '../components/Thread';
+import { __ } from '@/i18n';
 
 interface Props {
   ticket: {
@@ -45,7 +40,7 @@ export default function Ticket({ ticket, messages }: Props) {
           }
           actions={
             <Button asChild variant="secondary">
-              <Link href={list}>All tickets</Link>
+              <Link href={list}>{__('All tickets')}</Link>
             </Button>
           }
         />
@@ -57,18 +52,18 @@ export default function Ticket({ ticket, messages }: Props) {
         {ticket.status === 'solved' && !ticket.rating && (
           <Card>
             <CardHeader>
-              <CardTitle>How did we do?</CardTitle>
+              <CardTitle>{__('How did we do?')}</CardTitle>
             </CardHeader>
             <CardContent>
               <form
-                aria-label="Rate this ticket"
+                aria-label={__('Rate this ticket')}
                 className="grid gap-3"
                 onSubmit={(e) => {
                   e.preventDefault();
                   rate.post(`${base}/rate`, { preserveScroll: true });
                 }}
               >
-                <div className="flex gap-2" role="group" aria-label="Rating">
+                <div className="flex gap-2" role="group" aria-label={__('Rating')}>
                   {(
                     [
                       { value: 'good', label: 'Good' },
@@ -86,7 +81,7 @@ export default function Ticket({ ticket, messages }: Props) {
                     </Button>
                   ))}
                 </div>
-                <Field label="Anything to add? (optional)" error={rate.errors.comment}>
+                <Field label={__('Anything to add? (optional)')} error={rate.errors.comment}>
                   <Input
                     maxLength={500}
                     value={rate.data.comment}
@@ -99,7 +94,7 @@ export default function Ticket({ ticket, messages }: Props) {
                   disabled={!rate.data.rating}
                   loading={rate.processing}
                 >
-                  Send rating
+                  {__('Send rating')}
                 </Button>
               </form>
             </CardContent>
@@ -107,7 +102,7 @@ export default function Ticket({ ticket, messages }: Props) {
         )}
         {ticket.rating && (
           <p className="text-fg-muted text-sm">
-            Thanks — you rated this {ticket.rating === 'good' ? 'good' : 'not good'}.
+            {__('Thanks — you rated this')} {ticket.rating === 'good' ? 'good' : 'not good'}.
           </p>
         )}
 
@@ -119,7 +114,7 @@ export default function Ticket({ ticket, messages }: Props) {
           </CardHeader>
           <CardContent>
             <form
-              aria-label="Reply"
+              aria-label={__('Reply')}
               className="grid gap-3"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -130,7 +125,7 @@ export default function Ticket({ ticket, messages }: Props) {
                 });
               }}
             >
-              <Field label="Your reply" error={reply.errors.body}>
+              <Field label={__('Your reply')} error={reply.errors.body}>
                 <Textarea
                   rows={4}
                   maxLength={5000}
@@ -138,7 +133,10 @@ export default function Ticket({ ticket, messages }: Props) {
                   onChange={(e) => reply.setData('body', e.target.value)}
                 />
               </Field>
-              <Field label="Screenshots (optional)" hint="Up to 3 — PNG, JPG or WebP, 5 MB each.">
+              <Field
+                label={__('Screenshots (optional)')}
+                hint={__('Up to 3 — PNG, JPG or WebP, 5 MB each.')}
+              >
                 <Input
                   type="file"
                   multiple
@@ -149,7 +147,7 @@ export default function Ticket({ ticket, messages }: Props) {
                 />
               </Field>
               <Button type="submit" className="justify-self-start" loading={reply.processing}>
-                Send reply
+                {__('Send reply')}
               </Button>
             </form>
           </CardContent>

@@ -1,7 +1,11 @@
 import { usePage } from '@inertiajs/react';
 import { CircleHelp } from 'lucide-react';
 import { useState } from 'react';
-import { Button, Input, Sheet, SheetContent, Tooltip } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Input } from '@/design-system/components/input';
+import { Sheet, SheetContent } from '@/design-system/components/dialog';
+import { Tooltip } from '@/design-system/components/tooltip';
+import { __ } from '@/i18n';
 
 interface Article {
   slug: string;
@@ -39,7 +43,7 @@ export function HelpPanel() {
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Help for this page"
+          aria-label={__('Help for this page')}
           onClick={() => {
             setQ('');
             setOpen(true);
@@ -50,7 +54,7 @@ export function HelpPanel() {
         </Button>
       </Tooltip>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" title="Help">
+        <SheetContent side="right" title={__('Help')}>
           <div className="grid gap-4 p-5 text-sm">
             <form
               role="search"
@@ -60,14 +64,14 @@ export function HelpPanel() {
               }}
             >
               <Input
-                aria-label="Search help"
-                placeholder="Search help"
+                aria-label={__('Search help')}
+                placeholder={__('Search help')}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
             </form>
             {articles === null ? (
-              <p className="text-fg-muted">Loading…</p>
+              <p className="text-fg-muted">{__('Loading…')}</p>
             ) : articles.length === 0 ? (
               <p className="text-fg-muted">
                 {q.trim()
@@ -75,7 +79,7 @@ export function HelpPanel() {
                   : 'No help for this page yet — try a search.'}
               </p>
             ) : (
-              <ul aria-label="Help articles" className="grid gap-2">
+              <ul aria-label={__('Help articles')} className="grid gap-2">
                 {articles.map((a) => (
                   <li key={a.slug} className="border-border rounded-lg border">
                     <details>
@@ -98,7 +102,7 @@ export function HelpPanel() {
                           dangerouslySetInnerHTML={{ __html: a.html }}
                         />
                         <a className="underline" href={a.url} target="_blank" rel="noreferrer">
-                          Open in the help centre
+                          {__('Open in the help centre')}
                         </a>
                       </div>
                     </details>
@@ -108,7 +112,7 @@ export function HelpPanel() {
             )}
             {home && (
               <a className="underline" href={home} target="_blank" rel="noreferrer">
-                Browse all help
+                {__('Browse all help')}
               </a>
             )}
             {support && (
@@ -116,7 +120,7 @@ export function HelpPanel() {
                 className="underline"
                 href={`${support}?from=${encodeURIComponent(window.location.pathname)}`}
               >
-                Still stuck? Contact support
+                {__('Still stuck? Contact support')}
               </a>
             )}
           </div>

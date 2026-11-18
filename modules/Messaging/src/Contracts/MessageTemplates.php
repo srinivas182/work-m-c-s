@@ -20,14 +20,14 @@ interface MessageTemplates
      *
      * @param  array<string, string>  $vars
      */
-    public function subject(string $key, array $vars): string;
+    public function subject(string $key, array $vars, ?string $locale = null): string;
 
     /**
      * The text for a channel (email or sms), placeholders filled.
      *
      * @param  array<string, string>  $vars
      */
-    public function text(string $key, string $channel, array $vars): string;
+    public function text(string $key, string $channel, array $vars, ?string $locale = null): string;
 
     /** Whether an optional message is switched on for this business (non-optional messages always are). */
     public function enabled(string $key): bool;
@@ -37,5 +37,5 @@ interface MessageTemplates
      *
      * @param  array<string, string>  $vars
      */
-    public function email(string $key, string $to, array $vars): void;
+    public function email(string $key, string $to, array $vars, ?string $locale = null): void;
 }

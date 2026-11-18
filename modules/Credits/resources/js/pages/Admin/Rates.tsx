@@ -1,28 +1,33 @@
 import { Head, useForm } from '@inertiajs/react';
+import { Button } from '@/design-system/components/button';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Field,
-  Input,
-  PageHeader,
+} from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+} from '@/design-system/components/select';
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
 import AppShell from '@/layouts/AppShell';
 import { credits } from '../Summary';
+import { __ } from '@/i18n';
 
 interface Props {
   channels: Record<string, string>;
@@ -38,17 +43,19 @@ export default function Rates({ channels, countries, history }: Props) {
     effective_from: '',
   });
   return (
-    <AppShell title="Credit rates">
-      <Head title="Credit rates" />
+    <AppShell title={__('Credit rates')}>
+      <Head title={__('Credit rates')} />
       <div className="grid max-w-5xl gap-8">
         <PageHeader
-          title="Credit rates"
-          description="How many WURK Credits each message or action costs, per country. Changes apply from their start date; past usage keeps its price."
+          title={__('Credit rates')}
+          description={__(
+            'How many WURK Credits each message or action costs, per country. Changes apply from their start date; past usage keeps its price.',
+          )}
         />
-        <Table label="Current rates">
+        <Table label={__('Current rates')}>
           <TableHeader>
             <TableRow>
-              <TableHead>Country</TableHead>
+              <TableHead>{__('Country')}</TableHead>
               {Object.values(channels).map((c) => (
                 <TableHead key={c} className="text-right">
                   {c}
@@ -71,8 +78,8 @@ export default function Rates({ channels, countries, history }: Props) {
         </Table>
         <Card>
           <CardHeader>
-            <CardTitle>Change a rate</CardTitle>
-            <CardDescription>Leave the start date empty to apply it now.</CardDescription>
+            <CardTitle>{__('Change a rate')}</CardTitle>
+            <CardDescription>{__('Leave the start date empty to apply it now.')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form
@@ -85,7 +92,7 @@ export default function Rates({ channels, countries, history }: Props) {
               }}
               className="grid grid-cols-1 items-end gap-4 sm:grid-cols-[1fr_1fr_8rem_10rem_auto]"
             >
-              <Field label="Country">
+              <Field label={__('Country')}>
                 {(control) => (
                   <Select
                     value={form.data.country}
@@ -104,7 +111,7 @@ export default function Rates({ channels, countries, history }: Props) {
                   </Select>
                 )}
               </Field>
-              <Field label="Channel">
+              <Field label={__('Channel')}>
                 {(control) => (
                   <Select
                     value={form.data.channel}
@@ -123,7 +130,7 @@ export default function Rates({ channels, countries, history }: Props) {
                   </Select>
                 )}
               </Field>
-              <Field label="Credits" error={form.errors.credits} required>
+              <Field label={__('Credits')} error={form.errors.credits} required>
                 <Input
                   type="number"
                   step="0.001"
@@ -131,7 +138,7 @@ export default function Rates({ channels, countries, history }: Props) {
                   onChange={(e) => form.setData('credits', e.target.value)}
                 />
               </Field>
-              <Field label="Starts" error={form.errors.effective_from}>
+              <Field label={__('Starts')} error={form.errors.effective_from}>
                 <Input
                   type="date"
                   value={form.data.effective_from}
@@ -139,19 +146,19 @@ export default function Rates({ channels, countries, history }: Props) {
                 />
               </Field>
               <Button type="submit" loading={form.processing}>
-                Save
+                {__('Save')}
               </Button>
             </form>
           </CardContent>
         </Card>
         {history.length > 0 && (
-          <Table label="Rate history">
+          <Table label={__('Rate history')}>
             <TableHeader>
               <TableRow>
-                <TableHead>From</TableHead>
-                <TableHead>Country</TableHead>
-                <TableHead>Channel</TableHead>
-                <TableHead className="text-right">Credits</TableHead>
+                <TableHead>{__('From')}</TableHead>
+                <TableHead>{__('Country')}</TableHead>
+                <TableHead>{__('Channel')}</TableHead>
+                <TableHead className="text-right">{__('Credits')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

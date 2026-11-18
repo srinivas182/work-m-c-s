@@ -1,9 +1,14 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { Gift } from 'lucide-react';
 import { useState } from 'react';
-import { Badge, Button, EmptyState, Field, Input, PageHeader } from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Payout {
   id: string;
@@ -25,12 +30,14 @@ export default function Payouts({ payouts }: { payouts: Payout[] }) {
   const base = window.location.pathname.replace(/\/$/, '');
   const errors = (usePage().props.errors ?? {}) as Record<string, string | undefined>;
   return (
-    <AppShell title="Payouts">
-      <Head title="Payouts" />
+    <AppShell title={__('Payouts')}>
+      <Head title={__('Payouts')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Payouts"
-          description="Customers asking for their rewards to be paid out. Pay them from your bank, then mark it paid with your reference."
+          title={__('Payouts')}
+          description={__(
+            'Customers asking for their rewards to be paid out. Pay them from your bank, then mark it paid with your reference.',
+          )}
         />
         {errors.payout && (
           <p role="alert" className="text-danger text-sm">
@@ -40,11 +47,13 @@ export default function Payouts({ payouts }: { payouts: Payout[] }) {
         {payouts.length === 0 ? (
           <EmptyState
             icon={Gift}
-            title="No payout requests"
-            description="When a customer asks for their rewards to be paid out, it appears here."
+            title={__('No payout requests')}
+            description={__(
+              'When a customer asks for their rewards to be paid out, it appears here.',
+            )}
           />
         ) : (
-          <ul aria-label="Payout requests" className="grid gap-3">
+          <ul aria-label={__('Payout requests')} className="grid gap-3">
             {payouts.map((p) => (
               <PayoutRow key={p.id} p={p} base={base} />
             ))}
@@ -64,10 +73,10 @@ function PayoutRow({ p, base }: { p: Payout; base: string }) {
   return (
     <li className="border-border grid gap-2 rounded-lg border p-4 text-sm">
       <div className="flex flex-wrap items-center gap-2">
-        <strong>{p.customer}</strong> {rand(p.cents)} · asked {p.asked}
-        {p.status === 'requested' && <Badge tone="warning">To pay</Badge>}
-        {p.status === 'paid' && <Badge tone="success">Paid</Badge>}
-        {p.status === 'declined' && <Badge tone="neutral">Declined</Badge>}
+        <strong>{p.customer}</strong> {rand(p.cents)} {__('· asked')} {p.asked}
+        {p.status === 'requested' && <Badge tone="warning">{__('To pay')}</Badge>}
+        {p.status === 'paid' && <Badge tone="success">{__('Paid')}</Badge>}
+        {p.status === 'declined' && <Badge tone="neutral">{__('Declined')}</Badge>}
       </div>
       <p>
         {p.holder} · {p.bank} · <span className="font-mono">{p.account}</span>
@@ -90,7 +99,7 @@ function PayoutRow({ p, base }: { p: Payout; base: string }) {
               post('paid', { reference });
             }}
           >
-            <Field label="Your payment reference">
+            <Field label={__('Your payment reference')}>
               <Input
                 value={reference}
                 maxLength={80}
@@ -98,10 +107,10 @@ function PayoutRow({ p, base }: { p: Payout; base: string }) {
               />
             </Field>
             <Button size="sm" type="submit">
-              Mark paid
+              {__('Mark paid')}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setDeclining(true)}>
-              Decline…
+              {__('Decline…')}
             </Button>
           </form>
           {declining && (
@@ -113,11 +122,11 @@ function PayoutRow({ p, base }: { p: Payout; base: string }) {
                 post('decline', { reason });
               }}
             >
-              <Field label="Why (sent to the customer)">
+              <Field label={__('Why (sent to the customer)')}>
                 <Input value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} />
               </Field>
               <Button size="sm" type="submit">
-                Decline
+                {__('Decline')}
               </Button>
             </form>
           )}

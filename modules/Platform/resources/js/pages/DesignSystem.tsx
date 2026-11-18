@@ -26,62 +26,60 @@ import {
   contrast,
   isHex,
 } from '@/design-system/brand';
+import { Avatar } from '@/design-system/components/avatar';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
 import {
-  Avatar,
-  Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-  Checkbox,
+} from '@/design-system/components/card';
+import { Checkbox, RadioGroup, RadioGroupItem, Switch } from '@/design-system/components/choice';
+import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogFooter,
   DialogTrigger,
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/design-system/components/dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  EmptyState,
-  Field,
-  Input,
-  Label,
-  PageHeader,
-  RadioGroup,
-  RadioGroupItem,
+} from '@/design-system/components/dropdown-menu';
+import { EmptyState, PageHeader, Skeleton, StatCard } from '@/design-system/components/feedback';
+import { Field, Label } from '@/design-system/components/field';
+import { Input, Textarea } from '@/design-system/components/input';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  Skeleton,
-  StatCard,
-  Switch,
+} from '@/design-system/components/select';
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Textarea,
-  toast,
-  Tooltip,
-  useTheme,
-} from '@/design-system';
+} from '@/design-system/components/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/design-system/components/tabs';
+import { toast } from '@/design-system/components/toast';
+import { Tooltip } from '@/design-system/components/tooltip';
+import { useTheme } from '@/design-system/theme/use-theme';
 import { DEFAULT_BRAND } from '@/design-system/tokens/defaults';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 const PRESETS = [
   { name: 'WURK violet', hex: DEFAULT_BRAND },
@@ -165,7 +163,7 @@ function ContrastRow({
             className="inline-grid h-8 min-w-14 place-items-center rounded-md px-2 text-xs font-semibold"
             style={{ background: bg, color: fg }}
           >
-            Aa
+            {__('Aa')}
           </span>
         )}
       </TableCell>
@@ -207,10 +205,11 @@ function BrandLab() {
     <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
       <Card>
         <CardHeader>
-          <CardTitle>Brand colour</CardTitle>
+          <CardTitle>{__('Brand colour')}</CardTitle>
           <CardDescription>
-            Pick any colour. The engine builds light and dark scales and fixes anything that would
-            be hard to read.
+            {__(
+              'Pick any colour. The engine builds light and dark scales and fixes anything that would be hard to read.',
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-5">
@@ -219,13 +218,13 @@ function BrandLab() {
               type="color"
               value={hex}
               onChange={(e) => choose(e.target.value)}
-              aria-label="Brand colour picker"
+              aria-label={__('Brand colour picker')}
               className="border-border bg-surface size-12 shrink-0 cursor-pointer rounded-xl border p-1"
             />
             <Input
               value={draft}
               onChange={(e) => choose(e.target.value)}
-              aria-label="Brand colour hex"
+              aria-label={__('Brand colour hex')}
               data-testid="brand-hex"
               className="font-mono uppercase"
               maxLength={7}
@@ -234,7 +233,7 @@ function BrandLab() {
               <Button
                 variant="secondary"
                 size="icon"
-                aria-label="Reset brand colour"
+                aria-label={__('Reset brand colour')}
                 onClick={() => choose(DEFAULT_BRAND)}
               >
                 <RotateCcw />
@@ -264,9 +263,11 @@ function BrandLab() {
             ))}
           </div>
           <div className="bg-sunken rounded-xl p-4 text-sm">
-            <p className="font-medium">Contrast guard</p>
+            <p className="font-medium">{__('Contrast guard')}</p>
             {theme.brand.adjustments.length === 0 ? (
-              <p className="text-fg-muted mt-1">No adjustments needed — this colour works as-is.</p>
+              <p className="text-fg-muted mt-1">
+                {__('No adjustments needed — this colour works as-is.')}
+              </p>
             ) : (
               <ul className="text-fg-muted mt-2 grid gap-1.5">
                 {theme.brand.adjustments.map((note) => (
@@ -284,15 +285,19 @@ function BrandLab() {
       <div className="grid min-w-0 grid-cols-1 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Generated scales ({resolved} mode)</CardTitle>
+            <CardTitle>
+              {__('Generated scales (')}
+              {resolved} {__('mode)')}
+            </CardTitle>
             <CardDescription>
-              Steps 1–2 backgrounds · 3–5 component fills · 6–8 borders and focus · 9–10 solid ·
-              11–12 text
+              {__(
+                'Steps 1–2 backgrounds · 3–5 component fills · 6–8 borders and focus · 9–10 solid · 11–12 text',
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-5">
             <div>
-              <p className="mb-2 text-sm font-medium">Brand</p>
+              <p className="mb-2 text-sm font-medium">{__('Brand')}</p>
               <div className="grid grid-cols-6 gap-2 sm:grid-cols-12" data-testid="brand-scale">
                 {mode.scale.map((c, i) => (
                   <Swatch key={i} color={c} label={String(i + 1)} />
@@ -300,7 +305,7 @@ function BrandLab() {
               </div>
             </div>
             <div>
-              <p className="mb-2 text-sm font-medium">Neutral (tinted toward the brand)</p>
+              <p className="mb-2 text-sm font-medium">{__('Neutral (tinted toward the brand)')}</p>
               <div className="grid grid-cols-6 gap-2 sm:grid-cols-12">
                 {neutral.scale.map((c, i) => (
                   <Swatch key={i} color={c} label={String(i + 1)} />
@@ -310,49 +315,49 @@ function BrandLab() {
           </CardContent>
         </Card>
 
-        <Table label="Contrast report">
+        <Table label={__('Contrast report')}>
           <TableHeader>
             <TableRow>
-              <TableHead>Sample</TableHead>
-              <TableHead>Pairing</TableHead>
-              <TableHead>Ratio</TableHead>
-              <TableHead>Needs</TableHead>
-              <TableHead>WCAG 2.2</TableHead>
+              <TableHead>{__('Sample')}</TableHead>
+              <TableHead>{__('Pairing')}</TableHead>
+              <TableHead>{__('Ratio')}</TableHead>
+              <TableHead>{__('Needs')}</TableHead>
+              <TableHead>{__('WCAG 2.2')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <ContrastRow
-              label="Button text on brand"
+              label={__('Button text on brand')}
               fg={mode.onSolid}
               bg={mode.scale[8]}
               min={AA_TEXT}
             />
             <ContrastRow
-              label="Button text on hover"
+              label={__('Button text on hover')}
               fg={mode.onSolid}
               bg={mode.scale[9]}
               min={AA_TEXT}
             />
             <ContrastRow
-              label="Brand text on tinted fill"
+              label={__('Brand text on tinted fill')}
               fg={mode.scale[10]}
               bg={mode.scale[2]}
               min={AA_TEXT}
             />
             <ContrastRow
-              label="Body text on background"
+              label={__('Body text on background')}
               fg={neutral.scale[11]}
               bg={neutral.scale[1]}
               min={AAA_TEXT}
             />
             <ContrastRow
-              label="Muted text on background"
+              label={__('Muted text on background')}
               fg={neutral.scale[10]}
               bg={neutral.scale[1]}
               min={AA_TEXT}
             />
             <ContrastRow
-              label="Focus ring on background"
+              label={__('Focus ring on background')}
               fg={mode.scale[7]}
               bg={neutral.scale[0]}
               min={AA_NON_TEXT}
@@ -371,24 +376,24 @@ function Buttons() {
     <Card>
       <CardContent className="grid grid-cols-1 gap-6">
         <div className="flex flex-wrap items-center gap-3">
-          <Button>Primary</Button>
-          <Button variant="secondary">Secondary</Button>
-          <Button variant="soft">Soft</Button>
-          <Button variant="ghost">Ghost</Button>
-          <Button variant="danger">Delete</Button>
-          <Button variant="link">Link</Button>
+          <Button>{__('Primary')}</Button>
+          <Button variant="secondary">{__('Secondary')}</Button>
+          <Button variant="soft">{__('Soft')}</Button>
+          <Button variant="ghost">{__('Ghost')}</Button>
+          <Button variant="danger">{__('Delete')}</Button>
+          <Button variant="link">{__('Link')}</Button>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Button size="sm">
-            <Plus /> Small
+            <Plus /> {__('Small')}
           </Button>
           <Button>
-            <Plus /> Medium
+            <Plus /> {__('Medium')}
           </Button>
           <Button size="lg">
-            <Plus /> Large
+            <Plus /> {__('Large')}
           </Button>
-          <Button size="icon" variant="secondary" aria-label="Edit">
+          <Button size="icon" variant="secondary" aria-label={__('Edit')}>
             <Pencil />
           </Button>
           <Button
@@ -398,9 +403,9 @@ function Buttons() {
               setTimeout(() => setLoading(false), 1500);
             }}
           >
-            Save changes
+            {__('Save changes')}
           </Button>
-          <Button disabled>Disabled</Button>
+          <Button disabled>{__('Disabled')}</Button>
         </div>
       </CardContent>
     </Card>
@@ -412,59 +417,59 @@ function Forms() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>New booking</CardTitle>
+        <CardTitle>{__('New booking')}</CardTitle>
         <CardDescription>
-          Fields wire up labels, hints and errors for screen readers automatically.
+          {__('Fields wire up labels, hints and errors for screen readers automatically.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field
-          label="Customer name"
+          label={__('Customer name')}
           required
           error={errors ? 'Please enter the customer’s name.' : undefined}
         >
-          <Input placeholder="e.g. Thandi Mokoena" />
+          <Input placeholder={__('e.g. Thandi Mokoena')} />
         </Field>
-        <Field label="Phone" hint="We’ll send a WhatsApp confirmation.">
+        <Field label={__('Phone')} hint={__('We’ll send a WhatsApp confirmation.')}>
           <Input type="tel" placeholder="+27 82 000 0000" />
         </Field>
-        <Field label="Service">
+        <Field label={__('Service')}>
           {(control) => (
             <Select defaultValue="cut">
               <SelectTrigger {...control}>
-                <SelectValue placeholder="Choose a service" />
+                <SelectValue placeholder={__('Choose a service')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="cut">Cut &amp; blow-dry · 45 min</SelectItem>
-                <SelectItem value="colour">Full colour · 2 h</SelectItem>
-                <SelectItem value="braids">Braids · 3 h</SelectItem>
+                <SelectItem value="colour">{__('Full colour · 2 h')}</SelectItem>
+                <SelectItem value="braids">{__('Braids · 3 h')}</SelectItem>
               </SelectContent>
             </Select>
           )}
         </Field>
-        <Field label="Branch">
+        <Field label={__('Branch')}>
           <Input defaultValue="Sandton City" />
         </Field>
-        <Field label="Notes" className="sm:col-span-2">
-          <Textarea placeholder="Anything the stylist should know?" />
+        <Field label={__('Notes')} className="sm:col-span-2">
+          <Textarea placeholder={__('Anything the stylist should know?')} />
         </Field>
         <div className="grid grid-cols-1 gap-4 sm:col-span-2 sm:grid-cols-3">
           <div className="flex items-center gap-3">
             <Checkbox id="deposit" defaultChecked />
-            <Label htmlFor="deposit">Require deposit</Label>
+            <Label htmlFor="deposit">{__('Require deposit')}</Label>
           </div>
           <div className="flex items-center gap-3">
             <Switch id="reminder" defaultChecked />
-            <Label htmlFor="reminder">WhatsApp reminder</Label>
+            <Label htmlFor="reminder">{__('WhatsApp reminder')}</Label>
           </div>
-          <RadioGroup defaultValue="online" className="flex gap-4" aria-label="Payment">
+          <RadioGroup defaultValue="online" className="flex gap-4" aria-label={__('Payment')}>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="online" id="pay-online" />
-              <Label htmlFor="pay-online">Pay online</Label>
+              <Label htmlFor="pay-online">{__('Pay online')}</Label>
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="store" id="pay-store" />
-              <Label htmlFor="pay-store">In store</Label>
+              <Label htmlFor="pay-store">{__('In store')}</Label>
             </div>
           </RadioGroup>
         </div>
@@ -480,7 +485,7 @@ function Forms() {
             })
           }
         >
-          Confirm booking
+          {__('Confirm booking')}
         </Button>
       </CardFooter>
     </Card>
@@ -523,37 +528,42 @@ function DataDisplay() {
     <div className="grid grid-cols-1 gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Sales this month"
+          label={__('Sales this month')}
           value="R 84 210"
           change={12.4}
           icon={TrendingUp}
-          hint="vs last month"
+          hint={__('vs last month')}
         />
         <StatCard
-          label="Bookings"
+          label={__('Bookings')}
           value="342"
           change={8.1}
           icon={CalendarDays}
-          hint="vs last month"
+          hint={__('vs last month')}
         />
         <StatCard
-          label="New customers"
+          label={__('New customers')}
           value="58"
           change={-3.2}
           icon={Users}
-          hint="vs last month"
+          hint={__('vs last month')}
         />
-        <StatCard label="Wallet liability" value="R 6 480" icon={Wallet} hint="owed to referrers" />
+        <StatCard
+          label={__('Wallet liability')}
+          value="R 6 480"
+          icon={Wallet}
+          hint={__('owed to referrers')}
+        />
       </div>
-      <Table label="Recent orders">
+      <Table label={__('Recent orders')}>
         <TableHeader>
           <TableRow>
-            <TableHead>Order</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{__('Order')}</TableHead>
+            <TableHead>{__('Customer')}</TableHead>
+            <TableHead className="text-right">{__('Total')}</TableHead>
+            <TableHead>{__('Status')}</TableHead>
             <TableHead className="w-12">
-              <span className="sr-only">Actions</span>
+              <span className="sr-only">{__('Actions')}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -582,14 +592,14 @@ function DataDisplay() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem>
-                      <Pencil /> Edit
+                      <Pencil /> {__('Edit')}
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Copy /> Duplicate
+                      <Copy /> {__('Duplicate')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem destructive>
-                      <Trash2 /> Delete
+                      <Trash2 /> {__('Delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -607,22 +617,26 @@ function Feedback() {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <EmptyState
         icon={Inbox}
-        title="No bookings yet"
-        description="Share your booking link on WhatsApp and your first bookings will appear here."
+        title={__('No bookings yet')}
+        description={__(
+          'Share your booking link on WhatsApp and your first bookings will appear here.',
+        )}
         action={
           <Button
             onClick={() =>
               toast('Booking link copied', { description: 'srini-salon.wurk.co.za/book' })
             }
           >
-            <Copy /> Copy booking link
+            <Copy /> {__('Copy booking link')}
           </Button>
         }
       />
       <Card>
         <CardHeader>
-          <CardTitle>Loading state</CardTitle>
-          <CardDescription>Skeletons keep the layout steady while data loads.</CardDescription>
+          <CardTitle>{__('Loading state')}</CardTitle>
+          <CardDescription>
+            {__('Skeletons keep the layout steady while data loads.')}
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4">
           {[0, 1, 2].map((i) => (
@@ -635,18 +649,18 @@ function Feedback() {
             </div>
           ))}
           <div className="flex flex-wrap gap-2 pt-2">
-            <Badge>Neutral</Badge>
-            <Badge tone="brand">Brand</Badge>
+            <Badge>{__('Neutral')}</Badge>
+            <Badge tone="brand">{__('Brand')}</Badge>
             <Badge tone="success" dot>
-              Active
+              {__('Active')}
             </Badge>
             <Badge tone="warning" dot>
-              Pending
+              {__('Pending')}
             </Badge>
             <Badge tone="danger" dot>
-              Overdue
+              {__('Overdue')}
             </Badge>
-            <Badge tone="info">New</Badge>
+            <Badge tone="info">{__('New')}</Badge>
           </div>
         </CardContent>
       </Card>
@@ -660,19 +674,21 @@ function Overlays() {
       <CardContent className="flex flex-wrap gap-3">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="secondary">Open dialog</Button>
+            <Button variant="secondary">{__('Open dialog')}</Button>
           </DialogTrigger>
           <DialogContent
-            title="Cancel this booking?"
-            description="Thandi will be notified by WhatsApp. Her deposit is refunded to her wallet."
+            title={__('Cancel this booking?')}
+            description={__(
+              'Thandi will be notified by WhatsApp. Her deposit is refunded to her wallet.',
+            )}
           >
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="secondary">Keep booking</Button>
+                <Button variant="secondary">{__('Keep booking')}</Button>
               </DialogClose>
               <DialogClose asChild>
                 <Button variant="danger" onClick={() => toast.success('Booking cancelled')}>
-                  Cancel booking
+                  {__('Cancel booking')}
                 </Button>
               </DialogClose>
             </DialogFooter>
@@ -680,26 +696,28 @@ function Overlays() {
         </Dialog>
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="secondary">Open side panel</Button>
+            <Button variant="secondary">{__('Open side panel')}</Button>
           </SheetTrigger>
-          <SheetContent title="Order WK-1042">
+          <SheetContent title={__('Order WK-1042')}>
             <div className="grid grid-cols-1 gap-4 p-6 text-sm">
-              <p className="text-fg-muted">Detail drawers keep context while showing more.</p>
+              <p className="text-fg-muted">
+                {__('Detail drawers keep context while showing more.')}
+              </p>
               <div className="flex items-center gap-3">
                 <ShoppingBag className="text-accent-fg size-5" aria-hidden />
-                <span>3 items · R 1 250.00</span>
+                <span>{__('3 items · R 1 250.00')}</span>
               </div>
             </div>
           </SheetContent>
         </Sheet>
         <Tooltip content="Tooltips explain icon-only controls">
-          <Button variant="secondary">Hover me</Button>
+          <Button variant="secondary">{__('Hover me')}</Button>
         </Tooltip>
         <Button
           variant="secondary"
           onClick={() => toast.success('Saved', { description: 'Your changes are live.' })}
         >
-          Show toast
+          {__('Show toast')}
         </Button>
       </CardContent>
     </Card>
@@ -710,14 +728,15 @@ function Typography() {
   return (
     <Card>
       <CardContent className="grid grid-cols-1 gap-4">
-        <p className="font-display text-display-lg font-bold">Grow with WURK</p>
-        <p className="font-display text-display font-bold">Display · Plus Jakarta Sans</p>
-        <h3 className="text-2xl font-semibold tracking-tight">Heading · 24px semibold</h3>
+        <p className="font-display text-display-lg font-bold">{__('Grow with WURK')}</p>
+        <p className="font-display text-display font-bold">{__('Display · Plus Jakarta Sans')}</p>
+        <h3 className="text-2xl font-semibold tracking-tight">{__('Heading · 24px semibold')}</h3>
         <p className="max-w-prose text-base text-pretty">
-          Body · Inter 16px. Bookings, orders and referrals in one calm, fast back office — designed
-          to work beautifully on a phone in a busy salon.
+          {__(
+            'Body · Inter 16px. Bookings, orders and referrals in one calm, fast back office — designed to work beautifully on a phone in a busy salon.',
+          )}
         </p>
-        <p className="text-fg-muted text-sm">Muted · 14px for supporting information.</p>
+        <p className="text-fg-muted text-sm">{__('Muted · 14px for supporting information.')}</p>
       </CardContent>
     </Card>
   );
@@ -725,34 +744,39 @@ function Typography() {
 
 export default function DesignSystem() {
   return (
-    <AppShell title="Design system" user={{ name: 'Thandi Mokoena', email: 'thandi@salon.co.za' }}>
-      <Head title="Design system" />
+    <AppShell
+      title={__('Design system')}
+      user={{ name: 'Thandi Mokoena', email: 'thandi@salon.co.za' }}
+    >
+      <Head title={__('Design system')} />
       <div className="grid grid-cols-1 gap-14">
         <PageHeader
           eyebrow="Sprint 0.3"
-          title="WURK design system"
-          description="Every token and component in one place for review. Switch light and dark from the top bar, and try any brand colour below."
+          title={__('WURK design system')}
+          description={__(
+            'Every token and component in one place for review. Switch light and dark from the top bar, and try any brand colour below.',
+          )}
           actions={
             <Badge tone="brand" dot>
-              Internal · not in production
+              {__('Internal · not in production')}
             </Badge>
           }
         />
         <Section
           id="brand"
-          title="Brand engine"
-          description="One colour in, a complete accessible palette out."
+          title={__('Brand engine')}
+          description={__('One colour in, a complete accessible palette out.')}
         >
           <BrandLab />
         </Section>
         <Tabs defaultValue="buttons">
-          <TabsList aria-label="Component groups">
-            <TabsTrigger value="buttons">Buttons</TabsTrigger>
-            <TabsTrigger value="forms">Forms</TabsTrigger>
-            <TabsTrigger value="data">Data</TabsTrigger>
-            <TabsTrigger value="feedback">Feedback</TabsTrigger>
-            <TabsTrigger value="overlays">Overlays</TabsTrigger>
-            <TabsTrigger value="type">Typography</TabsTrigger>
+          <TabsList aria-label={__('Component groups')}>
+            <TabsTrigger value="buttons">{__('Buttons')}</TabsTrigger>
+            <TabsTrigger value="forms">{__('Forms')}</TabsTrigger>
+            <TabsTrigger value="data">{__('Data')}</TabsTrigger>
+            <TabsTrigger value="feedback">{__('Feedback')}</TabsTrigger>
+            <TabsTrigger value="overlays">{__('Overlays')}</TabsTrigger>
+            <TabsTrigger value="type">{__('Typography')}</TabsTrigger>
           </TabsList>
           <TabsContent value="buttons">
             <Buttons />

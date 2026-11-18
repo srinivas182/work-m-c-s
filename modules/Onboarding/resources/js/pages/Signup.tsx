@@ -29,17 +29,18 @@ import {
 } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { rand } from '@/lib/money';
+import { Button } from '@/design-system/components/button';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { OtpInput } from '@/design-system/components/otp-input';
 import {
-  Button,
-  Field,
-  Input,
-  OtpInput,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/design-system';
+} from '@/design-system/components/select';
+import { __ } from '@/i18n';
 
 interface Pkg {
   id: string;
@@ -128,11 +129,11 @@ function Shell({
             aria-hidden
             className="bg-primary text-primary-fg grid size-8 place-items-center rounded-[9px] text-sm"
           >
-            W
+            {__('W')}
           </span>
-          WURK
+          {__('WURK')}
         </p>
-        <ol aria-label="Signup progress" className="mt-8 flex gap-1.5">
+        <ol aria-label={__('Signup progress')} className="mt-8 flex gap-1.5">
           {steps.map((s, i) => (
             <li key={s} className="flex-1" aria-current={i === index ? 'step' : undefined}>
               <span
@@ -143,7 +144,7 @@ function Shell({
           ))}
         </ol>
         <p className="mt-3 text-sm text-[#1B1640]/65">
-          Step {index + 1} of {steps.length}
+          {__('Step')} {index + 1} {__('of')} {steps.length}
         </p>
         <h1 className="font-display mt-1 text-3xl font-extrabold tracking-[-0.02em]">{title}</h1>
         {errors.signup && (
@@ -184,7 +185,7 @@ function Details({ data, countries }: Pick<Props, 'data' | 'countries'>) {
   };
   return (
     <form onSubmit={submit} className="grid gap-5" noValidate>
-      <Field label="Business name" error={form.errors.business_name} required>
+      <Field label={__('Business name')} error={form.errors.business_name} required>
         <Input
           value={form.data.business_name}
           onChange={(e) => form.setData('business_name', e.target.value)}
@@ -194,7 +195,7 @@ function Details({ data, countries }: Pick<Props, 'data' | 'countries'>) {
         />
       </Field>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="First name" error={form.errors.first_name} required>
+        <Field label={__('First name')} error={form.errors.first_name} required>
           <Input
             value={form.data.first_name}
             onChange={(e) => form.setData('first_name', e.target.value)}
@@ -202,7 +203,7 @@ function Details({ data, countries }: Pick<Props, 'data' | 'countries'>) {
             className="h-12 text-base"
           />
         </Field>
-        <Field label="Last name" error={form.errors.last_name} required>
+        <Field label={__('Last name')} error={form.errors.last_name} required>
           <Input
             value={form.data.last_name}
             onChange={(e) => form.setData('last_name', e.target.value)}
@@ -212,8 +213,8 @@ function Details({ data, countries }: Pick<Props, 'data' | 'countries'>) {
         </Field>
       </div>
       <Field
-        label="Email or mobile number"
-        hint="We’ll send a code to check it’s you"
+        label={__('Email or mobile number')}
+        hint={__('We’ll send a code to check it’s you')}
         error={form.errors.contact}
         required
       >
@@ -226,7 +227,7 @@ function Details({ data, countries }: Pick<Props, 'data' | 'countries'>) {
         />
       </Field>
       {countries.length > 1 && (
-        <Field label="Country" error={form.errors.country}>
+        <Field label={__('Country')} error={form.errors.country}>
           {(control) => (
             <Select value={form.data.country} onValueChange={(v) => form.setData('country', v)}>
               <SelectTrigger {...control}>
@@ -244,15 +245,15 @@ function Details({ data, countries }: Pick<Props, 'data' | 'countries'>) {
         </Field>
       )}
       <Button type="submit" size="lg" className="w-full" loading={form.processing}>
-        Send my code
+        {__('Send my code')}
       </Button>
       <p className="text-center text-sm text-[#1B1640]/65">
-        Already on WURK?{' '}
+        {__('Already on WURK?')}{' '}
         <a
           href="/sign-in"
           className="text-primary font-semibold underline-offset-4 hover:underline"
         >
-          Sign in
+          {__('Sign in')}
         </a>
       </p>
     </form>
@@ -274,10 +275,10 @@ function Verify({ maskedContact, onEdit }: { maskedContact: string | null; onEdi
       className="grid gap-6"
     >
       <p className="text-[17px] text-[#1B1640]/75">
-        Enter the 6-digit code we sent to{' '}
+        {__('Enter the 6-digit code we sent to')}{' '}
         <strong className="font-semibold text-[#1B1640]">{maskedContact}</strong>.
       </p>
-      <div role="group" aria-label="One-time code">
+      <div role="group" aria-label={__('One-time code')}>
         <OtpInput
           value={form.data.code}
           onChange={(v) => form.setData('code', v)}
@@ -299,7 +300,7 @@ function Verify({ maskedContact, onEdit }: { maskedContact: string | null; onEdi
         loading={form.processing}
         disabled={form.data.code.length < 6}
       >
-        Verify
+        {__('Verify')}
       </Button>
       <div className="flex flex-wrap justify-between gap-3 text-sm">
         <button
@@ -307,14 +308,14 @@ function Verify({ maskedContact, onEdit }: { maskedContact: string | null; onEdi
           className="text-primary min-h-11 font-semibold underline-offset-4 hover:underline"
           onClick={() => router.post('/signup/resend', {}, { preserveScroll: true })}
         >
-          Send a new code
+          {__('Send a new code')}
         </button>
         <button
           type="button"
           className="min-h-11 text-[#1B1640]/70 underline-offset-4 hover:underline"
           onClick={onEdit}
         >
-          Use a different email or number
+          {__('Use a different email or number')}
         </button>
       </div>
     </form>
@@ -336,7 +337,7 @@ function PackageStep({ data, packages }: Pick<Props, 'data' | 'packages'>) {
     >
       <div
         role="radiogroup"
-        aria-label="Billing period"
+        aria-label={__('Billing period')}
         className="inline-flex w-fit rounded-full bg-[#F1EFFA] p-1"
       >
         {(['monthly', 'yearly'] as const).map((p) => (
@@ -352,7 +353,7 @@ function PackageStep({ data, packages }: Pick<Props, 'data' | 'packages'>) {
           </button>
         ))}
       </div>
-      <div role="radiogroup" aria-label="Package" className="grid gap-3">
+      <div role="radiogroup" aria-label={__('Package')} className="grid gap-3">
         {packages.map((p) => {
           const selected = form.data.package_id === p.id;
           return (
@@ -371,7 +372,8 @@ function PackageStep({ data, packages }: Pick<Props, 'data' | 'packages'>) {
                 )}
                 {p.trial_days > 0 && (
                   <span className="text-primary mt-1 block text-sm font-medium">
-                    {p.trial_days}-day free trial
+                    {p.trial_days}
+                    {__('-day free trial')}
                   </span>
                 )}
               </span>
@@ -380,7 +382,7 @@ function PackageStep({ data, packages }: Pick<Props, 'data' | 'packages'>) {
                   {rand(form.data.period === 'monthly' ? p.monthly_cents : p.yearly_cents)}
                 </span>
                 <span className="block text-xs text-[#1B1640]/65">
-                  / {form.data.period === 'monthly' ? 'month' : 'year'} excl. VAT
+                  / {form.data.period === 'monthly' ? 'month' : 'year'} {__('excl. VAT')}
                 </span>
               </span>
             </button>
@@ -399,7 +401,7 @@ function PackageStep({ data, packages }: Pick<Props, 'data' | 'packages'>) {
         loading={form.processing}
         disabled={!form.data.package_id}
       >
-        Continue
+        {__('Continue')}
       </Button>
     </form>
   );
@@ -443,9 +445,13 @@ function CategoryStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
       className="grid gap-5"
     >
       <p className="text-[#5b5776]">
-        This chooses designs made for your kind of business. It can’t be changed later.
+        {__('This chooses designs made for your kind of business. It can’t be changed later.')}
       </p>
-      <div role="radiogroup" aria-label="Business category" className="grid gap-3 sm:grid-cols-2">
+      <div
+        role="radiogroup"
+        aria-label={__('Business category')}
+        className="grid gap-3 sm:grid-cols-2"
+      >
         {catalogue.map((c) => {
           const Icon = CATEGORY_ICONS[c.icon] ?? Briefcase;
           const selected = form.data.category === c.key;
@@ -481,7 +487,7 @@ function CategoryStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
         loading={form.processing}
         disabled={!form.data.category}
       >
-        Continue
+        {__('Continue')}
       </Button>
     </form>
   );
@@ -509,17 +515,18 @@ function TemplateStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
       className="grid gap-5"
     >
       <p className="text-[#5b5776]">
-        Designs for <strong className="text-[#1B1640]">{category?.name ?? 'your business'}</strong>.
-        You can switch to the other design later and keep everything you add.{' '}
+        {__('Designs for')}{' '}
+        <strong className="text-[#1B1640]">{category?.name ?? 'your business'}</strong>
+        {__('. You can switch to the other design later and keep everything you add.')}{' '}
         <button
           type="button"
           className="font-semibold text-[#5b3df5] underline-offset-4 hover:underline"
           onClick={() => router.post('/signup/back/category', {}, { preserveScroll: true })}
         >
-          Change category
+          {__('Change category')}
         </button>
       </p>
-      <div role="radiogroup" aria-label="Website design" className="grid gap-3">
+      <div role="radiogroup" aria-label={__('Website design')} className="grid gap-3">
         {(category?.templates ?? []).map((t) => {
           const selected = form.data.template === t.key;
           return (
@@ -543,7 +550,11 @@ function TemplateStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
                 rel="noopener"
                 className="shrink-0 rounded-lg px-3 py-2 text-sm font-semibold text-[#5b3df5] hover:bg-white"
               >
-                Preview<span className="sr-only"> {t.name} (opens in a new tab)</span>
+                {__('Preview')}
+                <span className="sr-only">
+                  {' '}
+                  {t.name} {__('(opens in a new tab)')}
+                </span>
               </a>
             </div>
           );
@@ -555,12 +566,13 @@ function TemplateStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
         </p>
       )}
       <fieldset className="grid gap-3">
-        <legend className="mb-2 font-semibold">Style</legend>
+        <legend className="mb-2 font-semibold">{__('Style')}</legend>
         <p className="-mt-1 text-sm text-[#5b5776]">
-          Every design comes in three styles. Preview it in the one you choose; you can change it
-          any time.
+          {__(
+            'Every design comes in three styles. Preview it in the one you choose; you can change it any time.',
+          )}
         </p>
-        <div role="radiogroup" aria-label="Style" className="grid gap-3 sm:grid-cols-3">
+        <div role="radiogroup" aria-label={__('Style')} className="grid gap-3 sm:grid-cols-3">
           {SIGNUP_STYLES.map(([key, label, hint]) => {
             const selected = form.data.style === key;
             return (
@@ -586,7 +598,7 @@ function TemplateStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {
         loading={form.processing}
         disabled={!form.data.template}
       >
-        Continue
+        {__('Continue')}
       </Button>
     </form>
   );
@@ -622,7 +634,7 @@ function Address({ data, rootDomain }: Pick<Props, 'data' | 'rootDomain'>) {
       noValidate
     >
       <Field
-        label="Your web address"
+        label={__('Your web address')}
         hint={`${form.data.handle || 'your-business'}.${rootDomain}`}
         error={
           form.errors.handle ??
@@ -646,9 +658,9 @@ function Address({ data, rootDomain }: Pick<Props, 'data' | 'rootDomain'>) {
                 aria-live="polite"
               >
                 {shown.available ? (
-                  <Check className="text-success-11 size-5" aria-label="Available" />
+                  <Check className="text-success-11 size-5" aria-label={__('Available')} />
                 ) : (
-                  <X className="text-danger-11 size-5" aria-label="Not available" />
+                  <X className="text-danger-11 size-5" aria-label={__('Not available')} />
                 )}
               </span>
             )}
@@ -656,7 +668,9 @@ function Address({ data, rootDomain }: Pick<Props, 'data' | 'rootDomain'>) {
         )}
       </Field>
       <p className="text-sm text-[#1B1640]/65">
-        Letters, numbers and dashes. You can add your own domain later on packages that include it.
+        {__(
+          'Letters, numbers and dashes. You can add your own domain later on packages that include it.',
+        )}
       </p>
       <div className="flex gap-3">
         <Button
@@ -665,7 +679,7 @@ function Address({ data, rootDomain }: Pick<Props, 'data' | 'rootDomain'>) {
           size="lg"
           onClick={() => router.post('/signup/back/package', {}, { preserveScroll: true })}
         >
-          Back
+          {__('Back')}
         </Button>
         <Button
           type="submit"
@@ -674,7 +688,7 @@ function Address({ data, rootDomain }: Pick<Props, 'data' | 'rootDomain'>) {
           loading={form.processing}
           disabled={Boolean(shown && !shown.available)}
         >
-          Continue
+          {__('Continue')}
         </Button>
       </div>
     </form>
@@ -723,7 +737,7 @@ function Finish({
           size="lg"
           onClick={() => router.post('/signup/back/address', {}, { preserveScroll: true })}
         >
-          Back
+          {__('Back')}
         </Button>
         <Button
           type="button"
@@ -732,7 +746,7 @@ function Finish({
           loading={form.processing}
           onClick={() => form.post('/signup/complete')}
         >
-          Create my business
+          {__('Create my business')}
         </Button>
       </div>
     </div>
@@ -756,7 +770,7 @@ export default function Signup(props: Props) {
     <Shell step={step} steps={props.steps} title={titles[step] ?? ''}>
       {props.claim && (
         <p role="note" className="mb-6 rounded-xl bg-white px-4 py-3 text-[15px] shadow-sm">
-          You’re making{' '}
+          {__('You’re making')}{' '}
           <a
             className="font-semibold underline"
             href={props.claim.site}
@@ -765,7 +779,7 @@ export default function Signup(props: Props) {
           >
             {props.claim.business}
           </a>{' '}
-          yours — its site stays exactly as it is.
+          {__('yours — its site stays exactly as it is.')}
         </p>
       )}
       {step === 'details' && <Details data={props.data} countries={props.countries} />}

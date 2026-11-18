@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-ZA">
+<html lang="{{ app()->getLocale() }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,9 +24,9 @@
 
   @if ($instructions)
   <section class="card" aria-label="How to pay">
-    <h2>How to pay</h2>
+    <h2>{{ __('How to pay') }}</h2>
     <p class="pre">{{ $instructions }}</p>
-        <p>Use <strong>#{{ $order->number }}</strong> as your reference.</p>
+        <p>{{ __('Use') }} <strong>#{{ $order->number }}</strong> {{ __('as your reference.') }}</p>
   </section>
   @endif
 
@@ -34,25 +34,25 @@
   <section class="card" aria-label="Tracking">
     <h2>{{ $order->shipping_provider === 'pargo' ? 'On its way to your pickup point' : 'On its way' }}</h2>
     @if ($order->pickup_point_name)<p>Collect from: {{ $order->pickup_point_name }}</p>@endif
-    <p>Tracking number: <strong>{{ $order->tracking_reference }}</strong></p>
-    @if ($order->tracking_url && str_starts_with($order->tracking_url, 'https://'))<p><a href="{{ $order->tracking_url }}" rel="noreferrer">Track your parcel</a></p>@endif
+    <p>{{ __('Tracking number:') }} <strong>{{ $order->tracking_reference }}</strong></p>
+    @if ($order->tracking_url && str_starts_with($order->tracking_url, 'https://'))<p><a href="{{ $order->tracking_url }}" rel="noreferrer">{{ __('Track your parcel') }}</a></p>@endif
   </section>
   @endif
 
 
   <section class="card" aria-label="Your order">
-    <h2>Your order</h2>
+    <h2>{{ __('Your order') }}</h2>
     <table>
-      <caption class="sr-only" style="position:absolute;left:-9999px">Items, quantities and prices</caption>
-      <thead><tr><th scope="col">Item</th><th scope="col">Price</th></tr></thead>
+      <caption class="sr-only" style="position:absolute;left:-9999px">{{ __('Items, quantities and prices') }}</caption>
+      <thead><tr><th scope="col">{{ __('Item') }}</th><th scope="col">{{ __('Price') }}</th></tr></thead>
       <tbody>
       @foreach ($items as $item)
         <tr><td>{{ $item->quantity }} × {{ $item->product_name }}@if ($item->variant_label) ({{ $item->variant_label }})@endif</td><td>R{{ number_format($item->line_cents / 100, 2) }}</td></tr>
       @endforeach
       @if ($order->delivery_cents > 0)
-        <tr><td>Delivery</td><td>R{{ number_format($order->delivery_cents / 100, 2) }}</td></tr>
+        <tr><td>{{ __('Delivery') }}</td><td>R{{ number_format($order->delivery_cents / 100, 2) }}</td></tr>
       @endif
-        <tr><th scope="row">Total (incl. VAT)</th><th>R{{ number_format($order->total_cents / 100, 2) }}</th></tr>
+        <tr><th scope="row">{{ __('Total (incl. VAT)') }}</th><th>R{{ number_format($order->total_cents / 100, 2) }}</th></tr>
       </tbody>
     </table>
   </section>
@@ -61,7 +61,7 @@
     <h2>{{ $order->fulfilment === 'delivery' ? 'Delivery' : 'Collection' }}</h2>
     <p class="pre">{{ $order->fulfilment === 'delivery' ? $order->delivery_address : ($collection ?: 'We’ll let you know when it’s ready to collect.') }}</p>
   </section>
-  <p><a href="/">Back to the website</a></p>
+  <p><a href="/">{{ __('Back to the website') }}</a></p>
 </main>
 </body>
 </html>

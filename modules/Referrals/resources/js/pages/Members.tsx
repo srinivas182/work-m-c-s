@@ -1,9 +1,12 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Gift } from 'lucide-react';
 import { useState } from 'react';
-import { Button, EmptyState, Input, PageHeader } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Member {
   id: string;
@@ -30,28 +33,30 @@ export default function ReferralMembers({ enabled, code, members, pages }: Props
     void navigator.clipboard?.writeText(m.link).then(() => setCopied(m.id));
   };
   return (
-    <AppShell title="Referrals">
-      <Head title="Referrals" />
+    <AppShell title={__('Referrals')}>
+      <Head title={__('Referrals')} />
       <div className="grid max-w-5xl gap-6">
         <PageHeader
-          title="Referrals"
-          description="Each customer’s referral link and QR code, who referred them, and how many people they’ve brought."
+          title={__('Referrals')}
+          description={__(
+            'Each customer’s referral link and QR code, who referred them, and how many people they’ve brought.',
+          )}
         />
         {!enabled && (
           <p role="note" className="border-border rounded-lg border p-3 text-sm">
-            Your referral programme is off — links don’t credit anyone while it’s off.{' '}
+            {__('Your referral programme is off — links don’t credit anyone while it’s off.')}{' '}
             <Link
               className="underline"
               href={`${base.replace(/\/referrals$/, '')}/settings/referrals`}
             >
-              Set it up in Settings → Referrals
+              {__('Set it up in Settings → Referrals')}
             </Link>
             .
           </p>
         )}
         <form
           role="search"
-          aria-label="Find a customer by code"
+          aria-label={__('Find a customer by code')}
           className="flex max-w-sm gap-2"
           onSubmit={(e) => {
             e.preventDefault();
@@ -59,24 +64,26 @@ export default function ReferralMembers({ enabled, code, members, pages }: Props
           }}
         >
           <Input
-            aria-label="Referral code"
-            placeholder="Referral code"
+            aria-label={__('Referral code')}
+            placeholder={__('Referral code')}
             value={search}
             maxLength={7}
             onChange={(e) => setSearch(e.target.value)}
           />
           <Button type="submit" variant="secondary">
-            Find
+            {__('Find')}
           </Button>
         </form>
         {members.length === 0 ? (
           <EmptyState
             icon={Gift}
             title={code ? 'No customer with that code' : 'No customers in the programme yet'}
-            description="Customers get a referral code once the programme is on and they book, order or get in touch."
+            description={__(
+              'Customers get a referral code once the programme is on and they book, order or get in touch.',
+            )}
           />
         ) : (
-          <ul aria-label="Customers in the referral programme" className="grid gap-3">
+          <ul aria-label={__('Customers in the referral programme')} className="grid gap-3">
             {members.map((m) => (
               <li
                 key={m.id}
@@ -85,12 +92,13 @@ export default function ReferralMembers({ enabled, code, members, pages }: Props
                 <div className="grid gap-1">
                   <strong>{m.name}</strong>
                   <span>
-                    Code <span className="font-mono">{m.code}</span> ·{' '}
+                    {__('Code')} <span className="font-mono">{m.code}</span> ·{' '}
                     {m.referred === 1 ? '1 person referred' : `${m.referred} people referred`}
                     {m.referred_by ? ` · referred by ${m.referred_by}` : ''}
                   </span>
                   <span>
-                    Wallet: {rand(m.available_cents)} · {rand(m.pending_cents)} pending
+                    {__('Wallet:')} {rand(m.available_cents)} · {rand(m.pending_cents)}{' '}
+                    {__('pending')}
                   </span>
                   <span className="text-fg-muted break-all">{m.link}</span>
                 </div>
@@ -109,7 +117,7 @@ export default function ReferralMembers({ enabled, code, members, pages }: Props
                       download
                       aria-label={`Download ${m.name}’s QR code`}
                     >
-                      QR code
+                      {__('QR code')}
                     </a>
                   </Button>
                 </div>
@@ -118,24 +126,24 @@ export default function ReferralMembers({ enabled, code, members, pages }: Props
           </ul>
         )}
         {pages.last > 1 && (
-          <nav aria-label="Pages" className="flex items-center gap-3 text-sm">
+          <nav aria-label={__('Pages')} className="flex items-center gap-3 text-sm">
             {pages.current > 1 && (
               <Link
                 className="underline"
                 href={`${base}?page=${pages.current - 1}${code ? `&code=${code}` : ''}`}
               >
-                Previous
+                {__('Previous')}
               </Link>
             )}
             <span>
-              Page {pages.current} of {pages.last}
+              {__('Page')} {pages.current} {__('of')} {pages.last}
             </span>
             {pages.current < pages.last && (
               <Link
                 className="underline"
                 href={`${base}?page=${pages.current + 1}${code ? `&code=${code}` : ''}`}
               >
-                Next
+                {__('Next')}
               </Link>
             )}
           </nav>

@@ -12,32 +12,29 @@ import {
   User,
 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
+import { Avatar } from '@/design-system/components/avatar';
+import { Button } from '@/design-system/components/button';
+import { cn } from '@/design-system/lib/cn';
+import { Dialog, DialogContent, Sheet, SheetContent } from '@/design-system/components/dialog';
 import {
-  Avatar,
-  Button,
-  cn,
-  Dialog,
-  DialogContent,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Input,
-  Sheet,
-  SheetContent,
-  Toaster,
-  toast,
-  Tooltip,
-  TooltipProvider,
-  useTheme,
-  type ThemePreference,
-} from '@/design-system';
+} from '@/design-system/components/dropdown-menu';
+import { Input } from '@/design-system/components/input';
+import { Toaster, toast } from '@/design-system/components/toast';
+import { Tooltip, TooltipProvider } from '@/design-system/components/tooltip';
+import { useTheme } from '@/design-system/theme/use-theme';
+import { type ThemePreference } from '@/design-system/theme/theme';
 import { AskWurk } from '@/components/AskWurk';
 import { HelpPanel } from '@/components/HelpPanel';
+import { OfflineBar } from '@/components/OfflineBar';
 import { icon } from '@/design-system/icons';
 import type { NavigationItem, SharedProps } from '@/types/global';
+import { __ } from '@/i18n';
 
 interface ShellUser {
   name: string;
@@ -71,16 +68,18 @@ function Logo({ compact = false }: { compact?: boolean }) {
         aria-hidden
         className="from-brand-8 to-brand-10 font-display text-primary-fg grid size-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br text-sm font-bold shadow-sm"
       >
-        W
+        {__('W')}
       </span>
-      {!compact && <span className="font-display text-lg font-bold tracking-tight">WURK</span>}
+      {!compact && (
+        <span className="font-display text-lg font-bold tracking-tight">{__('WURK')}</span>
+      )}
     </Link>
   );
 }
 
 function NavLinks({ items, collapsed = false }: { items: NavigationItem[]; collapsed?: boolean }) {
   return (
-    <nav aria-label="Main" className="flex flex-col gap-6">
+    <nav aria-label={__('Main')} className="flex flex-col gap-6">
       {groupBySection(items).map(([section, sectionItems]) => (
         <div key={section}>
           {!collapsed && (
@@ -138,12 +137,12 @@ function ThemeMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Change theme">
+        <Button variant="ghost" size="icon" aria-label={__('Change theme')}>
           <Current />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+        <DropdownMenuLabel>{__('Appearance')}</DropdownMenuLabel>
         {options.map(({ value, label, Icon }) => (
           <DropdownMenuItem
             key={value}
@@ -180,7 +179,7 @@ function SearchButton() {
         className="border-border bg-surface text-fg-muted hover:border-border-strong hidden h-10 w-72 cursor-pointer items-center gap-2.5 rounded-lg border px-3 text-sm shadow-xs transition-colors md:flex"
       >
         <Search className="size-4" aria-hidden />
-        <span className="flex-1 text-left">Search…</span>
+        <span className="flex-1 text-left">{__('Search…')}</span>
         <kbd className="border-border bg-neutral-2 rounded-md border px-1.5 py-0.5 font-sans text-xs">
           ⌘K
         </kbd>
@@ -189,16 +188,19 @@ function SearchButton() {
         variant="ghost"
         size="icon"
         className="md:hidden"
-        aria-label="Search"
+        aria-label={__('Search')}
         onClick={() => setOpen(true)}
       >
         <Search />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent title="Search" description="Find customers, bookings, orders and settings.">
-          <Input autoFocus placeholder="Type to search…" aria-label="Search" />
+        <DialogContent
+          title={__('Search')}
+          description={__('Find customers, bookings, orders and settings.')}
+        >
+          <Input autoFocus placeholder={__('Type to search…')} aria-label={__('Search')} />
           <p className="text-fg-muted mt-4 text-sm">
-            Global search becomes available as modules are added.
+            {__('Global search becomes available as modules are added.')}
           </p>
         </DialogContent>
       </Dialog>
@@ -213,7 +215,7 @@ function UserMenu({ user }: { user: ShellUser }) {
         <button
           type="button"
           className="focus-visible:outline-ring cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-2"
-          aria-label="Account menu"
+          aria-label={__('Account menu')}
         >
           <Avatar name={user.name} size="sm" />
         </button>
@@ -231,7 +233,7 @@ function UserMenu({ user }: { user: ShellUser }) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem destructive onSelect={() => router.post('/sign-out')}>
-          <LogOut /> Sign out
+          <LogOut /> {__('Sign out')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -243,7 +245,7 @@ function BottomNav({ items, onMore }: { items: NavigationItem[]; onMore: () => v
   const primary = items.slice(0, 4);
   return (
     <nav
-      aria-label="Quick"
+      aria-label={__('Quick')}
       className="border-border bg-surface/90 fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
     >
       <ul className="grid grid-cols-5">
@@ -272,7 +274,7 @@ function BottomNav({ items, onMore }: { items: NavigationItem[]; onMore: () => v
             className="text-fg-muted flex h-16 w-full cursor-pointer flex-col items-center justify-center gap-1 text-[0.6875rem] font-medium"
           >
             <MoreHorizontal className="size-5" aria-hidden />
-            More
+            {__('More')}
           </button>
         </li>
       </ul>
@@ -315,7 +317,7 @@ export default function AppShell({ title, user: userProp, children }: AppShellPr
         href="#main"
         className="bg-surface sr-only z-50 rounded-lg px-4 py-2 focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
-        Skip to content
+        {__('Skip to content')}
       </a>
       <div className="flex min-h-dvh">
         <aside
@@ -351,7 +353,7 @@ export default function AppShell({ title, user: userProp, children }: AppShellPr
               variant="ghost"
               size="icon"
               className="md:hidden"
-              aria-label="Open menu"
+              aria-label={__('Open menu')}
               onClick={() => setMobileOpen(true)}
             >
               <Menu />
@@ -367,7 +369,7 @@ export default function AppShell({ title, user: userProp, children }: AppShellPr
               <AskWurk />
               <HelpPanel />
               <Tooltip content="Notifications">
-                <Button variant="ghost" size="icon" aria-label="Notifications">
+                <Button variant="ghost" size="icon" aria-label={__('Notifications')}>
                   <Bell />
                 </Button>
               </Tooltip>
@@ -396,6 +398,7 @@ export default function AppShell({ title, user: userProp, children }: AppShellPr
               )}
             </div>
           )}
+          <OfflineBar />
           <main id="main" className="flex-1 px-4 pt-6 pb-28 sm:px-6 md:pb-10 lg:px-10 lg:pt-10">
             <div className="mx-auto w-full max-w-7xl">{children}</div>
           </main>
@@ -405,7 +408,7 @@ export default function AppShell({ title, user: userProp, children }: AppShellPr
       <BottomNav items={navigation} onMore={() => setMobileOpen(true)} />
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" title="Menu" hideTitle>
+        <SheetContent side="left" title={__('Menu')} hideTitle>
           <div className="px-5 pt-5 pb-6">
             <Logo />
           </div>

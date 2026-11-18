@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en-ZA">
+@php($lite = \Wurk\Platform\I18n\Lite::on(request()))
+<html lang="en-ZA"@if ($lite) data-lite="1"@endif>
 <head>
 @if (!empty($demo))
 <meta name="robots" content="noindex, nofollow">
@@ -10,9 +11,11 @@
 @if ($description)
 <meta name="description" content="{{ $description }}">
 @endif
+@unless ($lite) {{-- lite mode (24.4): no web fonts, so nothing to preload --}}
 @foreach ($preloads as $font)
 <link rel="preload" href="{{ $font }}" as="font" type="font/woff2" crossorigin>
 @endforeach
+@endunless
 <link rel="canonical" href="{{ $canonical }}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{{ $siteName }}">
@@ -32,6 +35,9 @@
 <script type="application/ld+json">{!! $jsonLd !!}</script>
 @endif
 <link rel="stylesheet" href="{{ $stylesheet }}">
+@if ($lite)
+<style>[data-lite] *{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif!important}[data-lite] img{content-visibility:auto}</style>
+@endif
 @if ($islands)
 <script type="module" src="{{ $islands }}"></script>
 @endif

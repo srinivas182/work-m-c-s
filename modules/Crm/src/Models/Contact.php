@@ -12,6 +12,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
 
 /**
  * @property string $id
+ * @property string|null $locale the customer's language (24.2)
  * @property string $name
  * @property string|null $phone
  * @property string|null $email

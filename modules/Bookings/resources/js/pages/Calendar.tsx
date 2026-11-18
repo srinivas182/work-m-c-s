@@ -1,19 +1,14 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { CalendarDays } from 'lucide-react';
+import { __ } from '@/i18n';
 
 interface BookingRow {
   id: string;
@@ -80,7 +75,7 @@ function RecordPayment({ b, done }: { b: BookingRow; done: () => void }) {
         form.post(`${base()}/${b.id}/paid`, { preserveScroll: true, onSuccess: done });
       }}
     >
-      <Field label="How they paid" error={form.errors.method}>
+      <Field label={__('How they paid')} error={form.errors.method}>
         <select
           className={selectClass}
           value={form.data.method}
@@ -93,7 +88,7 @@ function RecordPayment({ b, done }: { b: BookingRow; done: () => void }) {
           ))}
         </select>
       </Field>
-      <Field label="Amount (R)" error={form.errors.amount}>
+      <Field label={__('Amount (R)')} error={form.errors.amount}>
         <Input
           inputMode="decimal"
           value={form.data.amount}
@@ -101,7 +96,7 @@ function RecordPayment({ b, done }: { b: BookingRow; done: () => void }) {
         />
       </Field>
       <Button type="submit" size="sm" loading={form.processing}>
-        Record
+        {__('Record')}
       </Button>
     </form>
   );
@@ -133,10 +128,10 @@ function BookingItem({
           {hm(b.starts_at)}–{hm(b.ends_at)} · {b.customer}
         </p>
         <span className="flex gap-1">
-          {b.source === 'website' && <Badge tone="info">Booked online</Badge>}
-          {b.source === 'chat' && <Badge tone="info">Booked by the AI assistant</Badge>}
-          {b.source === 'whatsapp' && <Badge tone="info">Booked on WhatsApp</Badge>}
-          {b.customer_confirmed && <Badge tone="success">Confirmed by the customer</Badge>}
+          {b.source === 'website' && <Badge tone="info">{__('Booked online')}</Badge>}
+          {b.source === 'chat' && <Badge tone="info">{__('Booked by the AI assistant')}</Badge>}
+          {b.source === 'whatsapp' && <Badge tone="info">{__('Booked on WhatsApp')}</Badge>}
+          {b.customer_confirmed && <Badge tone="success">{__('Confirmed by the customer')}</Badge>}
           {STATUS[b.status] && <Badge tone="neutral">{STATUS[b.status]}</Badge>}
         </span>
       </div>
@@ -156,7 +151,7 @@ function BookingItem({
             aria-label={`Move ${b.customer}’s booking at ${hm(b.starts_at)}`}
             onClick={() => setMoving(true)}
           >
-            Move
+            {__('Move')}
           </Button>
           {['confirmed', 'pending_payment', 'completed'].includes(b.status) && (
             <Button
@@ -165,7 +160,7 @@ function BookingItem({
               aria-label={`Paid in person: ${b.customer} at ${hm(b.starts_at)}`}
               onClick={() => setPaying(!paying)}
             >
-              Paid in person
+              {__('Paid in person')}
             </Button>
           )}
           {b.status === 'confirmed' && (
@@ -176,7 +171,7 @@ function BookingItem({
                 aria-label={`Done: ${b.customer} at ${hm(b.starts_at)}`}
                 onClick={() => set('completed')}
               >
-                Done
+                {__('Done')}
               </Button>
               <Button
                 size="sm"
@@ -184,7 +179,7 @@ function BookingItem({
                 aria-label={`No-show: ${b.customer} at ${hm(b.starts_at)}`}
                 onClick={() => set('no_show')}
               >
-                No-show
+                {__('No-show')}
               </Button>
               <Button
                 size="sm"
@@ -192,7 +187,7 @@ function BookingItem({
                 aria-label={`Cancel: ${b.customer} at ${hm(b.starts_at)}`}
                 onClick={() => set('cancelled')}
               >
-                Cancel
+                {__('Cancel')}
               </Button>
             </>
           )}
@@ -211,14 +206,14 @@ function BookingItem({
             });
           }}
         >
-          <Field label="Date" error={move.errors.date}>
+          <Field label={__('Date')} error={move.errors.date}>
             <Input
               type="date"
               value={move.data.date}
               onChange={(e) => move.setData('date', e.target.value)}
             />
           </Field>
-          <Field label="Time" error={move.errors.time}>
+          <Field label={__('Time')} error={move.errors.time}>
             <Input
               type="time"
               step={300}
@@ -226,7 +221,7 @@ function BookingItem({
               onChange={(e) => move.setData('time', e.target.value)}
             />
           </Field>
-          <Field label="With">
+          <Field label={__('With')}>
             <select
               className={selectClass}
               value={move.data.member}
@@ -241,10 +236,10 @@ function BookingItem({
           </Field>
           <span className="flex gap-2">
             <Button type="submit" size="sm" loading={move.processing}>
-              Move
+              {__('Move')}
             </Button>
             <Button type="button" size="sm" variant="ghost" onClick={() => setMoving(false)}>
-              Keep
+              {__('Keep')}
             </Button>
           </span>
         </form>
@@ -304,11 +299,11 @@ export default function Calendar({
         }));
 
   return (
-    <AppShell title="Calendar">
-      <Head title="Calendar" />
+    <AppShell title={__('Calendar')}>
+      <Head title={__('Calendar')} />
       <div className="grid gap-6">
         <PageHeader
-          title="Calendar"
+          title={__('Calendar')}
           description={view === 'day' ? dayLabel(start) : `Week of ${dayLabel(start)}`}
           actions={
             <div className="flex flex-wrap gap-2">
@@ -325,7 +320,7 @@ export default function Calendar({
                 size="sm"
                 onClick={() => go(new Date().toLocaleDateString('en-CA', { timeZone: timezone }))}
               >
-                Today
+                {__('Today')}
               </Button>
               <Button
                 variant="secondary"
@@ -341,7 +336,7 @@ export default function Calendar({
                 aria-pressed={view === 'day'}
                 onClick={() => go(date, 'day')}
               >
-                Day
+                {__('Day')}
               </Button>
               <Button
                 variant={view === 'week' ? 'primary' : 'ghost'}
@@ -349,7 +344,7 @@ export default function Calendar({
                 aria-pressed={view === 'week'}
                 onClick={() => go(date, 'week')}
               >
-                Week
+                {__('Week')}
               </Button>
             </div>
           }
@@ -358,8 +353,8 @@ export default function Calendar({
         {services.length === 0 && (
           <EmptyState
             icon={CalendarDays}
-            title="No services to book yet"
-            description="Add your services and team hours in Booking settings first."
+            title={__('No services to book yet')}
+            description={__('Add your services and team hours in Booking settings first.')}
           />
         )}
 
@@ -370,7 +365,7 @@ export default function Calendar({
             <section key={c.key} aria-label={c.title} className="grid content-start gap-2">
               <h2 className="font-semibold">{c.title}</h2>
               {c.items.length === 0 ? (
-                <p className="text-fg-muted text-sm">Nothing booked.</p>
+                <p className="text-fg-muted text-sm">{__('Nothing booked.')}</p>
               ) : (
                 <ul className="grid gap-2">
                   {c.items.map((b) => (
@@ -385,11 +380,11 @@ export default function Calendar({
         {canManage && services.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Add a booking</CardTitle>
+              <CardTitle>{__('Add a booking')}</CardTitle>
             </CardHeader>
             <CardContent>
               <form
-                aria-label="Add a booking"
+                aria-label={__('Add a booking')}
                 className="grid gap-4 sm:grid-cols-2"
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -400,7 +395,7 @@ export default function Calendar({
                   });
                 }}
               >
-                <Field label="Service" error={add.errors.service}>
+                <Field label={__('Service')} error={add.errors.service}>
                   <select
                     className={selectClass}
                     value={add.data.service}
@@ -408,18 +403,18 @@ export default function Calendar({
                   >
                     {services.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.name} ({s.duration} min)
+                        {s.name} ({s.duration} {__('min)')}
                       </option>
                     ))}
                   </select>
                 </Field>
-                <Field label="With" error={add.errors.member}>
+                <Field label={__('With')} error={add.errors.member}>
                   <select
                     className={selectClass}
                     value={add.data.member}
                     onChange={(e) => add.setData('member', e.target.value)}
                   >
-                    <option value="">Anyone free</option>
+                    <option value="">{__('Anyone free')}</option>
                     {team.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.name}
@@ -427,14 +422,18 @@ export default function Calendar({
                     ))}
                   </select>
                 </Field>
-                <Field label="Date" error={add.errors.date}>
+                <Field label={__('Date')} error={add.errors.date}>
                   <Input
                     type="date"
                     value={add.data.date}
                     onChange={(e) => add.setData('date', e.target.value)}
                   />
                 </Field>
-                <Field label="Time" hint="Walk-in? It’s set to now." error={add.errors.time}>
+                <Field
+                  label={__('Time')}
+                  hint={__('Walk-in? It’s set to now.')}
+                  error={add.errors.time}
+                >
                   <Input
                     type="time"
                     step={300}
@@ -442,21 +441,25 @@ export default function Calendar({
                     onChange={(e) => add.setData('time', e.target.value)}
                   />
                 </Field>
-                <Field label="Customer name" error={add.errors.name}>
+                <Field label={__('Customer name')} error={add.errors.name}>
                   <Input
                     value={add.data.name}
                     maxLength={120}
                     onChange={(e) => add.setData('name', e.target.value)}
                   />
                 </Field>
-                <Field label="Phone (optional)" error={add.errors.phone}>
+                <Field label={__('Phone (optional)')} error={add.errors.phone}>
                   <Input
                     type="tel"
                     value={add.data.phone}
                     onChange={(e) => add.setData('phone', e.target.value)}
                   />
                 </Field>
-                <Field label="Notes (optional)" error={add.errors.notes} className="sm:col-span-2">
+                <Field
+                  label={__('Notes (optional)')}
+                  error={add.errors.notes}
+                  className="sm:col-span-2"
+                >
                   <Input
                     value={add.data.notes}
                     maxLength={1000}
@@ -464,14 +467,15 @@ export default function Calendar({
                   />
                 </Field>
                 <Button type="submit" className="justify-self-start" loading={add.processing}>
-                  Add booking
+                  {__('Add booking')}
                 </Button>
               </form>
             </CardContent>
           </Card>
         )}
         <p className="text-fg-muted text-sm">
-          Times are in {timezone}. <Link href={`${base()}/settings`}>Booking settings</Link>
+          {__('Times are in')} {timezone}.{' '}
+          <Link href={`${base()}/settings`}>{__('Booking settings')}</Link>
         </p>
       </div>
     </AppShell>

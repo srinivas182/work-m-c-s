@@ -1,18 +1,14 @@
 import { Head, router } from '@inertiajs/react';
 import { useRef, useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Field,
-  Input,
-  PageHeader,
-} from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Checkbox } from '@/design-system/components/choice';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
+import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Channel {
   channel: 'email' | 'sms';
@@ -66,13 +62,13 @@ function ChannelEditor({ m, c, smsMax }: { m: Message; c: Channel; smsMax: numbe
       <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
         {c.channel === 'email' ? 'Email' : 'SMS'}
         {c.own ? (
-          <Badge tone="neutral">Your wording</Badge>
+          <Badge tone="neutral">{__('Your wording')}</Badge>
         ) : (
-          <Badge tone="neutral">Standard wording</Badge>
+          <Badge tone="neutral">{__('Standard wording')}</Badge>
         )}
       </div>
       {c.channel === 'email' && (
-        <Field label="Subject" error={errors.subject}>
+        <Field label={__('Subject')} error={errors.subject}>
           <Input
             id={`${id}-subject`}
             value={subject}
@@ -81,7 +77,7 @@ function ChannelEditor({ m, c, smsMax }: { m: Message; c: Channel; smsMax: numbe
           />
         </Field>
       )}
-      <Field label="Message" error={errors.text ?? errors.channel}>
+      <Field label={__('Message')} error={errors.text ?? errors.channel}>
         <textarea
           ref={box}
           id={`${id}-text`}
@@ -93,7 +89,7 @@ function ChannelEditor({ m, c, smsMax }: { m: Message; c: Channel; smsMax: numbe
       <div
         className="flex flex-wrap items-center gap-2 text-sm"
         role="group"
-        aria-label="Insert a placeholder"
+        aria-label={__('Insert a placeholder')}
       >
         {m.placeholders.map((p) => (
           <button
@@ -109,13 +105,18 @@ function ChannelEditor({ m, c, smsMax }: { m: Message; c: Channel; smsMax: numbe
       </div>
       {c.channel === 'sms' && (
         <p className="text-fg-muted text-sm" aria-live="polite">
-          About {length} of {smsMax} characters · {smsParts(length)} SMS{' '}
-          {smsParts(length) === 1 ? 'part' : 'parts'} per message (uses SMS credits)
+          {__('About')} {length} {__('of')} {smsMax} {__('characters ·')} {smsParts(length)}{' '}
+          {__('SMS')} {smsParts(length) === 1 ? 'part' : 'parts'}{' '}
+          {__('per message (uses SMS credits)')}
         </p>
       )}
       <div className="bg-muted rounded-md p-3 text-sm">
-        <p className="font-medium">Preview</p>
-        {c.channel === 'email' && <p>Subject: {fill(subject, m.sample)}</p>}
+        <p className="font-medium">{__('Preview')}</p>
+        {c.channel === 'email' && (
+          <p>
+            {__('Subject:')} {fill(subject, m.sample)}
+          </p>
+        )}
         <p className="whitespace-pre-line">{fill(text, m.sample)}</p>
       </div>
       {errors.test && (
@@ -134,7 +135,7 @@ function ChannelEditor({ m, c, smsMax }: { m: Message; c: Channel; smsMax: numbe
             )
           }
         >
-          Save
+          {__('Save')}
         </Button>
         {c.own && (
           <Button
@@ -142,7 +143,7 @@ function ChannelEditor({ m, c, smsMax }: { m: Message; c: Channel; smsMax: numbe
             variant="ghost"
             onClick={() => router.delete(`${base}/${m.key}/${c.channel}`, opts)}
           >
-            Back to standard wording
+            {__('Back to standard wording')}
           </Button>
         )}
         <Button
@@ -161,12 +162,14 @@ export default function Messages({ messages, smsMax }: { messages: Message[]; sm
   const base = window.location.pathname.replace(/\/$/, '');
   const groups = [...new Set(messages.map((m) => m.group))];
   return (
-    <AppShell title="Messages">
-      <Head title="Messages" />
+    <AppShell title={__('Messages')}>
+      <Head title={__('Messages')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Messages"
-          description="What your customers receive. Reword emails and SMS in your own voice — the parts customers need (like the link to change a booking) stay. Saved wording is used straight away."
+          title={__('Messages')}
+          description={__(
+            'What your customers receive. Reword emails and SMS in your own voice — the parts customers need (like the link to change a booking) stay. Saved wording is used straight away.',
+          )}
         />
         {groups.map((g) => (
           <section key={g} aria-label={g} className="grid gap-4">
@@ -180,9 +183,9 @@ export default function Messages({ messages, smsMax }: { messages: Message[]; sm
                       {m.label}
                       {m.optional &&
                         (m.enabled ? (
-                          <Badge tone="success">On</Badge>
+                          <Badge tone="success">{__('On')}</Badge>
                         ) : (
-                          <Badge tone="neutral">Off</Badge>
+                          <Badge tone="neutral">{__('Off')}</Badge>
                         ))}
                     </CardTitle>
                   </CardHeader>
@@ -199,7 +202,7 @@ export default function Messages({ messages, smsMax }: { messages: Message[]; sm
                             )
                           }
                         />
-                        Send this message
+                        {__('Send this message')}
                       </label>
                     )}
                     {m.channels.map((c) => (
@@ -207,8 +210,9 @@ export default function Messages({ messages, smsMax }: { messages: Message[]; sm
                     ))}
                     {m.whatsapp && (
                       <p className="text-fg-muted text-sm">
-                        WhatsApp uses wording approved by Meta for every WURK business, so it can’t
-                        be changed here.
+                        {__(
+                          'WhatsApp uses wording approved by Meta for every WURK business, so it can’t be changed here.',
+                        )}
                       </p>
                     )}
                   </CardContent>

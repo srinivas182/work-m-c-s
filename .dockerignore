@@ -22,5 +22,6 @@ e2e
 tests
 modules/*/tests
 scripts
+!scripts/bundle-budget.mjs
 compose.yaml
 docker/dev

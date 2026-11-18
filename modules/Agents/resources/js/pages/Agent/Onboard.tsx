@@ -1,7 +1,11 @@
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle, Field, Input } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import { AgentLayout } from '../../components/AgentLayout';
+import { __ } from '@/i18n';
 
 interface Onboarding {
   id: string;
@@ -57,7 +61,7 @@ function Clock({ since }: { since: string }) {
   );
   return (
     <p className="text-fg-muted text-sm" aria-live="off">
-      {minutes} {minutes === 1 ? 'minute' : 'minutes'} so far
+      {minutes} {minutes === 1 ? 'minute' : 'minutes'} {__('so far')}
     </p>
   );
 }
@@ -78,20 +82,20 @@ function Start({ demo }: { demo: Props['demo'] }) {
         form.post('/agent/onboard');
       }}
     >
-      <Field label="Business name" error={form.errors.business_name}>
+      <Field label={__('Business name')} error={form.errors.business_name}>
         <Input
           value={form.data.business_name}
           onChange={(e) => form.setData('business_name', e.target.value)}
         />
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Owner’s first name" error={form.errors.first_name}>
+        <Field label={__('Owner’s first name')} error={form.errors.first_name}>
           <Input
             value={form.data.first_name}
             onChange={(e) => form.setData('first_name', e.target.value)}
           />
         </Field>
-        <Field label="Owner’s last name" error={form.errors.last_name}>
+        <Field label={__('Owner’s last name')} error={form.errors.last_name}>
           <Input
             value={form.data.last_name}
             onChange={(e) => form.setData('last_name', e.target.value)}
@@ -99,8 +103,8 @@ function Start({ demo }: { demo: Props['demo'] }) {
         </Field>
       </div>
       <Field
-        label="Owner’s mobile number"
-        hint="We send them a code on WhatsApp or SMS."
+        label={__('Owner’s mobile number')}
+        hint={__('We send them a code on WhatsApp or SMS.')}
         error={form.errors.mobile}
       >
         <Input
@@ -117,11 +121,13 @@ function Start({ demo }: { demo: Props['demo'] }) {
             checked={form.data.use_demo}
             onChange={(e) => form.setData('use_demo', e.target.checked)}
           />
-          Use my demo site ({demo.business}) for this business
+          {__('Use my demo site (')}
+          {demo.business}
+          {__(') for this business')}
         </label>
       )}
       <Button type="submit" loading={form.processing}>
-        Send the code
+        {__('Send the code')}
       </Button>
     </form>
   );
@@ -138,9 +144,9 @@ function Verify({ o }: { o: Onboarding }) {
       }}
     >
       <p className="text-sm">
-        Ask {o.owner} for the code we sent to {o.masked}.
+        {__('Ask')} {o.owner} {__('for the code we sent to')} {o.masked}.
       </p>
-      <Field label="Code" error={form.errors.code}>
+      <Field label={__('Code')} error={form.errors.code}>
         <Input
           inputMode="numeric"
           autoComplete="one-time-code"
@@ -150,14 +156,14 @@ function Verify({ o }: { o: Onboarding }) {
       </Field>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" loading={form.processing}>
-          Check the code
+          {__('Check the code')}
         </Button>
         <Button
           type="button"
           variant="ghost"
           onClick={() => router.post(`/agent/onboard/${o.id}/resend`)}
         >
-          Send a new code
+          {__('Send a new code')}
         </Button>
       </div>
     </form>
@@ -175,7 +181,7 @@ function Package({ o, packages }: { o: Onboarding; packages: Pkg[] }) {
       }}
     >
       <fieldset className="grid gap-2">
-        <legend className="mb-1 text-sm font-medium">Package</legend>
+        <legend className="mb-1 text-sm font-medium">{__('Package')}</legend>
         {packages.map((p) => (
           <label
             key={p.id}
@@ -188,7 +194,7 @@ function Package({ o, packages }: { o: Onboarding; packages: Pkg[] }) {
                 checked={form.data.package_id === p.id}
                 onChange={() => form.setData('package_id', p.id)}
               />
-              {p.name} — {rand(p.monthly_cents)} a month
+              {p.name} — {rand(p.monthly_cents)} {__('a month')}
             </span>
             <span className="text-fg-muted">
               {p.description}
@@ -199,7 +205,7 @@ function Package({ o, packages }: { o: Onboarding; packages: Pkg[] }) {
       </fieldset>
       {form.errors.package_id && <p className="text-danger text-sm">{form.errors.package_id}</p>}
       <Button type="submit" loading={form.processing}>
-        Create {o.business}
+        {__('Create')} {o.business}
       </Button>
     </form>
   );
@@ -209,13 +215,15 @@ function Setup({ o }: { o: Onboarding }) {
   return (
     <div className="grid gap-3 text-sm">
       <p>
-        Now set up {o.business} together with {o.owner}: answer six questions by voice or text, or
-        start from their Google listing or Facebook page. Nothing goes live until it’s published.
+        {__('Now set up')} {o.business} {__('together with')} {o.owner}
+        {__(
+          ': answer six questions by voice or text, or start from their Google listing or Facebook page. Nothing goes live until it’s published.',
+        )}
       </p>
       <div className="flex flex-wrap gap-2">
         {o.setup_url && (
           <Button asChild>
-            <a href={o.setup_url}>Set up by talking</a>
+            <a href={o.setup_url}>{__('Set up by talking')}</a>
           </Button>
         )}
         <Button
@@ -243,7 +251,7 @@ function TopUp({ o, methods, min }: { o: Onboarding; methods: Props['methods']; 
   };
   return (
     <div className="grid gap-4 text-sm">
-      <Field label="Amount (R)" hint={`Any amount from R${min}.`} error={form.errors.amount}>
+      <Field label={__('Amount (R)')} hint={`Any amount from R${min}.`} error={form.errors.amount}>
         <Input
           inputMode="numeric"
           value={form.data.amount}
@@ -251,9 +259,9 @@ function TopUp({ o, methods, min }: { o: Onboarding; methods: Props['methods']; 
         />
       </Field>
       <fieldset className="border-border grid gap-3 rounded-md border p-3">
-        <legend className="px-1 font-medium">The owner pays now</legend>
+        <legend className="px-1 font-medium">{__('The owner pays now')}</legend>
         {Object.keys(methods).length > 0 && (
-          <Field label="How">
+          <Field label={__('How')}>
             <select
               className="border-border bg-bg rounded-md border px-3 py-2"
               value={form.data.method}
@@ -268,7 +276,7 @@ function TopUp({ o, methods, min }: { o: Onboarding; methods: Props['methods']; 
           </Field>
         )}
         <Field
-          label="Owner’s email (for the receipt)"
+          label={__('Owner’s email (for the receipt)')}
           error={form.errors.email ?? form.errors.method}
         >
           <Input
@@ -278,23 +286,23 @@ function TopUp({ o, methods, min }: { o: Onboarding; methods: Props['methods']; 
           />
         </Field>
         <Button onClick={() => submit('online')} loading={form.processing}>
-          Pay now
+          {__('Pay now')}
         </Button>
       </fieldset>
       <fieldset className="border-border grid gap-3 rounded-md border p-3">
-        <legend className="px-1 font-medium">The owner gives you cash</legend>
-        <Field label="Receipt number you gave" error={form.errors.receipt}>
+        <legend className="px-1 font-medium">{__('The owner gives you cash')}</legend>
+        <Field label={__('Receipt number you gave')} error={form.errors.receipt}>
           <Input
             value={form.data.receipt}
             onChange={(e) => form.setData('receipt', e.target.value)}
           />
         </Field>
         <Button variant="secondary" onClick={() => submit('cash')} loading={form.processing}>
-          Record cash
+          {__('Record cash')}
         </Button>
       </fieldset>
       <Button variant="ghost" onClick={() => submit('later')}>
-        The owner will top up later
+        {__('The owner will top up later')}
       </Button>
     </div>
   );
@@ -304,11 +312,12 @@ function HandOver({ o }: { o: Onboarding }) {
   return (
     <div className="grid gap-3 text-sm">
       <p>
-        {o.owner} gets a WhatsApp message with their sign-in link and how to share {o.business}.
-        Your access to the business ends; it stays credited to you.
+        {o.owner} {__('gets a WhatsApp message with their sign-in link and how to share')}{' '}
+        {o.business}
+        {__('. Your access to the business ends; it stays credited to you.')}
       </p>
       <Button onClick={() => router.post(`/agent/onboard/${o.id}/hand-over`)}>
-        Hand over to {o.owner}
+        {__('Hand over to')} {o.owner}
       </Button>
     </div>
   );
@@ -324,7 +333,7 @@ export default function AgentOnboard({
 }: Props) {
   const warning = (usePage().props.flash as { warning?: string | null } | undefined)?.warning;
   return (
-    <AgentLayout title="Set up a business">
+    <AgentLayout title={__('Set up a business')}>
       {warning && (
         <p role="alert" className="text-danger text-sm">
           {warning}
@@ -334,7 +343,7 @@ export default function AgentOnboard({
         <>
           <Card>
             <CardHeader>
-              <CardTitle>Start with the owner</CardTitle>
+              <CardTitle>{__('Start with the owner')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Start demo={demo} />
@@ -343,7 +352,7 @@ export default function AgentOnboard({
           {recent.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Recent</CardTitle>
+                <CardTitle>{__('Recent')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="grid gap-2 text-sm">
@@ -368,7 +377,7 @@ export default function AgentOnboard({
             <CardTitle>{o.business}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <ol aria-label="Steps" className="flex flex-wrap gap-2 text-xs">
+            <ol aria-label={__('Steps')} className="flex flex-wrap gap-2 text-xs">
               {STEPS.map((s, i) => (
                 <li
                   key={s}
@@ -387,8 +396,8 @@ export default function AgentOnboard({
             {o.step === 'handover' && <HandOver o={o} />}
             {o.step === 'done' && (
               <p className="text-sm">
-                Done. {o.owner} has their sign-in link.{' '}
-                <Link href="/agent/onboard">Set up another business</Link>
+                {__('Done.')} {o.owner} {__('has their sign-in link.')}{' '}
+                <Link href="/agent/onboard">{__('Set up another business')}</Link>
               </p>
             )}
           </CardContent>

@@ -1,7 +1,9 @@
 import { Link } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Button, Dialog, DialogContent, DialogFooter } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Dialog, DialogContent, DialogFooter } from '@/design-system/components/dialog';
+import { __ } from '@/i18n';
 
 export interface AiQuote {
   label: string;
@@ -66,9 +68,11 @@ export function AiConfirm({
       >
         {quote && quote.reason !== 'not_included' && (
           <dl className="bg-surface grid grid-cols-2 gap-2 rounded-xl p-4 text-sm">
-            <dt className="text-fg-muted">Your balance</dt>
-            <dd className="text-right font-semibold tabular-nums">{fmt(quote.balance)} credits</dd>
-            <dt className="text-fg-muted">After this</dt>
+            <dt className="text-fg-muted">{__('Your balance')}</dt>
+            <dd className="text-right font-semibold tabular-nums">
+              {fmt(quote.balance)} {__('credits')}
+            </dd>
+            <dt className="text-fg-muted">{__('After this')}</dt>
             <dd
               className={`text-right font-semibold tabular-nums ${quote.after < 0 ? 'text-danger-11' : ''}`}
             >
@@ -83,14 +87,14 @@ export function AiConfirm({
         )}
         {quote?.reason === 'insufficient' && (
           <p role="alert" className="text-sm">
-            You need {fmt(quote.credits)} credits and have {fmt(quote.balance)}.
+            {__('You need')} {fmt(quote.credits)} {__('credits and have')} {fmt(quote.balance)}.
           </p>
         )}
         <DialogFooter>
           {quote?.allowed ? (
             <>
               <Button variant="ghost" onClick={() => onOpenChange(false)}>
-                Cancel
+                {__('Cancel')}
               </Button>
               <Button onClick={onConfirm} loading={busy}>
                 <Sparkles /> {quote.free ? 'Go ahead' : `Use ${fmt(quote.credits)} credits`}
@@ -100,11 +104,11 @@ export function AiConfirm({
             <>
               {quote.reason === 'insufficient' && quote.can_buy && (
                 <Button variant="secondary" asChild>
-                  <Link href={`${tenantBase}/settings/billing`}>Buy credits</Link>
+                  <Link href={`${tenantBase}/settings/billing`}>{__('Buy credits')}</Link>
                 </Button>
               )}
               <Button asChild>
-                <Link href={`${tenantBase}/settings/billing`}>Upgrade</Link>
+                <Link href={`${tenantBase}/settings/billing`}>{__('Upgrade')}</Link>
               </Button>
             </>
           ) : null}

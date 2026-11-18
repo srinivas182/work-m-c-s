@@ -1,7 +1,9 @@
 import { router } from '@inertiajs/react';
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@/design-system';
+import { Button } from '@/design-system/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/components/card';
 import { rand } from '@/lib/money';
 import { MyWurkLayout } from '../../components/MyWurkLayout';
+import { __ } from '@/i18n';
 
 interface BusinessCard {
   handle: string;
@@ -14,13 +16,13 @@ interface BusinessCard {
 /** One card per business — each built from that business only. */
 export default function MyWurkHome({ cards }: { cards: BusinessCard[] }) {
   return (
-    <MyWurkLayout title="Your businesses" signedIn>
+    <MyWurkLayout title={__('Your businesses')} signedIn>
       {cards.length === 0 ? (
         <p className="text-sm">
-          When you sign in to a business’s account page on WURK, it appears here.
+          {__('When you sign in to a business’s account page on WURK, it appears here.')}
         </p>
       ) : (
-        <ul aria-label="Your businesses" className="grid gap-4">
+        <ul aria-label={__('Your businesses')} className="grid gap-4">
           {cards.map((c) => (
             <li key={c.handle}>
               <Card>
@@ -30,21 +32,25 @@ export default function MyWurkHome({ cards }: { cards: BusinessCard[] }) {
                 <CardContent className="grid gap-2 text-sm">
                   {c.wallet_cents !== null && (
                     <p>
-                      Wallet: <strong>{rand(c.wallet_cents)}</strong>
+                      {__('Wallet:')} <strong>{rand(c.wallet_cents)}</strong>
                       {c.pending_cents ? ` · ${rand(c.pending_cents)} on its way` : ''}
                     </p>
                   )}
-                  {c.latest && <p className="text-fg-muted">Latest: {c.latest}</p>}
+                  {c.latest && (
+                    <p className="text-fg-muted">
+                      {__('Latest:')} {c.latest}
+                    </p>
+                  )}
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" asChild>
-                      <a href={`/open/${c.handle}`}>Open</a>
+                      <a href={`/open/${c.handle}`}>{__('Open')}</a>
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => router.post(`/hide/${c.handle}`, {}, { preserveScroll: true })}
                     >
-                      Remove from My WURK
+                      {__('Remove from My WURK')}
                     </Button>
                   </div>
                 </CardContent>

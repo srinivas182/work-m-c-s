@@ -1,20 +1,22 @@
 import { Coins } from 'lucide-react';
+import { Badge } from '@/design-system/components/badge';
 import {
-  Badge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  EmptyState,
-  StatCard,
+} from '@/design-system/components/card';
+import { EmptyState, StatCard } from '@/design-system/components/feedback';
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/design-system';
+} from '@/design-system/components/table';
+import { __ } from '@/i18n';
 
 export interface CreditSummary {
   randPerCredit?: number | null;
@@ -50,26 +52,26 @@ export function CreditOverview({ summary }: { summary: CreditSummary }) {
     <div className="grid gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
-          label="Balance"
+          label={__('Balance')}
           value={credits(summary.balance)}
           icon={Coins}
           hint={summary.balance < summary.lowBalance ? 'Below your alert level' : undefined}
         />
         <StatCard
-          label="Of which monthly allowance"
+          label={__('Of which monthly allowance')}
           value={credits(summary.allowance)}
-          hint="Used first; unused allowance expires at the next one"
+          hint={__('Used first; unused allowance expires at the next one')}
         />
         <StatCard
-          label="Used this month"
+          label={__('Used this month')}
           value={credits(summary.usage.reduce((t, u) => t + u.credits, 0))}
           hint={`${summary.usage.reduce((t, u) => t + u.messages, 0)} messages`}
         />
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>What things cost</CardTitle>
-          <CardDescription>Credits per message or action.</CardDescription>
+          <CardTitle>{__('What things cost')}</CardTitle>
+          <CardDescription>{__('Credits per message or action.')}</CardDescription>
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
@@ -87,17 +89,17 @@ export function CreditOverview({ summary }: { summary: CreditSummary }) {
       {summary.ledger.length === 0 ? (
         <EmptyState
           icon={Coins}
-          title="No credit activity yet"
-          description="Allowances, purchases and usage will appear here."
+          title={__('No credit activity yet')}
+          description={__('Allowances, purchases and usage will appear here.')}
         />
       ) : (
-        <Table label="Credit activity">
+        <Table label={__('Credit activity')}>
           <TableHeader>
             <TableRow>
-              <TableHead>When</TableHead>
-              <TableHead>What</TableHead>
-              <TableHead className="text-right">Credits</TableHead>
-              <TableHead className="text-right">Balance</TableHead>
+              <TableHead>{__('When')}</TableHead>
+              <TableHead>{__('What')}</TableHead>
+              <TableHead className="text-right">{__('Credits')}</TableHead>
+              <TableHead className="text-right">{__('Balance')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

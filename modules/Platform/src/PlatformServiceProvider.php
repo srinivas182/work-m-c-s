@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Wurk\Platform;
 
+use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Database\Connection;
+use Illuminate\Routing\Middleware\ValidateSignature;
 use Wurk\Platform\Console\ListModulesCommand;
 use Wurk\Platform\Console\MakeModuleCommand;
 use Wurk\Platform\Contracts\AssistantTools;
@@ -21,7 +23,9 @@ use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Contracts\SalesTools;
 use Wurk\Platform\Contracts\SupportSessions;
+use Wurk\Platform\Database\AppTimezoneSQLiteConnection;
 use Wurk\Platform\Database\DatesPast2038Connection;
+use Wurk\Platform\I18n\StoreAwareLoader;
 use Wurk\Platform\Modules\ModuleRegistry;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\AssistantRegistry;
@@ -49,6 +53,8 @@ final class PlatformServiceProvider extends ModuleServiceProvider
     {
         // Year 2038 (18.4b): MySQL timestamp columns are created as DATETIME.
         Connection::resolverFor('mysql', fn ($pdo, string $database, string $prefix, array $config) => new DatesPast2038Connection($pdo, $database, $prefix, $config));
+        // Dates bound to queries are moved to the app's zone first, as stored (fix, 18 Nov 2026).
+        Connection::resolverFor('sqlite', fn ($pdo, string $database, string $prefix, array $config) => new AppTimezoneSQLiteConnection($pdo, $database, $prefix, $config));
         $this->app->singleton(DashboardTiles::class, TileRegistry::class);
         $this->app->singleton(BusinessReports::class, ReportRegistry::class);
         $this->app->singleton(PlatformMetrics::class, MetricsRegistry::class);
@@ -58,6 +64,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(OwnerDigest::class, OwnerDigestRegistry::class); // 21.6
         $this->app->singleton(BusinessSetup::class, BusinessSetupRegistry::class); // 23.1
         $this->app->singleton(MoneyOwed::class, MoneyOwedRegistry::class); // 23.5
+        $this->app->extend('translation.loader', fn (Loader $loader) => new StoreAwareLoader($loader)); // reviewed translations over the files (24.2)
         $this->app->singleton(SalesTools::class, SalesRegistry::class); // 19.5
         $this->app->singleton(HealthSignals::class, HealthRegistry::class);
         $this->app->singleton(DataExports::class, ExportRegistry::class);
@@ -96,6 +103,9 @@ final class PlatformServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->loadViewsFrom($this->modulePath('resources/views'), 'platform');
+        // A signed link stays valid when the customer picks their language (24.3) or it's tagged by where it was shared (23.3).
+        ValidateSignature::except(['lang', 'utm_source']);
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ListModulesCommand::class,

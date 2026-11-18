@@ -1,8 +1,13 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Users } from 'lucide-react';
-import { Badge, Button, EmptyState, Field, Input, PageHeader } from '@/design-system';
+import { Badge } from '@/design-system/components/badge';
+import { Button } from '@/design-system/components/button';
+import { EmptyState, PageHeader } from '@/design-system/components/feedback';
+import { Field } from '@/design-system/components/field';
+import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Row {
   id: string;
@@ -34,44 +39,44 @@ export default function Contacts({
       preserveScroll: true,
     });
   return (
-    <AppShell title="Contacts">
-      <Head title="Contacts" />
+    <AppShell title={__('Contacts')}>
+      <Head title={__('Contacts')} />
       <div className="grid max-w-5xl gap-6">
         <PageHeader
-          title="Contacts"
+          title={__('Contacts')}
           description={`Everyone who has booked, bought or taken a class — one row per person (${pages.total}).`}
           actions={
             canManage ? (
               <a className="text-sm underline" href={`${base}/export`}>
-                Export
+                {__('Export')}
               </a>
             ) : undefined
           }
         />
         <form
           role="search"
-          aria-label="Search contacts"
+          aria-label={__('Search contacts')}
           className="flex flex-wrap items-end gap-3"
           onSubmit={(e) => {
             e.preventDefault();
             go({ q: search, tag });
           }}
         >
-          <Field label="Name, phone or email">
+          <Field label={__('Name, phone or email')}>
             <Input value={search} onChange={(e) => setSearch(e.target.value)} />
           </Field>
           <Button type="submit" variant="secondary">
-            Search
+            {__('Search')}
           </Button>
           {(q || tag) && (
             <Button type="button" variant="ghost" onClick={() => go({})}>
-              Clear
+              {__('Clear')}
             </Button>
           )}
         </form>
         {tag && (
           <p className="text-sm">
-            Tagged <Badge tone="neutral">{tag}</Badge>
+            {__('Tagged')} <Badge tone="neutral">{tag}</Badge>
           </p>
         )}
         {contacts.length === 0 ? (
@@ -87,23 +92,23 @@ export default function Contacts({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Contacts</caption>
+              <caption className="sr-only">{__('Contacts')}</caption>
               <thead>
                 <tr className="border-border border-b">
                   <th scope="col" className="py-2">
-                    Name
+                    {__('Name')}
                   </th>
                   <th scope="col" className="py-2">
-                    Phone
+                    {__('Phone')}
                   </th>
                   <th scope="col" className="py-2">
-                    Email
+                    {__('Email')}
                   </th>
                   <th scope="col" className="py-2">
-                    Tags
+                    {__('Tags')}
                   </th>
                   <th scope="col" className="py-2">
-                    Last seen
+                    {__('Last seen')}
                   </th>
                 </tr>
               </thead>
@@ -140,18 +145,18 @@ export default function Contacts({
           </div>
         )}
         {pages.last > 1 && (
-          <nav aria-label="Pages" className="flex items-center gap-3 text-sm">
+          <nav aria-label={__('Pages')} className="flex items-center gap-3 text-sm">
             {pages.current > 1 && (
               <button
                 type="button"
                 className="underline"
                 onClick={() => go({ q, tag, page: pages.current - 1 })}
               >
-                ← Previous
+                {__('← Previous')}
               </button>
             )}
             <span>
-              Page {pages.current} of {pages.last}
+              {__('Page')} {pages.current} {__('of')} {pages.last}
             </span>
             {pages.current < pages.last && (
               <button
@@ -159,7 +164,7 @@ export default function Contacts({
                 className="underline"
                 onClick={() => go({ q, tag, page: pages.current + 1 })}
               >
-                Next →
+                {__('Next →')}
               </button>
             )}
           </nav>
