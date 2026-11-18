@@ -28,6 +28,11 @@ final class SeedCategoriesCommand extends Command
         ['cleaning', 'Cleaning', 'Home, office and specialist cleaning', 'sparkles'],
         ['car-wash', 'Car wash', 'Car washes, detailing studios and mobile washes', 'droplets'],
         ['catering', 'Catering', 'Event, office and home-kitchen catering', 'chef-hat'],
+        // Sprint 20.4b
+        ['spaza-grocery', 'Spaza & grocery', 'Corner shops, fresh produce and wholesale', 'store'],
+        ['beauty-supplies', 'Beauty supplies', 'Beauty stores, skin care brands and salon wholesale', 'shopping-bag'],
+        ['tailoring-fashion', 'Tailoring & fashion', 'Tailors, fashion labels and alterations', 'shirt'],
+        ['agriculture', 'Agriculture', 'Farms, agri supplies and co-operatives', 'sprout'],
     ];
 
     protected $signature = 'website:seed-categories';

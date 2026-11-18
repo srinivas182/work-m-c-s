@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Premium templates — Sprint 20.4b (four more categories)
+- **Spaza & grocery:** corner shop (airtime, electricity, WhatsApp orders), fresh produce market (weekly boxes), wholesale and bulk (delivery areas, trade accounts).
+- **Beauty supplies:** beauty supply store, skin care brand (story, ingredients, routine), salon wholesale (trade accounts, equipment).
+- **Tailoring & fashion:** made-to-measure tailor (fittings, group orders), fashion label (lookbook, collection shop, film), alterations and repairs.
+- **Agriculture:** family farm (produce, farm-gate orders), agri supplies and feed (advice, quotes), co-operative (how it works, partners, buyers).
+- Shop pages use the online shop's product sections, with an introduction so the page reads well before products are added.
+
 ### Premium templates — Sprint 20.4a (four new categories)
 - **Barbershop, Cleaning, Car wash and Catering**, each with three designs that differ in layout, not only colour:
   - **Barbershop:** classic shop, street-style studio, mobile barber.

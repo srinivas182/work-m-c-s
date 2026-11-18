@@ -1,0 +1,322 @@
+{
+  "category": "agriculture",
+  "key": "agri-cooperative",
+  "name": "Co-operative & agri project",
+  "position": 3,
+  "description": "Community-minded: a co-op or project showing its members, impact and how to buy or join.",
+  "definition": {
+    "branding": {
+      "primary": "#854D0E",
+      "secondary": "#16A34A",
+      "font_pairing": "clean",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "About the co-op",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Buy from us",
+          "type": "page",
+          "page": "buy"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Farming co-operative — fresh produce, grown together",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Buy from us",
+                "buttonHref": "/buy",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Growing together",
+                "text": "A farming co-operative of members who grow, pack and sell together — for fair prices and stronger communities.",
+                "primaryLabel": "Buy from us",
+                "primaryHref": "/buy",
+                "secondaryLabel": "About the co-op",
+                "secondaryHref": "/about",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/agri-cooperative/hero-1600.webp",
+                    "alt": "Co-op members harvesting together"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "values",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "What we stand for",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "users",
+                    "title": "Owned by members",
+                    "text": "Every member has a say and a share."
+                  },
+                  {
+                    "icon": "heart",
+                    "title": "Fair prices",
+                    "text": "Farmers are paid fairly for what they grow."
+                  },
+                  {
+                    "icon": "sparkles",
+                    "title": "Skills that last",
+                    "text": "Training in farming, packing and running a business."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How it works",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Members grow",
+                    "text": "Each member farms their plot with shared inputs."
+                  },
+                  {
+                    "title": "We pack together",
+                    "text": "Quality checked and packed at the packhouse."
+                  },
+                  {
+                    "title": "We sell together",
+                    "text": "To shops, markets and schools — and share the income."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "packhouse",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "From the field to the buyer",
+                "text": "Describe your packhouse, quality checks and how buyers can order.",
+                "image": "/images/templates/agri-cooperative/packhouse-1600.webp",
+                "imageAlt": "Produce being sorted and packed",
+                "imageSide": "left",
+                "buttonLabel": "Buy from us",
+                "buttonHref": "/buy"
+              }
+            },
+            {
+              "id": "partners",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Our partners and funders",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About the co-op",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Buy from us",
+                "buttonHref": "/buy",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Our story",
+                "text": "How the co-op started, who the members are, and what you want to achieve together."
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Our board and members",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "training",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Training and support",
+                "text": "Tell people about training, mentors and the support members receive.",
+                "image": "/images/templates/agri-cooperative/training-1600.webp",
+                "imageAlt": "Members in a training session",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "buy",
+        "title": "Buy from us",
+        "slug": "buy",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Buy from us",
+                "buttonHref": "/buy",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Buy from the co-op",
+                "intro": "Shops, schools and markets: tell us what you need.",
+                "services": [
+                  {
+                    "name": "Vegetables"
+                  },
+                  {
+                    "name": "Fruit"
+                  },
+                  {
+                    "name": "Eggs"
+                  },
+                  {
+                    "name": "Other"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Send",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Organisation",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "What and how much?",
+                    "type": "long",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "How often?",
+                    "type": "choice",
+                    "choices": "Once, Weekly, Monthly",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the co-op",
+                "intro": "Buyers, partners and new members welcome.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

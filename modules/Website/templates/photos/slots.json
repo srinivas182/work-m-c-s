@@ -501,5 +501,167 @@
       "shows": "The cook in a home kitchen, smiling",
       "search": "African woman cooking kitchen"
     }
+  },
+  "spaza-corner-shop": {
+    "hero": {
+      "shows": "A friendly shopkeeper at the counter of a local shop",
+      "search": "spaza shop owner counter"
+    },
+    "shelves": {
+      "shows": "Neat, well-stocked shelves of everyday groceries",
+      "search": "grocery shelves stocked"
+    }
+  },
+  "grocery-fresh-market": {
+    "produce": {
+      "shows": "Crates of fresh, colourful fruit and vegetables",
+      "search": "fresh vegetables market Africa"
+    },
+    "stall": {
+      "shows": "The stall or shop with customers choosing produce",
+      "search": "fruit vegetable market stall"
+    },
+    "box": {
+      "shows": "A packed box of mixed fruit and vegetables",
+      "search": "vegetable box"
+    }
+  },
+  "grocery-wholesale": {
+    "hero": {
+      "shows": "A warehouse floor with pallets of bulk groceries",
+      "search": "warehouse groceries pallets"
+    },
+    "loading": {
+      "shows": "Bulk stock being loaded onto a bakkie or truck",
+      "search": "loading truck goods"
+    }
+  },
+  "beauty-supply-store": {
+    "hero": {
+      "shows": "Shelves of hair products, braiding hair and wigs in a beauty store",
+      "search": "beauty supply store hair products"
+    },
+    "braids": {
+      "shows": "Packs of braiding hair in different colours",
+      "search": "braiding hair packs"
+    },
+    "wigs": {
+      "shows": "Wigs on display",
+      "search": "wigs display store"
+    }
+  },
+  "beauty-skincare-brand": {
+    "hero": {
+      "shows": "The brand’s bottles and jars styled simply",
+      "search": "natural skincare products bottles"
+    },
+    "ingredients": {
+      "shows": "Natural ingredients: shea butter, marula or baobab",
+      "search": "shea butter natural ingredients",
+      "decorative": true
+    },
+    "founder": {
+      "shows": "The founder making or packing products",
+      "search": "Black woman entrepreneur skincare"
+    }
+  },
+  "beauty-salon-wholesale": {
+    "hero": {
+      "shows": "Bulk salon products and equipment on warehouse shelves",
+      "search": "salon products wholesale"
+    },
+    "equipment": {
+      "shows": "Salon equipment: chairs, dryers, trolleys",
+      "search": "salon equipment chair dryer"
+    }
+  },
+  "tailor-made-to-measure": {
+    "hero": {
+      "shows": "A tailor taking a client’s measurements",
+      "search": "African tailor measuring client"
+    },
+    "fabric": {
+      "shows": "Rolls of colourful print fabric (shweshwe, ankara, kente)",
+      "search": "African print fabric rolls",
+      "decorative": true
+    },
+    "look-1": {
+      "shows": "A finished traditional outfit on a client",
+      "search": "African traditional attire"
+    },
+    "look-2": {
+      "shows": "A finished tailored suit",
+      "search": "tailored suit Black man"
+    }
+  },
+  "fashion-label": {
+    "hero": {
+      "shows": "A model in the label’s latest collection, editorial shoot",
+      "search": "African fashion model editorial"
+    },
+    "look-1": {
+      "shows": "Lookbook: a full outfit from the collection",
+      "search": "African fashion lookbook"
+    },
+    "look-2": {
+      "shows": "Lookbook: a second outfit",
+      "search": "African designer clothing"
+    },
+    "look-3": {
+      "shows": "Lookbook: a detail — print, beadwork or tailoring",
+      "search": "fashion detail fabric"
+    },
+    "studio": {
+      "shows": "The designer at work in the studio",
+      "search": "fashion designer studio Africa"
+    }
+  },
+  "alterations-repairs": {
+    "hero": {
+      "shows": "A sewing machine stitching a hem, close up",
+      "search": "sewing machine hem"
+    },
+    "counter": {
+      "shows": "Altered clothes on hangers, tagged for collection",
+      "search": "clothes on hangers tailor shop"
+    }
+  },
+  "farm-produce": {
+    "hero": {
+      "shows": "Farmland at golden hour: rows of crops",
+      "search": "African farm field sunrise"
+    },
+    "farmer": {
+      "shows": "The farmer (or family) in the field",
+      "search": "African farmer field"
+    },
+    "produce": {
+      "shows": "Fresh eggs, vegetables or a harvest basket",
+      "search": "fresh eggs vegetables basket"
+    }
+  },
+  "agri-supplies": {
+    "hero": {
+      "shows": "Bags of animal feed, seed and fertiliser stacked in a store",
+      "search": "agricultural supply store feed bags"
+    },
+    "advice": {
+      "shows": "A farmer talking with an adviser in a field or at the counter",
+      "search": "farmer advisor talking"
+    }
+  },
+  "agri-cooperative": {
+    "hero": {
+      "shows": "Co-op members working together in a field or packhouse",
+      "search": "farming cooperative women Africa"
+    },
+    "packhouse": {
+      "shows": "Produce being sorted and packed for buyers",
+      "search": "packhouse sorting vegetables"
+    },
+    "training": {
+      "shows": "Members in a training session outdoors",
+      "search": "farmers training group Africa"
+    }
   }
 }

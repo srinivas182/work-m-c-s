@@ -1,0 +1,387 @@
+{
+  "category": "agriculture",
+  "key": "farm-produce",
+  "name": "Family farm",
+  "position": 1,
+  "description": "Earthy and honest: a farm selling produce, eggs and meat to locals and shops.",
+  "definition": {
+    "branding": {
+      "primary": "#3F6212",
+      "secondary": "#B45309",
+      "font_pairing": "editorial",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "What we grow",
+          "type": "page",
+          "page": "produce"
+        },
+        {
+          "label": "Order",
+          "type": "page",
+          "page": "order"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Family farm — vegetables, eggs and meat",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order from the farm",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "From our farm to your table",
+                "text": "Vegetables, free-range eggs and meat — grown by our family and sold fresh to homes, shops and restaurants.",
+                "primaryLabel": "Order from the farm",
+                "primaryHref": "/order",
+                "secondaryLabel": "What we grow",
+                "secondaryHref": "/produce",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/farm-produce/hero-1600.webp",
+                    "alt": "Rows of crops on the farm at sunrise"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Our farm",
+                "text": "Tell people where the farm is, how long your family has farmed it, and how you grow and raise what you sell.",
+                "image": "/images/templates/farm-produce/farmer-1600.webp",
+                "imageAlt": "The farmer in the field",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "produce",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "In season",
+                "intro": "What we have depends on the season — ask what’s ready this week.",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Vegetables",
+                    "description": "Spinach, cabbage, tomatoes, onions",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Free-range eggs",
+                    "description": "Per tray",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Chickens",
+                    "description": "Live or slaughtered",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Maize",
+                    "description": "Green mealies in season",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "farm",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "On the farm",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/farm-produce/hero-1600.webp",
+                    "alt": "Rows of crops on the farm at sunrise"
+                  },
+                  {
+                    "src": "/images/templates/farm-produce/farmer-1600.webp",
+                    "alt": "The farmer in the field"
+                  },
+                  {
+                    "src": "/images/templates/farm-produce/produce-1600.webp",
+                    "alt": "Fresh eggs and vegetables"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "buyers",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Who we sell to",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "users",
+                    "title": "Families",
+                    "text": "Collect at the farm gate or order a weekly box."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Shops and spazas",
+                    "text": "Regular supply at trade prices."
+                  },
+                  {
+                    "icon": "heart",
+                    "title": "Restaurants",
+                    "text": "Fresh produce delivered twice a week."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Visit the farm",
+                "address": "",
+                "landmark": "Give directions from the nearest town — farms are hard to find.",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "produce",
+        "title": "What we grow",
+        "slug": "produce",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order from the farm",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "produce",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Produce and prices",
+                "intro": "",
+                "note": "Bulk prices for shops and restaurants.",
+                "items": [
+                  {
+                    "name": "Spinach",
+                    "description": "Per bunch",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Cabbage",
+                    "description": "Each",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Tomatoes",
+                    "description": "Per box",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Eggs",
+                    "description": "Per tray of 30",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Chicken",
+                    "description": "Per bird",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "farm",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Fresh this week",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/farm-produce/produce-1600.webp",
+                    "alt": "Fresh eggs and vegetables"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "order",
+        "title": "Order",
+        "slug": "order",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Order from the farm",
+                "buttonHref": "/order",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Order from the farm",
+                "intro": "Tell us what you need; we confirm availability and price.",
+                "services": [
+                  {
+                    "name": "Home order"
+                  },
+                  {
+                    "name": "Shop / spaza"
+                  },
+                  {
+                    "name": "Restaurant"
+                  },
+                  {
+                    "name": "Event"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Send my order",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "What do you need?",
+                    "type": "long",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Collect or deliver?",
+                    "type": "choice",
+                    "choices": "Collect at the farm, Deliver",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the farm",
+                "intro": "Call or WhatsApp — signal can be weak, so leave a message.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,374 @@
+{
+  "category": "tailoring-fashion",
+  "key": "tailor-made-to-measure",
+  "name": "Made-to-measure tailor",
+  "position": 1,
+  "description": "Crafted and personal: traditional wear, suits and alterations, made for you.",
+  "definition": {
+    "branding": {
+      "primary": "#312E81",
+      "secondary": "#D97706",
+      "font_pairing": "classic",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Our work",
+          "type": "page",
+          "page": "work"
+        },
+        {
+          "label": "Book a fitting",
+          "type": "page",
+          "page": "fitting"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Tailor — traditional wear, suits and alterations",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a fitting",
+                "buttonHref": "/fitting",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Made for you, to the centimetre",
+                "text": "Traditional wear, wedding outfits, suits and school uniforms — measured, cut and sewn by hand.",
+                "primaryLabel": "Book a fitting",
+                "primaryHref": "/fitting",
+                "secondaryLabel": "Our work",
+                "secondaryHref": "/work",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/tailor-made-to-measure/hero-1600.webp",
+                    "alt": "A tailor measuring a client"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "From fabric to fitting",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Measure",
+                    "text": "We take your measurements and talk about the look."
+                  },
+                  {
+                    "title": "Choose fabric",
+                    "text": "Bring your own or choose from ours."
+                  },
+                  {
+                    "title": "First fitting",
+                    "text": "We adjust until it fits perfectly."
+                  },
+                  {
+                    "title": "Collect",
+                    "text": "Pressed and ready for your day."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "work",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Recent work",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/tailor-made-to-measure/look-1-1600.webp",
+                    "alt": "A made-to-measure traditional outfit"
+                  },
+                  {
+                    "src": "/images/templates/tailor-made-to-measure/look-2-1600.webp",
+                    "alt": "A tailored suit"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "fabric",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Fabric for every occasion",
+                "text": "Shweshwe, ankara, kente, lace and suiting — tell people what you keep in stock.",
+                "image": "/images/templates/tailor-made-to-measure/fabric-1600.webp",
+                "imageAlt": "Rolls of colourful African print fabric",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "What we make",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Traditional wear",
+                    "description": "For weddings, umembeso, lobola and church",
+                    "duration": "2–3 weeks",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Suits",
+                    "description": "Two- or three-piece",
+                    "duration": "3 weeks",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Dresses",
+                    "description": "Evening, matric dance and bridesmaids",
+                    "duration": "2–3 weeks",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Alterations",
+                    "description": "Hems, taking in, zips",
+                    "duration": "2–5 days",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What customers say",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "work",
+        "title": "Our work",
+        "slug": "work",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a fitting",
+                "buttonHref": "/fitting",
+                "sticky": true
+              }
+            },
+            {
+              "id": "work",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Our work",
+                "intro": "Every piece made to measure.",
+                "images": [
+                  {
+                    "src": "/images/templates/tailor-made-to-measure/look-1-1600.webp",
+                    "alt": "A made-to-measure traditional outfit"
+                  },
+                  {
+                    "src": "/images/templates/tailor-made-to-measure/look-2-1600.webp",
+                    "alt": "A tailored suit"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Alterations",
+                "intro": "Before and after.",
+                "layout": "slider",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "fitting",
+        "title": "Book a fitting",
+        "slug": "fitting",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a fitting",
+                "buttonHref": "/fitting",
+                "sticky": true
+              }
+            },
+            {
+              "id": "book-online",
+              "type": "BookOnline",
+              "version": 1,
+              "props": {
+                "mode": "appointments",
+                "heading": "Book a fitting",
+                "intro": "Measurements take about 30 minutes.",
+                "fallbackText": "Call or message us to book.",
+                "fallbackLabel": "Contact us",
+                "fallbackHref": "/contact"
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Planning a wedding or group order?",
+                "intro": "Tell us the date and how many outfits.",
+                "services": [
+                  {
+                    "name": "Wedding party"
+                  },
+                  {
+                    "name": "Church group"
+                  },
+                  {
+                    "name": "School uniforms"
+                  },
+                  {
+                    "name": "Corporate"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Ask for a quote",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Date needed",
+                    "type": "date",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Number of outfits",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Visit the studio",
+                "intro": "Bring a photo of the look you love.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the studio",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
