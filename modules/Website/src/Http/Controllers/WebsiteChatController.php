@@ -79,6 +79,7 @@ final class WebsiteChatController
             'languages' => Receptionist::LANGUAGES,
             'credits_per_reply' => app(CreditWallet::class)->rateFor(Receptionist::CHANNEL) / 1000,
             'replies_this_month' => $this->receptionist->repliesThisMonth(),
+            'whatsapp_connected' => app(WhatsAppBusiness::class)->connected(),
         ];
     }
 
@@ -86,6 +87,8 @@ final class WebsiteChatController
     {
         $d = $request->validate([
             'enabled' => ['required', 'boolean'],
+            'whatsapp' => ['sometimes', 'boolean'],
+            'away' => ['nullable', 'string', 'max:300'],
             'may' => ['present', 'array'], 'may.*' => ['string', Rule::in(['book', 'change', 'order'])],
             'tone' => ['required', Rule::in(['friendly', 'formal'])],
             'greeting' => ['required', 'string', 'max:200'],
@@ -96,13 +99,18 @@ final class WebsiteChatController
         if ($d['enabled'] && ! $this->bot->settings()['enabled']) {
             throw ValidationException::withMessages(['enabled' => 'Switch the chat on first (Settings above): the assistant answers in it.']);
         }
+        if (($d['whatsapp'] ?? false) && ! app(WhatsAppBusiness::class)->connected()) {
+            throw ValidationException::withMessages(['whatsapp' => 'Connect your WhatsApp number first (Settings → WhatsApp).']);
+        }
         $this->receptionist->save([
-            'enabled' => (bool) $d['enabled'], 'may' => array_values(array_unique($d['may'])), 'tone' => $d['tone'], 'greeting' => trim($d['greeting']),
+            'enabled' => (bool) $d['enabled'], 'whatsapp' => (bool) ($d['whatsapp'] ?? false), 'away' => trim((string) ($d['away'] ?? '')), 'may' => array_values(array_unique($d['may'])), 'tone' => $d['tone'], 'greeting' => trim($d['greeting']),
             'languages' => array_values(array_unique($d['languages'])), 'person_hours' => trim((string) ($d['person_hours'] ?? '')), 'monthly_cap' => (int) $d['monthly_cap'],
         ]);
-        $this->audit->record('website.receptionist_settings', 'site', $this->context->id(), ['enabled' => (bool) $d['enabled'], 'may' => $d['may'], 'monthly_cap' => (int) $d['monthly_cap']]);
+        $this->audit->record('website.receptionist_settings', 'site', $this->context->id(), ['enabled' => (bool) $d['enabled'], 'whatsapp' => (bool) ($d['whatsapp'] ?? false), 'may' => $d['may'], 'monthly_cap' => (int) $d['monthly_cap']]);
 
-        return back()->with('status', $d['enabled'] ? 'AI assistant saved — it’s answering in your chat.' : 'AI assistant saved — it’s off.');
+        $where = array_keys(array_filter(['in your website chat' => (bool) $d['enabled'], 'on WhatsApp' => (bool) ($d['whatsapp'] ?? false)]));
+
+        return back()->with('status', $where !== [] ? 'AI assistant saved — it’s answering '.implode(' and ', $where).'.' : 'AI assistant saved — it’s off.');
     }
 
     /** "Try it": a test chat with the real facts and free times, where nothing is booked, changed or ordered. */

@@ -30,7 +30,10 @@ interface ReceptionistTool
     public function entitlement(): ?string;
 
     /**
-     * Run it. Return what the AI should see (facts, not prose). Throw ReceptionistRefused with a message for the AI
+     * Run it. Return what the AI should see (facts, not prose). Lists a customer picks from use these keys, so WhatsApp
+     * can show them as buttons or a list (21.3): `times` [{time}], `services` [{name, price, minutes}], `classes`
+     * [{title, when, price}], `products` [{name, options: [{price}]}]; a `card` with `action` {label, url} becomes a
+     * link button. Throw ReceptionistRefused with a message for the AI
      * when it can't be done (a time just taken, details missing) — the AI tells the customer in its own words.
      *
      * @param  array<string, mixed>  $arguments

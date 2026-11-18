@@ -53,6 +53,11 @@ final readonly class WhatsAppBusinessService implements WhatsAppBusiness
         return $this->send($to, ['type' => $kind, $kind => $media], $kind === 'image' ? 'Photo' : 'Document');
     }
 
+    public function sendInteractive(string $to, array $interactive): SendResult
+    {
+        return $this->send($to, ['type' => 'interactive', 'interactive' => $interactive], 'Reply');
+    }
+
     public function followUpReady(): bool
     {
         return ($this->connection()?->templates[WhatsAppGraph::FOLLOW_UP] ?? null) === 'APPROVED';

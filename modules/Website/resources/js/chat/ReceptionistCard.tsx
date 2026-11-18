@@ -12,6 +12,7 @@ import {
   Input,
   RadioGroup,
   RadioGroupItem,
+  Textarea,
 } from '@/design-system';
 import { firstError, request } from '../editor/http';
 
@@ -19,17 +20,20 @@ type May = 'book' | 'change' | 'order';
 export interface ReceptionistProps {
   settings: {
     enabled: boolean;
+    whatsapp: boolean;
     may: May[];
     tone: 'friendly' | 'formal';
     greeting: string;
     monthly_cap: number;
     languages: string[];
     person_hours: string;
+    away: string;
   };
   can: Record<May, boolean>;
   languages: Record<string, string>;
   credits_per_reply: number;
   replies_this_month: number;
+  whatsapp_connected: boolean;
 }
 
 const MAY: [May, string, string][] = [
@@ -56,7 +60,7 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           AI assistant{' '}
-          {r.settings.enabled ? (
+          {r.settings.enabled || r.settings.whatsapp ? (
             <Badge tone="success">On</Badge>
           ) : (
             <Badge tone="neutral">Off</Badge>
@@ -83,11 +87,32 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
               checked={f.data.enabled}
               onCheckedChange={(on) => f.setData('enabled', on === true)}
             />
-            Let the AI assistant answer in my chat
+            Let the AI assistant answer in my website chat
           </label>
           {f.errors.enabled && (
             <p role="alert" className="text-danger text-sm">
               {f.errors.enabled}
+            </p>
+          )}
+          <label className="flex items-start gap-2 text-sm">
+            <Checkbox
+              className="mt-0.5"
+              disabled={!r.whatsapp_connected && !f.data.whatsapp}
+              checked={f.data.whatsapp}
+              onCheckedChange={(on) => f.setData('whatsapp', on === true)}
+            />
+            <span>
+              Let it answer on WhatsApp too
+              <span className="text-fg-muted block">
+                {r.whatsapp_connected
+                  ? 'Customers tap buttons and lists to choose services and times. Take over any chat in Customers → Chats.'
+                  : 'Connect your WhatsApp number first (Settings → WhatsApp).'}
+              </span>
+            </span>
+          </label>
+          {f.errors.whatsapp && (
+            <p role="alert" className="text-danger text-sm">
+              {f.errors.whatsapp}
             </p>
           )}
           <fieldset className="grid gap-2">
@@ -183,6 +208,20 @@ export function ReceptionistCard({ r, base }: { r: ReceptionistProps; base: stri
               onChange={(e) => f.setData('person_hours', e.target.value)}
             />
           </Field>
+          {f.data.whatsapp && (
+            <Field
+              label="When you’re closed, WhatsApp customers first get"
+              hint="Sent once a day, outside the opening hours on your website. The assistant then carries on and can book them in."
+              error={f.errors.away}
+            >
+              <Textarea
+                rows={2}
+                value={f.data.away}
+                maxLength={300}
+                onChange={(e) => f.setData('away', e.target.value)}
+              />
+            </Field>
+          )}
           <Field
             label="Most replies a month"
             hint={`At ${credits(r.credits_per_reply)} a reply, ${f.data.monthly_cap} replies cost up to ${credits(f.data.monthly_cap * r.credits_per_reply)}. After that, your own answers take over.`}

@@ -16,6 +16,7 @@ use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Events\WhatsAppReceived;
 use Wurk\Messaging\Events\WhatsAppStatusChanged;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Jobs\AnswerOnWhatsApp;
 use Wurk\Website\Jobs\FetchWhatsAppMedia;
 use Wurk\Website\Models\ReceptionistConversation;
 use Wurk\Website\Models\ReceptionistMessage;
@@ -52,7 +53,8 @@ final readonly class WhatsAppChats
         if ($conversation === null) {
             $contact = $this->contacts->find($phone);
             $conversation = ReceptionistConversation::query()->create([
-                'channel' => self::CHANNEL, 'visitor' => hash('sha256', 'wa:'.$e->from), 'status' => 'waiting',
+                // With the assistant on for WhatsApp it answers first (21.3); otherwise the chat waits for the team.
+                'channel' => self::CHANNEL, 'visitor' => hash('sha256', 'wa:'.$e->from), 'status' => app(WhatsAppReceptionist::class)->on() ? 'ai' : 'waiting',
                 'name' => $contact['name'] ?? ($e->name !== null ? mb_substr($e->name, 0, 80) : null), 'phone' => $phone,
                 'contact_id' => $contact['id'] ?? null, 'last_message_at' => now(),
             ]);
@@ -76,6 +78,8 @@ final readonly class WhatsAppChats
             $this->append($conversation, 'person', 'You won’t get marketing messages from us any more. You can still message us any time.', null);
             app(WhatsAppBusiness::class)->sendText($phone, 'You won’t get marketing messages from us any more. You can still message us any time.');
             $this->audit->record('website.whatsapp_opt_out', 'receptionist_conversation', $conversation->id, []);
+        } elseif ($conversation->status === 'ai') {
+            AnswerOnWhatsApp::dispatch($this->context->id(), $conversation->id, $message->id)->delay(now()->addSeconds(AnswerOnWhatsApp::SETTLE));
         }
 
         return $conversation;

@@ -108,7 +108,8 @@ final readonly class DeliveryWebhooks
             [$text, $extra] = match ($type) {
                 'text' => [(string) ($part['body'] ?? ''), []],
                 'image', 'video', 'document' => [(string) ($part['caption'] ?? ''), []],
-                'interactive' => [(string) ($interactive['title'] ?? ''), ['reply_id' => $interactive['id'] ?? null]],
+                // A tapped list row reads as its title and description ("10:00 — Saturday 22 November"), as the customer saw it.
+                'interactive' => [trim(($interactive['title'] ?? '').(($interactive['description'] ?? '') !== '' ? ' — '.$interactive['description'] : '')), ['reply_id' => $interactive['id'] ?? null]],
                 'button' => [(string) ($part['text'] ?? ''), ['reply_id' => $part['payload'] ?? null]],
                 'location' => [trim(($part['name'] ?? '').' '.($part['address'] ?? '')), ['latitude' => $part['latitude'] ?? null, 'longitude' => $part['longitude'] ?? null]],
                 'reaction' => [(string) ($part['emoji'] ?? ''), ['reacted_to' => $part['message_id'] ?? null]],
