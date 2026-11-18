@@ -4,6 +4,19 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.20.0] — 2026-11-18 — Sprint 19: AI receptionist
+
+### AI receptionist — Sprint 19.7 (quality and release)
+- **An evaluation set of 120 conversations with a demo salon** covers booking, moving, cancelling, prices, opening hours, out of scope, abuse, prompt injection, eight languages, no free time and closed days. It runs in CI on every change, with the model's behaviour scripted, so it checks WURK's guardrails around any model:
+  - only real bookings;
+  - no invented times or prices;
+  - the owner's permissions;
+  - nothing reaching another customer.
+- **`wurk:eval-receptionist` runs the same set against the real model on staging** before a release, and scores what doesn't depend on wording.
+- **Fixed (found by the evaluation set): prices of R1 000 or more were wrongly blocked** when written with a space ("R1 200.00", "R2 500"), as WURK and South Africans write them. Customers got "I couldn't check that" instead of the correct price.
+- **Watchtower watches the AI receptionist and the sales assistant**: many failed AI replies in an hour, or several very slow ones, become a problem, emailed like any other.
+- An isolation test for the receptionist's tools: one business's assistant never sees another's services, times or bookings, even with another business's booking number.
+
 ### Keys in settings — Sprint 19.6b (contact addresses and the uptime token)
 - **Admin → Security → WURK's contact addresses**: where contact-form messages go, the support address, and the security contact (security.txt, the Trust and Security pages). Before, they were only in the server's settings. The saved addresses apply to every page, email and background job straight away. The server's values are used only until they're set here.
 - **Admin → Watchtower → Uptime checker**: shows the webhook address for Better Stack or UptimeRobot, and **makes a new one** (encrypted; the old address stops working at once). Only people who manage Watchtower see it. The server's token is used only until one is made here.

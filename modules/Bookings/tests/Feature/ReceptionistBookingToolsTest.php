@@ -17,6 +17,7 @@ use Wurk\Bookings\Models\ClassSession;
 use Wurk\Bookings\Models\Reservation;
 use Wurk\Bookings\Models\ReservationHours;
 use Wurk\Bookings\Models\ReservationSettings;
+use Wurk\Bookings\Receptionist\ChatBookings;
 use Wurk\Bookings\Support\Booker;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Messaging\Contracts\Messenger;
@@ -236,4 +237,25 @@ it('reserves tables only at times with room, for parties the restaurant takes on
     ($this->in)(fn () => expect(Reservation::query()->sole())->source->toBe('chat')->notes->toBe('Birthday'));
     // 4 of 6 covers are taken through 19:30: no room for 4 more until then.
     expect(fn () => ($this->run)('reserve_table', ['starts_at' => $t['times'][1]['starts_at'], 'party' => 4, ...$who]))->toThrow(ReceptionistRefused::class, 'no longer room');
+});
+
+it('never sees another business: its services, times and bookings stay with it (19.7, the isolation check for tools)', function () {
+    $other = $this->createTenant('rival-salon');
+    $theirs = app(TenantContext::class)->run($other, function () {
+        $s = BookingService::query()->create(['name' => 'Secret silk press', 'duration_minutes' => 60, 'price_cents' => 99900]);
+        DB::connection(app(TenantContext::class)->connectionName())->table('booking_service_member')->insert(['service_id' => $s->id, 'member_id' => CHAT_STYLIST, 'tenant_id' => app(TenantContext::class)->id()]);
+        BookingHours::query()->create(['member_id' => CHAT_STYLIST, 'weekday' => 0, 'starts' => '09:00', 'ends' => '17:00']);
+
+        return [$s, app(Booker::class)->book($s, CarbonImmutable::parse('2027-05-03 10:00', 'Africa/Johannesburg'), ['name' => 'Zodwa', 'phone' => '083 111 2222'])];
+    });
+    expect(json_encode(($this->run)('services', [])))->not->toContain('Secret silk press')->not->toContain('999');
+    expect(fn () => ($this->run)('free_times', ['service' => $theirs[0]->id, 'date' => '2027-05-03']))->toThrow(ReceptionistRefused::class, 'no service like that');
+    expect(fn () => ($this->run)('book_appointment', [...$this->book, 'service' => $theirs[0]->id]))->toThrow(ReceptionistRefused::class, 'no service like that');
+    $mine = ($this->run)('book_appointment', $this->book);
+    expect(fn () => ($this->run)('cancel_booking', ['booking_id' => $theirs[1]->id, 'confirmed' => true]))->toThrow(ReceptionistRefused::class, 'only change a booking made in this chat');
+    // Even a booking id remembered from this chat can't reach another business's calendar.
+    app(TenantContext::class)->run($this->glow, fn () => app(ChatBookings::class)->remember('conv-1', 'booking', $theirs[1]->id));
+    expect(fn () => ($this->run)('cancel_booking', ['booking_id' => $theirs[1]->id, 'confirmed' => true]))->toThrow(ReceptionistRefused::class);
+    app(TenantContext::class)->run($other, fn () => expect(Booking::query()->find($theirs[1]->id)->status)->toBe('confirmed'));
+    expect($mine['booked'])->toBeTrue();
 });

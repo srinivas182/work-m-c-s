@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved by WURK (18 Nov 2026: "All approved", with Sprints 19–25 in sequence) |
+| **Status** | Done — released as v0.20.0 (approved by WURK 18 Nov 2026: "All approved", with Sprints 19–25 in sequence) |
 | **Release** | v0.20.0 |
 | **Depends on** | v0.19.0. Builds on: Website chat (Sprint 12, rule-based), Chats inbox, WURK AI (providers, caps, credits), Bookings (services, availability, classes, tables, deposits), Shop, Payments, Help centre, Watchtower |
 | **Next** | Sprint 20 — Premium templates |
@@ -133,3 +133,32 @@ Owners of small African businesses lose bookings while they work: messages come 
 | 19.5b Sales assistant: the chat | #206 | wurk.co.za reuses the website chat panel, now with configurable endpoints and an optional hand-over link. The sales endpoint returns the panel's own config shape, and 404 while off, so the button appears only when HQ has it on. Like the public websites' chat, its endpoints run without a session or CSRF (nothing signed in to protect), behind per-visitor limits and HQ's caps. The e2e setup switches it on, and a visitor journey (chat, reply, "Talk to someone" → contact page) runs on desktop and phone. |
 | 19.6a "Test connection" for every key | #207 | 19.6 split: 19.6a = connection tests; 19.6b = WURK's contact addresses and the uptime token in settings. The audit found that email was already a provider (Sprint 2, with a test send). AI keys, Paystack and meeting apps had no real test. The Paystack "Check" was broken, because it required an address to send to. Four payment entries were dead: nothing read them, because businesses' payment methods take WURK's keys in Admin → Payment methods (checked on save, Yoco by registering its webhook). Checks: AI = list models; Paystack = balance; OAuth apps = token request with a made-up code (`invalid_client` vs `invalid_grant`). Keys never go in a web address. |
 | 19.6b Contacts and the uptime token | #207 | Watchtower's alert recipients and the support inbox were already in settings (18.0b, 16.3). New: the contact, support and security addresses (Security owns platform settings). They're applied over the configuration at boot, for every web request (middleware) and before every queued job, because Octane and queue workers outlive a single request. That way every existing `config()` reader gets the saved value without changing each module. The uptime token is encrypted in platform settings and rotated from Admin → Watchtower (audited; Watchtower now depends on Audit). |
+| 19.7 Quality and release | #208 | The 120-conversation set (`app/Eval/ReceptionistEval.php`) runs in CI with the model scripted (`tests/Feature/Eval`), and by hand against the real model (`wurk:eval-receptionist`, staging only; the per-business AI cap is raised for the run and put back). It found a real bug: prices with a space for thousands ("R1 200.00", WURK's own format) failed the price check. Watchtower checks the receptionist's and sales assistant's AI steps hourly through a new `AiConversations::health()` contract. The chat endpoints run outside the timed `web` group, and an AI reply normally takes seconds, so the 300 ms page budget doesn't apply. VERSION 0.20.0. |
+
+## Verification (before closing)
+
+Every spec item and acceptance criterion, against the code and its tests. Verified 18 Nov 2026.
+
+| Item | Where | Status |
+|---|---|---|
+| 19.1 Native tool calling (Anthropic, OpenAI, Google), simulated driver, `receptionist` task, up to 6 steps | Ai drivers, AiClient::converse; ConversationsTest | ✅ |
+| 19.1 Never states availability, prices or policies not from a tool (checked in code) | Receptionist::grounded; ReceptionistTest, evaluation set (prices, hours, closed days, no free time) | ✅ (thousands with a space fixed in 19.7) |
+| 19.2 Tools: business facts, owner FAQs, availability, book, find booking with a code, move, cancel (policy), classes, tables, products and cart link, deposit/payment link, hand over | Website/Receptionist, Bookings/Receptionist, Shop/Receptionist; ReceptionistTest, ReceptionistBookingToolsTest, ReceptionistShopToolsTest | ✅ |
+| 19.2 Owner controls: on/off, what it may do, tone, languages, greeting, when a person can take over, FAQ list | Website → Chat (ReceptionistCard), Website → Chat answers; ReceptionistOwnerTest, e2e receptionist.spec | ✅ |
+| 19.2 Safety: says it's an AI, consent before contact details, injection treated as text, tenant-only tools | System prompt, chat notice, tools' consent checks; evaluation set (16 injection cases), tools isolation test | ✅ |
+| 19.2 No training on customer messages | Providers' API terms: API data isn't used for training (Anthropic, OpenAI; Google's paid tier). WURK uses paid API keys | ✅ (policy, no code) |
+| 19.2 Credits per reply, price shown before switching on, monthly cap, fallback to the rule-based chat | Receptionist charge/refund, ReceptionistCard; ReceptionistTest | ✅ |
+| 19.2 Languages: replies in the customer's language (8 checked); confirmations use message templates | System prompt; evaluation set (16 language cases); BookingMessages | ✅ (the language quality itself is judged in the live run on staging) |
+| 19.3 Website chat: booking cards, quick replies, confirms in chat and by SMS/email, accessible, light on data, rule-based chat kept | site-chat-panel.ts; site-chat-panel tests, e2e receptionist.spec | ✅ (not streamed: decision F) |
+| 19.4 Chats inbox: outcome, Take over, Teach it; Try it; Results in Reports | Chats.tsx, WebsiteChatController, AssistantSection; ReceptionistOwnerTest, e2e | ✅ |
+| 19.5 WURK's sales assistant: live packages and help centre, recommends, opens signup, hands over to WURK or the referring agent; Admin → AI settings; WURK pays | Ai/SalesAssistant, Marketing and Agents tools; SalesAssistantTest, e2e sales-assistant.spec | ✅ |
+| 19.6 Every provider key in Admin → Providers with Test connection; email provider, uptime token, contact addresses in settings; infrastructure secrets on the server | ConnectionCheck, Providers page, UptimeToken, PlatformContacts; ConnectionCheckTest, UptimeTokenTest, PlatformContactsTest | ✅ (email was already a provider; Watchtower recipients and support inbox already in settings) |
+| 19.7 120-conversation evaluation set in CI; by hand against the real model | ReceptionistEval, ReceptionistEvalTest, wurk:eval-receptionist | ✅ (the live run is WURK's step on staging) |
+| 19.7 Watchtower watches receptionist errors and slow replies | AiChats; AiChatsTest | ✅ |
+| Acceptance 1: isiZulu request, real free times, books, deposit link, customer in Customers | Evaluation set (booking-zu), deposit test, Booking → ContactBook | ✅ |
+| Acceptance 2: bookings off → answers and hands over | Evaluation set (booking-not-allowed), ReceptionistTest | ✅ |
+| Acceptance 3: credits gone → rule-based chat | ReceptionistTest (fallbacks), e2e fallback in widget tests | ✅ |
+| Acceptance 4: injection refused; no other business's or customer's data | Evaluation set (injection), tools isolation test, isolation sweep | ✅ |
+| Acceptance 5: owner takes over, AI stops, transcript stays | ReceptionistOwnerTest, e2e receptionist.spec | ✅ |
+| Acceptance 6: wurk.co.za recommends a package at the live price and opens signup | SalesAssistantTest, e2e sales-assistant.spec | ✅ |
+| Acceptance 7: every key set in Admin with a working Test connection | ConnectionCheckTest (AI, Paystack, meetings), message providers' test send | ✅ |

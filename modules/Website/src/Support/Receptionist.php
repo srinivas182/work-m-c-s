@@ -261,11 +261,13 @@ TXT;
                 return false;
             }
         }
-        preg_match_all('/R\s?(\d[\d ,]*(?:\.\d{2})?)/u', $text, $amounts);
+        // Rands are written with spaces or commas between thousands ("R1 200.00", "R2,500"): compare digits only (19.7).
+        $digits = (string) preg_replace('/(?<=\d)[ ,\x{00A0}\x{202F}](?=\d)/u', '', $evidence);
+        preg_match_all('/R\s?(\d[\d ,\x{00A0}\x{202F}]*(?:\.\d{2})?)/u', $text, $amounts);
         foreach ($amounts[1] as $a) {
-            $plain = str_replace([' ', ','], '', $a);
+            $plain = (string) preg_replace('/[^\d.]/u', '', $a);
             $cents = (string) (int) round((float) $plain * 100);
-            if (! str_contains($evidence, $plain) && ! str_contains($evidence, $cents)) {
+            if (! str_contains($digits, $plain) && ! str_contains($digits, $cents)) {
                 return false;
             }
         }
