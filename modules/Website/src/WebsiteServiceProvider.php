@@ -106,6 +106,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
     {
         return [
             ['label' => 'Set up by talking', 'route' => 'tenant.website.setup', 'icon' => 'mic', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 99],
+            ['label' => 'Share', 'route' => 'tenant.website.share', 'icon' => 'share-2', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 101],
             ['label' => 'Pages', 'route' => 'tenant.website.pages', 'icon' => 'globe', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 100],
             ['label' => 'Branding', 'route' => 'tenant.website.branding', 'icon' => 'palette', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
             ['label' => 'Time to launch', 'route' => 'admin.launch-times', 'icon' => 'clock', 'section' => 'Platform', 'permission' => 'tenants.view', 'order' => 61],
