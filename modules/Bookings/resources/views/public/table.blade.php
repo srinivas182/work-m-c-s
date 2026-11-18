@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-ZA">
+<html lang="{{ app()->getLocale() }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,7 +17,7 @@
 <body>
 <main>
   <p>{{ $business }}</p>
-  <h1>Your reservation</h1>
+  <h1>{{ __('Your reservation') }}</h1>
   @if ($notice)
   <p class="card" role="status">{{ $notice }}</p>
   @endif
@@ -30,11 +30,11 @@
   </section>
   @if ($changeable)
   <form class="card" method="post" action="{{ $cancelUrl }}" aria-label="Cancel">
-    <p>Can’t make it? Let us know so someone else can have the table.</p>
-    <p><button type="submit">Cancel my reservation</button></p>
+    <p>{{ __('Can’t make it? Let us know so someone else can have the table.') }}</p>
+    <p><button type="submit">{{ __('Cancel my reservation') }}</button></p>
   </form>
   @endif
-  <p><a href="/">Back to the website</a></p>
+  <p><a href="/">{{ __('Back to the website') }}</a></p>
 </main>
 </body>
 </html>

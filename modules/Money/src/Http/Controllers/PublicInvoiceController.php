@@ -39,7 +39,7 @@ final class PublicInvoiceController
     /** Back from paying: checked with the provider before it counts. */
     public function returned(Request $request, string $handle, string $invoice): Response
     {
-        abort_unless($request->hasValidSignatureWhileIgnoring(['reference', 'trxref']), 403); // the provider adds its reference to our signed link
+        abort_unless($request->hasValidSignatureWhileIgnoring(['reference', 'trxref', 'lang']), 403); // the provider adds its reference to our signed link
 
         return $this->within($handle, function (CurrentTenant $t) use ($invoice) {
             $model = Invoice::query()->findOrFail($invoice);

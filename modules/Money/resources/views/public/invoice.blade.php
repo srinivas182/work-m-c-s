@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-ZA">
+<html lang="{{ app()->getLocale() }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -23,35 +23,36 @@
 <body>
 <main>
   <p>{{ $business }}</p>
-  <h1>Invoice {{ $label }}</h1>
-  <p>For {{ $customer }} · issued {{ $issued }} · due {{ $due }}@if ($vatNumber) · VAT number {{ $vatNumber }}@endif</p>
-  @if ($paid)<p><span class="status paid">Paid {{ $paidOn }}</span></p>@elseif ($void)<p><span class="status">Cancelled</span></p>@endif
+  <h1>{{ __('Invoice :number', ['number' => $label]) }}</h1>
+  <p>{{ __('For :customer · issued :issued · due :due', ['customer' => $customer, 'issued' => $issued, 'due' => $due]) }}@if ($vatNumber) · {{ __('VAT number :number', ['number' => $vatNumber]) }}@endif</p>
+  @if ($paid)<p><span class="status paid">{{ __('Paid :date', ['date' => $paidOn]) }}</span></p>@elseif ($void)<p><span class="status">{{ __('Cancelled') }}</span></p>@endif
   <table>
-    <thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Amount</th></tr></thead>
+    <thead><tr><th>{{ __('Item') }}</th><th class="n">{{ __('Qty') }}</th><th class="n">{{ __('Amount') }}</th></tr></thead>
     <tbody>
     @foreach ($lines as $l)
       <tr><td>{{ $l['description'] }}</td><td class="n">{{ $l['quantity'] }}</td><td class="n">{{ $l['amount'] }}</td></tr>
     @endforeach
     @if ($vat !== null)
-      <tr><td colspan="2">VAT (15%)</td><td class="n">{{ $vat }}</td></tr>
+      <tr><td colspan="2">{{ __('VAT (15%)') }}</td><td class="n">{{ $vat }}</td></tr>
     @endif
-      <tr class="total"><td colspan="2">Total</td><td class="n">{{ $total }}</td></tr>
+      <tr class="total"><td colspan="2">{{ __('Total') }}</td><td class="n">{{ $total }}</td></tr>
     </tbody>
   </table>
   @if ($message)<p role="status">{{ $message }}</p>@endif
   @if (! $paid && ! $void)
     @if ($canPayOnline)
       <form method="post" action="{{ $payUrl }}">
-        <button type="submit">Pay {{ $total }}</button>
+        <button type="submit">{{ __('Pay :amount', ['amount' => $total]) }}</button>
       </form>
     @endif
     @if ($eft)
-      <p>Or pay by EFT:</p>
+      <p>{{ __('Or pay by EFT:') }}</p>
       <pre>{{ $eft }}
-Reference: {{ $label }}</pre>
+{{ __('Reference: :number', ['number' => $label]) }}</pre>
     @endif
   @endif
-  <p><a href="/">Visit {{ $business }}’s website</a></p>
+  <p><a href="/">{{ __('Visit :business’s website', ['business' => $business]) }}</a></p>
+  @include('platform::language-links')
 </main>
 </body>
 </html>

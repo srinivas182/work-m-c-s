@@ -21,6 +21,7 @@ use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Platform\I18n\TranslationStore;
 use Wurk\Sales\Models\Sale;
 use Wurk\Sales\Support\Sales;
 use Wurk\Shop\Models\Order;
@@ -204,4 +205,13 @@ it('is for people who manage the money', function () {
     $this->member($staff, $this->glow);
     ($this->in)(fn () => app(Team::class)->add($staff->id, 'Thabo', 'staff'));
     expect($this->actingAs($staff)->get($this->base.'/owed')->status())->toBeIn([403, 404]);
+});
+
+it('shows the invoice in the customer’s language, and keeps its signed link valid when they switch', function () {
+    TranslationStore::save('fr', 'Item', 'Article', 'reviewed', null);
+    TranslationStore::save('fr', 'Invoice :number', 'Facture :number', 'reviewed', null);
+    ($this->invoice)(['send' => true]);
+    $link = ($this->in)(fn () => app(Invoices::class)->link(Invoice::query()->sole()));
+    $this->get($link, ['Accept-Language' => 'fr-FR'])->assertOk()->assertSee('<html lang="fr">', false)->assertSee('Facture INV-0001')->assertSee('Article')->assertSee('Français');
+    $this->get($link.'&lang=en')->assertOk()->assertSee('Invoice INV-0001')->assertCookie('wurk_lang', 'en', false);
 });

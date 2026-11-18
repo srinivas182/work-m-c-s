@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-ZA">
+<html lang="{{ app()->getLocale() }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,16 +17,16 @@
 <main>
   <p>{{ $business }}</p>
   @if ($confirmed)
-  <h1>You’re booked</h1>
-  <p>Your deposit is paid and your booking is confirmed for {{ $when }}. Paystack has emailed your receipt.</p>
+  <h1>{{ __('You’re booked') }}</h1>
+  <p>{{ __('Your deposit is paid and your booking is confirmed for :when. Paystack has emailed your receipt.', ['when' => $when]) }}</p>
   @if ($manage)
-  <p><a href="{{ $manage }}">Change or cancel this booking</a></p>
+  <p><a href="{{ $manage }}">{{ __('Change or cancel this booking') }}</a></p>
   @endif
   @else
-  <h1>We’re still confirming your payment</h1>
-  <p>This can take a minute. If your payment went through, your booking will be confirmed and you’ll get a message. If not, no money was taken and the time is released after 15 minutes.</p>
+  <h1>{{ __('We’re still confirming your payment') }}</h1>
+  <p>{{ __('This can take a minute. If your payment went through, your booking will be confirmed and you’ll get a message. If not, no money was taken and the time is released after 15 minutes.') }}</p>
   @endif
-  <p><a href="/">Back to the website</a></p>
+  <p><a href="/">{{ __('Back to the website') }}</a></p>
 </main>
 </body>
 </html>
