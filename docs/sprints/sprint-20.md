@@ -43,7 +43,8 @@ What leaders agree on (and reviewers look for): structure that fits the business
   - The launch checklist shows "Replace demo photos (N left)".
   - The editor shows a small "Demo photo — replace" badge.
   - Replacing offers the owner's own upload, the media library, another demo photo from the design's set, or an AI banner (decorative slots only).
-- Until WURK's licensed photos are uploaded, the current stand-ins stay.
+- **Import by link:** for each slot, HQ pastes a link to a photo on Nappy, Pexels or Unsplash; the server downloads it (only from those sites), makes the sizes and records photographer, licence and source. The slot's description and search words open the right search on each site. `php artisan website:import-template-photos <file>` imports a list in one go.
+- Every design must look finished and professional with demo content (as on Wix or WordPress): sharp photos, real-sounding copy, no blurred stand-ins on a launched template.
 
 ### 20.4 Fourteen new categories, three designs each
 Barbershop, church and NGO, school, catering, spaza and grocery, cleaning, security, real estate, legal and accounting, tailoring and fashion, car wash, agriculture, funeral services, and beauty supplies. Each design has its own structure (not a colour swap), real copy for that business, the right sections (e.g. quote form for cleaning and security, product grid for spaza and beauty supplies, listings for real estate, a donations call to action for church and NGO), and the category's legal pages.
@@ -63,7 +64,7 @@ So every category has at least three designs.
 
 | # | Decision | Recommendation |
 |---|---|---|
-| A | Where demo photos come from | A licensed African library for people, work and places, e.g. Nappy (CC0: commercial use, no credit needed, no reselling unmodified photos, so WURK should confirm templates are allowed) plus a paid African library for gaps. **WURK AI banners only for decorative slots.** HQ uploads them in Admin → Template photos; until then the stand-ins stay |
+| A | Where demo photos come from | **Decided (WURK, 18 Nov 2026):** real, sharp photos (no blurred stand-ins) from Nappy, with Pexels and Unsplash for gaps; WURK AI only for decorative banners, used as demo content. Nappy's licence (CC0 plus its own terms) allows commercial use and modification without credit; it forbids reselling photos without significant modification, reposting them on stock sites, and implying the photographer endorses anything. Shipping them as replaceable demo content in templates is ordinary commercial use. CC0 doesn't cover the rights of people in a photo (no model releases), so people photos are always marked demo, the launch checklist asks owners to replace them, and Nappy's sponsored photos are not used. Each photo records its source link, photographer and licence, so one can be swapped everywhere at once. This workspace can't download from photo sites, so HQ imports them on the server (Admin → Template photos, or `website:import-template-photos`) |
 | B | AI pictures of people or "our work" | **No.** They'd show customers things the business didn't do. Decorative only, as agreed in Sprint 7 |
 | C | Video backgrounds | Owner-uploaded, short (≤ 30 s, ≤ 20 MB); a poster image on phones with Save-Data or slow connections and under "reduce motion"; always a pause button |
 | D | How many designs | 3 per category to start (14 new categories × 3 = 42; 12 existing categories + 1 each = 12; 78 designs in all), each in 3 styles (234 looks). A fourth design per category later, where owners ask |
