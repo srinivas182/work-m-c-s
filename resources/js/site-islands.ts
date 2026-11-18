@@ -1587,9 +1587,85 @@ export function map(root: HTMLElement): void {
   });
 }
 
+/**
+ * Whether moving video should play by itself: never under "reduce motion", with Save-Data on, or on a slow
+ * connection (Network Information API, where the browser has it). Otherwise the still poster is the page.
+ */
+export function videoAllowed(): boolean {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  const connection = (
+    navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+  ).connection;
+  if (connection?.saveData) return false;
+  return !['slow-2g', '2g', '3g'].includes(connection?.effectiveType ?? '');
+}
+
+/**
+ * Video hero (Sprint 20.2): the server renders the poster; here the muted loop is added over it when allowed,
+ * with a visible pause button (WCAG 2.2.2). No sound, ever; the video is decoration, so it's hidden from screen readers.
+ */
+export function heroVideo(root: HTMLElement): void {
+  const src = root.dataset.src ?? '';
+  const toggle = root.querySelector<HTMLButtonElement>('[data-video-toggle]');
+  const poster = root.querySelector('img');
+  if (src === '' || !toggle || !videoAllowed()) return;
+  const video = document.createElement('video');
+  video.muted = true;
+  video.defaultMuted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.autoplay = true;
+  video.preload = 'auto';
+  video.setAttribute('aria-hidden', 'true');
+  video.className = 'absolute inset-0 size-full object-cover';
+  if (poster?.currentSrc || poster?.src) video.poster = poster.currentSrc || poster.src;
+  video.src = src;
+  root.insertBefore(video, toggle);
+  const label = () => {
+    // The name says what the button does next (no aria-pressed as well: that would contradict it).
+    toggle.textContent = video.paused ? 'Play the video' : 'Pause the video';
+  };
+  toggle.hidden = false;
+  toggle.addEventListener('click', () => {
+    if (video.paused) void video.play().catch(() => undefined);
+    else video.pause();
+  });
+  video.addEventListener('play', label);
+  video.addEventListener('pause', label);
+  // A browser that refuses to autoplay leaves the poster and offers "Play the video".
+  void video.play()?.catch(() => label());
+  label();
+}
+
+/** Video section (Sprint 20.2): tapping the poster plays the video in place, with sound and the browser's controls. */
+export function videoPlay(root: HTMLElement): void {
+  const src = root.dataset.src ?? '';
+  const start = root.querySelector<HTMLAnchorElement>('[data-video-play]');
+  if (src === '' || !start) return;
+  start.addEventListener('click', (event) => {
+    event.preventDefault();
+    const poster = start.querySelector('img');
+    const video = document.createElement('video');
+    video.src = src;
+    video.controls = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.preload = 'auto';
+    if (poster?.currentSrc || poster?.src) video.poster = poster.currentSrc || poster.src;
+    video.className = 'size-full bg-black object-contain';
+    video.setAttribute('aria-label', root.dataset.name ?? 'Video');
+    video.tabIndex = 0;
+    root.replaceChildren(video);
+    video.focus();
+    void video.play()?.catch(() => undefined);
+  });
+}
+
 const ISLANDS: Record<string, (root: HTMLElement) => void> = {
   'before-after': beforeAfter,
   map,
+  'hero-video': heroVideo,
+  'video-play': videoPlay,
   slideshow,
   promotion,
   booking: (root) => void booking(root),

@@ -26,6 +26,7 @@ import { BookOnline } from './blocks/BookOnline';
 import { ProductGrid } from './blocks/ProductGrid';
 import { PromotionBanner } from './blocks/PromotionBanner';
 import { Directions } from './blocks/Directions';
+import { Video } from './blocks/Video';
 import { Logos } from './blocks/Logos';
 import { Stats } from './blocks/Stats';
 import { Steps } from './blocks/Steps';
@@ -65,6 +66,7 @@ export const BLOCKS: Record<string, AnyBlock> = Object.fromEntries(
     Steps,
     Logos,
     Directions,
+    Video,
     Text,
     CallToAction,
     Footer,

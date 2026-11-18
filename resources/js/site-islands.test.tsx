@@ -819,3 +819,106 @@ describe('map (Sprint 20.2)', () => {
     expect(document.activeElement).toBe(frame);
   });
 });
+
+describe('videos (Sprint 20.2)', () => {
+  const heroVideo = {
+    layout: 'video',
+    video: { src: '/storage/sites/01T/clip.mp4', poster: '/storage/sites/01T/clip-1280.webp' },
+  };
+  const setConnection = (c: { saveData?: boolean; effectiveType?: string } | undefined) =>
+    Object.defineProperty(navigator, 'connection', { value: c, configurable: true });
+  beforeEach(() => {
+    setConnection(undefined);
+    HTMLMediaElement.prototype.play = vi.fn(() => Promise.resolve());
+    HTMLMediaElement.prototype.pause = vi.fn();
+  });
+
+  it('adds a muted, looping, silent-to-screen-readers video over the poster, with a pause button', () => {
+    const def = BLOCKS.Hero!;
+    const html = renderToString(
+      <SiteRenderer
+        document={{
+          schema: 1,
+          blocks: [
+            {
+              id: 'h',
+              type: 'Hero',
+              version: def.version,
+              props: { ...def.defaults, ...heroVideo },
+            },
+          ],
+        }}
+        branding={branding}
+        site={{ businessName: 'Glow Salon', editing: false, menus: { header: [], footer: [] } }}
+      />,
+    );
+    expect(html).not.toContain('<video'); // the published HTML is the poster only
+    expect(html).toMatch(/<button[^>]*data-video-toggle="true"[^>]*hidden=""/);
+    publish('Hero', heroVideo); // islands start
+    const video = document.querySelector('video')!;
+    expect(video.src).toContain('/storage/sites/01T/clip.mp4');
+    expect(video.muted && video.loop && video.playsInline).toBe(true);
+    expect(video.getAttribute('aria-hidden')).toBe('true');
+    const toggle = document.querySelector<HTMLButtonElement>('[data-video-toggle]')!;
+    expect(toggle.hidden).toBe(false);
+    expect(video.play).toHaveBeenCalled();
+    // The browser starts it (jsdom doesn't play media).
+    Object.defineProperty(video, 'paused', { value: false, configurable: true });
+    video.dispatchEvent(new Event('play'));
+    expect(toggle.textContent).toBe('Pause the video');
+    toggle.click();
+    expect(video.pause).toHaveBeenCalled();
+    Object.defineProperty(video, 'paused', { value: true, configurable: true });
+    video.dispatchEvent(new Event('pause'));
+    expect(toggle.textContent).toBe('Play the video');
+  });
+
+  it.each([
+    [
+      'reduce motion',
+      () => {
+        window.matchMedia = ((q: string) => ({
+          matches: q.includes('reduce'),
+          media: q,
+          addEventListener() {},
+          removeEventListener() {},
+        })) as never;
+      },
+    ],
+    ['Save-Data', () => setConnection({ saveData: true })],
+    ['a slow connection', () => setConnection({ effectiveType: '3g' })],
+  ])('keeps the still poster under %s', (_, arrange) => {
+    arrange();
+    publish('Hero', heroVideo);
+    expect(document.querySelector('video')).toBeNull();
+    expect(document.querySelector<HTMLButtonElement>('[data-video-toggle]')!.hidden).toBe(true);
+    expect(document.querySelector('img')!.getAttribute('src')).toBe(
+      '/storage/sites/01T/clip-1280.webp',
+    );
+  });
+
+  it('falls back to the first photo, then to text, when a video hero has no video', () => {
+    publish('Hero', { layout: 'video', images: [{ src: '/a-1280.webp', alt: 'The salon' }] });
+    expect(document.querySelector('img')!.getAttribute('alt')).toBe('The salon');
+    publish('Hero', { layout: 'video' });
+    expect(document.querySelector('img')).toBeNull();
+    expect(document.querySelector('h1')).not.toBeNull();
+  });
+
+  it('plays a Video section only when tapped, with controls, and links to the file without JavaScript', () => {
+    publish('Video', {
+      video: { src: '/storage/sites/01T/tour.mp4', poster: '/storage/sites/01T/tour-1280.webp' },
+      description: 'A walk through the salon',
+    });
+    const link = document.querySelector<HTMLAnchorElement>('[data-video-play]')!;
+    expect(link.getAttribute('href')).toBe('/storage/sites/01T/tour.mp4');
+    expect(link.getAttribute('aria-label')).toBe('Play: A walk through the salon');
+    expect(document.querySelector('video')).toBeNull(); // islands started: still nothing until tapped
+    link.click();
+    const video = document.querySelector('video')!;
+    expect(video.controls).toBe(true);
+    expect(video.muted).toBe(false);
+    expect(video.getAttribute('aria-label')).toBe('A walk through the salon');
+    expect(document.activeElement).toBe(video);
+  });
+});

@@ -256,7 +256,16 @@ export default function Editor({
         ),
       },
     };
-  }, [businessName, branding, menus, urls.photos, urls.aiImage, urls.aiQuote, urls.pages]);
+  }, [
+    businessName,
+    branding,
+    menus,
+    urls.photos,
+    urls.videos,
+    urls.aiImage,
+    urls.aiQuote,
+    urls.pages,
+  ]);
 
   const initialData = useMemo(() => toPuck(content), [content]);
   // Puck doesn't record the page as loaded in its history, so the first edit after
