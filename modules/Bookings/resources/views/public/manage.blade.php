@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-ZA">
+<html lang="{{ app()->getLocale() }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,7 +22,7 @@
 <body>
 <main>
   <p>{{ $business }}</p>
-  <h1>Your booking</h1>
+  <h1>{{ __('Your booking') }}</h1>
   @if ($notice)
   <p class="card notice" role="status">{{ $notice }}</p>
   @endif
@@ -30,14 +30,14 @@
     <p><strong>{{ $service }}</strong> for {{ $customer }}</p>
     <p>{{ $when }}</p>
     @if (! empty($health))
-      <p>Your practitioner: <strong>{{ $health['practitioner'] }}</strong></p>
+      <p>{{ __('Your practitioner:') }} <strong>{{ $health['practitioner'] }}</strong></p>
       <p>You agreed to the video-consultation terms on {{ $health['agreed'] }}. Please be somewhere private when you join.</p>
     @endif
     @if ($online && $status === 'confirmed')
       @if ($joinUrl)
-      <p><a href="{{ $joinUrl }}" rel="noopener noreferrer"><strong>Join online now</strong></a></p>
+      <p><a href="{{ $joinUrl }}" rel="noopener noreferrer"><strong>{{ __('Join online now') }}</strong></a></p>
       @else
-      <p>This is an online appointment. Your joining link appears here 15 minutes before it starts.</p>
+      <p>{{ __('This is an online appointment. Your joining link appears here 15 minutes before it starts.') }}</p>
       @endif
     @endif
     @if (! $changeable)
@@ -47,47 +47,47 @@
 
   @if ($changeable)
   <section class="card" aria-label="Cancellation policy">
-    <h2>Cancellation policy</h2>
+    <h2>{{ __('Cancellation policy') }}</h2>
     <p>{{ $policy }}</p>
     @if ($deposit === 'refund')
-    <p><strong>If you cancel now, your deposit will be refunded.</strong></p>
+    <p><strong>{{ __('If you cancel now, your deposit will be refunded.') }}</strong></p>
     @elseif ($deposit === 'keep')
-    <p><strong>If you cancel now, the deposit is kept.</strong></p>
+    <p><strong>{{ __('If you cancel now, the deposit is kept.') }}</strong></p>
     @endif
   </section>
 
   <section class="card" aria-label="Move to another time">
-    <h2>Move to another time</h2>
+    <h2>{{ __('Move to another time') }}</h2>
     <form method="get" action="{{ $action }}">
       @foreach ($signature as $k => $v)<input type="hidden" name="{{ $k }}" value="{{ $v }}">@endforeach
-      <label for="date">Day</label>
+      <label for="date">{{ __('Day') }}</label>
       <input id="date" type="date" name="date" value="{{ $date }}" required>
-      <button type="submit" class="secondary">Show free times</button>
+      <button type="submit" class="secondary">{{ __('Show free times') }}</button>
     </form>
     @if ($date !== null)
       @if (count($times) === 0)
-      <p>No free times on this day. Try another day.</p>
+      <p>{{ __('No free times on this day. Try another day.') }}</p>
       @else
       <form method="post" action="{{ $moveUrl }}">
-        <fieldset class="times"><legend>Free times</legend>
+        <fieldset class="times"><legend>{{ __('Free times') }}</legend>
           @foreach ($times as $t)
           <label><input type="radio" name="starts_at" value="{{ $t['starts_at'] }}" required> {{ $t['label'] }}</label>
           @endforeach
         </fieldset>
-        <p><button type="submit">Move my booking</button></p>
+        <p><button type="submit">{{ __('Move my booking') }}</button></p>
       </form>
       @endif
     @endif
   </section>
 
   <section class="card" aria-label="Cancel">
-    <h2>Cancel</h2>
+    <h2>{{ __('Cancel') }}</h2>
     <form method="post" action="{{ $cancelUrl }}">
-      <button type="submit" class="secondary">Cancel my booking</button>
+      <button type="submit" class="secondary">{{ __('Cancel my booking') }}</button>
     </form>
   </section>
   @endif
-  <p><a href="/">Back to the website</a></p>
+  <p><a href="/">{{ __('Back to the website') }}</a></p>
 </main>
 </body>
 </html>

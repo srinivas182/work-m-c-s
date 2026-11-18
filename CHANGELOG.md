@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Languages — Sprint 24.3a (customer pages in the customer's language)
+- **On a business's own address, pages follow the customer's language.** It comes from `?lang=` (remembered), then the cookie, then the browser. The pages say which language they're in (`<html lang>`, `Content-Language`), and the customer's language is remembered with their contact for their messages.
+- **Translated so far:** the invoice page, the booking confirmations and manage pages, class and table pages, the shop order page, the mobile money and payment hand-off pages, and the enquiry thank-you page. The invoice page has language links.
+- **Signed links stay valid** when `lang` or `utm_source` is added.
+- `scripts/i18n-blade.py` marks plain texts in Blade views; sentences with values are written by hand with placeholders.
+
 ### Languages — Sprint 24.2b (messages in the customer's language)
 - **Messages to customers follow the customer's language.** Booking messages, reminders, receipts, invoice messages and invoice reminders use the standard wording translated. A business's own wording is used exactly as they wrote it.
 - **Each customer's language is remembered** from the customer page they used (24.3 turns this on), or set by the business. It's kept on the contact as `contacts.locale`, through `ContactBook::locale()` / `setLocale()`.

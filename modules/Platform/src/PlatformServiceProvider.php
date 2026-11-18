@@ -6,6 +6,7 @@ namespace Wurk\Platform;
 
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Database\Connection;
+use Illuminate\Routing\Middleware\ValidateSignature;
 use Wurk\Platform\Console\ListModulesCommand;
 use Wurk\Platform\Console\MakeModuleCommand;
 use Wurk\Platform\Contracts\AssistantTools;
@@ -99,6 +100,9 @@ final class PlatformServiceProvider extends ModuleServiceProvider
 
     protected function bootModule(): void
     {
+        $this->loadViewsFrom($this->modulePath('resources/views'), 'platform');
+        // A signed link stays valid when the customer picks their language (24.3) or it's tagged by where it was shared (23.3).
+        ValidateSignature::except(['lang', 'utm_source']);
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ListModulesCommand::class,

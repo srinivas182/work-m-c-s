@@ -41,7 +41,7 @@ it('uses the person’s language, saves a new choice, and loads its translations
 it('picks a visitor’s language from ?lang=, then the cookie, then the browser, else English', function () {
     $this->get($this->app('/sign-in'), ['Accept-Language' => 'fr-FR,fr;q=0.9'])->assertSee('<html lang="fr">', false);
     $this->get($this->app('/sign-in'), ['Accept-Language' => 'de-DE'])->assertSee('<html lang="en">', false);
-    $this->get($this->app('/sign-in?lang=af'))->assertSee('<html lang="af">', false)->assertCookie(Locales::COOKIE, 'af');
+    $this->get($this->app('/sign-in?lang=af'))->assertSee('<html lang="af">', false)->assertCookie(Locales::COOKIE, 'af', false);
 });
 
 it('writes rand in each language’s style', function () {

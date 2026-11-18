@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
 @if ($state === 'pending')<meta http-equiv="refresh" content="4">@endif
 <title>Pay {{ $amount }} with {{ $provider }} · {{ $business }}</title>
@@ -20,23 +20,23 @@ a{color:#1b1640}
 <main>
   <p class="muted">{{ $business }}</p>
   @if ($state === 'pending')
-    <h1>Check your phone</h1>
+    <h1>{{ __('Check your phone') }}</h1>
     <div class="wait" aria-hidden="true"></div>
-    <p role="status">Approve the payment of <strong>{{ $amount }}</strong> with your {{ $provider }} PIN on {{ $phone }}.</p>
-    <p class="muted">This page updates by itself. Didn’t get the prompt? Wait a moment, then send it again.</p>
-    <form method="post" action="{{ $action }}"><input type="hidden" name="phone" value="{{ $phone }}"><button type="submit">Send the prompt again</button></form>
+    <p role="status">{{ __('Approve the payment of :amount with your :provider PIN on :phone.', ['amount' => $amount, 'provider' => $provider, 'phone' => $phone]) }}</p>
+    <p class="muted">{{ __('This page updates by itself. Didn’t get the prompt? Wait a moment, then send it again.') }}</p>
+    <form method="post" action="{{ $action }}"><input type="hidden" name="phone" value="{{ $phone }}"><button type="submit">{{ __('Send the prompt again') }}</button></form>
   @else
-    <h1>Pay {{ $amount }} with {{ $provider }}</h1>
+    <h1>{{ __('Pay :amount with :provider', ['amount' => $amount, 'provider' => $provider]) }}</h1>
     @if ($failure)<p class="alert" role="alert">{{ $failure }}</p>@endif
     @if ($error)<p class="alert" role="alert">{{ $error }}</p>@endif
     <form method="post" action="{{ $action }}">
-      <label for="phone">Your {{ $provider }} number</label>
+      <label for="phone">{{ __('Your :provider number', ['provider' => $provider]) }}</label>
       <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required value="{{ $phone }}">
       <button type="submit">{{ $failure ? 'Try again' : 'Send the payment prompt' }}</button>
     </form>
-    <p class="muted">A prompt appears on your phone. Approve it with your PIN to pay.</p>
+    <p class="muted">{{ __('A prompt appears on your phone. Approve it with your PIN to pay.') }}</p>
   @endif
-  @if ($cancel !== '')<p><a href="{{ $cancel }}">Choose another way to pay</a></p>@endif
+  @if ($cancel !== '')<p><a href="{{ $cancel }}">{{ __('Choose another way to pay') }}</a></p>@endif
 </main>
 </body>
 </html>
