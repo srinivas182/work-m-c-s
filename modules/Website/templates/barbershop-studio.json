@@ -1,0 +1,491 @@
+{
+  "category": "barbershop",
+  "key": "barbershop-studio",
+  "name": "Street-style studio",
+  "position": 2,
+  "description": "Loud, fresh and late-open: designs, colour and a culture people come back for.",
+  "definition": {
+    "branding": {
+      "primary": "#111827",
+      "secondary": "#22D3EE",
+      "font_pairing": "bold",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "The work",
+          "type": "page",
+          "page": "work"
+        },
+        {
+          "label": "Prices",
+          "type": "page",
+          "page": "prices"
+        },
+        {
+          "label": "Book",
+          "type": "page",
+          "page": "book"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Barber studio — fades, designs and colour",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Your cut. Your story.",
+                "text": "Designs, colour, fades and line-ups — open late, music loud, chairs ready.",
+                "primaryLabel": "Book now",
+                "primaryHref": "/book",
+                "secondaryLabel": "See the work",
+                "secondaryHref": "/work",
+                "facts": [
+                  {
+                    "text": "Open until 20:00 on Fridays"
+                  },
+                  {
+                    "text": "Designs from the first cut"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/barbershop-studio/hero-1600.webp",
+                    "alt": "A barber cutting a hair design"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "numbers",
+              "type": "Stats",
+              "version": 1,
+              "props": {
+                "heading": "The studio in numbers",
+                "note": "Change these to your own.",
+                "items": [
+                  {
+                    "value": "5",
+                    "label": "chairs"
+                  },
+                  {
+                    "value": "7 days",
+                    "label": "a week"
+                  },
+                  {
+                    "value": "20:00",
+                    "label": "late on Fridays"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "work",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "The work",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/barbershop-studio/work-1-1600.webp",
+                    "alt": "A freestyle hair design"
+                  },
+                  {
+                    "src": "/images/templates/barbershop-studio/work-2-1600.webp",
+                    "alt": "Platinum-blonde short hair"
+                  },
+                  {
+                    "src": "/images/templates/barbershop-studio/work-3-1600.webp",
+                    "alt": "A high-top fade"
+                  },
+                  {
+                    "src": "/images/templates/barbershop-studio/work-4-1600.webp",
+                    "alt": "Clients waiting in the studio"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "What we do",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Fade + design",
+                    "description": "Any fade with a freestyle design",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Colour",
+                    "description": "Platinum, blonde or bright colour",
+                    "duration": "1–2 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Twists & sponge",
+                    "description": "Two-strand or sponge twists",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Line-up",
+                    "description": "Edges and beard line",
+                    "duration": "15 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "video",
+              "type": "Video",
+              "version": 1,
+              "props": {
+                "heading": "Inside the studio",
+                "text": "Thirty seconds of the studio on a Friday night.",
+                "video": {
+                  "src": "",
+                  "poster": ""
+                },
+                "description": "The studio on a busy Friday night"
+              }
+            },
+            {
+              "id": "brands",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Products we use",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Lock in your chair",
+                "text": "Book ahead on weekends — we fill up fast.",
+                "buttonLabel": "Book now",
+                "buttonHref": "/book"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "work",
+        "title": "The work",
+        "slug": "work",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "work",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Latest cuts",
+                "intro": "New work every week on our socials.",
+                "images": [
+                  {
+                    "src": "/images/templates/barbershop-studio/work-1-1600.webp",
+                    "alt": "A freestyle hair design"
+                  },
+                  {
+                    "src": "/images/templates/barbershop-studio/work-2-1600.webp",
+                    "alt": "Platinum-blonde short hair"
+                  },
+                  {
+                    "src": "/images/templates/barbershop-studio/work-3-1600.webp",
+                    "alt": "A high-top fade"
+                  },
+                  {
+                    "src": "/images/templates/barbershop-studio/work-4-1600.webp",
+                    "alt": "Clients waiting in the studio"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "Before & after",
+                "intro": "From overgrown to sharp.",
+                "layout": "slider",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "prices",
+        "title": "Prices",
+        "slug": "prices",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Prices",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Fade",
+                    "description": "Any fade",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Fade + design",
+                    "description": "Freestyle design",
+                    "duration": "1 hr",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Colour",
+                    "description": "Bleach and tone",
+                    "duration": "1–2 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Twists & sponge",
+                    "description": "Two-strand or sponge",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Beard",
+                    "description": "Shape and line",
+                    "duration": "20 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Kids",
+                    "description": "Under 12s",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "memberships",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Studio pass",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Fresh Friday pass",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "A cut every Friday this month, guaranteed slot",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Join",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Crew booking",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Four or more friends — before a party or a match",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/book"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "book",
+        "title": "Book",
+        "slug": "book",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book now",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "book-online",
+              "type": "BookOnline",
+              "version": 1,
+              "props": {
+                "mode": "appointments",
+                "heading": "Book online",
+                "intro": "Choose a service and a time that suits you.",
+                "fallbackText": "Call or message us to book.",
+                "fallbackLabel": "Contact us",
+                "fallbackHref": "/contact"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Hit us up",
+                "intro": "WhatsApp is quickest.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Late on Fridays and Saturdays."
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find us",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

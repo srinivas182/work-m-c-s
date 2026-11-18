@@ -1,0 +1,457 @@
+{
+  "category": "barbershop",
+  "key": "barbershop-classic",
+  "name": "Classic barbershop",
+  "position": 1,
+  "description": "Timeless and warm: a proper chair, a hot towel and a sharp line-up.",
+  "definition": {
+    "branding": {
+      "primary": "#7C2D12",
+      "secondary": "#CA8A04",
+      "font_pairing": "classic",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Prices",
+          "type": "page",
+          "page": "prices"
+        },
+        {
+          "label": "The barbers",
+          "type": "page",
+          "page": "team"
+        },
+        {
+          "label": "Book",
+          "type": "page",
+          "page": "book"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Classic barbershop — fades, shaves and beard work",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a cut",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Sharp cuts. Proper shaves. No rush.",
+                "text": "Fades, line-ups, beard work and hot-towel shaves — done properly, by barbers who know your style.",
+                "primaryLabel": "Book a cut",
+                "primaryHref": "/book",
+                "secondaryLabel": "Prices",
+                "secondaryHref": "/prices",
+                "facts": [
+                  {
+                    "text": "Walk-ins welcome"
+                  },
+                  {
+                    "text": "Open Saturdays"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/barbershop-classic/hero-1600.webp",
+                    "alt": "A barber giving a client a clean fade"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "The menu",
+                "intro": "Prices on the board in the shop. Ask about student days.",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Fade",
+                    "description": "Skin, low, mid or high — finished with a line-up",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Chiskop",
+                    "description": "Clean shave with a razor finish",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Beard trim & shape",
+                    "description": "Shaped, lined and oiled",
+                    "duration": "20 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Hot-towel shave",
+                    "description": "Lather, straight razor and a cold towel to finish",
+                    "duration": "40 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Kids’ cut",
+                    "description": "Under 12s, patient barbers",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "story",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "A barbershop, the way it should be",
+                "text": "Tell people when you opened, who taught you, and why your regulars keep coming back. Mention the music, the conversation and the coffee.",
+                "image": "/images/templates/barbershop-classic/chair-1600.webp",
+                "imageAlt": "The barber’s chair and mirror",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "cuts",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "Fresh from the chair",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/barbershop-classic/cut-1-1600.webp",
+                    "alt": "A skin fade with a crisp line-up"
+                  },
+                  {
+                    "src": "/images/templates/barbershop-classic/cut-2-1600.webp",
+                    "alt": "A beard trimmed and shaped"
+                  },
+                  {
+                    "src": "/images/templates/barbershop-classic/cut-3-1600.webp",
+                    "alt": "Twists on short natural hair"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What the regulars say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Your chair is waiting",
+                "text": "Book a time, or walk in — we’ll fit you in.",
+                "buttonLabel": "Book a cut",
+                "buttonHref": "/book"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "prices",
+        "title": "Prices",
+        "slug": "prices",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a cut",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Cuts and shaves",
+                "intro": "",
+                "note": "Pensioners and students: ask about weekday specials.",
+                "items": [
+                  {
+                    "name": "Fade",
+                    "description": "Any fade, with a line-up",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Taper",
+                    "description": "Natural finish at the neck",
+                    "duration": "40 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Chiskop",
+                    "description": "Razor finish",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Line-up only",
+                    "description": "Edges and beard line",
+                    "duration": "15 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Beard trim & shape",
+                    "description": "Shaped, lined and oiled",
+                    "duration": "20 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Hot-towel shave",
+                    "description": "Straight razor",
+                    "duration": "40 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Dye",
+                    "description": "Black or colour, cut not included",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Kids’ cut",
+                    "description": "Under 12s",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Regulars",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Fresh every fortnight",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Two cuts a month, booked ahead, beard trim included",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Groom & groomsmen",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Cuts and shaves for the wedding party, at the shop or the venue",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Ask us",
+                    "buttonHref": "/book"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "team",
+        "title": "The barbers",
+        "slug": "team",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a cut",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "The barbers",
+                "intro": "Each barber, their speciality and the days they work.",
+                "people": []
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Late nights on Fridays. Closed on public holidays unless we say so."
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "book",
+        "title": "Book",
+        "slug": "book",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a cut",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "book-online",
+              "type": "BookOnline",
+              "version": 1,
+              "props": {
+                "mode": "appointments",
+                "heading": "Book online",
+                "intro": "Choose a service and a time that suits you.",
+                "fallbackText": "Call or message us to book.",
+                "fallbackLabel": "Contact us",
+                "fallbackHref": "/contact"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Visit the shop",
+                "intro": "Walk in, or book a chair so you don’t wait.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the shop",
+                "address": "",
+                "landmark": "Tell people what the shop is next to.",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

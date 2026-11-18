@@ -82,3 +82,34 @@ it('previews a design in each of its three styles, which owners can choose and k
         expect($ts)->toMatch("/\\b{$style}: \\{[^}]*font_pairing: '{$preset['font_pairing']}',\\s*corners: '{$preset['corners']}'/s");
     }
 });
+
+it('ships complete designs: every photo exists in both sizes, no invented reviews, and enough designs per category', function () {
+    $perCategory = [];
+    foreach (glob(base_path('modules/Website/templates/*.json')) ?: [] as $file) {
+        $source = json_decode((string) file_get_contents($file), true, flags: JSON_THROW_ON_ERROR);
+        $perCategory[$source['category']] = ($perCategory[$source['category']] ?? 0) + 1;
+        $json = (string) json_encode($source['definition'], JSON_UNESCAPED_SLASHES);
+        preg_match_all('#/images/templates/([a-z0-9-]+)/([a-z0-9-]+)-1600\.webp#', $json, $m, PREG_SET_ORDER);
+        expect($m)->not->toBeEmpty("{$source['key']} has no photos");
+        foreach ($m as [$path, $key, $slot]) {
+            expect($key)->toBe($source['key']);
+            foreach ([640, 1600] as $w) {
+                expect(is_file(public_path("images/templates/{$key}/{$slot}-{$w}.webp")))->toBeTrue("{$key}/{$slot}-{$w}.webp is missing");
+            }
+        }
+        foreach ($source['definition']['pages'] as $page) {
+            $ids = array_column($page['content']['blocks'], 'id');
+            expect(array_unique($ids))->toHaveCount(count($ids), "{$source['key']}/{$page['key']} repeats a block id");
+            foreach ($page['content']['blocks'] as $block) {
+                if ($block['type'] === 'Testimonials') {
+                    expect($block['props']['items'] ?? [])->toBe([], "{$source['key']} invents reviews"); // owners add real ones
+                }
+            }
+        }
+    }
+    // Sprint 20.4 categories start with three designs each (20.5 brings the first twelve to three).
+    foreach (['barbershop', 'cleaning', 'car-wash', 'catering'] as $category) {
+        expect($perCategory[$category] ?? 0)->toBeGreaterThanOrEqual(3, "{$category} needs three designs");
+    }
+    expect(min($perCategory))->toBeGreaterThanOrEqual(2);
+});

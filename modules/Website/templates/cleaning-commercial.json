@@ -1,0 +1,438 @@
+{
+  "category": "cleaning",
+  "key": "cleaning-commercial",
+  "name": "Office & commercial cleaning",
+  "position": 2,
+  "description": "Corporate and reliable, for offices, shops, schools and clinics.",
+  "definition": {
+    "branding": {
+      "primary": "#1E3A8A",
+      "secondary": "#38BDF8",
+      "font_pairing": "modern",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Services",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "Request a site visit",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Office and commercial cleaning services",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Request a site visit",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Clean, safe workplaces — every day",
+                "text": "Daily office cleaning, hygiene services and deep cleans for offices, retail, schools and clinics.",
+                "primaryLabel": "Request a site visit",
+                "primaryHref": "/quote",
+                "secondaryLabel": "Services",
+                "secondaryHref": "/services",
+                "facts": [
+                  {
+                    "text": "Trained, uniformed staff"
+                  },
+                  {
+                    "text": "Supervised and audited"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/cleaning-commercial/hero-1600.webp",
+                    "alt": "Cleaners working in an office after hours"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "numbers",
+              "type": "Stats",
+              "version": 1,
+              "props": {
+                "heading": "How we work",
+                "note": "Change these to your own numbers.",
+                "items": [
+                  {
+                    "value": "24 h",
+                    "label": "to send your proposal"
+                  },
+                  {
+                    "value": "1",
+                    "label": "supervisor for every site"
+                  },
+                  {
+                    "value": "7 days",
+                    "label": "a week, on your schedule"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "services",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "What we look after",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "sparkles",
+                    "title": "Daily cleaning",
+                    "text": "Desks, floors, kitchens and bathrooms, before you open or after you close."
+                  },
+                  {
+                    "icon": "shield",
+                    "title": "Hygiene services",
+                    "text": "Sanitary bins, washroom supplies and deep sanitising."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Deep cleans",
+                    "text": "Carpets, windows, high-level dusting and after-builders cleans — early, late or at weekends."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "clients",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Clients who trust us",
+                "items": []
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registered and compliant",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "COIDA",
+                    "logo": "",
+                    "detail": "Workers registered for injury cover"
+                  },
+                  {
+                    "name": "UIF",
+                    "logo": "",
+                    "detail": "All staff registered"
+                  },
+                  {
+                    "name": "B-BBEE",
+                    "logo": "",
+                    "detail": "Add your level"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Starting is simple",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Site visit",
+                    "text": "We walk the site with you and listen."
+                  },
+                  {
+                    "title": "Proposal",
+                    "text": "A clear scope, schedule and monthly price."
+                  },
+                  {
+                    "title": "Start",
+                    "text": "A supervisor sets the team up and checks in with you weekly."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Let’s see your site",
+                "text": "A free site visit, a clear proposal.",
+                "buttonLabel": "Request a site visit",
+                "buttonHref": "/quote"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Services",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Request a site visit",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "promise",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "A team you can rely on",
+                "text": "Explain how you supervise sites, check quality and replace a cleaner who is off sick — so the client never notices.",
+                "image": "/images/templates/cleaning-commercial/site-1600.webp",
+                "imageAlt": "A clean, empty reception area",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "",
+                "note": "We quote per site after a visit.",
+                "items": [
+                  {
+                    "name": "Daily office cleaning",
+                    "description": "Monthly contract",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Retail and shopping centres",
+                    "description": "Monthly contract",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Schools and clinics",
+                    "description": "Hygiene-focused",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "After-builders clean",
+                    "description": "Once-off",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Carpet and upholstery",
+                    "description": "Once-off or scheduled",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Washroom hygiene",
+                    "description": "Monthly service",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions businesses ask",
+                "items": [
+                  {
+                    "question": "Do you sign contracts?",
+                    "answer": "Yes — monthly service agreements with a notice period."
+                  },
+                  {
+                    "question": "Who supplies the products?",
+                    "answer": "We do, unless you prefer your own."
+                  },
+                  {
+                    "question": "How do you check quality?",
+                    "answer": "Supervisor checklists and a monthly review with you."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Request a site visit",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Request a site visit",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Request a site visit",
+                "intro": "Tell us about your premises.",
+                "services": [
+                  {
+                    "name": "Daily cleaning"
+                  },
+                  {
+                    "name": "Hygiene services"
+                  },
+                  {
+                    "name": "Deep clean"
+                  },
+                  {
+                    "name": "After-builders clean"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Request a visit",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Company name",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Type of premises",
+                    "type": "choice",
+                    "choices": "Office, Retail, School, Clinic, Warehouse, Other",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Size (square metres, roughly)",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "How often?",
+                    "type": "choice",
+                    "choices": "Daily, A few times a week, Weekly, Once-off",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Or call our office.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -29,8 +29,8 @@ const templates = readdirSync('modules/Website/templates')
       },
   );
 
-test('all 24 templates are checked @screens', () => {
-  expect(templates.length).toBe(24);
+test('every template is checked, at least three for each category @screens', () => {
+  expect(templates.length).toBeGreaterThanOrEqual(36); // 24 (Sprints 6–7) + 12 from 20.4a
 });
 
 for (const [i, template] of templates.entries()) {
@@ -43,7 +43,7 @@ for (const [i, template] of templates.entries()) {
     );
     test.setTimeout(240_000);
     // Previews are limited to 120 a minute per visitor; each template counts as its own visitor (the e2e environment's
-    // load-test token, as in load/k6), so 24 templates checked in parallel aren't throttled.
+    // load-test token, as in load/k6), so templates checked in parallel aren't throttled.
     await page.setExtraHTTPHeaders({
       'X-Wurk-Load-Test': 'e2e-visitors',
       'X-Wurk-Load-Visitor': `10.18.5.${i + 1}`,

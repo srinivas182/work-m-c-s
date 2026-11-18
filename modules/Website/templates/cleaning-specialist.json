@@ -1,0 +1,451 @@
+{
+  "category": "cleaning",
+  "key": "cleaning-specialist",
+  "name": "Carpet, upholstery & pressure washing",
+  "position": 3,
+  "description": "Results-first, for carpet, couch, mattress and pressure-washing specialists.",
+  "definition": {
+    "branding": {
+      "primary": "#7C3AED",
+      "secondary": "#22C55E",
+      "font_pairing": "technical",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Prices",
+          "type": "page",
+          "page": "prices"
+        },
+        {
+          "label": "Book a clean",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Carpet, couch and mattress cleaning, pressure washing",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a clean",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "collage",
+                "heading": "Like new again",
+                "text": "Carpets, couches, mattresses and paving — deep-cleaned, dried fast, and priced before we start.",
+                "primaryLabel": "Book a clean",
+                "primaryHref": "/quote",
+                "secondaryLabel": "Prices",
+                "secondaryHref": "/prices",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/cleaning-specialist/carpet-1600.webp",
+                    "alt": "A carpet being steam-cleaned"
+                  },
+                  {
+                    "src": "/images/templates/cleaning-specialist/couch-1600.webp",
+                    "alt": "A couch being cleaned"
+                  },
+                  {
+                    "src": "/images/templates/cleaning-specialist/paving-1600.webp",
+                    "alt": "Paving being pressure-washed"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "ba",
+              "type": "BeforeAfter",
+              "version": 1,
+              "props": {
+                "heading": "See the difference",
+                "intro": "Real jobs, same day.",
+                "layout": "slider",
+                "items": []
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "What we clean",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Carpets",
+                    "description": "Hot-water extraction, fast drying",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Couches & chairs",
+                    "description": "Fabric and leather",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Mattresses",
+                    "description": "Dust mites, stains and odours",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Rugs",
+                    "description": "At your home or at our plant",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Paving & driveways",
+                    "description": "Pressure washing and sealing",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Car interiors",
+                    "description": "Seats, carpets and roof lining",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why it works",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "sparkles",
+                    "title": "Machines, not shortcuts",
+                    "text": "Truck-mounted and portable extraction for deep cleans."
+                  },
+                  {
+                    "icon": "heart",
+                    "title": "Safe for children and pets",
+                    "text": "Products we’re happy to use in our own homes."
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "Dry in hours",
+                    "text": "Most carpets are dry the same day."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What customers say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Get a price today",
+                "text": "Send photos on WhatsApp for a fast quote.",
+                "buttonLabel": "Book a clean",
+                "buttonHref": "/quote"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "prices",
+        "title": "Prices",
+        "slug": "prices",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a clean",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Prices",
+                "intro": "",
+                "note": "Stains like red wine or ink may need extra treatment; we tell you first.",
+                "items": [
+                  {
+                    "name": "Carpet, per room",
+                    "description": "Up to 16 m²",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "3-seater couch",
+                    "description": "Fabric",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Mattress",
+                    "description": "Single to king",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Rug",
+                    "description": "Per square metre",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Paving",
+                    "description": "Per square metre",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Car interior",
+                    "description": "Sedan or SUV",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "bundles",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Bundles",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Moving out",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "All carpets and the oven cleaned for your deposit",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/quote"
+                  },
+                  {
+                    "name": "Allergy care",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Mattresses and couches, every 6 months",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Book",
+                    "buttonHref": "/quote"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "How long until I can use the carpet?",
+                    "answer": "Usually 2–6 hours, depending on the weather and airflow."
+                  },
+                  {
+                    "question": "Will every stain come out?",
+                    "answer": "Most do. We test first and tell you honestly what to expect."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Book a clean",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a clean",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Book a clean",
+                "intro": "Tell us what needs cleaning; add photos if you can.",
+                "services": [
+                  {
+                    "name": "Carpets"
+                  },
+                  {
+                    "name": "Couches"
+                  },
+                  {
+                    "name": "Mattresses"
+                  },
+                  {
+                    "name": "Rugs"
+                  },
+                  {
+                    "name": "Paving"
+                  },
+                  {
+                    "name": "Car interior"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Get my price",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Photos (optional)",
+                    "type": "file",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "Preferred date",
+                    "type": "date",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we cover",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "WhatsApp photos for the fastest quote.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

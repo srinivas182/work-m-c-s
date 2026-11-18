@@ -1,0 +1,456 @@
+{
+  "category": "catering",
+  "key": "catering-events",
+  "name": "Event catering",
+  "position": 1,
+  "description": "Generous and celebratory: weddings, funerals, parties and traditional ceremonies.",
+  "definition": {
+    "branding": {
+      "primary": "#9A3412",
+      "secondary": "#16A34A",
+      "font_pairing": "elegant",
+      "corners": "soft"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Sample menus",
+          "type": "page",
+          "page": "menus"
+        },
+        {
+          "label": "Get a quote",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Event catering — weddings, funerals and celebrations",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "slideshow",
+                "heading": "Food your guests will talk about",
+                "text": "Weddings, memorials, birthdays and traditional ceremonies — cooked with love, served on time.",
+                "primaryLabel": "Get a quote",
+                "primaryHref": "/quote",
+                "secondaryLabel": "Sample menus",
+                "secondaryHref": "/menus",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/catering-events/spread-1600.webp",
+                    "alt": "A buffet table with many dishes"
+                  },
+                  {
+                    "src": "/images/templates/catering-events/plated-1600.webp",
+                    "alt": "A plated main course"
+                  },
+                  {
+                    "src": "/images/templates/catering-events/team-1600.webp",
+                    "alt": "Chefs serving guests at a function"
+                  },
+                  {
+                    "src": "/images/templates/catering-events/dessert-1600.webp",
+                    "alt": "A dessert table"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why families choose us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "heart",
+                    "title": "Cooked like at home",
+                    "text": "Traditional and modern dishes, made fresh on the day."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Staff included",
+                    "text": "Servers, chafing dishes and clean-up on request."
+                  },
+                  {
+                    "icon": "calendar",
+                    "title": "Big or small",
+                    "text": "From 30 to 1 000 guests."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Menus per guest",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Traditional",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Pap, samp, rice, chakalaka, salads, two meats, dessert",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  },
+                  {
+                    "name": "Celebration buffet",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Three mains, sides, salads and desserts",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  },
+                  {
+                    "name": "Plated dinner",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Starter, main and dessert, served at the table",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "gallery",
+              "type": "Gallery",
+              "version": 1,
+              "props": {
+                "heading": "From recent events",
+                "intro": "",
+                "images": [
+                  {
+                    "src": "/images/templates/catering-events/spread-1600.webp",
+                    "alt": "A buffet table with many dishes"
+                  },
+                  {
+                    "src": "/images/templates/catering-events/plated-1600.webp",
+                    "alt": "A plated main course"
+                  },
+                  {
+                    "src": "/images/templates/catering-events/team-1600.webp",
+                    "alt": "Chefs serving guests at a function"
+                  },
+                  {
+                    "src": "/images/templates/catering-events/dessert-1600.webp",
+                    "alt": "A dessert table"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What hosts say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Planning an event?",
+                "text": "Tell us the date and guests — we’ll send a menu and price.",
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "menus",
+        "title": "Sample menus",
+        "slug": "menus",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "menu",
+              "type": "FoodMenu",
+              "version": 1,
+              "props": {
+                "heading": "Sample menu",
+                "intro": "Every menu is made to order — tell us what you love.",
+                "note": "Halaal, vegetarian and other needs on request.",
+                "sections": [
+                  {
+                    "name": "Mains",
+                    "dishes": [
+                      {
+                        "name": "Beef stew",
+                        "description": "Slow-cooked",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Roast chicken",
+                        "description": "Herb and lemon",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Lamb curry",
+                        "description": "Mild or hot",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Sides",
+                    "dishes": [
+                      {
+                        "name": "Pap & chakalaka",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Samp & beans",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Yellow rice",
+                        "description": "With raisins",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Salads",
+                    "dishes": [
+                      {
+                        "name": "Beetroot salad",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Coleslaw",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Potato salad",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Desserts",
+                    "dishes": [
+                      {
+                        "name": "Malva pudding",
+                        "description": "With custard",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Trifle",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      },
+                      {
+                        "name": "Fruit platter",
+                        "description": "",
+                        "price": 0,
+                        "tags": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Get a quote",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Get a quote",
+                "intro": "Tell us about your event.",
+                "services": [
+                  {
+                    "name": "Wedding"
+                  },
+                  {
+                    "name": "Memorial / funeral"
+                  },
+                  {
+                    "name": "Birthday"
+                  },
+                  {
+                    "name": "Traditional ceremony"
+                  },
+                  {
+                    "name": "Corporate event"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Get my quote",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Event date",
+                    "type": "date",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Number of guests",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Venue / area",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Staff and equipment?",
+                    "type": "choice",
+                    "choices": "Food only, Food and servers, Full service",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Call or WhatsApp to talk about your menu.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

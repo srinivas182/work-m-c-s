@@ -1,0 +1,469 @@
+{
+  "category": "cleaning",
+  "key": "cleaning-home",
+  "name": "Home cleaning",
+  "position": 1,
+  "description": "Bright and trustworthy, for regular, deep and move-in or move-out cleans.",
+  "definition": {
+    "branding": {
+      "primary": "#0369A1",
+      "secondary": "#10B981",
+      "font_pairing": "friendly",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Our cleans",
+          "type": "page",
+          "page": "services"
+        },
+        {
+          "label": "Get a quote",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Home cleaning — regular, deep and move-out cleans",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Come home to a clean house",
+                "text": "Vetted, trained cleaners for regular cleans, deep cleans and moving day — booked in minutes.",
+                "primaryLabel": "Get a quote",
+                "primaryHref": "/quote",
+                "secondaryLabel": "Our cleans",
+                "secondaryHref": "/services",
+                "facts": [
+                  {
+                    "text": "Vetted and trained"
+                  },
+                  {
+                    "text": "We bring the products"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/cleaning-home/hero-1600.webp",
+                    "alt": "A cleaner wiping a kitchen counter"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Our cleans",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Regular clean",
+                    "description": "Weekly or every two weeks: floors, bathrooms, kitchen, dusting",
+                    "duration": "4–6 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Deep clean",
+                    "description": "Inside cupboards, ovens, windows and the corners",
+                    "duration": "1 day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Move-in / move-out",
+                    "description": "Empty home, top to bottom, ready for the keys",
+                    "duration": "1 day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Ironing",
+                    "description": "Washed clothes ironed and folded",
+                    "duration": "2–4 hrs",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How it works",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Ask for a quote",
+                    "text": "Tell us the size of your home and the clean you need."
+                  },
+                  {
+                    "title": "Pick a day",
+                    "text": "We confirm the time and who is coming."
+                  },
+                  {
+                    "title": "Relax",
+                    "text": "Your cleaner arrives with products and equipment."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why families trust us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "shield",
+                    "title": "Vetted cleaners",
+                    "text": "References and background checks for everyone we send."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Same cleaner",
+                    "text": "For regular cleans, the same person each time where possible."
+                  },
+                  {
+                    "icon": "check",
+                    "title": "Happy or we return",
+                    "text": "Missed something? Tell us within 24 hours and we come back."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "team",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "People you’ll be glad to let in",
+                "text": "Introduce your team: how you train them, how long they’ve been with you, and how you look after them.",
+                "image": "/images/templates/cleaning-home/team-1600.webp",
+                "imageAlt": "The cleaning team in uniform",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What families say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Book your first clean",
+                "text": "Get a price in a few minutes.",
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "services",
+        "title": "Our cleans",
+        "slug": "services",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Cleans and prices",
+                "intro": "",
+                "note": "Prices depend on the size of your home; we confirm before we book.",
+                "items": [
+                  {
+                    "name": "Regular clean",
+                    "description": "Up to 3 bedrooms",
+                    "duration": "4–6 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Regular clean, larger home",
+                    "description": "4 bedrooms or more",
+                    "duration": "6–8 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Deep clean",
+                    "description": "Inside cupboards, oven, windows",
+                    "duration": "1 day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Move-in / move-out",
+                    "description": "Empty home",
+                    "duration": "1 day",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Windows",
+                    "description": "Inside and out, ground floor",
+                    "duration": "2–3 hrs",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Ironing",
+                    "description": "Per basket",
+                    "duration": "2 hrs",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "packages",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Regular plans",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Weekly",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "The same day each week, the same cleaner",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  },
+                  {
+                    "name": "Every two weeks",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "A fresh home twice a month",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Get a quote",
+                    "buttonHref": "/quote"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Do I need to be home?",
+                    "answer": "No. Many clients leave a key or a gate code with us."
+                  },
+                  {
+                    "question": "Do you bring products?",
+                    "answer": "Yes, and equipment. Tell us if you prefer your own products."
+                  },
+                  {
+                    "question": "Are your cleaners insured?",
+                    "answer": "Tell clients here how you cover damage or breakages."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Get a quote",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Get a quote",
+                "intro": "A few details and we’ll send a price.",
+                "services": [
+                  {
+                    "name": "Regular clean"
+                  },
+                  {
+                    "name": "Deep clean"
+                  },
+                  {
+                    "name": "Move-in / move-out"
+                  },
+                  {
+                    "name": "Ironing"
+                  },
+                  {
+                    "name": "Windows"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Get my price",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Bedrooms",
+                    "type": "choice",
+                    "choices": "1, 2, 3, 4, 5 or more",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Bathrooms",
+                    "type": "choice",
+                    "choices": "1, 2, 3, 4 or more",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Preferred date",
+                    "type": "date",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "areas",
+              "type": "ServiceAreas",
+              "version": 1,
+              "props": {
+                "heading": "Areas we clean",
+                "intro": "",
+                "areas": [],
+                "note": "",
+                "mapQuery": ""
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact us",
+                "intro": "Questions? WhatsApp us.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

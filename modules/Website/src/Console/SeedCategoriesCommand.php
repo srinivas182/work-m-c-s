@@ -7,7 +7,7 @@ namespace Wurk\Website\Console;
 use Illuminate\Console\Command;
 use Wurk\Website\Models\SiteCategory;
 
-/** The 12 agreed categories (sprint plan revision 3). Safe to re-run; never overwrites staff edits. */
+/** The agreed categories: 12 (sprint plan revision 3), then more from Sprint 20.4. Safe to re-run; never overwrites staff edits. */
 final class SeedCategoriesCommand extends Command
 {
     public const CATEGORIES = [
@@ -23,6 +23,11 @@ final class SeedCategoriesCommand extends Command
         ['education-training', 'Education & training', 'Tutors, online classes and early-learning centres', 'graduation-cap'],
         ['events-creative', 'Events & creative', 'Photographers, venues and event planners', 'camera'],
         ['transport-logistics', 'Transport & logistics', 'Shuttles, tours, couriers and removals', 'truck'],
+        // Sprint 20.4a
+        ['barbershop', 'Barbershop', 'Barbers, studios and mobile barbers', 'scissors'],
+        ['cleaning', 'Cleaning', 'Home, office and specialist cleaning', 'sparkles'],
+        ['car-wash', 'Car wash', 'Car washes, detailing studios and mobile washes', 'droplets'],
+        ['catering', 'Catering', 'Event, office and home-kitchen catering', 'chef-hat'],
     ];
 
     protected $signature = 'website:seed-categories';

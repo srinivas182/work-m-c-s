@@ -72,7 +72,9 @@ export function HeroSlideshow({
       <ul
         ref={track}
         data-hs-track
-        className="flex snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto [&::-webkit-scrollbar]:hidden"
+        // Keyboard users can scroll the photos with the arrow keys (WCAG 2.1.1; axe scrollable-region-focusable).
+        tabIndex={0}
+        className="flex snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto rounded-[var(--s-radius)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--s-brand)] [&::-webkit-scrollbar]:hidden"
         onScroll={(e) => {
           const el = e.currentTarget;
           setIndex(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)));

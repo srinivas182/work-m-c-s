@@ -14,6 +14,9 @@ import {
   GraduationCap,
   Camera,
   Truck,
+  Sparkles,
+  Droplets,
+  ChefHat,
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
@@ -407,6 +410,9 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   'graduation-cap': GraduationCap,
   camera: Camera,
   truck: Truck,
+  sparkles: Sparkles,
+  droplets: Droplets,
+  'chef-hat': ChefHat,
 };
 
 function CategoryStep({ data, catalogue }: Pick<Props, 'data' | 'catalogue'>) {

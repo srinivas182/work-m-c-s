@@ -1,120 +1,505 @@
 {
   "education-early-learning": {
-    "garden": {"shows": "Young children playing outside in a safe, green garden or play area", "search": "children playing outdoors Africa"},
-    "play": {"shows": "A teacher and small children doing a hands-on activity (blocks, painting)", "search": "preschool teacher children Africa"},
-    "room": {"shows": "A bright, tidy classroom with small tables and children’s work on the walls", "search": "preschool classroom"}
+    "garden": {
+      "shows": "Young children playing outside in a safe, green garden or play area",
+      "search": "children playing outdoors Africa"
+    },
+    "play": {
+      "shows": "A teacher and small children doing a hands-on activity (blocks, painting)",
+      "search": "preschool teacher children Africa"
+    },
+    "room": {
+      "shows": "A bright, tidy classroom with small tables and children’s work on the walls",
+      "search": "preschool classroom"
+    }
   },
   "education-tutor": {
-    "portrait": {"shows": "A friendly tutor, head and shoulders, looking at the camera", "search": "Black teacher portrait"},
-    "study": {"shows": "A tutor helping a learner at a desk with books or a laptop", "search": "student studying with tutor Africa"}
+    "portrait": {
+      "shows": "A friendly tutor, head and shoulders, looking at the camera",
+      "search": "Black teacher portrait"
+    },
+    "study": {
+      "shows": "A tutor helping a learner at a desk with books or a laptop",
+      "search": "student studying with tutor Africa"
+    }
   },
   "events-photographer": {
-    "hero": {"shows": "A striking wedding or event photograph — a couple or a celebration", "search": "African wedding couple"},
-    "shot-1": {"shows": "A portrait from a shoot (graduation, family or studio)", "search": "Black family portrait"},
-    "shot-2": {"shows": "A candid moment at an event — dancing, laughter, guests", "search": "African celebration dancing"},
-    "shot-3": {"shows": "A detail shot — rings, flowers, décor or a cake", "search": "wedding details flowers"}
+    "hero": {
+      "shows": "A striking wedding or event photograph — a couple or a celebration",
+      "search": "African wedding couple"
+    },
+    "shot-1": {
+      "shows": "A portrait from a shoot (graduation, family or studio)",
+      "search": "Black family portrait"
+    },
+    "shot-2": {
+      "shows": "A candid moment at an event — dancing, laughter, guests",
+      "search": "African celebration dancing"
+    },
+    "shot-3": {
+      "shows": "A detail shot — rings, flowers, décor or a cake",
+      "search": "wedding details flowers"
+    }
   },
   "events-venue-planner": {
-    "detail": {"shows": "A styled table detail — place settings, flowers, candles", "search": "event table setting"},
-    "garden": {"shows": "An outdoor venue or garden set up for a ceremony", "search": "outdoor wedding venue"},
-    "hall": {"shows": "An indoor hall dressed for a function, wide view", "search": "event hall decor"},
-    "table": {"shows": "Guests at a long table during a celebration", "search": "African dinner party guests"}
+    "detail": {
+      "shows": "A styled table detail — place settings, flowers, candles",
+      "search": "event table setting"
+    },
+    "garden": {
+      "shows": "An outdoor venue or garden set up for a ceremony",
+      "search": "outdoor wedding venue"
+    },
+    "hall": {
+      "shows": "An indoor hall dressed for a function, wide view",
+      "search": "event hall decor"
+    },
+    "table": {
+      "shows": "Guests at a long table during a celebration",
+      "search": "African dinner party guests"
+    }
   },
   "fitness-gym-studio": {
-    "class": {"shows": "A group class in progress — energy, movement, a coach leading", "search": "fitness class Black women"},
-    "floor": {"shows": "The gym floor with equipment, clean and well lit", "search": "gym interior weights"},
-    "hero": {"shows": "One athlete training hard (lifting, boxing or running)", "search": "Black man training gym"}
+    "class": {
+      "shows": "A group class in progress — energy, movement, a coach leading",
+      "search": "fitness class Black women"
+    },
+    "floor": {
+      "shows": "The gym floor with equipment, clean and well lit",
+      "search": "gym interior weights"
+    },
+    "hero": {
+      "shows": "One athlete training hard (lifting, boxing or running)",
+      "search": "Black man training gym"
+    }
   },
   "fitness-personal-trainer": {
-    "portrait": {"shows": "The trainer, confident, in training clothes", "search": "Black personal trainer portrait"},
-    "session": {"shows": "A trainer coaching one client through an exercise", "search": "personal trainer client workout"}
+    "portrait": {
+      "shows": "The trainer, confident, in training clothes",
+      "search": "Black personal trainer portrait"
+    },
+    "session": {
+      "shows": "A trainer coaching one client through an exercise",
+      "search": "personal trainer client workout"
+    }
   },
   "health-dental": {
-    "hero": {"shows": "A dentist with a relaxed, smiling patient in a bright surgery", "search": "Black dentist patient smile"},
-    "room": {"shows": "A clean, modern treatment room", "search": "dental clinic room"}
+    "hero": {
+      "shows": "A dentist with a relaxed, smiling patient in a bright surgery",
+      "search": "Black dentist patient smile"
+    },
+    "room": {
+      "shows": "A clean, modern treatment room",
+      "search": "dental clinic room"
+    }
   },
   "health-doctor": {
-    "consult": {"shows": "A doctor talking with a patient across a desk", "search": "Black doctor consultation patient"},
-    "practice": {"shows": "A welcoming reception or waiting area", "search": "medical clinic reception"}
+    "consult": {
+      "shows": "A doctor talking with a patient across a desk",
+      "search": "Black doctor consultation patient"
+    },
+    "practice": {
+      "shows": "A welcoming reception or waiting area",
+      "search": "medical clinic reception"
+    }
   },
   "hospitality-hotel": {
-    "garden": {"shows": "The garden, pool or view guests enjoy", "search": "lodge garden pool Africa"},
-    "hero": {"shows": "The guesthouse or lodge from outside, in good light", "search": "guesthouse exterior Africa"},
-    "lounge": {"shows": "A comfortable lounge or breakfast area", "search": "hotel lounge interior"},
-    "room-1": {"shows": "A made-up bedroom, bright and inviting", "search": "hotel bedroom"},
-    "room-2": {"shows": "A second room type or bathroom detail", "search": "hotel room bathroom"}
+    "garden": {
+      "shows": "The garden, pool or view guests enjoy",
+      "search": "lodge garden pool Africa"
+    },
+    "hero": {
+      "shows": "The guesthouse or lodge from outside, in good light",
+      "search": "guesthouse exterior Africa"
+    },
+    "lounge": {
+      "shows": "A comfortable lounge or breakfast area",
+      "search": "hotel lounge interior"
+    },
+    "room-1": {
+      "shows": "A made-up bedroom, bright and inviting",
+      "search": "hotel bedroom"
+    },
+    "room-2": {
+      "shows": "A second room type or bathroom detail",
+      "search": "hotel room bathroom"
+    }
   },
   "hospitality-restaurant": {
-    "dish-1": {"shows": "A signature dish, plated, close up", "search": "African food plate"},
-    "dish-2": {"shows": "A second dish or a spread of food on the table", "search": "African dishes table spread"},
-    "kitchen": {"shows": "A cook at work in the kitchen", "search": "Black chef cooking kitchen"},
-    "room": {"shows": "The dining room with guests or set tables", "search": "restaurant interior diners"}
+    "dish-1": {
+      "shows": "A signature dish, plated, close up",
+      "search": "African food plate"
+    },
+    "dish-2": {
+      "shows": "A second dish or a spread of food on the table",
+      "search": "African dishes table spread"
+    },
+    "kitchen": {
+      "shows": "A cook at work in the kitchen",
+      "search": "Black chef cooking kitchen"
+    },
+    "room": {
+      "shows": "The dining room with guests or set tables",
+      "search": "restaurant interior diners"
+    }
   },
   "mechanics-panel-auto-electrical": {
-    "hero": {"shows": "A technician working on a car (panel, paint or wiring)", "search": "Black mechanic car repair"},
-    "work": {"shows": "A close-up of the work — diagnostics, wiring or a finished panel", "search": "car diagnostics mechanic"}
+    "hero": {
+      "shows": "A technician working on a car (panel, paint or wiring)",
+      "search": "Black mechanic car repair"
+    },
+    "work": {
+      "shows": "A close-up of the work — diagnostics, wiring or a finished panel",
+      "search": "car diagnostics mechanic"
+    }
   },
   "mechanics-workshop": {
-    "bay": {"shows": "A workshop bay with a car on a lift", "search": "auto workshop car lift"},
-    "hero": {"shows": "A mechanic under the bonnet, focused", "search": "African mechanic engine"}
+    "bay": {
+      "shows": "A workshop bay with a car on a lift",
+      "search": "auto workshop car lift"
+    },
+    "hero": {
+      "shows": "A mechanic under the bonnet, focused",
+      "search": "African mechanic engine"
+    }
   },
   "professional-advisory": {
-    "meeting": {"shows": "An adviser meeting a client, papers or a laptop on the table", "search": "Black business meeting office"},
-    "office": {"shows": "A professional office or team at work", "search": "African professionals office"}
+    "meeting": {
+      "shows": "An adviser meeting a client, papers or a laptop on the table",
+      "search": "Black business meeting office"
+    },
+    "office": {
+      "shows": "A professional office or team at work",
+      "search": "African professionals office"
+    }
   },
   "professional-agency": {
-    "studio": {"shows": "A creative team working together in a studio", "search": "Black creative team studio"}
+    "studio": {
+      "shows": "A creative team working together in a studio",
+      "search": "Black creative team studio"
+    }
   },
   "retail-boutique": {
-    "look-1": {"shows": "A styled outfit or product, fashion-shoot quality", "search": "African fashion model"},
-    "look-2": {"shows": "A second look or product", "search": "African print fashion"},
-    "look-3": {"shows": "A third look, accessories or a detail", "search": "fashion accessories"},
-    "store": {"shows": "The shop floor or rails, inviting", "search": "boutique clothing store"}
+    "look-1": {
+      "shows": "A styled outfit or product, fashion-shoot quality",
+      "search": "African fashion model"
+    },
+    "look-2": {
+      "shows": "A second look or product",
+      "search": "African print fashion"
+    },
+    "look-3": {
+      "shows": "A third look, accessories or a detail",
+      "search": "fashion accessories"
+    },
+    "store": {
+      "shows": "The shop floor or rails, inviting",
+      "search": "boutique clothing store"
+    }
   },
   "retail-general-store": {
-    "counter": {"shows": "A shopkeeper at the counter serving a customer", "search": "African shopkeeper store"},
-    "shelves": {"shows": "Well-stocked shelves", "search": "grocery shelves"}
+    "counter": {
+      "shows": "A shopkeeper at the counter serving a customer",
+      "search": "African shopkeeper store"
+    },
+    "shelves": {
+      "shows": "Well-stocked shelves",
+      "search": "grocery shelves"
+    }
   },
   "salon-hair-braids": {
-    "hero": {"shows": "A stylist braiding a client’s hair, or a finished braided style", "search": "braids hairstylist"},
-    "story": {"shows": "The stylist or owner, warm and welcoming", "search": "Black hairstylist portrait"},
-    "work-1": {"shows": "Finished style: knotless braids", "search": "knotless braids"},
-    "work-2": {"shows": "Finished style: cornrows or locs", "search": "cornrows hairstyle"},
-    "work-3": {"shows": "Finished style: natural hair or a wig install", "search": "natural hair afro"}
+    "hero": {
+      "shows": "A stylist braiding a client’s hair, or a finished braided style",
+      "search": "braids hairstylist"
+    },
+    "story": {
+      "shows": "The stylist or owner, warm and welcoming",
+      "search": "Black hairstylist portrait"
+    },
+    "work-1": {
+      "shows": "Finished style: knotless braids",
+      "search": "knotless braids"
+    },
+    "work-2": {
+      "shows": "Finished style: cornrows or locs",
+      "search": "cornrows hairstyle"
+    },
+    "work-3": {
+      "shows": "Finished style: natural hair or a wig install",
+      "search": "natural hair afro"
+    }
   },
   "salon-nails-lashes-barbers": {
-    "collage-1": {"shows": "Nail art close up", "search": "nail art manicure"},
-    "collage-2": {"shows": "Lashes or brows close up", "search": "eyelash extensions"},
-    "collage-3": {"shows": "A fresh haircut or fade", "search": "barber fade haircut"},
-    "studio": {"shows": "The studio — stations, chairs, light", "search": "beauty salon interior"},
-    "work-1": {"shows": "A technician working on a client", "search": "nail technician client"}
+    "collage-1": {
+      "shows": "Nail art close up",
+      "search": "nail art manicure"
+    },
+    "collage-2": {
+      "shows": "Lashes or brows close up",
+      "search": "eyelash extensions"
+    },
+    "collage-3": {
+      "shows": "A fresh haircut or fade",
+      "search": "barber fade haircut"
+    },
+    "studio": {
+      "shows": "The studio — stations, chairs, light",
+      "search": "beauty salon interior"
+    },
+    "work-1": {
+      "shows": "A technician working on a client",
+      "search": "nail technician client"
+    }
   },
   "spa-day-spa": {
-    "hero": {"shows": "A calm treatment — massage or facial", "search": "Black woman spa massage"},
-    "room": {"shows": "A treatment room, soft light, towels and plants", "search": "spa treatment room"},
-    "treat-1": {"shows": "A facial or skincare treatment", "search": "facial treatment skincare"},
-    "treat-2": {"shows": "A massage, hands and oils", "search": "massage oils hands"},
-    "treat-3": {"shows": "Spa details — stones, candles, products", "search": "spa stones candles", "decorative": true}
+    "hero": {
+      "shows": "A calm treatment — massage or facial",
+      "search": "Black woman spa massage"
+    },
+    "room": {
+      "shows": "A treatment room, soft light, towels and plants",
+      "search": "spa treatment room"
+    },
+    "treat-1": {
+      "shows": "A facial or skincare treatment",
+      "search": "facial treatment skincare"
+    },
+    "treat-2": {
+      "shows": "A massage, hands and oils",
+      "search": "massage oils hands"
+    },
+    "treat-3": {
+      "shows": "Spa details — stones, candles, products",
+      "search": "spa stones candles",
+      "decorative": true
+    }
   },
   "spa-wellness-practitioner": {
-    "portrait": {"shows": "The practitioner, calm and approachable", "search": "Black wellness coach portrait"},
-    "space": {"shows": "The practice room or a peaceful space", "search": "yoga meditation room"}
+    "portrait": {
+      "shows": "The practitioner, calm and approachable",
+      "search": "Black wellness coach portrait"
+    },
+    "space": {
+      "shows": "The practice room or a peaceful space",
+      "search": "yoga meditation room"
+    }
   },
   "trades-home-services": {
-    "hero": {"shows": "A tradesperson at work in a home (plumbing, painting, building)", "search": "Black plumber worker home"},
-    "work": {"shows": "Finished work — a new kitchen, bathroom or painted room", "search": "renovated kitchen"}
+    "hero": {
+      "shows": "A tradesperson at work in a home (plumbing, painting, building)",
+      "search": "Black plumber worker home"
+    },
+    "work": {
+      "shows": "Finished work — a new kitchen, bathroom or painted room",
+      "search": "renovated kitchen"
+    }
   },
   "trades-solar-electrical": {
-    "board": {"shows": "An electrician at a distribution board or inverter", "search": "electrician working"},
-    "hero": {"shows": "Solar panels on a roof, under a blue sky", "search": "solar panels roof Africa"},
-    "roof": {"shows": "Installers fitting panels on a roof", "search": "solar installers roof"}
+    "board": {
+      "shows": "An electrician at a distribution board or inverter",
+      "search": "electrician working"
+    },
+    "hero": {
+      "shows": "Solar panels on a roof, under a blue sky",
+      "search": "solar panels roof Africa"
+    },
+    "roof": {
+      "shows": "Installers fitting panels on a roof",
+      "search": "solar installers roof"
+    }
   },
   "transport-couriers-removals": {
-    "hero": {"shows": "A driver loading or delivering parcels", "search": "Black delivery driver parcels"},
-    "van": {"shows": "A delivery van or truck on the road", "search": "delivery van road"}
+    "hero": {
+      "shows": "A driver loading or delivering parcels",
+      "search": "Black delivery driver parcels"
+    },
+    "van": {
+      "shows": "A delivery van or truck on the road",
+      "search": "delivery van road"
+    }
   },
   "transport-shuttles-tours": {
-    "hero": {"shows": "Travellers on a tour, a scenic African view", "search": "safari tour vehicle"},
-    "vehicle": {"shows": "A clean shuttle or tour vehicle", "search": "shuttle minibus"}
+    "hero": {
+      "shows": "Travellers on a tour, a scenic African view",
+      "search": "safari tour vehicle"
+    },
+    "vehicle": {
+      "shows": "A clean shuttle or tour vehicle",
+      "search": "shuttle minibus"
+    }
+  },
+  "barbershop-classic": {
+    "hero": {
+      "shows": "A barber finishing a sharp fade on a client in the chair",
+      "search": "Black barber fade haircut"
+    },
+    "chair": {
+      "shows": "The shop: chairs, mirrors and warm light, ready for clients",
+      "search": "barbershop interior chairs"
+    },
+    "cut-1": {
+      "shows": "A finished skin fade with a crisp line-up",
+      "search": "skin fade haircut"
+    },
+    "cut-2": {
+      "shows": "A beard trim and shape, close up",
+      "search": "beard trim barber"
+    },
+    "cut-3": {
+      "shows": "Short twists or a sponge style on natural hair",
+      "search": "twists short natural hair man"
+    }
+  },
+  "barbershop-studio": {
+    "hero": {
+      "shows": "A barber shaping a hair design or part, in the studio’s lights",
+      "search": "barber hair design"
+    },
+    "work-1": {
+      "shows": "A freestyle hair design or part, close up",
+      "search": "hair design pattern barber"
+    },
+    "work-2": {
+      "shows": "A colour job: platinum, blonde or bright colour on short hair",
+      "search": "bleached short hair man"
+    },
+    "work-3": {
+      "shows": "A high-top, flat-top or sponge twists",
+      "search": "high top fade"
+    },
+    "work-4": {
+      "shows": "The studio busy with clients and barbers",
+      "search": "busy barbershop"
+    }
+  },
+  "barbershop-mobile": {
+    "hero": {
+      "shows": "A barber cutting hair in a client’s home or office",
+      "search": "barber cutting hair at home"
+    },
+    "kit": {
+      "shows": "A clean, neatly laid-out barber kit (clippers, cape, brushes)",
+      "search": "barber tools clippers",
+      "decorative": true
+    },
+    "event": {
+      "shows": "Groomsmen or a team getting cuts before an event",
+      "search": "groomsmen getting ready"
+    }
+  },
+  "cleaning-home": {
+    "hero": {
+      "shows": "A friendly cleaner at work in a bright, tidy kitchen",
+      "search": "African cleaner kitchen cleaning"
+    },
+    "team": {
+      "shows": "The cleaning team in uniform, smiling, with their kit",
+      "search": "cleaning team uniform"
+    }
+  },
+  "cleaning-commercial": {
+    "hero": {
+      "shows": "Uniformed cleaners working in a modern office",
+      "search": "office cleaning staff"
+    },
+    "site": {
+      "shows": "A spotless reception or open-plan office",
+      "search": "clean modern office reception"
+    }
+  },
+  "cleaning-specialist": {
+    "carpet": {
+      "shows": "A carpet or rug being steam-cleaned, with a clear clean stripe",
+      "search": "carpet steam cleaning"
+    },
+    "couch": {
+      "shows": "A couch or mattress being deep-cleaned",
+      "search": "upholstery cleaning sofa"
+    },
+    "paving": {
+      "shows": "Paving or a driveway being pressure-washed, half done",
+      "search": "pressure washing driveway"
+    }
+  },
+  "carwash-drive-in": {
+    "hero": {
+      "shows": "A car covered in foam in the wash bay, washers at work",
+      "search": "car wash foam"
+    },
+    "bay": {
+      "shows": "Washers drying and finishing a clean car",
+      "search": "car wash workers drying car"
+    }
+  },
+  "carwash-detailing": {
+    "hero": {
+      "shows": "A freshly detailed car with a mirror-like finish under studio lights",
+      "search": "car detailing polish"
+    },
+    "detail-1": {
+      "shows": "A machine polisher correcting paint",
+      "search": "car paint polishing"
+    },
+    "detail-2": {
+      "shows": "A spotless leather interior after a detail",
+      "search": "clean car interior leather"
+    },
+    "detail-3": {
+      "shows": "Water beading on a ceramic-coated panel",
+      "search": "ceramic coating water beading"
+    }
+  },
+  "carwash-mobile": {
+    "hero": {
+      "shows": "A washer cleaning a car in a home driveway or office parking",
+      "search": "mobile car wash driveway"
+    },
+    "eco": {
+      "shows": "Eco products and microfibre cloths ready for a waterless wash",
+      "search": "waterless car wash products",
+      "decorative": true
+    }
+  },
+  "catering-events": {
+    "spread": {
+      "shows": "A generous buffet spread at an event",
+      "search": "African buffet catering"
+    },
+    "plated": {
+      "shows": "A beautifully plated main course",
+      "search": "plated food catering"
+    },
+    "team": {
+      "shows": "Catering staff serving guests at a wedding or function",
+      "search": "catering staff serving"
+    },
+    "dessert": {
+      "shows": "A dessert table or wedding cake",
+      "search": "dessert table wedding"
+    }
+  },
+  "catering-corporate": {
+    "platter": {
+      "shows": "A meeting platter: wraps, sandwiches and fruit",
+      "search": "catering platter sandwiches"
+    },
+    "lunchbox": {
+      "shows": "Neatly packed lunch boxes ready to deliver",
+      "search": "lunch boxes delivery"
+    }
+  },
+  "catering-home-kitchen": {
+    "meals": {
+      "shows": "Weekly meal-prep containers, neatly packed",
+      "search": "meal prep containers"
+    },
+    "cake": {
+      "shows": "A home-baked celebration cake",
+      "search": "homemade birthday cake"
+    },
+    "cook": {
+      "shows": "The cook in a home kitchen, smiling",
+      "search": "African woman cooking kitchen"
+    }
   }
 }
