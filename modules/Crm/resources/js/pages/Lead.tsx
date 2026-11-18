@@ -12,6 +12,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Data {
   id: string;
@@ -66,11 +67,11 @@ export default function Lead({
         <PageHeader
           title={l.title}
           description={`${SOURCE[l.source] ?? l.source}${l.value_cents != null ? ` · ${rand(l.value_cents)}` : ''}`}
-          actions={l.closed ? <Badge tone="neutral">Closed</Badge> : undefined}
+          actions={l.closed ? <Badge tone="neutral">{__('Closed')}</Badge> : undefined}
         />
         <p>
           <Link href={leads} className="underline">
-            ← All leads
+            {__('← All leads')}
           </Link>
         </p>
         {l.contact && (
@@ -84,10 +85,10 @@ export default function Lead({
         {canManage && (
           <Card>
             <CardHeader>
-              <CardTitle>Follow up</CardTitle>
+              <CardTitle>{__('Follow up')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
-              <Field label="Stage">
+              <Field label={__('Stage')}>
                 <select
                   className={selectClass}
                   value={l.stage}
@@ -100,13 +101,13 @@ export default function Lead({
                   ))}
                 </select>
               </Field>
-              <Field label="Assigned to">
+              <Field label={__('Assigned to')}>
                 <select
                   className={selectClass}
                   value={l.assigned_to ?? ''}
                   onChange={(e) => post('assign', { member: e.target.value || null })}
                 >
-                  <option value="">No one</option>
+                  <option value="">{__('No one')}</option>
                   {team.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
@@ -115,14 +116,14 @@ export default function Lead({
                 </select>
               </Field>
               <form
-                aria-label="Follow-up date"
+                aria-label={__('Follow-up date')}
                 className="flex flex-wrap items-end gap-2 sm:col-span-2"
                 onSubmit={(e) => {
                   e.preventDefault();
                   post('follow-up', { at: followUp || null });
                 }}
               >
-                <Field label="Follow up on">
+                <Field label={__('Follow up on')}>
                   <input
                     type="datetime-local"
                     className={selectClass}
@@ -131,11 +132,11 @@ export default function Lead({
                   />
                 </Field>
                 <Button type="submit" variant="secondary">
-                  Save follow-up
+                  {__('Save follow-up')}
                 </Button>
               </form>
               <form
-                aria-label="Add a note"
+                aria-label={__('Add a note')}
                 className="grid gap-2 sm:col-span-2"
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -147,7 +148,7 @@ export default function Lead({
                     );
                 }}
               >
-                <Field label="Note">
+                <Field label={__('Note')}>
                   <textarea
                     className="border-border bg-bg min-h-20 rounded-md border p-2 text-sm"
                     value={note}
@@ -155,7 +156,7 @@ export default function Lead({
                   />
                 </Field>
                 <Button type="submit" variant="secondary" className="justify-self-start">
-                  Add note
+                  {__('Add note')}
                 </Button>
               </form>
             </CardContent>
@@ -163,10 +164,10 @@ export default function Lead({
         )}
         <Card>
           <CardHeader>
-            <CardTitle>History</CardTitle>
+            <CardTitle>{__('History')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul aria-label="History" className="grid gap-2 text-sm">
+            <ul aria-label={__('History')} className="grid gap-2 text-sm">
               {history.map((h, k) => (
                 <li key={k}>
                   <strong>{EVENT[h.event] ?? h.event}</strong>

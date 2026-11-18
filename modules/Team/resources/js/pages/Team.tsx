@@ -13,6 +13,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Member {
   id: string;
@@ -61,11 +62,11 @@ function MemberRow({
     <li className="border-border grid gap-3 rounded-lg border p-3 text-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span>
-          <strong>{m.name}</strong> {self && <Badge tone="neutral">You</Badge>}
+          <strong>{m.name}</strong> {self && <Badge tone="neutral">{__('You')}</Badge>}
         </span>
         {canManage && !self ? (
           <label className="flex items-center gap-2">
-            Role
+            {__('Role')}
             <select
               className={selectClass}
               value={m.role}
@@ -84,11 +85,11 @@ function MemberRow({
       </div>
       {branches.length > 1 && m.role !== 'owner' && (
         <fieldset className="grid gap-2" disabled={!canManage || self}>
-          <legend className="font-medium">Branches</legend>
+          <legend className="font-medium">{__('Branches')}</legend>
           {!restricted && (
             <label className="flex items-center gap-2">
               <Checkbox checked={all} onCheckedChange={(on) => setAll(on === true)} />
-              All branches
+              {__('All branches')}
             </label>
           )}
           {!all &&
@@ -113,7 +114,7 @@ function MemberRow({
                 router.put(`${base}/${m.id}/branches`, { all, branches: chosen }, done)
               }
             >
-              Save branches
+              {__('Save branches')}
             </Button>
           )}
         </fieldset>
@@ -130,7 +131,7 @@ function MemberRow({
               router.delete(`${base}/${m.id}`, done);
           }}
         >
-          Remove from team
+          {__('Remove from team')}
         </Button>
       )}
     </li>
@@ -156,19 +157,21 @@ export default function TeamPage({
   const [error, setError] = useState<string | null>(null);
   const invite = useForm({ email: '', role: 'staff', first_name: '', last_name: '' });
   return (
-    <AppShell title="Team">
-      <Head title="Team" />
+    <AppShell title={__('Team')}>
+      <Head title={__('Team')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Team"
-          description="Who works in your business, what they can do, and — with more than one branch — where."
+          title={__('Team')}
+          description={__(
+            'Who works in your business, what they can do, and — with more than one branch — where.',
+          )}
         />
         {error && (
           <p role="alert" className="text-danger text-sm">
             {error}
           </p>
         )}
-        <ul className="grid gap-3" aria-label="Team members">
+        <ul className="grid gap-3" aria-label={__('Team members')}>
           {members.map((m) => (
             <MemberRow
               key={m.id}
@@ -185,10 +188,10 @@ export default function TeamPage({
         {pending.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Invitations waiting</CardTitle>
+              <CardTitle>{__('Invitations waiting')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="grid gap-2 text-sm" aria-label="Invitations waiting">
+              <ul className="grid gap-2 text-sm" aria-label={__('Invitations waiting')}>
                 {pending.map((p) => (
                   <li key={p.id} className="flex flex-wrap items-center justify-between gap-2">
                     <span>
@@ -203,7 +206,7 @@ export default function TeamPage({
                           router.delete(`${base}/invitations/${p.id}`, { preserveScroll: true })
                         }
                       >
-                        Cancel
+                        {__('Cancel')}
                       </Button>
                     )}
                   </li>
@@ -215,11 +218,11 @@ export default function TeamPage({
         {canManage && (
           <Card>
             <CardHeader>
-              <CardTitle>Invite someone</CardTitle>
+              <CardTitle>{__('Invite someone')}</CardTitle>
             </CardHeader>
             <CardContent>
               <form
-                aria-label="Invite someone"
+                aria-label={__('Invite someone')}
                 className="grid gap-3 sm:grid-cols-2"
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -229,14 +232,14 @@ export default function TeamPage({
                   });
                 }}
               >
-                <Field label="Email" error={invite.errors.email}>
+                <Field label={__('Email')} error={invite.errors.email}>
                   <Input
                     type="email"
                     value={invite.data.email}
                     onChange={(e) => invite.setData('email', e.target.value)}
                   />
                 </Field>
-                <Field label="Role" error={invite.errors.role}>
+                <Field label={__('Role')} error={invite.errors.role}>
                   <select
                     className={`${selectClass} h-10 w-full`}
                     value={invite.data.role}
@@ -249,20 +252,20 @@ export default function TeamPage({
                     ))}
                   </select>
                 </Field>
-                <Field label="First name (optional)">
+                <Field label={__('First name (optional)')}>
                   <Input
                     value={invite.data.first_name}
                     onChange={(e) => invite.setData('first_name', e.target.value)}
                   />
                 </Field>
-                <Field label="Last name (optional)">
+                <Field label={__('Last name (optional)')}>
                   <Input
                     value={invite.data.last_name}
                     onChange={(e) => invite.setData('last_name', e.target.value)}
                   />
                 </Field>
                 <Button type="submit" className="justify-self-start" loading={invite.processing}>
-                  Send invitation
+                  {__('Send invitation')}
                 </Button>
               </form>
             </CardContent>

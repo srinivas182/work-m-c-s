@@ -11,6 +11,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { ArrowLeftRight } from 'lucide-react';
+import { __ } from '@/i18n';
 
 interface Pair {
   from: string;
@@ -41,27 +42,29 @@ export default function Settlements({
 }) {
   const base = window.location.pathname.replace(/\/$/, '');
   return (
-    <AppShell title="Between branches">
-      <Head title="Between branches" />
+    <AppShell title={__('Between branches')}>
+      <Head title={__('Between branches')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Between branches"
-          description="When one branch’s account is paid for something another branch supplied, the amount owed is recorded here. Settle it between your branches as you normally would, then mark it settled. No money moves through WURK."
+          title={__('Between branches')}
+          description={__(
+            'When one branch’s account is paid for something another branch supplied, the amount owed is recorded here. Settle it between your branches as you normally would, then mark it settled. No money moves through WURK.',
+          )}
         />
-        <nav aria-label="Month" className="flex items-center gap-3 text-sm">
+        <nav aria-label={__('Month')} className="flex items-center gap-3 text-sm">
           <Link href={`${base}?month=${previous}`} className="underline">
-            ← Previous month
+            {__('← Previous month')}
           </Link>
           <strong>{label}</strong>
           <Link href={`${base}?month=${next}`} className="underline">
-            Next month →
+            {__('Next month →')}
           </Link>
         </nav>
         {pairs.length === 0 ? (
           <EmptyState
             icon={ArrowLeftRight}
-            title="Nothing owed this month"
-            description="Branches were paid for what they supplied themselves."
+            title={__('Nothing owed this month')}
+            description={__('Branches were paid for what they supplied themselves.')}
           />
         ) : (
           pairs.map((p) => (
@@ -71,19 +74,19 @@ export default function Settlements({
                   {p.total_cents >= 0
                     ? `${p.from_name} owes ${p.to_name} ${rand(p.total_cents)}`
                     : `${p.to_name} owes ${p.from_name} ${rand(-p.total_cents)}`}
-                  {p.settled && <Badge tone="success">Settled</Badge>}
+                  {p.settled && <Badge tone="success">{__('Settled')}</Badge>}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3">
                 <table className="w-full text-left text-sm">
-                  <caption className="sr-only">What makes up this amount</caption>
+                  <caption className="sr-only">{__('What makes up this amount')}</caption>
                   <thead>
                     <tr className="border-border border-b">
                       <th scope="col" className="py-2">
-                        What
+                        {__('What')}
                       </th>
                       <th scope="col" className="py-2 text-right">
-                        Amount
+                        {__('Amount')}
                       </th>
                     </tr>
                   </thead>
@@ -108,7 +111,7 @@ export default function Settlements({
                       )
                     }
                   >
-                    Mark as settled
+                    {__('Mark as settled')}
                   </Button>
                 )}
               </CardContent>

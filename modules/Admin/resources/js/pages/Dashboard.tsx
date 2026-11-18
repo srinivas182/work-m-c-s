@@ -13,6 +13,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { auditLabel } from '@/lib/audit-labels';
+import { __ } from '@/i18n';
 
 interface Props {
   businesses: {
@@ -34,37 +35,39 @@ export default function Dashboard({ businesses, staff, recent }: Props) {
     businesses.capacity > 0 ? Math.round((businesses.used / businesses.capacity) * 1000) / 10 : 0;
 
   return (
-    <AppShell title="Dashboard">
-      <Head title="Dashboard" />
+    <AppShell title={__('Dashboard')}>
+      <Head title={__('Dashboard')} />
       <div className="grid gap-8">
         <PageHeader
           eyebrow="WURK admin"
-          title="Dashboard"
-          description="Revenue and growth metrics arrive with billing. For now: businesses, capacity and recent activity."
+          title={__('Dashboard')}
+          description={__(
+            'Revenue and growth metrics arrive with billing. For now: businesses, capacity and recent activity.',
+          )}
           actions={
             <Button asChild>
               <Link href="/businesses/new">
-                <Plus /> New business
+                <Plus /> {__('New business')}
               </Link>
             </Button>
           }
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
-            label="Active businesses"
+            label={__('Active businesses')}
             value={businesses.active.toLocaleString()}
             icon={Building2}
             hint={`${businesses.suspended} suspended`}
           />
-          <StatCard label="WURK staff" value={staff.toLocaleString()} icon={UserCog} />
+          <StatCard label={__('WURK staff')} value={staff.toLocaleString()} icon={UserCog} />
           <StatCard
-            label="Shared databases"
+            label={__('Shared databases')}
             value={businesses.shards.toLocaleString()}
             icon={Database}
             hint={`${businesses.used.toLocaleString()} businesses placed`}
           />
           <StatCard
-            label="Capacity used"
+            label={__('Capacity used')}
             value={`${usedPct}%`}
             icon={Activity}
             hint={`of ${businesses.capacity.toLocaleString()} places`}
@@ -72,15 +75,15 @@ export default function Dashboard({ businesses, staff, recent }: Props) {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Recent platform activity</CardTitle>
-            <CardDescription>From the platform audit log.</CardDescription>
+            <CardTitle>{__('Recent platform activity')}</CardTitle>
+            <CardDescription>{__('From the platform audit log.')}</CardDescription>
           </CardHeader>
           <CardContent>
             {recent.length === 0 ? (
               <EmptyState
                 icon={Activity}
-                title="Nothing yet"
-                description="Sign-ins and changes will appear here."
+                title={__('Nothing yet')}
+                description={__('Sign-ins and changes will appear here.')}
               />
             ) : (
               <ul className="divide-border divide-y">

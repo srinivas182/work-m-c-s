@@ -1,6 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Button, Card, CardContent, Field, Input, PageHeader } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   campaign: {
@@ -46,7 +47,7 @@ export default function Show({ campaign: c, segment, estimate }: Props) {
           <CardContent className="grid gap-2 pt-6 text-sm">
             {c.subject && (
               <p>
-                <strong>Subject:</strong> {c.subject}
+                <strong>{__('Subject:')}</strong> {c.subject}
               </p>
             )}
             <p className="whitespace-pre-wrap">{c.body}</p>
@@ -56,19 +57,24 @@ export default function Show({ campaign: c, segment, estimate }: Props) {
           <Card>
             <CardContent className="grid gap-3 pt-6 text-sm">
               <p className={estimate.enough ? '' : 'text-danger'}>
-                Goes to {estimate.recipients} {estimate.recipients === 1 ? 'customer' : 'customers'}
+                {__('Goes to')} {estimate.recipients}{' '}
+                {estimate.recipients === 1 ? 'customer' : 'customers'}
                 {c.channel === 'sms'
                   ? ` · about ${estimate.credits} credits${estimate.spendable !== null ? ` · you have ${estimate.spendable}` : ''}`
                   : ' · free'}
                 {estimate.enough ? '' : ' — not enough credits'}
               </p>
-              {c.status === 'scheduled' && <p>Scheduled for {c.scheduled_at}.</p>}
+              {c.status === 'scheduled' && (
+                <p>
+                  {__('Scheduled for')} {c.scheduled_at}.
+                </p>
+              )}
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="secondary"
                   onClick={() => router.post(`${base}/test`, {}, { preserveScroll: true })}
                 >
-                  Send me a test
+                  {__('Send me a test')}
                 </Button>
                 <Button
                   disabled={!estimate.enough || estimate.recipients === 0}
@@ -77,7 +83,7 @@ export default function Show({ campaign: c, segment, estimate }: Props) {
                       router.post(`${base}/send`, { when: 'now' }, { preserveScroll: true });
                   }}
                 >
-                  Send now
+                  {__('Send now')}
                 </Button>
                 {c.status === 'draft' && (
                   <Button
@@ -85,19 +91,19 @@ export default function Show({ campaign: c, segment, estimate }: Props) {
                     className="text-danger-11"
                     onClick={() => router.delete(base)}
                   >
-                    Delete draft
+                    {__('Delete draft')}
                   </Button>
                 )}
               </div>
               <form
-                aria-label="Schedule"
+                aria-label={__('Schedule')}
                 className="flex flex-wrap items-end gap-2"
                 onSubmit={(e) => {
                   e.preventDefault();
                   schedule.post(`${base}/send`, { preserveScroll: true });
                 }}
               >
-                <Field label="Or send at" error={schedule.errors.at}>
+                <Field label={__('Or send at')} error={schedule.errors.at}>
                   <Input
                     type="datetime-local"
                     value={schedule.data.at}
@@ -105,14 +111,17 @@ export default function Show({ campaign: c, segment, estimate }: Props) {
                   />
                 </Field>
                 <Button type="submit" variant="secondary" loading={schedule.processing}>
-                  Schedule
+                  {__('Schedule')}
                 </Button>
               </form>
             </CardContent>
           </Card>
         )}
         {c.status === 'sent' && (
-          <p className="text-sm">Sent {c.sent_at}. Results are on the Campaigns page.</p>
+          <p className="text-sm">
+            {__('Sent')} {c.sent_at}
+            {__('. Results are on the Campaigns page.')}
+          </p>
         )}
       </div>
     </AppShell>
@@ -132,24 +141,24 @@ function PhonePreview({
   const fill = (t: string) => t.replaceAll('{first_name}', 'Thandi');
   return (
     <figure
-      aria-label="Phone preview"
+      aria-label={__('Phone preview')}
       className="mx-auto w-full max-w-[18rem] rounded-[2rem] border-8 border-neutral-800 bg-white p-3 text-sm text-neutral-900 shadow-sm"
     >
       {channel === 'sms' ? (
         <p className="w-fit max-w-[90%] rounded-2xl rounded-bl-sm bg-neutral-100 px-3 py-2 whitespace-pre-wrap">
-          {fill(body)} Stop: https://…/c/…/stop
+          {fill(body)} {__('Stop: https://…/c/…/stop')}
         </p>
       ) : (
         <div className="grid gap-2">
           <p className="font-semibold">{fill(subject ?? '')}</p>
           <p className="whitespace-pre-wrap">{fill(body)}</p>
           <p className="text-xs text-neutral-500">
-            You’re getting this because you agreed to hear from us. Stop these messages.
+            {__('You’re getting this because you agreed to hear from us. Stop these messages.')}
           </p>
         </div>
       )}
       <figcaption className="mt-2 text-center text-xs text-neutral-500">
-        Preview, with a sample first name
+        {__('Preview, with a sample first name')}
       </figcaption>
     </figure>
   );

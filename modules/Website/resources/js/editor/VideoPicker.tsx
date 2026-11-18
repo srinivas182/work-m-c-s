@@ -2,6 +2,7 @@ import { Clapperboard, Loader2, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import type { VideoValue } from '../site/types';
 import { firstError, request } from './http';
+import { __ } from '@/i18n';
 
 interface LibraryVideo extends VideoValue {
   id: string;
@@ -38,7 +39,7 @@ export function VideoPicker({
   if (!videosUrl) {
     return (
       <p className="text-sm text-[#5b5776]">
-        Owners add their own video. Until then, the first photo is shown.
+        {__('Owners add their own video. Until then, the first photo is shown.')}
       </p>
     );
   }
@@ -69,12 +70,14 @@ export function VideoPicker({
         <div className="grid grid-cols-[96px_1fr] items-center gap-3 rounded-lg border border-[#d9d6e8] p-2">
           <img src={value.poster} alt="" className="aspect-video w-24 rounded-md object-cover" />
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[#5b5776]">Plays muted, on a loop, with a pause button.</span>
+            <span className="text-[#5b5776]">
+              {__('Plays muted, on a loop, with a pause button.')}
+            </span>
             <button
               type="button"
               className="rounded p-1 text-[#8a1c1c] hover:bg-[#fdecec]"
               onClick={() => onChange({ src: '', poster: '' })}
-              aria-label="Remove video"
+              aria-label={__('Remove video')}
             >
               <Trash2 className="size-4" aria-hidden />
             </button>
@@ -87,7 +90,7 @@ export function VideoPicker({
           type="file"
           accept="video/mp4,video/quicktime,video/webm"
           className="sr-only"
-          aria-label="Choose a video to upload"
+          aria-label={__('Choose a video to upload')}
           tabIndex={-1}
           onChange={(e) => {
             const file = e.target.files?.[0];
@@ -113,7 +116,7 @@ export function VideoPicker({
           onClick={() => void openLibrary()}
           className="rounded-md border border-[#d9d6e8] px-3 py-2 font-medium"
         >
-          Choose from my videos
+          {__('Choose from my videos')}
         </button>
       </div>
       <p className="text-[#5b5776]">
@@ -129,7 +132,7 @@ export function VideoPicker({
       {library && (
         <div className="grid gap-2 rounded-lg border border-[#d9d6e8] p-2">
           {library.videos.length === 0 ? (
-            <p>No videos yet — upload one.</p>
+            <p>{__('No videos yet — upload one.')}</p>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {library.videos.map((v) => (

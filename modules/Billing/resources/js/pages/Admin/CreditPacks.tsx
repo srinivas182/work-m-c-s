@@ -18,6 +18,7 @@ import {
   TableRow,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   packs: { id: string; name: string; credits: number; price: number; active: boolean }[];
@@ -26,23 +27,23 @@ interface Props {
 export default function CreditPacks({ packs }: Props) {
   const form = useForm({ name: '', credits: '', price: '' });
   return (
-    <AppShell title="Credit packs">
-      <Head title="Credit packs" />
+    <AppShell title={__('Credit packs')}>
+      <Head title={__('Credit packs')} />
       <div className="grid max-w-4xl gap-8">
         <PageHeader
-          title="Credit packs"
-          description="What businesses can buy from Settings → Billing. Prices exclude VAT."
+          title={__('Credit packs')}
+          description={__('What businesses can buy from Settings → Billing. Prices exclude VAT.')}
         />
         {packs.length > 0 && (
-          <Table label="Credit packs">
+          <Table label={__('Credit packs')}>
             <TableHeader>
               <TableRow>
-                <TableHead>Pack</TableHead>
-                <TableHead className="text-right">Credits</TableHead>
-                <TableHead className="text-right">Price (R)</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{__('Pack')}</TableHead>
+                <TableHead className="text-right">{__('Credits')}</TableHead>
+                <TableHead className="text-right">{__('Price (R)')}</TableHead>
+                <TableHead>{__('Status')}</TableHead>
                 <TableHead>
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">{__('Actions')}</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -55,7 +56,11 @@ export default function CreditPacks({ packs }: Props) {
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{p.price.toFixed(2)}</TableCell>
                   <TableCell>
-                    {p.active ? <Badge tone="success">On sale</Badge> : <Badge>Withdrawn</Badge>}
+                    {p.active ? (
+                      <Badge tone="success">{__('On sale')}</Badge>
+                    ) : (
+                      <Badge>{__('Withdrawn')}</Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Button
@@ -75,9 +80,9 @@ export default function CreditPacks({ packs }: Props) {
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Add a pack</CardTitle>
+            <CardTitle>{__('Add a pack')}</CardTitle>
             <CardDescription>
-              Packs can’t be edited once sold; withdraw one and add a new one instead.
+              {__('Packs can’t be edited once sold; withdraw one and add a new one instead.')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -91,20 +96,20 @@ export default function CreditPacks({ packs }: Props) {
               }}
               className="grid grid-cols-1 items-end gap-4 sm:grid-cols-[1.5fr_1fr_1fr_auto]"
             >
-              <Field label="Name" error={form.errors.name} required>
+              <Field label={__('Name')} error={form.errors.name} required>
                 <Input
                   value={form.data.name}
                   onChange={(e) => form.setData('name', e.target.value)}
                 />
               </Field>
-              <Field label="Credits" error={form.errors.credits} required>
+              <Field label={__('Credits')} error={form.errors.credits} required>
                 <Input
                   type="number"
                   value={form.data.credits}
                   onChange={(e) => form.setData('credits', e.target.value)}
                 />
               </Field>
-              <Field label="Price excl. VAT (R)" error={form.errors.price} required>
+              <Field label={__('Price excl. VAT (R)')} error={form.errors.price} required>
                 <Input
                   type="number"
                   step="0.01"
@@ -113,7 +118,7 @@ export default function CreditPacks({ packs }: Props) {
                 />
               </Field>
               <Button type="submit" loading={form.processing}>
-                Add pack
+                {__('Add pack')}
               </Button>
             </form>
           </CardContent>

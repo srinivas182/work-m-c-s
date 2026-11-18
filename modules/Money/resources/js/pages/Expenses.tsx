@@ -11,6 +11,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   profit: { took: number; spent: number; made: number; by_category: Record<string, number> };
@@ -63,12 +64,12 @@ export default function Expenses({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slip?.id]);
   return (
-    <AppShell title="Expenses and profit">
-      <Head title="Expenses and profit" />
+    <AppShell title={__('Expenses and profit')}>
+      <Head title={__('Expenses and profit')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Expenses and profit"
-          description="Add what you spend in seconds, and see what you made."
+          title={__('Expenses and profit')}
+          description={__('Add what you spend in seconds, and see what you made.')}
         />
         {warning && (
           <p role="alert" className="text-danger text-sm">
@@ -81,15 +82,16 @@ export default function Expenses({
           </CardHeader>
           <CardContent>
             <p className="text-lg">
-              This month you took <strong>{rand(profit.took)}</strong>, spent{' '}
-              <strong>{rand(profit.spent)}</strong>, so you made about{' '}
+              {__('This month you took')} <strong>{rand(profit.took)}</strong>
+              {__(', spent')} <strong>{rand(profit.spent)}</strong>
+              {__(', so you made about')}{' '}
               <strong className={profit.made < 0 ? 'text-danger' : ''}>{rand(profit.made)}</strong>.
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Add an expense</CardTitle>
+            <CardTitle>{__('Add an expense')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-2 text-sm">
@@ -99,7 +101,7 @@ export default function Expenses({
                 accept="image/*"
                 capture="environment"
                 className="sr-only"
-                aria-label="Photo of the slip"
+                aria-label={__('Photo of the slip')}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -118,12 +120,13 @@ export default function Expenses({
                 className="justify-self-start"
                 onClick={() => fileInput.current?.click()}
               >
-                Take a photo of the slip
+                {__('Take a photo of the slip')}
               </Button>
               {slipError && <p className="text-danger">{slipError}</p>}
               <p className="text-fg-muted">
-                WURK AI reads the amount, date and what it was for (1 credit). You check it before
-                it’s added.
+                {__(
+                  'WURK AI reads the amount, date and what it was for (1 credit). You check it before it’s added.',
+                )}
               </p>
             </div>
             <form
@@ -137,14 +140,14 @@ export default function Expenses({
               }}
             >
               <div className="grid gap-3 sm:grid-cols-3">
-                <Field label="Amount (R)" error={form.errors.amount}>
+                <Field label={__('Amount (R)')} error={form.errors.amount}>
                   <Input
                     inputMode="decimal"
                     value={form.data.amount}
                     onChange={(e) => form.setData('amount', e.target.value)}
                   />
                 </Field>
-                <Field label="Category" error={form.errors.category}>
+                <Field label={__('Category')} error={form.errors.category}>
                   <select
                     className="border-border bg-bg min-h-10 rounded-md border px-3"
                     value={form.data.category}
@@ -157,7 +160,7 @@ export default function Expenses({
                     ))}
                   </select>
                 </Field>
-                <Field label="Date" error={form.errors.spent_on}>
+                <Field label={__('Date')} error={form.errors.spent_on}>
                   <Input
                     type="date"
                     max={today}
@@ -166,7 +169,7 @@ export default function Expenses({
                   />
                 </Field>
               </div>
-              <Field label="Note" error={form.errors.note}>
+              <Field label={__('Note')} error={form.errors.note}>
                 <Input
                   value={form.data.note}
                   onChange={(e) => form.setData('note', e.target.value)}
@@ -181,7 +184,7 @@ export default function Expenses({
         {expenses.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Expenses</CardTitle>
+              <CardTitle>{__('Expenses')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="grid gap-2 text-sm">
@@ -199,7 +202,7 @@ export default function Expenses({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Slip
+                          {__('Slip')}
                         </a>
                       )}
                       <Button
@@ -212,7 +215,7 @@ export default function Expenses({
                           })
                         }
                       >
-                        Remove
+                        {__('Remove')}
                       </Button>
                     </span>
                   </li>
@@ -223,7 +226,7 @@ export default function Expenses({
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Monday summary and cash-ups</CardTitle>
+            <CardTitle>{__('Monday summary and cash-ups')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm">
             <label className="flex items-center gap-2">
@@ -238,13 +241,16 @@ export default function Expenses({
                   )
                 }
               />
-              Send me “how did I do” on WhatsApp every Monday
+              {__('Send me “how did I do” on WhatsApp every Monday')}
             </label>
             {!weekly.phone && (
-              <p className="text-fg-muted">Verify your mobile number in your account to get it.</p>
+              <p className="text-fg-muted">
+                {__('Verify your mobile number in your account to get it.')}
+              </p>
             )}
             <p className="text-fg-muted">
-              A cash-up asks for a reason when the cash is more than {rand(reasonAbove)} out.
+              {__('A cash-up asks for a reason when the cash is more than')} {rand(reasonAbove)}{' '}
+              {__('out.')}
             </p>
           </CardContent>
         </Card>

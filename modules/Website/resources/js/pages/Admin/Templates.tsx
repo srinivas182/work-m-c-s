@@ -23,6 +23,7 @@ import {
   Textarea,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Category {
   id: string;
@@ -59,11 +60,11 @@ function NewTemplate({
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        title="New template"
-        description="Start blank, or copy an existing design and change it."
+        title={__('New template')}
+        description={__('Start blank, or copy an existing design and change it.')}
       >
         <form onSubmit={submit} className="grid gap-4" noValidate>
-          <Field label="Category" error={form.errors.category}>
+          <Field label={__('Category')} error={form.errors.category}>
             {(control) => (
               <Select value={form.data.category} onValueChange={(v) => form.setData('category', v)}>
                 <SelectTrigger {...control}>
@@ -79,12 +80,17 @@ function NewTemplate({
               </Select>
             )}
           </Field>
-          <Field label="Name" hint="e.g. Hair & braids salon" error={form.errors.name} required>
+          <Field
+            label={__('Name')}
+            hint="e.g. Hair & braids salon"
+            error={form.errors.name}
+            required
+          >
             <Input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
           </Field>
           <Field
-            label="Short description"
-            hint="Shown to owners when they choose a design"
+            label={__('Short description')}
+            hint={__('Shown to owners when they choose a design')}
             error={form.errors.description}
           >
             <Textarea
@@ -93,7 +99,7 @@ function NewTemplate({
               onChange={(e) => form.setData('description', e.target.value)}
             />
           </Field>
-          <Field label="Copy from (optional)" error={form.errors.copy_from}>
+          <Field label={__('Copy from (optional)')} error={form.errors.copy_from}>
             {(control) => (
               <Select
                 value={form.data.copy_from || 'none'}
@@ -103,7 +109,7 @@ function NewTemplate({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Start blank</SelectItem>
+                  <SelectItem value="none">{__('Start blank')}</SelectItem>
                   {allTemplates.map((t) => (
                     <SelectItem key={t.key} value={t.key}>
                       {t.name}
@@ -115,7 +121,7 @@ function NewTemplate({
           </Field>
           <DialogFooter>
             <Button type="submit" loading={form.processing}>
-              Create template
+              {__('Create template')}
             </Button>
           </DialogFooter>
         </form>
@@ -127,15 +133,17 @@ function NewTemplate({
 export default function Templates({ categories, allTemplates }: Props) {
   const [creating, setCreating] = useState<string | null>(null);
   return (
-    <AppShell title="Templates">
-      <Head title="Templates" />
+    <AppShell title={__('Templates')}>
+      <Head title={__('Templates')} />
       <div className="grid gap-8">
         <PageHeader
-          title="Website templates"
-          description="Designs businesses choose at signup. A category appears in signup once it has a published template."
+          title={__('Website templates')}
+          description={__(
+            'Designs businesses choose at signup. A category appears in signup once it has a published template.',
+          )}
           actions={
             <Button onClick={() => setCreating(categories[0]?.key ?? '')}>
-              <Plus /> New template
+              <Plus /> {__('New template')}
             </Button>
           }
         />
@@ -164,9 +172,9 @@ export default function Templates({ categories, allTemplates }: Props) {
                 </div>
               </CardHeader>
               <CardContent className="grid gap-2">
-                {!c.active && <Badge>Hidden from signup</Badge>}
+                {!c.active && <Badge>{__('Hidden from signup')}</Badge>}
                 {c.templates.length === 0 && (
-                  <p className="text-fg-muted text-sm">No templates yet.</p>
+                  <p className="text-fg-muted text-sm">{__('No templates yet.')}</p>
                 )}
                 {c.templates.map((t) => {
                   const [tone, label] = STATUS[t.status] ?? ['neutral', t.status];
@@ -193,7 +201,7 @@ export default function Templates({ categories, allTemplates }: Props) {
                   className="w-fit"
                   onClick={() => setCreating(c.key)}
                 >
-                  <Plus /> Add a template
+                  <Plus /> {__('Add a template')}
                 </Button>
               </CardContent>
             </Card>

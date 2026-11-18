@@ -14,6 +14,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { CalendarDays } from 'lucide-react';
+import { __ } from '@/i18n';
 
 interface Attendee {
   id: string;
@@ -53,17 +54,17 @@ function ClassCard({ c }: { c: ClassRow }) {
     <Card>
       <CardHeader>
         <CardTitle>
-          {c.title} {c.online && <Badge tone="info">Online</Badge>}{' '}
-          {c.paid && <Badge tone="neutral">Paid online</Badge>}{' '}
-          {!live && <Badge tone="neutral">Cancelled</Badge>}
+          {c.title} {c.online && <Badge tone="info">{__('Online')}</Badge>}{' '}
+          {c.paid && <Badge tone="neutral">{__('Paid online')}</Badge>}{' '}
+          {!live && <Badge tone="neutral">{__('Cancelled')}</Badge>}
         </CardTitle>
         <CardDescription>
-          {c.when} · {c.minutes} min · {taken} of {c.capacity} places taken
+          {c.when} · {c.minutes} {__('min ·')} {taken} {__('of')} {c.capacity} {__('places taken')}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
         {c.attendees.length === 0 ? (
-          <p className="text-fg-muted text-sm">No one has booked yet.</p>
+          <p className="text-fg-muted text-sm">{__('No one has booked yet.')}</p>
         ) : (
           <ul className="grid gap-2" aria-label={`Coming to ${c.title}`}>
             {c.attendees.map((a) => (
@@ -80,7 +81,7 @@ function ClassCard({ c }: { c: ClassRow }) {
                       aria-label={`Attended: ${a.name}`}
                       onClick={() => mark(a.id, 'attended')}
                     >
-                      Attended
+                      {__('Attended')}
                     </Button>
                     <Button
                       size="sm"
@@ -88,7 +89,7 @@ function ClassCard({ c }: { c: ClassRow }) {
                       aria-label={`No-show: ${a.name}`}
                       onClick={() => mark(a.id, 'no_show')}
                     >
-                      No-show
+                      {__('No-show')}
                     </Button>
                     <Button
                       size="sm"
@@ -96,7 +97,7 @@ function ClassCard({ c }: { c: ClassRow }) {
                       aria-label={`Cancel ${a.name}’s place`}
                       onClick={() => mark(a.id, 'cancelled')}
                     >
-                      Cancel
+                      {__('Cancel')}
                     </Button>
                   </span>
                 ) : (
@@ -122,14 +123,14 @@ function ClassCard({ c }: { c: ClassRow }) {
                 });
               }}
             >
-              <Field label="Name" error={add.errors.name}>
+              <Field label={__('Name')} error={add.errors.name}>
                 <Input
                   value={add.data.name}
                   maxLength={120}
                   onChange={(e) => add.setData('name', e.target.value)}
                 />
               </Field>
-              <Field label="Phone (optional)">
+              <Field label={__('Phone (optional)')}>
                 <Input
                   type="tel"
                   value={add.data.phone}
@@ -137,7 +138,7 @@ function ClassCard({ c }: { c: ClassRow }) {
                 />
               </Field>
               <Button type="submit" variant="secondary" loading={add.processing}>
-                Add
+                {__('Add')}
               </Button>
             </form>
             <Button
@@ -145,7 +146,7 @@ function ClassCard({ c }: { c: ClassRow }) {
               onClick={() => router.post(`${base()}/${c.id}/cancel`, {}, { preserveScroll: true })}
               aria-label={`Cancel class: ${c.title}`}
             >
-              Cancel class
+              {__('Cancel class')}
             </Button>
           </div>
         )}
@@ -168,29 +169,31 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
     pay_online: false,
   });
   return (
-    <AppShell title="Classes">
-      <Head title="Classes" />
+    <AppShell title={__('Classes')}>
+      <Head title={__('Classes')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Classes"
-          description="Group classes, in person or online — people book a place on your website."
+          title={__('Classes')}
+          description={__(
+            'Group classes, in person or online — people book a place on your website.',
+          )}
         />
         {classes.length === 0 ? (
           <EmptyState
             icon={CalendarDays}
-            title="No classes scheduled"
-            description="Schedule your first class below."
+            title={__('No classes scheduled')}
+            description={__('Schedule your first class below.')}
           />
         ) : (
           classes.map((c) => <ClassCard key={c.id} c={c} />)
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Schedule a class</CardTitle>
+            <CardTitle>{__('Schedule a class')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form
-              aria-label="Schedule a class"
+              aria-label={__('Schedule a class')}
               className="grid gap-4 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -201,20 +204,20 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
                 });
               }}
             >
-              <Field label="Class name" error={form.errors.title}>
+              <Field label={__('Class name')} error={form.errors.title}>
                 <Input
                   value={form.data.title}
                   maxLength={120}
                   onChange={(e) => form.setData('title', e.target.value)}
                 />
               </Field>
-              <Field label="Taught by" error={form.errors.member}>
+              <Field label={__('Taught by')} error={form.errors.member}>
                 <select
                   className={selectClass}
                   value={form.data.member}
                   onChange={(e) => form.setData('member', e.target.value)}
                 >
-                  <option value="">Not shown</option>
+                  <option value="">{__('Not shown')}</option>
                   {team.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
@@ -222,14 +225,14 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
                   ))}
                 </select>
               </Field>
-              <Field label="Date" error={form.errors.date}>
+              <Field label={__('Date')} error={form.errors.date}>
                 <Input
                   type="date"
                   value={form.data.date}
                   onChange={(e) => form.setData('date', e.target.value)}
                 />
               </Field>
-              <Field label="Time" error={form.errors.time}>
+              <Field label={__('Time')} error={form.errors.time}>
                 <Input
                   type="time"
                   step={300}
@@ -237,7 +240,7 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
                   onChange={(e) => form.setData('time', e.target.value)}
                 />
               </Field>
-              <Field label="Length (minutes)" error={form.errors.minutes}>
+              <Field label={__('Length (minutes)')} error={form.errors.minutes}>
                 <Input
                   type="number"
                   min={10}
@@ -245,7 +248,7 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
                   onChange={(e) => form.setData('minutes', Number(e.target.value))}
                 />
               </Field>
-              <Field label="Places" error={form.errors.capacity}>
+              <Field label={__('Places')} error={form.errors.capacity}>
                 <Input
                   type="number"
                   min={1}
@@ -254,7 +257,7 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
                 />
               </Field>
               <Field
-                label="Where"
+                label={__('Where')}
                 hint={
                   canGoOnline
                     ? undefined
@@ -267,13 +270,13 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
                   value={form.data.location_type}
                   onChange={(e) => form.setData('location_type', e.target.value)}
                 >
-                  <option value="in_person">In person</option>
-                  <option value="online">Online</option>
+                  <option value="in_person">{__('In person')}</option>
+                  <option value="online">{__('Online')}</option>
                 </select>
               </Field>
               <Field
-                label="Price (R)"
-                hint="Shown to people booking."
+                label={__('Price (R)')}
+                hint={__('Shown to people booking.')}
                 error={form.errors.price_cents}
               >
                 <Input
@@ -297,7 +300,7 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
                   onChange={(e) => form.setData('pay_online', e.target.checked)}
                 />
                 <span>
-                  <strong>Paid online when booking</strong> —{' '}
+                  <strong>{__('Paid online when booking')}</strong> —{' '}
                   {canTakePayments
                     ? 'the price goes straight to your bank; places are held while people pay.'
                     : 'connect your bank in Booking settings first.'}
@@ -307,7 +310,7 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
                 </span>
               </label>
               <Button type="submit" className="justify-self-start" loading={form.processing}>
-                Schedule class
+                {__('Schedule class')}
               </Button>
             </form>
           </CardContent>

@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Button, Card, CardContent, Field, Input, PageHeader } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 /** Percent ↔ basis points (1% = 100), two decimals, no rounding drift. */
 const toPct = (bp: number) => String(Number((bp / 100).toFixed(2)));
@@ -27,24 +28,24 @@ export default function Commission({
     );
   const total = form.data.level_bp.reduce((a, b) => a + b, 0);
   return (
-    <AppShell title="Agent commission">
-      <Head title="Agent commission" />
+    <AppShell title={__('Agent commission')}>
+      <Head title={__('Agent commission')} />
       <div className="grid max-w-2xl gap-6">
         <PageHeader
-          title="Agent commission"
+          title={__('Agent commission')}
           description={`On each business’s WURK subscription, excluding VAT. Payable ${refundDays} days after the payment, when refunds close. Changes apply to payments from now on.`}
         />
         <Card>
           <CardContent className="pt-6">
             <form
-              aria-label="Commission percentages"
+              aria-label={__('Commission percentages')}
               className="grid gap-3"
               onSubmit={(e) => {
                 e.preventDefault();
                 form.put('/agents/commission', { preserveScroll: true });
               }}
             >
-              <ol aria-label="Levels" className="grid gap-3">
+              <ol aria-label={__('Levels')} className="grid gap-3">
                 {form.data.level_bp.map((bp, i) => (
                   <li key={i} className="flex items-end gap-2">
                     <Field
@@ -69,7 +70,7 @@ export default function Commission({
                         aria-label={`Remove level ${i}`}
                         onClick={() => form.setData('level_bp', form.data.level_bp.slice(0, -1))}
                       >
-                        Remove
+                        {__('Remove')}
                       </Button>
                     )}
                   </li>
@@ -77,7 +78,8 @@ export default function Commission({
               </ol>
               {errors.level_bp && <p className="text-danger text-sm">{errors.level_bp}</p>}
               <p className="text-fg-muted text-sm">
-                Total: {toPct(total)}% of each subscription payment.
+                {__('Total:')} {toPct(total)}
+                {__('% of each subscription payment.')}
               </p>
               {canManage && (
                 <div className="flex flex-wrap gap-2">
@@ -86,11 +88,11 @@ export default function Commission({
                       variant="secondary"
                       onClick={() => form.setData('level_bp', [...form.data.level_bp, 0])}
                     >
-                      Add level {form.data.level_bp.length}
+                      {__('Add level')} {form.data.level_bp.length}
                     </Button>
                   )}
                   <Button type="submit" loading={form.processing}>
-                    Save
+                    {__('Save')}
                   </Button>
                 </div>
               )}

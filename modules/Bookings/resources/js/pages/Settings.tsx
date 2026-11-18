@@ -16,6 +16,7 @@ import {
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
 import { CalendarClock } from 'lucide-react';
+import { __ } from '@/i18n';
 
 interface Service {
   id: string;
@@ -156,7 +157,7 @@ function ServiceForm({
       className="border-border grid gap-4 rounded-lg border p-4"
       aria-label={service ? `Edit ${service.name}` : 'Add a service'}
     >
-      <Field label="Name" error={form.errors.name}>
+      <Field label={__('Name')} error={form.errors.name}>
         <Input
           value={form.data.name}
           maxLength={120}
@@ -170,7 +171,7 @@ function ServiceForm({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
-          label="Where"
+          label={__('Where')}
           error={(form.errors as Record<string, string | undefined>).location_type}
         >
           <select
@@ -180,14 +181,14 @@ function ServiceForm({
               form.setData('location_type', e.target.value as Service['location_type'])
             }
           >
-            <option value="in_person">In person</option>
-            <option value="online">Online</option>
-            <option value="either">The client chooses</option>
+            <option value="in_person">{__('In person')}</option>
+            <option value="online">{__('Online')}</option>
+            <option value="either">{__('The client chooses')}</option>
           </select>
         </Field>
         <Field
-          label="Deposit"
-          hint="Paid when booking online (once your bank is connected)."
+          label={__('Deposit')}
+          hint={__('Paid when booking online (once your bank is connected).')}
           error={form.errors.deposit_type}
         >
           <select
@@ -197,15 +198,15 @@ function ServiceForm({
               form.setData('deposit_type', e.target.value as Service['deposit_type'])
             }
           >
-            <option value="none">No deposit</option>
-            <option value="fixed">A fixed amount</option>
-            <option value="percent">A percentage of the price</option>
-            <option value="full">The full price</option>
+            <option value="none">{__('No deposit')}</option>
+            <option value="fixed">{__('A fixed amount')}</option>
+            <option value="percent">{__('A percentage of the price')}</option>
+            <option value="full">{__('The full price')}</option>
           </select>
         </Field>
         {form.data.location_type === 'either' && form.data.deposit_type !== 'none' && (
           <Field
-            label="Charge it"
+            label={__('Charge it')}
             error={(form.errors as Record<string, string | undefined>).deposit_when}
           >
             <select
@@ -215,8 +216,8 @@ function ServiceForm({
                 form.setData('deposit_when', e.target.value as Service['deposit_when'])
               }
             >
-              <option value="always">Always</option>
-              <option value="online">Only for online appointments</option>
+              <option value="always">{__('Always')}</option>
+              <option value="online">{__('Only for online appointments')}</option>
             </select>
           </Field>
         )}
@@ -247,8 +248,8 @@ function ServiceForm({
         )}
       </div>
       <Field
-        label="Price (R)"
-        hint="0 shows “Ask us”."
+        label={__('Price (R)')}
+        hint={__('0 shows “Ask us”.')}
         error={(form.errors as Record<string, string | undefined>).price_cents}
       >
         <Input
@@ -260,7 +261,7 @@ function ServiceForm({
         />
       </Field>
       <fieldset className="grid gap-2">
-        <legend className="mb-1 text-sm font-medium">Who does it</legend>
+        <legend className="mb-1 text-sm font-medium">{__('Who does it')}</legend>
         {team.map((m) => (
           <label key={m.id} className="flex items-center gap-2 text-sm">
             <Checkbox
@@ -279,10 +280,10 @@ function ServiceForm({
       </fieldset>
       {branches.length > 1 && (
         <fieldset className="grid gap-2">
-          <legend className="mb-1 text-sm font-medium">Offered at</legend>
+          <legend className="mb-1 text-sm font-medium">{__('Offered at')}</legend>
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={everywhere} onCheckedChange={(on) => setEverywhere(on === true)} />
-            Every branch (including new ones), at this price
+            {__('Every branch (including new ones), at this price')}
           </label>
           {!everywhere &&
             branches.map((b) => (
@@ -304,7 +305,7 @@ function ServiceForm({
                 </label>
                 {b.id in offered && (
                   <label className="flex items-center gap-2">
-                    Price here (R, optional)
+                    {__('Price here (R, optional)')}
                     <Input
                       type="number"
                       min={0}
@@ -321,10 +322,10 @@ function ServiceForm({
       )}
       <div className="flex gap-2">
         <Button type="submit" loading={form.processing}>
-          Save service
+          {__('Save service')}
         </Button>
         <Button type="button" variant="ghost" onClick={onDone}>
-          Cancel
+          {__('Cancel')}
         </Button>
         {service && (
           <Button
@@ -338,7 +339,7 @@ function ServiceForm({
               })
             }
           >
-            Delete service
+            {__('Delete service')}
           </Button>
         )}
       </div>
@@ -402,7 +403,9 @@ function HoursEditor({
               {day}
             </label>
             <div className="flex flex-wrap items-center gap-2">
-              {stretches.length === 0 && <span className="text-fg-muted text-sm">Not working</span>}
+              {stretches.length === 0 && (
+                <span className="text-fg-muted text-sm">{__('Not working')}</span>
+              )}
               {stretches.map((s, i) => (
                 <span key={i} className="flex items-center gap-1">
                   <Input
@@ -442,7 +445,7 @@ function HoursEditor({
                   aria-label={`Add a break on ${day}`}
                   onClick={() => set(d, [...stretches, { starts: '13:00', ends: '17:00' }])}
                 >
-                  Add a break
+                  {__('Add a break')}
                 </Button>
               )}
             </div>
@@ -455,7 +458,8 @@ function HoursEditor({
         </p>
       )}
       <Button type="button" className="justify-self-start" loading={saving} onClick={save}>
-        Save {member.name}’s hours
+        {__('Save')} {member.name}
+        {__('’s hours')}
       </Button>
     </section>
   );
@@ -467,11 +471,11 @@ function HealthCard({ health, team }: Pick<Props, 'health' | 'team'>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Health practice</CardTitle>
+        <CardTitle>{__('Health practice')}</CardTitle>
         <CardDescription>
-          For doctors, therapists and other health professionals. When it’s on, online consultations
-          show each practitioner’s registration number, and patients must agree to the
-          video-consultation terms before booking.
+          {__(
+            'For doctors, therapists and other health professionals. When it’s on, online consultations show each practitioner’s registration number, and patients must agree to the video-consultation terms before booking.',
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -486,15 +490,17 @@ function HealthCard({ health, team }: Pick<Props, 'health' | 'team'>) {
               )
             }
           />
-          We’re a health practice
+          {__('We’re a health practice')}
         </label>
         {health.on && (
           <details className="border-border rounded-lg border p-3 text-sm">
-            <summary className="cursor-pointer font-medium">The terms patients agree to</summary>
+            <summary className="cursor-pointer font-medium">
+              {__('The terms patients agree to')}
+            </summary>
             <p className="text-fg-muted mt-2">{health.consent}</p>
           </details>
         )}
-        <ul className="grid gap-2" aria-label="Practitioner registrations">
+        <ul className="grid gap-2" aria-label={__('Practitioner registrations')}>
           {team.map((m) => {
             const r = health.registrations[m.id];
             return (
@@ -529,14 +535,14 @@ function HealthCard({ health, team }: Pick<Props, 'health' | 'team'>) {
                       });
                     }}
                   >
-                    <Field label="Council" error={reg.errors.council}>
+                    <Field label={__('Council')} error={reg.errors.council}>
                       <Input
                         value={reg.data.council}
                         maxLength={60}
                         onChange={(e) => reg.setData('council', e.target.value)}
                       />
                     </Field>
-                    <Field label="Registration number" error={reg.errors.number}>
+                    <Field label={__('Registration number')} error={reg.errors.number}>
                       <Input
                         value={reg.data.number}
                         maxLength={40}
@@ -544,7 +550,7 @@ function HealthCard({ health, team }: Pick<Props, 'health' | 'team'>) {
                       />
                     </Field>
                     <Button type="submit" loading={reg.processing}>
-                      Save
+                      {__('Save')}
                     </Button>
                   </form>
                 )}
@@ -572,19 +578,22 @@ function VideoCard({ video, team }: Pick<Props, 'video' | 'team'>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Meeting links</CardTitle>
+        <CardTitle>{__('Meeting links')}</CardTitle>
         <CardDescription>
-          For online appointments and classes. Paste each person’s Google Meet or Zoom link —
-          clients get the link of the person they booked with.
+          {__(
+            'For online appointments and classes. Paste each person’s Google Meet or Zoom link — clients get the link of the person they booked with.',
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
         <p className="border-border rounded-lg border p-3 text-sm">
-          <strong>Tip:</strong> turn on the waiting room in Zoom, or let guests in from the lobby in
-          Google Meet — then you decide who joins, even if a link is shared.
+          <strong>{__('Tip:')}</strong>{' '}
+          {__(
+            'turn on the waiting room in Zoom, or let guests in from the lobby in Google Meet — then you decide who joins, even if a link is shared.',
+          )}
         </p>
         <form
-          aria-label="Meeting links"
+          aria-label={__('Meeting links')}
           className="grid gap-3"
           onSubmit={(e) => {
             e.preventDefault();
@@ -610,8 +619,8 @@ function VideoCard({ video, team }: Pick<Props, 'video' | 'team'>) {
             </Field>
           ))}
           <Field
-            label="For the whole business (optional)"
-            hint="Used for anyone without their own link."
+            label={__('For the whole business (optional)')}
+            hint={__('Used for anyone without their own link.')}
             error={errors.default}
           >
             <Input
@@ -628,7 +637,7 @@ function VideoCard({ video, team }: Pick<Props, 'video' | 'team'>) {
             className="justify-self-start"
             loading={form.processing}
           >
-            Save meeting links
+            {__('Save meeting links')}
           </Button>
         </form>
         {(connectable.length > 0 || (c && c.provider !== 'fixed')) && (
@@ -637,15 +646,15 @@ function VideoCard({ video, team }: Pick<Props, 'video' | 'team'>) {
               <>
                 <span>
                   <strong>{name[c.provider]}</strong>
-                  {c.account_label ? ` — ${c.account_label}` : ''} is connected: each appointment
-                  gets its own private link.
+                  {c.account_label ? ` — ${c.account_label}` : ''}{' '}
+                  {__('is connected: each appointment gets its own private link.')}
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => router.delete(`${base()}/video`, { preserveScroll: true })}
                 >
-                  Disconnect
+                  {__('Disconnect')}
                 </Button>
               </>
             ) : (
@@ -655,7 +664,7 @@ function VideoCard({ video, team }: Pick<Props, 'video' | 'team'>) {
                   href={`${base()}/video/connect/${p}`}
                   className="border-border inline-flex h-10 items-center rounded-md border px-4 font-medium"
                 >
-                  Or connect {name[p]}
+                  {__('Or connect')} {name[p]}
                 </a>
               ))
             )}
@@ -695,15 +704,16 @@ function MessagesCard({ messages }: Pick<Props, 'messages'>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Confirmations and reminders</CardTitle>
+        <CardTitle>{__('Confirmations and reminders')}</CardTitle>
         <CardDescription>
-          Customers get a confirmation, reminders, and a message if their booking moves or is
-          cancelled — in WURK’s standard wording, with a link to change or cancel.
+          {__(
+            'Customers get a confirmation, reminders, and a message if their booking moves or is cancelled — in WURK’s standard wording, with a link to change or cancel.',
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form
-          aria-label="Confirmations and reminders"
+          aria-label={__('Confirmations and reminders')}
           className="grid gap-4"
           onSubmit={(e) => {
             e.preventDefault();
@@ -711,7 +721,7 @@ function MessagesCard({ messages }: Pick<Props, 'messages'>) {
           }}
         >
           <fieldset className="grid gap-2">
-            <legend className="mb-1 text-sm font-medium">Send messages by</legend>
+            <legend className="mb-1 text-sm font-medium">{__('Send messages by')}</legend>
             {options.map((o) => (
               <label
                 key={o.value}
@@ -733,20 +743,20 @@ function MessagesCard({ messages }: Pick<Props, 'messages'>) {
             ))}
           </fieldset>
           <fieldset className="grid gap-2">
-            <legend className="mb-1 text-sm font-medium">Reminders</legend>
+            <legend className="mb-1 text-sm font-medium">{__('Reminders')}</legend>
             <label className="flex items-center gap-2 text-sm">
               <Checkbox
                 checked={form.data.remind_24h}
                 onCheckedChange={(on) => form.setData('remind_24h', on === true)}
               />
-              24 hours before
+              {__('24 hours before')}
             </label>
             <label className="flex items-center gap-2 text-sm">
               <Checkbox
                 checked={form.data.remind_2h}
                 onCheckedChange={(on) => form.setData('remind_2h', on === true)}
               />
-              2 hours before
+              {__('2 hours before')}
             </label>
           </fieldset>
           <Button
@@ -755,7 +765,7 @@ function MessagesCard({ messages }: Pick<Props, 'messages'>) {
             className="justify-self-start"
             loading={form.processing}
           >
-            Save message settings
+            {__('Save message settings')}
           </Button>
         </form>
       </CardContent>
@@ -768,35 +778,36 @@ function DepositsCard({ cardPayments, policy }: Pick<Props, 'cardPayments' | 'po
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Deposits and cancellations</CardTitle>
+        <CardTitle>{__('Deposits and cancellations')}</CardTitle>
         <CardDescription>
-          Deposits are paid straight into your bank account through Paystack — WURK never holds your
-          money. Set a deposit on each service.
+          {__(
+            'Deposits are paid straight into your bank account through Paystack — WURK never holds your money. Set a deposit on each service.',
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
         {cardPayments.length > 0 ? (
           <p className="border-border rounded-lg border p-3">
-            Deposits are paid through your{' '}
+            {__('Deposits are paid through your')}{' '}
             <strong>
               {cardPayments.map((p) => (p === 'yoco' ? 'Yoco' : 'PayFast')).join(' or ')}
             </strong>{' '}
-            account — straight to you.
+            {__('account — straight to you.')}
           </p>
         ) : (
           <p className="text-fg-muted text-sm">
-            To take deposits, connect PayFast or Yoco under{' '}
+            {__('To take deposits, connect PayFast or Yoco under')}{' '}
             <a
               className="underline"
               href={`${window.location.pathname.split('/').slice(0, 2).join('/')}/settings/payments`}
             >
-              Settings → Payments
+              {__('Settings → Payments')}
             </a>
-            . Bookings work without deposits in the meantime.
+            {__('. Bookings work without deposits in the meantime.')}
           </p>
         )}
         <form
-          aria-label="Cancellation policy"
+          aria-label={__('Cancellation policy')}
           className="grid gap-4"
           onSubmit={(e) => {
             e.preventDefault();
@@ -804,8 +815,10 @@ function DepositsCard({ cardPayments, policy }: Pick<Props, 'cardPayments' | 'po
           }}
         >
           <Field
-            label="Free cancellation until (hours before)"
-            hint="Cancel in time: the deposit is refunded. Later, or a missed booking: it’s kept."
+            label={__('Free cancellation until (hours before)')}
+            hint={__(
+              'Cancel in time: the deposit is refunded. Later, or a missed booking: it’s kept.',
+            )}
             error={rules.errors.hours}
           >
             <Input
@@ -818,8 +831,8 @@ function DepositsCard({ cardPayments, policy }: Pick<Props, 'cardPayments' | 'po
             />
           </Field>
           <Field
-            label="Policy wording (optional)"
-            hint="Shown to customers. Leave empty to use the standard wording."
+            label={__('Policy wording (optional)')}
+            hint={__('Shown to customers. Leave empty to use the standard wording.')}
             error={rules.errors.text}
           >
             <textarea
@@ -836,7 +849,7 @@ function DepositsCard({ cardPayments, policy }: Pick<Props, 'cardPayments' | 'po
             className="justify-self-start"
             loading={rules.processing}
           >
-            Save policy
+            {__('Save policy')}
           </Button>
         </form>
       </CardContent>
@@ -873,25 +886,25 @@ export default function Settings({
     });
 
   return (
-    <AppShell title="Booking settings">
-      <Head title="Booking settings" />
+    <AppShell title={__('Booking settings')}>
+      <Head title={__('Booking settings')} />
       <div className="grid max-w-4xl gap-8">
         <PageHeader
-          title="Booking settings"
+          title={__('Booking settings')}
           description={`What customers can book, who does it and when. Times are in ${timezone}.`}
         />
 
         <Card>
           <CardHeader>
-            <CardTitle>Services</CardTitle>
-            <CardDescription>What customers can book online.</CardDescription>
+            <CardTitle>{__('Services')}</CardTitle>
+            <CardDescription>{__('What customers can book online.')}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             {services.length === 0 && editing !== 'new' && (
               <EmptyState
                 icon={CalendarClock}
-                title="No services yet"
-                description="Add your first bookable service."
+                title={__('No services yet')}
+                description={__('Add your first bookable service.')}
               />
             )}
             <ul className="grid gap-2">
@@ -913,7 +926,7 @@ export default function Settings({
                     <div>
                       <p className="font-medium">{s.name}</p>
                       <p className="text-fg-muted text-sm">
-                        {s.duration_minutes} min
+                        {s.duration_minutes} {__('min')}
                         {s.buffer_after_minutes
                           ? ` + ${s.buffer_after_minutes} min after`
                           : ''} · {s.price_cents ? rand(s.price_cents) : 'Ask us'} ·{' '}
@@ -927,7 +940,7 @@ export default function Settings({
                         aria-label={`Edit ${s.name}`}
                         onClick={() => setEditing(s)}
                       >
-                        Edit
+                        {__('Edit')}
                       </Button>
                     )}
                   </li>
@@ -948,7 +961,7 @@ export default function Settings({
                   className="justify-self-start"
                   onClick={() => setEditing('new')}
                 >
-                  Add a service
+                  {__('Add a service')}
                 </Button>
               )
             )}
@@ -966,15 +979,15 @@ export default function Settings({
 
         <Card>
           <CardHeader>
-            <CardTitle>Team hours</CardTitle>
+            <CardTitle>{__('Team hours')}</CardTitle>
             <CardDescription>
-              When each person can be booked. Add a second stretch for a lunch break.
+              {__('When each person can be booked. Add a second stretch for a lunch break.')}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-8">
             {branches.length > 1 && (
               <label className="flex items-center gap-2 text-sm font-medium">
-                Hours at
+                {__('Hours at')}
                 <select
                   className="border-border bg-bg h-10 rounded-md border px-3"
                   value={hoursBranch ?? ''}
@@ -1001,9 +1014,9 @@ export default function Settings({
 
         <Card>
           <CardHeader>
-            <CardTitle>Time off</CardTitle>
+            <CardTitle>{__('Time off')}</CardTitle>
             <CardDescription>
-              Holidays, leave and public holidays. Nobody can book these times.
+              {__('Holidays, leave and public holidays. Nobody can book these times.')}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -1026,14 +1039,14 @@ export default function Settings({
                         router.delete(`${base()}/time-off/${t.id}`, { preserveScroll: true })
                       }
                     >
-                      Remove
+                      {__('Remove')}
                     </Button>
                   </li>
                 ))}
               </ul>
             )}
             <form
-              aria-label="Add time off"
+              aria-label={__('Add time off')}
               className="grid gap-4 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -1047,13 +1060,13 @@ export default function Settings({
                 });
               }}
             >
-              <Field label="Who" error={off.errors.member_id}>
+              <Field label={__('Who')} error={off.errors.member_id}>
                 <select
                   className={selectClass}
                   value={off.data.member_id}
                   onChange={(e) => off.setData('member_id', e.target.value)}
                 >
-                  <option value="">Everyone (the business is closed)</option>
+                  <option value="">{__('Everyone (the business is closed)')}</option>
                   {team.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
@@ -1061,14 +1074,14 @@ export default function Settings({
                   ))}
                 </select>
               </Field>
-              <Field label="Reason (optional)" error={off.errors.reason}>
+              <Field label={__('Reason (optional)')} error={off.errors.reason}>
                 <Input
                   value={off.data.reason}
                   maxLength={120}
                   onChange={(e) => off.setData('reason', e.target.value)}
                 />
               </Field>
-              <Field label="From" error={off.errors.starts_at}>
+              <Field label={__('From')} error={off.errors.starts_at}>
                 <Input
                   type="datetime-local"
                   step={300}
@@ -1076,7 +1089,7 @@ export default function Settings({
                   onChange={(e) => off.setData('starts_at', e.target.value)}
                 />
               </Field>
-              <Field label="Until" error={off.errors.ends_at}>
+              <Field label={__('Until')} error={off.errors.ends_at}>
                 <Input
                   type="datetime-local"
                   step={300}
@@ -1085,7 +1098,7 @@ export default function Settings({
                 />
               </Field>
               <Button type="submit" className="justify-self-start" loading={off.processing}>
-                Add time off
+                {__('Add time off')}
               </Button>
             </form>
           </CardContent>

@@ -2,6 +2,7 @@ import { Link, router, useForm } from '@inertiajs/react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Button, OtpInput } from '@/design-system';
 import AuthLayout from '@/layouts/AuthLayout';
+import { __ } from '@/i18n';
 
 interface Props {
   destination: string;
@@ -51,16 +52,17 @@ export default function Code({
 
   return (
     <AuthLayout
-      title="Enter your code"
+      title={__('Enter your code')}
       description={
         <>
-          We sent a 6-digit code to <strong className="text-fg font-semibold">{destination}</strong>
-          . It expires in 5 minutes.
+          {__('We sent a 6-digit code to')}{' '}
+          <strong className="text-fg font-semibold">{destination}</strong>
+          {__('. It expires in 5 minutes.')}
         </>
       }
       footer={
         <Link href={back} className="text-accent-fg font-medium hover:underline">
-          Use a different email or number
+          {__('Use a different email or number')}
         </Link>
       }
     >
@@ -89,16 +91,19 @@ export default function Code({
           {purpose === 'reset' ? 'Continue' : 'Sign in'}
         </Button>
         <p className="text-fg-muted text-center text-sm" aria-live="polite">
-          Didn’t get it?{' '}
+          {__('Didn’t get it?')}{' '}
           {wait > 0 ? (
-            <span>You can send a new code in {wait}s</span>
+            <span>
+              {__('You can send a new code in')} {wait}
+              {__('s')}
+            </span>
           ) : (
             <button
               type="button"
               onClick={resend}
               className="text-accent-fg cursor-pointer font-medium hover:underline"
             >
-              Send a new code
+              {__('Send a new code')}
             </button>
           )}
         </p>

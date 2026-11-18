@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import { Button, OtpInput } from '@/design-system';
 import AuthLayout from '@/layouts/AuthLayout';
+import { __ } from '@/i18n';
 
 interface Props {
   qr: string;
@@ -19,12 +20,12 @@ export default function MfaSetup({ qr, secret, account }: Props) {
 
   return (
     <AuthLayout
-      title="Protect your account"
-      description="WURK staff accounts need two-step verification. It takes about a minute."
+      title={__('Protect your account')}
+      description={__('WURK staff accounts need two-step verification. It takes about a minute.')}
     >
       <MfaEnrolment qr={qr} secret={secret} account={account} />
       <form onSubmit={submit} className="mt-6 grid gap-4" noValidate>
-        <p className="text-sm font-medium">3. Enter the 6-digit code from the app</p>
+        <p className="text-sm font-medium">{__('3. Enter the 6-digit code from the app')}</p>
         <OtpInput
           value={form.data.code}
           onChange={(v) => form.setData('code', v)}
@@ -43,7 +44,7 @@ export default function MfaSetup({ qr, secret, account }: Props) {
           disabled={form.data.code.length !== 6}
           className="w-full"
         >
-          Turn on and continue
+          {__('Turn on and continue')}
         </Button>
       </form>
     </AuthLayout>
@@ -54,13 +55,13 @@ export function MfaEnrolment({ qr, secret, account }: Props) {
   return (
     <ol className="grid gap-5 text-sm">
       <li>
-        <p className="font-medium">1. Install an authenticator app</p>
+        <p className="font-medium">{__('1. Install an authenticator app')}</p>
         <p className="text-fg-muted mt-1">
-          Google Authenticator, Microsoft Authenticator or 1Password all work.
+          {__('Google Authenticator, Microsoft Authenticator or 1Password all work.')}
         </p>
       </li>
       <li>
-        <p className="font-medium">2. Scan this QR code</p>
+        <p className="font-medium">{__('2. Scan this QR code')}</p>
         <div className="border-border mt-3 flex flex-col items-center gap-3 rounded-2xl border bg-white p-5 sm:flex-row sm:items-start">
           {/* Server-generated SVG of the otpauth URI. */}
           <div
@@ -70,7 +71,7 @@ export function MfaEnrolment({ qr, secret, account }: Props) {
             dangerouslySetInnerHTML={{ __html: qr }}
           />
           <div className="text-neutral-12">
-            <p className="text-neutral-11 text-xs">Can’t scan? Enter this key instead:</p>
+            <p className="text-neutral-11 text-xs">{__('Can’t scan? Enter this key instead:')}</p>
             <code className="mt-1 block font-mono text-sm font-semibold tracking-wider break-all">
               {secret}
             </code>

@@ -12,6 +12,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Account {
   active: boolean;
@@ -80,7 +81,7 @@ function Details({
         </Field>
       ))}
       <Button type="submit" className="justify-self-start" loading={form.processing}>
-        Save {mode} details
+        {__('Save')} {mode} {__('details')}
       </Button>
     </form>
   );
@@ -115,12 +116,16 @@ function ProviderCard({ p, base, branch }: { p: Provider; base: string; branch: 
               {a.mode === 'live' ? 'On' : 'On — test mode'}
             </Badge>
           ) : (
-            <Badge tone="neutral">Off</Badge>
+            <Badge tone="neutral">{__('Off')}</Badge>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 text-sm">
-        {a?.label && <p className="text-fg-muted">Connected: {a.label}</p>}
+        {a?.label && (
+          <p className="text-fg-muted">
+            {__('Connected:')} {a.label}
+          </p>
+        )}
         <div className="flex flex-wrap gap-2">
           <Button
             variant="secondary"
@@ -141,7 +146,7 @@ function ProviderCard({ p, base, branch }: { p: Provider; base: string; branch: 
           <Details p={p} mode={editing} base={base} q={q} done={() => setEditing(null)} />
         )}
         {a && p.provider === 'pargo' && (
-          <Field label="What customers pay for a pickup point (R)">
+          <Field label={__('What customers pay for a pickup point (R)')}>
             <Input
               type="number"
               min={0}
@@ -160,7 +165,7 @@ function ProviderCard({ p, base, branch }: { p: Provider; base: string; branch: 
                 variant={a.active && a.mode === 'test' ? 'primary' : 'secondary'}
                 onClick={() => save(true, 'test')}
               >
-                Use test mode
+                {__('Use test mode')}
               </Button>
             )}
             {a.has_live && (
@@ -169,12 +174,12 @@ function ProviderCard({ p, base, branch }: { p: Provider; base: string; branch: 
                 variant={a.active && a.mode === 'live' ? 'primary' : 'secondary'}
                 onClick={() => save(true, 'live')}
               >
-                Go live
+                {__('Go live')}
               </Button>
             )}
             {a.active && (
               <Button size="sm" variant="ghost" onClick={() => save(false, a.mode)}>
-                Switch off
+                {__('Switch off')}
               </Button>
             )}
             <Button
@@ -183,7 +188,7 @@ function ProviderCard({ p, base, branch }: { p: Provider; base: string; branch: 
               aria-label={`Disconnect ${p.name}`}
               onClick={() => router.delete(`${base}/${p.provider}${q}`, { preserveScroll: true })}
             >
-              Disconnect
+              {__('Disconnect')}
             </Button>
           </div>
         )}
@@ -226,14 +231,15 @@ function Parcels({
       className="border-border grid gap-4 rounded-lg border p-4"
     >
       <h2 id="parcels-title" className="text-lg font-semibold">
-        Parcels
+        {__('Parcels')}
       </h2>
       <p className="text-fg-muted text-sm">
-        Courier prices depend on weight and size. Products without a weight use the default; each
-        order goes in the smallest of your boxes that fits.
+        {__(
+          'Courier prices depend on weight and size. Products without a weight use the default; each order goes in the smallest of your boxes that fits.',
+        )}
       </p>
       <label className="grid max-w-xs gap-1 text-sm font-medium" htmlFor="default-kg">
-        Default weight per item (kg)
+        {__('Default weight per item (kg)')}
         <input
           id="default-kg"
           className={cell}
@@ -246,7 +252,7 @@ function Parcels({
         />
         {errors.default_kg && <span className="text-danger">{errors.default_kg}</span>}
       </label>
-      <ol aria-label="Boxes" className="grid gap-3">
+      <ol aria-label={__('Boxes')} className="grid gap-3">
         {form.data.boxes.map((b, i) => (
           <li key={i} className="border-border grid gap-2 rounded-md border p-3 sm:grid-cols-6">
             {(
@@ -296,7 +302,7 @@ function Parcels({
                   )
                 }
               >
-                Remove
+                {__('Remove')}
               </Button>
             </div>
           </li>
@@ -312,13 +318,13 @@ function Parcels({
             ])
           }
         >
-          Add a box
+          {__('Add a box')}
         </Button>
         <Button
           loading={form.processing}
           onClick={() => form.put(`${base}/parcels`, { preserveScroll: true })}
         >
-          Save parcels
+          {__('Save parcels')}
         </Button>
       </div>
     </section>
@@ -337,23 +343,25 @@ export default function ShippingSettings({
   const base = window.location.pathname.replace(/\/$/, '');
   const [branch, setBranch] = useState('');
   return (
-    <AppShell title="Shipping">
-      <Head title="Shipping" />
+    <AppShell title={__('Shipping')}>
+      <Head title={__('Shipping')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Shipping"
-          description="Connect your own courier accounts. Bob Go gives customers live courier rates at checkout; Pargo lets them collect from a pickup point near them. You pay the couriers directly — WURK never handles the money."
+          title={__('Shipping')}
+          description={__(
+            'Connect your own courier accounts. Bob Go gives customers live courier rates at checkout; Pargo lets them collect from a pickup point near them. You pay the couriers directly — WURK never handles the money.',
+          )}
         />
         {branches.length > 1 && (
           <div className="grid gap-2">
             <label className="flex flex-wrap items-center gap-2 text-sm font-medium">
-              Accounts for
+              {__('Accounts for')}
               <select
                 className="border-border bg-bg h-10 rounded-md border px-3"
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
               >
-                <option value="">The whole business</option>
+                <option value="">{__('The whole business')}</option>
                 {branches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
@@ -363,7 +371,7 @@ export default function ShippingSettings({
             </label>
             {branch && (
               <p className="text-fg-muted text-sm">
-                Without its own account, this branch uses the business’s.
+                {__('Without its own account, this branch uses the business’s.')}
               </p>
             )}
           </div>

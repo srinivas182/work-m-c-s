@@ -21,6 +21,9 @@ export function t(text: string, values: Record<string, string | number> = {}): s
   return out;
 }
 
+/** The same as t(), under a name pages don't use for anything else (the codemod and most pages use this one). */
+export const __ = t;
+
 /** The page's language code (from <html lang>), e.g. 'zu'. */
 export function locale(): string {
   return typeof document === 'undefined' ? 'en' : document.documentElement.lang.slice(0, 2) || 'en';

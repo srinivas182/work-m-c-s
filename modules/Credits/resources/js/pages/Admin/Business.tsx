@@ -13,6 +13,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { CreditOverview, type CreditSummary } from '../Summary';
+import { __ } from '@/i18n';
 
 type Props = CreditSummary & { business: { id: string; name: string }; canAdjust: boolean };
 
@@ -28,15 +29,16 @@ export default function Business({ business, canAdjust, ...summary }: Props) {
         >
           <ArrowLeft className="size-4" aria-hidden /> {business.name}
         </Link>
-        <PageHeader title="WURK Credits" eyebrow={business.name} />
+        <PageHeader title={__('WURK Credits')} eyebrow={business.name} />
         <CreditOverview summary={summary} />
         {canAdjust && (
           <Card>
             <CardHeader>
-              <CardTitle>Adjust balance</CardTitle>
+              <CardTitle>{__('Adjust balance')}</CardTitle>
               <CardDescription>
-                Goodwill credits or corrections. Use a negative number to remove credits. Recorded
-                in the audit log.
+                {__(
+                  'Goodwill credits or corrections. Use a negative number to remove credits. Recorded in the audit log.',
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -50,7 +52,7 @@ export default function Business({ business, canAdjust, ...summary }: Props) {
                 }}
                 className="grid grid-cols-1 items-end gap-4 sm:grid-cols-[10rem_1fr_auto]"
               >
-                <Field label="Credits" error={form.errors.credits} required>
+                <Field label={__('Credits')} error={form.errors.credits} required>
                   <Input
                     type="number"
                     step="0.1"
@@ -58,14 +60,14 @@ export default function Business({ business, canAdjust, ...summary }: Props) {
                     onChange={(e) => form.setData('credits', e.target.value)}
                   />
                 </Field>
-                <Field label="Reason" error={form.errors.reason} required>
+                <Field label={__('Reason')} error={form.errors.reason} required>
                   <Input
                     value={form.data.reason}
                     onChange={(e) => form.setData('reason', e.target.value)}
                   />
                 </Field>
                 <Button type="submit" loading={form.processing}>
-                  Apply
+                  {__('Apply')}
                 </Button>
               </form>
             </CardContent>

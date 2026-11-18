@@ -2,6 +2,7 @@ import { Link, useForm } from '@inertiajs/react';
 import { useState, type FormEvent } from 'react';
 import { Button, Field, Input, OtpInput } from '@/design-system';
 import AuthLayout from '@/layouts/AuthLayout';
+import { __ } from '@/i18n';
 
 export default function MfaChallenge() {
   const [recovery, setRecovery] = useState(false);
@@ -19,7 +20,7 @@ export default function MfaChallenge() {
 
   return (
     <AuthLayout
-      title="Two-step verification"
+      title={__('Two-step verification')}
       description={
         recovery
           ? 'Enter one of the recovery codes you saved when you set up your authenticator app.'
@@ -27,17 +28,17 @@ export default function MfaChallenge() {
       }
       footer={
         <Link href="/sign-in" className="text-accent-fg font-medium hover:underline">
-          Start again
+          {__('Start again')}
         </Link>
       }
     >
       <form onSubmit={submit} className="grid gap-5" noValidate>
         {recovery ? (
-          <Field label="Recovery code" error={form.errors.code}>
+          <Field label={__('Recovery code')} error={form.errors.code}>
             <Input
               value={form.data.code}
               onChange={(e) => form.setData('code', e.target.value)}
-              placeholder="xxxxx-xxxxx"
+              placeholder={__('xxxxx-xxxxx')}
               autoComplete="off"
               autoFocus
               className="h-12 font-mono text-base"
@@ -62,7 +63,7 @@ export default function MfaChallenge() {
           </>
         )}
         <Button type="submit" size="lg" loading={form.processing} className="w-full">
-          Verify
+          {__('Verify')}
         </Button>
         <button
           type="button"

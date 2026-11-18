@@ -3,6 +3,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Button, Checkbox, Field, Input, Label } from '@/design-system';
 import AuthLayout from '@/layouts/AuthLayout';
+import { __ } from '@/i18n';
 
 interface Props {
   identifier: string;
@@ -20,18 +21,18 @@ export default function Password({ identifier, surface }: Props) {
 
   return (
     <AuthLayout
-      title="Sign in with password"
+      title={__('Sign in with password')}
       footer={
         <>
-          No password?{' '}
+          {__('No password?')}{' '}
           <Link href="/sign-in" className="text-accent-fg font-medium hover:underline">
-            Get a code instead
+            {__('Get a code instead')}
           </Link>
         </>
       }
     >
       <form onSubmit={submit} className="grid gap-5" noValidate>
-        <Field label="Email or mobile number" error={form.errors.identifier} required>
+        <Field label={__('Email or mobile number')} error={form.errors.identifier} required>
           <Input
             value={form.data.identifier}
             onChange={(e) => form.setData('identifier', e.target.value)}
@@ -40,7 +41,7 @@ export default function Password({ identifier, surface }: Props) {
             className="h-12 text-base"
           />
         </Field>
-        <Field label="Password" error={form.errors.password} required>
+        <Field label={__('Password')} error={form.errors.password} required>
           {(control) => (
             <div className="relative">
               <Input
@@ -76,7 +77,7 @@ export default function Password({ identifier, surface }: Props) {
                 onCheckedChange={(v) => form.setData('remember', v === true)}
               />
               <Label htmlFor="remember" className="text-fg-muted font-normal">
-                Keep me signed in
+                {__('Keep me signed in')}
               </Label>
             </div>
           ) : (
@@ -86,11 +87,11 @@ export default function Password({ identifier, surface }: Props) {
             href="/forgot-password"
             className="text-accent-fg text-sm font-medium hover:underline"
           >
-            Forgot password?
+            {__('Forgot password?')}
           </Link>
         </div>
         <Button type="submit" size="lg" loading={form.processing} className="w-full">
-          Sign in
+          {__('Sign in')}
         </Button>
       </form>
     </AuthLayout>

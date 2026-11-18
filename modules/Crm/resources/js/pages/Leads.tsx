@@ -13,6 +13,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 type Stage = {
   id: string | null;
@@ -39,7 +40,7 @@ function StagesEditor({ stages, base, done }: { stages: Stage[]; base: string; d
     setRows(rows.map((r, k) => (k === i ? { ...r, ...patch } : r)));
   return (
     <form
-      aria-label="Edit stages"
+      aria-label={__('Edit stages')}
       className="grid gap-3"
       onSubmit={(e) => {
         e.preventDefault();
@@ -62,7 +63,7 @@ function StagesEditor({ stages, base, done }: { stages: Stage[]; base: string; d
       {rows.map((r, i) => (
         <div key={i} className="flex flex-wrap items-center gap-2 text-sm">
           <label className="flex items-center gap-2">
-            Stage {i + 1}
+            {__('Stage')} {i + 1}
             <input
               className={`${selectClass} w-40`}
               value={r.name}
@@ -70,15 +71,15 @@ function StagesEditor({ stages, base, done }: { stages: Stage[]; base: string; d
             />
           </label>
           <label className="flex items-center gap-2">
-            Type
+            {__('Type')}
             <select
               className={selectClass}
               value={r.kind}
               onChange={(e) => set(i, { kind: e.target.value as Stage['kind'] })}
             >
-              <option value="open">Open</option>
-              <option value="won">Won</option>
-              <option value="lost">Lost</option>
+              <option value="open">{__('Open')}</option>
+              <option value="won">{__('Won')}</option>
+              <option value="lost">{__('Lost')}</option>
             </select>
           </label>
           <Button
@@ -88,7 +89,7 @@ function StagesEditor({ stages, base, done }: { stages: Stage[]; base: string; d
             aria-label={`Remove ${r.name || `stage ${i + 1}`}`}
             onClick={() => setRows(rows.filter((_, k) => k !== i))}
           >
-            Remove
+            {__('Remove')}
           </Button>
         </div>
       ))}
@@ -99,10 +100,10 @@ function StagesEditor({ stages, base, done }: { stages: Stage[]; base: string; d
           size="sm"
           onClick={() => setRows([...rows, { id: null, name: '', kind: 'open' }])}
         >
-          Add a stage
+          {__('Add a stage')}
         </Button>
         <Button type="submit" size="sm">
-          Save stages
+          {__('Save stages')}
         </Button>
       </div>
     </form>
@@ -137,12 +138,18 @@ export default function Leads({
       <span className="text-fg-muted flex flex-wrap gap-2">
         {l.value_cents != null && <span>{rand(l.value_cents)}</span>}
         {l.assignee && <span>· {l.assignee}</span>}
-        {l.follow_up && <span>· follow up {l.follow_up}</span>}
+        {l.follow_up && (
+          <span>
+            {__('· follow up')} {l.follow_up}
+          </span>
+        )}
       </span>
-      {l.overdue && <Badge tone="warning">Overdue</Badge>}
+      {l.overdue && <Badge tone="warning">{__('Overdue')}</Badge>}
       {canManage && (
         <label className="flex items-center gap-2">
-          <span className="sr-only">Move {l.title} to</span>
+          <span className="sr-only">
+            {__('Move')} {l.title} {__('to')}
+          </span>
           <select
             className={selectClass}
             value={l.stage}
@@ -159,22 +166,22 @@ export default function Leads({
     </li>
   );
   return (
-    <AppShell title="Leads">
-      <Head title="Leads" />
+    <AppShell title={__('Leads')}>
+      <Head title={__('Leads')} />
       <div className="grid gap-6">
         <PageHeader
-          title="Leads"
+          title={__('Leads')}
           description={`${pipeline.name} — follow up enquiries and quotes. Add a lead from a contact’s page.`}
           actions={
             <span className="flex gap-3 text-sm">
               <Link href={base} className={view === 'board' ? 'font-semibold' : 'underline'}>
-                Board
+                {__('Board')}
               </Link>
               <Link
                 href={`${base}?view=list`}
                 className={view === 'list' ? 'font-semibold' : 'underline'}
               >
-                List
+                {__('List')}
               </Link>
               <Link
                 href={closed ? `${base}?view=${view}` : `${base}?view=${view}&show=closed`}
@@ -184,7 +191,7 @@ export default function Leads({
               </Link>
               {canManage && (
                 <button type="button" className="underline" onClick={() => setEditing(!editing)}>
-                  Edit stages
+                  {__('Edit stages')}
                 </button>
               )}
             </span>
@@ -193,7 +200,7 @@ export default function Leads({
         {editing && (
           <Card>
             <CardHeader>
-              <CardTitle>Stages</CardTitle>
+              <CardTitle>{__('Stages')}</CardTitle>
             </CardHeader>
             <CardContent>
               <StagesEditor stages={stages} base={base} done={() => setEditing(false)} />
@@ -203,8 +210,10 @@ export default function Leads({
         {leads.length === 0 ? (
           <EmptyState
             icon={Columns3}
-            title="No leads yet"
-            description="Open a lead from a contact’s page; forms and the chatbot will add them too."
+            title={__('No leads yet')}
+            description={__(
+              'Open a lead from a contact’s page; forms and the chatbot will add them too.',
+            )}
           />
         ) : view === 'board' ? (
           <div className="grid gap-4 overflow-x-auto md:auto-cols-[minmax(14rem,1fr)] md:grid-flow-col">
@@ -227,7 +236,7 @@ export default function Leads({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Leads</caption>
+              <caption className="sr-only">{__('Leads')}</caption>
               <thead>
                 <tr className="border-border border-b">
                   {['Lead', 'Contact', 'Stage', 'Value', 'Assigned to', 'Follow up'].map((h) => (

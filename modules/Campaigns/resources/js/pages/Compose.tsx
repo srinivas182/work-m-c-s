@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Button, Card, CardContent, Field, Input, PageHeader } from '@/design-system';
 import { HelpTip } from '@/components/HelpTip';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Draft {
   name: string;
@@ -52,47 +53,50 @@ export default function Compose({
   }, [base, form.data.channel, form.data.segment, form.data.branch_id]);
   const sms = form.data.channel === 'sms';
   return (
-    <AppShell title="New campaign">
-      <Head title="New campaign" />
+    <AppShell title={__('New campaign')}>
+      <Head title={__('New campaign')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="New campaign"
-          description="Only customers who agreed to hear from you receive it. {first_name} is replaced with each customer’s first name."
+          title={__('New campaign')}
+          description={__(
+            'Only customers who agreed to hear from you receive it. {first_name} is replaced with each customer’s first name.',
+          )}
         />
         <Card>
           <CardContent className="pt-6">
             <form
-              aria-label="New campaign"
+              aria-label={__('New campaign')}
               className="grid gap-3 text-sm"
               onSubmit={(e) => {
                 e.preventDefault();
                 form.post(`${base}/new`);
               }}
             >
-              <Field label="Name (for you)" error={form.errors.name}>
+              <Field label={__('Name (for you)')} error={form.errors.name}>
                 <Input
                   value={form.data.name}
                   onChange={(e) => form.setData('name', e.target.value)}
                 />
               </Field>
-              <Field label="Send by">
+              <Field label={__('Send by')}>
                 <select
                   className="border-border bg-bg h-10 w-full rounded-md border px-3"
                   value={form.data.channel}
                   onChange={(e) => form.setData('channel', e.target.value)}
                 >
-                  <option value="email">Email (free)</option>
-                  <option value="sms">SMS (uses credits)</option>
+                  <option value="email">{__('Email (free)')}</option>
+                  <option value="sms">{__('SMS (uses credits)')}</option>
                 </select>
               </Field>
               <p className="text-fg-muted flex items-center gap-1">
-                Only customers who agreed to hear from you are included.{' '}
+                {__('Only customers who agreed to hear from you are included.')}{' '}
                 <HelpTip>
-                  Customers agree when they tick “Send me offers” at checkout, when booking or on
-                  your forms. Anyone who opts out is removed straight away.
+                  {__(
+                    'Customers agree when they tick “Send me offers” at checkout, when booking or on your forms. Anyone who opts out is removed straight away.',
+                  )}
                 </HelpTip>
               </p>
-              <Field label="Who" error={form.errors.segment}>
+              <Field label={__('Who')} error={form.errors.segment}>
                 <select
                   className="border-border bg-bg h-10 w-full rounded-md border px-3"
                   value={form.data.segment}
@@ -108,13 +112,13 @@ export default function Compose({
                 </select>
               </Field>
               {form.data.segment === 'branch' && (
-                <Field label="Branch" error={form.errors.branch_id}>
+                <Field label={__('Branch')} error={form.errors.branch_id}>
                   <select
                     className="border-border bg-bg h-10 w-full rounded-md border px-3"
                     value={form.data.branch_id}
                     onChange={(e) => form.setData('branch_id', e.target.value)}
                   >
-                    <option value="">Choose a branch</option>
+                    <option value="">{__('Choose a branch')}</option>
                     {branches.map((b) => (
                       <option key={b.id} value={b.id}>
                         {b.name}
@@ -124,7 +128,7 @@ export default function Compose({
                 </Field>
               )}
               {!sms && (
-                <Field label="Subject" error={form.errors.subject}>
+                <Field label={__('Subject')} error={form.errors.subject}>
                   <Input
                     value={form.data.subject}
                     onChange={(e) => form.setData('subject', e.target.value)}
@@ -150,7 +154,7 @@ export default function Compose({
                   : `${estimate.recipients} ${estimate.recipients === 1 ? 'customer' : 'customers'}${sms ? ` · about ${estimate.credits} credits${estimate.spendable !== null ? ` · you have ${estimate.spendable}` : ''}` : ''}${estimate.enough ? '' : ' — not enough credits'}`}
               </p>
               <Button type="submit" className="justify-self-start" loading={form.processing}>
-                Save and preview
+                {__('Save and preview')}
               </Button>
             </form>
           </CardContent>

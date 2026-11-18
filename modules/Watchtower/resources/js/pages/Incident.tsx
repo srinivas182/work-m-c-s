@@ -13,6 +13,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { at, type IncidentRow, severityTone } from './Incidents';
+import { __ } from '@/i18n';
 
 interface Props {
   incident: IncidentRow & {
@@ -71,12 +72,12 @@ export default function Incident({
   const max = Math.max(1, ...days.map((d) => d.count));
   const open = i.status === 'new' || i.status === 'acknowledged';
   return (
-    <AppShell title="Watchtower">
+    <AppShell title={__('Watchtower')}>
       <Head title={`${i.reference} · Watchtower`} />
       <div className="grid max-w-5xl gap-6">
         <p>
           <Link href={back} className="text-sm underline-offset-2 hover:underline">
-            ← All problems
+            {__('← All problems')}
           </Link>
         </p>
         <PageHeader eyebrow={i.reference} title={i.title} />
@@ -85,13 +86,16 @@ export default function Incident({
           <Badge>{statuses[i.status] ?? i.status}</Badge>
           {i.regressed && (
             <Badge tone="danger">
-              Came back after being fixed{i.fixed_in ? ` in ${i.fixed_in}` : ''}
+              {__('Came back after being fixed')}
+              {i.fixed_in ? ` in ${i.fixed_in}` : ''}
             </Badge>
           )}
-          {i.ongoing && <Badge tone="danger">Still failing</Badge>}
+          {i.ongoing && <Badge tone="danger">{__('Still failing')}</Badge>}
           <span className="text-fg-muted">
-            {i.occurrences}× since {at(i.first_seen_at)} · {i.last_hour} in the last hour · last{' '}
-            {at(i.last_seen_at)} · releases {i.first_release ?? '—'} → {i.last_release ?? '—'}
+            {i.occurrences}
+            {__('× since')} {at(i.first_seen_at)} · {i.last_hour} {__('in the last hour · last')}{' '}
+            {at(i.last_seen_at)} {__('· releases')} {i.first_release ?? '—'} →{' '}
+            {i.last_release ?? '—'}
           </span>
         </div>
 
@@ -104,12 +108,12 @@ export default function Incident({
                   onClick={() => act('acknowledge')}
                   disabled={form.processing}
                 >
-                  Acknowledge
+                  {__('Acknowledge')}
                 </Button>
               )}
               {i.status !== 'fixed' && (
                 <>
-                  <Field label="Fixed in release" error={form.errors.fixed_in}>
+                  <Field label={__('Fixed in release')} error={form.errors.fixed_in}>
                     <Input
                       className="w-32"
                       value={form.data.fixed_in}
@@ -117,13 +121,13 @@ export default function Incident({
                     />
                   </Field>
                   <Button onClick={() => act('fixed')} disabled={form.processing}>
-                    Mark fixed
+                    {__('Mark fixed')}
                   </Button>
                 </>
               )}
               {i.status !== 'ignored' && (
                 <Button variant="ghost" onClick={() => act('ignore')} disabled={form.processing}>
-                  Ignore
+                  {__('Ignore')}
                 </Button>
               )}
               {!open && (
@@ -132,7 +136,7 @@ export default function Incident({
                   onClick={() => act('reopen')}
                   disabled={form.processing}
                 >
-                  Reopen
+                  {__('Reopen')}
                 </Button>
               )}
             </CardContent>
@@ -141,7 +145,7 @@ export default function Incident({
 
         <Card>
           <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-            <CardTitle>What WURK’s AI thinks</CardTitle>
+            <CardTitle>{__('What WURK’s AI thinks')}</CardTitle>
             {can_manage && i.analysis?.status !== 'pending' && (
               <Button
                 size="sm"
@@ -155,29 +159,31 @@ export default function Incident({
             )}
           </CardHeader>
           <CardContent className="grid gap-2 text-sm">
-            {!i.analysis && <p className="text-fg-muted">Not explained yet.</p>}
+            {!i.analysis && <p className="text-fg-muted">{__('Not explained yet.')}</p>}
             {i.analysis?.status === 'pending' && (
-              <p className="text-fg-muted">Working on it — refresh in a minute or two.</p>
+              <p className="text-fg-muted">{__('Working on it — refresh in a minute or two.')}</p>
             )}
             {i.analysis?.status === 'failed' && (
-              <p className="text-danger-11">The AI couldn’t explain it: {i.analysis.error}</p>
+              <p className="text-danger-11">
+                {__('The AI couldn’t explain it:')} {i.analysis.error}
+              </p>
             )}
             {i.analysis?.status === 'done' && (
               <>
                 <p>{i.analysis.summary}</p>
                 {i.analysis.cause && (
                   <p>
-                    <strong>Likely cause:</strong> {i.analysis.cause}
+                    <strong>{__('Likely cause:')}</strong> {i.analysis.cause}
                   </p>
                 )}
                 {i.analysis.fix && (
                   <p className="whitespace-pre-wrap">
-                    <strong>Suggested fix:</strong> {i.analysis.fix}
+                    <strong>{__('Suggested fix:')}</strong> {i.analysis.fix}
                   </p>
                 )}
                 <p className="text-fg-muted">
-                  {i.analysis.confidence} confidence · from release {i.analysis.release}. Check it
-                  before acting on it.
+                  {i.analysis.confidence} {__('confidence · from release')} {i.analysis.release}
+                  {__('. Check it before acting on it.')}
                 </p>
               </>
             )}
@@ -186,17 +192,19 @@ export default function Incident({
 
         <Card>
           <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-            <CardTitle>Fix request</CardTitle>
+            <CardTitle>{__('Fix request')}</CardTitle>
             <Button size="sm" onClick={() => void copy()}>
               {copied ? 'Copied' : 'Copy fix request'}
             </Button>
           </CardHeader>
           <CardContent className="grid gap-2">
             <p className="text-fg-muted text-sm">
-              Paste this into your engineering chat to get it fixed. Personal data has been removed.
+              {__(
+                'Paste this into your engineering chat to get it fixed. Personal data has been removed.',
+              )}
             </p>
             <pre
-              aria-label="Fix request"
+              aria-label={__('Fix request')}
               className="bg-neutral-2 max-h-96 overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap"
             >
               {fix_request}
@@ -207,10 +215,10 @@ export default function Incident({
         {days.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Last 14 days</CardTitle>
+              <CardTitle>{__('Last 14 days')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul aria-label="Occurrences per day" className="grid gap-1 text-sm">
+              <ul aria-label={__('Occurrences per day')} className="grid gap-1 text-sm">
                 {days.map((d) => (
                   <li key={d.day} className="grid grid-cols-[7rem_1fr_3rem] items-center gap-2">
                     <span>{d.day}</span>
@@ -230,7 +238,8 @@ export default function Incident({
           <Card>
             <CardHeader>
               <CardTitle>
-                Businesses affected ({i.businesses}
+                {__('Businesses affected (')}
+                {i.businesses}
                 {i.businesses > businesses.length ? `, first ${businesses.length} shown` : ''})
               </CardTitle>
             </CardHeader>
@@ -249,7 +258,7 @@ export default function Incident({
         {i.trace && (
           <Card>
             <CardHeader>
-              <CardTitle>Trace</CardTitle>
+              <CardTitle>{__('Trace')}</CardTitle>
             </CardHeader>
             <CardContent>
               <pre className="bg-neutral-2 max-h-96 overflow-auto rounded-md p-3 text-xs">

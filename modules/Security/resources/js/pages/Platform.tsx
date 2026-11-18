@@ -15,6 +15,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   allowlist: string[];
@@ -71,7 +72,7 @@ function ListEditor({
         className="w-fit"
         onClick={() => onChange([...values, ''])}
       >
-        <Plus /> Add
+        <Plus /> {__('Add')}
       </Button>
     </div>
   );
@@ -100,25 +101,28 @@ export default function Platform({
   };
 
   return (
-    <AppShell title="Security">
-      <Head title="Security" />
+    <AppShell title={__('Security')}>
+      <Head title={__('Security')} />
       <form onSubmit={submit} className="grid max-w-3xl gap-8">
         <PageHeader
-          title="Security"
-          description="Platform-wide protections. WURK staff always need an authenticator app, whatever is set here."
+          title={__('Security')}
+          description={__(
+            'Platform-wide protections. WURK staff always need an authenticator app, whatever is set here.',
+          )}
         />
         <Card>
           <CardHeader>
-            <CardTitle>Admin access by network</CardTitle>
+            <CardTitle>{__('Admin access by network')}</CardTitle>
             <CardDescription>
-              Leave empty to allow any network. When set, the WURK admin (including sign-in) only
-              opens from these addresses. You’re on{' '}
+              {__(
+                'Leave empty to allow any network. When set, the WURK admin (including sign-in) only opens from these addresses. You’re on',
+              )}{' '}
               <strong className="text-fg font-semibold">{yourIp}</strong>.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <ListEditor
-              label="IP address or range"
+              label={__('IP address or range')}
               values={form.data.allowlist}
               placeholder="196.25.10.0/24"
               onChange={(v) => form.setData('allowlist', v)}
@@ -128,15 +132,16 @@ export default function Platform({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Cash payments</CardTitle>
+            <CardTitle>{__('Cash payments')}</CardTitle>
             <CardDescription>
-              When a cash payment is recorded (from Sprint 3), these people approve it with a
-              one-time code, and receipts go to these addresses.
+              {__(
+                'When a cash payment is recorded (from Sprint 3), these people approve it with a one-time code, and receipts go to these addresses.',
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6">
             <fieldset className="grid gap-3">
-              <legend className="mb-1 text-sm font-medium">Approval codes go to</legend>
+              <legend className="mb-1 text-sm font-medium">{__('Approval codes go to')}</legend>
               {staff.map((s) => (
                 <div key={s.id} className="flex items-center gap-3">
                   <Checkbox
@@ -158,11 +163,11 @@ export default function Platform({
               ))}
             </fieldset>
             <div className="grid gap-2">
-              <p className="text-sm font-medium">Receipts go to</p>
+              <p className="text-sm font-medium">{__('Receipts go to')}</p>
               <ListEditor
-                label="Receipt email"
+                label={__('Receipt email')}
                 values={form.data.cash_receipt_recipients}
-                placeholder="finance@wurk.co.za"
+                placeholder={__('finance@wurk.co.za')}
                 onChange={(v) => form.setData('cash_receipt_recipients', v)}
                 errors={errorsFor('cash_receipt_recipients')}
               />
@@ -170,7 +175,7 @@ export default function Platform({
           </CardContent>
         </Card>
         <Button type="submit" size="lg" className="w-fit" loading={form.processing}>
-          Save security settings
+          {__('Save security settings')}
         </Button>
       </form>
       <Contacts contacts={contacts} />
@@ -200,7 +205,7 @@ function Contacts({ contacts }: { contacts: Props['contacts'] }) {
   ];
   return (
     <form
-      aria-label="WURK’s contact addresses"
+      aria-label={__('WURK’s contact addresses')}
       className="mt-8 grid max-w-3xl gap-4"
       onSubmit={(e) => {
         e.preventDefault();
@@ -209,9 +214,9 @@ function Contacts({ contacts }: { contacts: Props['contacts'] }) {
     >
       <Card>
         <CardHeader>
-          <CardTitle>WURK’s contact addresses</CardTitle>
+          <CardTitle>{__('WURK’s contact addresses')}</CardTitle>
           <CardDescription>
-            Where WURK can be reached, and where messages to WURK go.
+            {__('Where WURK can be reached, and where messages to WURK go.')}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -225,7 +230,7 @@ function Contacts({ contacts }: { contacts: Props['contacts'] }) {
             </Field>
           ))}
           <Button type="submit" className="w-fit" loading={f.processing}>
-            Save contact addresses
+            {__('Save contact addresses')}
           </Button>
         </CardContent>
       </Card>

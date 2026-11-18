@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp, ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
 import { AiConfirm } from '@/components/AiConfirm';
 import { firstError, request } from './http';
+import { __ } from '@/i18n';
 
 export interface PhotoValue {
   src: string;
@@ -121,31 +122,31 @@ export function PhotoPicker({
             <img src={photo.src} alt="" className="size-[72px] rounded-md object-cover" />
             {isDemoPhoto(photo.src) && (
               <span className="absolute inset-x-0 bottom-0 rounded-b-md bg-[#7a4b00] px-1 py-0.5 text-center text-[10px] font-semibold text-white">
-                Demo
+                {__('Demo')}
               </span>
             )}
           </div>
           <div className="grid gap-1.5">
             {isDemoPhoto(photo.src) && (
               <p className="text-[#7a4b00]">
-                Demo photo — replace it with one of your own business.
+                {__('Demo photo — replace it with one of your own business.')}
               </p>
             )}
             {withAlt && (
               <label className="grid gap-1">
-                <span className="font-medium">Describe this photo</span>
+                <span className="font-medium">{__('Describe this photo')}</span>
                 <input
                   className="rounded-md border border-[#d9d6e8] px-2 py-1.5"
                   value={photo.alt}
                   maxLength={140}
-                  placeholder="e.g. Stylist braiding a client’s hair"
+                  placeholder={__('e.g. Stylist braiding a client’s hair')}
                   onChange={(e) => update(i, { alt: e.target.value })}
                 />
               </label>
             )}
             {withAlt && !photo.alt && (
               <span className="text-[#8a1c1c]">
-                Add a short description for people using screen readers.
+                {__('Add a short description for people using screen readers.')}
               </span>
             )}
             <div className="flex gap-1">
@@ -156,7 +157,7 @@ export function PhotoPicker({
                     className="rounded p-1 hover:bg-[#f2f0f9] disabled:opacity-40"
                     disabled={i === 0}
                     onClick={() => move(i, -1)}
-                    aria-label="Move photo earlier"
+                    aria-label={__('Move photo earlier')}
                   >
                     <ArrowUp className="size-4" aria-hidden />
                   </button>
@@ -165,7 +166,7 @@ export function PhotoPicker({
                     className="rounded p-1 hover:bg-[#f2f0f9] disabled:opacity-40"
                     disabled={i === value.length - 1}
                     onClick={() => move(i, 1)}
-                    aria-label="Move photo later"
+                    aria-label={__('Move photo later')}
                   >
                     <ArrowDown className="size-4" aria-hidden />
                   </button>
@@ -175,7 +176,7 @@ export function PhotoPicker({
                 type="button"
                 className="rounded p-1 text-[#8a1c1c] hover:bg-[#fdecec]"
                 onClick={() => onChange(value.filter((_, j) => j !== i))}
-                aria-label="Remove photo"
+                aria-label={__('Remove photo')}
               >
                 <Trash2 className="size-4" aria-hidden />
               </button>
@@ -193,7 +194,7 @@ export function PhotoPicker({
             accept="image/jpeg,image/png,image/webp"
             className="sr-only"
             // Uploads start from the visible button; the input itself is named and kept out of the tab order.
-            aria-label="Choose a photo to upload"
+            aria-label={__('Choose a photo to upload')}
             tabIndex={-1}
             onChange={(e) => {
               const file = e.target.files?.[0];
@@ -219,11 +220,15 @@ export function PhotoPicker({
             onClick={() => void openLibrary()}
             className="rounded-md border border-[#d9d6e8] px-3 py-2 font-medium"
           >
-            Choose from my photos
+            {__('Choose from my photos')}
           </button>
         </div>
       )}
-      {full && max > 1 && <p className="text-[#5b5776]">Up to {max} photos.</p>}
+      {full && max > 1 && (
+        <p className="text-[#5b5776]">
+          {__('Up to')} {max} {__('photos.')}
+        </p>
+      )}
       {error && (
         <p role="alert" className="text-[#8a1c1c]">
           {error}
@@ -233,16 +238,16 @@ export function PhotoPicker({
       {allowAi && ai && !full && (
         <div className="grid gap-2 rounded-lg border border-dashed border-[#d9d6e8] p-2">
           <label className="grid gap-1" htmlFor={`${id}-prompt`}>
-            <span className="font-medium">Or generate an image with WURK AI</span>
+            <span className="font-medium">{__('Or generate an image with WURK AI')}</span>
             <span className="text-[#5b5776]">
-              For decoration only — use real photos to show your work, team or premises.
+              {__('For decoration only — use real photos to show your work, team or premises.')}
             </span>
             <input
               id={`${id}-prompt`}
               value={prompt}
               maxLength={300}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. warm morning light in a calm, modern salon"
+              placeholder={__('e.g. warm morning light in a calm, modern salon')}
               className="rounded-md border border-[#d9d6e8] px-2 py-1.5"
             />
           </label>
@@ -269,13 +274,13 @@ export function PhotoPicker({
         <div className="grid gap-2 rounded-lg border border-[#d9d6e8] p-2">
           {library.limit_mb > 0 && (
             <p className="text-[#5b5776]">
-              {library.used_mb} MB of {library.limit_mb} MB used
+              {library.used_mb} {__('MB of')} {library.limit_mb} {__('MB used')}
             </p>
           )}
           {(library.demo?.length ?? 0) > 0 && (
             <details className="text-[#5b5776]">
               <summary className="cursor-pointer font-medium">
-                Or another demo photo from your design
+                {__('Or another demo photo from your design')}
               </summary>
               <div className="mt-2 grid grid-cols-3 gap-2">
                 {(library.demo ?? []).map((p) => (
@@ -297,7 +302,7 @@ export function PhotoPicker({
             </details>
           )}
           {library.photos.filter((p) => allowAi || !p.ai).length === 0 ? (
-            <p>No photos yet — upload one.</p>
+            <p>{__('No photos yet — upload one.')}</p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {library.photos
@@ -327,7 +332,7 @@ export function PhotoPicker({
                         aria-hidden
                         className="absolute top-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[11px] font-semibold text-white"
                       >
-                        AI
+                        {__('AI')}
                       </span>
                     )}
                   </button>

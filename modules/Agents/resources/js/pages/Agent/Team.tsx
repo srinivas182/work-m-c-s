@@ -1,6 +1,7 @@
 import { Badge, EmptyState } from '@/design-system';
 import { Users } from 'lucide-react';
 import { AgentLayout } from '../../components/AgentLayout';
+import { __ } from '@/i18n';
 
 interface Member {
   level: number;
@@ -14,12 +15,12 @@ interface Member {
 export default function AgentTeam({ team }: { team: Member[] }) {
   const levels = [...new Set(team.map((m) => m.level))];
   return (
-    <AgentLayout title="Your team">
+    <AgentLayout title={__('Your team')}>
       {team.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No team yet"
-          description="Agents WURK places under you appear here."
+          title={__('No team yet')}
+          description={__('Agents WURK places under you appear here.')}
         />
       ) : (
         levels.map((lvl) => (
@@ -34,7 +35,7 @@ export default function AgentTeam({ team }: { team: Member[] }) {
                   <li key={m.code} className="flex flex-wrap items-center gap-2">
                     {m.name} <span className="font-mono">{m.code}</span> ·{' '}
                     {m.businesses === 1 ? '1 business' : `${m.businesses} businesses`}
-                    {m.status === 'suspended' && <Badge tone="warning">Suspended</Badge>}
+                    {m.status === 'suspended' && <Badge tone="warning">{__('Suspended')}</Badge>}
                   </li>
                 ))}
             </ul>
