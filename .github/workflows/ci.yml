@@ -400,7 +400,15 @@ jobs:
         env:
           APP_ENV: e2e
           PART: ${{ matrix.part }}
-        run: pnpm test:e2e --grep=@screens --shard="${PART#screens }"
+        # Parts 1-4 share the crawl (34 heavy tests: every screen, both themes); parts 5-7 the light template checks.
+        # A single shard over all 348 put most of the crawl in two parts, which reached the 12-minute limit (24.6).
+        run: |
+          n="${PART#screens }"; n="${n%/7}"
+          if [ "$n" -le 4 ]; then
+            pnpm test:e2e --grep=@screens e2e/a11y-screens.spec.ts --shard="$n/4"
+          else
+            pnpm test:e2e --grep=@screens e2e/phone-width.spec.ts e2e/template-contrast.spec.ts --shard="$((n - 4))/3"
+          fi
       # Every template's public home page: mobile Lighthouse ≥ 90 and layout shift < 0.1 (Sprint 5 gate), half each.
       - name: Performance gate (mobile Lighthouse on every template)
         if: startsWith(matrix.part, 'performance')
