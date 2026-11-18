@@ -135,7 +135,7 @@ it('follows up once with the approved template after the window closes, and the 
     $this->actingAs($this->owner)->post("{$this->chats}/ai/{$id}/follow-up")->assertSessionHasErrors(['text' => 'Meta hasn’t approved your follow-up message yet. Check Settings → WhatsApp.']);
     $this->actingAs($this->owner)->get($this->chats.'?show=whatsapp')->assertInertia(fn (Assert $p) => $p->where('follow_up', false)->where('conversations.0.window_open', false));
 
-    WhatsAppConnection::query()->update(['follow_up_status' => 'APPROVED']);
+    WhatsAppConnection::query()->update(['templates' => json_encode(['wurk_follow_up' => 'APPROVED'])]);
     $this->actingAs($this->owner)->get($this->chats.'?show=whatsapp')->assertInertia(fn (Assert $p) => $p->where('follow_up', true));
     $this->actingAs($this->owner)->post("{$this->chats}/ai/{$id}/follow-up")->assertSessionHas('status', 'Follow-up sent. When they reply, you can write freely again for 24 hours.');
     Http::assertSent(fn ($r) => $r['type'] === 'template' && $r['template']['name'] === 'wurk_follow_up'

@@ -77,7 +77,7 @@ it('connects the owner’s number with Embedded Signup, keeping the WhatsApp Bus
     // The follow-up message for after the 24-hour window goes to Meta for review on the business's own account.
     Http::assertSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/waba-1/message_templates') && $r['name'] === 'wurk_follow_up'
         && $r['category'] === 'UTILITY' && str_contains($r['components'][0]['text'], 'following up on your message'));
-    expect($c->follow_up_status)->toBe('PENDING');
+    expect($c->templates)->toBe(['wurk_follow_up' => 'PENDING']);
 
     $this->actingAs($this->owner)->get($this->base)->assertInertia(fn (Assert $p) => $p->where('available', true)
         ->where('connection.display_phone', '+27 82 555 0101')->where('connection.coexistence', true)->missing('connection.token'));
@@ -141,7 +141,7 @@ it('checks the number with Meta again, and disconnects (forgetting the token)', 
     ($this->meta)([GRAPH.'/waba-1/phone_numbers*' => Http::response(['data' => [['id' => 'pn-1', 'display_phone_number' => '+27 82 555 0101', 'quality_rating' => 'YELLOW', 'messaging_limit_tier' => 'TIER_10K', 'name_status' => 'APPROVED']]]),
         GRAPH.'/waba-1/message_templates*' => Http::response(['data' => [['name' => 'wurk_follow_up', 'status' => 'APPROVED', 'language' => 'en']]])]);
     $this->actingAs($this->owner)->post("{$this->base}/refresh")->assertSessionHas('status', 'Checked with Meta just now.');
-    expect(WhatsAppConnection::query()->sole()->only(['quality', 'messaging_limit', 'follow_up_status']))->toBe(['quality' => 'YELLOW', 'messaging_limit' => 'TIER_10K', 'follow_up_status' => 'APPROVED']);
+    expect(WhatsAppConnection::query()->sole()->only(['quality', 'messaging_limit', 'templates']))->toBe(['quality' => 'YELLOW', 'messaging_limit' => 'TIER_10K', 'templates' => ['wurk_follow_up' => 'APPROVED']]);
     Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_contains($r->url(), 'message_templates')); // already there: not submitted twice
     $this->actingAs($this->owner)->get($this->base)->assertInertia(fn (Assert $p) => $p->where('connection.follow_up_status', 'APPROVED'));
 

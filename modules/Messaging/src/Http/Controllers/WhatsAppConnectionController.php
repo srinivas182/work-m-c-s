@@ -36,7 +36,7 @@ final class WhatsAppConnectionController
             'connection' => $c === null || ! $c->active() ? null : [
                 'display_phone' => $c->display_phone, 'verified_name' => $c->verified_name, 'coexistence' => $c->coexistence,
                 'name_status' => $c->name_status, 'quality' => $c->quality, 'messaging_limit' => $c->messaging_limit,
-                'follow_up_status' => $c->follow_up_status,
+                'follow_up_status' => $c->templates[WhatsAppGraph::FOLLOW_UP] ?? null,
                 'connected_at' => $c->connected_at?->toIso8601String(), 'checked_at' => $c->checked_at?->toIso8601String(),
             ],
             'base' => route('tenant.whatsapp', [], false),
@@ -99,7 +99,7 @@ final class WhatsAppConnectionController
                 $this->graph->register($number['id'], $token, $pin);
             }
             $this->graph->subscribe($number['waba'], $token);
-            $followUp = $this->followUp($number['waba'], $token);
+            $templates = $this->templates($number['waba'], $token);
         } catch (Throwable $e) {
             report($e);
 
@@ -110,7 +110,7 @@ final class WhatsAppConnectionController
             'waba_id' => $number['waba'], 'phone_number_id' => $number['id'], 'display_phone' => $number['display_phone'],
             'verified_name' => $number['verified_name'], 'quality' => $number['quality'], 'messaging_limit' => $number['messaging_limit'],
             'name_status' => $number['name_status'], 'coexistence' => $coexistence, 'token' => $token, 'pin' => $pin, 'status' => 'connected',
-            'follow_up_status' => $followUp, 'connected_by' => (string) $request->user()?->getAuthIdentifier(), 'connected_at' => now(), 'disconnected_at' => null, 'checked_at' => now(),
+            'templates' => $templates, 'connected_by' => (string) $request->user()?->getAuthIdentifier(), 'connected_at' => now(), 'disconnected_at' => null, 'checked_at' => now(),
         ]);
         $context->run($tenant, fn () => $this->audit->record('messaging.whatsapp_connected', 'whatsapp_connection', $tenant->tenantId(),
             ['phone' => $number['display_phone'], 'coexistence' => $coexistence]));
@@ -132,7 +132,7 @@ final class WhatsAppConnectionController
         }
         $c->update(['display_phone' => $phone['display_phone'], 'verified_name' => $phone['verified_name'], 'quality' => $phone['quality'],
             'messaging_limit' => $phone['messaging_limit'], 'name_status' => $phone['name_status'], 'checked_at' => now(),
-            'follow_up_status' => $this->followUp($c->waba_id, $c->token) ?? $c->follow_up_status]);
+            'templates' => $this->templates($c->waba_id, $c->token) ?? $c->templates]);
 
         return back()->with('status', 'Checked with Meta just now.');
     }
@@ -151,11 +151,15 @@ final class WhatsAppConnectionController
         return back()->with('status', 'WhatsApp is disconnected. Your number keeps working in the WhatsApp Business app.');
     }
 
-    /** Submits (or looks up) the follow-up template. Not fatal: messaging works without it inside the 24-hour window. */
-    private function followUp(string $wabaId, string $token): ?string
+    /**
+     * Submits (or looks up) WURK's templates. Not fatal: messaging works without them inside the 24-hour window.
+     *
+     * @return array<string, string>|null
+     */
+    private function templates(string $wabaId, string $token): ?array
     {
         try {
-            return $this->graph->ensureFollowUp($wabaId, $token);
+            return $this->graph->ensureTemplates($wabaId, $token);
         } catch (Throwable $e) {
             report($e);
 

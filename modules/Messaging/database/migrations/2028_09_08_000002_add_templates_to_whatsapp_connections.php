@@ -9,20 +9,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Sprint 21.2: Meta's review status of the "follow-up" template WURK submits on each business's WhatsApp account. After
-     * the 24-hour window closes, the team can still reach a customer with it once Meta approves it.
+     * Sprint 21.2: Meta's review status of each template WURK submits on a business's WhatsApp account (the follow-up after
+     * the 24-hour window, then reminders with buttons — 21.5), by name: PENDING, APPROVED, REJECTED or PAUSED.
      */
     public function up(): void
     {
         Schema::table('whatsapp_connections', function (Blueprint $table) {
-            $table->string('follow_up_status', 20)->nullable()->after('payment_method'); // PENDING | APPROVED | REJECTED | PAUSED | …
+            $table->json('templates')->nullable()->after('payment_method');
         });
     }
 
     public function down(): void
     {
         Schema::table('whatsapp_connections', function (Blueprint $table) {
-            $table->dropColumn('follow_up_status');
+            $table->dropColumn('templates');
         });
     }
 };

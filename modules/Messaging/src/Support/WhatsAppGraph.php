@@ -16,13 +16,22 @@ use Wurk\Messaging\Drivers\WhatsApp\MetaCloudWhatsApp;
  */
 final readonly class WhatsAppGraph
 {
-    /** The template WURK submits on every connected account, so a business can follow up after the 24-hour window. */
+    /** The template a business uses to follow up after the 24-hour window. */
     public const FOLLOW_UP = 'wurk_follow_up';
 
     public const FOLLOW_UP_LANGUAGE = 'en';
 
     /** Its words, with the customer's name and the business's name. */
     public const FOLLOW_UP_BODY = 'Hi {{1}}, this is {{2}} following up on your message. Reply here and we’ll carry on the conversation.';
+
+    /**
+     * The templates WURK submits on every connected account for Meta's review (utility messages, in English for now).
+     *
+     * @var array<string, array{body: string, example: list<string>}>
+     */
+    public const TEMPLATES = [
+        self::FOLLOW_UP => ['body' => self::FOLLOW_UP_BODY, 'example' => ['Thandi', 'Glow Salon']],
+    ];
 
     public function __construct(private ProviderCredentials $providers) {}
 
@@ -116,36 +125,46 @@ final readonly class WhatsAppGraph
     }
 
     /**
-     * Submits the follow-up template to the business's account for Meta's review (once; Meta keeps it), and returns its
-     * review status: PENDING, APPROVED, REJECTED or PAUSED.
+     * Submits WURK's templates that the account doesn't have yet (Meta keeps them), and returns every one's review
+     * status by name: PENDING, APPROVED, REJECTED or PAUSED.
+     *
+     * @return array<string, string>
      */
-    public function ensureFollowUp(string $wabaId, string $token): string
+    public function ensureTemplates(string $wabaId, string $token): array
     {
-        $status = $this->templateStatus($wabaId, $token, self::FOLLOW_UP);
-        if ($status !== null) {
-            return $status;
+        $statuses = $this->templateStatuses($wabaId, $token);
+        foreach (self::TEMPLATES as $name => $t) {
+            if (isset($statuses[$name])) {
+                continue;
+            }
+            $components = [['type' => 'BODY', 'text' => $t['body'], 'example' => ['body_text' => [$t['example']]]]];
+            $response = $this->ok(Http::withToken($token)->timeout(15)->post($this->url($wabaId.'/message_templates'), [
+                'name' => $name, 'language' => self::FOLLOW_UP_LANGUAGE, 'category' => 'UTILITY', 'components' => $components,
+            ]));
+            $statuses[$name] = strtoupper((string) ($response->json('status') ?: 'PENDING'));
         }
-        $response = $this->ok(Http::withToken($token)->timeout(15)->post($this->url($wabaId.'/message_templates'), [
-            'name' => self::FOLLOW_UP, 'language' => self::FOLLOW_UP_LANGUAGE, 'category' => 'UTILITY',
-            'components' => [['type' => 'BODY', 'text' => self::FOLLOW_UP_BODY, 'example' => ['body_text' => [['Thandi', 'Glow Salon']]]]],
-        ]));
 
-        return strtoupper((string) ($response->json('status') ?: 'PENDING'));
+        return array_intersect_key($statuses, self::TEMPLATES);
     }
 
-    /** A template's review status on the account, or null when it isn't there. */
-    public function templateStatus(string $wabaId, string $token, string $name): ?string
+    /**
+     * WURK's templates on the account (in English) and their review status, by name.
+     *
+     * @return array<string, string>
+     */
+    public function templateStatuses(string $wabaId, string $token): array
     {
         $rows = (array) $this->ok(Http::withToken($token)->timeout(15)->get($this->url($wabaId.'/message_templates'), [
-            'name' => $name, 'fields' => 'name,status,language',
+            'fields' => 'name,status,language', 'limit' => 200,
         ]))->json('data', []);
+        $statuses = [];
         foreach ($rows as $row) {
-            if (is_array($row) && ($row['name'] ?? '') === $name && ($row['language'] ?? self::FOLLOW_UP_LANGUAGE) === self::FOLLOW_UP_LANGUAGE) {
-                return strtoupper((string) ($row['status'] ?? 'PENDING'));
+            if (is_array($row) && isset(self::TEMPLATES[$row['name'] ?? '']) && ($row['language'] ?? self::FOLLOW_UP_LANGUAGE) === self::FOLLOW_UP_LANGUAGE) {
+                $statuses[(string) $row['name']] = strtoupper((string) ($row['status'] ?? 'PENDING'));
             }
         }
 
-        return null;
+        return $statuses;
     }
 
     /** @return array{app_id: string, app_secret: string, config_id: string, version: string} */

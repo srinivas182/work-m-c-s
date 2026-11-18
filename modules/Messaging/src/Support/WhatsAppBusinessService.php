@@ -55,7 +55,7 @@ final readonly class WhatsAppBusinessService implements WhatsAppBusiness
 
     public function followUpReady(): bool
     {
-        return $this->connection()?->follow_up_status === 'APPROVED';
+        return ($this->connection()?->templates[WhatsAppGraph::FOLLOW_UP] ?? null) === 'APPROVED';
     }
 
     public function sendFollowUp(string $to, string $name): SendResult
