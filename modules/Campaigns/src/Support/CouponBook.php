@@ -7,6 +7,7 @@ namespace Wurk\Campaigns\Support;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Wurk\Payments\Contracts\Coupons;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** The business's coupon codes (Sprint 15.3b). Uses count only while the order or booking stands; releases give them back. */
@@ -27,7 +28,7 @@ final readonly class CouponBook implements Coupons
             return $no('That code has expired.');
         }
         if ($amountCents < (int) $c->min_spend_cents) {
-            return $no('That code needs a spend of at least R'.number_format($c->min_spend_cents / 100, 2).'.');
+            return $no('That code needs a spend of at least '.Money::format((int) $c->min_spend_cents).'.');
         }
         $used = $db->table('coupon_redemptions')->where('tenant_id', $t)->where('coupon_id', $c->id)->whereNull('released_at');
         if ($c->max_uses !== null && (clone $used)->count() >= (int) $c->max_uses) {

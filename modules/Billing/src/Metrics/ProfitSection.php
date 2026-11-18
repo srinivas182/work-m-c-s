@@ -7,6 +7,7 @@ namespace Wurk\Billing\Metrics;
 use Illuminate\Support\Facades\DB;
 use Wurk\Credits\Contracts\UsageHistory;
 use Wurk\Plans\Contracts\SubscriptionHistory;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -88,6 +89,6 @@ final readonly class ProfitSection
 
     private static function r(int $cents): string
     {
-        return ($cents < 0 ? '−' : '').'R'.number_format(abs($cents) / 100, 2);
+        return ($cents < 0 ? '−' : '').Money::zar((int) (abs($cents)));
     }
 }

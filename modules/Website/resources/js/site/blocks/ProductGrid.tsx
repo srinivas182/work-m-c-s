@@ -1,5 +1,6 @@
 import type { BlockDefinition, ProductSummary } from '../types';
 import { EmptyHint, Heading, Section, photoSrcSet } from './shared';
+import { moneyShort } from '@/i18n';
 
 export interface ProductGridProps extends Record<string, unknown> {
   heading: string;
@@ -44,7 +45,7 @@ const SAMPLES: ProductSummary[] = [
     in_stock: false,
   },
 ];
-const rand = (c: number) => `R${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
+const rand = (c: number) => moneyShort(c); // the business's currency (25.1b)
 
 export const ProductGrid: BlockDefinition<ProductGridProps> = {
   type: 'ProductGrid',

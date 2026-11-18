@@ -6,7 +6,7 @@ import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
-import { __ } from '@/i18n';
+import { __, currencySymbol, money } from '@/i18n';
 
 interface Props {
   profit: { took: number; spent: number; made: number; by_category: Record<string, number> };
@@ -27,7 +27,7 @@ interface Props {
 }
 
 /** Rand as WURK writes it everywhere: R1 380.00 (the server's own format). */
-const rand = (c: number) => `R${(c / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
+const rand = (c: number) => money(c); // the business's currency (25.1b)
 const tenantBase = () => '/' + window.location.pathname.split('/')[1];
 
 export default function Expenses({
@@ -135,7 +135,10 @@ export default function Expenses({
               }}
             >
               <div className="grid gap-3 sm:grid-cols-3">
-                <Field label={__('Amount (R)')} error={form.errors.amount}>
+                <Field
+                  label={__('Amount (:currency)', { currency: currencySymbol() })}
+                  error={form.errors.amount}
+                >
                   <Input
                     inputMode="decimal"
                     value={form.data.amount}

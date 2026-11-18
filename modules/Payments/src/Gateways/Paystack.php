@@ -11,6 +11,7 @@ use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Models\PaymentAttempt;
 use Wurk\Payments\Models\PlatformPaymentAccount;
 use Wurk\Payments\Models\PlatformPaymentAttempt;
+use Wurk\Platform\Money\Money;
 
 /**
  * Paystack (Sprint 22.1), on the business's own account or WURK's: a hosted checkout with the channels the owner chose.
@@ -54,7 +55,8 @@ final class Paystack
             $r = self::http($a)->post(self::API.'/transaction/initialize', array_filter([
                 // Paystack needs an email. A customer without one gets a stand-in address that receives nothing.
                 'email' => filter_var($customer['email'] ?? '', FILTER_VALIDATE_EMAIL) ?: 'pay+'.strtolower(substr($attempt->reference, -12)).'@customers.wurk.co.za',
-                'amount' => $attempt->amount_cents, 'currency' => 'ZAR', 'reference' => $attempt->reference,
+                // The business's currency (25.1b); amounts are hundredths for every currency.
+                'amount' => $attempt->amount_cents, 'currency' => Money::business()->code, 'reference' => $attempt->reference,
                 'callback_url' => $urls['return'], 'channels' => $channels === [] ? null : $channels,
                 'metadata' => ['cancel_action' => $urls['cancel'], 'custom_fields' => [['display_name' => 'Name', 'variable_name' => 'name', 'value' => mb_substr($customer['name'], 0, 80)]]],
             ], fn ($v) => $v !== null));
@@ -75,7 +77,7 @@ final class Paystack
             return ['paid' => false, 'amount_cents' => 0];
         }
         $paid = $r->successful() && $r->json('data.status') === 'success' && $r->json('data.reference') === $attempt->reference
-            && strtoupper((string) $r->json('data.currency')) === 'ZAR';
+            && strtoupper((string) $r->json('data.currency')) === Money::business()->code;
 
         return ['paid' => $paid, 'amount_cents' => $paid ? (int) $r->json('data.amount', 0) : 0];
     }

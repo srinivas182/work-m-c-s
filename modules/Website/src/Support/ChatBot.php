@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\LeadBook;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Mail\ChatHandoffMail;
 use Wurk\Website\Models\ChatAnswer;
@@ -130,7 +131,7 @@ final readonly class ChatBot
 
         return match ($fact) {
             'hours' => empty($facts['hours']) ? null : 'We’re open '.implode(', ', array_map(fn ($h) => $h['opens'].'–'.$h['closes'], (array) $facts['hours'])).'.',
-            'services' => empty($facts['services']) ? null : implode("\n", array_map(fn ($sv) => $sv['name'].': '.($sv['from'] ? 'from ' : '').'R'.number_format($sv['price'] / 100, $sv['price'] % 100 ? 2 : 0), array_slice((array) $facts['services'], 0, 8))),
+            'services' => empty($facts['services']) ? null : implode("\n", array_map(fn ($sv) => $sv['name'].': '.($sv['from'] ? 'from ' : '').Money::short((int) $sv['price']), array_slice((array) $facts['services'], 0, 8))),
             'address' => ($c['address'] ?? '') === '' ? null : 'You’ll find us at '.$c['address'].'.',
             'phone' => ($c['phone'] ?? '') === '' ? null : 'Call us on '.$c['phone'].'.',
             'whatsapp' => ($c['whatsapp'] ?? '') === '' ? null : 'Send us a WhatsApp on '.$c['whatsapp'].'.',

@@ -9,7 +9,7 @@ import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { STATUS, rand } from './Orders';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface OrderData {
   id: string;
@@ -320,7 +320,7 @@ export default function Order({ order: o }: { order: OrderData }) {
                   }}
                 >
                   <Field
-                    label={__('Amount (R)')}
+                    label={__('Amount (:currency)', { currency: currencySymbol() })}
                     hint={`Leave empty to refund all that’s left (${rand(left)}).${o.payment === 'offline' ? ' For EFT orders, pay the customer back yourself — this records it.' : ''}`}
                   >
                     <Input

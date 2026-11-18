@@ -7,6 +7,7 @@ namespace Wurk\Billing\Metrics;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Wurk\Plans\Contracts\SubscriptionHistory;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Support\ReportPeriod;
 
 /**
@@ -62,7 +63,7 @@ final class RevenueSection
         }
         arsort($groups);
 
-        return ['columns' => ['Package', 'Country', 'Net revenue (excl. VAT)'], 'data' => array_values(array_map(fn ($k, $c) => [...explode('|', (string) $k), ($c < 0 ? '−' : '').'R'.number_format(abs($c) / 100, 2)], array_keys($groups), array_values($groups)))];
+        return ['columns' => ['Package', 'Country', 'Net revenue (excl. VAT)'], 'data' => array_values(array_map(fn ($k, $c) => [...explode('|', (string) $k), ($c < 0 ? '−' : '').Money::zar((int) (abs($c)))], array_keys($groups), array_values($groups)))];
     }
 
     /** @return array{received: int, refunds: int, chargebacks: int, net: int, vat: int, failed: int, purposes: list<list<string>>} */
@@ -74,7 +75,7 @@ final class RevenueSection
         $in = (int) $received->sum('amount_excl_cents');
         $purposes = [];
         foreach ($received->groupBy('purpose') as $purpose => $g) {
-            $purposes[] = [self::PURPOSES[$purpose] ?? ucfirst((string) $purpose), (string) $g->count(), 'R'.number_format($g->sum('amount_excl_cents') / 100, 2)];
+            $purposes[] = [self::PURPOSES[$purpose] ?? ucfirst((string) $purpose), (string) $g->count(), Money::zar((int) ($g->sum('amount_excl_cents')))];
         }
 
         return ['received' => $in, 'refunds' => $refunds, 'chargebacks' => $chargebacks, 'net' => $in - $refunds - $chargebacks, 'vat' => (int) $received->sum('vat_cents'),

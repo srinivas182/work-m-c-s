@@ -16,6 +16,7 @@ use Wurk\Billing\Models\CashPayment;
 use Wurk\Billing\Models\Payment;
 use Wurk\Identity\Contracts\PeopleDirectory;
 use Wurk\Messaging\Contracts\Messenger;
+use Wurk\Platform\Money\Money;
 use Wurk\Security\Contracts\PlatformSettings;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -137,7 +138,7 @@ final readonly class CashPayments
     {
         $business = $this->tenants->find($cash->tenant_id)?->displayName() ?? 'a business';
         $total = Payment::query()->whereKey($cash->payment_id)->value('total_cents');
-        $amount = 'R'.number_format(((int) $total) / 100, 2, '.', ' ');
+        $amount = Money::zar(((int) $total));
 
         foreach ($this->people->contacts($cash->approvers) as $person) {
             $text = "WURK cash approval: {$amount} from {$business} (receipt {$cash->receipt_number}). Code {$code}, valid ".self::CODE_MINUTES.' minutes. Only share it if you agree.';

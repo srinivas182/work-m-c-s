@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Platform\Contracts\ReceptionistRefused;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -86,7 +87,7 @@ final readonly class ChatBookings
 
     public function money(?int $cents): ?string
     {
-        return $cents === null ? null : 'R'.number_format($cents / 100, 2, '.', ' ');
+        return $cents === null ? null : Money::format((int) $cents);
     }
 
     public function local(CarbonImmutable|\DateTimeInterface $at): CarbonImmutable

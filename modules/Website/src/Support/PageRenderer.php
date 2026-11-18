@@ -7,6 +7,7 @@ namespace Wurk\Website\Support;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Models\Page;
@@ -60,6 +61,7 @@ final readonly class PageRenderer
         $input = [
             'document' => $document,
             'branding' => $record->branding,
+            'currency' => Money::business()->toArray(), // 25.1b: prices in the business's currency
             'site' => [
                 'businessName' => $this->context->current()->displayName(),
                 'logo' => $record->branding['logo'] ?? null,

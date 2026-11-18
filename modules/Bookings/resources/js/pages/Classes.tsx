@@ -13,7 +13,7 @@ import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { CalendarDays } from 'lucide-react';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface Attendee {
   id: string;
@@ -274,7 +274,7 @@ export default function Classes({ team, canGoOnline, canTakePayments, classes }:
                 </select>
               </Field>
               <Field
-                label={__('Price (R)')}
+                label={__('Price (:currency)', { currency: currencySymbol() })}
                 hint={__('Shown to people booking.')}
                 error={form.errors.price_cents}
               >

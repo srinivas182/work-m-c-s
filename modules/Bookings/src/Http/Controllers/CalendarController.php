@@ -20,6 +20,7 @@ use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\Instant;
 use Wurk\Bookings\Support\SlotTaken;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners and staff: the bookings calendar — day or week, per team member. */
@@ -136,7 +137,7 @@ final class CalendarController
         $name = collect($this->team->roster())->firstWhere('identity_id', $me)['name'] ?? 'Team';
         app(Deposits::class)->paidInPerson($model, (string) $data['method'], (int) round((float) $data['amount'] * 100), $me, (string) $name);
 
-        return back()->with('status', 'R'.number_format((float) $data['amount'], 2).' recorded: '.strtolower(InPersonPayments::METHODS[$data['method']]).'.');
+        return back()->with('status', Money::format((int) round((float) $data['amount'] * 100)).' recorded: '.strtolower(InPersonPayments::METHODS[$data['method']]).'.');
     }
 
     private function at(string $date, string $time): CarbonImmutable

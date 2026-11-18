@@ -5,6 +5,7 @@
  * Uses the same SiteRenderer as the editor and previews: no second copy of any block.
  */
 import { renderToString } from 'react-dom/server';
+import { type Currency, setCurrency } from '@/i18n';
 import { SiteRenderer, upgradeBlock } from '@modules/Website/resources/js/site/SiteRenderer';
 import { FONT_PAIRINGS } from '@modules/Website/resources/js/site/theme';
 import type { Branding, ContentDocument, MenuItem } from '@modules/Website/resources/js/site/types';
@@ -18,6 +19,8 @@ interface RenderInput {
     menus: { header: MenuItem[]; footer: MenuItem[] };
     formAction?: string;
   };
+  /** The business's currency (25.1b). */
+  currency?: Currency;
 }
 
 let raw = '';
@@ -26,6 +29,7 @@ process.stdin.on('data', (chunk) => (raw += chunk));
 process.stdin.on('end', () => {
   try {
     const input = JSON.parse(raw) as RenderInput;
+    setCurrency(input.currency); // prices in the business's currency (25.1b)
     const html = renderToString(
       <SiteRenderer
         document={input.document}

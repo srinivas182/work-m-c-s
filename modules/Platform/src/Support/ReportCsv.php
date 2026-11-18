@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Wurk\Platform\Support;
 
+use Wurk\Platform\Money\Money;
+
 /** A report as CSV (Sprint 15.1b; shared with Admin → Metrics in 15.4b): every figure with the previous period's, then each table. */
 final class ReportCsv
 {
@@ -40,7 +42,7 @@ final class ReportCsv
         $v = $m[$key] ?? 0;
 
         return match ($m['format'] ?? 'count') {
-            'money' => 'R'.number_format(((int) $v) / 100, 2),
+            'money' => Money::format(((int) $v)),
             'percent' => rtrim(rtrim(number_format((float) $v, 1), '0'), '.').'%',
             default => (string) $v,
         };

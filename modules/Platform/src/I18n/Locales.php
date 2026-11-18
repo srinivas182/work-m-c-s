@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Wurk\Platform\Money\Money;
 
 /**
  * WURK's languages (Sprint 24). English is the source: every fixed text is written in English in the code, and each
@@ -116,17 +117,9 @@ final class Locales
         return $out;
     }
 
-    /**
-     * Rand in the language's own style: R1 380.00 in South Africa's languages and English; 1 380,00 R in French and
-     * Portuguese. The same rule as the browser's (resources/js/i18n.ts).
-     */
+    /** The business's money in the reader's language (25.1b: in the business's currency). See {@see Money}. */
     public static function money(int $cents, ?string $code = null): string
     {
-        $code ??= app()->getLocale();
-        $negative = $cents < 0 ? '-' : '';
-        $comma = in_array($code, ['fr', 'pt'], true);
-        $n = number_format(abs($cents) / 100, 2, $comma ? ',' : '.', ' ');
-
-        return $comma ? $negative.$n.' R' : $negative.'R'.$n;
+        return Money::format($cents, $code);
     }
 }

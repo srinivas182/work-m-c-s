@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Platform\Money\Money;
 use Wurk\Shop\Mail\NewOrderMail;
 use Wurk\Shop\Mail\OrderUpdateMail;
 use Wurk\Shop\Models\Order;
@@ -24,7 +25,7 @@ final readonly class OrderMessages
     /** A new order: everyone who can manage the shop is told. */
     public function newOrder(Order $order): void
     {
-        $rand = fn (int $c) => 'R'.number_format($c / 100, 2);
+        $rand = fn (int $c) => Money::format((int) $c);
         $lines = array_values(OrderItem::query()->where('order_id', $order->id)->get()
             ->map(fn (OrderItem $i) => "{$i->quantity} × {$i->product_name}".($i->variant_label ? " ({$i->variant_label})" : ''))->all());
         $how = ($order->payment_method === 'card' ? 'Paying by card' : 'Paying by EFT or on collection — mark it paid when the money arrives')
@@ -52,7 +53,7 @@ final readonly class OrderMessages
                 return;
             }
             $amount = $event->status === 'refunded'
-                ? 'R'.number_format((int) DB::connection($this->context->connectionName())->table('shop_order_events')->where('order_id', $order->id)->where('event', 'refunded')->orderByDesc('id')->value('amount_cents') / 100, 2)
+                ? Money::format((int) DB::connection($this->context->connectionName())->table('shop_order_events')->where('order_id', $order->id)->where('event', 'refunded')->orderByDesc('id')->value('amount_cents'))
                 : '';
             $link = URL::signedRoute('shop.public.order', ['handle' => $tenant->handle(), 'order' => $order->id]);
             $vars = ['business' => $tenant->displayName(), 'number' => (string) $order->number, 'amount' => $amount];

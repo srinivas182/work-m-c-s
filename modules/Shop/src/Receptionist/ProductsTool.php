@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Shop\Receptionist;
 
 use Wurk\Platform\Contracts\ReceptionistTool;
+use Wurk\Platform\Money\Money;
 use Wurk\Shop\Support\ShopCatalog;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -61,7 +62,7 @@ final readonly class ProductsTool implements ReceptionistTool
 
     public static function money(int $cents): string
     {
-        return 'R'.number_format($cents / 100, 2, '.', ' ');
+        return Money::format((int) $cents);
     }
 
     public static function url(string $path): string

@@ -7,6 +7,7 @@ namespace Wurk\Shop\Reports;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -48,8 +49,8 @@ final readonly class SalesSection
                 ['label' => 'Average order', 'value' => $count > 0 ? intdiv($sales, $count) : 0, 'previous' => $before->count() > 0 ? intdiv($prevSales, $before->count()) : 0, 'format' => 'money'],
             ],
             'chart' => ['label' => 'Sales by day', 'points' => array_map(fn ($d, $c) => ['label' => $d, 'value' => $c], array_keys($days), array_values($days))],
-            'rows' => ['columns' => ['Best sellers', 'Sold', 'Sales'], 'data' => array_values($best->map(fn ($b) => [(string) $b->product_name, (string) (int) $b->qty, 'R'.number_format(((int) $b->cents) / 100, 2)])->all())],
-            'extra' => ['columns' => ['Payment method', 'Orders', 'Sales'], 'data' => array_values($methods->map(fn ($v, $k) => [ucfirst((string) $k), (string) $v[0], 'R'.number_format($v[1] / 100, 2)])->all())],
+            'rows' => ['columns' => ['Best sellers', 'Sold', 'Sales'], 'data' => array_values($best->map(fn ($b) => [(string) $b->product_name, (string) (int) $b->qty, Money::format(((int) $b->cents))])->all())],
+            'extra' => ['columns' => ['Payment method', 'Orders', 'Sales'], 'data' => array_values($methods->map(fn ($v, $k) => [ucfirst((string) $k), (string) $v[0], Money::format((int) $v[1])])->all())],
             'highlights' => $highlights,
         ];
     }

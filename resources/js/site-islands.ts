@@ -3,6 +3,8 @@
  * already works without JavaScript (the slideshow swipes, before & after shows a 50/50 split).
  * Mirrors the React behaviour of BeforeAfter, HeroSlideshow and PromotionBanner.
  */
+import { money } from '@/i18n';
+
 const ACTIVE = ['w-5', 'bg-[var(--s-brand)]'];
 const INACTIVE = ['w-1.5', 'bg-[var(--s-border)]'];
 
@@ -835,7 +837,7 @@ const writeCart = (lines: CartLine[]) => {
     /* storage blocked: the cart lasts this page only */
   }
 };
-const randOf = (c: number) => `R${(c / 100).toFixed(2)}`;
+const randOf = (c: number) => money(c); // the business's currency, from <html data-currency> (25.1b)
 
 /**
  * A cart link from the AI receptionist (Sprint 19.2c): /cart?add=variant:2,variant:1 adds those items to this

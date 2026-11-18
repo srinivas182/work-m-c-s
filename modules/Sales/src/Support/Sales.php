@@ -12,6 +12,7 @@ use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Payments\Contracts\RefundWindow;
+use Wurk\Platform\Money\Money;
 use Wurk\Sales\Contracts\SalesTotals;
 use Wurk\Sales\Models\Sale;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -52,7 +53,7 @@ final readonly class Sales implements SalesTotals
         $sale = DB::connection($this->context->connectionName())->transaction(function () use ($d, $byId, $byName, $device, $needsApproval) {
             $sale = Sale::query()->create(['amount_cents' => $d['amount_cents'], 'method' => $d['method'], 'note' => $d['note'], 'branch_id' => $d['branch_id'],
                 'status' => $needsApproval ? 'pending' : 'recorded', 'recorded_by' => $byId, 'recorded_by_name' => $byName, 'device' => $device, 'recorded_at' => now()]);
-            $summary = 'In-store sale: R'.number_format($d['amount_cents'] / 100, 2);
+            $summary = 'In-store sale: '.Money::format((int) $d['amount_cents']);
             if (($d['contact_id'] ?? null) !== null) { // proven by their code: exactly this customer
                 $this->contacts->link($d['contact_id'], 'sale', $sale->id, $d['branch_id'], $summary);
                 $contact = $d['contact_id'];
@@ -149,6 +150,6 @@ final readonly class Sales implements SalesTotals
         }
         $tenant = $this->context->current();
         app(MessageTemplates::class)->email('sale.receipt', $email, ['client' => $this->contacts->names([$sale->contact_id])[$sale->contact_id] ?? 'there',
-            'business' => $tenant->displayName(), 'amount' => 'R'.number_format($sale->amount_cents / 100, 2), 'when' => $sale->recorded_at->setTimezone($tenant->timezone())->format('j M Y')]);
+            'business' => $tenant->displayName(), 'amount' => Money::format((int) $sale->amount_cents), 'when' => $sale->recorded_at->setTimezone($tenant->timezone())->format('j M Y')]);
     }
 }

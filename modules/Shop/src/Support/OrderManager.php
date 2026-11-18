@@ -13,6 +13,7 @@ use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
+use Wurk\Platform\Money\Money;
 use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Models\Order;
@@ -127,7 +128,7 @@ final readonly class OrderManager
         $left = $order->total_cents - $order->refunded_cents;
         $amount = $cents ?? $left;
         if ($amount < 1 || $amount > $left) {
-            throw new CheckoutProblem('Refund up to R'.number_format($left / 100, 2).' (what’s left of this order).');
+            throw new CheckoutProblem('Refund up to '.Money::format((int) $left).' (what’s left of this order).');
         }
         // Decision F: the wallet part back to the wallet, the rest back to the card or account — in proportion to how
         // the order was paid; the last refund returns exactly what's left of each part.

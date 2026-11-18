@@ -5,7 +5,7 @@ import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
-import { __ } from '@/i18n';
+import { __, currencySymbol, money } from '@/i18n';
 
 type Till = { cash: number; card_machine: number; qr: number };
 interface Row {
@@ -29,7 +29,7 @@ interface Props {
 }
 
 /** Rand as WURK writes it everywhere: R1 380.00 (the server's own format). */
-const rand = (c: number) => `R${(c / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
+const rand = (c: number) => money(c); // the business's currency (25.1b)
 const tenantBase = () => '/' + window.location.pathname.split('/')[1];
 
 export default function CashUp({
@@ -122,21 +122,30 @@ export default function CashUp({
                 }}
               >
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <Field label={__('Cash counted (R)')} error={form.errors.cash}>
+                  <Field
+                    label={__('Cash counted (:currency)', { currency: currencySymbol() })}
+                    error={form.errors.cash}
+                  >
                     <Input
                       inputMode="decimal"
                       value={form.data.cash}
                       onChange={(e) => form.setData('cash', e.target.value)}
                     />
                   </Field>
-                  <Field label={__('Card machine slip (R)')} error={form.errors.card_machine}>
+                  <Field
+                    label={__('Card machine slip (:currency)', { currency: currencySymbol() })}
+                    error={form.errors.card_machine}
+                  >
                     <Input
                       inputMode="decimal"
                       value={form.data.card_machine}
                       onChange={(e) => form.setData('card_machine', e.target.value)}
                     />
                   </Field>
-                  <Field label={__('SnapScan / Zapper (R)')} error={form.errors.qr}>
+                  <Field
+                    label={__('SnapScan / Zapper (:currency)', { currency: currencySymbol() })}
+                    error={form.errors.qr}
+                  >
                     <Input
                       inputMode="decimal"
                       value={form.data.qr}

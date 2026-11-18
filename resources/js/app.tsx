@@ -1,6 +1,7 @@
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
+import { type Currency, setCurrency } from '@/i18n';
 import { reportCrash, watchForErrors } from '@/lib/recent-error';
 import { resolvePage } from '@/lib/resolve-page';
 import { startLite } from '@/lite';
@@ -23,6 +24,11 @@ void createInertiaApp({
     watchForErrors(); // for "Contact support" (16.3) and Watchtower (18.0)
     startLite(); // lite mode and the data counter (24.4)
     startOffline(); // saved now, sent later (24.5)
+    // Money is written in the business's currency (25.1b): each page carries it.
+    const currencyOf = (p: { props: Record<string, unknown> }) =>
+      p.props.currency as Currency | null;
+    setCurrency(currencyOf(props.initialPage));
+    router.on('navigate', (e) => setCurrency(currencyOf(e.detail.page)));
     // A screen that crashes while drawing is reported to Watchtower (18.0).
     const onUncaughtError = (error: unknown) => {
       if (error instanceof Error) reportCrash(error.message, error.stack, 'render');

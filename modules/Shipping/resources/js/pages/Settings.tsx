@@ -7,7 +7,7 @@ import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface Account {
   active: boolean;
@@ -141,7 +141,11 @@ function ProviderCard({ p, base, branch }: { p: Provider; base: string; branch: 
           <Details p={p} mode={editing} base={base} q={q} done={() => setEditing(null)} />
         )}
         {a && p.provider === 'pargo' && (
-          <Field label={__('What customers pay for a pickup point (R)')}>
+          <Field
+            label={__('What customers pay for a pickup point (:currency)', {
+              currency: currencySymbol(),
+            })}
+          >
             <Input
               type="number"
               min={0}

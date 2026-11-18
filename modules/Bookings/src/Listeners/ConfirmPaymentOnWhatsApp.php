@@ -13,6 +13,7 @@ use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Support\BookingMessages;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Events\WhatsAppSent;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -39,7 +40,7 @@ final readonly class ConfirmPaymentOnWhatsApp
             $to = BookingMessages::international((string) $booking->customer_phone);
             $what = $booking instanceof ClassAttendee ? $booking->session()->title : (string) BookingService::withTrashed()->whereKey($booking->service_id)->value('name');
             $start = $booking instanceof ClassAttendee ? $booking->session()->starts_at : $booking->starts_at;
-            $paid = 'R'.number_format(($booking->deposit_cents - (int) $booking->wallet_cents) / 100, 2, '.', ' ');
+            $paid = Money::format((int) (($booking->deposit_cents - (int) $booking->wallet_cents)));
             $text = 'Payment received — thank you, '.strtok($booking->customer_name, ' ').'! Your '.$paid.' '.($booking instanceof ClassAttendee ? 'payment' : 'deposit')
                 .' is in, and your '.$what.' on '.CarbonImmutable::instance($start)->setTimezone($this->context->current()->timezone())->format('l j F \a\t H:i').' is confirmed.';
             $sent = $this->whatsapp->sendText($to, $text);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Wurk\Website\Support;
 
+use Wurk\Platform\Money\Money;
+
 /** Search-engine and AI-assistant outputs, built only from SiteFacts (what the owner published). */
 final class SiteSeo
 {
@@ -45,7 +47,7 @@ final class SiteSeo
                 $offer = ['@type' => 'Offer', 'itemOffered' => array_filter(['@type' => 'Service', 'name' => $s['name'], 'description' => $s['description'] ?: null])];
                 if ($s['price'] > 0) { // 0 means "ask us": no price rather than "free"
                     $offer['price'] = number_format($s['price'] / 100, 2, '.', '');
-                    $offer['priceCurrency'] = 'ZAR';
+                    $offer['priceCurrency'] = Money::business()->code; // 25.1b
                 }
 
                 return $offer;
@@ -66,7 +68,7 @@ final class SiteSeo
         if ($facts['services'] !== []) {
             $lines[] = '## Services and prices';
             foreach ($facts['services'] as $s) {
-                $price = $s['price'] > 0 ? ' — '.($s['from'] ? 'from ' : '').'R'.number_format($s['price'] / 100, $s['price'] % 100 === 0 ? 0 : 2, '.', ' ') : ' — ask for a price';
+                $price = $s['price'] > 0 ? ' — '.($s['from'] ? 'from ' : '').Money::short((int) $s['price']) : ' — ask for a price';
                 $lines[] = "- {$s['name']}{$price}".($s['description'] !== '' ? ": {$s['description']}" : '');
             }
             $lines[] = '';

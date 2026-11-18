@@ -11,6 +11,7 @@ use Wurk\Payments\Models\PaymentAccount;
 use Wurk\Payments\Models\PaymentAttempt;
 use Wurk\Payments\Models\PlatformPaymentAccount;
 use Wurk\Payments\Models\PlatformPaymentAttempt;
+use Wurk\Platform\Money\Money;
 
 /**
  * Flutterwave (Sprint 22.4), WURK's second gateway for its own billing: cards, and mobile money and bank transfers
@@ -35,7 +36,7 @@ final class Flutterwave
     {
         try {
             $r = self::http($a)->post(self::API.'/payments', [
-                'tx_ref' => $attempt->reference, 'amount' => number_format($attempt->amount_cents / 100, 2, '.', ''), 'currency' => 'ZAR',
+                'tx_ref' => $attempt->reference, 'amount' => number_format($attempt->amount_cents / 100, 2, '.', ''), 'currency' => Money::business()->code, // 25.1b
                 'redirect_url' => $urls['return'],
                 'customer' => ['email' => filter_var($customer['email'] ?? '', FILTER_VALIDATE_EMAIL) ?: 'billing+'.strtolower(substr($attempt->reference, -12)).'@customers.wurk.co.za', 'name' => mb_substr($customer['name'], 0, 80)],
                 'customizations' => ['title' => 'WURK'],
@@ -56,7 +57,7 @@ final class Flutterwave
         } catch (Throwable) {
             return ['paid' => false, 'amount_cents' => 0, 'id' => null];
         }
-        $paid = $r->successful() && $r->json('data.status') === 'successful' && $r->json('data.tx_ref') === $attempt->reference && strtoupper((string) $r->json('data.currency')) === 'ZAR';
+        $paid = $r->successful() && $r->json('data.status') === 'successful' && $r->json('data.tx_ref') === $attempt->reference && strtoupper((string) $r->json('data.currency')) === Money::business()->code;
 
         return ['paid' => $paid, 'amount_cents' => $paid ? (int) round((float) $r->json('data.amount') * 100) : 0, 'id' => $paid ? (string) $r->json('data.id') : null];
     }

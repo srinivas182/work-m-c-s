@@ -1,7 +1,8 @@
 import type { BlockDefinition } from '../types';
 import { Section, SectionTitle, photoSrcSet } from './shared';
+import { moneyShort } from '@/i18n';
 
-const rand = (c: number) => `R${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
+const rand = (c: number) => moneyShort(c); // the business's currency (25.1b)
 
 /**
  * A product's own page — internal: the renderer knows it, the editor's library never lists it (it only

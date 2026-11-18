@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Wurk\Platform\Money\Money;
 use Wurk\Website\Models\SetupInterview;
 use Wurk\Website\Models\SiteCategory;
 use Wurk\Website\Setup\WebsiteSetupStep;
@@ -125,7 +126,7 @@ final class SetupTalkController
      */
     private static function understood(string $key, array $b): string
     {
-        $rand = fn (int $c) => $c > 0 ? ' R'.number_format($c / 100, 2) : '';
+        $rand = fn (int $c) => $c > 0 ? ' '.Money::format((int) $c) : '';
         $or = fn (string $s) => $s !== '' ? $s : '—';
 
         return match ($key) {

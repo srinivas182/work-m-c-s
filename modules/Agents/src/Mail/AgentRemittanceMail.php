@@ -7,6 +7,7 @@ namespace Wurk\Agents\Mail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Wurk\Platform\Money\Money;
 
 /** Remittance advice (Sprint 14.5b): what WURK paid an agent, the bank reference, and the businesses it covers. */
 final class AgentRemittanceMail extends Mailable
@@ -16,7 +17,7 @@ final class AgentRemittanceMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'WURK paid you R'.number_format($this->cents / 100, 2).' — '.$this->reference);
+        return new Envelope(subject: 'WURK paid you '.Money::zar((int) $this->cents).' — '.$this->reference);
     }
 
     public function content(): Content

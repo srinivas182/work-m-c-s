@@ -19,6 +19,7 @@ use Wurk\Money\Models\CashUp;
 use Wurk\Money\Models\Expense;
 use Wurk\Money\Models\Invoice;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Platform\Money\Money;
 use Wurk\Sales\Contracts\SalesTotals;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -186,7 +187,7 @@ final readonly class MoneyBook
 
     public static function rand(int $cents): string
     {
-        return 'R'.number_format($cents / 100, 2, '.', ' ');
+        return Money::format((int) $cents);
     }
 
     /** A slip's photo, for the person who added the expense (never public). */
