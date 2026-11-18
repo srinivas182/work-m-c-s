@@ -60,7 +60,7 @@ describe('VideoPicker (Sprint 20.2)', () => {
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Upload an MP4, MOV or WebM video.',
     );
-    expect(fetch.mock.calls[0]![0]).toBe('/t/website/videos');
+    expect((fetch.mock.calls[0] as unknown[])[0]).toBe('/t/website/videos');
     expect(onChange).not.toHaveBeenCalled();
   });
 
