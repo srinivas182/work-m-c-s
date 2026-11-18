@@ -61,6 +61,7 @@
             "Wurk\\Security\\": "modules/Security/src/",
             "Wurk\\Shop\\": "modules/Shop/src/",
             "Wurk\\Shipping\\": "modules/Shipping/src/",
+            "Wurk\\Money\\": "modules/Money/src/",
             "Wurk\\Success\\": "modules/Success/src/",
             "Wurk\\Watchtower\\": "modules/Watchtower/src/",
             "Wurk\\Support\\": "modules/Support/src/",

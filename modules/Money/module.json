@@ -1,0 +1,15 @@
+{
+    "name": "Money",
+    "key": "money",
+    "version": "0.1.0",
+    "description": "Money tools for owners: who owes me (deposits, pay-later orders, sales on account and simple invoices with pay links and reminders), end-of-day cash-ups, expenses and profit in plain words, and a weekly \"how did I do\" summary.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit",
+        "payments",
+        "messaging"
+    ]
+}

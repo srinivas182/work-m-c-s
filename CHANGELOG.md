@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Money — Sprint 23.5a (who owes me, invoices, reminders)
+- **New module: Money → Who owes me.** One list of what customers still owe, and the total: unpaid deposits (Bookings), pay-later orders (Shop), sales on account (Sales) and invoices. Each module adds its own items through the new Platform contract `MoneyOwed`. Items can be marked paid in person (cash, card machine, QR) or by EFT, straight from the list.
+- **Simple invoices:**
+  - Lines, VAT at 15% with the VAT number when the business is VAT-registered, a due date, and a signed pay link to the customer's invoice page on the business's own address. The customer pays online with the business's own payment methods, or by EFT.
+  - Sent from the business's WhatsApp number once Meta approves the new template `wurk_payment_request` (submitted automatically, like the reminder template). Otherwise by SMS (credits), then email. With no phone number or email, the invoice comes with a link to share, and a "Share on WhatsApp" button sends it from the owner's own phone.
+  - Paid by link: marked paid only once the provider confirms the payment. Paid in person: recorded with who took it, and counted in the day's takings.
+- **Reminders:** sent automatically on days 1, 7 and 14 after the due date (`money:remind-invoices`, 09:00 SAST), or with one tap. Never more than one a week, three in all. A customer's STOP on WhatsApp is respected. Reminders can be switched off per invoice.
+- **Record sale → On account (pays later):** the sale shows in Who owes me until it's marked paid.
+
 ### Agents — Sprint 23.4 (a business set up in 15 minutes, on the agent's phone)
 - **Agent area → Set up a business,** one guided flow with a clock:
   1. The owner's name, business and mobile. A one-time code goes to the owner's phone, and the owner reads it out.

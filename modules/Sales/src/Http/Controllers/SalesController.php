@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Access\Contracts\BranchRestriction;
+use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\CustomerIdentity;
 use Wurk\Sales\Models\Sale;
@@ -96,6 +97,20 @@ final class SalesController
             (string) $user?->getAuthIdentifier(), $this->who($request), mb_substr((string) $request->userAgent(), 0, 120), Gate::allows('sales.approve'));
 
         return back()->with('status', $sale->status === 'pending' ? 'Sale saved — it needs a manager’s approval (over R'.number_format($this->sales->threshold() / 100, 2).').' : 'Sale recorded.');
+    }
+
+    public function settle(Request $request, string $sale): RedirectResponse
+    {
+        $how = (string) $request->validate(['how' => ['required', 'in:eft,cash,card_machine,qr']])['how'];
+        $me = (string) $request->user()?->getAuthIdentifier();
+        $name = (string) (collect(app(TeamDirectory::class)->roster())->firstWhere('identity_id', $me)['name'] ?? 'Team');
+        try {
+            $this->sales->settle($this->sale($request, $sale), $how, $me, $name);
+        } catch (SaleProblem $e) {
+            return back()->with('warning', $e->getMessage());
+        }
+
+        return back()->with('status', 'Marked paid.');
     }
 
     public function approve(Request $request, string $sale): RedirectResponse
