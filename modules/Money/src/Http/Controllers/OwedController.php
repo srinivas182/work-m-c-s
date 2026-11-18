@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Money\Http\Controllers;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,11 +14,13 @@ use Wurk\Money\Models\Invoice;
 use Wurk\Money\Support\Invoices;
 use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Platform\Contracts\MoneyOwed;
+use Wurk\Regions\Contracts\Countries;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 /** Owners: Money → Who owes me (23.5a). One list of what customers owe, and simple invoices with pay links and reminders. */
 final class OwedController
 {
-    public function __construct(private Invoices $invoices) {}
+    public function __construct(private Invoices $invoices, private Countries $countries, private TenantContext $context) {}
 
     public function index(MoneyOwed $owed): Response
     {
@@ -35,6 +38,7 @@ final class OwedController
             ])->all(),
             'paidMethods' => [...InPersonPayments::METHODS, 'eft' => 'EFT (it’s in the bank)'],
             'today' => now()->toDateString(),
+            'tax' => $this->tax(),
         ]);
     }
 
@@ -106,5 +110,14 @@ final class OwedController
             'email' => 'sent by email.',
             default => 'is ready: there’s no number or email to send it to, so share its link.',
         };
+    }
+
+    /** @return array{name: string, rate: float} */
+    private function tax(): array
+    {
+        $business = $this->context->current();
+        $tax = $this->countries->taxOn($business->countryCode(), CarbonImmutable::now($business->timezone()));
+
+        return ['name' => $tax['name'] ?? 'VAT', 'rate' => ($tax['total_bp'] ?? 0) / 100];
     }
 }

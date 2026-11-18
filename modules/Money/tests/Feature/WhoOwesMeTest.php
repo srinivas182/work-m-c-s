@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
+use Inertia\Testing\AssertableInertia;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\InteractsWithIdentity;
 use Tests\Support\InteractsWithShards;
@@ -22,6 +23,7 @@ use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\I18n\TranslationStore;
+use Wurk\Regions\Models\TaxRate;
 use Wurk\Sales\Models\Sale;
 use Wurk\Sales\Support\Sales;
 use Wurk\Shop\Models\Order;
@@ -214,4 +216,14 @@ it('shows the invoice in the customer’s language, and keeps its signed link va
     $link = ($this->in)(fn () => app(Invoices::class)->link(Invoice::query()->sole()));
     $this->get($link, ['Accept-Language' => 'fr-FR'])->assertOk()->assertSee('<html lang="fr">', false)->assertSee('Facture INV-0001')->assertSee('Article')->assertSee('Français');
     $this->get($link.'&lang=en')->assertOk()->assertSee('Invoice INV-0001')->assertCookie('wurk_lang', 'en', false);
+});
+
+it('charges the tax of the business’s country on the invoice’s day, and shows its name and rate on the form (25.1)', function () {
+    $this->glow->forceFill(['country' => 'NA'])->save();
+    TaxRate::query()->where('country_code', 'NA')->update(['confirmed_at' => now()]);
+    TaxRate::query()->create(['country_code' => 'NA', 'rate_bp' => 1700, 'starts_on' => now()->subDay()->toDateString()]); // not confirmed: not used
+    ($this->invoice)()->assertSessionHasNoErrors();
+    $i = ($this->in)(fn () => Invoice::query()->sole());
+    expect([$i->vat_bp, $i->vat_cents, $i->total_cents])->toBe([1500, 18000, 138000]);
+    $this->actingAs($this->owner)->get($this->base.'/owed')->assertInertia(fn (AssertableInertia $p) => $p->where('tax', ['name' => 'VAT', 'rate' => 15]));
 });
