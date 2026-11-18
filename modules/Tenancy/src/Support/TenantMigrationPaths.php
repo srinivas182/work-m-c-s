@@ -25,6 +25,14 @@ final readonly class TenantMigrationPaths
                 $paths[] = $path;
             }
         }
+        // Tests only (never production): extra folders, so rollout tests use their own migrations (18.4b).
+        if (! app()->isProduction()) {
+            foreach ((array) config('wurk.tenancy.extra_migration_paths', []) as $extra) {
+                if (is_string($extra) && is_dir($extra)) {
+                    $paths[] = $extra;
+                }
+            }
+        }
 
         return $paths;
     }

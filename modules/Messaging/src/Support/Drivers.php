@@ -13,7 +13,7 @@ use Wurk\Messaging\Drivers\WhatsApp\MetaCloudWhatsApp;
 
 /**
  * Every provider WURK supports, per channel, with the credential and setting
- * fields the admin shows. Payment gateways are stored now and used from Sprint 3.
+ * fields the admin shows. Every key is encrypted, and has a "Test connection" (19.6).
  */
 final class Drivers
 {
@@ -55,10 +55,9 @@ final class Drivers
                     'host' => 'Host (Brevo: smtp-relay.brevo.com)', 'port' => 'Port (587)', 'from_address' => 'From address', 'from_name' => 'From name',
                 ]],
             ],
-            'payments.payfast' => ['payfast' => ['name' => 'PayFast', 'fields' => ['merchant_id' => ['label' => 'Merchant ID', 'secret' => false], 'merchant_key' => ['label' => 'Merchant key', 'secret' => true], 'passphrase' => ['label' => 'Passphrase', 'secret' => true]], 'settings' => ['sandbox' => 'Sandbox (1 = yes)']]],
+            // How WURK collects its own subscriptions (Billing). WURK's keys for the payment methods businesses offer
+            // (PayFast, Yoco, Ozow, Peach) are set in Admin → Payment methods, where they're checked when saved (19.6).
             'payments.paystack' => ['paystack' => ['name' => 'Paystack', 'fields' => ['public_key' => ['label' => 'Public key', 'secret' => false], 'secret_key' => ['label' => 'Secret key', 'secret' => true]], 'settings' => []]],
-            'payments.yoco' => ['yoco' => ['name' => 'Yoco', 'fields' => ['secret_key' => ['label' => 'Secret key', 'secret' => true]], 'settings' => []]],
-            'payments.ozow' => ['ozow' => ['name' => 'Ozow', 'fields' => ['site_code' => ['label' => 'Site code', 'secret' => false], 'private_key' => ['label' => 'Private key', 'secret' => true], 'api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => ['sandbox' => 'Sandbox (1 = yes)']]],
             // WURK AI providers (Ai module): one secret key each; the model per task is chosen in AI settings.
             // Video meetings (Sprint 9): businesses connect their own accounts through WURK's apps.
             'meetings.google' => ['google' => ['name' => 'Google (Meet)', 'fields' => ['client_id' => ['label' => 'OAuth client ID', 'secret' => false], 'client_secret' => ['label' => 'OAuth client secret', 'secret' => true]], 'settings' => []]],
@@ -66,7 +65,6 @@ final class Drivers
             'ai.anthropic' => ['anthropic' => ['name' => 'Anthropic (Claude)', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
             'ai.google' => ['google' => ['name' => 'Google (Gemini)', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
             'ai.openai' => ['openai' => ['name' => 'OpenAI', 'fields' => ['api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => []]],
-            'payments.peach' => ['peach' => ['name' => 'Peach Payments', 'fields' => ['entity_id' => ['label' => 'Entity ID', 'secret' => false], 'access_token' => ['label' => 'Access token', 'secret' => true]], 'settings' => ['sandbox' => 'Sandbox (1 = yes)']]],
         ];
     }
 

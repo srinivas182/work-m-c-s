@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { Radar } from 'lucide-react';
 import {
   Badge,
@@ -80,6 +80,7 @@ interface Props {
   scheduler: string | null;
   recipients: string[];
   can_manage: boolean;
+  uptime_hook?: { url: string | null; source: 'settings' | 'server' | 'none' } | null;
   rows: { data: IncidentRow[]; total: number; next: string | null; prev: string | null };
 }
 
@@ -105,6 +106,7 @@ export default function Incidents({
   scheduler,
   recipients,
   can_manage,
+  uptime_hook = null,
   rows,
 }: Props) {
   const base = window.location.pathname.replace(/\/$/, '');
@@ -399,6 +401,45 @@ export default function Incidents({
             )}
           </CardContent>
         </Card>
+
+        {uptime_hook && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Uptime checker</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 text-sm">
+              <p>
+                Your uptime checker (Better Stack or UptimeRobot) tells WURK about outages by
+                sending to this address. Keep it secret: anyone with it can report an outage.
+              </p>
+              {uptime_hook.url ? (
+                <p className="bg-muted rounded-md p-2 font-mono break-all">{uptime_hook.url}</p>
+              ) : (
+                <p>No address yet: make one, then paste it into the uptime checker.</p>
+              )}
+              {uptime_hook.source === 'server' && (
+                <p className="text-fg-muted">
+                  This address comes from the server’s settings. Making a new one here replaces it.
+                </p>
+              )}
+              <Button
+                type="button"
+                variant="secondary"
+                className="justify-self-start"
+                onClick={() => {
+                  if (
+                    uptime_hook.url === null ||
+                    window.confirm('The current address stops working at once. Make a new one?')
+                  ) {
+                    router.post(`${base}/uptime-token`, {}, { preserveScroll: true });
+                  }
+                }}
+              >
+                {uptime_hook.url ? 'Make a new address' : 'Make an address'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </AppShell>
   );

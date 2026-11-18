@@ -26,6 +26,7 @@ use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Analytics\AssistantSection;
 use Wurk\Website\Analytics\SiteVisits;
 use Wurk\Website\Analytics\WebsiteSection;
 use Wurk\Website\Console\DemoSitesCommand;
@@ -34,6 +35,7 @@ use Wurk\Website\Console\InstallTemplatesCommand;
 use Wurk\Website\Console\RerenderDatedPagesCommand;
 use Wurk\Website\Console\SeedCategoriesCommand;
 use Wurk\Website\Console\SeedSampleTemplatesCommand;
+use Wurk\Website\Console\SweepConversationsCommand;
 use Wurk\Website\Contracts\CatalogChanged;
 use Wurk\Website\Contracts\MediaLibrary;
 use Wurk\Website\Contracts\ProductCatalog;
@@ -148,6 +150,10 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
             $r->register('website', 500, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
                 && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'website')
                 ? app(WebsiteSection::class)->build($p) : null);
+            // Reports → Website chat assistant (19.4b).
+            $r->register('website.assistant', 510, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
+                && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'website')
+                ? app(AssistantSection::class)->build($p) : null);
         });
         $this->app->bindIf(ProductCatalog::class, NoProductCatalog::class); // Shop provides the real one
         $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);
@@ -168,15 +174,19 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         // The chatbot: per business AND visitor (never one counter across businesses).
         RateLimiter::for('chat', fn (Request $r) => Limit::perMinute(60)->by('chat|'.(string) $r->route('handle').'|'.$r->ip()));
         RateLimiter::for('chat-handoff', fn (Request $r) => Limit::perMinutes(10, 5)->by('chat-handoff|'.(string) $r->route('handle').'|'.$r->ip()));
+        // The AI receptionist (19.2): a person types, at most about one message every 3 seconds.
+        RateLimiter::for('chat-ai', fn (Request $r) => Limit::perMinute(20)->by('chat-ai|'.(string) $r->route('handle').'|'.$r->ip()));
         RateLimiter::for('quote-form', fn (Request $r) => Limit::perMinutes(10, 10)->by('quote-form|'.(string) $r->route('handle').'|'.$r->ip()));
         // Dated content (promotions, expiring specials) refreshed just after midnight.
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('website:rerender-dated')->dailyAt('00:05')->timezone('Africa/Johannesburg')->onOneServer()->withoutOverlapping();
             $schedule->command('website:expire-form-files')->dailyAt('03:15')->onOneServer()->withoutOverlapping();
+            $schedule->command('website:sweep-conversations')->dailyAt('03:25')->onOneServer()->withoutOverlapping(); // 19.2
         });
         $this->loadViewsFrom($this->modulePath('resources/views'), 'website');
         if ($this->app->runningInConsole()) {
-            $this->commands([ExpireFormFilesCommand::class, SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
+            $this->commands([ExpireFormFilesCommand::class,
+                SweepConversationsCommand::class, SeedCategoriesCommand::class, SeedSampleTemplatesCommand::class, InstallTemplatesCommand::class, RerenderDatedPagesCommand::class, DemoSitesCommand::class]);
         }
     }
 }

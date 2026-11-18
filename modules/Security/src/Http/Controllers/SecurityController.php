@@ -13,6 +13,7 @@ use Inertia\Response;
 use Symfony\Component\HttpFoundation\IpUtils;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Identity\Contracts\PeopleDirectory;
+use Wurk\Security\Support\PlatformContacts;
 use Wurk\Security\Support\Settings;
 
 final class SecurityController
@@ -30,7 +31,23 @@ final class SecurityController
             'cashOtpRecipients' => (array) $this->settings->platform('cash_otp_recipients', []),
             'cashReceiptRecipients' => (array) $this->settings->platform('cash_receipt_recipients', []),
             'staff' => array_values(array_map(fn (array $s) => ['id' => $s['id'], 'name' => $s['name']], array_filter($people->staff(), fn (array $s) => $s['active']))),
+            'contacts' => app(PlatformContacts::class)->current(), // 19.6
         ]);
+    }
+
+    /** WURK's own contact addresses (19.6): no longer only in the server's settings. */
+    public function updateContacts(Request $request, PlatformContacts $contacts, AuditLog $audit): RedirectResponse
+    {
+        Gate::authorize('security.manage');
+        $d = $request->validate([
+            'contact_email' => ['required', 'email:rfc', 'max:160'],
+            'support_email' => ['required', 'email:rfc', 'max:160'],
+            'security_email' => ['required', 'email:rfc', 'max:160'],
+        ]);
+        $contacts->save(array_map(fn ($v) => mb_strtolower(trim((string) $v)), $d), (string) $request->user()?->getAuthIdentifier());
+        $audit->record('security.contacts_updated', 'platform', 'contacts', $d);
+
+        return back()->with('status', 'WURK’s contact addresses saved.');
     }
 
     public function updatePlatform(Request $request): RedirectResponse
