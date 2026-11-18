@@ -45,7 +45,7 @@ final readonly class TemplatePhotoImporter
     }
 
     /**
-     * @param  array{photographer?: string|null, licence: string}  $credit
+     * @param  array{photographer?: string|null, licence: string, source_url?: string|null}  $credit  source_url: the photo's page, when the link is its image
      */
     public function fromLink(SiteTemplate $template, string $slot, string $link, array $credit, ?string $by): TemplateAsset
     {
@@ -78,7 +78,7 @@ final readonly class TemplatePhotoImporter
             file_put_contents((string) $path, $body);
             $file = new UploadedFile((string) $path, $slot.'.jpg', null, null, true);
 
-            return $this->store($template, $slot, $file, [...$credit, 'source_url' => mb_substr($link, 0, 500)], $by);
+            return $this->store($template, $slot, $file, [...$credit, 'source_url' => mb_substr((string) (($credit['source_url'] ?? '') !== '' ? $credit['source_url'] : $link), 0, 500)], $by);
         } finally {
             @unlink((string) $path);
         }

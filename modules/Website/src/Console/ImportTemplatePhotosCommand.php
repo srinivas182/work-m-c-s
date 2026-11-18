@@ -12,12 +12,13 @@ use Wurk\Website\Support\TemplatePhotos;
 
 /**
  * Fills designs' photo slots from a list (Sprint 20.3), on a server that can reach Nappy, Pexels and Unsplash:
- * a JSON list of {"template", "slot", "link", "photographer"?, "licence"}. Slots that already have the same link are
+ * a JSON list of {"template", "slot", "link", "source"?, "photographer"?, "licence"} (source: the photo's page when the link is
+ * its image file). Slots that already have the same link are
  * skipped, so it is safe to run again; problems are listed and the rest still import.
  */
 final class ImportTemplatePhotosCommand extends Command
 {
-    protected $signature = 'website:import-template-photos {file : JSON list of {template, slot, link, photographer?, licence}} {--dry-run : Only check the list}';
+    protected $signature = 'website:import-template-photos {file : JSON list of {template, slot, link, source?, photographer?, licence}} {--dry-run : Only check the list}';
 
     protected $description = 'Import demo photos for templates’ photo slots from Nappy, Pexels or Unsplash links';
 
@@ -55,11 +56,11 @@ final class ImportTemplatePhotosCommand extends Command
                 $problems[] = "{$where}: licence must be one of ".implode(', ', array_diff(TemplatePhotoImporter::LICENCES, ['WURK AI']));
             } elseif (! TemplatePhotoImporter::allowed($link)) {
                 $problems[] = "{$where}: link must be an https link on Nappy, Pexels or Unsplash";
-            } elseif (($photos->chosen($template)[$slot] ?? null)?->source_url === $link) {
+            } elseif (in_array(($photos->chosen($template)[$slot] ?? null)?->source_url, [$link, $row['source'] ?? null], true)) {
                 $skipped++;
             } elseif (! $this->option('dry-run')) {
                 try {
-                    $importer->fromLink($template, $slot, $link, ['photographer' => $row['photographer'] ?? null, 'licence' => $licence], null);
+                    $importer->fromLink($template, $slot, $link, ['photographer' => $row['photographer'] ?? null, 'licence' => $licence, 'source_url' => is_string($row['source'] ?? null) ? $row['source'] : null], null);
                     $done++;
                 } catch (ValidationException $e) {
                     $problems[] = "{$where}: ".collect($e->errors())->flatten()->first();
