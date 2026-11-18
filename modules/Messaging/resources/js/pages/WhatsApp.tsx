@@ -21,6 +21,7 @@ interface Connection {
   name_status: string | null;
   quality: string | null;
   messaging_limit: string | null;
+  follow_up_status: string | null;
   connected_at: string | null;
   checked_at: string | null;
 }
@@ -41,6 +42,13 @@ const NAME: Record<string, string> = {
   APPROVED: 'Display name approved',
   PENDING_REVIEW: 'Display name waiting for Meta’s review',
   DECLINED: 'Display name declined — change it in Meta Business Settings',
+};
+
+const FOLLOW_UP: Record<string, { label: string; tone: 'success' | 'warning' | 'danger' }> = {
+  APPROVED: { label: 'Follow-up message approved', tone: 'success' },
+  PENDING: { label: 'Follow-up message waiting for Meta’s review', tone: 'warning' },
+  REJECTED: { label: 'Follow-up message declined by Meta', tone: 'danger' },
+  PAUSED: { label: 'Follow-up message paused by Meta', tone: 'warning' },
 };
 
 /** Settings → WhatsApp (Sprint 21.1): connect the business's own number, usually keeping the WhatsApp Business app. */
@@ -120,6 +128,12 @@ export default function WhatsApp({ available, connection, base }: Props) {
                   </Badge>
                 )}
                 {quality && <Badge tone={quality.tone}>{quality.label}</Badge>}
+                {connection.follow_up_status && (
+                  <Badge tone={FOLLOW_UP[connection.follow_up_status]?.tone ?? 'warning'}>
+                    {FOLLOW_UP[connection.follow_up_status]?.label ??
+                      `Follow-up message: ${connection.follow_up_status.toLowerCase()}`}
+                  </Badge>
+                )}
               </div>
               {connection.messaging_limit && (
                 <p className="text-sm">
@@ -128,6 +142,11 @@ export default function WhatsApp({ available, connection, base }: Props) {
                   customers. Replies to customers who wrote to you don’t count.
                 </p>
               )}
+              <p className="text-muted-foreground text-sm">
+                WhatsApp allows free replies for 24 hours after a customer writes. After that, Chats
+                offers your follow-up message (“Hi Thandi, this is your business following up on
+                your message…”) once Meta approves it.
+              </p>
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="secondary"

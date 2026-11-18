@@ -24,6 +24,7 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property string|null $quality
  * @property string|null $messaging_limit
  * @property bool|null $payment_method
+ * @property string|null $follow_up_status
  * @property string $token
  * @property string|null $pin
  * @property string|null $connected_by

@@ -39,6 +39,7 @@ beforeEach(function () {
             'quality_rating' => 'GREEN', 'messaging_limit_tier' => 'TIER_1K', 'name_status' => 'APPROVED', 'platform_type' => 'CLOUD_API']]]),
         GRAPH.'/waba-1/subscribed_apps' => Http::response(['success' => true]),
         GRAPH.'/pn-1/register' => Http::response(['success' => true]),
+        GRAPH.'/waba-1/message_templates*' => fn ($r) => $r->method() === 'POST' ? Http::response(['id' => 'tpl-1', 'status' => 'PENDING', 'category' => 'UTILITY']) : Http::response(['data' => []]),
         ...$extra,
     ]);
     $this->start = function (bool $coexistence = true): array {
@@ -73,6 +74,10 @@ it('connects the owner’s number with Embedded Signup, keeping the WhatsApp Bus
         ->and(DB::table('whatsapp_connections')->value('token'))->not->toContain('biz-token'); // encrypted at rest
     Http::assertSent(fn ($r) => str_ends_with($r->url(), '/waba-1/subscribed_apps') && $r->hasHeader('Authorization', 'Bearer biz-token'));
     Http::assertNotSent(fn ($r) => str_contains($r->url(), '/register')); // the app's number is already registered
+    // The follow-up message for after the 24-hour window goes to Meta for review on the business's own account.
+    Http::assertSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/waba-1/message_templates') && $r['name'] === 'wurk_follow_up'
+        && $r['category'] === 'UTILITY' && str_contains($r['components'][0]['text'], 'following up on your message'));
+    expect($c->follow_up_status)->toBe('PENDING');
 
     $this->actingAs($this->owner)->get($this->base)->assertInertia(fn (Assert $p) => $p->where('available', true)
         ->where('connection.display_phone', '+27 82 555 0101')->where('connection.coexistence', true)->missing('connection.token'));
@@ -133,9 +138,12 @@ it('won’t connect a number that’s already connected to another business', fu
 it('checks the number with Meta again, and disconnects (forgetting the token)', function () {
     ($this->switchOn)();
     WhatsAppConnection::query()->create(['tenant_id' => $this->glow->id, 'waba_id' => 'waba-1', 'phone_number_id' => 'pn-1', 'token' => 'biz-token', 'status' => 'connected', 'quality' => 'GREEN']);
-    ($this->meta)([GRAPH.'/waba-1/phone_numbers*' => Http::response(['data' => [['id' => 'pn-1', 'display_phone_number' => '+27 82 555 0101', 'quality_rating' => 'YELLOW', 'messaging_limit_tier' => 'TIER_10K', 'name_status' => 'APPROVED']]])]);
+    ($this->meta)([GRAPH.'/waba-1/phone_numbers*' => Http::response(['data' => [['id' => 'pn-1', 'display_phone_number' => '+27 82 555 0101', 'quality_rating' => 'YELLOW', 'messaging_limit_tier' => 'TIER_10K', 'name_status' => 'APPROVED']]]),
+        GRAPH.'/waba-1/message_templates*' => Http::response(['data' => [['name' => 'wurk_follow_up', 'status' => 'APPROVED', 'language' => 'en']]])]);
     $this->actingAs($this->owner)->post("{$this->base}/refresh")->assertSessionHas('status', 'Checked with Meta just now.');
-    expect(WhatsAppConnection::query()->sole()->only(['quality', 'messaging_limit']))->toBe(['quality' => 'YELLOW', 'messaging_limit' => 'TIER_10K']);
+    expect(WhatsAppConnection::query()->sole()->only(['quality', 'messaging_limit', 'follow_up_status']))->toBe(['quality' => 'YELLOW', 'messaging_limit' => 'TIER_10K', 'follow_up_status' => 'APPROVED']);
+    Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_contains($r->url(), 'message_templates')); // already there: not submitted twice
+    $this->actingAs($this->owner)->get($this->base)->assertInertia(fn (Assert $p) => $p->where('connection.follow_up_status', 'APPROVED'));
 
     $this->actingAs($this->owner)->delete($this->base)->assertSessionHas('status', 'WhatsApp is disconnected. Your number keeps working in the WhatsApp Business app.');
     Http::assertSent(fn ($r) => $r->method() === 'DELETE' && str_ends_with($r->url(), '/waba-1/subscribed_apps'));

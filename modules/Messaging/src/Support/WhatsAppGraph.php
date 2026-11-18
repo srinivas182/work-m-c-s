@@ -16,6 +16,14 @@ use Wurk\Messaging\Drivers\WhatsApp\MetaCloudWhatsApp;
  */
 final readonly class WhatsAppGraph
 {
+    /** The template WURK submits on every connected account, so a business can follow up after the 24-hour window. */
+    public const FOLLOW_UP = 'wurk_follow_up';
+
+    public const FOLLOW_UP_LANGUAGE = 'en';
+
+    /** Its words, with the customer's name and the business's name. */
+    public const FOLLOW_UP_BODY = 'Hi {{1}}, this is {{2}} following up on your message. Reply here and we’ll carry on the conversation.';
+
     public function __construct(private ProviderCredentials $providers) {}
 
     /** Whether WURK's Meta app is set up for businesses to connect (app ID, secret and configuration). */
@@ -105,6 +113,39 @@ final readonly class WhatsAppGraph
     public function register(string $phoneNumberId, string $token, string $pin): void
     {
         $this->ok(Http::withToken($token)->timeout(15)->post($this->url($phoneNumberId.'/register'), ['messaging_product' => 'whatsapp', 'pin' => $pin]));
+    }
+
+    /**
+     * Submits the follow-up template to the business's account for Meta's review (once; Meta keeps it), and returns its
+     * review status: PENDING, APPROVED, REJECTED or PAUSED.
+     */
+    public function ensureFollowUp(string $wabaId, string $token): string
+    {
+        $status = $this->templateStatus($wabaId, $token, self::FOLLOW_UP);
+        if ($status !== null) {
+            return $status;
+        }
+        $response = $this->ok(Http::withToken($token)->timeout(15)->post($this->url($wabaId.'/message_templates'), [
+            'name' => self::FOLLOW_UP, 'language' => self::FOLLOW_UP_LANGUAGE, 'category' => 'UTILITY',
+            'components' => [['type' => 'BODY', 'text' => self::FOLLOW_UP_BODY, 'example' => ['body_text' => [['Thandi', 'Glow Salon']]]]],
+        ]));
+
+        return strtoupper((string) ($response->json('status') ?: 'PENDING'));
+    }
+
+    /** A template's review status on the account, or null when it isn't there. */
+    public function templateStatus(string $wabaId, string $token, string $name): ?string
+    {
+        $rows = (array) $this->ok(Http::withToken($token)->timeout(15)->get($this->url($wabaId.'/message_templates'), [
+            'name' => $name, 'fields' => 'name,status,language',
+        ]))->json('data', []);
+        foreach ($rows as $row) {
+            if (is_array($row) && ($row['name'] ?? '') === $name && ($row['language'] ?? self::FOLLOW_UP_LANGUAGE) === self::FOLLOW_UP_LANGUAGE) {
+                return strtoupper((string) ($row['status'] ?? 'PENDING'));
+            }
+        }
+
+        return null;
     }
 
     /** @return array{app_id: string, app_secret: string, config_id: string, version: string} */

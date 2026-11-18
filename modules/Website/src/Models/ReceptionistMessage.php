@@ -19,6 +19,10 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string $role
  * @property array<string, mixed> $content
  * @property Carbon $created_at
+ * @property string|null $external_id WhatsApp's message ID (21.2)
+ * @property string|null $delivery sent | delivered | read | failed
+ * @property string|null $delivery_error
+ * @property array{path: string, mime: string, name: string, bytes: int, kind: string}|array{blocked: string}|null $attachment
  */
 final class ReceptionistMessage extends Model
 {
@@ -30,6 +34,6 @@ final class ReceptionistMessage extends Model
 
     protected function casts(): array
     {
-        return ['content' => 'array'];
+        return ['content' => 'array', 'attachment' => 'array'];
     }
 }
