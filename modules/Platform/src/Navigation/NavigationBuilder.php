@@ -67,10 +67,10 @@ final readonly class NavigationBuilder
                 $href = $this->url->route($entry['route'], [], false);
 
                 $items[] = new NavigationItem(
-                    label: $entry['label'],
+                    label: __($entry['label']), // the person's language (24.1)
                     href: $href,
                     icon: $entry['icon'] ?? 'circle',
-                    section: $entry['section'] ?? 'Main',
+                    section: __($entry['section'] ?? 'Main'),
                     order: $entry['order'] ?? 100,
                     active: $request->routeIs($entry['route'], $entry['route'].'.*'),
                 );

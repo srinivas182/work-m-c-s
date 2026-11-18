@@ -1,4 +1,5 @@
 import { Badge } from '@/design-system';
+import { __ } from '@/i18n';
 
 export interface ThreadMessage {
   id: string;
@@ -21,7 +22,7 @@ export function Thread({
   fileUrl: (id: string) => string;
 }) {
   return (
-    <ol aria-label="Conversation" className="grid gap-3">
+    <ol aria-label={__('Conversation')} className="grid gap-3">
       {messages.map((m) => (
         <li
           key={m.id}
@@ -29,12 +30,12 @@ export function Thread({
         >
           <div className="flex flex-wrap items-center gap-2">
             <strong>{m.from}</strong>
-            {m.internal && <Badge tone="warning">Internal note</Badge>}
+            {m.internal && <Badge tone="warning">{__('Internal note')}</Badge>}
             {m.at && <span className="text-fg-muted">{when.format(new Date(m.at))}</span>}
           </div>
           <p className="whitespace-pre-line">{m.body}</p>
           {m.files.length > 0 && (
-            <ul aria-label="Screenshots" className="flex flex-wrap gap-2">
+            <ul aria-label={__('Screenshots')} className="flex flex-wrap gap-2">
               {m.files.map((f) => (
                 <li key={f.id}>
                   <a className="underline" href={fileUrl(f.id)}>

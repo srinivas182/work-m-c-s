@@ -1,6 +1,7 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import { Button } from '@/design-system';
+import { __ } from '@/i18n';
 
 /** The customer portal's own simple layout (not the business back office). */
 export function PortalLayout({
@@ -24,7 +25,7 @@ export function PortalLayout({
         </a>
         {signedIn && (
           <Button size="sm" variant="ghost" onClick={() => router.post('/account/sign-out')}>
-            Sign out
+            {__('Sign out')}
           </Button>
         )}
       </header>

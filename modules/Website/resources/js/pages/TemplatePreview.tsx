@@ -2,6 +2,7 @@ import '../site/fonts';
 import { Head } from '@inertiajs/react';
 import { SiteRenderer } from '../site/SiteRenderer';
 import type { Branding, ContentDocument, MenuItem } from '../site/types';
+import { __ } from '@/i18n';
 
 interface Props {
   template: { key: string; name: string; category: string | null };
@@ -29,7 +30,7 @@ export default function TemplatePreview({
         <span className="font-semibold">{template.name}</span>
         {template.category && <span className="text-white/70">· {template.category}</span>}
         <label className="ml-auto inline-flex items-center gap-2">
-          <span className="text-white/70">Page</span>
+          <span className="text-white/70">{__('Page')}</span>
           <select
             className="rounded-md bg-white/10 px-2 py-1 text-white"
             value={page.key}
@@ -43,7 +44,7 @@ export default function TemplatePreview({
           </select>
         </label>
         <span className="w-full text-xs text-white/70 sm:w-auto">
-          Sample content — your own details and branding replace it.
+          {__('Sample content — your own details and branding replace it.')}
         </span>
       </div>
       <SiteRenderer

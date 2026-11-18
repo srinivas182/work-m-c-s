@@ -2,6 +2,7 @@ import { Badge, EmptyState } from '@/design-system';
 import { Wallet } from 'lucide-react';
 import { rand } from '@/lib/money';
 import { AgentLayout } from '../../components/AgentLayout';
+import { __ } from '@/i18n';
 
 interface Payout {
   reference: string;
@@ -20,15 +21,17 @@ const STATUS = {
 /** What WURK has paid the agent. */
 export default function AgentPayouts({ payouts }: { payouts: Payout[] }) {
   return (
-    <AgentLayout title="Payouts">
+    <AgentLayout title={__('Payouts')}>
       {payouts.length === 0 ? (
         <EmptyState
           icon={Wallet}
-          title="No payouts yet"
-          description="When WURK pays your commission, it appears here with the bank reference."
+          title={__('No payouts yet')}
+          description={__(
+            'When WURK pays your commission, it appears here with the bank reference.',
+          )}
         />
       ) : (
-        <ul aria-label="Payouts" className="grid gap-2 text-sm">
+        <ul aria-label={__('Payouts')} className="grid gap-2 text-sm">
           {payouts.map((p) => (
             <li
               key={p.reference + p.status}

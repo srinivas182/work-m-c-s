@@ -4,6 +4,7 @@ import { blockClass, upgradeBlock } from '../site/SiteRenderer';
 import type { ContentDocument, Field, SiteContext, VideoValue } from '../site/types';
 import { PhotoPicker } from './PhotoPicker';
 import { VideoPicker } from './VideoPicker';
+import { __ } from '@/i18n';
 
 /*
  * The only place that knows about Puck (Sprint 4 decision 1). Pages are stored in
@@ -30,7 +31,7 @@ function moneyField(label: string): PuckField {
     label,
     render: ({ value, onChange, id }) => (
       <label className="flex items-center gap-2 text-sm" htmlFor={id}>
-        <span className="font-medium text-[#5b5776]">R</span>
+        <span className="font-medium text-[#5b5776]">{__('R')}</span>
         <input
           id={id}
           type="number"
@@ -39,7 +40,7 @@ function moneyField(label: string): PuckField {
           inputMode="decimal"
           className="w-full rounded-md border border-[#d9d6e8] px-2 py-1.5"
           value={typeof value === 'number' && value > 0 ? (value / 100).toFixed(2) : ''}
-          placeholder="0 = ask us"
+          placeholder={__('0 = ask us')}
           onChange={(e) => onChange(Math.max(0, Math.round(Number(e.target.value || 0) * 100)))}
         />
       </label>

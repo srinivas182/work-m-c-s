@@ -4,6 +4,7 @@ import { BarChart3 } from 'lucide-react';
 import { type Section, SectionCard } from '@/components/ReportSections';
 import { Card, CardContent, CardHeader, CardTitle, EmptyState, PageHeader } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   period: string;
@@ -21,15 +22,15 @@ export default function Metrics(p: Props) {
     ...(p.period === 'custom' ? { from: p.range.from, to: p.range.to } : {}),
   }).toString();
   return (
-    <AppShell title="Metrics">
-      <Head title="Metrics" />
+    <AppShell title={__('Metrics')}>
+      <Head title={__('Metrics')} />
       <div className="grid max-w-5xl gap-6">
         <PageHeader
-          title="Metrics"
+          title={__('Metrics')}
           description={`${p.range.from} to ${p.range.to}, compared with the period before. Amounts exclude VAT.`}
         />
         <label className="flex items-center gap-2 text-sm">
-          Period
+          {__('Period')}
           <select
             className="border-border bg-bg h-10 rounded-md border px-3"
             value={p.period}
@@ -50,7 +51,7 @@ export default function Metrics(p: Props) {
         </label>
         {p.period === 'custom' && (
           <form
-            aria-label="Dates"
+            aria-label={__('Dates')}
             className="flex flex-wrap items-end gap-2 text-sm"
             onSubmit={(e) => {
               e.preventDefault();
@@ -62,7 +63,7 @@ export default function Metrics(p: Props) {
             }}
           >
             <label className="grid gap-1">
-              From
+              {__('From')}
               <input
                 type="date"
                 className="border-border bg-bg h-10 rounded-md border px-3"
@@ -71,7 +72,7 @@ export default function Metrics(p: Props) {
               />
             </label>
             <label className="grid gap-1">
-              To
+              {__('To')}
               <input
                 type="date"
                 className="border-border bg-bg h-10 rounded-md border px-3"
@@ -80,7 +81,7 @@ export default function Metrics(p: Props) {
               />
             </label>
             <button type="submit" className="h-10 underline">
-              Apply
+              {__('Apply')}
             </button>
           </form>
         )}
@@ -88,15 +89,15 @@ export default function Metrics(p: Props) {
           className="justify-self-start text-sm underline"
           href={`${window.location.pathname}/export.csv?${query}`}
         >
-          Download CSV
+          {__('Download CSV')}
         </a>
         {p.highlights.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Highlights</CardTitle>
+              <CardTitle>{__('Highlights')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul aria-label="Highlights" className="grid list-disc gap-1 pl-5 text-sm">
+              <ul aria-label={__('Highlights')} className="grid list-disc gap-1 pl-5 text-sm">
                 {p.highlights.map((h) => (
                   <li key={h}>{h}</li>
                 ))}
@@ -107,8 +108,8 @@ export default function Metrics(p: Props) {
         {p.sections.length === 0 ? (
           <EmptyState
             icon={BarChart3}
-            title="Nothing to show yet"
-            description="Metrics fill in as businesses subscribe."
+            title={__('Nothing to show yet')}
+            description={__('Metrics fill in as businesses subscribe.')}
           />
         ) : (
           p.sections.map((s) => <SectionCard key={s.key} s={s} />)

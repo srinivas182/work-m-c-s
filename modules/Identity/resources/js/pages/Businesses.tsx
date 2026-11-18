@@ -2,6 +2,7 @@ import { Link, router } from '@inertiajs/react';
 import { Building2, ChevronRight, LogOut } from 'lucide-react';
 import { Button, EmptyState } from '@/design-system';
 import AuthLayout from '@/layouts/AuthLayout';
+import { __ } from '@/i18n';
 
 interface Business {
   name: string;
@@ -16,20 +17,22 @@ export default function Businesses({ businesses }: { businesses: Business[] }) {
       onClick={() => router.post('/sign-out')}
       className="text-accent-fg inline-flex cursor-pointer items-center gap-1.5 font-medium hover:underline"
     >
-      <LogOut className="size-4" aria-hidden /> Sign out
+      <LogOut className="size-4" aria-hidden /> {__('Sign out')}
     </button>
   );
 
   if (businesses.length === 0) {
     return (
-      <AuthLayout title="No businesses yet" footer={signOut}>
+      <AuthLayout title={__('No businesses yet')} footer={signOut}>
         <EmptyState
           icon={Building2}
-          title="You’re not part of a business on WURK"
-          description="Ask the business owner to add you to their team, or create your own business."
+          title={__('You’re not part of a business on WURK')}
+          description={__(
+            'Ask the business owner to add you to their team, or create your own business.',
+          )}
           action={
             <Button asChild>
-              <a href="https://wurk.co.za">Create a business</a>
+              <a href="https://wurk.co.za">{__('Create a business')}</a>
             </Button>
           }
         />
@@ -39,8 +42,8 @@ export default function Businesses({ businesses }: { businesses: Business[] }) {
 
   return (
     <AuthLayout
-      title="Choose a business"
-      description="You’re part of more than one business."
+      title={__('Choose a business')}
+      description={__('You’re part of more than one business.')}
       footer={signOut}
     >
       <ul className="grid gap-3">
@@ -56,7 +59,8 @@ export default function Businesses({ businesses }: { businesses: Business[] }) {
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-medium">{b.name}</span>
                 <span className="text-fg-muted block truncate text-sm">
-                  app.wurk.co.za/{b.handle}
+                  {__('app.wurk.co.za/')}
+                  {b.handle}
                 </span>
               </span>
               <ChevronRight

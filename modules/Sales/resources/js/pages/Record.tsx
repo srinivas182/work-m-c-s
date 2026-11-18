@@ -13,6 +13,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface SaleRow {
   id: string;
@@ -122,12 +123,14 @@ export default function RecordSale({
   const act = (id: string, what: 'approve' | 'decline') =>
     router.post(`${base}/${id}/${what}`, {}, { preserveScroll: true });
   return (
-    <AppShell title="Record sale">
-      <Head title="Record sale" />
+    <AppShell title={__('Record sale')}>
+      <Head title={__('Record sale')} />
       <div className="grid max-w-3xl gap-6">
         <PageHeader
-          title="Record sale"
-          description="An in-store sale, linked to the customer — it counts towards their rewards and the person who referred them."
+          title={__('Record sale')}
+          description={__(
+            'An in-store sale, linked to the customer — it counts towards their rewards and the person who referred them.',
+          )}
         />
         {errors.sale && (
           <p role="alert" className="text-danger text-sm">
@@ -137,7 +140,7 @@ export default function RecordSale({
         <Card>
           <CardContent className="pt-6">
             <form
-              aria-label="Record a sale"
+              aria-label={__('Record a sale')}
               className="grid gap-4"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -153,7 +156,7 @@ export default function RecordSale({
             >
               <div className="flex flex-wrap items-end gap-2">
                 <Field
-                  label="Customer’s code (from their account)"
+                  label={__('Customer’s code (from their account)')}
                   error={codeError ?? form.errors.customer_code}
                 >
                   <Input
@@ -171,7 +174,7 @@ export default function RecordSale({
                 </Field>
                 {canScan && (
                   <Button type="button" variant="secondary" onClick={() => void scan()}>
-                    Scan with camera
+                    {__('Scan with camera')}
                   </Button>
                 )}
               </div>
@@ -186,12 +189,12 @@ export default function RecordSale({
               )}
               {proven && (
                 <p role="status" className="text-sm font-medium">
-                  Customer: {proven.name}
+                  {__('Customer:')} {proven.name}
                   {proven.email ? ' (receipt by email)' : ''}
                 </p>
               )}
               <div className="flex flex-wrap items-end gap-2" hidden={!!proven}>
-                <Field label="Customer’s phone" error={form.errors.phone}>
+                <Field label={__('Customer’s phone')} error={form.errors.phone}>
                   <Input
                     type="tel"
                     inputMode="tel"
@@ -209,7 +212,7 @@ export default function RecordSale({
                   onClick={() => void find()}
                   disabled={!form.data.phone && !form.data.email}
                 >
-                  Find
+                  {__('Find')}
                 </Button>
               </div>
               <p aria-live="polite" className="text-sm">
@@ -219,14 +222,14 @@ export default function RecordSale({
                   `Found: ${found.name}${found.email ? ' (receipt by email)' : ''}`}
               </p>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Name" error={form.errors.name}>
+                <Field label={__('Name')} error={form.errors.name}>
                   <Input
                     value={form.data.name}
                     maxLength={80}
                     onChange={(e) => form.setData('name', e.target.value)}
                   />
                 </Field>
-                <Field label="Email (optional — for their receipt)" error={form.errors.email}>
+                <Field label={__('Email (optional — for their receipt)')} error={form.errors.email}>
                   <Input
                     type="email"
                     value={form.data.email}
@@ -234,7 +237,7 @@ export default function RecordSale({
                     onChange={(e) => form.setData('email', e.target.value)}
                   />
                 </Field>
-                <Field label="Amount paid (R)" error={form.errors.amount}>
+                <Field label={__('Amount paid (R)')} error={form.errors.amount}>
                   <Input
                     type="number"
                     inputMode="decimal"
@@ -245,7 +248,7 @@ export default function RecordSale({
                   />
                 </Field>
                 {branches.length > 0 && (
-                  <Field label="Branch" error={form.errors.branch_id}>
+                  <Field label={__('Branch')} error={form.errors.branch_id}>
                     <select
                       className="border-border bg-bg h-10 w-full rounded-md border px-3 text-sm"
                       value={form.data.branch_id}
@@ -261,7 +264,7 @@ export default function RecordSale({
                 )}
               </div>
               <fieldset className="grid gap-2">
-                <legend className="text-sm font-medium">How they paid</legend>
+                <legend className="text-sm font-medium">{__('How they paid')}</legend>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(methods).map(([key, label]) => (
                     <label
@@ -280,7 +283,7 @@ export default function RecordSale({
                   ))}
                 </div>
               </fieldset>
-              <Field label="Note (optional)" error={form.errors.note}>
+              <Field label={__('Note (optional)')} error={form.errors.note}>
                 <Input
                   value={form.data.note}
                   maxLength={200}
@@ -289,11 +292,11 @@ export default function RecordSale({
               </Field>
               {threshold > 0 && !canApprove && (
                 <p className="text-fg-muted text-sm">
-                  Sales over {rand(threshold)} need a manager’s approval.
+                  {__('Sales over')} {rand(threshold)} {__('need a manager’s approval.')}
                 </p>
               )}
               <Button type="submit" className="justify-self-start" loading={form.processing}>
-                Record sale
+                {__('Record sale')}
               </Button>
             </form>
           </CardContent>
@@ -301,31 +304,33 @@ export default function RecordSale({
 
         <section aria-labelledby="recent-title" className="grid gap-3">
           <h2 id="recent-title" className="text-lg font-semibold">
-            Today and waiting for approval
+            {__('Today and waiting for approval')}
           </h2>
           {sales.length === 0 ? (
-            <p className="text-fg-muted text-sm">No sales recorded today.</p>
+            <p className="text-fg-muted text-sm">{__('No sales recorded today.')}</p>
           ) : (
-            <ul aria-label="Recent sales" className="grid gap-2">
+            <ul aria-label={__('Recent sales')} className="grid gap-2">
               {sales.map((s) => (
                 <li key={s.id} className="border-border grid gap-2 rounded-lg border p-3 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
-                    <strong>{s.customer}</strong> {rand(s.amount_cents)} · {s.method} · {s.at} · by{' '}
-                    {s.by}
-                    {s.status === 'pending' && <Badge tone="warning">Needs approval</Badge>}
-                    {s.status === 'declined' && <Badge tone="neutral">Declined</Badge>}
+                    <strong>{s.customer}</strong> {rand(s.amount_cents)} · {s.method} · {s.at}{' '}
+                    {__('· by')} {s.by}
+                    {s.status === 'pending' && <Badge tone="warning">{__('Needs approval')}</Badge>}
+                    {s.status === 'declined' && <Badge tone="neutral">{__('Declined')}</Badge>}
                     {s.refunded_cents > 0 && (
-                      <Badge tone="neutral">Refunded {rand(s.refunded_cents)}</Badge>
+                      <Badge tone="neutral">
+                        {__('Refunded')} {rand(s.refunded_cents)}
+                      </Badge>
                     )}
                   </div>
                   {s.note && <span className="text-fg-muted">{s.note}</span>}
                   {canApprove && s.status === 'pending' && (
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => act(s.id, 'approve')}>
-                        Approve
+                        {__('Approve')}
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => act(s.id, 'decline')}>
-                        Decline
+                        {__('Decline')}
                       </Button>
                     </div>
                   )}
@@ -345,7 +350,7 @@ export default function RecordSale({
                           );
                         }}
                       >
-                        <Field label="Refund (R)">
+                        <Field label={__('Refund (R)')}>
                           <Input
                             type="number"
                             inputMode="decimal"
@@ -356,10 +361,10 @@ export default function RecordSale({
                           />
                         </Field>
                         <Button size="sm" type="submit">
-                          Refund
+                          {__('Refund')}
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => setRefund(null)}>
-                          Cancel
+                          {__('Cancel')}
                         </Button>
                       </form>
                     ) : (
@@ -374,7 +379,7 @@ export default function RecordSale({
                           })
                         }
                       >
-                        Refund…
+                        {__('Refund…')}
                       </Button>
                     ))}
                 </li>
@@ -395,11 +400,11 @@ function ApprovalLimit({ threshold }: { threshold: number }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Approval</CardTitle>
+        <CardTitle>{__('Approval')}</CardTitle>
       </CardHeader>
       <CardContent>
         <form
-          aria-label="Approval limit"
+          aria-label={__('Approval limit')}
           className="flex flex-wrap items-end gap-3"
           onSubmit={(e) => {
             e.preventDefault();
@@ -407,7 +412,7 @@ function ApprovalLimit({ threshold }: { threshold: number }) {
           }}
         >
           <Field
-            label="Sales over this amount need a manager (R; 0 = never)"
+            label={__('Sales over this amount need a manager (R; 0 = never)')}
             error={form.errors.amount}
           >
             <Input
@@ -420,7 +425,7 @@ function ApprovalLimit({ threshold }: { threshold: number }) {
             />
           </Field>
           <Button type="submit" loading={form.processing}>
-            Save
+            {__('Save')}
           </Button>
         </form>
       </CardContent>

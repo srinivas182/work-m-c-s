@@ -12,6 +12,7 @@ import {
 } from '@/design-system';
 import { rand } from '@/lib/money';
 import { PortalLayout } from '../components/PortalLayout';
+import { __ } from '@/i18n';
 
 interface Rewards {
   code: string;
@@ -67,16 +68,16 @@ export default function Home({ business, name, rewards, history, deletion, payou
     >
       <Card>
         <CardHeader>
-          <CardTitle>Show this at the till</CardTitle>
+          <CardTitle>{__('Show this at the till')}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-2 text-sm">
           <p>
-            So {business} can add your in-store purchases to your account. It changes every few
-            minutes.
+            {__('So')} {business}{' '}
+            {__('can add your in-store purchases to your account. It changes every few minutes.')}
           </p>
           <img
             src={`/account/id-qr.svg?v=${idVersion}`}
-            alt="Your code for the till"
+            alt={__('Your code for the till')}
             width={200}
             height={200}
             className="rounded-md bg-white p-2"
@@ -87,30 +88,36 @@ export default function Home({ business, name, rewards, history, deletion, payou
         <>
           <Card>
             <CardHeader>
-              <CardTitle>Your rewards</CardTitle>
+              <CardTitle>{__('Your rewards')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2 text-sm">
               <p className="text-3xl font-semibold">{rand(rewards.wallet_cents)}</p>
-              <p>to spend with {business}.</p>
+              <p>
+                {__('to spend with')} {business}.
+              </p>
               {rewards.pending_cents > 0 && (
                 <p className="text-fg-muted">
-                  {rand(rewards.pending_cents)} more on its way — available once the return period
-                  ends.
+                  {rand(rewards.pending_cents)}{' '}
+                  {__('more on its way — available once the return period ends.')}
                 </p>
               )}
               {rewards.expiry_months > 0 && (
                 <p className="text-fg-muted">
-                  Unused rewards expire {rewards.expiry_months} months after they become available.
+                  {__('Unused rewards expire')} {rewards.expiry_months}{' '}
+                  {__('months after they become available.')}
                 </p>
               )}
             </CardContent>
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Share and earn</CardTitle>
+              <CardTitle>{__('Share and earn')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 text-sm">
-              <p>When someone you send buys from {business}, you earn a reward too.</p>
+              <p>
+                {__('When someone you send buys from')} {business}
+                {__(', you earn a reward too.')}
+              </p>
               <p className="font-mono break-all">{rewards.link}</p>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -123,24 +130,24 @@ export default function Home({ business, name, rewards, history, deletion, payou
                 </Button>
                 <Button size="sm" variant="secondary" asChild>
                   <a href="/account/referral-qr.svg" download={`referral-${rewards.code}.svg`}>
-                    Download your QR code
+                    {__('Download your QR code')}
                   </a>
                 </Button>
               </div>
               <img
                 src="/account/referral-qr.svg"
-                alt="Your referral QR code"
+                alt={__('Your referral QR code')}
                 width={160}
                 height={160}
                 className="rounded-md bg-white p-2"
               />
               {rewards.referred.length > 0 && (
                 <>
-                  <h3 className="font-medium">People you’ve referred</h3>
-                  <ul aria-label="People you’ve referred" className="grid gap-1">
+                  <h3 className="font-medium">{__('People you’ve referred')}</h3>
+                  <ul aria-label={__('People you’ve referred')} className="grid gap-1">
                     {rewards.referred.map((r, i) => (
                       <li key={i}>
-                        {r.name} · since {r.since}
+                        {r.name} {__('· since')} {r.since}
                       </li>
                     ))}
                   </ul>
@@ -152,13 +159,13 @@ export default function Home({ business, name, rewards, history, deletion, payou
       )}
       <Card>
         <CardHeader>
-          <CardTitle>Your history</CardTitle>
+          <CardTitle>{__('Your history')}</CardTitle>
         </CardHeader>
         <CardContent>
           {history.length === 0 ? (
-            <p className="text-fg-muted text-sm">Nothing yet.</p>
+            <p className="text-fg-muted text-sm">{__('Nothing yet.')}</p>
           ) : (
-            <ul aria-label="Your history" className="grid gap-2 text-sm">
+            <ul aria-label={__('Your history')} className="grid gap-2 text-sm">
               {history.map((h, i) => (
                 <li key={i}>
                   <strong>{KIND[h.type] ?? h.type}</strong> · {h.summary} · {h.at}
@@ -187,20 +194,20 @@ function YourInformation({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Your information</CardTitle>
+        <CardTitle>{__('Your information')}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 text-sm">
         <a className="underline" href="/account/my-information.json" download>
-          Download a copy of your information
+          {__('Download a copy of your information')}
         </a>
         {deletion?.status === 'open' ? (
           <p role="status">
-            You asked {business} to delete your information on {deletion.asked}. We’ll email you
-            when it’s done.
+            {__('You asked')} {business} {__('to delete your information on')} {deletion.asked}
+            {__('. We’ll email you when it’s done.')}
           </p>
         ) : deletion?.status === 'declined' && !asking ? (
           <p>
-            {business} couldn’t delete your information: {deletion.reason}
+            {business} {__('couldn’t delete your information:')} {deletion.reason}
           </p>
         ) : !asking ? (
           <Button
@@ -209,28 +216,32 @@ function YourInformation({
             className="justify-self-start"
             onClick={() => setAsking(true)}
           >
-            Ask {business} to delete my information
+            {__('Ask')} {business} {__('to delete my information')}
           </Button>
         ) : (
           <form
-            aria-label="Ask for my information to be deleted"
+            aria-label={__('Ask for my information to be deleted')}
             className="grid gap-3"
             onSubmit={(e) => {
               e.preventDefault();
               form.post('/account/delete-request', { preserveScroll: true });
             }}
           >
-            <p>If {business} approves it:</p>
+            <p>
+              {__('If')} {business} {__('approves it:')}
+            </p>
             <ul className="grid list-disc gap-1 pl-5">
-              <li>any money in your wallet is paid out or refunded to you first;</li>
-              <li>rewards that aren’t available yet are cancelled;</li>
+              <li>{__('any money in your wallet is paid out or refunded to you first;')}</li>
+              <li>{__('rewards that aren’t available yet are cancelled;')}</li>
               <li>
-                your name and contact details are removed, and this account and your referral link
-                stop working;
+                {__(
+                  'your name and contact details are removed, and this account and your referral link stop working;',
+                )}
               </li>
               <li>
-                records the law requires them to keep (such as invoices and patient records) are
-                kept for as long as required.
+                {__(
+                  'records the law requires them to keep (such as invoices and patient records) are kept for as long as required.',
+                )}
               </li>
             </ul>
             <label className="flex items-start gap-2">
@@ -238,7 +249,7 @@ function YourInformation({
                 checked={form.data.confirm}
                 onCheckedChange={(on) => form.setData('confirm', on === true)}
               />
-              I understand — please delete my information.
+              {__('I understand — please delete my information.')}
             </label>
             {form.errors.confirm && (
               <p role="alert" className="text-danger">
@@ -247,10 +258,10 @@ function YourInformation({
             )}
             <div className="flex gap-2">
               <Button size="sm" type="submit" loading={form.processing}>
-                Send my request
+                {__('Send my request')}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setAsking(false)}>
-                Cancel
+                {__('Cancel')}
               </Button>
             </div>
           </form>
@@ -273,7 +284,7 @@ function PayoutCard({ business, payouts }: { business: string; payouts: Props['p
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Payouts</CardTitle>
+        <CardTitle>{__('Payouts')}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 text-sm">
         {payouts.latest && (
@@ -288,10 +299,12 @@ function PayoutCard({ business, payouts }: { business: string; payouts: Props['p
         )}
         {!waiting &&
           (payouts.wallet_cents < payouts.min_cents ? (
-            <p className="text-fg-muted">Payouts start at {rand(payouts.min_cents)}.</p>
+            <p className="text-fg-muted">
+              {__('Payouts start at')} {rand(payouts.min_cents)}.
+            </p>
           ) : (
             <form
-              aria-label="Ask for a payout"
+              aria-label={__('Ask for a payout')}
               className="grid gap-3"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -311,20 +324,20 @@ function PayoutCard({ business, payouts }: { business: string; payouts: Props['p
                   onChange={(e) => form.setData('amount', e.target.value)}
                 />
               </Field>
-              <Field label="Account holder" error={form.errors.holder}>
+              <Field label={__('Account holder')} error={form.errors.holder}>
                 <Input
                   autoComplete="name"
                   value={form.data.holder}
                   onChange={(e) => form.setData('holder', e.target.value)}
                 />
               </Field>
-              <Field label="Bank" error={form.errors.bank}>
+              <Field label={__('Bank')} error={form.errors.bank}>
                 <Input
                   value={form.data.bank}
                   onChange={(e) => form.setData('bank', e.target.value)}
                 />
               </Field>
-              <Field label="Account number" error={form.errors.account}>
+              <Field label={__('Account number')} error={form.errors.account}>
                 <Input
                   inputMode="numeric"
                   autoComplete="off"
@@ -332,7 +345,7 @@ function PayoutCard({ business, payouts }: { business: string; payouts: Props['p
                   onChange={(e) => form.setData('account', e.target.value)}
                 />
               </Field>
-              <Field label="Branch code (optional)" error={form.errors.branch}>
+              <Field label={__('Branch code (optional)')} error={form.errors.branch}>
                 <Input
                   inputMode="numeric"
                   value={form.data.branch}
@@ -340,8 +353,9 @@ function PayoutCard({ business, payouts }: { business: string; payouts: Props['p
                 />
               </Field>
               <p className="text-fg-muted">
-                The amount is set aside straight away. Your account number is kept encrypted and
-                deleted once the payout is done.
+                {__(
+                  'The amount is set aside straight away. Your account number is kept encrypted and deleted once the payout is done.',
+                )}
               </p>
               <Button
                 size="sm"
@@ -349,7 +363,7 @@ function PayoutCard({ business, payouts }: { business: string; payouts: Props['p
                 className="justify-self-start"
                 loading={form.processing}
               >
-                Ask for a payout
+                {__('Ask for a payout')}
               </Button>
             </form>
           ))}

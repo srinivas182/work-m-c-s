@@ -4,6 +4,7 @@ import { BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, EmptyState, PageHeader } from '@/design-system';
 import { type Section, SectionCard } from '@/components/ReportSections';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   period: string;
@@ -34,16 +35,16 @@ export default function Overview(p: Props) {
     ...custom,
   }).toString();
   return (
-    <AppShell title="Reports">
-      <Head title="Reports" />
+    <AppShell title={__('Reports')}>
+      <Head title={__('Reports')} />
       <div className="grid max-w-5xl gap-6">
         <PageHeader
-          title="Reports"
+          title={__('Reports')}
           description={`${p.range.from} to ${p.range.to}, compared with the period before.`}
         />
         <div className="flex flex-wrap gap-3 text-sm">
           <label className="flex items-center gap-2">
-            Period
+            {__('Period')}
             <select
               className="border-border bg-bg h-10 rounded-md border px-3"
               value={p.period}
@@ -66,7 +67,7 @@ export default function Overview(p: Props) {
           </label>
           {p.period === 'custom' && (
             <form
-              aria-label="Dates"
+              aria-label={__('Dates')}
               className="flex flex-wrap items-end gap-2 text-sm"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -74,7 +75,7 @@ export default function Overview(p: Props) {
               }}
             >
               <label className="grid gap-1">
-                From
+                {__('From')}
                 <input
                   type="date"
                   className="border-border bg-bg h-10 rounded-md border px-3"
@@ -83,7 +84,7 @@ export default function Overview(p: Props) {
                 />
               </label>
               <label className="grid gap-1">
-                To
+                {__('To')}
                 <input
                   type="date"
                   className="border-border bg-bg h-10 rounded-md border px-3"
@@ -92,13 +93,13 @@ export default function Overview(p: Props) {
                 />
               </label>
               <button type="submit" className="h-10 underline">
-                Apply
+                {__('Apply')}
               </button>
             </form>
           )}
           {p.branches.length > 0 && (
             <label className="flex items-center gap-2">
-              Branch
+              {__('Branch')}
               <select
                 className="border-border bg-bg h-10 rounded-md border px-3"
                 value={p.branch}
@@ -117,14 +118,14 @@ export default function Overview(p: Props) {
 
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <a className="underline" href={`${window.location.pathname}/export/csv?${exportQuery}`}>
-            Download CSV
+            {__('Download CSV')}
           </a>
           <a className="underline" href={`${window.location.pathname}/export/pdf?${exportQuery}`}>
-            Download PDF
+            {__('Download PDF')}
           </a>
           {p.summary !== null && (
             <label className="flex items-center gap-2">
-              Email me a summary
+              {__('Email me a summary')}
               <select
                 className="border-border bg-bg h-10 rounded-md border px-3"
                 value={p.summary}
@@ -136,9 +137,9 @@ export default function Overview(p: Props) {
                   )
                 }
               >
-                <option value="weekly">Weekly (Mondays)</option>
-                <option value="monthly">Monthly (the 1st)</option>
-                <option value="off">Off</option>
+                <option value="weekly">{__('Weekly (Mondays)')}</option>
+                <option value="monthly">{__('Monthly (the 1st)')}</option>
+                <option value="off">{__('Off')}</option>
               </select>
             </label>
           )}
@@ -147,10 +148,10 @@ export default function Overview(p: Props) {
         {p.highlights.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Highlights</CardTitle>
+              <CardTitle>{__('Highlights')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul aria-label="Highlights" className="grid list-disc gap-1 pl-5 text-sm">
+              <ul aria-label={__('Highlights')} className="grid list-disc gap-1 pl-5 text-sm">
                 {p.highlights.map((h) => (
                   <li key={h}>{h}</li>
                 ))}
@@ -162,8 +163,8 @@ export default function Overview(p: Props) {
         {p.sections.length === 0 ? (
           <EmptyState
             icon={BarChart3}
-            title="Nothing to report yet"
-            description="Reports fill in as you take orders, bookings and customers."
+            title={__('Nothing to report yet')}
+            description={__('Reports fill in as you take orders, bookings and customers.')}
           />
         ) : (
           p.sections.map((s) => <SectionCard key={s.key} s={s} />)

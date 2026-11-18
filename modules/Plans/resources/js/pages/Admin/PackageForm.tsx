@@ -27,6 +27,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { rand, type PackageData } from './Packages';
+import { __ } from '@/i18n';
 
 interface CreditCosts {
   perCredit: Record<string, { label: string; zar_per_credit: number | null }>;
@@ -53,7 +54,9 @@ function CostTip({
   const missing = entries.filter((e) => e.zar_per_credit === null).map((e) => e.label);
   if (credits <= 0 || known.length === 0) {
     return missing.length > 0 ? (
-      <p className="text-fg-muted text-sm">Costs not set yet for: {missing.join(', ')}.</p>
+      <p className="text-fg-muted text-sm">
+        {__('Costs not set yet for:')} {missing.join(', ')}.
+      </p>
     ) : null;
   }
   const cheapest = known.reduce((a, b) => (a.zar <= b.zar ? a : b));
@@ -62,32 +65,42 @@ function CostTip({
   return (
     <div
       role="note"
-      aria-label="Estimated cost of these credits"
+      aria-label={__('Estimated cost of these credits')}
       className="bg-surface grid gap-1.5 rounded-xl p-4 text-sm"
     >
       <p className="font-semibold">
-        {credits.toLocaleString('en-ZA')} credits — your cost if fully used:{' '}
-        {rands(credits * cheapest.zar)}–{rands(credits * dearest.zar)} / month
+        {credits.toLocaleString('en-ZA')} {__('credits — your cost if fully used:')}{' '}
+        {rands(credits * cheapest.zar)}–{rands(credits * dearest.zar)} {__('/ month')}
       </p>
       <p className="text-fg-muted">
-        Cheapest: all spent on {cheapest.label} · Most expensive: all on {dearest.label}
+        {__('Cheapest: all spent on')} {cheapest.label} {__('· Most expensive: all on')}{' '}
+        {dearest.label}
         {monthlyPrice > 0 && (
           <>
             {' '}
-            · up to {Math.round(((credits * dearest.zar) / monthlyPrice) * 100)}% of the{' '}
-            {rand(monthlyPrice)} monthly price
+            {__('· up to')} {Math.round(((credits * dearest.zar) / monthlyPrice) * 100)}
+            {__('% of the')} {rand(monthlyPrice)} {__('monthly price')}
           </>
         )}
       </p>
       <p>
-        At your {costs.assumptions.target_margin_pct}% margin, sell extra credits for at least{' '}
-        <strong>{rands(dearest.zar / (1 - margin))}</strong> each.
+        {__('At your')} {costs.assumptions.target_margin_pct}
+        {__('% margin, sell extra credits for at least')}{' '}
+        <strong>{rands(dearest.zar / (1 - margin))}</strong> {__('each.')}
       </p>
       <p className="text-fg-muted text-xs">
-        Allowance credits expire monthly and many businesses won’t use them all, so real cost is
-        usually lower. AI costs use R{costs.assumptions.fx_zar_per_usd} per US dollar plus a{' '}
-        {costs.assumptions.fx_buffer_pct}% buffer.
-        {missing.length > 0 && <> Not included yet (cost not set): {missing.join(', ')}.</>}
+        {__(
+          'Allowance credits expire monthly and many businesses won’t use them all, so real cost is usually lower. AI costs use R',
+        )}
+        {costs.assumptions.fx_zar_per_usd} {__('per US dollar plus a')}{' '}
+        {costs.assumptions.fx_buffer_pct}
+        {__('% buffer.')}
+        {missing.length > 0 && (
+          <>
+            {' '}
+            {__('Not included yet (cost not set):')} {missing.join(', ')}.
+          </>
+        )}
       </p>
     </div>
   );
@@ -160,12 +173,14 @@ export default function PackageForm({
           href="/packages"
           className="text-fg-muted hover:text-fg inline-flex w-fit items-center gap-1.5 text-sm font-medium"
         >
-          <ArrowLeft className="size-4" aria-hidden /> Packages
+          <ArrowLeft className="size-4" aria-hidden /> {__('Packages')}
         </Link>
         <PageHeader
           title={pkg ? pkg.name : 'New package'}
           eyebrow={pkg ? `Version ${pkg.version}` : undefined}
-          description="Changing prices, limits or modules saves a new version. Businesses already on this package keep their current terms."
+          description={__(
+            'Changing prices, limits or modules saves a new version. Businesses already on this package keep their current terms.',
+          )}
           actions={
             pkg &&
             canManage && (
@@ -184,22 +199,22 @@ export default function PackageForm({
         <fieldset disabled={disabled} className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Presentation</CardTitle>
+              <CardTitle>{__('Presentation')}</CardTitle>
               <CardDescription>
-                Shown to businesses. Changing these doesn’t create a new version.
+                {__('Shown to businesses. Changing these doesn’t create a new version.')}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="Name" error={form.errors.name} required>
+              <Field label={__('Name')} error={form.errors.name} required>
                 <Input
                   value={form.data.name}
                   onChange={(e) => form.setData('name', e.target.value)}
                 />
               </Field>
               <Field
-                label="Key"
+                label={__('Key')}
                 error={form.errors.key}
-                hint="Used in links and reports; can’t change later"
+                hint={__('Used in links and reports; can’t change later')}
                 required
               >
                 <Input
@@ -208,7 +223,11 @@ export default function PackageForm({
                   disabled={Boolean(pkg)}
                 />
               </Field>
-              <Field label="Description" error={form.errors.description} className="sm:col-span-2">
+              <Field
+                label={__('Description')}
+                error={form.errors.description}
+                className="sm:col-span-2"
+              >
                 <Textarea
                   value={form.data.description}
                   onChange={(e) => form.setData('description', e.target.value)}
@@ -219,7 +238,7 @@ export default function PackageForm({
                   value={form.data.type}
                   onValueChange={(v) => form.setData('type', v as 'self_managed' | 'managed')}
                   className="flex gap-6 sm:col-span-2"
-                  aria-label="Package type"
+                  aria-label={__('Package type')}
                 >
                   {(['self_managed', 'managed'] as const).map((v) => (
                     <div key={v} className="flex items-center gap-2">
@@ -237,9 +256,9 @@ export default function PackageForm({
                   checked={form.data.visibility === 'private'}
                   onCheckedChange={(v) => form.setData('visibility', v ? 'private' : 'public')}
                 />
-                <Label htmlFor="private">Private (only WURK staff can assign it)</Label>
+                <Label htmlFor="private">{__('Private (only WURK staff can assign it)')}</Label>
               </div>
-              <Field label="Display order" error={form.errors.display_order}>
+              <Field label={__('Display order')} error={form.errors.display_order}>
                 <Input
                   type="number"
                   value={form.data.display_order}
@@ -250,11 +269,13 @@ export default function PackageForm({
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Price and limits</CardTitle>
-              <CardDescription>Prices exclude VAT (15% is added at checkout).</CardDescription>
+              <CardTitle>{__('Price and limits')}</CardTitle>
+              <CardDescription>
+                {__('Prices exclude VAT (15% is added at checkout).')}
+              </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-              <Field label="Monthly price (R)" error={form.errors.monthly_price} required>
+              <Field label={__('Monthly price (R)')} error={form.errors.monthly_price} required>
                 <Input
                   type="number"
                   step="0.01"
@@ -262,7 +283,7 @@ export default function PackageForm({
                   onChange={number('monthly_price')}
                 />
               </Field>
-              <Field label="Yearly price (R)" error={form.errors.yearly_price} required>
+              <Field label={__('Yearly price (R)')} error={form.errors.yearly_price} required>
                 <Input
                   type="number"
                   step="0.01"
@@ -270,20 +291,24 @@ export default function PackageForm({
                   onChange={number('yearly_price')}
                 />
               </Field>
-              <Field label="Free trial (days)" error={form.errors.trial_days} hint="0 = no trial">
+              <Field
+                label={__('Free trial (days)')}
+                error={form.errors.trial_days}
+                hint={__('0 = no trial')}
+              >
                 <Input type="number" value={form.data.trial_days} onChange={number('trial_days')} />
               </Field>
-              <Field label="Storage (MB)" error={form.errors.storage_mb}>
+              <Field label={__('Storage (MB)')} error={form.errors.storage_mb}>
                 <Input type="number" value={form.data.storage_mb} onChange={number('storage_mb')} />
               </Field>
-              <Field label="Team members" error={form.errors.staff_limit}>
+              <Field label={__('Team members')} error={form.errors.staff_limit}>
                 <Input
                   type="number"
                   value={form.data.staff_limit}
                   onChange={number('staff_limit')}
                 />
               </Field>
-              <Field label="Monthly WURK Credits" error={form.errors.monthly_credits}>
+              <Field label={__('Monthly WURK Credits')} error={form.errors.monthly_credits}>
                 <Input
                   type="number"
                   value={form.data.monthly_credits}
@@ -305,7 +330,7 @@ export default function PackageForm({
                   checked={form.data.credit_packs_allowed}
                   onCheckedChange={(v) => form.setData('credit_packs_allowed', v)}
                 />
-                <Label htmlFor="packs">Can buy credit packs</Label>
+                <Label htmlFor="packs">{__('Can buy credit packs')}</Label>
               </div>
               <div className="flex items-center gap-3">
                 <Switch
@@ -314,7 +339,9 @@ export default function PackageForm({
                   onCheckedChange={(v) => form.setData('prepaid', v)}
                 />
                 <Label htmlFor="prepaid">
-                  Pay as you go: the monthly price comes out of WURK credits each day (no invoice)
+                  {__(
+                    'Pay as you go: the monthly price comes out of WURK credits each day (no invoice)',
+                  )}
                 </Label>
               </div>
               <div className="flex items-center gap-3">
@@ -323,9 +350,9 @@ export default function PackageForm({
                   checked={form.data.multi_branch}
                   onCheckedChange={(v) => form.setData('multi_branch', v)}
                 />
-                <Label htmlFor="multi">Multiple branches</Label>
+                <Label htmlFor="multi">{__('Multiple branches')}</Label>
               </div>
-              <Field label="Max branches" error={form.errors.max_branches}>
+              <Field label={__('Max branches')} error={form.errors.max_branches}>
                 <Input
                   type="number"
                   value={form.data.max_branches}
@@ -339,12 +366,12 @@ export default function PackageForm({
                   checked={form.data.custom_domain}
                   onCheckedChange={(v) => form.setData('custom_domain', v)}
                 />
-                <Label htmlFor="domain">Own domain allowed</Label>
+                <Label htmlFor="domain">{__('Own domain allowed')}</Label>
               </div>
               <Field
-                label="Referral levels (max)"
+                label={__('Referral levels (max)')}
                 error={form.errors.referral_max_levels}
-                hint="Self-cashback + up to this many levels"
+                hint={__('Self-cashback + up to this many levels')}
               >
                 <Input
                   type="number"
@@ -353,9 +380,9 @@ export default function PackageForm({
                 />
               </Field>
               <Field
-                label="Referral payout cap (%)"
+                label={__('Referral payout cap (%)')}
                 error={form.errors.referral_max_commission}
-                hint="Across all levels"
+                hint={__('Across all levels')}
               >
                 <Input
                   type="number"
@@ -365,7 +392,7 @@ export default function PackageForm({
                 />
               </Field>
               {form.data.type === 'managed' && (
-                <Field label="Managed fee (R / month)" error={form.errors.managed_fee}>
+                <Field label={__('Managed fee (R / month)')} error={form.errors.managed_fee}>
                   <Input
                     type="number"
                     step="0.01"
@@ -378,9 +405,9 @@ export default function PackageForm({
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Modules</CardTitle>
+              <CardTitle>{__('Modules')}</CardTitle>
               <CardDescription>
-                Modules not built yet can be included now; they switch on when they ship.
+                {__('Modules not built yet can be included now; they switch on when they ship.')}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -392,7 +419,7 @@ export default function PackageForm({
                     onCheckedChange={(v) => toggleModule(key, v === true)}
                   />
                   <Label htmlFor={`m-${key}`} className="font-normal">
-                    {m.name} {!m.installed && <Badge className="ml-1">Coming</Badge>}
+                    {m.name} {!m.installed && <Badge className="ml-1">{__('Coming')}</Badge>}
                   </Label>
                 </div>
               ))}
@@ -410,20 +437,23 @@ export default function PackageForm({
           </Button>
         )}
         {versions.length > 0 && (
-          <Table label="Version history">
+          <Table label={__('Version history')}>
             <TableHeader>
               <TableRow>
-                <TableHead>Version</TableHead>
-                <TableHead>Monthly</TableHead>
-                <TableHead>Yearly</TableHead>
-                <TableHead>Businesses on it</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>{__('Version')}</TableHead>
+                <TableHead>{__('Monthly')}</TableHead>
+                <TableHead>{__('Yearly')}</TableHead>
+                <TableHead>{__('Businesses on it')}</TableHead>
+                <TableHead>{__('Created')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {versions.map((v) => (
                 <TableRow key={v.version}>
-                  <TableCell className="font-medium">v{v.version}</TableCell>
+                  <TableCell className="font-medium">
+                    {__('v')}
+                    {v.version}
+                  </TableCell>
                   <TableCell>{rand(v.monthly / 100)}</TableCell>
                   <TableCell>{rand(v.yearly / 100)}</TableCell>
                   <TableCell>{v.subscribers}</TableCell>

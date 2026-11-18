@@ -16,6 +16,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   permissions: { key: string; label: string }[];
@@ -37,12 +38,14 @@ export default function Roles({ permissions, system, custom }: Props) {
   };
 
   return (
-    <AppShell title="Staff roles">
-      <Head title="Staff roles" />
+    <AppShell title={__('Staff roles')}>
+      <Head title={__('Staff roles')} />
       <div className="grid gap-8">
         <PageHeader
-          title="Staff roles"
-          description="What each WURK staff role can do. Built-in roles are always up to date; create custom roles for special cases."
+          title={__('Staff roles')}
+          description={__(
+            'What each WURK staff role can do. Built-in roles are always up to date; create custom roles for special cases.',
+          )}
         />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {[
@@ -55,7 +58,7 @@ export default function Roles({ permissions, system, custom }: Props) {
                   <CardTitle>{r.name}</CardTitle>
                   {r.builtIn ? (
                     <Badge>
-                      <Lock /> Built-in
+                      <Lock /> {__('Built-in')}
                     </Badge>
                   ) : (
                     <Button
@@ -81,19 +84,24 @@ export default function Roles({ permissions, system, custom }: Props) {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>New custom role</CardTitle>
-            <CardDescription>Choose exactly what this role allows.</CardDescription>
+            <CardTitle>{__('New custom role')}</CardTitle>
+            <CardDescription>{__('Choose exactly what this role allows.')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={submit} className="grid gap-5">
-              <Field label="Role name" error={form.errors.name} required className="sm:max-w-sm">
+              <Field
+                label={__('Role name')}
+                error={form.errors.name}
+                required
+                className="sm:max-w-sm"
+              >
                 <Input
                   value={form.data.name}
                   onChange={(e) => form.setData('name', e.target.value)}
                 />
               </Field>
               <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <legend className="mb-2 text-sm font-medium">Permissions</legend>
+                <legend className="mb-2 text-sm font-medium">{__('Permissions')}</legend>
                 {permissions.map((p) => (
                   <div key={p.key} className="flex items-center gap-3">
                     <Checkbox
@@ -113,7 +121,7 @@ export default function Roles({ permissions, system, custom }: Props) {
                 </p>
               )}
               <Button type="submit" className="w-fit" loading={form.processing}>
-                <Plus /> Create role
+                <Plus /> {__('Create role')}
               </Button>
             </form>
           </CardContent>

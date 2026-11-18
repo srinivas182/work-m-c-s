@@ -17,6 +17,7 @@ import {
   Textarea,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   business: string;
@@ -44,16 +45,18 @@ export default function AiWriter({ business, base }: Props) {
   const errors = form.errors as Record<string, string>;
 
   return (
-    <AppShell title="Write with AI">
-      <Head title="Write with AI" />
+    <AppShell title={__('Write with AI')}>
+      <Head title={__('Write with AI')} />
       <div className="grid max-w-2xl gap-6">
         <PageHeader
-          title="Write your website with AI"
-          description="Tell WURK AI about your business. It writes your pages as drafts — you review everything before it goes live."
+          title={__('Write your website with AI')}
+          description={__(
+            'Tell WURK AI about your business. It writes your pages as drafts — you review everything before it goes live.',
+          )}
         />
         <Card>
           <CardContent className="grid gap-5 p-6">
-            <Field label="Business name" error={form.errors.business}>
+            <Field label={__('Business name')} error={form.errors.business}>
               <Input
                 value={form.data.business}
                 onChange={(e) => form.setData('business', e.target.value)}
@@ -61,8 +64,10 @@ export default function AiWriter({ business, base }: Props) {
               />
             </Field>
             <Field
-              label="What do you do?"
-              hint="One or two sentences, e.g. “Braids and natural hair care for women and children.”"
+              label={__('What do you do?')}
+              hint={__(
+                'One or two sentences, e.g. “Braids and natural hair care for women and children.”',
+              )}
               error={form.errors.what}
             >
               <Textarea
@@ -72,17 +77,17 @@ export default function AiWriter({ business, base }: Props) {
                 rows={3}
               />
             </Field>
-            <Field label="Where are you? (optional)" error={form.errors.area}>
+            <Field label={__('Where are you? (optional)')} error={form.errors.area}>
               <Input
                 value={form.data.area}
                 onChange={(e) => form.setData('area', e.target.value)}
                 maxLength={80}
-                placeholder="e.g. Durban North"
+                placeholder={__('e.g. Durban North')}
               />
             </Field>
-            <Field label="Tone">
+            <Field label={__('Tone')}>
               <Select value={form.data.tone} onValueChange={(v) => form.setData('tone', v)}>
-                <SelectTrigger aria-label="Tone">
+                <SelectTrigger aria-label={__('Tone')}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -96,14 +101,14 @@ export default function AiWriter({ business, base }: Props) {
             </Field>
             <fieldset className="grid gap-3">
               <legend className="mb-1 text-sm font-medium">
-                Your main services and prices (optional)
+                {__('Your main services and prices (optional)')}
               </legend>
               <p className="text-fg-muted text-sm">
-                Prices only ever come from you — WURK AI never makes them up.
+                {__('Prices only ever come from you — WURK AI never makes them up.')}
               </p>
               {form.data.services.map((s, i) => (
                 <div key={i} className="flex items-end gap-2">
-                  <Field label="Service" className="flex-1">
+                  <Field label={__('Service')} className="flex-1">
                     <Input
                       value={s.name}
                       maxLength={60}
@@ -117,7 +122,7 @@ export default function AiWriter({ business, base }: Props) {
                       }
                     />
                   </Field>
-                  <Field label="Price (R)" className="w-32">
+                  <Field label={__('Price (R)')} className="w-32">
                     <Input
                       inputMode="numeric"
                       value={s.price === null ? '' : String(s.price / 100)}
@@ -161,7 +166,7 @@ export default function AiWriter({ business, base }: Props) {
                     form.setData('services', [...form.data.services, { name: '', price: null }])
                   }
                 >
-                  <Plus /> Add a service
+                  <Plus /> {__('Add a service')}
                 </Button>
               )}
             </fieldset>
@@ -175,7 +180,7 @@ export default function AiWriter({ business, base }: Props) {
               disabled={form.data.what.trim() === ''}
               onClick={() => setConfirming(true)}
             >
-              <Sparkles /> Write my website
+              <Sparkles /> {__('Write my website')}
             </Button>
           </CardContent>
         </Card>

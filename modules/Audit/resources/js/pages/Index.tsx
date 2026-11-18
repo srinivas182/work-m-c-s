@@ -22,6 +22,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { auditLabel } from '@/lib/audit-labels';
+import { __ } from '@/i18n';
 
 interface AuditRow {
   id: string;
@@ -73,7 +74,7 @@ function Details({ details }: { details: Record<string, unknown> | null }) {
         aria-expanded={open}
         className="text-accent-fg inline-flex cursor-pointer items-center gap-1 text-sm font-medium hover:underline"
       >
-        {open ? 'Hide' : 'Show'} details{' '}
+        {open ? 'Hide' : 'Show'} {__('details')}{' '}
         <ChevronDown
           className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden
@@ -109,12 +110,12 @@ export default function Index({ scope, filters, events }: Props) {
   const exportUrl = `${window.location.pathname}?${new URLSearchParams({ ...Object.fromEntries(Object.entries(filters).filter(([, v]) => v)), format: 'csv' }).toString()}`;
 
   return (
-    <AppShell title="Audit log">
-      <Head title="Audit log" />
+    <AppShell title={__('Audit log')}>
+      <Head title={__('Audit log')} />
       <div className="grid gap-8">
         <PageHeader
           eyebrow={scope}
-          title="Audit log"
+          title={__('Audit log')}
           description={
             scope === 'WURK platform'
               ? 'Every sign-in, business change and staff access change. Entries are chained together, so nothing can be edited or removed unnoticed.'
@@ -123,7 +124,7 @@ export default function Index({ scope, filters, events }: Props) {
           actions={
             <Button variant="secondary" asChild>
               <a href={exportUrl}>
-                <Download /> Export CSV
+                <Download /> {__('Export CSV')}
               </a>
             </Button>
           }
@@ -133,7 +134,7 @@ export default function Index({ scope, filters, events }: Props) {
           onSubmit={apply}
           className="border-border bg-surface grid grid-cols-1 items-end gap-4 rounded-2xl border p-5 shadow-xs sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto]"
         >
-          <Field label="Activity">
+          <Field label={__('Activity')}>
             {(control) => (
               <Select
                 value={form.action}
@@ -152,21 +153,21 @@ export default function Index({ scope, filters, events }: Props) {
               </Select>
             )}
           </Field>
-          <Field label="Person">
+          <Field label={__('Person')}>
             <Input
               value={form.actor}
               onChange={(e) => setForm((f) => ({ ...f, actor: e.target.value }))}
-              placeholder="Name"
+              placeholder={__('Name')}
             />
           </Field>
-          <Field label="From">
+          <Field label={__('From')}>
             <Input
               type="date"
               value={form.from}
               onChange={(e) => setForm((f) => ({ ...f, from: e.target.value }))}
             />
           </Field>
-          <Field label="To">
+          <Field label={__('To')}>
             <Input
               type="date"
               value={form.to}
@@ -174,26 +175,26 @@ export default function Index({ scope, filters, events }: Props) {
             />
           </Field>
           <Button type="submit">
-            <Search /> Filter
+            <Search /> {__('Filter')}
           </Button>
         </form>
 
         {events.data.length === 0 ? (
           <EmptyState
             icon={ShieldCheck}
-            title="No activity found"
-            description="Try a wider date range or a different activity type."
+            title={__('No activity found')}
+            description={__('Try a wider date range or a different activity type.')}
           />
         ) : (
           <div className="grid gap-4">
-            <Table label="Audit events">
+            <Table label={__('Audit events')}>
               <TableHeader>
                 <TableRow>
-                  <TableHead>When</TableHead>
-                  <TableHead>Who</TableHead>
-                  <TableHead>What</TableHead>
-                  <TableHead>Details</TableHead>
-                  <TableHead>IP address</TableHead>
+                  <TableHead>{__('When')}</TableHead>
+                  <TableHead>{__('Who')}</TableHead>
+                  <TableHead>{__('What')}</TableHead>
+                  <TableHead>{__('Details')}</TableHead>
+                  <TableHead>{__('IP address')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -223,14 +224,14 @@ export default function Index({ scope, filters, events }: Props) {
                 {events.prev && (
                   <Button variant="secondary" size="sm" asChild>
                     <Link href={events.prev} preserveScroll>
-                      Newer
+                      {__('Newer')}
                     </Link>
                   </Button>
                 )}
                 {events.next && (
                   <Button variant="secondary" size="sm" asChild>
                     <Link href={events.next} preserveScroll>
-                      Older
+                      {__('Older')}
                     </Link>
                   </Button>
                 )}

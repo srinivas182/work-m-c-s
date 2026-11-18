@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Languages — Sprint 24.1b (the back office's texts)
+- **Every fixed text on the back-office screens is marked for translation, about 2,400 in all.** That covers labels, buttons, headings, hints, placeholders and accessible names, plus the menu and fixed flash messages. They show in each person's language as translations arrive, and in English until then.
+- `scripts/i18n-codemod.mjs` marks texts in React files; it was run here for every back-office page. Pages use `__()`, because many already have a local variable called `t`.
+- Not yet included: the business's public site and the wurk.co.za marketing pages, which come with customer pages in 24.3.
+
 ### Languages — Sprint 24.1a (the foundation)
 - **Account & security → Language:** each person picks the language WURK uses for them, from English, isiZulu, isiXhosa, Afrikaans, Sesotho, Swahili, French, Portuguese, Hausa and Yoruba. Visitors get theirs from `?lang=` (remembered), then their browser.
 - **How translations work:**

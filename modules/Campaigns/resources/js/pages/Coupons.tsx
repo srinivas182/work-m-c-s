@@ -16,6 +16,7 @@ import {
 import { HelpTip } from '@/components/HelpTip';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Coupon {
   id: string;
@@ -61,42 +62,42 @@ export default function Coupons({
   });
   const base = window.location.pathname.replace(/\/$/, '');
   return (
-    <AppShell title="Coupons">
-      <Head title="Coupons" />
+    <AppShell title={__('Coupons')}>
+      <Head title={__('Coupons')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Coupons"
-          description="Codes customers enter at checkout or when paying a booking deposit."
+          title={__('Coupons')}
+          description={__('Codes customers enter at checkout or when paying a booking deposit.')}
         />
         <Card>
           <CardHeader>
-            <CardTitle>New coupon</CardTitle>
+            <CardTitle>{__('New coupon')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form
-              aria-label="New coupon"
+              aria-label={__('New coupon')}
               className="grid gap-3 text-sm sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 form.post(base, { preserveScroll: true, onSuccess: () => form.reset() });
               }}
             >
-              <Field label="Code" error={form.errors.code}>
+              <Field label={__('Code')} error={form.errors.code}>
                 <Input
                   value={form.data.code}
                   onChange={(e) => form.setData('code', e.target.value.toUpperCase())}
                 />
               </Field>
-              <Field label="Discount" error={form.errors.value}>
+              <Field label={__('Discount')} error={form.errors.value}>
                 <div className="flex gap-2">
                   <select
-                    aria-label="Kind of discount"
+                    aria-label={__('Kind of discount')}
                     className="border-border bg-bg h-10 rounded-md border px-3"
                     value={form.data.kind}
                     onChange={(e) => form.setData('kind', e.target.value)}
                   >
                     <option value="percent">%</option>
-                    <option value="amount">Rand</option>
+                    <option value="amount">{__('Rand')}</option>
                   </select>
                   <Input
                     aria-label={
@@ -108,32 +109,32 @@ export default function Coupons({
                   />
                 </div>
               </Field>
-              <Field label="Use on" error={form.errors.applies_to}>
+              <Field label={__('Use on')} error={form.errors.applies_to}>
                 <select
                   className="border-border bg-bg h-10 w-full rounded-md border px-3"
                   value={form.data.applies_to}
                   onChange={(e) => form.setData('applies_to', e.target.value)}
                 >
-                  <option value="both">The shop and booking deposits</option>
-                  <option value="shop">The shop only</option>
-                  <option value="bookings">Booking deposits only</option>
+                  <option value="both">{__('The shop and booking deposits')}</option>
+                  <option value="shop">{__('The shop only')}</option>
+                  <option value="bookings">{__('Booking deposits only')}</option>
                 </select>
               </Field>
-              <Field label="Minimum spend in rand (optional)" error={form.errors.min_spend}>
+              <Field label={__('Minimum spend in rand (optional)')} error={form.errors.min_spend}>
                 <Input
                   inputMode="decimal"
                   value={form.data.min_spend}
                   onChange={(e) => form.setData('min_spend', e.target.value)}
                 />
               </Field>
-              <Field label="Last day (optional)" error={form.errors.ends_on}>
+              <Field label={__('Last day (optional)')} error={form.errors.ends_on}>
                 <Input
                   type="date"
                   value={form.data.ends_on}
                   onChange={(e) => form.setData('ends_on', e.target.value)}
                 />
               </Field>
-              <Field label="How many times in total (optional)" error={form.errors.max_uses}>
+              <Field label={__('How many times in total (optional)')} error={form.errors.max_uses}>
                 <Input
                   inputMode="numeric"
                   value={form.data.max_uses}
@@ -141,13 +142,13 @@ export default function Coupons({
                 />
               </Field>
               {campaigns.length > 0 && (
-                <Field label="For a campaign (optional)" error={form.errors.campaign_id}>
+                <Field label={__('For a campaign (optional)')} error={form.errors.campaign_id}>
                   <select
                     className="border-border bg-bg h-10 w-full rounded-md border px-3"
                     value={form.data.campaign_id}
                     onChange={(e) => form.setData('campaign_id', e.target.value)}
                   >
-                    <option value="">None</option>
+                    <option value="">{__('None')}</option>
                     {campaigns.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
@@ -161,13 +162,13 @@ export default function Coupons({
                   checked={form.data.once_per_customer}
                   onCheckedChange={(on) => form.setData('once_per_customer', on === true)}
                 />
-                Once per customer{' '}
+                {__('Once per customer')}{' '}
                 <HelpTip>
-                  We recognise customers by their phone number, however it’s written.
+                  {__('We recognise customers by their phone number, however it’s written.')}
                 </HelpTip>
               </label>
               <Button type="submit" className="justify-self-start" loading={form.processing}>
-                Create coupon
+                {__('Create coupon')}
               </Button>
             </form>
           </CardContent>
@@ -175,11 +176,11 @@ export default function Coupons({
         {coupons.length === 0 ? (
           <EmptyState
             icon={Tag}
-            title="No coupons yet"
-            description="Create one above, then share the code in a campaign."
+            title={__('No coupons yet')}
+            description={__('Create one above, then share the code in a campaign.')}
           />
         ) : (
-          <ul aria-label="Coupons" className="grid gap-2">
+          <ul aria-label={__('Coupons')} className="grid gap-2">
             {coupons.map((c) => (
               <li
                 key={c.id}
@@ -192,8 +193,8 @@ export default function Coupons({
                 </span>
                 <Badge tone={c.active ? 'success' : 'neutral'}>{c.active ? 'On' : 'Off'}</Badge>
                 <span className="text-fg-muted">
-                  Used {c.uses}
-                  {c.max_uses ? ` of ${c.max_uses}` : ''} · {rand(c.given_cents)} given
+                  {__('Used')} {c.uses}
+                  {c.max_uses ? ` of ${c.max_uses}` : ''} · {rand(c.given_cents)} {__('given')}
                   {c.ends_at ? ` · until ${c.ends_at.slice(0, 10)}` : ''}
                 </span>
                 {c.active && (
@@ -202,7 +203,7 @@ export default function Coupons({
                     variant="ghost"
                     onClick={() => router.post(`${base}/${c.id}/off`, {}, { preserveScroll: true })}
                   >
-                    Switch off
+                    {__('Switch off')}
                   </Button>
                 )}
               </li>

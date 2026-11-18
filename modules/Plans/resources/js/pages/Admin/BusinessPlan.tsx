@@ -22,6 +22,7 @@ import {
   Textarea,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface ModuleRow {
   key: string;
@@ -67,10 +68,10 @@ function OverrideDialog({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent
         title={`${row.enabled ? 'Remove' : 'Give'} ${row.name}`}
-        description="An exception to this business’s package, recorded in the audit log."
+        description={__('An exception to this business’s package, recorded in the audit log.')}
       >
         <form onSubmit={submit}>
-          <Field label="Reason" error={form.errors.reason} required>
+          <Field label={__('Reason')} error={form.errors.reason} required>
             <Textarea
               value={form.data.reason}
               onChange={(e) => form.setData('reason', e.target.value)}
@@ -89,7 +90,7 @@ function OverrideDialog({
                   });
                 }}
               >
-                Follow the package again
+                {__('Follow the package again')}
               </Button>
             )}
             <Button type="submit" loading={form.processing}>
@@ -122,10 +123,10 @@ export default function BusinessPlan({
         >
           <ArrowLeft className="size-4" aria-hidden /> {business.name}
         </Link>
-        <PageHeader title="Plan and modules" eyebrow={business.name} />
+        <PageHeader title={__('Plan and modules')} eyebrow={business.name} />
         <Card>
           <CardHeader>
-            <CardTitle>Package</CardTitle>
+            <CardTitle>{__('Package')}</CardTitle>
             <CardDescription>
               {subscription
                 ? `${subscription.package} · version ${subscription.version}${subscription.latest ? '' : ' (older terms — kept until they change package)'}`
@@ -141,14 +142,14 @@ export default function BusinessPlan({
                 }}
                 className="flex flex-col gap-3 sm:flex-row sm:items-end"
               >
-                <Field label="Change package" className="sm:w-80">
+                <Field label={__('Change package')} className="sm:w-80">
                   {(control) => (
                     <Select
                       value={form.data.package_id}
                       onValueChange={(v) => form.setData('package_id', v)}
                     >
                       <SelectTrigger {...control}>
-                        <SelectValue placeholder="Choose a package" />
+                        <SelectValue placeholder={__('Choose a package')} />
                       </SelectTrigger>
                       <SelectContent>
                         {packages.map((p) => (
@@ -161,7 +162,7 @@ export default function BusinessPlan({
                   )}
                 </Field>
                 <Button type="submit" loading={form.processing} disabled={!form.data.package_id}>
-                  Apply
+                  {__('Apply')}
                 </Button>
               </form>
             </CardContent>
@@ -169,9 +170,9 @@ export default function BusinessPlan({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Modules</CardTitle>
+            <CardTitle>{__('Modules')}</CardTitle>
             <CardDescription>
-              From the package, plus any exceptions you set for this business.
+              {__('From the package, plus any exceptions you set for this business.')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -183,10 +184,10 @@ export default function BusinessPlan({
                 >
                   <span>
                     <span className="font-medium">{m.name}</span>
-                    {!m.installed && <Badge className="ml-2">Coming</Badge>}
+                    {!m.installed && <Badge className="ml-2">{__('Coming')}</Badge>}
                     {m.override && (
                       <span className="text-fg-muted block text-sm">
-                        Exception: {m.override.reason}
+                        {__('Exception:')} {m.override.reason}
                       </span>
                     )}
                   </span>
@@ -196,7 +197,7 @@ export default function BusinessPlan({
                     </Badge>
                     {canManage && (
                       <Button variant="ghost" size="sm" onClick={() => setEditing(m)}>
-                        Change
+                        {__('Change')}
                       </Button>
                     )}
                   </span>

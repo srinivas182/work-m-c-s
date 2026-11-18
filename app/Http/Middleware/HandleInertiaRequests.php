@@ -57,7 +57,7 @@ final class HandleInertiaRequests extends Middleware
             ],
             // The language (24.1): its translations load as a script before the app (resources/views/app.blade.php).
             'i18n' => fn () => ['locale' => app()->getLocale(), 'languages' => array_map(fn (string $code, array $names) => ['code' => $code, 'name' => $names[1]], array_keys(Locales::SUPPORTED), Locales::SUPPORTED)],
-            'flash' => fn () => ['status' => $request->session()->get('status'), 'warning' => $request->session()->get('warning')],
+            'flash' => fn () => ['status' => self::translated($request->session()->get('status')), 'warning' => self::translated($request->session()->get('warning'))],
             // A page-wide notice a module attached to this request (e.g. Billing's payment reminder).
             'banner' => fn () => $request->attributes->get('wurk.banner'),
             // "Ask WURK" in a business's back office (Sprint 16.2), when on.
@@ -65,5 +65,11 @@ final class HandleInertiaRequests extends Middleware
             // "Contact support" in a business's back office (Sprint 16.3).
             'support' => fn () => $request->attributes->get('wurk.support'),
         ];
+    }
+
+    /** A fixed flash message in the person's language (24.1); messages built with values stay as they are. */
+    private static function translated(mixed $message): mixed
+    {
+        return is_string($message) ? __($message) : $message;
     }
 }

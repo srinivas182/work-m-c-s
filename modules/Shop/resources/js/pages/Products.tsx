@@ -16,6 +16,7 @@ import {
 import AppShell from '@/layouts/AppShell';
 import { PhotoPicker } from '@modules/Website/resources/js/editor/PhotoPicker';
 import { Package } from 'lucide-react';
+import { __ } from '@/i18n';
 
 interface VariantRow {
   id?: string;
@@ -139,7 +140,7 @@ function Editor({
       <CardHeader>
         <CardTitle>{product ? `Edit ${product.name}` : 'Add a product'}</CardTitle>
         <CardDescription>
-          Prices include VAT. Leave stock empty if you don’t track it.
+          {__('Prices include VAT. Leave stock empty if you don’t track it.')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -180,20 +181,20 @@ function Editor({
           }}
         >
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Name" error={errors.name}>
+            <Field label={__('Name')} error={errors.name}>
               <Input
                 value={form.data.name}
                 maxLength={120}
                 onChange={(e) => form.setData('name', e.target.value)}
               />
             </Field>
-            <Field label="Category" error={errors.category_id}>
+            <Field label={__('Category')} error={errors.category_id}>
               <select
                 className={selectClass}
                 value={form.data.category_id}
                 onChange={(e) => form.setData('category_id', e.target.value)}
               >
-                <option value="">None</option>
+                <option value="">{__('None')}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -202,7 +203,7 @@ function Editor({
               </select>
             </Field>
           </div>
-          <Field label="Description" error={errors.description}>
+          <Field label={__('Description')} error={errors.description}>
             <textarea
               className="border-border bg-bg min-h-24 w-full rounded-md border p-3 text-sm"
               maxLength={5000}
@@ -212,36 +213,37 @@ function Editor({
           </Field>
           <fieldset className="grid gap-3">
             <legend className="mb-1 text-sm font-medium">
-              Weight and size (for courier delivery)
+              {__('Weight and size (for courier delivery)')}
             </legend>
             <p className="text-fg-muted text-sm">
-              Optional. Without a weight, delivery uses your default weight (Settings → Shipping);
-              sizes help choose the right box.
+              {__(
+                'Optional. Without a weight, delivery uses your default weight (Settings → Shipping); sizes help choose the right box.',
+              )}
             </p>
             <div className="grid gap-3 sm:grid-cols-4">
               <Measure
-                label="Weight (kg)"
+                label={__('Weight (kg)')}
                 step="0.001"
                 value={form.data.weight_kg}
                 error={errors.weight_kg}
                 onChange={(n) => form.setData('weight_kg', n)}
               />
               <Measure
-                label="Length (cm)"
+                label={__('Length (cm)')}
                 step="0.1"
                 value={form.data.length_cm}
                 error={errors.length_cm}
                 onChange={(n) => form.setData('length_cm', n)}
               />
               <Measure
-                label="Width (cm)"
+                label={__('Width (cm)')}
                 step="0.1"
                 value={form.data.width_cm}
                 error={errors.width_cm}
                 onChange={(n) => form.setData('width_cm', n)}
               />
               <Measure
-                label="Height (cm)"
+                label={__('Height (cm)')}
                 step="0.1"
                 value={form.data.height_cm}
                 error={errors.height_cm}
@@ -250,7 +252,9 @@ function Editor({
             </div>
           </fieldset>
           <fieldset className="grid gap-2">
-            <legend className="mb-1 text-sm font-medium">Photos (the first is the main one)</legend>
+            <legend className="mb-1 text-sm font-medium">
+              {__('Photos (the first is the main one)')}
+            </legend>
             <PhotoPicker
               value={form.data.photos.map((src) => ({ src, alt: form.data.name }))}
               onChange={(next) =>
@@ -265,7 +269,9 @@ function Editor({
             />
           </fieldset>
           <fieldset className="grid gap-2">
-            <legend className="mb-1 text-sm font-medium">Options (e.g. Size, Colour)</legend>
+            <legend className="mb-1 text-sm font-medium">
+              {__('Options (e.g. Size, Colour)')}
+            </legend>
             <div className="flex flex-wrap items-end gap-2">
               {form.data.options.map((o, i) => (
                 <span key={i} className="flex items-end gap-1">
@@ -285,7 +291,7 @@ function Editor({
                     aria-label={`Remove option ${o || i + 1}`}
                     onClick={() => setOptions(form.data.options.filter((_, j) => j !== i))}
                   >
-                    Remove
+                    {__('Remove')}
                   </Button>
                 </span>
               ))}
@@ -305,7 +311,7 @@ function Editor({
                     ])
                   }
                 >
-                  Add an option
+                  {__('Add an option')}
                 </Button>
               )}
             </div>
@@ -331,7 +337,7 @@ function Editor({
                     />
                   </Field>
                 ))}
-                <Field label="Price (R)" error={errors[`variants.${i}.price_cents`]}>
+                <Field label={__('Price (R)')} error={errors[`variants.${i}.price_cents`]}>
                   <Input
                     type="number"
                     min={0}
@@ -340,7 +346,7 @@ function Editor({
                     onChange={(e) => setVariant(i, { price_cents: cents(e.target.value) ?? 0 })}
                   />
                 </Field>
-                <Field label="Was (R)" error={errors[`variants.${i}.compare_at_cents`]}>
+                <Field label={__('Was (R)')} error={errors[`variants.${i}.compare_at_cents`]}>
                   <Input
                     type="number"
                     min={0}
@@ -349,7 +355,7 @@ function Editor({
                     onChange={(e) => setVariant(i, { compare_at_cents: cents(e.target.value) })}
                   />
                 </Field>
-                <Field label="SKU">
+                <Field label={__('SKU')}>
                   <Input
                     value={v.sku ?? ''}
                     maxLength={60}
@@ -359,31 +365,31 @@ function Editor({
                 {form.data.variants.length > 1 && (
                   <fieldset className="grid gap-3 sm:col-span-2 sm:grid-cols-4">
                     <legend className="text-sm font-medium">
-                      Own weight and size (optional — otherwise the product’s)
+                      {__('Own weight and size (optional — otherwise the product’s)')}
                     </legend>
                     <Measure
-                      label="Own weight (kg)"
+                      label={__('Own weight (kg)')}
                       step="0.001"
                       value={v.weight_kg ?? null}
                       error={errors[`variants.${i}.weight_kg`]}
                       onChange={(n) => setVariant(i, { weight_kg: n })}
                     />
                     <Measure
-                      label="Own length (cm)"
+                      label={__('Own length (cm)')}
                       step="0.1"
                       value={v.length_cm ?? null}
                       error={errors[`variants.${i}.length_cm`]}
                       onChange={(n) => setVariant(i, { length_cm: n })}
                     />
                     <Measure
-                      label="Own width (cm)"
+                      label={__('Own width (cm)')}
                       step="0.1"
                       value={v.width_cm ?? null}
                       error={errors[`variants.${i}.width_cm`]}
                       onChange={(n) => setVariant(i, { width_cm: n })}
                     />
                     <Measure
-                      label="Own height (cm)"
+                      label={__('Own height (cm)')}
                       step="0.1"
                       value={v.height_cm ?? null}
                       error={errors[`variants.${i}.height_cm`]}
@@ -393,7 +399,9 @@ function Editor({
                 )}
                 {several ? (
                   <fieldset className="grid gap-2 sm:col-span-2">
-                    <legend className="text-sm font-medium">Stock and price by branch</legend>
+                    <legend className="text-sm font-medium">
+                      {__('Stock and price by branch')}
+                    </legend>
                     {branches.map((b) => (
                       <div key={b.id} className="flex flex-wrap items-end gap-3 text-sm">
                         <span className="w-28 font-medium">{b.name}</span>
@@ -433,11 +441,11 @@ function Editor({
                       </div>
                     ))}
                     <p className="text-fg-muted text-xs">
-                      Leave every stock box empty if you don’t track stock.
+                      {__('Leave every stock box empty if you don’t track stock.')}
                     </p>
                   </fieldset>
                 ) : (
-                  <Field label="Stock" error={errors[`variants.${i}.stock`]}>
+                  <Field label={__('Stock')} error={errors[`variants.${i}.stock`]}>
                     <Input
                       type="number"
                       min={0}
@@ -463,7 +471,7 @@ function Editor({
                       )
                     }
                   >
-                    Remove
+                    {__('Remove')}
                   </Button>
                 )}
               </div>
@@ -478,7 +486,7 @@ function Editor({
                   form.setData('variants', [...form.data.variants, blankVariant(form.data.options)])
                 }
               >
-                Add a variant
+                {__('Add a variant')}
               </Button>
             )}
           </fieldset>
@@ -488,14 +496,14 @@ function Editor({
               checked={form.data.status === 'published'}
               onChange={(e) => form.setData('status', e.target.checked ? 'published' : 'draft')}
             />
-            Show in the shop
+            {__('Show in the shop')}
           </label>
           <span className="flex gap-2">
             <Button type="submit" loading={form.processing}>
-              Save product
+              {__('Save product')}
             </Button>
             <Button type="button" variant="ghost" onClick={onDone}>
-              Cancel
+              {__('Cancel')}
             </Button>
           </span>
         </form>
@@ -512,14 +520,18 @@ export default function Products({ categories, products, branches, missingWeight
   const shown = onlyMissing ? products.filter(unweighed) : products;
   const category = useForm({ name: '' });
   return (
-    <AppShell title="Products">
-      <Head title="Products" />
+    <AppShell title={__('Products')}>
+      <Head title={__('Products')} />
       <div className="grid max-w-5xl gap-6">
         <PageHeader
-          title="Products"
-          description="What you sell online. Customers buy from your website; payments go straight to your bank."
+          title={__('Products')}
+          description={__(
+            'What you sell online. Customers buy from your website; payments go straight to your bank.',
+          )}
           actions={
-            editing ? undefined : <Button onClick={() => setEditing('new')}>Add a product</Button>
+            editing ? undefined : (
+              <Button onClick={() => setEditing('new')}>{__('Add a product')}</Button>
+            )
           }
         />
         {editing && (
@@ -532,11 +544,12 @@ export default function Products({ categories, products, branches, missingWeight
         )}
         {missingWeights !== null && missingWeights > 0 && !editing && (
           <p className="border-border rounded-lg border p-3 text-sm" role="note">
-            {missingWeights === 1 ? '1 product uses' : `${missingWeights} products use`} your
-            default weight for courier delivery. Add real weights for accurate delivery prices — or
-            change the default in{' '}
+            {missingWeights === 1 ? '1 product uses' : `${missingWeights} products use`}{' '}
+            {__(
+              'your default weight for courier delivery. Add real weights for accurate delivery prices — or change the default in',
+            )}{' '}
             <a className="underline" href={`${base().replace(/\/shop$/, '')}/settings/shipping`}>
-              Settings → Shipping
+              {__('Settings → Shipping')}
             </a>
             .{' '}
             <button
@@ -552,11 +565,11 @@ export default function Products({ categories, products, branches, missingWeight
         {products.length === 0 && !editing ? (
           <EmptyState
             icon={Package}
-            title="No products yet"
-            description="Add your first product to start selling."
+            title={__('No products yet')}
+            description={__('Add your first product to start selling.')}
           />
         ) : (
-          <ul className="grid gap-2" aria-label="Products">
+          <ul className="grid gap-2" aria-label={__('Products')}>
             {shown.map((p) => {
               const prices = p.variants.map((v) => v.price_cents);
               const tracked = p.variants.filter((v) => v.stock !== null);
@@ -592,7 +605,7 @@ export default function Products({ categories, products, branches, missingWeight
                       aria-label={`Edit ${p.name}`}
                       onClick={() => setEditing(p)}
                     >
-                      Edit
+                      {__('Edit')}
                     </Button>
                     <Button
                       size="sm"
@@ -602,7 +615,7 @@ export default function Products({ categories, products, branches, missingWeight
                         router.delete(`${base()}/products/${p.id}`, { preserveScroll: true })
                       }
                     >
-                      Delete
+                      {__('Delete')}
                     </Button>
                   </span>
                 </li>
@@ -612,10 +625,10 @@ export default function Products({ categories, products, branches, missingWeight
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Categories</CardTitle>
+            <CardTitle>{__('Categories')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <ul className="flex flex-wrap gap-2" aria-label="Categories">
+            <ul className="flex flex-wrap gap-2" aria-label={__('Categories')}>
               {categories.map((c) => (
                 <li
                   key={c.id}
@@ -630,13 +643,13 @@ export default function Products({ categories, products, branches, missingWeight
                       router.delete(`${base()}/categories/${c.id}`, { preserveScroll: true })
                     }
                   >
-                    Remove
+                    {__('Remove')}
                   </Button>
                 </li>
               ))}
             </ul>
             <form
-              aria-label="Add a category"
+              aria-label={__('Add a category')}
               className="flex flex-wrap items-end gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -646,7 +659,7 @@ export default function Products({ categories, products, branches, missingWeight
                 });
               }}
             >
-              <Field label="New category" error={category.errors.name}>
+              <Field label={__('New category')} error={category.errors.name}>
                 <Input
                   value={category.data.name}
                   maxLength={80}
@@ -654,7 +667,7 @@ export default function Products({ categories, products, branches, missingWeight
                 />
               </Field>
               <Button type="submit" variant="secondary" loading={category.processing}>
-                Add category
+                {__('Add category')}
               </Button>
             </form>
           </CardContent>

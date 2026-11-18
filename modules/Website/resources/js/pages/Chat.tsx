@@ -14,6 +14,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { ReceptionistCard, type ReceptionistProps } from '../chat/ReceptionistCard';
+import { __ } from '@/i18n';
 
 interface Answer {
   id?: string;
@@ -66,27 +67,29 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
     setRows(next);
   };
   return (
-    <AppShell title="Chat">
-      <Head title="Chat" />
+    <AppShell title={__('Chat')}>
+      <Head title={__('Chat')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Chat"
-          description="A chat on your website that answers common questions straight away and, when someone wants a person, takes their details for you. Only chats that reach you are kept."
+          title={__('Chat')}
+          description={__(
+            'A chat on your website that answers common questions straight away and, when someone wants a person, takes their details for you. Only chats that reach you are kept.',
+          )}
         />
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              Settings{' '}
+              {__('Settings')}{' '}
               {settings.enabled ? (
-                <Badge tone="success">On</Badge>
+                <Badge tone="success">{__('On')}</Badge>
               ) : (
-                <Badge tone="neutral">Off</Badge>
+                <Badge tone="neutral">{__('Off')}</Badge>
               )}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form
-              aria-label="Chat settings"
+              aria-label={__('Chat settings')}
               className="grid gap-4"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -98,15 +101,15 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                   checked={s.data.enabled}
                   onCheckedChange={(on) => s.setData('enabled', on === true)}
                 />
-                Show the chat on my website
+                {__('Show the chat on my website')}
               </label>
-              <Field label="Greeting" error={s.errors.greeting}>
+              <Field label={__('Greeting')} error={s.errors.greeting}>
                 <Input
                   value={s.data.greeting}
                   onChange={(e) => s.setData('greeting', e.target.value)}
                 />
               </Field>
-              <Field label="When there’s no answer" error={s.errors.fallback}>
+              <Field label={__('When there’s no answer')} error={s.errors.fallback}>
                 <Input
                   value={s.data.fallback}
                   onChange={(e) => s.setData('fallback', e.target.value)}
@@ -117,10 +120,10 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                   checked={s.data.leads}
                   onCheckedChange={(on) => s.setData('leads', on === true)}
                 />
-                Open a lead when someone asks for a person
+                {__('Open a lead when someone asks for a person')}
               </label>
               <fieldset className="grid gap-2">
-                <legend className="text-sm font-medium">Hide the chat on</legend>
+                <legend className="text-sm font-medium">{__('Hide the chat on')}</legend>
                 {pages.map((p) => (
                   <label key={p.path} className="flex items-center gap-2 text-sm">
                     <Checkbox
@@ -139,7 +142,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                 ))}
               </fieldset>
               <Button type="submit" className="justify-self-start" loading={s.processing}>
-                Save settings
+                {__('Save settings')}
               </Button>
             </form>
           </CardContent>
@@ -149,7 +152,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
 
         <Card>
           <CardHeader>
-            <CardTitle>Answers</CardTitle>
+            <CardTitle>{__('Answers')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
             {error && (
@@ -157,7 +160,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                 {error}
               </p>
             )}
-            <ol aria-label="Answers" className="grid gap-4">
+            <ol aria-label={__('Answers')} className="grid gap-4">
               {rows.map((r, i) => (
                 <li
                   key={r.id ?? `new-${i}`}
@@ -168,27 +171,27 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                       {r.kind === 'button' ? r.label || 'New button' : 'Keyword answer'}
                     </strong>
                     {r.fact && !r.edited && !r.reset && (
-                      <Badge tone="neutral">Ready-made — follows your details</Badge>
+                      <Badge tone="neutral">{__('Ready-made — follows your details')}</Badge>
                     )}
                     {r.fact && r.edited && !r.reset && (
                       <Button size="sm" variant="ghost" onClick={() => set(i, { reset: true })}>
-                        Back to ready-made
+                        {__('Back to ready-made')}
                       </Button>
                     )}
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <Field label="Type">
+                    <Field label={__('Type')}>
                       <select
                         className={select}
                         value={r.kind}
                         onChange={(e) => set(i, { kind: e.target.value as Answer['kind'] })}
                       >
-                        <option value="button">A button</option>
-                        <option value="keyword">Keywords only</option>
+                        <option value="button">{__('A button')}</option>
+                        <option value="keyword">{__('Keywords only')}</option>
                       </select>
                     </Field>
                     {r.kind === 'button' && (
-                      <Field label="Button text">
+                      <Field label={__('Button text')}>
                         <Input
                           maxLength={30}
                           value={r.label ?? ''}
@@ -196,13 +199,13 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                         />
                       </Field>
                     )}
-                    <Field label="Words that lead here (separated by commas)">
+                    <Field label={__('Words that lead here (separated by commas)')}>
                       <Input
                         value={r.keywords ?? ''}
                         onChange={(e) => set(i, { keywords: e.target.value })}
                       />
                     </Field>
-                    <Field label="Link">
+                    <Field label={__('Link')}>
                       <select
                         className={select}
                         value={r.link_kind}
@@ -218,13 +221,13 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                       </select>
                     </Field>
                     {r.link_kind === 'page' && (
-                      <Field label="Page">
+                      <Field label={__('Page')}>
                         <select
                           className={select}
                           value={r.link_target ?? ''}
                           onChange={(e) => set(i, { link_target: e.target.value })}
                         >
-                          <option value="">Choose a page…</option>
+                          <option value="">{__('Choose a page…')}</option>
                           {pages.map((p) => (
                             <option key={p.path} value={p.path}>
                               {p.title}
@@ -234,7 +237,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                       </Field>
                     )}
                   </div>
-                  <Field label="Answer">
+                  <Field label={__('Answer')}>
                     <textarea
                       className="border-border bg-bg min-h-20 rounded-md border p-2 text-sm"
                       maxLength={600}
@@ -250,7 +253,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                         aria-label={`Move ${r.label || 'answer'} up`}
                         onClick={() => move(i, -1)}
                       >
-                        Up
+                        {__('Up')}
                       </Button>
                     )}
                     {i < rows.length - 1 && (
@@ -260,7 +263,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                         aria-label={`Move ${r.label || 'answer'} down`}
                         onClick={() => move(i, 1)}
                       >
-                        Down
+                        {__('Down')}
                       </Button>
                     )}
                     <Button
@@ -269,7 +272,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                       aria-label={`Remove ${r.label || 'answer'}`}
                       onClick={() => setRows(rows.filter((_, k) => k !== i))}
                     >
-                      Remove
+                      {__('Remove')}
                     </Button>
                   </div>
                 </li>
@@ -292,7 +295,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                   ])
                 }
               >
-                Add an answer
+                {__('Add an answer')}
               </Button>
               <Button
                 onClick={() =>
@@ -307,7 +310,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                   )
                 }
               >
-                Save answers
+                {__('Save answers')}
               </Button>
             </div>
           </CardContent>
@@ -315,7 +318,7 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
 
         <Card>
           <CardHeader>
-            <CardTitle>Preview</CardTitle>
+            <CardTitle>{__('Preview')}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2 text-sm">
             <p>{preview.greeting}</p>
@@ -326,17 +329,20 @@ export default function Chat({ settings, answers, pages, preview, taps, receptio
                 </span>
               ))}
             </p>
-            <p className="text-fg-muted">When someone asks for a person: “{preview.reply}”</p>
+            <p className="text-fg-muted">
+              {__('When someone asks for a person: “')}
+              {preview.reply}”
+            </p>
           </CardContent>
         </Card>
 
         {taps.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Most used in the last 30 days</CardTitle>
+              <CardTitle>{__('Most used in the last 30 days')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul aria-label="Most used buttons" className="grid gap-1 text-sm">
+              <ul aria-label={__('Most used buttons')} className="grid gap-1 text-sm">
                 {taps.map((t) => (
                   <li key={t.label}>
                     {t.label}: {t.taps}

@@ -14,6 +14,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Row {
   id: string;
@@ -69,15 +70,16 @@ function SettingsCard({ settings, hours }: Pick<Props, 'settings' | 'hours'>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Table settings</CardTitle>
+        <CardTitle>{__('Table settings')}</CardTitle>
         <CardDescription>
-          Reservations by covers — how many guests you can seat at once. Add the “Book online”
-          section in table mode to your website.
+          {__(
+            'Reservations by covers — how many guests you can seat at once. Add the “Book online” section in table mode to your website.',
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form
-          aria-label="Table settings"
+          aria-label={__('Table settings')}
           className="grid gap-4"
           onSubmit={(e) => {
             e.preventDefault();
@@ -93,14 +95,14 @@ function SettingsCard({ settings, hours }: Pick<Props, 'settings' | 'hours'>) {
               checked={form.data.enabled}
               onCheckedChange={(on) => form.setData('enabled', on === true)}
             />
-            Take table reservations online
+            {__('Take table reservations online')}
           </label>
           <div className="grid gap-4 sm:grid-cols-3">
             {num('covers', 'Covers', 'Guests seated at once.')}
             {num('sitting_minutes', 'Sitting (minutes)', 'How long a table is kept.')}
             {num('max_party', 'Largest party online')}
             {num('notice_minutes', 'Notice (minutes)')}
-            <Field label="Times every" error={form.errors.step_minutes}>
+            <Field label={__('Times every')} error={form.errors.step_minutes}>
               <select
                 className="border-border bg-bg h-10 w-full rounded-md border px-3 text-sm"
                 value={form.data.step_minutes}
@@ -108,7 +110,7 @@ function SettingsCard({ settings, hours }: Pick<Props, 'settings' | 'hours'>) {
               >
                 {[15, 30, 60].map((m) => (
                   <option key={m} value={m}>
-                    {m} minutes
+                    {m} {__('minutes')}
                   </option>
                 ))}
               </select>
@@ -116,7 +118,7 @@ function SettingsCard({ settings, hours }: Pick<Props, 'settings' | 'hours'>) {
           </div>
           <fieldset className="grid gap-2">
             <legend className="mb-1 text-sm font-medium">
-              Arrival times (first and last arrival)
+              {__('Arrival times (first and last arrival)')}
             </legend>
             {DAYS.map((day, d) => {
               const stretches = days[d] ?? [];
@@ -169,7 +171,7 @@ function SettingsCard({ settings, hours }: Pick<Props, 'settings' | 'hours'>) {
                       aria-label={`Add lunch and dinner on ${day}`}
                       onClick={() => set([{ starts: '12:00', ends: '14:00' }, ...stretches])}
                     >
-                      Add lunch and dinner
+                      {__('Add lunch and dinner')}
                     </Button>
                   )}
                 </div>
@@ -177,7 +179,7 @@ function SettingsCard({ settings, hours }: Pick<Props, 'settings' | 'hours'>) {
             })}
           </fieldset>
           <Button type="submit" className="justify-self-start" loading={form.processing}>
-            Save table settings
+            {__('Save table settings')}
           </Button>
         </form>
       </CardContent>
@@ -201,18 +203,18 @@ export default function Tables({ date, timezone, reservations, settings, hours }
     router.post(`${base()}/${id}/status`, { status }, { preserveScroll: true });
 
   return (
-    <AppShell title="Tables">
-      <Head title="Tables" />
+    <AppShell title={__('Tables')}>
+      <Head title={__('Tables')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Tables"
+          title={__('Tables')}
           description={`${label} · ${seated} guest${seated === 1 ? '' : 's'} booked · ${settings.covers} covers`}
           actions={
             <div className="flex gap-2">
               <Button
                 variant="secondary"
                 size="sm"
-                aria-label="Previous day"
+                aria-label={__('Previous day')}
                 onClick={() => go(shift(date, -1))}
               >
                 ‹
@@ -222,12 +224,12 @@ export default function Tables({ date, timezone, reservations, settings, hours }
                 size="sm"
                 onClick={() => go(new Date().toLocaleDateString('en-CA', { timeZone: timezone }))}
               >
-                Today
+                {__('Today')}
               </Button>
               <Button
                 variant="secondary"
                 size="sm"
-                aria-label="Next day"
+                aria-label={__('Next day')}
                 onClick={() => go(shift(date, 1))}
               >
                 ›
@@ -235,9 +237,9 @@ export default function Tables({ date, timezone, reservations, settings, hours }
             </div>
           }
         />
-        <section aria-label="Reservations" className="grid gap-2">
+        <section aria-label={__('Reservations')} className="grid gap-2">
           {reservations.length === 0 ? (
-            <p className="text-fg-muted text-sm">No reservations for this day.</p>
+            <p className="text-fg-muted text-sm">{__('No reservations for this day.')}</p>
           ) : (
             <ul className="grid gap-2">
               {reservations.map((r) => (
@@ -247,13 +249,14 @@ export default function Tables({ date, timezone, reservations, settings, hours }
                 >
                   <div>
                     <p className="font-medium">
-                      {r.time} · {r.customer} · {r.party} guest{r.party === 1 ? '' : 's'}
+                      {r.time} · {r.customer} · {r.party} {__('guest')}
+                      {r.party === 1 ? '' : 's'}
                     </p>
                     <p className="text-fg-muted text-sm">
                       {[r.phone, r.notes].filter(Boolean).join(' · ')}
                       {r.source === 'website' && (
                         <Badge tone="info" className="ml-2">
-                          Booked online
+                          {__('Booked online')}
                         </Badge>
                       )}
                     </p>
@@ -266,7 +269,7 @@ export default function Tables({ date, timezone, reservations, settings, hours }
                         aria-label={`Seated: ${r.customer} at ${r.time}`}
                         onClick={() => set(r.id, 'seated')}
                       >
-                        Seated
+                        {__('Seated')}
                       </Button>
                       <Button
                         size="sm"
@@ -274,7 +277,7 @@ export default function Tables({ date, timezone, reservations, settings, hours }
                         aria-label={`No-show: ${r.customer} at ${r.time}`}
                         onClick={() => set(r.id, 'no_show')}
                       >
-                        No-show
+                        {__('No-show')}
                       </Button>
                       <Button
                         size="sm"
@@ -282,7 +285,7 @@ export default function Tables({ date, timezone, reservations, settings, hours }
                         aria-label={`Cancel: ${r.customer} at ${r.time}`}
                         onClick={() => set(r.id, 'cancelled')}
                       >
-                        Cancel
+                        {__('Cancel')}
                       </Button>
                     </span>
                   ) : (
@@ -295,11 +298,11 @@ export default function Tables({ date, timezone, reservations, settings, hours }
         </section>
         <Card>
           <CardHeader>
-            <CardTitle>Add a reservation</CardTitle>
+            <CardTitle>{__('Add a reservation')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form
-              aria-label="Add a reservation"
+              aria-label={__('Add a reservation')}
               className="grid gap-4 sm:grid-cols-3"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -309,14 +312,14 @@ export default function Tables({ date, timezone, reservations, settings, hours }
                 });
               }}
             >
-              <Field label="Date" error={add.errors.date}>
+              <Field label={__('Date')} error={add.errors.date}>
                 <Input
                   type="date"
                   value={add.data.date}
                   onChange={(e) => add.setData('date', e.target.value)}
                 />
               </Field>
-              <Field label="Time" error={add.errors.time}>
+              <Field label={__('Time')} error={add.errors.time}>
                 <Input
                   type="time"
                   step={300}
@@ -324,7 +327,7 @@ export default function Tables({ date, timezone, reservations, settings, hours }
                   onChange={(e) => add.setData('time', e.target.value)}
                 />
               </Field>
-              <Field label="Guests" error={add.errors.party}>
+              <Field label={__('Guests')} error={add.errors.party}>
                 <Input
                   type="number"
                   min={1}
@@ -332,21 +335,21 @@ export default function Tables({ date, timezone, reservations, settings, hours }
                   onChange={(e) => add.setData('party', Number(e.target.value))}
                 />
               </Field>
-              <Field label="Name" error={add.errors.name}>
+              <Field label={__('Name')} error={add.errors.name}>
                 <Input
                   value={add.data.name}
                   maxLength={120}
                   onChange={(e) => add.setData('name', e.target.value)}
                 />
               </Field>
-              <Field label="Phone (optional)" error={add.errors.phone}>
+              <Field label={__('Phone (optional)')} error={add.errors.phone}>
                 <Input
                   type="tel"
                   value={add.data.phone}
                   onChange={(e) => add.setData('phone', e.target.value)}
                 />
               </Field>
-              <Field label="Notes (optional)" error={add.errors.notes}>
+              <Field label={__('Notes (optional)')} error={add.errors.notes}>
                 <Input
                   value={add.data.notes}
                   maxLength={1000}
@@ -354,7 +357,7 @@ export default function Tables({ date, timezone, reservations, settings, hours }
                 />
               </Field>
               <Button type="submit" className="justify-self-start" loading={add.processing}>
-                Add reservation
+                {__('Add reservation')}
               </Button>
             </form>
           </CardContent>

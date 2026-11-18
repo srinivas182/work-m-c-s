@@ -20,9 +20,18 @@ dirs.forEach(walk);
 
 // t('…') / t("…") / __('…') / __("…") with a plain string literal first.
 const pattern = /(?<![\w$.])(?:t|__)\(\s*(['"])((?:\\.|(?!\1)[^\\\n])*)\1/g;
+// Menu labels and sections (module providers), and fixed flash messages: translated where they're shown.
+const menu = /'(?:label|section)'\s*=>\s*'((?:\\.|[^'\\])*)'/g;
+const flash = /->with\(\s*'(?:status|warning)',\s*'((?:\\.|[^'\\])*)'\s*\)/g;
 const texts = new Set();
 for (const f of files) {
   const src = readFileSync(join(root, f), 'utf8');
+  if (f.endsWith('.php')) {
+    for (const m of [...(f.endsWith('ServiceProvider.php') ? src.matchAll(menu) : []), ...src.matchAll(flash)]) {
+      const text = m[1].replace(/\\(['\\])/g, '$1');
+      if (/\p{L}/u.test(text)) texts.add(text);
+    }
+  }
   for (const m of src.matchAll(pattern)) {
     const text = m[2].replace(/\\(['"\\])/g, '$1');
     if (text.trim() !== '') texts.add(text);

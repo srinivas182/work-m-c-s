@@ -3,6 +3,7 @@ import { Badge, EmptyState } from '@/design-system';
 import { Coins } from 'lucide-react';
 import { rand } from '@/lib/money';
 import { AgentLayout } from '../../components/AgentLayout';
+import { __ } from '@/i18n';
 
 interface Line {
   at: string;
@@ -26,10 +27,10 @@ export default function AgentEarnings({
 }) {
   const total = lines.reduce((a, l) => a + l.cents, 0);
   return (
-    <AgentLayout title="Earnings">
+    <AgentLayout title={__('Earnings')}>
       <div className="flex flex-wrap items-end gap-3 text-sm">
         <label className="flex items-center gap-2">
-          Period
+          {__('Period')}
           <select
             className="border-border bg-bg h-10 rounded-md border px-3"
             value={period}
@@ -45,27 +46,31 @@ export default function AgentEarnings({
           </select>
         </label>
         <a className="underline" href={`/agent/earnings?period=${period}&format=csv`}>
-          Download CSV
+          {__('Download CSV')}
         </a>
-        <span>Total: {rand(total)}</span>
+        <span>
+          {__('Total:')} {rand(total)}
+        </span>
       </div>
       {lines.length === 0 ? (
         <EmptyState
           icon={Coins}
-          title="No earnings in this period"
-          description="Commission appears here when businesses you brought pay their WURK subscription."
+          title={__('No earnings in this period')}
+          description={__(
+            'Commission appears here when businesses you brought pay their WURK subscription.',
+          )}
         />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <caption className="sr-only">Earnings</caption>
+            <caption className="sr-only">{__('Earnings')}</caption>
             <thead>
               <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Business</th>
-                <th scope="col">Level</th>
-                <th scope="col">Amount</th>
-                <th scope="col">Payable</th>
+                <th scope="col">{__('Date')}</th>
+                <th scope="col">{__('Business')}</th>
+                <th scope="col">{__('Level')}</th>
+                <th scope="col">{__('Amount')}</th>
+                <th scope="col">{__('Payable')}</th>
               </tr>
             </thead>
             <tbody>
@@ -76,9 +81,19 @@ export default function AgentEarnings({
                   <td>{l.level === 0 ? 'Own' : `Level ${l.level}`}</td>
                   <td>
                     {rand(l.cents)}
-                    {l.kind === 'reversed' && <span className="text-fg-muted"> (refund)</span>}
+                    {l.kind === 'reversed' && (
+                      <span className="text-fg-muted"> {__('(refund)')}</span>
+                    )}
                   </td>
-                  <td>{l.pending ? <Badge tone="neutral">From {l.payable}</Badge> : 'Payable'}</td>
+                  <td>
+                    {l.pending ? (
+                      <Badge tone="neutral">
+                        {__('From')} {l.payable}
+                      </Badge>
+                    ) : (
+                      'Payable'
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

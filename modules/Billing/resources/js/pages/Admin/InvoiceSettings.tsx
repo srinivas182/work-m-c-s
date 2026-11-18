@@ -12,6 +12,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Props {
   issuer: { name: string; address: string; vat_number: string; registration: string };
@@ -48,51 +49,60 @@ export default function InvoiceSettings({ issuer, placeholder, dunning, refundDa
   const errors = form.errors as Record<string, string>;
 
   return (
-    <AppShell title="Invoice settings">
-      <Head title="Invoice settings" />
+    <AppShell title={__('Invoice settings')}>
+      <Head title={__('Invoice settings')} />
       <form onSubmit={submit} className="grid max-w-3xl gap-8" noValidate>
         <PageHeader
-          title="Invoice settings"
-          description="The supplier details printed on every tax invoice, and how WURK chases failed payments."
+          title={__('Invoice settings')}
+          description={__(
+            'The supplier details printed on every tax invoice, and how WURK chases failed payments.',
+          )}
         />
         {placeholder && (
           <div role="alert" className="border-danger-6 bg-danger-3 rounded-2xl border p-5 text-sm">
-            <p className="font-semibold">These are placeholder company details.</p>
+            <p className="font-semibold">{__('These are placeholder company details.')}</p>
             <p className="mt-1">
-              Issued tax invoices can never be edited, so replace them with WURK’s registered name,
-              address and VAT number before invoicing real customers.
+              {__(
+                'Issued tax invoices can never be edited, so replace them with WURK’s registered name, address and VAT number before invoicing real customers.',
+              )}
             </p>
           </div>
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Supplier on invoices</CardTitle>
+            <CardTitle>{__('Supplier on invoices')}</CardTitle>
             <CardDescription>
-              Changes apply to new invoices only; issued invoices keep the details they were issued
-              with.
+              {__(
+                'Changes apply to new invoices only; issued invoices keep the details they were issued with.',
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-5 sm:grid-cols-2">
-            <Field label="Registered name" error={errors.name} required className="sm:col-span-2">
+            <Field
+              label={__('Registered name')}
+              error={errors.name}
+              required
+              className="sm:col-span-2"
+            >
               <Input
                 value={form.data.name}
                 onChange={(e) => form.setData('name', e.target.value)}
               />
             </Field>
-            <Field label="Address" error={errors.address} required className="sm:col-span-2">
+            <Field label={__('Address')} error={errors.address} required className="sm:col-span-2">
               <Input
                 value={form.data.address}
                 onChange={(e) => form.setData('address', e.target.value)}
               />
             </Field>
-            <Field label="VAT number" error={errors.vat_number} required>
+            <Field label={__('VAT number')} error={errors.vat_number} required>
               <Input
                 value={form.data.vat_number}
                 onChange={(e) => form.setData('vat_number', e.target.value)}
                 inputMode="numeric"
               />
             </Field>
-            <Field label="Company registration" error={errors.registration}>
+            <Field label={__('Company registration')} error={errors.registration}>
               <Input
                 value={form.data.registration}
                 onChange={(e) => form.setData('registration', e.target.value)}
@@ -102,15 +112,15 @@ export default function InvoiceSettings({ issuer, placeholder, dunning, refundDa
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Failed payments</CardTitle>
+            <CardTitle>{__('Failed payments')}</CardTitle>
             <CardDescription>
-              Day 0 is the day a payment fails. Owners are told at once and on each retry.
+              {__('Day 0 is the day a payment fails. Owners are told at once and on each retry.')}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-5 sm:grid-cols-3">
             <Field
-              label="Retry on days"
-              hint="e.g. 3, 5, 7"
+              label={__('Retry on days')}
+              hint={__('e.g. 3, 5, 7')}
               error={errors.retry_days ?? errors['retry_days.0']}
             >
               <Input
@@ -118,14 +128,14 @@ export default function InvoiceSettings({ issuer, placeholder, dunning, refundDa
                 onChange={(e) => form.setData('retry_days', e.target.value)}
               />
             </Field>
-            <Field label="Only Billing open from day" error={errors.restrict_from_day}>
+            <Field label={__('Only Billing open from day')} error={errors.restrict_from_day}>
               <Input
                 type="number"
                 value={form.data.restrict_from_day}
                 onChange={(e) => form.setData('restrict_from_day', Number(e.target.value))}
               />
             </Field>
-            <Field label="Suspend on day" error={errors.suspend_on_day}>
+            <Field label={__('Suspend on day')} error={errors.suspend_on_day}>
               <Input
                 type="number"
                 value={form.data.suspend_on_day}
@@ -133,7 +143,7 @@ export default function InvoiceSettings({ issuer, placeholder, dunning, refundDa
               />
             </Field>
             <Field
-              label="Pay as you go: days a business keeps working with no credits"
+              label={__('Pay as you go: days a business keeps working with no credits')}
               error={(errors as Record<string, string | undefined>).prepaid_grace_days}
             >
               <Input
@@ -144,7 +154,7 @@ export default function InvoiceSettings({ issuer, placeholder, dunning, refundDa
               />
             </Field>
             <Field
-              label="Refund window (days after payment; 0 = no refunds)"
+              label={__('Refund window (days after payment; 0 = no refunds)')}
               error={(errors as Record<string, string | undefined>).refund_days}
             >
               <Input
@@ -156,13 +166,14 @@ export default function InvoiceSettings({ issuer, placeholder, dunning, refundDa
               />
             </Field>
             <p className="text-fg-muted text-sm">
-              No credit notes once a payment’s window has closed. Agents’ commission on a payment
-              becomes payable when it closes.
+              {__(
+                'No credit notes once a payment’s window has closed. Agents’ commission on a payment becomes payable when it closes.',
+              )}
             </p>
           </CardContent>
         </Card>
         <Button type="submit" size="lg" className="w-fit" loading={form.processing}>
-          Save settings
+          {__('Save settings')}
         </Button>
       </form>
     </AppShell>

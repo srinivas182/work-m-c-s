@@ -14,6 +14,7 @@ import {
   StatCard,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 export interface IncidentRow {
   id: string;
@@ -122,24 +123,24 @@ export default function Incidents({
   const settings = useForm({ recipients: recipients.join(', ') });
   const failing = checks.filter((c) => !c.ok);
   return (
-    <AppShell title="Watchtower">
-      <Head title="Watchtower" />
+    <AppShell title={__('Watchtower')}>
+      <Head title={__('Watchtower')} />
       <div className="grid max-w-6xl gap-6">
         <PageHeader
-          title="Watchtower"
+          title={__('Watchtower')}
           description={`Everything that goes wrong on WURK — grouped into problems, worst first. Running ${release}. Scheduler ${scheduler ? `last checked in ${at(scheduler)}` : 'hasn’t checked in yet'}.`}
         />
         <div className="grid gap-4 sm:grid-cols-4">
-          <StatCard label="Critical — open" value={String(summary.critical)} />
-          <StatCard label="High — open" value={String(summary.high)} />
-          <StatCard label="Normal — open" value={String(summary.normal)} />
-          <StatCard label="New today" value={String(summary.today)} />
+          <StatCard label={__('Critical — open')} value={String(summary.critical)} />
+          <StatCard label={__('High — open')} value={String(summary.high)} />
+          <StatCard label={__('Normal — open')} value={String(summary.normal)} />
+          <StatCard label={__('New today')} value={String(summary.today)} />
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle>
-              Systems{' '}
+              {__('Systems')}{' '}
               {checks.length > 0 && (
                 <Badge tone={failing.length === 0 ? 'success' : 'danger'}>
                   {failing.length === 0
@@ -152,10 +153,10 @@ export default function Incidents({
           <CardContent>
             {checks.length === 0 ? (
               <p className="text-fg-muted text-sm">
-                Not checked yet — checks run every minute once the scheduler is running.
+                {__('Not checked yet — checks run every minute once the scheduler is running.')}
               </p>
             ) : (
-              <ul aria-label="System checks" className="grid gap-1 text-sm sm:grid-cols-2">
+              <ul aria-label={__('System checks')} className="grid gap-1 text-sm sm:grid-cols-2">
                 {checks.map((c) => (
                   <li key={c.name} className="flex flex-wrap items-center gap-2">
                     <Badge tone={c.ok ? 'success' : 'danger'} dot>
@@ -164,7 +165,7 @@ export default function Incidents({
                     <span>{c.name}</span>
                     {!c.ok && (
                       <span className="text-danger-11">
-                        {c.message} (since {at(c.failing_since)})
+                        {c.message} {__('(since')} {at(c.failing_since)})
                       </span>
                     )}
                   </li>
@@ -174,7 +175,7 @@ export default function Incidents({
           </CardContent>
         </Card>
 
-        <nav aria-label="Show" className="flex flex-wrap items-center gap-2">
+        <nav aria-label={__('Show')} className="flex flex-wrap items-center gap-2">
           {Object.entries(views).map(([v, label]) => (
             <Button
               key={v}
@@ -187,7 +188,7 @@ export default function Incidents({
               </Link>
             </Button>
           ))}
-          <span className="text-fg-muted px-1 text-sm">Severity:</span>
+          <span className="text-fg-muted px-1 text-sm">{__('Severity:')}</span>
           {[['', 'Any'], ...Object.entries(severities)].map(([s, label]) => (
             <Button
               key={s || 'any'}
@@ -198,7 +199,7 @@ export default function Incidents({
               <Link href={href({ severity: s ?? '' })}>{label}</Link>
             </Button>
           ))}
-          <span className="text-fg-muted px-1 text-sm">Kind:</span>
+          <span className="text-fg-muted px-1 text-sm">{__('Kind:')}</span>
           {[['', 'Any'], ...Object.entries(kinds)].map(([k, label]) => (
             <Button
               key={k || 'any'}
@@ -215,10 +216,12 @@ export default function Incidents({
           <EmptyState
             icon={Radar}
             title={filters.view === 'open' ? 'Nothing wrong right now' : 'Nothing here'}
-            description="Problems appear here as soon as they happen; critical and high ones are emailed straight away."
+            description={__(
+              'Problems appear here as soon as they happen; critical and high ones are emailed straight away.',
+            )}
           />
         ) : (
-          <ul aria-label="Problems" className="grid gap-3">
+          <ul aria-label={__('Problems')} className="grid gap-3">
             {rows.data.map((r) => (
               <li key={r.id}>
                 <Card>
@@ -226,8 +229,8 @@ export default function Incidents({
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge tone={severityTone[r.severity]}>{severities[r.severity]}</Badge>
                       <Badge>{kinds[r.kind] ?? r.kind}</Badge>
-                      {r.regressed && <Badge tone="danger">Came back after a fix</Badge>}
-                      {r.ongoing && <Badge tone="danger">Still failing</Badge>}
+                      {r.regressed && <Badge tone="danger">{__('Came back after a fix')}</Badge>}
+                      {r.ongoing && <Badge tone="danger">{__('Still failing')}</Badge>}
                       <Link
                         href={`${base}/${r.id}`}
                         className="font-medium underline-offset-2 hover:underline"
@@ -236,10 +239,10 @@ export default function Incidents({
                       </Link>
                     </div>
                     <p className="text-fg-muted">
-                      {r.reference} · {r.occurrences}× ({r.last_hour} in the last hour)
+                      {r.reference} · {r.occurrences}× ({r.last_hour} {__('in the last hour)')}
                       {r.businesses > 0 &&
                         ` · ${r.businesses} business${r.businesses === 1 ? '' : 'es'}`}{' '}
-                      · last {at(r.last_seen_at)} in {r.last_release ?? '—'}
+                      {__('· last')} {at(r.last_seen_at)} {__('in')} {r.last_release ?? '—'}
                       {r.location && ` · ${r.location}`}
                     </p>
                   </CardContent>
@@ -249,15 +252,15 @@ export default function Incidents({
           </ul>
         )}
         {(rows.prev || rows.next) && (
-          <nav aria-label="Pages" className="flex gap-2">
+          <nav aria-label={__('Pages')} className="flex gap-2">
             {rows.prev && (
               <Button asChild variant="secondary" size="sm">
-                <Link href={rows.prev}>Previous</Link>
+                <Link href={rows.prev}>{__('Previous')}</Link>
               </Button>
             )}
             {rows.next && (
               <Button asChild variant="secondary" size="sm">
-                <Link href={rows.next}>Next</Link>
+                <Link href={rows.next}>{__('Next')}</Link>
               </Button>
             )}
           </nav>
@@ -266,15 +269,17 @@ export default function Incidents({
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Uptime (30 days, seen from outside)</CardTitle>
+              <CardTitle>{__('Uptime (30 days, seen from outside)')}</CardTitle>
             </CardHeader>
             <CardContent>
               {uptime.length === 0 ? (
                 <p className="text-fg-muted text-sm">
-                  No outages reported by the uptime checker — or it isn’t connected yet (Sprint 17).
+                  {__(
+                    'No outages reported by the uptime checker — or it isn’t connected yet (Sprint 17).',
+                  )}
                 </p>
               ) : (
-                <ul aria-label="Uptime" className="grid gap-1 text-sm">
+                <ul aria-label={__('Uptime')} className="grid gap-1 text-sm">
                   {uptime.map((u) => (
                     <li key={u.monitor} className="flex flex-wrap items-center gap-2">
                       <Badge
@@ -284,7 +289,9 @@ export default function Incidents({
                         {u.down_now ? 'Down now' : `${u.uptime_pct}%`}
                       </Badge>
                       <span>{u.monitor}</span>
-                      <span className="text-fg-muted">{u.down_minutes} min down</span>
+                      <span className="text-fg-muted">
+                        {u.down_minutes} {__('min down')}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -293,21 +300,22 @@ export default function Incidents({
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Slow pages (last 24 hours)</CardTitle>
+              <CardTitle>{__('Slow pages (last 24 hours)')}</CardTitle>
             </CardHeader>
             <CardContent>
               {slow.length === 0 ? (
                 <p className="text-fg-muted text-sm">
-                  Every page within target: 95% of requests answered in 300 ms.
+                  {__('Every page within target: 95% of requests answered in 300 ms.')}
                 </p>
               ) : (
-                <ul aria-label="Slow pages" className="grid gap-1 text-sm">
+                <ul aria-label={__('Slow pages')} className="grid gap-1 text-sm">
                   {slow.map((r) => (
                     <li key={r.route}>
                       <code>{r.route}</code>{' '}
                       <span className="text-fg-muted">
-                        {r.over_budget_pct}% over 300 ms · {r.over_2s} over 2 s · slowest{' '}
-                        {r.max_ms.toLocaleString()} ms
+                        {r.over_budget_pct}
+                        {__('% over 300 ms ·')} {r.over_2s} {__('over 2 s · slowest')}{' '}
+                        {r.max_ms.toLocaleString()} {__('ms')}
                       </span>
                     </li>
                   ))}
@@ -324,13 +332,13 @@ export default function Incidents({
 
         <Card>
           <CardHeader>
-            <CardTitle>Scheduled tasks</CardTitle>
+            <CardTitle>{__('Scheduled tasks')}</CardTitle>
           </CardHeader>
           <CardContent>
             {tasks.length === 0 ? (
-              <p className="text-fg-muted text-sm">No scheduled task has run yet.</p>
+              <p className="text-fg-muted text-sm">{__('No scheduled task has run yet.')}</p>
             ) : (
-              <ul aria-label="Scheduled tasks" className="grid gap-1 text-sm">
+              <ul aria-label={__('Scheduled tasks')} className="grid gap-1 text-sm">
                 {tasks.map((t) => (
                   <li key={t.task} className="flex flex-wrap items-center gap-2">
                     <Badge
@@ -347,7 +355,8 @@ export default function Incidents({
                     </Badge>
                     <code>{t.task}</code>
                     <span className="text-fg-muted">
-                      ({t.expression}) · last started {at(t.last_started_at)}
+                      ({t.expression}
+                      {__(') · last started')} {at(t.last_started_at)}
                       {t.last_runtime_ms !== null &&
                         ` · took ${(t.last_runtime_ms / 1000).toFixed(1)} s`}
                     </span>
@@ -360,12 +369,12 @@ export default function Incidents({
 
         <Card>
           <CardHeader>
-            <CardTitle>Who gets problem emails</CardTitle>
+            <CardTitle>{__('Who gets problem emails')}</CardTitle>
           </CardHeader>
           <CardContent>
             {can_manage ? (
               <form
-                aria-label="Problem emails"
+                aria-label={__('Problem emails')}
                 className="flex flex-wrap items-end gap-2"
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -379,8 +388,10 @@ export default function Incidents({
                 }}
               >
                 <Field
-                  label="Email addresses (comma-separated, up to 5)"
-                  hint="Critical and high problems straight away; a daily report at 08:00 SAST."
+                  label={__('Email addresses (comma-separated, up to 5)')}
+                  hint={__(
+                    'Critical and high problems straight away; a daily report at 08:00 SAST.',
+                  )}
                   error={
                     settings.errors.recipients ??
                     Object.entries(settings.errors).find(([k]) => k.startsWith('recipients.'))?.[1]
@@ -393,7 +404,7 @@ export default function Incidents({
                   />
                 </Field>
                 <Button type="submit" disabled={settings.processing}>
-                  Save
+                  {__('Save')}
                 </Button>
               </form>
             ) : (
@@ -405,21 +416,24 @@ export default function Incidents({
         {uptime_hook && (
           <Card>
             <CardHeader>
-              <CardTitle>Uptime checker</CardTitle>
+              <CardTitle>{__('Uptime checker')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 text-sm">
               <p>
-                Your uptime checker (Better Stack or UptimeRobot) tells WURK about outages by
-                sending to this address. Keep it secret: anyone with it can report an outage.
+                {__(
+                  'Your uptime checker (Better Stack or UptimeRobot) tells WURK about outages by sending to this address. Keep it secret: anyone with it can report an outage.',
+                )}
               </p>
               {uptime_hook.url ? (
                 <p className="bg-muted rounded-md p-2 font-mono break-all">{uptime_hook.url}</p>
               ) : (
-                <p>No address yet: make one, then paste it into the uptime checker.</p>
+                <p>{__('No address yet: make one, then paste it into the uptime checker.')}</p>
               )}
               {uptime_hook.source === 'server' && (
                 <p className="text-fg-muted">
-                  This address comes from the server’s settings. Making a new one here replaces it.
+                  {__(
+                    'This address comes from the server’s settings. Making a new one here replaces it.',
+                  )}
                 </p>
               )}
               <Button

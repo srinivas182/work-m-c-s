@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { __ } from '@/i18n';
 
 interface ModuleSummary {
   name: string;
@@ -17,7 +18,7 @@ interface Props {
 export default function Welcome({ modules }: Props) {
   return (
     <>
-      <Head title="Welcome" />
+      <Head title={__('Welcome')} />
       <div className="relative min-h-dvh overflow-hidden bg-neutral-950 text-white">
         <div
           aria-hidden
@@ -25,20 +26,21 @@ export default function Welcome({ modules }: Props) {
         />
         <main className="relative mx-auto flex max-w-4xl flex-col px-6 pt-28 pb-20 sm:pt-40">
           <span className="w-fit rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium tracking-wide text-white/70">
-            Platform foundations
+            {__('Platform foundations')}
           </span>
           <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance sm:text-7xl">
-            WURK
+            {__('WURK')}
           </h1>
           <p className="mt-5 max-w-xl text-lg text-pretty text-white/65">
-            Websites, bookings, shop, CRM and customer referrals for growing businesses across
-            Africa.
+            {__(
+              'Websites, bookings, shop, CRM and customer referrals for growing businesses across Africa.',
+            )}
           </p>
 
           {modules.length > 0 && (
             <section className="mt-16">
               <h2 className="text-sm font-medium tracking-wide text-white/60 uppercase">
-                Installed modules
+                {__('Installed modules')}
               </h2>
               <ul className="mt-4 grid gap-3 sm:grid-cols-2">
                 {modules.map((module) => (
@@ -48,7 +50,10 @@ export default function Welcome({ modules }: Props) {
                   >
                     <div className="flex items-baseline justify-between gap-4">
                       <span className="font-medium">{module.name}</span>
-                      <span className="text-xs text-white/65 tabular-nums">v{module.version}</span>
+                      <span className="text-xs text-white/65 tabular-nums">
+                        {__('v')}
+                        {module.version}
+                      </span>
                     </div>
                     {module.description && (
                       <p className="mt-2 text-sm text-white/65">{module.description}</p>

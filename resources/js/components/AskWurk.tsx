@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Button, Sheet, SheetContent, Textarea, Tooltip } from '@/design-system';
+import { __ } from '@/i18n';
 
 interface Source {
   title: string;
@@ -166,7 +167,7 @@ export function AskWurk() {
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Ask WURK"
+          aria-label={__('Ask WURK')}
           onClick={() => {
             setOpen(true);
             load(); // fetched when asked for, never on every page
@@ -176,15 +177,16 @@ export function AskWurk() {
         </Button>
       </Tooltip>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" title="Ask WURK">
+        <SheetContent side="right" title={__('Ask WURK')}>
           <div className="flex h-full flex-col gap-3 p-5 text-sm">
             <p className="text-fg-muted">
-              Ask how to do something, ask about your figures, or ask me to make a change — you’ll
-              see exactly what changes before anything happens.
+              {__(
+                'Ask how to do something, ask about your figures, or ask me to make a change — you’ll see exactly what changes before anything happens.',
+              )}
             </p>
             <div aria-live="polite" className="grid flex-1 content-start gap-4 overflow-y-auto">
               {turns.length === 0 && suggestions.length > 0 && (
-                <ul aria-label="Things you can ask" className="flex flex-wrap gap-2">
+                <ul aria-label={__('Things you can ask')} className="flex flex-wrap gap-2">
                   {suggestions.map((s) => (
                     <li key={s}>
                       <Button variant="secondary" size="sm" onClick={() => void ask(s)}>
@@ -201,7 +203,7 @@ export function AskWurk() {
                   </p>
                   {t.answer && <p className="whitespace-pre-line">{t.answer}</p>}
                   {t.sources.length > 0 && (
-                    <ul aria-label="From the help centre" className="grid gap-1">
+                    <ul aria-label={__('From the help centre')} className="grid gap-1">
                       {t.sources.map((s) => (
                         <li key={s.url}>
                           <a className="underline" href={s.url} target="_blank" rel="noreferrer">
@@ -214,7 +216,7 @@ export function AskWurk() {
                   {t.action && (
                     <div
                       className="border-border grid gap-2 rounded-lg border p-3"
-                      aria-label="Proposed change"
+                      aria-label={__('Proposed change')}
                     >
                       <p className="font-semibold">{t.action.summary}</p>
                       <ul className="list-disc pl-5">
@@ -225,31 +227,31 @@ export function AskWurk() {
                       {t.action.status === 'proposed' && (
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => void act(t, 'confirm')}>
-                            Confirm
+                            {__('Confirm')}
                           </Button>
                           <Button size="sm" variant="ghost" onClick={() => void act(t, 'cancel')}>
-                            Cancel
+                            {__('Cancel')}
                           </Button>
                         </div>
                       )}
                       {t.action.status === 'applied' && (
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-success-11">Done.</span>
+                          <span className="text-success-11">{__('Done.')}</span>
                           {t.action.link && (
                             <a className="underline" href={t.action.link}>
-                              Open
+                              {__('Open')}
                             </a>
                           )}
                           <Button size="sm" variant="secondary" onClick={() => void act(t, 'undo')}>
-                            Undo
+                            {__('Undo')}
                           </Button>
                         </div>
                       )}
                       {t.action.status === 'undone' && (
-                        <span className="text-fg-muted">Undone.</span>
+                        <span className="text-fg-muted">{__('Undone.')}</span>
                       )}
                       {t.action.status === 'cancelled' && (
-                        <span className="text-fg-muted">Cancelled — nothing changed.</span>
+                        <span className="text-fg-muted">{__('Cancelled — nothing changed.')}</span>
                       )}
                       {t.note && t.action.status === 'proposed' && (
                         <p role="alert" className="text-danger-11">
@@ -263,7 +265,7 @@ export function AskWurk() {
                   )}
                 </div>
               ))}
-              {busy && <p className="text-fg-muted">Thinking…</p>}
+              {busy && <p className="text-fg-muted">{__('Thinking…')}</p>}
               <div ref={end} />
             </div>
             {quote && (
@@ -271,10 +273,10 @@ export function AskWurk() {
                 <p>{quote.message}</p>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={() => void ask(quote.question, true)}>
-                    Ask anyway
+                    {__('Ask anyway')}
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setQuote(null)}>
-                    Not now
+                    {__('Not now')}
                   </Button>
                 </div>
               </div>
@@ -289,7 +291,7 @@ export function AskWurk() {
                 className="text-sm underline"
                 href={`${props.support.url}?from=${encodeURIComponent(window.location.pathname)}`}
               >
-                Not what you needed? Contact support
+                {__('Not what you needed? Contact support')}
               </a>
             )}
             <form
@@ -300,8 +302,8 @@ export function AskWurk() {
               }}
             >
               <Textarea
-                aria-label="Your question"
-                placeholder="e.g. How many bookings do we have tomorrow?"
+                aria-label={__('Your question')}
+                placeholder={__('e.g. How many bookings do we have tomorrow?')}
                 rows={2}
                 maxLength={500}
                 value={q}
@@ -316,7 +318,7 @@ export function AskWurk() {
               <div className="flex items-center justify-between gap-2">
                 <span className="text-fg-muted text-xs">{usage ? usageLine(usage) : ''}</span>
                 <Button type="submit" size="sm" loading={busy}>
-                  Ask
+                  {__('Ask')}
                 </Button>
               </div>
             </form>

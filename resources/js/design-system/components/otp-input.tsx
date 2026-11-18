@@ -1,5 +1,6 @@
 import { useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
 import { cn } from '../lib/cn';
+import { __ } from '@/i18n';
 
 interface OtpInputProps {
   value: string;
@@ -69,7 +70,7 @@ export function OtpInput({
   };
 
   return (
-    <div className="flex gap-2 sm:gap-3" role="group" aria-label="One-time code">
+    <div className="flex gap-2 sm:gap-3" role="group" aria-label={__('One-time code')}>
       {digits.map((digit, i) => (
         <input
           key={i}

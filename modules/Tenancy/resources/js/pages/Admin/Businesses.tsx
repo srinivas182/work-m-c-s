@@ -21,6 +21,7 @@ import {
   TableRow,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 export interface BusinessSummary {
   id: string;
@@ -57,17 +58,17 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
   };
 
   return (
-    <AppShell title="Businesses">
-      <Head title="Businesses" />
+    <AppShell title={__('Businesses')}>
+      <Head title={__('Businesses')} />
       <div className="grid gap-8">
         <PageHeader
-          title="Businesses"
+          title={__('Businesses')}
           description={`${businesses.total.toLocaleString()} ${businesses.total === 1 ? 'business' : 'businesses'} on WURK.`}
           actions={
             canCreate && (
               <Button asChild>
                 <Link href="/businesses/new">
-                  <Plus /> New business
+                  <Plus /> {__('New business')}
                 </Link>
               </Button>
             )
@@ -77,14 +78,14 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
           onSubmit={apply}
           className="border-border bg-surface grid grid-cols-1 items-end gap-4 rounded-2xl border p-5 shadow-xs sm:grid-cols-[2fr_1fr_1fr_auto]"
         >
-          <Field label="Search">
+          <Field label={__('Search')}>
             <Input
               value={form.search}
               onChange={(e) => setForm((f) => ({ ...f, search: e.target.value }))}
-              placeholder="Name or handle"
+              placeholder={__('Name or handle')}
             />
           </Field>
-          <Field label="Status">
+          <Field label={__('Status')}>
             {(control) => (
               <Select
                 value={form.status}
@@ -94,30 +95,30 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="any">Any status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
-                  <SelectItem value="provisioning">Provisioning</SelectItem>
-                  <SelectItem value="deleted">Archived</SelectItem>
+                  <SelectItem value="any">{__('Any status')}</SelectItem>
+                  <SelectItem value="active">{__('Active')}</SelectItem>
+                  <SelectItem value="suspended">{__('Suspended')}</SelectItem>
+                  <SelectItem value="provisioning">{__('Provisioning')}</SelectItem>
+                  <SelectItem value="deleted">{__('Archived')}</SelectItem>
                 </SelectContent>
               </Select>
             )}
           </Field>
-          <Field label="Kind">
+          <Field label={__('Kind')}>
             {(control) => (
               <Select value={form.kind} onValueChange={(v) => setForm((f) => ({ ...f, kind: v }))}>
                 <SelectTrigger {...control}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="any">Live and demos</SelectItem>
-                  <SelectItem value="live">Live businesses</SelectItem>
-                  <SelectItem value="demo">Agents’ demos</SelectItem>
+                  <SelectItem value="any">{__('Live and demos')}</SelectItem>
+                  <SelectItem value="live">{__('Live businesses')}</SelectItem>
+                  <SelectItem value="demo">{__('Agents’ demos')}</SelectItem>
                 </SelectContent>
               </Select>
             )}
           </Field>
-          <Field label="Database">
+          <Field label={__('Database')}>
             {(control) => (
               <Select
                 value={form.shard}
@@ -127,7 +128,7 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="any">Any database</SelectItem>
+                  <SelectItem value="any">{__('Any database')}</SelectItem>
                   {shards.map((s) => (
                     <SelectItem key={s} value={s}>
                       {s}
@@ -138,31 +139,31 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
             )}
           </Field>
           <Button type="submit">
-            <Search /> Filter
+            <Search /> {__('Filter')}
           </Button>
         </form>
         {businesses.data.length === 0 ? (
           <EmptyState
             icon={Building2}
-            title="No businesses found"
-            description="Try a different search, or create the first business."
+            title={__('No businesses found')}
+            description={__('Try a different search, or create the first business.')}
             action={
               canCreate && (
                 <Button asChild>
-                  <Link href="/businesses/new">New business</Link>
+                  <Link href="/businesses/new">{__('New business')}</Link>
                 </Button>
               )
             }
           />
         ) : (
           <div className="grid gap-4">
-            <Table label="Businesses">
+            <Table label={__('Businesses')}>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Business</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Database</TableHead>
+                  <TableHead>{__('Business')}</TableHead>
+                  <TableHead>{__('Address')}</TableHead>
+                  <TableHead>{__('Status')}</TableHead>
+                  <TableHead>{__('Database')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -174,7 +175,7 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
                       </Link>
                       {b.demo && (
                         <Badge tone="neutral" className="ml-2">
-                          Demo
+                          {__('Demo')}
                         </Badge>
                       )}
                     </TableCell>
@@ -192,12 +193,12 @@ export default function Businesses({ filters, shards, canCreate, businesses }: P
             <div className="flex justify-end gap-2">
               {businesses.prev && (
                 <Button variant="secondary" size="sm" asChild>
-                  <Link href={businesses.prev}>Previous</Link>
+                  <Link href={businesses.prev}>{__('Previous')}</Link>
                 </Button>
               )}
               {businesses.next && (
                 <Button variant="secondary" size="sm" asChild>
-                  <Link href={businesses.next}>Next</Link>
+                  <Link href={businesses.next}>{__('Next')}</Link>
                 </Button>
               )}
             </div>

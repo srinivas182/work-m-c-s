@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button, Card, CardContent } from '@/design-system';
 import { AgentLayout } from '../../components/AgentLayout';
+import { __ } from '@/i18n';
 
 /** The agent's marketing kit: link, QR code, and a ready message to share. */
 export default function AgentKit({
@@ -24,20 +25,20 @@ export default function AgentKit({
     }
   };
   return (
-    <AgentLayout title="Marketing kit">
+    <AgentLayout title={__('Marketing kit')}>
       <Card>
         <CardContent className="grid gap-3 pt-6 text-sm">
           <p>
-            Your link (code <span className="font-mono">{code}</span>):{' '}
+            {__('Your link (code')} <span className="font-mono">{code}</span>):{' '}
             <span className="font-mono break-all">{link}</span>
           </p>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="secondary" onClick={() => copy(link, 'link')}>
-              Copy link
+              {__('Copy link')}
             </Button>
             <Button size="sm" variant="secondary" asChild>
               <a href="/agent/qr.svg" download>
-                Download QR code
+                {__('Download QR code')}
               </a>
             </Button>
           </div>
@@ -45,16 +46,16 @@ export default function AgentKit({
       </Card>
       <Card>
         <CardContent className="grid gap-3 pt-6 text-sm">
-          <p className="font-medium">A message to share</p>
+          <p className="font-medium">{__('A message to share')}</p>
           <p className="bg-surface rounded-md p-3">{message}</p>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" asChild>
               <a href={whatsapp} target="_blank" rel="noopener noreferrer">
-                Share on WhatsApp
+                {__('Share on WhatsApp')}
               </a>
             </Button>
             <Button size="sm" variant="secondary" onClick={() => copy(message, 'message')}>
-              Copy message
+              {__('Copy message')}
             </Button>
           </div>
         </CardContent>

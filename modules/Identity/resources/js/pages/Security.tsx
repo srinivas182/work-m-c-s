@@ -18,6 +18,7 @@ import {
 import AppShell from '@/layouts/AppShell';
 import { MfaEnrolment } from './MfaSetup';
 import { RecoveryCodeList } from './RecoveryCodes';
+import { __ } from '@/i18n';
 
 interface Session {
   id: string;
@@ -53,22 +54,22 @@ function ProfileCard({ profile }: Pick<Props, 'profile'>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profile</CardTitle>
+        <CardTitle>{__('Profile')}</CardTitle>
         <CardDescription>
-          Signed in as {profile.email ?? profile.phone}. To change your email or number, contact
-          support.
+          {__('Signed in as')} {profile.email ?? profile.phone}
+          {__('. To change your email or number, contact support.')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="First name" error={form.errors.first_name} required>
+          <Field label={__('First name')} error={form.errors.first_name} required>
             <Input
               value={form.data.first_name}
               onChange={(e) => form.setData('first_name', e.target.value)}
               autoComplete="given-name"
             />
           </Field>
-          <Field label="Last name" error={form.errors.last_name}>
+          <Field label={__('Last name')} error={form.errors.last_name}>
             <Input
               value={form.data.last_name}
               onChange={(e) => form.setData('last_name', e.target.value)}
@@ -77,7 +78,7 @@ function ProfileCard({ profile }: Pick<Props, 'profile'>) {
           </Field>
           <div className="sm:col-span-2">
             <Button type="submit" loading={form.processing} disabled={!form.isDirty}>
-              Save profile
+              {__('Save profile')}
             </Button>
           </div>
         </form>
@@ -95,7 +96,7 @@ function PasswordCard({ hasPassword }: Pick<Props, 'hasPassword'>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Password</CardTitle>
+        <CardTitle>{__('Password')}</CardTitle>
         <CardDescription>
           {hasPassword
             ? 'Changing your password signs you out on your other devices.'
@@ -106,7 +107,7 @@ function PasswordCard({ hasPassword }: Pick<Props, 'hasPassword'>) {
         <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {hasPassword && (
             <Field
-              label="Current password"
+              label={__('Current password')}
               error={form.errors.current_password}
               className="sm:col-span-2"
             >
@@ -118,7 +119,11 @@ function PasswordCard({ hasPassword }: Pick<Props, 'hasPassword'>) {
               />
             </Field>
           )}
-          <Field label="New password" error={form.errors.password} hint="At least 10 characters">
+          <Field
+            label={__('New password')}
+            error={form.errors.password}
+            hint={__('At least 10 characters')}
+          >
             <Input
               type="password"
               value={form.data.password}
@@ -126,7 +131,7 @@ function PasswordCard({ hasPassword }: Pick<Props, 'hasPassword'>) {
               autoComplete="new-password"
             />
           </Field>
-          <Field label="Confirm new password">
+          <Field label={__('Confirm new password')}>
             <Input
               type="password"
               value={form.data.password_confirmation}
@@ -158,20 +163,20 @@ function MfaCard({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
-          <CardTitle>Authenticator app</CardTitle>
+          <CardTitle>{__('Authenticator app')}</CardTitle>
           <Badge tone={mfaEnabled ? 'success' : 'neutral'} dot>
             {mfaEnabled ? 'On' : 'Off'}
           </Badge>
         </div>
         <CardDescription>
-          A second step at sign-in using a code from an app on your phone.
+          {__('A second step at sign-in using a code from an app on your phone.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-5">
         {recoveryCodes && (
           <div>
             <p className="mb-3 text-sm font-medium">
-              Save these recovery codes — they won’t be shown again.
+              {__('Save these recovery codes — they won’t be shown again.')}
             </p>
             <RecoveryCodeList codes={recoveryCodes} />
           </div>
@@ -182,7 +187,7 @@ function MfaCard({
             className="w-fit"
             onClick={() => router.post('/account/mfa', {}, { preserveScroll: true })}
           >
-            <ShieldCheck /> Set up authenticator app
+            <ShieldCheck /> {__('Set up authenticator app')}
           </Button>
         )}
         {!mfaEnabled && enrolment && (
@@ -194,7 +199,7 @@ function MfaCard({
             className="grid gap-4"
           >
             <MfaEnrolment {...enrolment} />
-            <p className="text-sm font-medium">3. Enter the 6-digit code from the app</p>
+            <p className="text-sm font-medium">{__('3. Enter the 6-digit code from the app')}</p>
             <OtpInput
               value={confirm.data.code}
               onChange={(v) => confirm.setData('code', v)}
@@ -207,7 +212,7 @@ function MfaCard({
               </p>
             )}
             <Button type="submit" className="w-fit" loading={confirm.processing}>
-              Turn on
+              {__('Turn on')}
             </Button>
           </form>
         )}
@@ -223,7 +228,7 @@ function MfaCard({
             className="grid gap-3 sm:max-w-sm"
           >
             <Field
-              label="Code from your app to turn it off"
+              label={__('Code from your app to turn it off')}
               error={
                 disable.errors.code ?? (disable.errors as Record<string, string | undefined>).mfa
               }
@@ -241,12 +246,12 @@ function MfaCard({
               className="w-fit"
               loading={disable.processing}
             >
-              Turn off
+              {__('Turn off')}
             </Button>
           </form>
         )}
         {mfaEnabled && mfaRequired && (
-          <p className="text-fg-muted text-sm">Required for WURK staff accounts.</p>
+          <p className="text-fg-muted text-sm">{__('Required for WURK staff accounts.')}</p>
         )}
       </CardContent>
     </Card>
@@ -258,9 +263,9 @@ function SessionsCard({ sessions }: Pick<Props, 'sessions'>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Where you’re signed in</CardTitle>
+        <CardTitle>{__('Where you’re signed in')}</CardTitle>
         <CardDescription>
-          If you don’t recognise a device, sign it out and change your password.
+          {__('If you don’t recognise a device, sign it out and change your password.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -277,7 +282,7 @@ function SessionsCard({ sessions }: Pick<Props, 'sessions'>) {
                     {s.device}{' '}
                     {s.current && (
                       <Badge tone="success" className="ml-1">
-                        This device
+                        {__('This device')}
                       </Badge>
                     )}
                   </span>
@@ -296,7 +301,7 @@ function SessionsCard({ sessions }: Pick<Props, 'sessions'>) {
             className="w-fit"
             onClick={() => router.delete('/account/sessions', { preserveScroll: true })}
           >
-            <KeyRound /> Sign out other devices
+            <KeyRound /> {__('Sign out other devices')}
           </Button>
         )}
       </CardContent>
@@ -352,7 +357,7 @@ export default function Security(props: Props) {
       <div className="grid gap-8">
         <PageHeader
           title="Account & security"
-          description="Your WURK ID works across every business you belong to."
+          description={__('Your WURK ID works across every business you belong to.')}
         />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="grid content-start gap-6">

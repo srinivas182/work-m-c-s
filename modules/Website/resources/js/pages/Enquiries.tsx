@@ -14,6 +14,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Enquiry {
   id: string;
@@ -64,11 +65,11 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
     router.put(`${base}/${e.id}`, { status }, { preserveScroll: true });
 
   return (
-    <AppShell title="Enquiries">
-      <Head title="Enquiries" />
+    <AppShell title={__('Enquiries')}>
+      <Head title={__('Enquiries')} />
       <div className="grid max-w-4xl gap-8">
         <PageHeader
-          title="Enquiries"
+          title={__('Enquiries')}
           description={
             newCount > 0
               ? `${newCount} new request${newCount === 1 ? '' : 's'} from your website.`
@@ -86,10 +87,12 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
           <EmptyState
             icon={Inbox}
             title={view === 'archived' ? 'Nothing archived' : 'No requests yet'}
-            description="When a visitor sends your quote form, you’ll see it here — and by email if you set it below."
+            description={__(
+              'When a visitor sends your quote form, you’ll see it here — and by email if you set it below.',
+            )}
           />
         ) : (
-          <ul className="grid gap-4" aria-label="Enquiries">
+          <ul className="grid gap-4" aria-label={__('Enquiries')}>
             {enquiries.map((e) => (
               <li key={e.id}>
                 <Card>
@@ -97,7 +100,7 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="flex items-center gap-2 font-semibold">
                         {e.name}
-                        {e.status === 'new' && <Badge tone="brand">New</Badge>}
+                        {e.status === 'new' && <Badge tone="brand">{__('New')}</Badge>}
                       </span>
                       <span className="text-fg-muted text-sm">
                         {new Date(e.at).toLocaleString()}
@@ -119,7 +122,7 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
                     )}
                     {e.message && <p className="whitespace-pre-line">{e.message}</p>}
                     {e.files.length > 0 && (
-                      <ul aria-label="Files" className="grid gap-1 text-sm">
+                      <ul aria-label={__('Files')} className="grid gap-1 text-sm">
                         {e.files.map((f) => (
                           <li key={f.id} className="flex flex-wrap gap-2">
                             {f.status === 'clean' ? (
@@ -150,12 +153,12 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
                       <p className="flex flex-wrap gap-3 text-sm">
                         {e.contact_id && (
                           <a className="underline" href={`${appBase}/contacts/${e.contact_id}`}>
-                            Contact
+                            {__('Contact')}
                           </a>
                         )}
                         {e.lead_id && (
                           <a className="underline" href={`${appBase}/leads/${e.lead_id}`}>
-                            Lead
+                            {__('Lead')}
                           </a>
                         )}
                       </p>
@@ -165,7 +168,7 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
                         <>
                           <Button size="sm" variant="secondary" asChild>
                             <a href={`tel:${e.phone}`}>
-                              <Phone /> Call
+                              <Phone /> {__('Call')}
                             </a>
                           </Button>
                           <Button size="sm" variant="secondary" asChild>
@@ -174,8 +177,8 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
                               target="_blank"
                               rel="noopener"
                             >
-                              <MessageCircle /> WhatsApp
-                              <span className="sr-only"> (opens in a new tab)</span>
+                              <MessageCircle /> {__('WhatsApp')}
+                              <span className="sr-only"> {__('(opens in a new tab)')}</span>
                             </a>
                           </Button>
                         </>
@@ -183,22 +186,22 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
                       {e.email && (
                         <Button size="sm" variant="secondary" asChild>
                           <a href={`mailto:${e.email}`}>
-                            <Mail /> Email
+                            <Mail /> {__('Email')}
                           </a>
                         </Button>
                       )}
                       {e.status === 'new' && (
                         <Button size="sm" variant="ghost" onClick={() => setStatus(e, 'read')}>
-                          Mark as read
+                          {__('Mark as read')}
                         </Button>
                       )}
                       {e.status !== 'archived' ? (
                         <Button size="sm" variant="ghost" onClick={() => setStatus(e, 'archived')}>
-                          <Archive /> Archive
+                          <Archive /> {__('Archive')}
                         </Button>
                       ) : (
                         <Button size="sm" variant="ghost" onClick={() => setStatus(e, 'read')}>
-                          Move back to open
+                          {__('Move back to open')}
                         </Button>
                       )}
                     </div>
@@ -210,8 +213,8 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Email me new requests</CardTitle>
-            <CardDescription>Leave empty to turn email notifications off.</CardDescription>
+            <CardTitle>{__('Email me new requests')}</CardTitle>
+            <CardDescription>{__('Leave empty to turn email notifications off.')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form
@@ -222,7 +225,7 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
               className="flex flex-wrap items-end gap-3"
             >
               <Field
-                label="Email address"
+                label={__('Email address')}
                 error={form.errors.notify_email}
                 className="min-w-64 flex-1"
               >
@@ -234,7 +237,7 @@ export default function Enquiries({ view, enquiries, newCount, notifyEmail, base
                 />
               </Field>
               <Button type="submit" loading={form.processing}>
-                Save
+                {__('Save')}
               </Button>
             </form>
           </CardContent>

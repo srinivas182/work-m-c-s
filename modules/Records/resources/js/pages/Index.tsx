@@ -15,6 +15,7 @@ import {
   PageHeader,
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
+import { __ } from '@/i18n';
 
 interface Row {
   id: string;
@@ -43,12 +44,14 @@ export default function RecordsIndex({
   const add = useForm({ name: '', email: '', phone: '' });
   if (!health) {
     return (
-      <AppShell title="Patient records">
-        <Head title="Patient records" />
+      <AppShell title={__('Patient records')}>
+        <Head title={__('Patient records')} />
         <EmptyState
           icon={FileLock}
-          title="For health practices"
-          description="Switch on “We’re a health practice” under Booking settings → Health practice to keep patient documents here — encrypted, private to your practice, and shared with patients only after a one-time code."
+          title={__('For health practices')}
+          description={__(
+            'Switch on “We’re a health practice” under Booking settings → Health practice to keep patient documents here — encrypted, private to your practice, and shared with patients only after a one-time code.',
+          )}
         />
       </AppShell>
     );
@@ -68,7 +71,7 @@ export default function RecordsIndex({
           {p.flagged && (
             <>
               {' '}
-              <Badge tone="warning">Due for removal</Badge>
+              <Badge tone="warning">{__('Due for removal')}</Badge>
             </>
           )}
         </span>
@@ -76,24 +79,26 @@ export default function RecordsIndex({
     </li>
   );
   return (
-    <AppShell title="Patient records">
-      <Head title="Patient records" />
+    <AppShell title={__('Patient records')}>
+      <Head title={__('Patient records')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Patient records"
+          title={__('Patient records')}
           description={`Documents are encrypted and private to your practice. Nothing can be deleted for ${retentionYears} years after a patient’s most recent document; corrections add a new version.`}
         />
         {due.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Due for removal</CardTitle>
+              <CardTitle>{__('Due for removal')}</CardTitle>
               <CardDescription>
-                These patients’ records are past the {retentionYears}-year retention period. Nothing
-                is removed automatically — review and remove them if you no longer need them.
+                {__('These patients’ records are past the')} {retentionYears}
+                {__(
+                  '-year retention period. Nothing is removed automatically — review and remove them if you no longer need them.',
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="grid gap-2" aria-label="Due for removal">
+              <ul className="grid gap-2" aria-label={__('Due for removal')}>
                 {due.map(row)}
               </ul>
             </CardContent>
@@ -101,31 +106,31 @@ export default function RecordsIndex({
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Add a patient</CardTitle>
+            <CardTitle>{__('Add a patient')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form
-              aria-label="Add a patient"
+              aria-label={__('Add a patient')}
               className="grid gap-3 sm:grid-cols-3 sm:items-end"
               onSubmit={(e) => {
                 e.preventDefault();
                 add.post(base);
               }}
             >
-              <Field label="Name" error={add.errors.name}>
+              <Field label={__('Name')} error={add.errors.name}>
                 <Input
                   value={add.data.name}
                   onChange={(e) => add.setData('name', e.target.value)}
                 />
               </Field>
-              <Field label="Email" error={add.errors.email}>
+              <Field label={__('Email')} error={add.errors.email}>
                 <Input
                   type="email"
                   value={add.data.email}
                   onChange={(e) => add.setData('email', e.target.value)}
                 />
               </Field>
-              <Field label="Mobile number" error={add.errors.phone}>
+              <Field label={__('Mobile number')} error={add.errors.phone}>
                 <Input
                   type="tel"
                   value={add.data.phone}
@@ -133,7 +138,7 @@ export default function RecordsIndex({
                 />
               </Field>
               <Button type="submit" className="justify-self-start" loading={add.processing}>
-                Add patient
+                {__('Add patient')}
               </Button>
             </form>
           </CardContent>
@@ -146,25 +151,25 @@ export default function RecordsIndex({
             router.get(base, { q: search }, { preserveState: true });
           }}
         >
-          <Field label="Find a patient" className="flex-1">
+          <Field label={__('Find a patient')} className="flex-1">
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Name or email"
+              placeholder={__('Name or email')}
             />
           </Field>
           <Button type="submit" variant="secondary" className="self-end">
-            Search
+            {__('Search')}
           </Button>
         </form>
         {patients.length === 0 ? (
           <EmptyState
             icon={FileLock}
-            title="No patients yet"
-            description="Add a patient, then upload their documents."
+            title={__('No patients yet')}
+            description={__('Add a patient, then upload their documents.')}
           />
         ) : (
-          <ul className="grid gap-2" aria-label="Patients">
+          <ul className="grid gap-2" aria-label={__('Patients')}>
             {patients.map(row)}
           </ul>
         )}

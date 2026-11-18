@@ -13,6 +13,7 @@ import { AddSection, noDragOverrides } from '../editor/no-drag';
 import { firstError, request } from '../editor/http';
 import { siteTheme } from '../site/theme';
 import type { Branding, ContentDocument, MenuItem } from '../site/types';
+import { __ } from '@/i18n';
 
 interface Props {
   page: { id: string; title: string; slug: string; is_home: boolean };
@@ -159,12 +160,12 @@ function EditorTips() {
   const last = index === TIPS.length - 1;
   return (
     <aside
-      aria-label="Editing tip"
+      aria-label={__('Editing tip')}
       ref={card}
       className="fixed right-4 bottom-36 left-4 z-[70] rounded-xl bg-[#1B1640] p-4 text-sm text-white shadow-lg sm:right-auto sm:bottom-4 sm:max-w-sm"
     >
       <p className="mb-1 text-xs font-semibold tracking-wide text-white/70 uppercase">
-        Tip {index + 1} of {TIPS.length}
+        {__('Tip')} {index + 1} {__('of')} {TIPS.length}
       </p>
       <p>{TIPS[index]}</p>
       <div className="mt-3 flex gap-2">
@@ -174,7 +175,7 @@ function EditorTips() {
             onClick={() => setIndex(index + 1)}
             className="rounded-md bg-white px-3 py-1.5 font-semibold text-[#1B1640]"
           >
-            Next tip
+            {__('Next tip')}
           </button>
         )}
         <button
@@ -182,7 +183,7 @@ function EditorTips() {
           onClick={dismiss}
           className="rounded-md px-3 py-1.5 font-semibold text-white underline-offset-4 hover:underline"
         >
-          Got it
+          {__('Got it')}
         </button>
       </div>
     </aside>
@@ -418,7 +419,7 @@ export default function Editor({
               href={urls.pages}
               className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-[#5b5776] hover:bg-[#f2f0f9]"
             >
-              <ArrowLeft className="size-4" aria-hidden /> Pages
+              <ArrowLeft className="size-4" aria-hidden /> {__('Pages')}
             </a>
             <span
               role="status"
@@ -430,12 +431,12 @@ export default function Editor({
             </span>
             {status === 'error' && (
               <Button size="sm" variant="secondary" onClick={() => void save()}>
-                Try again
+                {__('Try again')}
               </Button>
             )}
             {status === 'conflict' && (
               <Button size="sm" variant="secondary" onClick={() => window.location.reload()}>
-                Load their version
+                {__('Load their version')}
               </Button>
             )}
             <Button
@@ -444,7 +445,7 @@ export default function Editor({
               className="hidden md:inline-flex"
               onClick={() => void openVersions()}
             >
-              <History /> Versions
+              <History /> {__('Versions')}
             </Button>
             {canPublish && (
               <Button
@@ -471,7 +472,12 @@ export default function Editor({
           {s.icon}
           {s.text}
         </span>
-        <Button size="sm" variant="ghost" aria-label="Versions" onClick={() => void openVersions()}>
+        <Button
+          size="sm"
+          variant="ghost"
+          aria-label={__('Versions')}
+          onClick={() => void openVersions()}
+        >
           <History />
         </Button>
         {canPublish && (
@@ -492,7 +498,7 @@ export default function Editor({
             className="ml-2 font-semibold underline"
             onClick={() => setMessage(null)}
           >
-            Dismiss
+            {__('Dismiss')}
           </button>
         </div>
       )}
@@ -501,7 +507,9 @@ export default function Editor({
         <Dialog open onOpenChange={(o) => !o && setPublishing(false)}>
           <DialogContent
             title={`Publish ${page.title}`}
-            description="Visitors see this version as soon as your website is live. You can go back to any earlier version."
+            description={__(
+              'Visitors see this version as soon as your website is live. You can go back to any earlier version.',
+            )}
           >
             <form
               className="grid gap-4"
@@ -510,16 +518,19 @@ export default function Editor({
                 void publish();
               }}
             >
-              <Field label="What changed? (optional)" hint="Helps you find this version later">
+              <Field
+                label={__('What changed? (optional)')}
+                hint={__('Helps you find this version later')}
+              >
                 <Input
                   value={note}
                   maxLength={255}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="e.g. December prices"
+                  placeholder={__('e.g. December prices')}
                 />
               </Field>
               <DialogFooter>
-                <Button type="submit">Publish now</Button>
+                <Button type="submit">{__('Publish now')}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -529,11 +540,13 @@ export default function Editor({
       {versions && (
         <Dialog open onOpenChange={(o) => !o && setVersions(null)}>
           <DialogContent
-            title="Published versions"
-            description="Restoring copies a version into your draft. Publish it when you’re happy."
+            title={__('Published versions')}
+            description={__(
+              'Restoring copies a version into your draft. Publish it when you’re happy.',
+            )}
           >
             {versions.length === 0 ? (
-              <p className="text-fg-muted text-sm">Nothing published yet.</p>
+              <p className="text-fg-muted text-sm">{__('Nothing published yet.')}</p>
             ) : (
               <ul className="grid max-h-[50vh] gap-2 overflow-y-auto">
                 {versions.map((v) => (
@@ -542,10 +555,12 @@ export default function Editor({
                     className="border-border flex items-center justify-between gap-3 rounded-lg border p-3"
                   >
                     <span className="text-sm">
-                      <span className="font-semibold">Version {v.number}</span>
+                      <span className="font-semibold">
+                        {__('Version')} {v.number}
+                      </span>
                       {v.live && (
                         <span className="bg-success-3 text-success-11 ml-2 rounded-full px-2 py-0.5 text-xs font-medium">
-                          Live
+                          {__('Live')}
                         </span>
                       )}
                       <span className="text-fg-muted block">
@@ -555,7 +570,7 @@ export default function Editor({
                     </span>
                     {canPublish && (
                       <Button size="sm" variant="secondary" onClick={() => void restore(v)}>
-                        Restore
+                        {__('Restore')}
                       </Button>
                     )}
                   </li>

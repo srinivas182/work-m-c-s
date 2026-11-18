@@ -12,6 +12,7 @@ import {
 } from '@/design-system';
 import AppShell from '@/layouts/AppShell';
 import { rand } from '@/lib/money';
+import { __ } from '@/i18n';
 
 interface Row {
   agent_id: string;
@@ -42,12 +43,14 @@ export default function Payouts({ minimum, preview, batches }: Props) {
   const min = useForm({ minimum: String(minimum / 100) });
   const total = preview.included.reduce((a, r) => a + r.cents, 0);
   return (
-    <AppShell title="Agent payouts">
-      <Head title="Agent payouts" />
+    <AppShell title={__('Agent payouts')}>
+      <Head title={__('Agent payouts')} />
       <div className="grid max-w-4xl gap-6">
         <PageHeader
-          title="Agent payouts"
-          description="Pay agents’ available commission by EFT: check the preview, make the batch, pay it through your bank, then mark it paid."
+          title={__('Agent payouts')}
+          description={__(
+            'Pay agents’ available commission by EFT: check the preview, make the batch, pay it through your bank, then mark it paid.',
+          )}
         />
         {errors.batch && (
           <p role="alert" className="text-danger text-sm">
@@ -55,14 +58,14 @@ export default function Payouts({ minimum, preview, batches }: Props) {
           </p>
         )}
         <form
-          aria-label="Minimum payout"
+          aria-label={__('Minimum payout')}
           className="flex flex-wrap items-end gap-3"
           onSubmit={(e) => {
             e.preventDefault();
             min.put('/agents/payouts/minimum', { preserveScroll: true });
           }}
         >
-          <Field label="Minimum payout (R)" error={min.errors.minimum}>
+          <Field label={__('Minimum payout (R)')} error={min.errors.minimum}>
             <Input
               type="number"
               inputMode="decimal"
@@ -73,31 +76,31 @@ export default function Payouts({ minimum, preview, batches }: Props) {
             />
           </Field>
           <Button type="submit" variant="secondary" loading={min.processing}>
-            Save
+            {__('Save')}
           </Button>
         </form>
 
         <Card>
           <CardHeader>
             <CardTitle>
-              Next batch: {preview.included.length}{' '}
+              {__('Next batch:')} {preview.included.length}{' '}
               {preview.included.length === 1 ? 'agent' : 'agents'}, {rand(total)}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 text-sm">
             <Group
-              title="Included"
+              title={__('Included')}
               rows={preview.included}
               empty="Nobody is due a payout right now."
             />
-            <Group title="Held — check with the agent first" rows={preview.held} />
-            <Group title="Not included" rows={preview.skipped} />
+            <Group title={__('Held — check with the agent first')} rows={preview.held} />
+            <Group title={__('Not included')} rows={preview.skipped} />
             {preview.included.length > 0 && (
               <Button
                 className="justify-self-start"
                 onClick={() => router.post('/agents/payouts', {}, { preserveScroll: true })}
               >
-                Make the batch
+                {__('Make the batch')}
               </Button>
             )}
           </CardContent>
@@ -106,10 +109,10 @@ export default function Payouts({ minimum, preview, batches }: Props) {
         {batches.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Batches</CardTitle>
+              <CardTitle>{__('Batches')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul aria-label="Batches" className="grid gap-3 text-sm">
+              <ul aria-label={__('Batches')} className="grid gap-3 text-sm">
                 {batches.map((b) => (
                   <li key={b.id} className="flex flex-wrap items-center gap-3">
                     <span className="font-mono">{b.reference}</span>
@@ -130,7 +133,7 @@ export default function Payouts({ minimum, preview, batches }: Props) {
                     {b.status === 'ready' && (
                       <>
                         <a className="underline" href={`/agents/payouts/${b.id}/csv`}>
-                          Download CSV
+                          {__('Download CSV')}
                         </a>
                         <Button
                           size="sm"
@@ -148,7 +151,7 @@ export default function Payouts({ minimum, preview, batches }: Props) {
                             }
                           }}
                         >
-                          Mark paid
+                          {__('Mark paid')}
                         </Button>
                         <Button
                           size="sm"
@@ -167,7 +170,7 @@ export default function Payouts({ minimum, preview, batches }: Props) {
                             }
                           }}
                         >
-                          Cancel
+                          {__('Cancel')}
                         </Button>
                       </>
                     )}
@@ -180,7 +183,7 @@ export default function Payouts({ minimum, preview, batches }: Props) {
                           <li key={i.id} className="flex flex-wrap items-center gap-2">
                             {i.holder} · {i.bank} · {rand(i.cents)}
                             {i.status === 'bounced' ? (
-                              <Badge tone="danger">Bounced</Badge>
+                              <Badge tone="danger">{__('Bounced')}</Badge>
                             ) : (
                               <Button
                                 size="sm"
@@ -199,7 +202,7 @@ export default function Payouts({ minimum, preview, batches }: Props) {
                                   }
                                 }}
                               >
-                                Mark bounced
+                                {__('Mark bounced')}
                               </Button>
                             )}
                           </li>
