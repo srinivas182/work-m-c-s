@@ -89,7 +89,7 @@ it('brings a customer’s WhatsApp messages into Chats, once each, with a contac
             ->and(ReceptionistMessage::query()->orderBy('position')->pluck('content')->pluck('content')->all())->toBe(['Hi, can I book braids on Saturday?', 'Maponya Mall']);
     });
     $this->actingAs($this->owner)->get($this->chats.'?show=whatsapp')->assertOk()->assertInertia(fn (Assert $p) => $p->component('Website::Chats')
-        ->where('whatsapp', true)->where('conversations.0.channel', 'whatsapp')->where('conversations.0.window_open', true)
+        ->where('whatsapp', true)->where('reply_credits', '5')->where('conversations.0.channel', 'whatsapp')->where('conversations.0.window_open', true)
         ->where('conversations.0.lines.0.text', 'Hi, can I book braids on Saturday?'));
     // Not mixed into the website assistant's tab.
     $this->actingAs($this->owner)->get($this->chats.'?show=ai')->assertInertia(fn (Assert $p) => $p->where('conversations', []));

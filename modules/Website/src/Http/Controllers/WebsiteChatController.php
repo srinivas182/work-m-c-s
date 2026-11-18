@@ -183,6 +183,8 @@ final class WebsiteChatController
             'assistant' => $this->receptionist->settings()['enabled'] || ReceptionistConversation::query()->whereNotIn('channel', [Receptionist::TRY, WhatsAppChats::CHANNEL])->exists(),
             'whatsapp' => $whatsapp->connected() || ReceptionistConversation::query()->where('channel', WhatsAppChats::CHANNEL)->exists(),
             'follow_up' => $show === 'whatsapp' && $whatsapp->followUpReady(),
+            // Meta charges replies too (from 1 Oct 2026): the team sees the cost before sending.
+            'reply_credits' => $show === 'whatsapp' ? rtrim(rtrim(number_format(app(CreditWallet::class)->rateFor('whatsapp') / 1000, 2, '.', ''), '0'), '.') : null,
             'chats' => in_array($show, ['ai', 'whatsapp'], true) ? [] : ChatHandoff::query()->when($show === 'archived', fn ($q) => $q->where('status', 'archived'), fn ($q) => $q->where('status', '!=', 'archived'))
                 ->orderByDesc('created_at')->limit(200)->get()->map(fn (ChatHandoff $c) => [
                     'id' => $c->id, 'name' => $c->name, 'phone' => $c->phone, 'email' => $c->email, 'message' => $c->message, 'transcript' => $c->transcript, 'status' => $c->status,

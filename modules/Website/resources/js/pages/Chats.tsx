@@ -351,7 +351,11 @@ function ConversationItem({
 /** Reply on WhatsApp from Chats (21.2): text, a photo or a PDF, inside WhatsApp's 24-hour window. */
 function WhatsAppReply({ c, base }: { c: Conversation; base: string }) {
   const form = useForm<{ text: string; file: File | null }>({ text: '', file: null });
-  const followUp = usePage<{ follow_up?: boolean }>().props.follow_up === true;
+  const page = usePage<{ follow_up?: boolean; reply_credits?: string | null }>().props;
+  const followUp = page.follow_up === true;
+  const cost = page.reply_credits
+    ? ` Each message uses ${page.reply_credits} credit${page.reply_credits === '1' ? '' : 's'}.`
+    : '';
   const nudge = useForm<{ text: string }>({ text: '' });
   if (!c.window_open) {
     return (
@@ -360,7 +364,7 @@ function WhatsAppReply({ c, base }: { c: Conversation; base: string }) {
           More than 24 hours since {c.name ?? 'the customer'} last wrote, so WhatsApp only allows an
           approved message.{' '}
           {followUp
-            ? 'Send your follow-up: when they reply, you can write freely again.'
+            ? `Send your follow-up: when they reply, you can write freely again.${cost}`
             : `Your follow-up message is waiting for Meta’s approval (Settings → WhatsApp)${c.phone ? '. Or call ' + c.phone : ''}.`}
         </p>
         {followUp && (
@@ -398,7 +402,11 @@ function WhatsAppReply({ c, base }: { c: Conversation; base: string }) {
     >
       <Field
         label="Your reply"
-        hint={c.window_ends ? `You can reply freely until ${c.window_ends}.` : undefined}
+        hint={
+          c.window_ends
+            ? `You can reply freely until ${c.window_ends}.${cost}`
+            : cost.trim() || undefined
+        }
         error={form.errors.text ?? form.errors.file}
       >
         <Textarea
