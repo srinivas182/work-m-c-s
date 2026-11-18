@@ -36,7 +36,10 @@ export const Steps: BlockDefinition<StepsProps> = {
           <EmptyHint editing={site.editing}>Add three to six steps, in order.</EmptyHint>
         </div>
       ) : (
-        <ol className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+        // Four steps sit in one row on wide screens (2 × 2 on tablets), rather than three and one left over.
+        <ol
+          className={`mt-12 grid gap-10 sm:grid-cols-2 ${p.items.length === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}
+        >
           {p.items.map((item, i) => (
             <li key={i} className="relative">
               <span

@@ -17,7 +17,7 @@ uses(InteractsWithShards::class);
 
 beforeEach(function () {
     Storage::fake('local');
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     $this->createShards(1);
     $this->glow = $this->createTenant('glow-salon', name: 'Glow Salon');
     $this->ctx = app(TenantContext::class);

@@ -1,0 +1,419 @@
+{
+  "category": "school",
+  "key": "school-primary",
+  "name": "Primary school",
+  "position": 1,
+  "description": "Friendly and reassuring for parents: admissions, fees, school day and staff.",
+  "definition": {
+    "branding": {
+      "primary": "#1D4ED8",
+      "secondary": "#F59E0B",
+      "font_pairing": "friendly",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Our school",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Admissions",
+          "type": "page",
+          "page": "admissions"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Primary school — admissions, fees and school life",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Apply",
+                "buttonHref": "/admissions",
+                "sticky": true
+              }
+            },
+            {
+              "id": "promo",
+              "type": "PromotionBanner",
+              "version": 1,
+              "props": {
+                "text": "Applications for next year are open",
+                "linkLabel": "Apply now",
+                "linkHref": "/admissions",
+                "tone": "brand",
+                "starts": "",
+                "ends": ""
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Where every child is known by name",
+                "text": "Small classes, caring teachers and a school day full of learning, sport and the arts.",
+                "primaryLabel": "Apply",
+                "primaryHref": "/admissions",
+                "secondaryLabel": "Book a tour",
+                "secondaryHref": "/admissions",
+                "facts": [
+                  {
+                    "text": "Grade R to Grade 7"
+                  },
+                  {
+                    "text": "Aftercare until 17:30"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/school-primary/hero-1600.webp",
+                    "alt": "Learners in a bright classroom"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "why",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Why parents choose us",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "users",
+                    "title": "Small classes",
+                    "text": "Teachers who know every learner."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Strong basics",
+                    "text": "Reading, maths and languages from Grade R."
+                  },
+                  {
+                    "icon": "heart",
+                    "title": "Safe and caring",
+                    "text": "Secure grounds and a culture of respect."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reading",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Learning that sticks",
+                "text": "Describe your approach: curriculum (CAPS or other), languages of teaching, reading programmes and support.",
+                "image": "/images/templates/school-primary/reading-1600.webp",
+                "imageAlt": "A teacher reading with learners",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "sport",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Sport, culture and play",
+                "text": "List extra-murals: soccer, netball, choir, chess, art — and when they run.",
+                "image": "/images/templates/school-primary/playground-1600.webp",
+                "imageAlt": "Children playing on the school field",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "apply",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How to apply",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Book a tour",
+                    "text": "See the school and meet the principal."
+                  },
+                  {
+                    "title": "Apply",
+                    "text": "Complete the form and bring documents."
+                  },
+                  {
+                    "title": "Confirmation",
+                    "text": "We confirm a place and the start date."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What parents say",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "Our school",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Apply",
+                "buttonHref": "/admissions",
+                "sticky": true
+              }
+            },
+            {
+              "id": "ethos",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Our school",
+                "text": "Your history, values and what makes the school special."
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Our staff",
+                "intro": "Principal, teachers and support staff.",
+                "people": []
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registered",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Department of Basic Education",
+                    "logo": "",
+                    "detail": "Add your registration number"
+                  },
+                  {
+                    "name": "Umalusi / ISASA",
+                    "logo": "",
+                    "detail": "If applicable"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "admissions",
+        "title": "Admissions",
+        "slug": "admissions",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Apply",
+                "buttonHref": "/admissions",
+                "sticky": true
+              }
+            },
+            {
+              "id": "fees",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "School fees",
+                "intro": "Ask about sibling discounts and payment plans.",
+                "items": [
+                  {
+                    "name": "Grade R",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Per year, payable monthly",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Apply",
+                    "buttonHref": "/admissions"
+                  },
+                  {
+                    "name": "Grades 1–3",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Per year",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Apply",
+                    "buttonHref": "/admissions"
+                  },
+                  {
+                    "name": "Grades 4–7",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Per year",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Apply",
+                    "buttonHref": "/admissions"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "waiting_list",
+                "heading": "Apply or book a tour",
+                "intro": "Tell us about your child.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Send",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Child’s name",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Grade applying for",
+                    "type": "choice",
+                    "choices": "Grade R, 1, 2, 3, 4, 5, 6, 7",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Year",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "I’d like to",
+                    "type": "choice",
+                    "choices": "Apply, Book a tour",
+                    "required": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions parents ask",
+                "items": [
+                  {
+                    "question": "What documents do I need?",
+                    "answer": "Birth certificate, immunisation card, last report and proof of address."
+                  },
+                  {
+                    "question": "Is there aftercare?",
+                    "answer": "Yes, until 17:30 on school days."
+                  },
+                  {
+                    "question": "Do you offer transport?",
+                    "answer": "Say whether you have school transport."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the school office",
+                "intro": "Office hours 07:30–15:00.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

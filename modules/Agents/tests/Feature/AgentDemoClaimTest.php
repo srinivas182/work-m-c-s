@@ -24,7 +24,7 @@ beforeEach(function () {
     Mail::fake();
     $this->createShards(1);
     $this->artisan('website:seed-categories');
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     $this->package = app(PackageCatalog::class)->create([
         'key' => 'starter', 'name' => 'Starter', 'type' => 'self_managed', 'visibility' => 'public', 'display_order' => 1,
         'monthly_price_cents' => 29900, 'yearly_price_cents' => 299000, 'trial_days' => 14, 'storage_mb' => 1024, 'staff_limit' => 3,

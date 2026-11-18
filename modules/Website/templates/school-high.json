@@ -1,0 +1,400 @@
+{
+  "category": "school",
+  "key": "school-high",
+  "name": "High school & college",
+  "position": 2,
+  "description": "Confident and achievement-led: subjects, results, campus and applications.",
+  "definition": {
+    "branding": {
+      "primary": "#7F1D1D",
+      "secondary": "#CA8A04",
+      "font_pairing": "editorial",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Academics",
+          "type": "page",
+          "page": "academics"
+        },
+        {
+          "label": "Apply",
+          "type": "page",
+          "page": "apply"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "High school — subjects, results and admissions",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Apply",
+                "buttonHref": "/apply",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Ready for what comes next",
+                "text": "Strong academics, sport and leadership — preparing learners for university, college and work.",
+                "primaryLabel": "Apply",
+                "primaryHref": "/apply",
+                "secondaryLabel": "Subjects",
+                "secondaryHref": "/academics",
+                "facts": [
+                  {
+                    "text": "Grades 8–12"
+                  },
+                  {
+                    "text": "Open day every term"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/school-high/hero-1600.webp",
+                    "alt": "High school learners on campus"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "results",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Our results",
+                "text": "Share last year’s matric results: pass rate, bachelor passes and distinctions — and where learners went next."
+              }
+            },
+            {
+              "id": "lab",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Facilities",
+                "text": "Labs, computer centre, library and sports fields — tell parents what learners use every day.",
+                "image": "/images/templates/school-high/lab-1600.webp",
+                "imageAlt": "Learners in a science laboratory",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "streams",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Subject streams",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "star",
+                    "title": "Science",
+                    "text": "Maths, physical and life sciences."
+                  },
+                  {
+                    "icon": "users",
+                    "title": "Commerce",
+                    "text": "Accounting, business and economics."
+                  },
+                  {
+                    "icon": "sparkles",
+                    "title": "Humanities and arts",
+                    "text": "History, geography, languages and visual arts."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "matric",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Celebrating achievement",
+                "text": "Prize-giving, matric results and alumni — show what learners go on to do.",
+                "image": "/images/templates/school-high/matric-1600.webp",
+                "imageAlt": "Matric learners celebrating results",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "openday",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Come to an open day",
+                "text": "Meet teachers, see the campus and ask your questions.",
+                "buttonLabel": "Book a place",
+                "buttonHref": "/apply"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "academics",
+        "title": "Academics",
+        "slug": "academics",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Apply",
+                "buttonHref": "/apply",
+                "sticky": true
+              }
+            },
+            {
+              "id": "curriculum",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "Curriculum",
+                "text": "CAPS or IEB, languages, subject choices in Grade 10, and extra support."
+              }
+            },
+            {
+              "id": "timetable",
+              "type": "ClassTimetable",
+              "version": 1,
+              "props": {
+                "heading": "Extra lessons",
+                "intro": "Free extra classes for matrics.",
+                "note": "Times may change in exam season.",
+                "bookLabel": "",
+                "bookHref": "",
+                "classes": [
+                  {
+                    "day": "Monday",
+                    "start": "14:30",
+                    "end": "15:30",
+                    "name": "Maths support",
+                    "instructor": "",
+                    "level": "All levels"
+                  },
+                  {
+                    "day": "Wednesday",
+                    "start": "14:30",
+                    "end": "15:30",
+                    "name": "Physical sciences",
+                    "instructor": "",
+                    "level": "All levels"
+                  },
+                  {
+                    "day": "Saturday",
+                    "start": "08:00",
+                    "end": "11:00",
+                    "name": "Matric revision",
+                    "instructor": "",
+                    "level": "Advanced"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Heads of department",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "apply",
+        "title": "Apply",
+        "slug": "apply",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Apply",
+                "buttonHref": "/apply",
+                "sticky": true
+              }
+            },
+            {
+              "id": "steps",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Applying",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Open day",
+                    "text": "Visit and meet us."
+                  },
+                  {
+                    "title": "Application",
+                    "text": "Submit the form and documents."
+                  },
+                  {
+                    "title": "Assessment",
+                    "text": "A short assessment and interview."
+                  },
+                  {
+                    "title": "Offer",
+                    "text": "We confirm a place in writing."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "fees",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Fees",
+                "intro": "Ask about bursaries and payment plans.",
+                "items": [
+                  {
+                    "name": "Grades 8–9",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Per year",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Apply",
+                    "buttonHref": "/apply"
+                  },
+                  {
+                    "name": "Grades 10–12",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Per year",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Apply",
+                    "buttonHref": "/apply"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "waiting_list",
+                "heading": "Apply",
+                "intro": "Tell us about the learner.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Apply",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Learner’s name",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Grade applying for",
+                    "type": "choice",
+                    "choices": "Grade 8, 9, 10, 11, 12",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Current school",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Admissions office",
+                "intro": "Questions about applying.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

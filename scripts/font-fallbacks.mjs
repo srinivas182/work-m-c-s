@@ -2,6 +2,10 @@
  * Size-matched fallback fonts, so a web font arriving after first paint moves nothing
  * (layout shift). Each fallback is a local system font (Georgia for serifs, Arial for the
  * rest) scaled to the web font's measurements (Capsize metrics), the approach Next.js uses.
+ * Android has neither, so each family has a second fallback on Android's own fonts (Noto Serif,
+ * Roboto), scaled to them; Linux has Liberation Sans (Arial's metrics) and Liberation Serif
+ * (Times New Roman's), so serif families have a third, scaled to Times. Stacks list them all, and a
+ * browser uses the first it has.
  * Run: pnpm fonts:fallbacks — writes modules/Website/resources/js/site/font-fallbacks.css.
  */
 import { writeFileSync } from 'node:fs';
@@ -12,19 +16,26 @@ const FONTS = ['Plus Jakarta Sans', 'Inter', 'Playfair Display', 'Source Sans 3'
 const byName = Object.fromEntries(Object.values(entireMetricsCollection).map((m) => [m.familyName, m]));
 const pct = (n) => `${(n * 100).toFixed(4)}%`;
 
-const rules = FONTS.map((family) => {
+const rule = (family, name, local, fallback) => {
   const font = byName[family];
-  const serif = SERIF.includes(family);
-  const fallback = byName[serif ? 'Georgia' : 'Arial'];
   const size = font.xWidthAvg / font.unitsPerEm / (fallback.xWidthAvg / fallback.unitsPerEm);
   return `@font-face {
-  font-family: '${family} Fallback';
-  src: ${serif ? "local('Georgia'), local('Times New Roman')" : "local('Arial'), local('Helvetica')"};
+  font-family: '${name}';
+  src: ${local};
   size-adjust: ${pct(size)};
   ascent-override: ${pct(font.ascent / (font.unitsPerEm * size))};
   descent-override: ${pct(Math.abs(font.descent) / (font.unitsPerEm * size))};
   line-gap-override: ${pct(font.lineGap / (font.unitsPerEm * size))};
 }`;
+};
+
+const rules = FONTS.flatMap((family) => {
+  const serif = SERIF.includes(family);
+  return [
+    rule(family, `${family} Fallback`, serif ? "local('Georgia')" : "local('Arial'), local('Helvetica'), local('Liberation Sans')", byName[serif ? 'Georgia' : 'Arial']),
+    rule(family, `${family} Fallback Android`, serif ? "local('Noto Serif'), local('NotoSerif-Regular')" : "local('Roboto'), local('Roboto-Regular')", byName[serif ? 'Noto Serif' : 'Roboto']),
+    ...(serif ? [rule(family, `${family} Fallback Times`, "local('Times New Roman'), local('Liberation Serif')", byName['Times New Roman'])] : []),
+  ];
 });
 
 writeFileSync(

@@ -27,7 +27,7 @@ beforeEach(function () {
 
         return Process::result(output: (string) json_encode(['html' => '<main></main>', 'fonts' => [], 'blocks' => $blocks]));
     }]);
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     $this->createShards(1);
     $this->glow = $this->createTenant('glow-salon', name: 'Glow Salon');
     $this->ctx = app(TenantContext::class);

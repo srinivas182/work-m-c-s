@@ -76,7 +76,7 @@ it('lists published products with their “from” price, “was” price and st
 });
 
 it('passes products to the renderer, and re-renders only pages with a Products section when they change', function () {
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     Process::fake(['*' => Process::result(output: json_encode(['html' => '<h1>Shop</h1>']))]);
     ($this->product)('Kasi T-shirt', 'published', [['price_cents' => 25000]]);
     $withGrid = ($this->in)(function () {
@@ -108,7 +108,7 @@ it('announces catalogue changes when products are saved or deleted', function ()
 });
 
 it('gives each published product its own page at /shop/{slug} — and removes it when unpublished', function () {
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     Process::fake(['*' => Process::result(output: json_encode(['html' => '<main><h1>Kasi T-shirt</h1></main>']))]);
     $tee = ($this->product)('Kasi T-shirt', 'published', [['price_cents' => 25000]]);
     ($this->product)('Draft cap', 'draft', [['price_cents' => 10000]]);
@@ -140,7 +140,7 @@ it('shows nothing once the business’s package no longer includes the shop', fu
 });
 
 it('builds the cart page only while the business takes orders online', function () {
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     Process::fake(['*' => Process::result(output: json_encode(['html' => '<main><h1>Your cart</h1></main>']))]);
     ($this->product)('Kasi T-shirt', 'published', [['price_cents' => 25000]]);
     ($this->in)(function () {
@@ -167,7 +167,7 @@ it('builds the cart page only while the business takes orders online', function 
 });
 
 it('keeps each business’s cart page apart — two businesses on one shard can both take orders', function () {
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     Process::fake(['*' => Process::result(output: json_encode(['html' => '<main><h1>Your cart</h1></main>']))]);
     $other = $this->createTenant('other-shop', name: 'Other Shop');
     $growth = app(PackageCatalog::class)->create([

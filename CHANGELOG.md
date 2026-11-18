@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Premium templates — Sprint 20.4c (four more categories)
+- **Church & NGO:** community church (service times, "New here?", ministries, giving), charity and NGO (programmes, ways to give, registration, volunteering), ministry and outreach (events, film, weekly programme).
+- **School:** primary school (admissions, fees, application steps), high school and college (facilities, subject streams, extra lessons, open days), skills academy (accredited courses, intakes, employers).
+- **Funeral services:** funeral home (24-hour line, what to do first, plans), funeral cover and burial society (plans, claims, call-back), tombstones and memorials (designs, process, quotes). The tone is calm, and the photos are flowers, candles or the chapel, never grieving people.
+- **Security:** armed response (what happens when the alarm goes, coverage, PSIRA), guarding (sectors, risk assessment, compliance), alarms, CCTV and fencing (installations, projects, free site quote).
+- "How it works" with four steps now shows them in one row on wide screens.
+
 ### Premium templates — Sprint 20.4b (four more categories)
 - **Spaza & grocery:** corner shop (airtime, electricity, WhatsApp orders), fresh produce market (weekly boxes), wholesale and bulk (delivery areas, trade accounts).
 - **Beauty supplies:** beauty supply store, skin care brand (story, ingredients, routine), salon wholesale (trade accounts, equipment).
