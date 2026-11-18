@@ -36,22 +36,23 @@ final class Templates implements MessageTemplates
     }
 
     /** @param  array<string, string>  $vars */
-    public function subject(string $key, array $vars): string
+    public function subject(string $key, array $vars, ?string $locale = null): string
     {
         $def = $this->definition($key);
         $own = $this->own($key, 'email');
 
-        return $this->fill($own?->subject ?: $def['subject'], $vars);
+        // The standard wording in the customer's language (24.2); a business's own wording is used as they wrote it.
+        return $this->fill($own?->subject ?: __($def['subject'], [], $locale ?? app()->getLocale()), $vars);
     }
 
     /** @param  array<string, string>  $vars */
-    public function text(string $key, string $channel, array $vars): string
+    public function text(string $key, string $channel, array $vars, ?string $locale = null): string
     {
         $def = $this->definition($key);
 
         $own = $this->own($key, $channel);
 
-        return $this->fill($own === null ? $def['text'] : $own->text, $vars);
+        return $this->fill($own === null ? __($def['text'], [], $locale ?? app()->getLocale()) : $own->text, $vars);
     }
 
     /**
@@ -111,14 +112,14 @@ final class Templates implements MessageTemplates
     }
 
     /** @param  array<string, string>  $vars */
-    public function email(string $key, string $to, array $vars): void
+    public function email(string $key, string $to, array $vars, ?string $locale = null): void
     {
         $context = app(TenantContext::class);
         if ($context->has() && $context->current()->isDemo()) {
             return; // an agent's demo site sends no emails to customers (Sprint 14.8)
         }
 
-        Mail::to($to)->send(new CustomerMessageMail($this->subject($key, $vars), $this->text($key, 'email', $vars)));
+        Mail::to($to)->send(new CustomerMessageMail($this->subject($key, $vars, $locale), $this->text($key, 'email', $vars, $locale)));
     }
 
     /** Back to the standard wording. */

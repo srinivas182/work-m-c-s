@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactRemembered;
 use Wurk\Crm\Models\Contact;
+use Wurk\Platform\I18n\Locales;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 final readonly class Contacts implements ContactBook
@@ -69,6 +70,10 @@ final readonly class Contacts implements ContactBook
             } else { // fill in what was missing; a name, number or email already known is kept
                 $contact->fill(array_filter(['phone' => $contact->phone ?? $phone, 'email' => $contact->email ?? $email], fn ($v) => $v !== null));
             }
+            // A customer page in their language (24.3 sets this): remember it for their messages, unless already known.
+            if (request()->attributes->get('wurk.customer_page') === true && app()->getLocale() !== 'en' && $contact->locale === null) {
+                $contact->fill(['locale' => app()->getLocale()]);
+            }
             if ($consentSource !== null && $contact->marketing_consent_at === null) {
                 $contact->fill(['marketing_consent_at' => now(), 'marketing_consent_source' => $consentSource]);
             }
@@ -82,6 +87,18 @@ final readonly class Contacts implements ContactBook
 
             return $contact->id;
         });
+    }
+
+    public function locale(?string $phone, ?string $email = null): ?string
+    {
+        $c = $this->match(Phone::normalise($phone), $email === null || trim($email) === '' ? null : mb_strtolower(trim($email)));
+
+        return $c?->locale !== null && Locales::supported((string) $c->locale) ? (string) $c->locale : null;
+    }
+
+    public function setLocale(string $contactId, ?string $locale): void
+    {
+        Contact::query()->whereKey($contactId)->update(['locale' => $locale !== null && Locales::supported($locale) ? $locale : null]);
     }
 
     public function profile(string $contactId): ?array
