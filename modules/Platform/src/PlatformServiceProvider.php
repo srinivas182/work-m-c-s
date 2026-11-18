@@ -23,6 +23,7 @@ use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Contracts\SalesTools;
 use Wurk\Platform\Contracts\SupportSessions;
+use Wurk\Platform\Database\AppTimezoneSQLiteConnection;
 use Wurk\Platform\Database\DatesPast2038Connection;
 use Wurk\Platform\I18n\StoreAwareLoader;
 use Wurk\Platform\Modules\ModuleRegistry;
@@ -52,6 +53,8 @@ final class PlatformServiceProvider extends ModuleServiceProvider
     {
         // Year 2038 (18.4b): MySQL timestamp columns are created as DATETIME.
         Connection::resolverFor('mysql', fn ($pdo, string $database, string $prefix, array $config) => new DatesPast2038Connection($pdo, $database, $prefix, $config));
+        // Dates bound to queries are moved to the app's zone first, as stored (fix, 18 Nov 2026).
+        Connection::resolverFor('sqlite', fn ($pdo, string $database, string $prefix, array $config) => new AppTimezoneSQLiteConnection($pdo, $database, $prefix, $config));
         $this->app->singleton(DashboardTiles::class, TileRegistry::class);
         $this->app->singleton(BusinessReports::class, ReportRegistry::class);
         $this->app->singleton(PlatformMetrics::class, MetricsRegistry::class);

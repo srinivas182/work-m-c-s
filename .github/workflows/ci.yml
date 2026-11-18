@@ -91,6 +91,9 @@ jobs:
               - '.dockerignore'
               - 'composer.lock'
               - 'pnpm-lock.yaml'
+              - 'package.json' # the build script runs inside the image (24.4's data budget broke it unseen)
+              - 'scripts/bundle-budget.mjs'
+              - 'vite.config.*'
 
   # Sprint 18.1b: on every change, drafts included (about a minute). Any PHP advisory, a high or critical advisory in
   # a JavaScript production dependency, a secret in this PR's commits, or a breach of WURK's static rules fails CI.
