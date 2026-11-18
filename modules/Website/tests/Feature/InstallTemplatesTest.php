@@ -113,3 +113,8 @@ it('ships complete designs: every photo exists in both sizes, no invented review
     }
     expect(min($perCategory))->toBeGreaterThanOrEqual(2);
 });
+
+it('installs only the designs asked for, when given --only (tests use it to stay quick)', function () {
+    $this->artisan('website:install-templates', ['--only' => ['health-dental', 'spa-day-spa']])->assertSuccessful()->expectsOutputToContain('2 templates created');
+    expect(SiteTemplate::query()->pluck('key')->sort()->values()->all())->toBe(['health-dental', 'spa-day-spa']);
+});

@@ -23,7 +23,7 @@ const FIREFOX = 'Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefo
 beforeEach(function () {
     $this->createShards(1);
     $this->artisan('website:seed-categories');
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     $this->glow = $this->createTenant('glow-salon', name: 'Glow Salon');
     $this->ctx = app(TenantContext::class);
     $p = app(PackageCatalog::class)->create([

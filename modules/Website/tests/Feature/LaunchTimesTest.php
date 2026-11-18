@@ -15,7 +15,7 @@ use Wurk\Website\Support\SiteBuilder;
 uses(InteractsWithIdentity::class, InteractsWithShards::class);
 
 beforeEach(function () {
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids']]);
     $this->createShards(1);
     $this->ctx = app(TenantContext::class);
     $this->launchAfter = function (string $handle, int $minutes): void {

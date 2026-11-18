@@ -26,7 +26,7 @@ beforeEach(function () {
     $this->dineo = app(AgentRoster::class)->create('dineo@example.com', 'Dineo', 'Agent', null, null);
     $this->me = Identity::query()->findOrFail($this->dineo->identity_id);
     $this->artisan('website:seed-categories');
-    $this->artisan('website:install-templates'); // the 24 real industry templates, as production setup loads them
+    $this->artisan('website:install-templates', ['--only' => ['salon-hair-braids', 'salon-nails-lashes-barbers']]); // real industry templates, as production setup loads them (only the two the tests use)
     $cat = app(SiteTemplates::class)->catalogue()[0];
     $this->pick = ['category' => $cat['key'], 'template' => $cat['templates'][0]['key']];
     $this->area = fn (string $p = '') => 'http://'.config('wurk.domains.app').'/agent'.$p;

@@ -38,7 +38,7 @@ function jpegBytes(int $w = 1800, int $h = 1200): string
 
 beforeEach(function () {
     Storage::fake('public');
-    $this->artisan('website:install-templates');
+    $this->artisan('website:install-templates', ['--only' => ['health-dental', 'spa-day-spa']]);
     $this->staff = $this->staffWithRole('super-admin', 'design@wurk.co.za');
     $this->dental = SiteTemplate::query()->where('key', 'health-dental')->firstOrFail();
     $this->base = $this->admin('/templates/health-dental');
@@ -57,9 +57,10 @@ it('lists every photo place of a design, with what it should show and where to f
 });
 
 it('every design’s photo places are described in the catalogue', function () {
-    foreach (SiteTemplate::query()->get() as $template) {
-        foreach (TemplatePhotos::slots($template->key, (array) json_decode((string) $template->draft, true)) as $slot) {
-            expect($slot['shows'])->not->toStartWith('A photo for', "{$template->key}/{$slot['slot']} has no description");
+    foreach (glob(base_path('modules/Website/templates/*.json')) ?: [] as $file) {
+        $source = json_decode((string) file_get_contents($file), true, flags: JSON_THROW_ON_ERROR);
+        foreach (TemplatePhotos::slots($source['key'], $source['definition']) as $slot) {
+            expect($slot['shows'])->not->toStartWith('A photo for', "{$source['key']}/{$slot['slot']} has no description");
         }
     }
 });
