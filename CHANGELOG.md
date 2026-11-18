@@ -4,6 +4,8 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.22.0] — 2026-11-18 — Sprint 21: WhatsApp both ways
+
 ### WhatsApp — Sprint 21.6 (the owner's evening summary)
 - **Settings → WhatsApp → Your evening summary:** owners can get one WhatsApp each evening, at a time they choose. It covers tomorrow's bookings, today's orders and money in, chats waiting, and up to five things that need a yes or no.
 - **Reply to answer:** "1" says yes to item 1 and "N1" says no. Each answer is applied as the owner, audited and confirmed by reply. Answerable items today are EFT orders waiting to be marked paid and large in-store sales waiting for approval. Other modules can add their own.
