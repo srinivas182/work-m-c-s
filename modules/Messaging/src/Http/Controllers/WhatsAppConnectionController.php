@@ -151,7 +151,7 @@ final class WhatsAppConnectionController
     /** The message customers' chats start with from the website's button and the QR code. */
     public function chatLink(Request $request, TenantContext $context): RedirectResponse
     {
-        $text = trim((string) $request->validate(['text' => ['nullable', 'string', 'max:160']])['text']);
+        $text = trim((string) ($request->validate(['text' => ['nullable', 'string', 'max:160']])['text'] ?? '')); // left out: back to the default
         WhatsAppConnection::query()->where('tenant_id', $context->id())->where('status', 'connected')->firstOrFail()->update(['chat_text' => $text !== '' ? $text : null]);
 
         return back()->with('status', 'Saved. Your website’s WhatsApp button and QR code use it now.');
