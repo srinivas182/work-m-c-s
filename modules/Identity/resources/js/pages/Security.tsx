@@ -1,5 +1,4 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { t } from '@/i18n';
 import { KeyRound, Laptop, ShieldCheck, Smartphone } from 'lucide-react';
 import type { FormEvent } from 'react';
 import {
@@ -311,16 +310,17 @@ function SessionsCard({ sessions }: Pick<Props, 'sessions'>) {
 
 /** The person's language for WURK's screens and their own messages (24.1). */
 function LanguageCard({ current }: { current: string }) {
-  const languages = (usePage().props.i18n as { languages: { code: string; name: string }[] })
-    .languages;
+  const languages = (
+    usePage().props.i18n as { languages: { code: string; name: string; preview: boolean }[] }
+  ).languages;
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('Language')}</CardTitle>
+        <CardTitle>{__('Language')}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 text-sm">
         <label className="grid gap-1">
-          <span>{t('The language WURK uses for you')}</span>
+          <span>{__('The language WURK uses for you')}</span>
           <select
             className="border-border bg-bg min-h-10 rounded-md border px-3"
             value={current}
@@ -335,13 +335,13 @@ function LanguageCard({ current }: { current: string }) {
           >
             {languages.map((l) => (
               <option key={l.code} value={l.code} lang={l.code}>
-                {l.name}
+                {l.preview ? `${l.name} (${__('preview')})` : l.name}
               </option>
             ))}
           </select>
         </label>
         <p className="text-fg-muted">
-          {t(
+          {__(
             'Languages marked preview are still being checked by people. Tell us if a word is wrong.',
           )}
         </p>

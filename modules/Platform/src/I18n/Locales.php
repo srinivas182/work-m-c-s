@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wurk\Platform\I18n;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -66,6 +67,13 @@ final class Locales
         if ($code === 'en') {
             return [];
         }
+
+        return [...self::fileMessages($code), ...TranslationStore::overrides($code)]; // people's reviews and AI drafts over the shipped file
+    }
+
+    /** @return array<string, string> the shipped translations (lang/{code}.json) */
+    public static function fileMessages(string $code): array
+    {
         $file = lang_path($code.'.json');
 
         return File::exists($file) ? (array) json_decode((string) File::get($file), true) : [];
@@ -76,7 +84,30 @@ final class Locales
     {
         $file = lang_path($code.'.json');
 
-        return File::exists($file) ? substr(md5((string) filemtime($file).filesize($file)), 0, 10) : '0';
+        return substr(md5((File::exists($file) ? filemtime($file).filesize($file) : '0').'|'.TranslationStore::stamp($code)), 0, 10);
+    }
+
+    /**
+     * The languages people can choose, with "preview" for those still being reviewed.
+     *
+     * @return list<array{code: string, name: string, preview: bool}>
+     */
+    public static function offered(): array
+    {
+        try {
+            $progress = Cache::remember('i18n-offered:'.implode(',', array_map(fn ($c) => TranslationStore::stamp($c), array_keys(self::SUPPORTED))), 600, fn () => TranslationStore::progress());
+        } catch (\Throwable) {
+            $progress = [];
+        }
+        $out = [['code' => 'en', 'name' => 'English', 'preview' => false]];
+        foreach (self::SUPPORTED as $code => $names) {
+            if ($code === 'en' || ! ($progress[$code]['enabled'] ?? true)) {
+                continue;
+            }
+            $out[] = ['code' => $code, 'name' => $names[1], 'preview' => $progress[$code]['preview'] ?? true];
+        }
+
+        return $out;
     }
 
     /**

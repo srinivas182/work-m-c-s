@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wurk\Platform;
 
+use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Database\Connection;
 use Wurk\Platform\Console\ListModulesCommand;
 use Wurk\Platform\Console\MakeModuleCommand;
@@ -22,6 +23,7 @@ use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Contracts\SalesTools;
 use Wurk\Platform\Contracts\SupportSessions;
 use Wurk\Platform\Database\DatesPast2038Connection;
+use Wurk\Platform\I18n\StoreAwareLoader;
 use Wurk\Platform\Modules\ModuleRegistry;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\AssistantRegistry;
@@ -58,6 +60,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(OwnerDigest::class, OwnerDigestRegistry::class); // 21.6
         $this->app->singleton(BusinessSetup::class, BusinessSetupRegistry::class); // 23.1
         $this->app->singleton(MoneyOwed::class, MoneyOwedRegistry::class); // 23.5
+        $this->app->extend('translation.loader', fn (Loader $loader) => new StoreAwareLoader($loader)); // reviewed translations over the files (24.2)
         $this->app->singleton(SalesTools::class, SalesRegistry::class); // 19.5
         $this->app->singleton(HealthSignals::class, HealthRegistry::class);
         $this->app->singleton(DataExports::class, ExportRegistry::class);
