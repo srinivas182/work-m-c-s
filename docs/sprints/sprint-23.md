@@ -155,3 +155,4 @@ Sources:
 
 | Part | PR | Notes |
 |---|---|---|
+| 23.1 | | Website → **Set up by talking**: six questions by text or voice note, each read by WURK AI and shown back with every value checked (prices to cents, HH:MM hours, email, known categories). On confirmation, setup steps registered by each module run in order: Website (first design for the category, contact and hours blocks, AI-written pages; the first site is free), Bookings (services linked to the owner, hours) and Shop (priced products), each only when the business's package includes it |

@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Setup — Sprint 23.1 (set up by talking)
+- **Website → Set up by talking:** six short questions (the business, the area, what it sells and for how much, hours, contact, online booking or a shop), answered by typing or a voice note. WURK AI reads each answer and shows what it understood; every value is checked (prices, times, email, category) before it's kept.
+- **Nothing is set up until the owner confirms.** One tap then makes the website (the first one is free), fills in the contact and opening-hours sections, adds bookable services and hours when the business has bookings, and adds products with prices when it has a shop.
+- Modules add their own setup steps through a new Platform contract (`BusinessSetup` / `SetupStep`), so new modules can join setup without changes to Website.
+
 ## [0.23.0] — 2026-11-18 — Sprint 22: Mobile money & payments
 
 ### Payments — Sprint 22.6 (in the chat, in the summary, and release)
