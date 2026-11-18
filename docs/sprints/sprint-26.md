@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** (18 Nov 2026). Waiting for WURK's approval, with the additions to Sprints 23 and 25 below |
+| **Status** | Approved by WURK (18 Nov 2026: "yes, agreed to all"), with the additions to Sprints 23 and 25 and decisions A–F as recommended |
 | **Release** | v0.27.0 |
 | **Depends on** | v0.26.0 (Sprint 25). Builds on: WhatsApp both ways and the owner's evening summary (Sprint 21), payments and cash recording (Sprint 22), languages and lite mode (Sprint 24), Bookings, Shop, Team, Customer accounts (Portal), Campaigns |
 | **Next** | Sprint 17 — Cloud & going live (still last) |
@@ -150,11 +150,11 @@ Sources:
 5. A customer's 8th paid haircut, including two paid in cash, earns the free cut. They see their progress in WhatsApp, and the reward is used once.
 6. Nothing changes a business's data without a confirmation, and every owner action on WhatsApp is audited.
 
-## Waiting on WURK
+## Agreed (18 Nov 2026)
 
-- Approval of Sprint 26 and of the three additions to Sprints 23 and 25.
-- Decisions A–F above.
-- The daily cap for owner AI on WhatsApp, and whether it's charged at the receptionist's rate.
+- Sprint 26 runs after Sprint 25 and before Sprint 17, and the three additions go into Sprints 23 and 25.
+- Decisions A–F are taken as recommended.
+- **Owner AI on WhatsApp is charged at the AI receptionist's rate**, with a default cap of **50 owner requests per business per day**. The cap can be changed in Admin → WURK AI.
 
 ## Parts
 

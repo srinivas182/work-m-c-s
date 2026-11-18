@@ -12,6 +12,8 @@
 > - Every provider key is set in **Admin → Providers** (encrypted, with "Test connection"), never only on the server. Infrastructure secrets are the exception.
 > - Template demo photos come from an African stock library or AI-generated banners, and owners replace them with their own.
 
+> **Added (WURK, 18 Nov 2026, later the same day):** **Sprint 26 — Run it from your phone** runs after Sprint 25, so the order is 22 → 23 → 24 → 25 → 26 → 17. Sprint 23 also gains setup from an existing online page and a share kit, and Sprint 25 gains automatic Google review requests. See [sprint-26.md](sprints/sprint-26.md).
+
 
 | Sprint | Dates | Focus | Deliverables | Status |
 |---|---|---|---|---|
@@ -41,7 +43,7 @@
 | 23 | | **Easy setup & money tools** *(new; [spec](sprints/sprint-23.md))* | Set up by voice note or WhatsApp; agents' 15-minute onboarding on their phone; who owes me, end-of-day cash-up, profit in plain words, weekly "how did I do" | |
 | 24 | | **Languages & light on data** *(new)* | Back office and customer pages in isiZulu, isiXhosa, Afrikaans, Sesotho, Swahili, French, Portuguese, Hausa, Yoruba; a lite mode for 3G and older Android phones that keeps working with a weak signal and catches up later | |
 | 25 | | **Reach & trust** *(new)* | USSD and SMS booking for customers without smartphones or data; verified-business badge; reviews on WhatsApp; clear refunds; country packs (currency, VAT, phone formats, payment providers); help in the owner's language: video clips and a WhatsApp help line backed by AI | |
-| 26 | | **Run it from your phone** *(proposed 18 Nov 2026)* | The owner tells WURK what to do on WhatsApp (text or voice, always confirmed); the WURK app for owners and teams (installs from the browser, push notifications, Today); "needs you now" on Home; shifts, clock-in and commission; loyalty cards on WhatsApp. Also proposed: setup from an existing Facebook/Google/website page and a share kit (Sprint 23), automatic Google review requests (Sprint 25). [Spec](sprints/sprint-26.md) | |
+| 26 | | **Run it from your phone** *(new, approved 18 Nov 2026)* | The owner tells WURK what to do on WhatsApp (text or voice, always confirmed); the WURK app for owners and teams (installs from the browser, push notifications, Today); "needs you now" on Home; shifts, clock-in and commission; loyalty cards on WhatsApp. Also added: setup from an existing Facebook/Google/website page and a share kit (Sprint 23), automatic Google review requests (Sprint 25). [Spec](sprints/sprint-26.md) | |
 
 **Closed beta** from ~19 July 2027 with 20–50 pilot businesses; 2–3 sprints of beta feedback before public launch (~August–September 2027). Sprint dates do not yet allow for South African public holidays (e.g. Good Friday and Family Day 2027); affected sprints will be noted in their specifications.
 
