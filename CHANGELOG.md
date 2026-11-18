@@ -4,6 +4,17 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Premium templates — Sprint 20.4a (four new categories)
+- **Barbershop, Cleaning, Car wash and Catering**, each with three designs that differ in layout, not only colour:
+  - **Barbershop:** classic shop, street-style studio, mobile barber.
+  - **Cleaning:** home cleaning, office and commercial, carpet and pressure washing.
+  - **Car wash:** drive-in wash, detailing studio, mobile wash.
+  - **Catering:** event catering, office lunches, home kitchen and meal prep.
+- Each design comes with real copy for that kind of business and the sections it needs: booking, quote forms with the right questions, menus, packages, before and after, service areas, and directions.
+- No invented reviews or prices: owners add their own.
+- Photo places show crisp placeholders until HQ adds real demo photos (Admin → Templates → Demo photos).
+- **Fixed:** the hero slideshow's photos can be scrolled with the keyboard.
+
 ### Premium templates — Sprint 20.3 (demo photos)
 - **Demo photos for every design.** HQ fills each photo place (hero, gallery, team…) with a sharp, licensed photo: paste a link from Nappy, Pexels or Unsplash, or upload one. WURK records the photographer, licence and source, and keeps WURK AI images to decorative places. New sites, previews and demo sites get the photos straight away.
 - **Owners see what to replace.** Demo photos carry a **Demo** badge in the editor, and the launch checklist says **Replace demo photos (N left)**. Choosing a photo also offers the design's other demo photos, to use until the owner has their own.

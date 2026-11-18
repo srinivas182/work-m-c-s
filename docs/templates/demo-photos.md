@@ -51,6 +51,9 @@ php artisan website:import-template-photos photos.json
 
 ## The photo places
 
+Until HQ adds a photo, a place shows a stand-in. New designs (Sprint 20.4 on) use crisp, tonal placeholders with a line icon, never blurred. `scripts/templates/` writes them along with the designs.
+
+
 Places come from the stand-in files a design's pages use (`/images/templates/{design}/{place}-1600.webp`). What each should show, and the search words, are in `modules/Website/templates/photos/slots.json`. A test fails if a design uses a place that file doesn't describe.
 
 ## On a business's site
