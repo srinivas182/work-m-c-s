@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### WhatsApp — Sprint 21.4 (voice notes understood)
+- **Voice notes are transcribed** as they arrive. Chats shows the words with a player, the length and the language. The assistant answers them as if typed.
+- **When WURK AI isn't sure** of the words, Chats marks them, and the assistant says what it understood and asks the customer to confirm or type it. Notes longer than 2 minutes, or ones that can't be heard, get a polite request to type or send a shorter one.
+- **Costs:** each voice note costs 0.1 credits (refunded if it can't be transcribed). Without credits, the team can still play it.
+- **Privacy:** the audio is deleted after 30 days (`WURK_VOICE_NOTE_DAYS`); the words stay with the chat. WhatsApp conversations are now kept like the chats in the WhatsApp app, not swept after 30 days like the website assistant's.
+- **For HQ:** **Admin → AI** has a speech-to-text model (OpenAI `gpt-4o-transcribe` by default), a fallback (Gemini) and per-minute prices. Anthropic has no speech-to-text. The AI receptionist and voice notes no longer count towards a business's daily WURK AI request limit; they have their own monthly limit and credits.
+
 ### WhatsApp — Sprint 21.3 (the AI assistant on WhatsApp)
 - **Website → Chat → AI assistant:** a separate switch lets the assistant answer on the business's WhatsApp number too, with the same answers, booking tools, limits and hand-over as the website chat.
 - **Customers tap instead of type:** free times, services, classes and products come as WhatsApp reply buttons (up to 3) or a list (up to 10). A booking's **Pay the deposit** or **Change or cancel** link comes as a button.

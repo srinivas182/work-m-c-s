@@ -39,6 +39,13 @@ interface Conversation {
     delivery?: 'sent' | 'delivered' | 'read' | 'failed' | null;
     error?: string | null;
     file?: { url: string; name: string; kind: string } | { blocked: string } | null;
+    /** A voice note (21.4): its words are `text`. */
+    voice?: {
+      seconds: number | null;
+      unclear: boolean;
+      language: string | null;
+      transcribed: boolean;
+    } | null;
   }[];
 }
 type Show = 'open' | 'archived' | 'ai' | 'whatsapp';
@@ -53,6 +60,7 @@ const BLOCKED: Record<string, string> = {
   infected: 'A file that failed the virus check (not kept)',
   too_large: 'A file too large to keep',
   unavailable: 'A file WhatsApp no longer has',
+  expired: 'The recording was deleted after 30 days; its words are kept',
 };
 
 const OUTCOME: Record<string, [string, 'success' | 'info' | 'warning' | 'neutral']> = {
@@ -245,8 +253,8 @@ function ConversationItem({
             <strong>
               {l.from === 'customer' ? who : l.from === 'assistant' ? 'Assistant' : 'You'}:
             </strong>{' '}
-            {l.text}
-            {l.file && 'url' in l.file && (
+            {l.voice ? <VoiceNote line={l} /> : l.text}
+            {l.file && 'url' in l.file && l.file.kind !== 'audio' && (
               <>
                 {' '}
                 <a className="underline" href={l.file.url}>
@@ -345,6 +353,32 @@ function ConversationItem({
         </form>
       )}
     </li>
+  );
+}
+
+/** A customer's voice note (21.4): its words (when WURK AI could make them out) and a player. */
+function VoiceNote({ line }: { line: Conversation['lines'][number] }) {
+  const v = line.voice;
+  if (!v) return null;
+  const length = v.seconds
+    ? ` · ${Math.floor(v.seconds / 60)}:${String(v.seconds % 60).padStart(2, '0')}`
+    : '';
+  return (
+    <span className="inline-grid gap-1 align-top">
+      <span>
+        <Badge tone={v.unclear ? 'warning' : 'neutral'}>
+          Voice note{length}
+          {v.language ? ` · ${v.language}` : ''}
+          {v.unclear ? ' · words may be wrong' : ''}
+        </Badge>{' '}
+        {v.transcribed ? line.text.replace(/^\[Voice note, unclear\] /, '') : line.text}
+      </span>
+      {line.file && 'url' in line.file && (
+        <audio controls preload="none" src={line.file.url} className="h-8 max-w-xs">
+          <a href={line.file.url}>Download the voice note</a>
+        </audio>
+      )}
+    </span>
   );
 }
 

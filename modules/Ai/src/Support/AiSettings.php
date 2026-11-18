@@ -20,6 +20,9 @@ final readonly class AiSettings
     /** Image providers (Google is added once WURK's key lets us verify its API). */
     public const IMAGE_PROVIDERS = ['openai' => 'OpenAI', 'simulated' => 'Simulated (development only)'];
 
+    /** Speech-to-text for voice notes (21.4). Anthropic has none. */
+    public const SPEECH_PROVIDERS = ['openai' => 'OpenAI', 'google' => 'Google (Gemini)', 'simulated' => 'Simulated (development only)'];
+
     public const DEFAULTS = [
         'tasks' => [
             'site_generation' => ['provider' => 'anthropic', 'model' => 'claude-sonnet-5-5'],
@@ -48,6 +51,10 @@ final readonly class AiSettings
         'image' => ['provider' => 'openai', 'model' => 'gpt-image-1'],
         'image_fallback' => [],
         'image_prices' => ['openai:gpt-image-1' => 0.04, 'simulated:simulated' => 0.0],
+        // Voice notes (21.4, decision C): model and fallback, priced per minute of audio (US dollars) — placeholders until confirmed.
+        'speech' => ['provider' => 'openai', 'model' => 'gpt-4o-transcribe'],
+        'speech_fallback' => [['provider' => 'google', 'model' => 'gemini-3.8-flash']],
+        'speech_prices' => ['openai:gpt-4o-transcribe' => 0.006, 'openai:gpt-4o-mini-transcribe' => 0.003, 'openai:whisper-1' => 0.006, 'google:gemini-3.8-flash' => 0.002, 'simulated:simulated' => 0.0],
         // "Ask WURK" (16.2, decision A): free questions a month per business, then the rate card's "ai.assistant" price each;
         // actions are free; no business asks more than the monthly cap.
         'assistant' => ['enabled' => true, 'free_questions' => 50, 'monthly_cap' => 500],
@@ -107,6 +114,27 @@ final readonly class AiSettings
 
         /** @var list<array{provider: string, model: string}> $chain */
         return $chain;
+    }
+
+    /** @return list<array{provider: string, model: string}> */
+    public function speechChain(): array
+    {
+        $all = $this->all();
+        $chain = [(array) $all['speech']];
+        foreach ((array) $all['speech_fallback'] as $f) {
+            if ((array) $f !== $chain[0]) {
+                $chain[] = (array) $f;
+            }
+        }
+
+        /** @var list<array{provider: string, model: string}> $chain */
+        return $chain;
+    }
+
+    /** A voice note's cost in US dollars × 1,000,000 (a minute is charged when the length isn't known). */
+    public function speechCostMicro(string $provider, string $model, ?float $seconds): int
+    {
+        return (int) round((float) ($this->all()['speech_prices']["{$provider}:{$model}"] ?? 0) * max(1.0, ($seconds ?? 60.0) / 60) * 1_000_000);
     }
 
     public function imageCostMicro(string $provider, string $model): int

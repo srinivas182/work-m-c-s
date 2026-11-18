@@ -8,15 +8,19 @@ use Wurk\Ai\Contracts\Ai;
 use Wurk\Ai\Contracts\AiConversations;
 use Wurk\Ai\Contracts\AiUnavailable;
 use Wurk\Ai\Contracts\ChatReply;
+use Wurk\Ai\Contracts\Transcript;
 use Wurk\Ai\Drivers\AiDriver;
 use Wurk\Ai\Drivers\AnthropicDriver;
 use Wurk\Ai\Drivers\ChatDriver;
 use Wurk\Ai\Drivers\GoogleDriver;
+use Wurk\Ai\Drivers\GoogleSpeechDriver;
 use Wurk\Ai\Drivers\OpenAiDriver;
 use Wurk\Ai\Drivers\OpenAiImageDriver;
+use Wurk\Ai\Drivers\OpenAiSpeechDriver;
 use Wurk\Ai\Drivers\ProviderFailed;
 use Wurk\Ai\Drivers\SimulatedDriver;
 use Wurk\Ai\Drivers\SimulatedImageDriver;
+use Wurk\Ai\Drivers\SimulatedSpeechDriver;
 use Wurk\Ai\Models\AiRequest;
 use Wurk\Messaging\Contracts\ProviderCredentials;
 
@@ -109,7 +113,7 @@ final readonly class AiClient implements Ai, AiConversations
     {
         $caps = (array) $this->settings->all()['caps'];
         if ($tenantId !== null && (int) ($caps['tenant_daily_requests'] ?? 0) > 0
-            && AiRequest::query()->where('tenant_id', $tenantId)->where('status', 'succeeded')->where('task', '!=', 'assistant')->where('created_at', '>=', now()->startOfDay())->count() >= (int) $caps['tenant_daily_requests']) {
+            && AiRequest::query()->where('tenant_id', $tenantId)->where('status', 'succeeded')->whereNotIn('task', ['assistant', 'receptionist', 'transcribe'])->where('created_at', '>=', now()->startOfDay())->count() >= (int) $caps['tenant_daily_requests']) {
             throw new AiUnavailable('You’ve reached today’s limit for WURK AI. It resets tomorrow.');
         }
         foreach ((array) ($caps['provider_monthly_usd'] ?? []) as $provider => $usd) {
@@ -180,5 +184,34 @@ final readonly class AiClient implements Ai, AiConversations
         }
 
         throw new AiUnavailable('WURK AI couldn’t make an image right now. Please try again in a few minutes.');
+    }
+
+    public function transcribe(string $audio, string $mime, ?float $seconds = null, ?string $tenantId = null): Transcript
+    {
+        $this->checkCaps($tenantId);
+        $chain = array_values(array_filter($this->settings->speechChain(), fn (array $step) => $this->key($step['provider']) !== null));
+        if ($chain === [] && ! app()->environment('production')) {
+            $chain = [['provider' => 'simulated', 'model' => 'simulated']];
+        }
+        foreach ($chain as $i => $step) {
+            $started = microtime(true);
+            try {
+                $driver = match ($step['provider']) {
+                    'openai' => new OpenAiSpeechDriver, 'google' => new GoogleSpeechDriver, default => new SimulatedSpeechDriver
+                };
+                $heard = $driver->transcribe($step['model'], $audio, $mime, (string) $this->key($step['provider']));
+                AiRequest::query()->create([
+                    'tenant_id' => $tenantId, 'task' => 'transcribe', 'provider' => $step['provider'], 'model' => $step['model'],
+                    'cost_usd_micro' => $this->settings->speechCostMicro($step['provider'], $step['model'], $seconds), 'status' => 'succeeded',
+                    'fallback' => $i > 0, 'duration_ms' => (int) round((microtime(true) - $started) * 1000), 'created_at' => now(),
+                ]);
+
+                return new Transcript($heard['text'], $heard['language'], $heard['confidence']);
+            } catch (ProviderFailed $e) {
+                $this->log($tenantId, 'transcribe', $step, 0, 0, 'failed', $e->getMessage(), $i > 0, $started);
+            }
+        }
+
+        throw new AiUnavailable('WURK AI couldn’t listen to that voice note right now.');
     }
 }

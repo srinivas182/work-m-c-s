@@ -50,16 +50,21 @@ final class FetchWhatsAppMedia implements ShouldQueue
             $media = app(WhatsAppBusiness::class)->media($this->mediaId);
             if ($media === null) {
                 $message->update(['attachment' => ['blocked' => 'unavailable']]);
+                $this->settled($message);
 
                 return;
             }
             if (strlen($media['contents']) > self::MAX_BYTES) {
                 $message->update(['attachment' => ['blocked' => 'too_large']]);
+                $this->settled($message);
 
                 return;
             }
             $verdict = $scanner->scan($media['contents']);
             if ($verdict === null) {
+                if ($this->attempts() === 1) {
+                    $this->settled($message); // a voice note can't wait for the scanner: the assistant asks them to type
+                }
                 $this->release($this->backoff());
 
                 return;
@@ -67,6 +72,7 @@ final class FetchWhatsAppMedia implements ShouldQueue
             if ($verdict === VirusScanner::INFECTED) {
                 $message->update(['attachment' => ['blocked' => 'infected']]);
                 app(AuditLog::class)->record('website.whatsapp_file_infected', 'receptionist_message', $message->id, []);
+                $this->settled($message);
 
                 return;
             }
@@ -74,6 +80,17 @@ final class FetchWhatsAppMedia implements ShouldQueue
             $kind = str_starts_with($mime, 'image/') ? 'image' : (str_starts_with($mime, 'audio/') ? 'audio' : (str_starts_with($mime, 'video/') ? 'video' : 'document'));
             $message->update(['attachment' => ['path' => app(WhatsAppChats::class)->keep($media['contents'], $mime), 'mime' => $mime,
                 'name' => mb_substr($this->filename ?? $kind, 0, 120), 'bytes' => strlen($media['contents']), 'kind' => $kind]]);
+            if ($kind === 'audio') {
+                TranscribeVoiceNote::dispatch($this->tenantId, $message->id); // it answers once it knows what was said (21.4)
+            }
         });
+    }
+
+    /** A voice note that won't be transcribed: the assistant answers it anyway (and asks them to type). */
+    private function settled(ReceptionistMessage $message): void
+    {
+        if (str_starts_with((string) $this->mime, 'audio/')) {
+            app(WhatsAppChats::class)->answerLater($message);
+        }
     }
 }

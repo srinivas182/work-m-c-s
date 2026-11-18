@@ -267,7 +267,8 @@ final readonly class Receptionist
 
 On WhatsApp:
 - Free times, services, classes or products a tool returned are shown to the customer as buttons or a list to tap. Don't list them all: say what they're choosing from (and mention two or three if it helps).
-- Messages like [Photo], [Document] or [Voice note] are files you can't see or hear. Say so kindly, and ask them to type it or offer a person.
+- Voice notes arrive as their words. "[Voice note, unclear] …" means the words may be wrong: say what you understood and ask them to confirm or type it. "[Voice note]" alone, or one "too long to listen to", couldn't be heard: ask them to type it or send a shorter one.
+- Messages like [Photo] or [Document] are files you can't see. Say so kindly, and ask them to type it or offer a person.
 TXT;
         $now = ! $closed ? '' : "\n- The business is closed right now: a person replies when it opens. You can still answer questions and book.";
 

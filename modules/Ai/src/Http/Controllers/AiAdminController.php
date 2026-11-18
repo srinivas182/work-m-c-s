@@ -40,6 +40,7 @@ final class AiAdminController
         return Inertia::render('Ai::Admin/Ai', [
             'settings' => $all,
             'providers' => AiSettings::PROVIDERS,
+            'speechProviders' => AiSettings::SPEECH_PROVIDERS,
             'tasks' => AiSettings::TASKS,
             'connected' => collect(['anthropic', 'google', 'openai'])->mapWithKeys(fn ($p) => [$p => ($providers->active('ai.'.$p)['credentials']['api_key'] ?? '') !== ''])->all(),
             'usage' => ['byProvider' => $byProvider, 'byBusiness' => $byBusiness, 'totalZar' => round(array_sum(array_column($byProvider, 'zar')), 2)],
@@ -77,8 +78,16 @@ final class AiAdminController
             'sales.enabled' => ['required', 'boolean'],
             'sales.greeting' => ['required', 'string', 'max:200'],
             'sales.monthly_cap' => ['required', 'integer', 'between:0,1000000'],
+            // Voice notes (21.4): speech-to-text model, an optional fallback, and per-minute prices.
+            'speech.provider' => ['required', 'in:'.implode(',', array_keys(AiSettings::SPEECH_PROVIDERS))],
+            'speech.model' => ['required', 'string', 'max:80', 'regex:/^[a-z0-9][a-z0-9.\-]*$/', 'not_regex:/latest/'],
+            'speech_fallback' => ['array', 'max:2'],
+            'speech_fallback.*.provider' => ['required', 'in:'.implode(',', array_keys(AiSettings::SPEECH_PROVIDERS))],
+            'speech_fallback.*.model' => ['required', 'string', 'max:80', 'regex:/^[a-z0-9][a-z0-9.\-]*$/', 'not_regex:/latest/'],
+            'speech_prices' => ['array'],
+            'speech_prices.*' => ['numeric', 'min:0', 'max:10'],
         ], ['assistant.monthly_cap.gte' => 'The most questions a month can’t be fewer than the free ones.']);
-        if (app()->environment('production') && collect([...$data['tasks'], ...($data['fallback'] ?? [])])->contains('provider', 'simulated')) {
+        if (app()->environment('production') && collect([...$data['tasks'], ...($data['fallback'] ?? []), $data['speech'], ...($data['speech_fallback'] ?? [])])->contains('provider', 'simulated')) {
             return back()->withErrors(['tasks' => 'The simulated provider can’t be used in production.']);
         }
         $settings->save($data, (string) $request->user()?->getAuthIdentifier());
