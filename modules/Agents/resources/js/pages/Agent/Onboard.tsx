@@ -41,7 +41,8 @@ const ORDER: Record<Onboarding['step'], number> = {
   handover: 5,
   done: 6,
 };
-const rand = (c: number) => `R${(c / 100).toLocaleString('en-ZA', { maximumFractionDigits: 2 })}`;
+/** Rand as WURK writes it everywhere: R1 380.00 (the server's own format). */
+const rand = (c: number) => `R${(c / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
 
 /** Minutes since the start, so the agent can keep to the 15 minutes. */
 function Clock({ since }: { since: string }) {

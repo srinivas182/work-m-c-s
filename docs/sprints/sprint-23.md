@@ -164,3 +164,31 @@ Sources:
 | 23.4 | | Agent area → **Set up a business**: `agent_onboardings` (platform). Code by the signup OTP (WhatsApp or SMS, same limits), package (one trial per verified number, as at signup), business provisioned or the agent's demo claimed, owner made owner, attribution `agent` (or `demo` on hand-over). The agent is a temporary team member (owner role) for setup by talking (which returns to the flow), deactivated at hand-over. Top-up through Billing's new `CreditTopUps` contract (online checkout or cash with HQ approval) or later. Hand-over by `wurk_agent_handover`, falling back to SMS; minutes from start to hand-over are audited and shown |
 | 23.5a | | New **Money** module (`money.manage`). Platform `MoneyOwed` registry, fed by Bookings (deposits pending payment), Shop (offline orders awaiting payment), Sales (new `account` method; `settled_at` / `settled_how`; `POST sales/{sale}/settle`) and Money (sent invoices). `money_invoices`: numbered per business, VAT 15% optional, reference `inv_{tenant}_{id}` (BusinessPaymentReceived → verified before paid). Signed customer page and pay action on `{handle}.wurk.co.za/invoice/…`; the return is signed too (ignoring the provider's reference). Sending: own WhatsApp template `wurk_payment_request`, then SMS (charged, refunded if it fails), then email, else a link to share. Reminders on days 1/7/14, at most weekly, at most 3; STOP on WhatsApp stops them (`money_reminder_stops`) |
 | 23.5b | | `money_cashups` (expected = in-person ledger + Sales cash/card via the new `SalesTotals` contract; locked; owner-only reopen; reason above `money_settings.cashup_reason_above_cents`, default R20), `money_expenses` (6 categories), `money_slips` (photo on the private disk, read by `Ai::see('slip')` under the `read_slip` credited action, confirmed before it becomes an expense). Profit = Crm `Takings::net` + invoices paid − expenses, shown on Expenses, as a Home tile and as a Reports section. Monday summary: `wurk_weekly_summary` to owners' verified numbers, charged like a WhatsApp message, once a week; STOP on WURK's number (new `WurkWhatsAppReceived` event) is kept in `money_weekly_stops` |
+| 23.6 | | End-to-end tests (`e2e/money-and-setup.spec.ts`, desktop and mobile); a second e2e agent per project for onboarding. CHANGELOG [0.24.0], VERSION 0.24.0, upgrade steps in docker.md. Release v0.24.0 |
+
+## Verification (before closing)
+
+Every spec item and acceptance criterion, checked against the code and its tests. Verified 18 Nov 2026.
+
+| Item | Where | Status |
+|---|---|---|
+| 23.1 Six questions, typed or a voice note; WURK AI reads each; every value checked | SetupTalk, SetupTalkController; SetupTalkTest, e2e | ✅ |
+| 23.1 A preview of exactly what will happen; nothing until confirmed; website, services, hours and products set up per package | BusinessSetup / SetupStep (Website, Bookings, Shop); SetupTalkTest | ✅ |
+| 23.1 Setup by WhatsApp voice note | — | ➡️ Delivered with 26.1, as the spec's delivery note says (it needs WURK's WhatsApp number in place) |
+| 23.2 Google listing through Places API; website / Facebook / Instagram public preview and text | OnlineImport; SetupFromOnlineTest | ✅ |
+| 23.2 Owner checks every answer; picks photos (only the business's own); reviews linked, never copied | SetupTalk.tsx PhotoPicker, WebsiteSetupStep, Testimonials `moreHref`; SetupFromOnlineTest | ✅ |
+| 23.2 Safe fetching (https, public IPs on every redirect, size limits) | OnlineImport::get / publicHost; SetupFromOnlineTest | ✅ |
+| 23.3 WhatsApp Status image (9:16, brand, link); share sheet, WhatsApp, Facebook, Instagram | ShareKit::statusImage, ShareKit.tsx; ShareKitTest, e2e | ✅ |
+| 23.3 Posters A4, A5, table tent with QR, logo, colours; book / order / chat versions | ShareKit::poster, share/poster views; ShareKitTest | ✅ A "Scan to visit us" version is added for businesses without bookings or a shop. |
+| 23.3 Links tagged by source and counted in Reports | ShareKit::tagged, SiteVisits; ShareKitTest | ✅ |
+| 23.4 Owner's number verified by code; package; setup with the owner; first top-up (online or cash); hand-over on WhatsApp | AgentOnboarding, AgentOnboardingController, CreditTopUps; AgentOnboardingTest, e2e | ✅ The package comes before setup (delivery note). |
+| 23.4 Commission by the usual rules; "set up, not yet live" until published; a demo can be claimed | AgentAttribution, SiteLaunches, TenantClaimed; AgentOnboardingTest | ✅ |
+| 23.5 Who owes me: deposits, pay-later orders, sales on account, invoices | MoneyOwed registry; WhoOwesMeTest | ✅ |
+| 23.5 Invoice: lines, VAT, due date, pay link; WhatsApp or email; paid by link marked automatically; cash recorded | Invoices, PublicInvoiceController; WhoOwesMeTest, e2e | ✅ SMS is a further fallback. |
+| 23.5 Reminders days 1, 7, 14; WhatsApp first; STOP; never more than one a week | Invoices::remindOverdue / remind / stop; WhoOwesMeTest | ✅ |
+| 23.5 Cash-up: expected cash and card per day; counted; reason above an owner-set amount; locked, audited, owner reopens | MoneyBook::expected / cashUp / reopen; CashUpAndProfitTest, e2e | ⚠️ Per business for now: not yet split per person or per branch (open item, to schedule) |
+| 23.5 Expenses in seconds or from a slip photo read by AI and confirmed; simple categories | MoneyBook::addExpense / readSlip, Ai::see; CashUpAndProfitTest, e2e | ✅ |
+| 23.5 "This month you took R…, spent R…, so you made about R…" on Reports and Home | MoneyBook::profit, Reports section, Home tile; CashUpAndProfitTest | ✅ |
+| 23.5 Monday "how did I do" on WhatsApp; on by default; STOP turns it off | WeeklySummary, WurkWhatsAppReceived; CashUpAndProfitTest | ✅ |
+| Acceptance 1 (isiZulu voice notes on WhatsApp) | — | ➡️ Voice notes in any language work in the app now; on WhatsApp with 26.1 |
+| Acceptance 2–8 | the tests above | ✅ |

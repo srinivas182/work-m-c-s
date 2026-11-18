@@ -32,8 +32,8 @@ interface Props {
   isOwner: boolean;
 }
 
-const rand = (c: number) =>
-  `R${(c / 100).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+/** Rand as WURK writes it everywhere: R1 380.00 (the server's own format). */
+const rand = (c: number) => `R${(c / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
 const tenantBase = () => '/' + window.location.pathname.split('/')[1];
 
 export default function CashUp({
