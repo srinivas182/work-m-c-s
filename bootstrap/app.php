@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Wurk\Platform\I18n\IdempotentRequests;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +14,7 @@ use Wurk\Identity\Auth\SignInFlow;
 use Wurk\Identity\Http\Middleware\SessionGuardian;
 use Wurk\Identity\Support\Surface;
 use Wurk\Platform\I18n\CustomerLocale;
+use Wurk\Platform\I18n\IdempotentRequests;
 use Wurk\Platform\I18n\SetLocale;
 
 return Application::configure(basePath: dirname(__DIR__))
