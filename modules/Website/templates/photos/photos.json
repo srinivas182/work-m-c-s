@@ -1,0 +1,1507 @@
+[
+ {
+  "template": "education-early-learning",
+  "slot": "garden",
+  "link": "https://images.pexels.com/photos/36838830/pexels-photo-36838830.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/joyful-children-playing-outdoors-in-ghana-36838830/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "education-early-learning",
+  "slot": "play",
+  "link": "https://images.pexels.com/photos/5905444/pexels-photo-5905444.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/focused-black-female-teacher-explaining-class-plan-to-pupils-5905444/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "education-early-learning",
+  "slot": "room",
+  "link": "https://images.pexels.com/photos/28593055/pexels-photo-28593055.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/smiling-children-in-african-classroom-setting-28593055/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "education-tutor",
+  "slot": "portrait",
+  "link": "https://images.pexels.com/photos/5905478/pexels-photo-5905478.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/black-teacher-standing-near-desk-and-pointing-at-pupils-copybook-5905478/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "education-tutor",
+  "slot": "study",
+  "link": "https://images.pexels.com/photos/5311406/pexels-photo-5311406.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-tutor-teaching-a-student-5311406/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-photographer",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/34371787/pexels-photo-34371787.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/elegant-wedding-couple-in-a-lush-garden-setting-34371787/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-photographer",
+  "slot": "shot-1",
+  "link": "https://images.pexels.com/photos/33900360/pexels-photo-33900360.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/beautiful-nigerian-family-portrait-indoors-33900360/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-photographer",
+  "slot": "shot-2",
+  "link": "https://images.pexels.com/photos/19750196/pexels-photo-19750196.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/happy-couple-dancing-at-wedding-19750196/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-photographer",
+  "slot": "shot-3",
+  "link": "https://images.pexels.com/photos/11309259/pexels-photo-11309259.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/wedding-rings-by-a-flower-bouquet-11309259/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-venue-planner",
+  "slot": "detail",
+  "link": "https://images.pexels.com/photos/12876404/pexels-photo-12876404.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/elegant-decoration-on-the-tables-on-a-wedding-reception-12876404/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-venue-planner",
+  "slot": "garden",
+  "link": "https://images.pexels.com/photos/28976226/pexels-photo-28976226.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/elegant-outdoor-wedding-reception-setup-28976226/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-venue-planner",
+  "slot": "hall",
+  "link": "https://images.pexels.com/photos/7856735/pexels-photo-7856735.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/hall-decorated-for-wedding-7856735/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-venue-planner",
+  "slot": "table",
+  "link": "https://images.pexels.com/photos/4262173/pexels-photo-4262173.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/family-having-dinner-and-celebrating-4262173/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fitness-gym-studio",
+  "slot": "class",
+  "link": "https://images.pexels.com/photos/7894538/pexels-photo-7894538.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-group-of-women-in-black-sportswear-doing-exercise-7894538/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fitness-gym-studio",
+  "slot": "floor",
+  "link": "https://images.pexels.com/photos/17227607/pexels-photo-17227607.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/empty-interior-of-gym-17227607/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fitness-gym-studio",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/6998798/pexels-photo-6998798.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/african-american-sportsman-wearing-gloves-while-training-with-dumbbells-in-gym-6998798/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fitness-personal-trainer",
+  "slot": "portrait",
+  "link": "https://images.pexels.com/photos/33832204/pexels-photo-33832204.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/confident-woman-in-gym-exercise-pose-33832204/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fitness-personal-trainer",
+  "slot": "session",
+  "link": "https://images.pexels.com/photos/6456303/pexels-photo-6456303.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/black-coach-reaching-hand-to-woman-6456303/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "health-dental",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/12917374/pexels-photo-12917374.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/dentist-and-her-patient-posing-at-the-camera-12917374/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "health-dental",
+  "slot": "room",
+  "link": "https://images.pexels.com/photos/3881161/pexels-photo-3881161.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/smiling-young-ethnic-female-patient-sitting-in-dental-chair-in-modern-clinic-3881161/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "health-doctor",
+  "slot": "consult",
+  "link": "https://images.pexels.com/photos/7578808/pexels-photo-7578808.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-medical-practitioner-showing-a-patient-paper-7578808/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "health-doctor",
+  "slot": "practice",
+  "link": "https://images.pexels.com/photos/33812025/pexels-photo-33812025.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/modern-medical-reception-area-interior-design-33812025/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-hotel",
+  "slot": "garden",
+  "link": "https://images.pexels.com/photos/5029310/pexels-photo-5029310.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/backyard-of-hotel-with-pool-and-trees-5029310/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-hotel",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/21297784/pexels-photo-21297784.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-house-with-a-large-yard-and-grass-21297784/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-hotel",
+  "slot": "lounge",
+  "link": "https://images.pexels.com/photos/5328927/pexels-photo-5328927.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/luxury-design-lounge-room-in-hotel-5328927/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-hotel",
+  "slot": "room-1",
+  "link": "https://images.pexels.com/photos/6186819/pexels-photo-6186819.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-of-bright-room-in-hotel-6186819/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-hotel",
+  "slot": "room-2",
+  "link": "https://images.pexels.com/photos/16641319/pexels-photo-16641319.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-design-of-hotel-room-16641319/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-restaurant",
+  "slot": "dish-1",
+  "link": "https://images.pexels.com/photos/17952748/pexels-photo-17952748.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/fried-cubes-and-rice-on-white-plate-17952748/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-restaurant",
+  "slot": "dish-2",
+  "link": "https://images.pexels.com/photos/37100094/pexels-photo-37100094.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/traditional-burundian-meal-with-ugali-and-beans-37100094/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-restaurant",
+  "slot": "kitchen",
+  "link": "https://images.pexels.com/photos/5794152/pexels-photo-5794152.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-man-in-black-shirt-cooking-in-the-kitchen-5794152/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-restaurant",
+  "slot": "room",
+  "link": "https://images.pexels.com/photos/34686219/pexels-photo-34686219.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/cozy-modern-restaurant-interior-with-ambient-lighting-34686219/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "mechanics-panel-auto-electrical",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/12555015/pexels-photo-12555015.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/mechanics-working-on-an-engine-12555015/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "mechanics-panel-auto-electrical",
+  "slot": "work",
+  "link": "https://images.pexels.com/photos/6870332/pexels-photo-6870332.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/man-in-blue-coveralls-standing-beside-an-orange-car-using-an-automotive-diagnostic-tool-6870332/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "mechanics-workshop",
+  "slot": "bay",
+  "link": "https://images.pexels.com/photos/3894030/pexels-photo-3894030.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/vehicle-on-a-car-lift-3894030/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "mechanics-workshop",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/4439585/pexels-photo-4439585.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/young-black-man-repairing-vehicle-in-workshop-4439585/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "professional-advisory",
+  "slot": "meeting",
+  "link": "https://images.pexels.com/photos/8112231/pexels-photo-8112231.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/male-lawyer-talking-to-his-clients-8112231/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "professional-advisory",
+  "slot": "office",
+  "link": "https://images.pexels.com/photos/7841469/pexels-photo-7841469.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-group-people-having-a-meeting-inside-the-office-7841469/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "professional-agency",
+  "slot": "studio",
+  "link": "https://images.pexels.com/photos/39190472/pexels-photo-39190472.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/creative-team-collaborating-in-modern-office-space-39190472/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "retail-boutique",
+  "slot": "look-1",
+  "link": "https://images.pexels.com/photos/28959523/pexels-photo-28959523.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/elegant-african-fashion-model-posing-outdoors-28959523/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "retail-boutique",
+  "slot": "look-2",
+  "link": "https://images.pexels.com/photos/32965721/pexels-photo-32965721.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/stylish-editorial-fashion-in-ilorin-nigeria-32965721/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "retail-boutique",
+  "slot": "look-3",
+  "link": "https://images.pexels.com/photos/8187056/pexels-photo-8187056.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/handmade-bags-and-embroidered-top-8187056/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "retail-boutique",
+  "slot": "store",
+  "link": "https://images.pexels.com/photos/5490970/pexels-photo-5490970.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-of-stylish-boutique-with-colorful-clothes-5490970/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "retail-general-store",
+  "slot": "counter",
+  "link": "https://images.pexels.com/photos/30848031/pexels-photo-30848031.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/small-shop-interior-with-local-shopkeeper-30848031/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "retail-general-store",
+  "slot": "shelves",
+  "link": "https://images.pexels.com/photos/17546505/pexels-photo-17546505.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/rack-of-grains-17546505/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-hair-braids",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/13212603/pexels-photo-13212603.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/person-braiding-a-woman-s-hair-13212603/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-hair-braids",
+  "slot": "story",
+  "link": "https://images.pexels.com/photos/9709014/pexels-photo-9709014.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-woman-in-black-clothes-sitting-on-a-barber-chair-while-holding-scissors-9709014/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-hair-braids",
+  "slot": "work-1",
+  "link": "https://images.pexels.com/photos/7607802/pexels-photo-7607802.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/close-up-shot-of-a-woman-with-braided-hairstyle-7607802/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-hair-braids",
+  "slot": "work-2",
+  "link": "https://images.pexels.com/photos/33664383/pexels-photo-33664383.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/top-view-of-stylish-braided-hairstyle-on-woman-33664383/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-hair-braids",
+  "slot": "work-3",
+  "link": "https://images.pexels.com/photos/11215202/pexels-photo-11215202.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/portrait-of-a-afro-haired-woman-smiling-11215202/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-nails-lashes-barbers",
+  "slot": "collage-1",
+  "link": "https://images.pexels.com/photos/39272726/pexels-photo-39272726.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/professional-manicure-with-glitter-nail-art-39272726/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-nails-lashes-barbers",
+  "slot": "collage-2",
+  "link": "https://images.pexels.com/photos/5128220/pexels-photo-5128220.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/person-working-on-eyelash-of-a-woman-5128220/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-nails-lashes-barbers",
+  "slot": "collage-3",
+  "link": "https://images.pexels.com/photos/39559270/pexels-photo-39559270.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/barber-perfecting-a-fade-haircut-close-up-39559270/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-nails-lashes-barbers",
+  "slot": "studio",
+  "link": "https://images.pexels.com/photos/35844833/pexels-photo-35844833.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/modern-hair-salon-interior-with-stylish-lighting-35844833/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "salon-nails-lashes-barbers",
+  "slot": "work-1",
+  "link": "https://images.pexels.com/photos/7446915/pexels-photo-7446915.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/close-up-woman-having-her-nails-done-at-a-nail-salon-7446915/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spa-day-spa",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/5659056/pexels-photo-5659056.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-person-massaging-woman-s-face-5659056/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spa-day-spa",
+  "slot": "room",
+  "link": "https://images.pexels.com/photos/11774389/pexels-photo-11774389.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-design-of-a-massage-room-11774389/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spa-day-spa",
+  "slot": "treat-1",
+  "link": "https://images.pexels.com/photos/13899862/pexels-photo-13899862.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woman-getting-a-beauty-treatment-13899862/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spa-day-spa",
+  "slot": "treat-2",
+  "link": "https://images.pexels.com/photos/4085450/pexels-photo-4085450.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/getting-back-massage-4085450/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spa-day-spa",
+  "slot": "treat-3",
+  "link": "https://images.pexels.com/photos/3865611/pexels-photo-3865611.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-dripping-oil-on-person-s-hand-3865611/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spa-wellness-practitioner",
+  "slot": "portrait",
+  "link": "https://images.pexels.com/photos/8032744/pexels-photo-8032744.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woman-in-black-activewear-meditating-indoors-8032744/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spa-wellness-practitioner",
+  "slot": "space",
+  "link": "https://images.pexels.com/photos/6958255/pexels-photo-6958255.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woman-in-black-active-wear-concentrating-while-sitting-on-a-yoga-mat-6958255/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "trades-home-services",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/32588548/pexels-photo-32588548.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/plumber-repairing-pipe-with-wrench-indoors-32588548/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "trades-home-services",
+  "slot": "work",
+  "link": "https://images.pexels.com/photos/7005268/pexels-photo-7005268.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-of-modern-bathroom-with-glass-shower-cabin-7005268/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "trades-solar-electrical",
+  "slot": "board",
+  "link": "https://images.pexels.com/photos/17842843/pexels-photo-17842843.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-man-maintaining-an-inverter-17842843/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "trades-solar-electrical",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/8457868/pexels-photo-8457868.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/solar-panels-on-tiled-roofs-of-a-house-8457868/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "trades-solar-electrical",
+  "slot": "roof",
+  "link": "https://images.pexels.com/photos/6961085/pexels-photo-6961085.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/solar-technicians-installing-solar-panels-6961085/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "transport-couriers-removals",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/4175032/pexels-photo-4175032.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/man-delivering-packages-to-a-person-4175032/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "transport-couriers-removals",
+  "slot": "van",
+  "link": "https://images.pexels.com/photos/12474180/pexels-photo-12474180.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-white-van-on-a-road-12474180/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "transport-shuttles-tours",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/16444293/pexels-photo-16444293.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/people-sitting-in-the-back-of-a-safari-vehicle-on-a-trip-in-a-tropical-rural-place-16444293/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "transport-shuttles-tours",
+  "slot": "vehicle",
+  "link": "https://images.pexels.com/photos/31374505/pexels-photo-31374505.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/minibus-navigating-a-serene-rural-road-bend-31374505/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-classic",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/7697661/pexels-photo-7697661.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/mature-black-man-getting-haircut-in-barbershop-7697661/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-classic",
+  "slot": "chair",
+  "link": "https://images.pexels.com/photos/3993308/pexels-photo-3993308.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/black-leather-barber-chair-in-front-of-mirror-3993308/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-classic",
+  "slot": "cut-1",
+  "link": "https://images.pexels.com/photos/39559324/pexels-photo-39559324.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/modern-fade-haircut-with-sharp-beard-style-39559324/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-classic",
+  "slot": "cut-2",
+  "link": "https://images.pexels.com/photos/7447127/pexels-photo-7447127.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/man-ready-for-haircut-7447127/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-classic",
+  "slot": "cut-3",
+  "link": "https://images.pexels.com/photos/18491010/pexels-photo-18491010.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/smiling-young-black-man-with-dreadlocks-posing-in-studio-18491010/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-studio",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/10989588/pexels-photo-10989588.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-man-having-a-haircut-10989588/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-studio",
+  "slot": "work-1",
+  "link": "https://images.pexels.com/photos/7697205/pexels-photo-7697205.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-barber-checking-a-client-s-hair-7697205/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-studio",
+  "slot": "work-2",
+  "link": "https://images.pexels.com/photos/7388920/pexels-photo-7388920.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/plump-woman-dying-hair-of-black-man-7388920/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-studio",
+  "slot": "work-3",
+  "link": "https://images.pexels.com/photos/7447129/pexels-photo-7447129.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/man-receiving-haircut-at-barber-shop-7447129/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-studio",
+  "slot": "work-4",
+  "link": "https://images.pexels.com/photos/7697271/pexels-photo-7697271.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/man-in-orange-shirt-sitting-on-chair-7697271/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-mobile",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/7697280/pexels-photo-7697280.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/person-cutting-a-man-s-hair-using-scissors-7697280/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-mobile",
+  "slot": "kit",
+  "link": "https://images.pexels.com/photos/7697208/pexels-photo-7697208.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/close-up-of-barber-tools-7697208/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "barbershop-mobile",
+  "slot": "event",
+  "link": "https://images.pexels.com/photos/27687913/pexels-photo-27687913.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/three-men-in-suits-standing-next-to-each-other-27687913/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "cleaning-home",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/5591903/pexels-photo-5591903.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woman-cleaning-a-kitchen-counter-5591903/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "cleaning-home",
+  "slot": "team",
+  "link": "https://images.pexels.com/photos/6195121/pexels-photo-6195121.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/people-looking-at-the-camera-6195121/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "cleaning-commercial",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/6196677/pexels-photo-6196677.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/cleaners-walking-while-holding-cleaning-equipment-6196677/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "cleaning-commercial",
+  "slot": "site",
+  "link": "https://images.pexels.com/photos/34823913/pexels-photo-34823913.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/modern-reception-area-in-office-interior-design-34823913/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "cleaning-specialist",
+  "slot": "carpet",
+  "link": "https://images.pexels.com/photos/4107284/pexels-photo-4107284.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/black-vacuum-cleaner-on-area-rug-4107284/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "cleaning-specialist",
+  "slot": "couch",
+  "link": "https://images.pexels.com/photos/4401538/pexels-photo-4401538.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/cleaner-vacuuming-a-sofa-chair-4401538/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "cleaning-specialist",
+  "slot": "paving",
+  "link": "https://images.pexels.com/photos/5652626/pexels-photo-5652626.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/back-view-of-a-person-pressure-washing-a-house-5652626/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "carwash-drive-in",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/6872591/pexels-photo-6872591.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-woman-using-snow-foam-while-cleaning-a-car-6872591/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "carwash-drive-in",
+  "slot": "bay",
+  "link": "https://images.pexels.com/photos/6873119/pexels-photo-6873119.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-person-cleaning-a-white-car-6873119/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "carwash-detailing",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/6872161/pexels-photo-6872161.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-bentley-continental-gt-at-a-car-wash-6872161/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "carwash-detailing",
+  "slot": "detail-1",
+  "link": "https://images.pexels.com/photos/5233262/pexels-photo-5233262.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-person-buffing-the-side-of-a-motor-vehicle-5233262/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "carwash-detailing",
+  "slot": "detail-2",
+  "link": "https://images.pexels.com/photos/29293845/pexels-photo-29293845.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/luxurious-brown-leather-car-seat-interior-29293845/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "carwash-detailing",
+  "slot": "detail-3",
+  "link": "https://images.pexels.com/photos/971522/pexels-photo-971522.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/water-droplets-on-black-audi-vehicle-hood-971522/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "carwash-mobile",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/4876641/pexels-photo-4876641.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/faceless-man-washing-luxury-sports-car-in-yard-of-house-4876641/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "carwash-mobile",
+  "slot": "eco",
+  "link": "https://images.pexels.com/photos/4140943/pexels-photo-4140943.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/set-of-car-cleaning-products-in-garage-4140943/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "catering-events",
+  "slot": "spread",
+  "link": "https://images.pexels.com/photos/28736731/pexels-photo-28736731.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/banquet-buffet-in-enugu-nigeria-28736731/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "catering-events",
+  "slot": "plated",
+  "link": "https://images.pexels.com/photos/17952745/pexels-photo-17952745.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/meal-with-rice-and-fried-cubes-of-aubergine-17952745/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "catering-events",
+  "slot": "team",
+  "link": "https://images.pexels.com/photos/32805961/pexels-photo-32805961.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/indoor-event-catering-with-food-service-32805961/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "catering-events",
+  "slot": "dessert",
+  "link": "https://images.pexels.com/photos/37803992/pexels-photo-37803992.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/elegant-wedding-cake-and-decoration-setup-37803992/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "catering-corporate",
+  "slot": "platter",
+  "link": "https://images.pexels.com/photos/31970816/pexels-photo-31970816.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/appetizing-finger-food-platter-with-mini-sandwiches-31970816/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "catering-corporate",
+  "slot": "lunchbox",
+  "link": "https://images.pexels.com/photos/5852333/pexels-photo-5852333.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/food-in-lunch-boxes-5852333/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "catering-home-kitchen",
+  "slot": "meals",
+  "link": "https://images.pexels.com/photos/5852326/pexels-photo-5852326.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/packed-food-in-colorful-containers-5852326/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "catering-home-kitchen",
+  "slot": "cake",
+  "link": "https://images.pexels.com/photos/18131293/pexels-photo-18131293.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/chocolate-birthday-cake-18131293/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "catering-home-kitchen",
+  "slot": "cook",
+  "link": "https://images.pexels.com/photos/6579075/pexels-photo-6579075.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/delighted-black-woman-with-whisk-covered-with-batter-6579075/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spaza-corner-shop",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/30020992/pexels-photo-30020992.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/nigerian-shopkeeper-in-local-grocery-store-30020992/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spaza-corner-shop",
+  "slot": "shelves",
+  "link": "https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/grocery-store-264636/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "grocery-fresh-market",
+  "slot": "produce",
+  "link": "https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/assorted-vegetables-on-crates-1093837/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "grocery-fresh-market",
+  "slot": "stall",
+  "link": "https://images.pexels.com/photos/20432829/pexels-photo-20432829.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woman-selling-vegetables-on-a-food-market-20432829/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "grocery-fresh-market",
+  "slot": "box",
+  "link": "https://images.pexels.com/photos/6994271/pexels-photo-6994271.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/brown-box-with-green-leafy-vegetables-6994271/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "grocery-wholesale",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/17229385/pexels-photo-17229385.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/forklift-in-warehouse-17229385/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "grocery-wholesale",
+  "slot": "loading",
+  "link": "https://images.pexels.com/photos/34585120/pexels-photo-34585120.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/forklift-operators-loading-pallets-on-truck-34585120/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-supply-store",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/12618341/pexels-photo-12618341.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/photograph-of-a-wig-shop-12618341/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-supply-store",
+  "slot": "braids",
+  "link": "https://images.pexels.com/photos/5301531/pexels-photo-5301531.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/crop-faceless-ethnic-person-touching-ponytail-of-african-braids-5301531/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-supply-store",
+  "slot": "wigs",
+  "link": "https://images.pexels.com/photos/13439624/pexels-photo-13439624.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/different-kinds-of-wigs-display-in-a-store-13439624/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-skincare-brand",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/32565175/pexels-photo-32565175.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/handcrafted-artisan-skincare-in-soft-natural-light-32565175/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-skincare-brand",
+  "slot": "ingredients",
+  "link": "https://images.pexels.com/photos/11284698/pexels-photo-11284698.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woman-posing-while-biting-a-shea-nut-11284698/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-skincare-brand",
+  "slot": "founder",
+  "link": "https://images.pexels.com/photos/1191533/pexels-photo-1191533.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woman-holding-two-cosmetic-product-boxes-1191533/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-salon-wholesale",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/28846853/pexels-photo-28846853.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/wholesale-warehouse-aisle-with-various-products-28846853/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-salon-wholesale",
+  "slot": "equipment",
+  "link": "https://images.pexels.com/photos/7388938/pexels-photo-7388938.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/chair-placed-near-cart-with-hairdresser-instruments-7388938/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "tailor-made-to-measure",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/6765658/pexels-photo-6765658.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-tailor-measuring-his-client-using-a-tape-measure-6765658/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "tailor-made-to-measure",
+  "slot": "fabric",
+  "link": "https://images.pexels.com/photos/38487457/pexels-photo-38487457.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/colorful-african-fabric-display-at-market-stall-38487457/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "tailor-made-to-measure",
+  "slot": "look-1",
+  "link": "https://images.pexels.com/photos/31871810/pexels-photo-31871810.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/portrait-of-woman-in-traditional-nigerian-attire-31871810/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "tailor-made-to-measure",
+  "slot": "look-2",
+  "link": "https://images.pexels.com/photos/7562644/pexels-photo-7562644.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/serious-black-man-wearing-stylish-suit-7562644/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fashion-label",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/22690356/pexels-photo-22690356.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/editorial-fashion-photo-of-a-beautiful-black-woman-22690356/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fashion-label",
+  "slot": "look-1",
+  "link": "https://images.pexels.com/photos/38256842/pexels-photo-38256842.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/elegant-black-model-in-sequin-dress-in-lagos-studio-38256842/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fashion-label",
+  "slot": "look-2",
+  "link": "https://images.pexels.com/photos/30088728/pexels-photo-30088728.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/elegant-woman-in-vibrant-african-dress-portrait-30088728/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fashion-label",
+  "slot": "look-3",
+  "link": "https://images.pexels.com/photos/35633192/pexels-photo-35633192.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/colorful-african-fabrics-displayed-at-market-35633192/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fashion-label",
+  "slot": "studio",
+  "link": "https://images.pexels.com/photos/3965539/pexels-photo-3965539.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/assorted-sewing-patterns-on-hangers-inside-tailor-atelier-3965539/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "alterations-repairs",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/6461130/pexels-photo-6461130.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/sewing-machine-close-up-photo-6461130/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "alterations-repairs",
+  "slot": "counter",
+  "link": "https://images.pexels.com/photos/5424922/pexels-photo-5424922.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/clothes-racks-in-a-boutique-5424922/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "farm-produce",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/33786606/pexels-photo-33786606.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/sunny-cornfield-with-rows-of-growing-crops-33786606/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "farm-produce",
+  "slot": "farmer",
+  "link": "https://images.pexels.com/photos/33993456/pexels-photo-33993456.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/smiling-african-farmer-in-nigerian-field-33993456/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "farm-produce",
+  "slot": "produce",
+  "link": "https://images.pexels.com/photos/4975353/pexels-photo-4975353.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/farmer-holding-basket-with-fresh-harvest-of-fruits-and-vegetables-4975353/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "agri-supplies",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/2827121/pexels-photo-2827121.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/pile-of-white-sacks-2827121/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "agri-supplies",
+  "slot": "advice",
+  "link": "https://images.pexels.com/photos/34411687/pexels-photo-34411687.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/african-farmer-inspecting-crops-in-field-34411687/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "agri-cooperative",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/14314165/pexels-photo-14314165.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/people-farming-on-the-field-14314165/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "agri-cooperative",
+  "slot": "packhouse",
+  "link": "https://images.pexels.com/photos/8877378/pexels-photo-8877378.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/people-sorting-cherry-tomatoes-on-a-conveyor-belt-8877378/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "agri-cooperative",
+  "slot": "training",
+  "link": "https://images.pexels.com/photos/33749805/pexels-photo-33749805.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/community-gathering-in-rural-african-village-33749805/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "church-community",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/7520355/pexels-photo-7520355.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/choir-singing-and-dancing-inside-the-church-7520355/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "church-community",
+  "slot": "choir",
+  "link": "https://images.pexels.com/photos/7520369/pexels-photo-7520369.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/choir-singing-inside-the-church-7520369/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "church-community",
+  "slot": "kids",
+  "link": "https://images.pexels.com/photos/8535169/pexels-photo-8535169.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-woman-teaching-children-to-read-book-8535169/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "ngo-impact",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/6647178/pexels-photo-6647178.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/love-people-africa-travel-6647178/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "ngo-impact",
+  "slot": "programme",
+  "link": "https://images.pexels.com/photos/5529760/pexels-photo-5529760.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/crop-ethnic-women-harvesting-vegetables-in-green-garden-5529760/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "ngo-impact",
+  "slot": "volunteers",
+  "link": "https://images.pexels.com/photos/6647119/pexels-photo-6647119.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/food-love-africa-travel-6647119/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "ministry-outreach",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/35555152/pexels-photo-35555152.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/crowd-engaging-in-live-worship-event-indoors-35555152/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "ministry-outreach",
+  "slot": "outreach",
+  "link": "https://images.pexels.com/photos/6646778/pexels-photo-6646778.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/food-love-africa-travel-6646778/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "school-primary",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/28593054/pexels-photo-28593054.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/young-african-students-in-classroom-setting-28593054/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "school-primary",
+  "slot": "playground",
+  "link": "https://images.pexels.com/photos/29440634/pexels-photo-29440634.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/children-playing-soccer-in-rural-african-village-29440634/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "school-primary",
+  "slot": "reading",
+  "link": "https://images.pexels.com/photos/5905919/pexels-photo-5905919.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/black-teacher-with-kids-in-modern-classroom-5905919/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "school-high",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/34162710/pexels-photo-34162710.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/smiling-schoolchildren-in-uniform-share-a-moment-34162710/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "school-high",
+  "slot": "lab",
+  "link": "https://images.pexels.com/photos/8924160/pexels-photo-8924160.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-boy-and-girl-doing-experiment-in-the-laboratory-8924160/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "school-high",
+  "slot": "matric",
+  "link": "https://images.pexels.com/photos/10604063/pexels-photo-10604063.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/people-in-black-academic-dress-10604063/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "skills-academy",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/31820972/pexels-photo-31820972.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/african-classroom-training-session-with-uniformed-students-31820972/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "skills-academy",
+  "slot": "class",
+  "link": "https://images.pexels.com/photos/5940713/pexels-photo-5940713.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/attentive-young-black-groupmates-using-laptop-while-preparing-for-exams-with-anonymous-teacher-5940713/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "funeral-home",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/7317671/pexels-photo-7317671.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/flowers-on-the-floor-7317671/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "funeral-home",
+  "slot": "chapel",
+  "link": "https://images.pexels.com/photos/7317665/pexels-photo-7317665.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/an-empty-funeral-service-7317665/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "funeral-cover-society",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/7114419/pexels-photo-7114419.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/joyful-black-family-sitting-together-on-couch-in-room-7114419/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "memorials-tombstones",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/8964077/pexels-photo-8964077.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/laying-flowers-over-a-tombstone-8964077/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "memorials-tombstones",
+  "slot": "design-1",
+  "link": "https://images.pexels.com/photos/6841683/pexels-photo-6841683.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/close-up-shot-of-a-red-rose-flower-on-tombstone-6841683/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "memorials-tombstones",
+  "slot": "design-2",
+  "link": "https://images.pexels.com/photos/34351065/pexels-photo-34351065.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/elegant-cemetery-gravestone-with-autumn-leaves-34351065/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "memorials-tombstones",
+  "slot": "workshop",
+  "link": "https://images.pexels.com/photos/6242546/pexels-photo-6242546.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/man-carving-in-stone-6242546/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "security-armed-response",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/7402645/pexels-photo-7402645.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/man-standing-in-front-of-a-black-vehicle-7402645/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "security-armed-response",
+  "slot": "control",
+  "link": "https://images.pexels.com/photos/30481728/pexels-photo-30481728.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/security-control-room-with-diverse-team-monitoring-30481728/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "security-guarding",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/18166929/pexels-photo-18166929.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/security-standing-by-gate-18166929/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "security-guarding",
+  "slot": "events",
+  "link": "https://images.pexels.com/photos/34585117/pexels-photo-34585117.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/security-guard-overseeing-outdoor-event-crowd-34585117/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "security-installations",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/5966513/pexels-photo-5966513.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/modern-equipment-for-video-surveillance-on-wall-5966513/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "security-installations",
+  "slot": "fence",
+  "link": "https://images.pexels.com/photos/5889553/pexels-photo-5889553.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/abstract-background-of-geometric-wall-with-barbed-wire-5889553/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "security-installations",
+  "slot": "app",
+  "link": "https://images.pexels.com/photos/24346971/pexels-photo-24346971.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/home-monitoring-security-24346971/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "estate-agency",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/7587880/pexels-photo-7587880.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/modern-house-exterior-7587880/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "estate-agency",
+  "slot": "home-1",
+  "link": "https://images.pexels.com/photos/6267516/pexels-photo-6267516.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/green-grass-lawn-near-white-and-brown-house-under-blue-sky-6267516/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "estate-agency",
+  "slot": "home-2",
+  "link": "https://images.pexels.com/photos/4857757/pexels-photo-4857757.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-of-modern-living-room-4857757/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "estate-agency",
+  "slot": "home-3",
+  "link": "https://images.pexels.com/photos/15409440/pexels-photo-15409440.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/exterior-of-residential-homes-15409440/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "estate-agency",
+  "slot": "agent",
+  "link": "https://images.pexels.com/photos/7937361/pexels-photo-7937361.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-real-estate-agent-giving-a-house-tour-to-a-couple-7937361/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "property-development",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/6422939/pexels-photo-6422939.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/house-exterior-during-daytime-6422939/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "property-development",
+  "slot": "unit-1",
+  "link": "https://images.pexels.com/photos/6934189/pexels-photo-6934189.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-of-living-room-in-studio-apartment-6934189/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "property-development",
+  "slot": "unit-2",
+  "link": "https://images.pexels.com/photos/7535076/pexels-photo-7535076.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-of-contemporary-kitchen-in-apartment-7535076/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "property-development",
+  "slot": "site",
+  "link": "https://images.pexels.com/photos/7121536/pexels-photo-7121536.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/construction-site-with-big-tower-crane-7121536/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "rentals-management",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/8815915/pexels-photo-8815915.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/real-estate-agent-handing-house-keys-8815915/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "rentals-management",
+  "slot": "rental-1",
+  "link": "https://images.pexels.com/photos/6527037/pexels-photo-6527037.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-of-apartment-with-furniture-6527037/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "rentals-management",
+  "slot": "rental-2",
+  "link": "https://images.pexels.com/photos/4969995/pexels-photo-4969995.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/cottage-facade-with-garden-illuminated-by-shiny-sun-4969995/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "law-firm",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/8112166/pexels-photo-8112166.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/clients-and-lawyer-in-an-office-8112166/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "law-firm",
+  "slot": "office",
+  "link": "https://images.pexels.com/photos/7534174/pexels-photo-7534174.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-of-contemporary-boardroom-in-office-7534174/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "accounting-practice",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/8296970/pexels-photo-8296970.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-person-examining-documents-8296970/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "accounting-practice",
+  "slot": "desk",
+  "link": "https://images.pexels.com/photos/7109316/pexels-photo-7109316.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-laptop-showing-graphs-7109316/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "business-services",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/5648033/pexels-photo-5648033.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/crop-black-male-executive-writing-on-paper-sheet-near-laptop-5648033/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-makeup-bridal",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/35538643/pexels-photo-35538643.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/makeup-artist-applying-lipstick-to-a-bride-35538643/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-makeup-bridal",
+  "slot": "look-1",
+  "link": "https://images.pexels.com/photos/24554127/pexels-photo-24554127.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/portrait-of-a-smiling-bride-in-a-white-wedding-dress-and-veil-24554127/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-makeup-bridal",
+  "slot": "look-2",
+  "link": "https://images.pexels.com/photos/6953600/pexels-photo-6953600.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/smiling-black-woman-with-eyeshadow-palette-6953600/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "beauty-makeup-bridal",
+  "slot": "look-3",
+  "link": "https://images.pexels.com/photos/30730737/pexels-photo-30730737.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/young-women-preparing-for-event-in-pink-dresses-30730737/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "health-physio",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/20860622/pexels-photo-20860622.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/physiotherapist-with-exercising-man-20860622/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "health-physio",
+  "slot": "rehab",
+  "link": "https://images.pexels.com/photos/20860621/pexels-photo-20860621.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woman-helping-patient-exercising-20860621/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spa-mobile-massage",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/6628649/pexels-photo-6628649.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-woman-having-a-massage-6628649/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "spa-mobile-massage",
+  "slot": "setup",
+  "link": "https://images.pexels.com/photos/35884499/pexels-photo-35884499.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/cozy-spa-massage-table-with-candle-and-decor-35884499/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "retail-gifts-homeware",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/8058762/pexels-photo-8058762.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woven-baskets-besides-a-wooden-table-8058762/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "retail-gifts-homeware",
+  "slot": "maker",
+  "link": "https://images.pexels.com/photos/31964014/pexels-photo-31964014.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/traditional-basket-weaving-in-daura-nigeria-31964014/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fitness-yoga-dance",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/3775566/pexels-photo-3775566.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/group-of-women-doing-exercise-inside-the-building-3775566/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "fitness-yoga-dance",
+  "slot": "dance",
+  "link": "https://images.pexels.com/photos/5936039/pexels-photo-5936039.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/group-of-people-in-a-fitness-class-5936039/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "professional-consultant",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/5905895/pexels-photo-5905895.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/confident-black-woman-in-formal-clothes-5905895/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "professional-consultant",
+  "slot": "workshop",
+  "link": "https://images.pexels.com/photos/8554281/pexels-photo-8554281.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/woman-at-a-business-meeting-standing-next-to-a-whiteboard-and-holding-a-laptop-8554281/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "mechanics-tyres-fitment",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/3807695/pexels-photo-3807695.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/serious-car-mechanic-pumping-up-car-wheel-in-modern-service-garage-3807695/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "mechanics-tyres-fitment",
+  "slot": "alignment",
+  "link": "https://images.pexels.com/photos/3807799/pexels-photo-3807799.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/serious-mechanic-checking-car-wheels-on-lift-in-modern-car-service-garage-3807799/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-cafe-bakery",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/34104120/pexels-photo-34104120.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/delightful-brunch-table-with-pastries-and-coffee-34104120/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-cafe-bakery",
+  "slot": "cakes",
+  "link": "https://images.pexels.com/photos/18133723/pexels-photo-18133723.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/decorated-birthday-cake-18133723/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "hospitality-cafe-bakery",
+  "slot": "inside",
+  "link": "https://images.pexels.com/photos/36871073/pexels-photo-36871073.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/cozy-cafe-interior-with-barista-and-customer-36871073/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "trades-builder-renovations",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/11429199/pexels-photo-11429199.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/brick-workers-at-construction-site-11429199/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "trades-builder-renovations",
+  "slot": "project-1",
+  "link": "https://images.pexels.com/photos/7018387/pexels-photo-7018387.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/interior-of-modern-kitchen-and-dining-zone-in-apartment-7018387/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "trades-builder-renovations",
+  "slot": "project-2",
+  "link": "https://images.pexels.com/photos/16113325/pexels-photo-16113325.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/modern-bathroom-interior-design-16113325/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "education-driving-school",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/9518018/pexels-photo-9518018.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/adult-man-looking-at-a-teenager-seated-on-driver-s-side-of-a-car-9518018/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-dj-sound",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/13740094/pexels-photo-13740094.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-dj-holding-his-headphones-at-a-party-13740094/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "events-dj-sound",
+  "slot": "sound",
+  "link": "https://images.pexels.com/photos/34594386/pexels-photo-34594386.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/professional-audio-equipment-setup-at-live-event-34594386/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "transport-freight",
+  "slot": "hero",
+  "link": "https://images.pexels.com/photos/28264496/pexels-photo-28264496.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/a-large-semi-truck-driving-down-a-rural-road-28264496/",
+  "licence": "Pexels licence"
+ },
+ {
+  "template": "transport-freight",
+  "slot": "fleet",
+  "link": "https://images.pexels.com/photos/13961751/pexels-photo-13961751.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "source": "https://www.pexels.com/photo/trucks-parked-in-row-13961751/",
+  "licence": "Pexels licence"
+ }
+]

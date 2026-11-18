@@ -159,6 +159,50 @@ it('imports a list of links in one go, safe to run again, and reports problems w
     @unlink($list);
 });
 
+it('WURK’s demo photo list covers every photo place with a licensed Pexels photo, none used twice', function () {
+    $rows = json_decode((string) file_get_contents(base_path('modules/Website/templates/photos/photos.json')), true, flags: JSON_THROW_ON_ERROR);
+    $listed = collect($rows)->map(fn (array $r) => $r['template'].'/'.$r['slot'])->all();
+    $places = [];
+    foreach (glob(base_path('modules/Website/templates/*.json')) ?: [] as $file) {
+        $source = json_decode((string) file_get_contents($file), true, flags: JSON_THROW_ON_ERROR);
+        foreach (TemplatePhotos::slots($source['key'], $source['definition']) as $slot) {
+            $places[] = $source['key'].'/'.$slot['slot'];
+        }
+    }
+    expect($listed)->toEqualCanonicalizing($places)
+        ->and(collect($rows)->pluck('link')->unique()->count())->toBe(count($rows));
+    foreach ($rows as $r) {
+        expect(TemplatePhotoImporter::allowed($r['link']))->toBeTrue($r['link'])
+            ->and($r['source'])->toStartWith('https://www.pexels.com/photo/')
+            ->and($r['licence'])->toBe('Pexels licence');
+    }
+});
+
+it('installs the demo photos with the templates by default, skips them next time, and never fails the install for a photo', function () {
+    config(['wurk.template_demo_photos' => true]);
+    Http::fake(['https://images.pexels.com/*' => Http::sequence()
+        ->push(jpegBytes(), 200, ['Content-Type' => 'image/jpeg'])
+        ->push('gone', 404)
+        ->whenEmpty(Http::response(jpegBytes(), 200, ['Content-Type' => 'image/jpeg']))]);
+    $places = count(TemplatePhotos::slots('health-dental', (array) json_decode((string) $this->dental->draft, true)));
+
+    $this->artisan('website:install-templates', ['--only' => ['health-dental']])->assertSuccessful()
+        ->expectsOutputToContain('Some demo photos weren’t imported');
+    expect(TemplateAsset::query()->count())->toBe($places - 1)
+        ->and(TemplateAsset::query()->first()->licence)->toBe('Pexels licence')
+        ->and(TemplateAsset::query()->first()->source_url)->toStartWith('https://www.pexels.com/photo/');
+
+    // Next deploy: only the missing photo is fetched; the others are already there.
+    $this->artisan('website:install-templates', ['--only' => ['health-dental']])->assertSuccessful()
+        ->expectsOutputToContain('Imported 1, skipped '.($places - 1).' already there');
+    expect(TemplateAsset::query()->count())->toBe($places);
+
+    // --no-photos (and WURK_TEMPLATE_DEMO_PHOTOS=false) leave the photos alone.
+    Http::fake(fn () => throw new RuntimeException('no fetch expected'));
+    $this->artisan('website:install-templates', ['--only' => ['spa-day-spa'], '--no-photos' => true])->assertSuccessful();
+    expect(TemplateAsset::query()->count())->toBe($places);
+});
+
 it('tells demo photos from the business’s own', function () {
     expect(TemplatePhotos::isDemo('/images/templates/health-dental/hero-1600.webp'))->toBeTrue()
         ->and(TemplatePhotos::isDemo('https://cdn.test/storage/templates/health-dental/01jabc-640.webp'))->toBeTrue()
