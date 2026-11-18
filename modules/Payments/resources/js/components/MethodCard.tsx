@@ -13,13 +13,15 @@ import {
 } from '@/design-system';
 
 export interface Method {
-  provider: 'yoco' | 'payfast' | 'ozow' | 'peach' | 'eft';
+  provider: 'yoco' | 'payfast' | 'ozow' | 'peach' | 'paystack' | 'eft';
   name: string;
   allowed?: boolean; // business: has WURK switched it on?
   available?: boolean; // admin: may businesses offer it?
   account?: Account | null;
   branches?: Record<string, Account | null>; // several branches: each branch's own account
   wurk?: Account | null;
+  channels?: { key: string; label: string }[] | null; // Paystack: the ways to pay it offers here
+  webhook?: string | null; // Paystack: the address to paste into Paystack
 }
 interface Account {
   active: boolean;
@@ -27,6 +29,7 @@ interface Account {
   label: string | null;
   has_test: boolean;
   has_live: boolean;
+  channels?: string[] | null; // Paystack: the owner's choice (empty = all)
 }
 
 /** Each provider's keys: label, and whether it's secret. */
@@ -49,6 +52,7 @@ const FIELDS: Record<Method['provider'], [string, string, boolean][]> = {
     ['merchant_id', 'Merchant ID', false],
     ['secret_token', 'Webhook secret token', true],
   ],
+  paystack: [['secret_key', 'Secret key', true]],
   eft: [['instructions', 'How to pay (bank, account number, branch code)', false]],
 };
 
@@ -105,6 +109,68 @@ function KeysForm({
         Save {mode} {m.provider === 'eft' ? 'details' : 'keys'}
       </Button>
     </form>
+  );
+}
+
+/** Paystack: which ways to pay customers see, and the webhook address to paste into Paystack. */
+function PaystackOptions({ m, a, base, q }: { m: Method; a: Account; base: string; q: string }) {
+  const form = useForm<{ channels: string[] }>({ channels: a.channels ?? [] });
+  const toggle = (key: string, on: boolean) =>
+    form.setData(
+      'channels',
+      on ? [...form.data.channels, key] : form.data.channels.filter((c) => c !== key),
+    );
+  return (
+    <div className="border-border grid gap-3 rounded-md border p-3">
+      <form
+        aria-label="Paystack ways to pay"
+        className="grid gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.put(`${base}/paystack/channels${q}`, { preserveScroll: true });
+        }}
+      >
+        <p className="font-medium">Ways customers can pay</p>
+        <p className="text-fg-muted">
+          Leave all unticked to offer every way your Paystack account allows.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          {(m.channels ?? []).map((c) => (
+            <label key={c.key} className="flex items-center gap-2">
+              <Checkbox
+                checked={form.data.channels.includes(c.key)}
+                onCheckedChange={(on) => toggle(c.key, on === true)}
+              />
+              {c.label}
+            </label>
+          ))}
+        </div>
+        {form.errors.channels && (
+          <p role="alert" className="text-danger">
+            {form.errors.channels}
+          </p>
+        )}
+        <Button
+          type="submit"
+          size="sm"
+          variant="secondary"
+          className="justify-self-start"
+          loading={form.processing}
+        >
+          Save ways to pay
+        </Button>
+      </form>
+      {m.webhook && (
+        <div className="grid gap-1">
+          <p className="font-medium">Webhook address</p>
+          <p className="text-fg-muted">
+            In Paystack, open Settings → API Keys &amp; Webhooks and paste this as the webhook URL,
+            so payments are confirmed even if a customer closes the page.
+          </p>
+          <code className="bg-surface rounded px-2 py-1 text-xs break-all">{m.webhook}</code>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -228,6 +294,9 @@ export function MethodCard({
             </div>
             {editing && (
               <KeysForm m={m} mode={editing} base={base} q={q} done={() => setEditing(null)} />
+            )}
+            {!admin && m.provider === 'paystack' && a && (
+              <PaystackOptions m={m} a={a} base={base} q={q} />
             )}
           </>
         )}

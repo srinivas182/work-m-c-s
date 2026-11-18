@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\DB;
 /** Super admin: which payment methods businesses may offer (platform-wide; on unless switched off). */
 final class PlatformMethods
 {
-    /** Card and instant-EFT providers (paid online), then manual EFT. */
-    public const ONLINE = ['yoco', 'payfast', 'ozow', 'peach'];
+    /** Card, instant-EFT and QR providers (paid online), then manual EFT. */
+    public const ONLINE = ['yoco', 'payfast', 'ozow', 'peach', 'paystack'];
 
     public const ALL = [...self::ONLINE, 'eft'];
 
-    public const NAMES = ['yoco' => 'Yoco', 'payfast' => 'PayFast', 'ozow' => 'Ozow', 'peach' => 'Peach Payments', 'eft' => 'EFT / bank transfer'];
+    public const NAMES = ['yoco' => 'Yoco', 'payfast' => 'PayFast', 'ozow' => 'Ozow', 'peach' => 'Peach Payments', 'paystack' => 'Paystack', 'eft' => 'EFT / bank transfer'];
 
     public function available(string $provider): bool
     {

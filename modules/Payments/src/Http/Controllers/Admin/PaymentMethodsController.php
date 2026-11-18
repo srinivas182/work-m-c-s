@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Payments\Gateways\Paystack;
 use Wurk\Payments\Gateways\Yoco;
 use Wurk\Payments\Models\PlatformPaymentAccount;
 use Wurk\Payments\Support\KeyFields;
@@ -52,8 +53,11 @@ final class PaymentMethodsController
     public function keys(Request $request, string $provider, string $mode): RedirectResponse
     {
         Gate::authorize('providers.manage');
-        $keys = array_map(fn ($v) => trim((string) $v), $request->validate(KeyFields::rules($provider, $mode), KeyFields::messages($mode)));
+        $keys = array_map(fn ($v) => trim((string) $v), $request->validate(KeyFields::rules($provider, $mode), KeyFields::messages($mode, $provider)));
         $account = PlatformPaymentAccount::query()->find($provider) ?? new PlatformPaymentAccount(['provider' => $provider, 'mode' => $mode]);
+        if ($provider === 'paystack' && ! Paystack::check(new PlatformPaymentAccount(['provider' => 'paystack', 'mode' => $mode, $mode.'_credentials' => $keys]))) {
+            throw ValidationException::withMessages(['secret_key' => 'Paystack didn’t accept that key. Check it (Settings → API Keys & Webhooks in Paystack) and try again.']);
+        }
         if ($provider === 'yoco') { // registering our notification address tests the key, and gives this mode its own signing secret
             $probe = new PlatformPaymentAccount(['provider' => 'yoco', 'mode' => $mode, $mode.'_credentials' => $keys]);
             $hook = Yoco::register($probe, 'https://'.config('wurk.domains.app').'/payments/notify/yoco');

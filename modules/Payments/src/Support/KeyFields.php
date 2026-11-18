@@ -15,19 +15,22 @@ final class KeyFields
             'yoco' => ['secret_key' => ['required', 'regex:/^sk_'.$mode.'_[A-Za-z0-9]+$/']],
             'ozow' => ['site_code' => ['required', 'string', 'max:40'], 'private_key' => ['required', 'string', 'max:200'], 'api_key' => ['required', 'string', 'max:200']],
             'peach' => ['entity_id' => ['required', 'string', 'max:64'], 'client_id' => ['required', 'string', 'max:200'], 'client_secret' => ['required', 'string', 'max:200'], 'merchant_id' => ['required', 'string', 'max:64'], 'secret_token' => ['required', 'string', 'max:200']],
+            'paystack' => ['secret_key' => ['required', 'regex:/^sk_'.$mode.'_[A-Za-z0-9]+$/']],
             'eft' => ['instructions' => ['required', 'string', 'max:2000']],
             default => [],
         };
     }
 
     /** @return array<string, string> */
-    public static function messages(string $mode): array
+    public static function messages(string $mode, string $provider = 'yoco'): array
     {
+        $name = PlatformMethods::NAMES[$provider] ?? 'Yoco';
+
         return [
             'merchant_id.regex' => 'Your PayFast merchant ID is a number (Settings → Integration in PayFast).',
             'merchant_key.regex' => 'Your PayFast merchant key is letters and numbers (Settings → Integration in PayFast).',
             'passphrase.required' => 'Set a passphrase in PayFast (Settings → Integration) and enter it here — it protects your payments.',
-            'secret_key.regex' => "Paste your Yoco {$mode} secret key — it starts with sk_{$mode}_.",
+            'secret_key.regex' => "Paste your {$name} {$mode} secret key — it starts with sk_{$mode}_.",
             'instructions.required' => 'Tell people how to pay — e.g. bank, account number and branch code.',
         ];
     }
@@ -39,7 +42,7 @@ final class KeyFields
 
         return match ($provider) {
             'payfast' => 'Merchant '.$last((string) ($keys['merchant_id'] ?? '')),
-            'yoco' => 'Key '.$last((string) ($keys['secret_key'] ?? '')),
+            'yoco', 'paystack' => 'Key '.$last((string) ($keys['secret_key'] ?? '')),
             'ozow' => 'Site '.(string) ($keys['site_code'] ?? ''),
             'peach' => 'Entity '.$last((string) ($keys['entity_id'] ?? '')),
             default => 'Bank details saved',
