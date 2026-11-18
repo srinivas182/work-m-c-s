@@ -1,0 +1,512 @@
+{
+  "category": "real-estate",
+  "key": "estate-agency",
+  "name": "Estate agency",
+  "position": 1,
+  "description": "Polished and local: featured homes, a free valuation and the agents who know the area.",
+  "definition": {
+    "branding": {
+      "primary": "#0F172A",
+      "secondary": "#B45309",
+      "font_pairing": "elegant",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Properties",
+          "type": "page",
+          "page": "properties"
+        },
+        {
+          "label": "About us",
+          "type": "page",
+          "page": "about"
+        },
+        {
+          "label": "Valuation",
+          "type": "page",
+          "page": "valuation"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Estate agency — homes for sale and to rent",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Free valuation",
+                "buttonHref": "/valuation",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Find home. Sell well.",
+                "text": "Homes for sale and to rent in your area, with agents who know every street — and a free valuation when you’re ready to sell.",
+                "primaryLabel": "Free valuation",
+                "primaryHref": "/valuation",
+                "secondaryLabel": "View properties",
+                "secondaryHref": "/properties",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/estate-agency/hero-1600.webp",
+                    "alt": "A modern family home at dusk"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "featured",
+              "type": "Listings",
+              "version": 1,
+              "props": {
+                "heading": "Featured properties",
+                "intro": "",
+                "buttonLabel": "All properties",
+                "buttonHref": "/properties",
+                "listings": [
+                  {
+                    "title": "Four-bedroom family home with a garden and pool",
+                    "photo": "/images/templates/estate-agency/home-1-1600.webp",
+                    "photoAlt": "A family home with a garden",
+                    "deal": "sale",
+                    "price": 0,
+                    "area": "",
+                    "beds": "4",
+                    "baths": "3",
+                    "parking": "2",
+                    "size": "320",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  },
+                  {
+                    "title": "Two-bedroom apartment close to shops and transport",
+                    "photo": "/images/templates/estate-agency/home-2-1600.webp",
+                    "photoAlt": "A modern apartment living room",
+                    "deal": "rent",
+                    "price": 0,
+                    "area": "",
+                    "beds": "2",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "78",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  },
+                  {
+                    "title": "Three-bedroom townhouse in a secure estate",
+                    "photo": "/images/templates/estate-agency/home-3-1600.webp",
+                    "photoAlt": "A townhouse in a secure estate",
+                    "deal": "sale",
+                    "price": 0,
+                    "area": "",
+                    "beds": "3",
+                    "baths": "2",
+                    "parking": "2",
+                    "size": "160",
+                    "status": "under-offer",
+                    "detailsHref": "/contact"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sell",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Selling with us",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Free valuation",
+                    "text": "A realistic price, based on recent sales nearby."
+                  },
+                  {
+                    "title": "Marketing",
+                    "text": "Photos, portals, social media and show days."
+                  },
+                  {
+                    "title": "Sold",
+                    "text": "We handle offers, bond approvals and transfer with you."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "agents",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Agents who know the area",
+                "text": "Introduce your agents, the areas they cover and the homes they’ve sold.",
+                "image": "/images/templates/estate-agency/agent-1600.webp",
+                "imageAlt": "An estate agent with clients",
+                "imageSide": "right",
+                "buttonLabel": "Meet the team",
+                "buttonHref": "/about"
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What buyers and sellers say",
+                "items": []
+              }
+            },
+            {
+              "id": "cta",
+              "type": "CallToAction",
+              "version": 1,
+              "props": {
+                "heading": "Thinking of selling?",
+                "text": "Get a free, no-obligation valuation.",
+                "buttonLabel": "Book a valuation",
+                "buttonHref": "/valuation"
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "properties",
+        "title": "Properties",
+        "slug": "properties",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Free valuation",
+                "buttonHref": "/valuation",
+                "sticky": true
+              }
+            },
+            {
+              "id": "all",
+              "type": "Listings",
+              "version": 1,
+              "props": {
+                "heading": "Properties",
+                "intro": "Ask us about homes that aren’t listed yet.",
+                "buttonLabel": "",
+                "buttonHref": "",
+                "listings": [
+                  {
+                    "title": "Four-bedroom family home with a garden and pool",
+                    "photo": "/images/templates/estate-agency/home-1-1600.webp",
+                    "photoAlt": "A family home with a garden",
+                    "deal": "sale",
+                    "price": 0,
+                    "area": "",
+                    "beds": "4",
+                    "baths": "3",
+                    "parking": "2",
+                    "size": "320",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  },
+                  {
+                    "title": "Two-bedroom apartment close to shops and transport",
+                    "photo": "/images/templates/estate-agency/home-2-1600.webp",
+                    "photoAlt": "A modern apartment living room",
+                    "deal": "rent",
+                    "price": 0,
+                    "area": "",
+                    "beds": "2",
+                    "baths": "1",
+                    "parking": "1",
+                    "size": "78",
+                    "status": "available",
+                    "detailsHref": "/contact"
+                  },
+                  {
+                    "title": "Three-bedroom townhouse in a secure estate",
+                    "photo": "/images/templates/estate-agency/home-3-1600.webp",
+                    "photoAlt": "A townhouse in a secure estate",
+                    "deal": "sale",
+                    "price": 0,
+                    "area": "",
+                    "beds": "3",
+                    "baths": "2",
+                    "parking": "2",
+                    "size": "160",
+                    "status": "under-offer",
+                    "detailsHref": "/contact"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "form",
+              "type": "Form",
+              "version": 1,
+              "props": {
+                "purpose": "interest",
+                "heading": "Tell us what you’re looking for",
+                "intro": "We’ll let you know when something matches.",
+                "detailsLabel": "Anything else?",
+                "submitLabel": "Alert me",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Buy or rent?",
+                    "type": "choice",
+                    "choices": "Buy, Rent",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Area",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Budget",
+                    "type": "short",
+                    "choices": "",
+                    "required": "no"
+                  },
+                  {
+                    "label": "Bedrooms",
+                    "type": "choice",
+                    "choices": "1, 2, 3, 4 or more",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "about",
+        "title": "About us",
+        "slug": "about",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Free valuation",
+                "buttonHref": "/valuation",
+                "sticky": true
+              }
+            },
+            {
+              "id": "story",
+              "type": "Text",
+              "version": 1,
+              "props": {
+                "heading": "About us",
+                "text": "Your agency’s story, the areas you cover and how you work."
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Our agents",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Registered",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "PPRA",
+                    "logo": "",
+                    "detail": "Fidelity Fund Certificates for every agent"
+                  },
+                  {
+                    "name": "FICA",
+                    "logo": "",
+                    "detail": "Compliant"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "valuation",
+        "title": "Valuation",
+        "slug": "valuation",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Free valuation",
+                "buttonHref": "/valuation",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Book a free valuation",
+                "intro": "Tell us about your property.",
+                "services": [
+                  {
+                    "name": "House"
+                  },
+                  {
+                    "name": "Townhouse"
+                  },
+                  {
+                    "name": "Apartment"
+                  },
+                  {
+                    "name": "Plot"
+                  },
+                  {
+                    "name": "Farm or smallholding"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Book my valuation",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "Address or suburb",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Bedrooms",
+                    "type": "choice",
+                    "choices": "1, 2, 3, 4, 5 or more",
+                    "required": "no"
+                  },
+                  {
+                    "label": "When do you want to sell?",
+                    "type": "choice",
+                    "choices": "Now, In 3 months, Just curious",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Visit the office",
+                "intro": "Or call an agent directly.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find our office",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

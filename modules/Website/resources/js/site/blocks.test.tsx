@@ -32,8 +32,8 @@ const render = (blocks: ContentDocument['blocks'], editing = false) =>
   );
 
 describe('block library', () => {
-  it('has 32 blocks whose types and versions the server accepts', () => {
-    expect(Object.keys(BLOCKS)).toHaveLength(32); // + Book online (8.2), Products (10.1), Form (12.3), Numbers, How it works, Logos, Map and directions, Video (20.2)
+  it('has 33 blocks whose types and versions the server accepts', () => {
+    expect(Object.keys(BLOCKS)).toHaveLength(33); // + Book online (8.2), Products (10.1), Form (12.3), Numbers, How it works, Logos, Map and directions, Video (20.2), Property listings (20.4d)
     for (const [type, def] of Object.entries(BLOCKS)) {
       expect(type).toMatch(/^[A-Z][A-Za-z0-9]{1,40}$/);
       expect(def.type).toBe(type);
@@ -358,5 +358,39 @@ describe('sections added in Sprint 20.2', () => {
     expect(
       render([block('Logos', { heading: 'We stock', items: [{ image: '', name: 'x' }] })]),
     ).not.toContain('We stock'); // empty: hidden live
+  });
+
+  it('lists properties with the facts buyers compare, status and rent per month (20.4d)', () => {
+    const listing = {
+      title: '3-bedroom house with a garden',
+      photo: '',
+      photoAlt: '',
+      deal: 'rent',
+      price: 1250000,
+      area: 'Midrand',
+      beds: '3',
+      baths: '2',
+      parking: '2',
+      size: '180',
+      status: 'under-offer',
+      detailsHref: '/viewing',
+    };
+    const html = render([block('Listings', { heading: 'To let', listings: [listing] })]);
+    expect(html).toContain('R12');
+    expect(html).toContain(' / month');
+    expect(html).toContain('Under offer');
+    expect(html).toContain('180 m²');
+    expect(html).toContain('<span class="sr-only"> bedrooms</span>');
+    expect(html).toContain('href="/viewing"');
+    expect(
+      render([
+        block('Listings', {
+          listings: [{ ...listing, price: 0, deal: 'sale', status: 'available' }],
+        }),
+      ]),
+    ).toContain('Price on request');
+    expect(render([block('Listings', { heading: 'To let', listings: [] })])).not.toContain(
+      'To let',
+    ); // empty: hidden live
   });
 });

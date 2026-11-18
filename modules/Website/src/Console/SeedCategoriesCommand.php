@@ -38,6 +38,9 @@ final class SeedCategoriesCommand extends Command
         ['school', 'School', 'Schools, colleges and skills academies', 'school'],
         ['funeral-services', 'Funeral services', 'Funeral homes, funeral cover and memorials', 'flower-2'],
         ['security', 'Security', 'Armed response, guarding and installations', 'shield-check'],
+        // Sprint 20.4d
+        ['real-estate', 'Real estate', 'Estate agents, developments and rentals', 'house'],
+        ['legal-accounting', 'Legal & accounting', 'Attorneys, accountants and business services', 'scale'],
     ];
 
     protected $signature = 'website:seed-categories';
