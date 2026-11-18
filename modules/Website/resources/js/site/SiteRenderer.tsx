@@ -81,6 +81,7 @@ export function SiteRenderer({
   return (
     <div
       className={fill ? 'wurk-site min-h-svh' : 'wurk-site'}
+      data-style={branding.style ?? 'minimal'}
       style={{
         ...siteTheme(branding),
         background: 'var(--s-bg)',

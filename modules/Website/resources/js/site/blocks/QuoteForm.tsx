@@ -301,7 +301,7 @@ export function QuoteFormView({
           <button
             type="submit"
             disabled={!live}
-            className="inline-flex min-h-12 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-6 font-semibold text-[var(--s-on-brand)] disabled:opacity-60"
+            className="s-btn inline-flex min-h-12 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-6 font-semibold text-[var(--s-on-brand)] disabled:opacity-60"
           >
             {p.submitLabel}
           </button>

@@ -18,3 +18,68 @@
 .wurk-site :is(h3, h4, h5, h6) {
   font-weight: 600;
 }
+
+/*
+ * Styles (Sprint 20.1): one design, three looks. The variables come from theme.ts; these rules sit outside Tailwind's
+ * layers, so they shape every section without each block knowing about styles.
+ */
+.wurk-site .s-section {
+  padding-block: var(--s-section-y, clamp(4rem, 8vw, 6rem));
+}
+
+.wurk-site :is(h1, h2) {
+  font-weight: var(--s-heading-weight, 700);
+  letter-spacing: var(--s-heading-tracking, -0.01em);
+}
+
+.wurk-site h2 {
+  font-size: calc(clamp(1.875rem, 1.4rem + 1.6vw, 2.5rem) * var(--s-heading-scale, 1));
+  line-height: 1.12;
+}
+
+.wurk-site .s-btn {
+  text-transform: var(--s-btn-case, none);
+  letter-spacing: var(--s-btn-tracking, 0);
+  font-size: var(--s-btn-size, 1rem);
+}
+
+/* Luxury: alternate sections become deep, quiet bands, with every colour inside them taken from the dark palette. */
+.wurk-site[data-style='luxury'] [data-tone='surface'] {
+  --s-bg: var(--s-inv-bg);
+  --s-surface: var(--s-inv-surface);
+  --s-surface-2: var(--s-inv-surface-2);
+  --s-border: var(--s-inv-border);
+  --s-fg: var(--s-inv-fg);
+  --s-fg-muted: var(--s-inv-fg-muted);
+  --s-brand: var(--s-inv-brand);
+  --s-on-brand: var(--s-inv-on-brand);
+  --s-brand-text: var(--s-inv-brand-text);
+  --s-brand-soft: var(--s-inv-brand-soft);
+  --s-brand-softer: var(--s-inv-brand-softer);
+  --s-accent: var(--s-inv-accent);
+  --s-on-accent: var(--s-inv-on-accent);
+  background: var(--s-inv-bg);
+  color: var(--s-inv-fg);
+}
+
+.wurk-site[data-style='luxury'] .s-btn {
+  font-weight: 600;
+}
+
+/* Modern minimal: no fills between sections, just a fine line. */
+.wurk-site[data-style='minimal'] [data-tone='surface'] {
+  background: var(--s-bg);
+  border-block: 1px solid var(--s-border);
+}
+
+/* Bold: alternate sections in a soft wash of the brand colour. */
+.wurk-site[data-style='bold'] [data-tone='surface'] {
+  --s-bg: var(--s-brand-softer);
+  --s-surface: var(--s-brand-soft);
+  background: var(--s-brand-softer);
+}
+
+.wurk-site[data-style='bold'] .s-btn {
+  font-weight: 800;
+  padding-inline: 1.75rem;
+}

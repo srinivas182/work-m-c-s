@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
+use Illuminate\Validation\ValidationException;
 use Tests\Support\InteractsWithShards;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\SiteTemplate;
 use Wurk\Website\Models\SiteTemplateVersion;
+use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\SiteBuilder;
 use Wurk\Website\Support\TemplateSwitcher;
 
@@ -60,4 +62,23 @@ it('previews a design in other colours — only real colours are taken (Sprint 1
         ->assertInertia(fn ($p) => $p->where('branding.primary', '#E53935')->where('branding.secondary', '#FFFFFF'));
     $this->get($url.'?primary=red;background:url(x)')->assertOk()
         ->assertInertia(fn ($p) => $p->where('branding.primary', $default['primary']));
+});
+
+it('previews a design in each of its three styles, which owners can choose and keep (Sprint 20.1)', function () {
+    $this->artisan('website:install-templates');
+    $url = 'http://'.config('wurk.domains.app').'/templates/salon-hair-braids/preview';
+    $this->get($url.'?style=luxury')->assertOk()
+        ->assertInertia(fn ($p) => $p->where('branding.style', 'luxury')->where('branding.font_pairing', 'elegant')->where('branding.corners', 'square'));
+    $this->get($url.'?style=gaudy')->assertOk()->assertInertia(fn ($p) => $p->where('branding.style', 'minimal')); // only real styles
+
+    $clean = app(Branding::class)->validate(['primary' => '#9D174D', 'font_pairing' => 'bold', 'corners' => 'round', 'style' => 'bold']);
+    expect($clean['style'])->toBe('bold')
+        ->and(app(Branding::class)->validate(['primary' => '#9D174D', 'font_pairing' => 'bold', 'corners' => 'round'])['style'])->toBe('minimal');
+    expect(fn () => app(Branding::class)->validate(['primary' => '#9D174D', 'font_pairing' => 'bold', 'corners' => 'round', 'style' => 'gaudy']))->toThrow(ValidationException::class);
+
+    // The renderer's presets (site/theme.ts) are the same as the server's.
+    $ts = (string) file_get_contents(base_path('modules/Website/resources/js/site/theme.ts'));
+    foreach (Branding::STYLE_PRESETS as $style => $preset) {
+        expect($ts)->toMatch("/\\b{$style}: \\{[^}]*font_pairing: '{$preset['font_pairing']}',\\s*corners: '{$preset['corners']}'/s");
+    }
 });

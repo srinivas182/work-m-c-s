@@ -21,7 +21,7 @@ export function Section({
         ? 'bg-[var(--s-brand)] text-[var(--s-on-brand)]'
         : '';
   return (
-    <section id={id} className={`px-5 py-16 sm:px-8 sm:py-24 ${bg}`}>
+    <section id={id} data-tone={tone} className={`s-section px-5 sm:px-8 ${bg}`}>
       <div className="mx-auto max-w-6xl">
         {narrow ? <div className="max-w-3xl">{children}</div> : children}
       </div>

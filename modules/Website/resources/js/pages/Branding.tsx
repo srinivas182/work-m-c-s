@@ -15,8 +15,8 @@ import { generatePalette } from '@/design-system/brand/palette';
 import AppShell from '@/layouts/AppShell';
 import { PhotoPicker } from '../editor/PhotoPicker';
 import { SiteRenderer } from '../site/SiteRenderer';
-import { FONT_PAIRINGS } from '../site/theme';
-import type { Branding as BrandingValue, ContentDocument } from '../site/types';
+import { FONT_PAIRINGS, STYLES } from '../site/theme';
+import type { Branding as BrandingValue, ContentDocument, SiteStyle } from '../site/types';
 
 interface Props {
   branding: BrandingValue;
@@ -38,7 +38,7 @@ const PREVIEW: ContentDocument = {
       props: {
         layout: 'centered',
         heading: 'This is how your website looks',
-        text: 'Your colours, fonts and corners — change them on the left and watch this update.',
+        text: 'Your style, colours, fonts and corners — change them on the left and watch this update.',
         facts: [{ text: 'Open today until 18:00' }],
       },
     },
@@ -184,6 +184,48 @@ export default function Branding({
                     value={data.favicon ? [{ src: data.favicon, alt: '' }] : []}
                     onChange={(n) => set('favicon', n[0]?.src ?? null)}
                   />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Style</CardTitle>
+                <CardDescription>
+                  One design, three looks. Your words and photos stay as they are.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div role="radiogroup" aria-label="Style" className="grid gap-3">
+                  {(Object.entries(STYLES) as [SiteStyle, (typeof STYLES)[SiteStyle]][]).map(
+                    ([key, style]) => {
+                      const selected = (data.style ?? 'minimal') === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() =>
+                            setData((d) => ({
+                              ...d,
+                              style: key,
+                              font_pairing: style.font_pairing,
+                              corners: style.corners,
+                            }))
+                          }
+                          className={`grid gap-1 rounded-xl border p-3 text-left transition ${selected ? 'border-primary ring-primary/30 ring-2' : 'border-border hover:border-fg-subtle'}`}
+                        >
+                          <span
+                            className="text-lg leading-tight font-semibold"
+                            style={{ fontFamily: FONT_PAIRINGS[style.font_pairing]?.display }}
+                          >
+                            {style.label}
+                          </span>
+                          <span className="text-fg-muted text-sm">{style.description}</span>
+                        </button>
+                      );
+                    },
+                  )}
                 </div>
               </CardContent>
             </Card>

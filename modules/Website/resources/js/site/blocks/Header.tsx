@@ -102,7 +102,7 @@ export const Header: BlockDefinition<HeaderProps> = {
             {p.buttonLabel && (
               <a
                 href={href(p.buttonHref)}
-                className="inline-flex min-h-11 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-5 text-sm font-semibold text-[var(--s-on-brand)]"
+                className="s-btn inline-flex min-h-11 items-center rounded-[var(--s-radius)] bg-[var(--s-brand)] px-5 text-sm font-semibold text-[var(--s-on-brand)]"
               >
                 {p.buttonLabel}
               </a>
