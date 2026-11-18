@@ -140,3 +140,13 @@ it('sends Monday’s summary to the owner on WhatsApp, once a week, until they r
     $this->artisan('money:weekly-summaries')->assertSuccessful();
     expect($messenger->sent)->toHaveCount(2);
 });
+
+it('records a change sent twice with the same key once (saved offline, sent later)', function () {
+    $send = fn (array $data) => $this->actingAs($this->owner)->withHeader('Idempotency-Key', 'k-1234567890-abc')->post($this->base.'/expenses', $data);
+    $send(['amount' => 0, 'category' => 'rent', 'spent_on' => $this->today])->assertSessionHasErrors('amount'); // a problem: not remembered
+    $send(['amount' => 80, 'category' => 'transport', 'spent_on' => $this->today])->assertSessionHas('status', 'R80.00 added to transport.');
+    $send(['amount' => 80, 'category' => 'transport', 'spent_on' => $this->today])->assertSessionHas('status', 'Already sent.');
+    expect(($this->in)(fn () => Expense::query()->count()))->toBe(1);
+    $this->actingAs($this->owner)->withHeader('Idempotency-Key', 'k-0987654321-xyz')->post($this->base.'/expenses', ['amount' => 80, 'category' => 'transport', 'spent_on' => $this->today]);
+    expect(($this->in)(fn () => Expense::query()->count()))->toBe(2); // a different change
+});

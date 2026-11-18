@@ -4,6 +4,17 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Offline — Sprint 24.5 (keep working with a weak signal, catch up later)
+- **WURK opens without a signal:**
+  - A service worker keeps the app's files on the phone and shows the last-seen pages, with a bar that says you're offline.
+  - The app can be added to the home screen (a web app manifest), which is the base for Sprint 26's app.
+- **Saved now, sent later**, for six everyday changes only (decision E): record a sale, money taken in person, add a booking, add an expense, a cash-up count, and a chat reply.
+  - Offline, or when the signal drops mid-way, the change is kept on the phone and shown as "waiting to send". It's sent when the signal returns.
+  - If something changed meanwhile (for example, the time was taken), the person is told plainly what wasn't recorded.
+  - Nothing that moves money online is queued.
+- **Sent once:** each change carries its own `Idempotency-Key`. The server records the first that succeeds and answers any repeat "Already sent" (`IdempotentRequests` middleware).
+- **Signing out** clears the phone's saved pages and anything waiting to send.
+
 ### Lite mode — Sprint 24.4 (light on data)
 - **Lite mode switches on by itself** when the browser's Data Saver is on (`Save-Data`) or the connection is 2G/3G. A person can set it to Automatic, Always on or Off for their phone in Account & security, which also shows about how much data WURK used on that phone this month.
 - **What lite mode changes:**

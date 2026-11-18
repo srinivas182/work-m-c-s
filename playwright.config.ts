@@ -24,6 +24,10 @@ export default defineConfig({
       ...(process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {}),
     },
     screenshot: 'only-on-failure',
+    // The service worker (24.5) caches each page it serves; every test starts a fresh browser, so here it only adds
+    // work for the single test server (screens shards ran 2-3 min longer). e2e/languages-and-lite.spec.ts allows it
+    // for the one test that checks it installs.
+    serviceWorkers: 'block',
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
