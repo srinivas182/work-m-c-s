@@ -111,5 +111,5 @@ So every category has at least three designs.
 
 ## Follow-ups
 
-- **Demo photos:** HQ fills the photo places (Admin → Templates → Demo photos, or `website:import-template-photos`), about 230 places across 78 designs.
+- **Demo photos:** HQ fills the photo places (Admin → Templates → Demo photos, or `website:import-template-photos`), 215 places across 78 designs.
 - **Fallback fonts on Android:** the metric-matched fallbacks name Georgia and Arial, which Android phones don't have. Add Roboto and Noto Serif fallbacks with their own metrics, so a slow font swap can't shift the page. Most WURK visitors are on Android. One CI run showed this once (a funeral design's layout shift of 0.23), but it didn't happen again.
