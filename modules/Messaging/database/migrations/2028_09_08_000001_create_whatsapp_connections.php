@@ -30,10 +30,10 @@ return new class extends Migration
             $table->text('token');                              // encrypted business token; never sent to the browser
             $table->text('pin')->nullable();                    // encrypted two-step verification PIN (new numbers only)
             $table->ulid('connected_by')->nullable();
-            $table->timestamp('connected_at')->nullable();
-            $table->timestamp('disconnected_at')->nullable();
-            $table->timestamp('checked_at')->nullable();
-            $table->timestamps();
+            $table->dateTime('connected_at')->nullable();
+            $table->dateTime('disconnected_at')->nullable();
+            $table->dateTime('checked_at')->nullable();
+            $table->datetimes();
         });
     }
 
