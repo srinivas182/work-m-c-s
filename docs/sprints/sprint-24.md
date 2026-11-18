@@ -1,6 +1,6 @@
 # Sprint 24 — Languages & light on data
 
-**Status:** proposed 18 Nov 2026, waiting for approval.
+**Status:** approved 18 Nov 2026 (decisions A–G as recommended).
 
 ## Why
 
