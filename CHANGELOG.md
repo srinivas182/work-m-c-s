@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.21.0] — 2026-11-18 — Sprint 20: Premium templates
+
+### Premium templates — Sprint 20.6 (quality bar and release)
+- **A written quality bar** for every design (`docs/templates/quality-bar.md`). It covers structure, the first screen, typography, photography, copy, mobile, motion, speed, accessibility and launch in under an hour, and says which checks are automatic and which are reviewed.
+- **78 designs in 26 categories, each in three styles (234 looks).** Each one passes WCAG 2.2 AA in its own and six other colours, fits a phone, and scores 97–100 on mobile Lighthouse.
+
 ### Premium templates — Sprint 20.5 (a third design for every category)
 - The first twelve categories each get a third design:
   - **Salon & beauty:** makeup and bridal beauty.

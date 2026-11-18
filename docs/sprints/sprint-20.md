@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved by WURK (18 Nov 2026: "All approved", with Sprints 19–25 in sequence; photos: "real photographs tenants can replace … an African library or AI generated") |
+| **Status** | Done — released as v0.21.0 (approved by WURK 18 Nov 2026: "All approved", with Sprints 19–25 in sequence; photos: "real photographs tenants can replace … an African library or AI generated"; 18 Nov: "don't blur any photo") |
 | **Release** | v0.21.0 |
 | **Depends on** | v0.20.0. Builds on: the 24 templates (Sprints 6–7), the section registry and site renderer, the palette engine (WCAG AA pairings), the media library, WURK AI images (decorative only, Sprint 7), the launch checklist, the per-template accessibility, contrast and phone-width checks (18.5, 19.4a) |
 | **Next** | Sprint 21 — WhatsApp both ways |
@@ -96,3 +96,20 @@ So every category has at least three designs.
 | 20.4c Church & NGO, school, funeral services, security | #216 | Twelve more designs (`part_c.py`). Service times use the feature grid (no prices shown); giving pages leave banking details and Section 18A to the organisation; funeral designs are calm and use decorative imagery (AI allowed there) rather than people; security designs show PSIRA registration as something the owner fills in. Numbers that would be claims (pass rates, response times) are written as prompts for the owner instead. |
 | 20.4d Real estate, legal & accounting | #217 | New **Property listings** section (`Listings`, block 33): price or "price on request", sale or rent per month, beds, baths, parking, m², status badge (under offer / sold / let), details link (`detailsHref`, so the link check covers it). Demo listings use demo photos (the checklist counts them) and no prices. Six designs (`part_d.py`); law-firm design states that the site isn't legal advice. With 20.4a–d, the 14 new categories have 3 designs each (42). |
 | 20.5 Third design for the first twelve | #218 | Twelve designs (`part_e.py`) chosen to cover what the first two didn't (e.g. health → physio, education → driving school, transport → freight). The design check now requires ≥ 3 designs in every seeded category and that every category has designs. 78 designs, 26 categories. |
+| 20.6 Quality bar and release | — | `docs/templates/quality-bar.md`: ten areas, each line marked [auto] (a test or gate enforces it) or [review], plus a per-design release checklist. CI scaled for 78 designs: the screens crawl in five parts and the performance gate in two (the gate prints what shifted when layout shift fails); tests install only the designs they use (`install-templates --only`). Release v0.21.0. |
+
+## Acceptance — verified
+
+| # | Criterion | How it's met |
+|---|---|---|
+| 1 | Pick "Barbershop", see three designs, preview each in three styles, launch in under an hour | Signup lists Barbershop's three designs, with style choice and `?style=` previews (20.1, 20.4a). The launch checklist leads to publishing |
+| 2 | Switching design or style keeps every word and photo | `TemplateSwitchTest`, `InstallTemplatesTest` (switch keeps the owner's work); styles only change CSS variables and presets (20.1) |
+| 3 | WCAG 2.2 AA in seven colour sets and at phone width; default styles ≥ 90 on mobile Lighthouse | `template-contrast.spec` (every page, plus home in own + six colours, Luxury and Bold), `phone-width.spec`, `public-templates.spec`, performance gate on all 78 home pages (every one 97–100, layout shift ≤ 0.03 in CI) |
+| 4 | HQ uploads a licensed photo; new sites show it marked demo; owner replaces it in two taps | `TemplatePhotosTest` (link import, upload, resolution into new sites, checklist count); editor badge and "Choose from my photos" (`PhotoPicker.test`) |
+| 5 | Video hero: still picture and pause button under reduce motion and Save-Data; never sound | `site-islands.test` (reduce motion, Save-Data, slow connection keep the poster; muted loop; pause/play) |
+| 6 | Quality bar written; each design checked against it | `docs/templates/quality-bar.md`; automated lines enforced in CI; designs reviewed in screenshots during 20.4–20.5. **Still with HQ:** choosing the real demo photos (this workspace can't download or view them); until then, designs from 20.4 on show crisp placeholders, and the first 24 their earlier stand-ins |
+
+## Follow-ups
+
+- **Demo photos:** HQ fills the photo places (Admin → Templates → Demo photos, or `website:import-template-photos`), about 230 places across 78 designs.
+- **Fallback fonts on Android:** the metric-matched fallbacks name Georgia and Arial, which Android phones don't have. Add Roboto and Noto Serif fallbacks with their own metrics, so a slow font swap can't shift the page. Most WURK visitors are on Android. One CI run showed this once (a funeral design's layout shift of 0.23), but it didn't happen again.
