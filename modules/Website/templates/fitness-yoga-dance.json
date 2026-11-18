@@ -1,0 +1,381 @@
+{
+  "category": "fitness",
+  "key": "fitness-yoga-dance",
+  "name": "Yoga, pilates & dance studio",
+  "position": 3,
+  "description": "Light and calm: a timetable of classes, intro offer and booking.",
+  "definition": {
+    "branding": {
+      "primary": "#6D28D9",
+      "secondary": "#14B8A6",
+      "font_pairing": "clean",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Timetable",
+          "type": "page",
+          "page": "timetable"
+        },
+        {
+          "label": "Book",
+          "type": "page",
+          "page": "book"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Yoga, pilates and dance classes",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a class",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "promo",
+              "type": "PromotionBanner",
+              "version": 1,
+              "props": {
+                "text": "New here? Your first week of classes for a special price",
+                "linkLabel": "Book your first class",
+                "linkHref": "/book",
+                "tone": "brand",
+                "starts": "",
+                "ends": ""
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Move, breathe, feel at home",
+                "text": "Yoga, pilates and dance classes for every body and every level.",
+                "primaryLabel": "Book a class",
+                "primaryHref": "/book",
+                "secondaryLabel": "Timetable",
+                "secondaryHref": "/timetable",
+                "facts": [],
+                "images": [
+                  {
+                    "src": "/images/templates/fitness-yoga-dance/hero-1600.webp",
+                    "alt": "A yoga class in a bright studio"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "timetable",
+              "type": "ClassTimetable",
+              "version": 1,
+              "props": {
+                "heading": "This week",
+                "intro": "Book ahead — classes are small.",
+                "note": "",
+                "bookLabel": "Book a class",
+                "bookHref": "/book",
+                "classes": [
+                  {
+                    "day": "Monday",
+                    "start": "06:00",
+                    "end": "07:00",
+                    "name": "Morning flow yoga",
+                    "instructor": "",
+                    "level": "All levels"
+                  },
+                  {
+                    "day": "Tuesday",
+                    "start": "18:00",
+                    "end": "19:00",
+                    "name": "Mat pilates",
+                    "instructor": "",
+                    "level": "Beginner"
+                  },
+                  {
+                    "day": "Wednesday",
+                    "start": "18:30",
+                    "end": "19:30",
+                    "name": "Afro dance",
+                    "instructor": "",
+                    "level": "All levels"
+                  },
+                  {
+                    "day": "Saturday",
+                    "start": "08:00",
+                    "end": "09:15",
+                    "name": "Slow yoga",
+                    "instructor": "",
+                    "level": "All levels"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "dance",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Classes for every body",
+                "text": "Describe your classes and teachers, and how beginners are looked after.",
+                "image": "/images/templates/fitness-yoga-dance/dance-1600.webp",
+                "imageAlt": "A dance class mid-movement",
+                "imageSide": "left",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "passes",
+              "type": "Packages",
+              "version": 1,
+              "props": {
+                "heading": "Passes",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "Intro week",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Unlimited classes for 7 days",
+                    "validUntil": "",
+                    "highlight": true,
+                    "buttonLabel": "Start",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "10-class pass",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Use within 3 months",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Buy",
+                    "buttonHref": "/book"
+                  },
+                  {
+                    "name": "Monthly unlimited",
+                    "price": 0,
+                    "from": false,
+                    "inclusions": "Every class, every week",
+                    "validUntil": "",
+                    "highlight": false,
+                    "buttonLabel": "Join",
+                    "buttonHref": "/book"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What customers say",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "timetable",
+        "title": "Timetable",
+        "slug": "timetable",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a class",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "timetable",
+              "type": "ClassTimetable",
+              "version": 1,
+              "props": {
+                "heading": "Timetable",
+                "intro": "",
+                "note": "Timetable changes over holidays.",
+                "bookLabel": "Book",
+                "bookHref": "/book",
+                "classes": [
+                  {
+                    "day": "Monday",
+                    "start": "06:00",
+                    "end": "07:00",
+                    "name": "Morning flow yoga",
+                    "instructor": "",
+                    "level": "All levels"
+                  },
+                  {
+                    "day": "Tuesday",
+                    "start": "18:00",
+                    "end": "19:00",
+                    "name": "Mat pilates",
+                    "instructor": "",
+                    "level": "Beginner"
+                  },
+                  {
+                    "day": "Wednesday",
+                    "start": "18:30",
+                    "end": "19:30",
+                    "name": "Afro dance",
+                    "instructor": "",
+                    "level": "All levels"
+                  },
+                  {
+                    "day": "Thursday",
+                    "start": "18:00",
+                    "end": "19:00",
+                    "name": "Power yoga",
+                    "instructor": "",
+                    "level": "Intermediate"
+                  },
+                  {
+                    "day": "Saturday",
+                    "start": "08:00",
+                    "end": "09:15",
+                    "name": "Slow yoga",
+                    "instructor": "",
+                    "level": "All levels"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "team",
+              "type": "Team",
+              "version": 1,
+              "props": {
+                "heading": "Teachers",
+                "intro": "",
+                "people": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "book",
+        "title": "Book",
+        "slug": "book",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a class",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "book-online",
+              "type": "BookOnline",
+              "version": 1,
+              "props": {
+                "mode": "classes",
+                "heading": "Book a class",
+                "intro": "Choose a class and reserve your spot.",
+                "fallbackText": "Call or message us to book.",
+                "fallbackLabel": "Contact us",
+                "fallbackHref": "/contact"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the studio",
+                "intro": "Private classes and events: ask us.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the studio",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

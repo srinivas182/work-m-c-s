@@ -889,5 +889,138 @@
       "shows": "A young entrepreneur at a desk completing documents",
       "search": "young African entrepreneur paperwork"
     }
+  },
+  "beauty-makeup-bridal": {
+    "hero": {
+      "shows": "A makeup artist doing a bride’s makeup",
+      "search": "African bride makeup artist"
+    },
+    "look-1": {
+      "shows": "A finished bridal look, close up",
+      "search": "Black bride makeup"
+    },
+    "look-2": {
+      "shows": "Soft glam for a matric dance or party",
+      "search": "soft glam makeup Black woman"
+    },
+    "look-3": {
+      "shows": "Bridesmaids getting ready together",
+      "search": "bridesmaids getting ready African"
+    }
+  },
+  "health-physio": {
+    "hero": {
+      "shows": "A physiotherapist treating a patient",
+      "search": "Black physiotherapist patient treatment"
+    },
+    "rehab": {
+      "shows": "A patient doing guided exercises in the practice",
+      "search": "physiotherapy rehab exercise"
+    }
+  },
+  "spa-mobile-massage": {
+    "hero": {
+      "shows": "A calm massage treatment",
+      "search": "massage therapy relaxing"
+    },
+    "setup": {
+      "shows": "A massage table set up in a home or hotel room",
+      "search": "massage table candles towels",
+      "decorative": true
+    }
+  },
+  "retail-gifts-homeware": {
+    "hero": {
+      "shows": "Styled homeware: baskets, ceramics, cushions",
+      "search": "African homeware baskets ceramics"
+    },
+    "maker": {
+      "shows": "A maker weaving or crafting",
+      "search": "African woman weaving basket"
+    }
+  },
+  "fitness-yoga-dance": {
+    "hero": {
+      "shows": "A class in a bright studio",
+      "search": "yoga class Black women studio"
+    },
+    "dance": {
+      "shows": "A dance or pilates class in motion",
+      "search": "dance class studio Africa"
+    }
+  },
+  "professional-consultant": {
+    "hero": {
+      "shows": "The consultant, professional portrait or with a client",
+      "search": "Black businesswoman consultant portrait"
+    },
+    "workshop": {
+      "shows": "Running a workshop with a team",
+      "search": "business workshop facilitator Africa"
+    }
+  },
+  "mechanics-tyres-fitment": {
+    "hero": {
+      "shows": "A technician fitting a tyre on a car",
+      "search": "tyre fitting mechanic"
+    },
+    "alignment": {
+      "shows": "A car on a wheel-alignment machine",
+      "search": "wheel alignment machine"
+    }
+  },
+  "hospitality-cafe-bakery": {
+    "hero": {
+      "shows": "Coffee and fresh pastries on a café table",
+      "search": "coffee pastries cafe"
+    },
+    "cakes": {
+      "shows": "A celebration cake from the bakery",
+      "search": "celebration cake bakery"
+    },
+    "inside": {
+      "shows": "Inside the café, warm and busy",
+      "search": "cosy cafe interior Africa"
+    }
+  },
+  "trades-builder-renovations": {
+    "hero": {
+      "shows": "Builders at work on an extension or new house",
+      "search": "construction workers building house Africa"
+    },
+    "project-1": {
+      "shows": "A finished extension or new room",
+      "search": "house extension finished"
+    },
+    "project-2": {
+      "shows": "A renovated bathroom or kitchen",
+      "search": "renovated bathroom tiles"
+    }
+  },
+  "education-driving-school": {
+    "hero": {
+      "shows": "An instructor with a learner driver in a dual-control car",
+      "search": "driving instructor learner driver"
+    }
+  },
+  "events-dj-sound": {
+    "hero": {
+      "shows": "A DJ performing to a crowd",
+      "search": "African DJ party crowd"
+    },
+    "sound": {
+      "shows": "Sound and lighting set up at a venue",
+      "search": "event speakers lighting setup"
+    }
+  },
+  "transport-freight": {
+    "hero": {
+      "shows": "A truck on the open road",
+      "search": "truck highway South Africa"
+    },
+    "fleet": {
+      "shows": "The fleet at the depot",
+      "search": "truck fleet depot"
+    }
   }
 }

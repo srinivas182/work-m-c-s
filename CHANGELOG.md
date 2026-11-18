@@ -4,6 +4,22 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Premium templates — Sprint 20.5 (a third design for every category)
+- The first twelve categories each get a third design:
+  - **Salon & beauty:** makeup and bridal beauty.
+  - **Health:** physiotherapy and allied health.
+  - **Spa & wellness:** massage and mobile spa.
+  - **Retail:** gifts and homeware.
+  - **Fitness:** yoga, pilates and dance studio.
+  - **Professional services:** consultant and coach.
+  - **Car mechanics:** tyres and fitment centre.
+  - **Hospitality:** café and bakery.
+  - **Trades & home:** builder and renovations.
+  - **Education:** driving school.
+  - **Events & creative:** DJ, sound and entertainment.
+  - **Transport & logistics:** freight and trucking.
+- **78 designs in 26 categories**, each in three styles (234 looks).
+
 ### Premium templates — Sprint 20.4d (real estate, legal & accounting)
 - **New section: Property listings.** Homes for sale or to rent, with price (or "price on request"), rent per month, area, bedrooms, bathrooms, parking and size. Each listing can be marked under offer, sold or let, and links to a viewing form or a portal.
 - **Real estate:** estate agency (featured homes, selling steps, free valuation, PPRA), new development (unit types, how to buy, show-unit tour, register interest), rentals and property management (rentals, landlord packages, applications, deposits in trust).

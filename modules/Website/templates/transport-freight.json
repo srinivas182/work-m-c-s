@@ -1,0 +1,363 @@
+{
+  "category": "transport-logistics",
+  "key": "transport-freight",
+  "name": "Freight & trucking",
+  "position": 3,
+  "description": "Reliable and corporate: long-distance freight, fleet, tracking and quotes.",
+  "definition": {
+    "branding": {
+      "primary": "#1E3A8A",
+      "secondary": "#F97316",
+      "font_pairing": "technical",
+      "corners": "square"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Fleet",
+          "type": "page",
+          "page": "fleet"
+        },
+        {
+          "label": "Freight quote",
+          "type": "page",
+          "page": "quote"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Freight and trucking — long-distance and cross-border",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a freight quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "photo",
+                "heading": "Your load, delivered on time",
+                "text": "Long-distance and cross-border freight with tracked trucks and drivers you can reach.",
+                "primaryLabel": "Get a freight quote",
+                "primaryHref": "/quote",
+                "secondaryLabel": "Our fleet",
+                "secondaryHref": "/fleet",
+                "facts": [
+                  {
+                    "text": "Tracked 24/7"
+                  },
+                  {
+                    "text": "Cross-border to SADC"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/transport-freight/hero-1600.webp",
+                    "alt": "A truck on the highway"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "services",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "Services",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "star",
+                    "title": "Full loads",
+                    "text": "Tautliners, flatbeds and tippers."
+                  },
+                  {
+                    "icon": "pin",
+                    "title": "Cross-border",
+                    "text": "Botswana, Namibia, Zimbabwe, Mozambique and Zambia."
+                  },
+                  {
+                    "icon": "shield",
+                    "title": "Insured",
+                    "text": "Goods-in-transit cover on every load."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "fleet",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Our fleet",
+                "text": "List your trucks and trailers, payloads and how you maintain them.",
+                "image": "/images/templates/transport-freight/fleet-1600.webp",
+                "imageAlt": "The fleet parked at the depot",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "How it works",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Quote",
+                    "text": "Tell us the load and route."
+                  },
+                  {
+                    "title": "Load",
+                    "text": "We collect on the agreed day."
+                  },
+                  {
+                    "title": "Track",
+                    "text": "Updates until delivery."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "clients",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Clients",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "fleet",
+        "title": "Fleet",
+        "slug": "fleet",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a freight quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "fleet",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Fleet",
+                "intro": "",
+                "note": "",
+                "items": [
+                  {
+                    "name": "Tautliner",
+                    "description": "34 tonnes",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Flatbed",
+                    "description": "30 tonnes",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Tipper",
+                    "description": "30 tonnes",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "8-tonner",
+                    "description": "Local loads",
+                    "duration": "",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "accreditations",
+              "type": "Accreditations",
+              "version": 1,
+              "props": {
+                "heading": "Compliance",
+                "intro": "",
+                "items": [
+                  {
+                    "name": "RTMS",
+                    "logo": "",
+                    "detail": "Add if accredited"
+                  },
+                  {
+                    "name": "Insurance",
+                    "logo": "",
+                    "detail": "Goods-in-transit cover"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "quote",
+        "title": "Freight quote",
+        "slug": "quote",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Get a freight quote",
+                "buttonHref": "/quote",
+                "sticky": true
+              }
+            },
+            {
+              "id": "quote",
+              "type": "QuoteForm",
+              "version": 1,
+              "props": {
+                "heading": "Get a freight quote",
+                "intro": "Tell us about the load.",
+                "services": [
+                  {
+                    "name": "Full load"
+                  },
+                  {
+                    "name": "Part load"
+                  },
+                  {
+                    "name": "Cross-border"
+                  },
+                  {
+                    "name": "Abnormal load"
+                  }
+                ],
+                "detailsLabel": "Tell us more",
+                "submitLabel": "Get my quote",
+                "leads": "yes",
+                "askNews": "yes",
+                "questions": [
+                  {
+                    "label": "From",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "To",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Load (type and weight)",
+                    "type": "short",
+                    "choices": "",
+                    "required": "yes"
+                  },
+                  {
+                    "label": "Date",
+                    "type": "date",
+                    "choices": "",
+                    "required": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact operations",
+                "intro": "Our control room is open 24 hours.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

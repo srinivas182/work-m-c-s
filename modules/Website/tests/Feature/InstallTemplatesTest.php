@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Validation\ValidationException;
 use Tests\Support\InteractsWithShards;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Website\Console\SeedCategoriesCommand;
 use Wurk\Website\Models\Page;
 use Wurk\Website\Models\SiteTemplate;
 use Wurk\Website\Models\SiteTemplateVersion;
@@ -107,11 +108,11 @@ it('ships complete designs: every photo exists in both sizes, no invented review
             }
         }
     }
-    // Sprint 20.4 categories start with three designs each (20.5 brings the first twelve to three).
-    foreach (['barbershop', 'cleaning', 'car-wash', 'catering', 'spaza-grocery', 'beauty-supplies', 'tailoring-fashion', 'agriculture', 'church-ngo', 'school', 'funeral-services', 'security', 'real-estate', 'legal-accounting'] as $category) {
-        expect($perCategory[$category] ?? 0)->toBeGreaterThanOrEqual(3, "{$category} needs three designs");
+    // Every category has at least three designs (Sprint 20.4 for the new ones, 20.5 for the first twelve).
+    foreach ($perCategory as $category => $count) {
+        expect($count)->toBeGreaterThanOrEqual(3, "{$category} needs three designs");
     }
-    expect(min($perCategory))->toBeGreaterThanOrEqual(2);
+    expect(array_keys($perCategory))->toEqualCanonicalizing(array_column(SeedCategoriesCommand::CATEGORIES, 0));
 });
 
 it('installs only the designs asked for, when given --only (tests use it to stay quick)', function () {

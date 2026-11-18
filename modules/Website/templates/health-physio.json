@@ -1,0 +1,356 @@
+{
+  "category": "health",
+  "key": "health-physio",
+  "name": "Physiotherapy & allied health",
+  "position": 3,
+  "description": "Active and reassuring: treatments, conditions, medical aids and online booking.",
+  "definition": {
+    "branding": {
+      "primary": "#0F766E",
+      "secondary": "#F97316",
+      "font_pairing": "modern",
+      "corners": "round"
+    },
+    "menus": {
+      "header": [
+        {
+          "label": "Treatments",
+          "type": "page",
+          "page": "treatments"
+        },
+        {
+          "label": "Book",
+          "type": "page",
+          "page": "book"
+        }
+      ],
+      "footer": [
+        {
+          "label": "Privacy policy",
+          "type": "page",
+          "page": "privacy"
+        },
+        {
+          "label": "Terms of use",
+          "type": "page",
+          "page": "terms"
+        },
+        {
+          "label": "Cookies",
+          "type": "page",
+          "page": "cookies"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "key": "home",
+        "title": "Home",
+        "slug": "home",
+        "is_home": true,
+        "seo_title": "Physiotherapy — injuries, pain and rehabilitation",
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "hero",
+              "type": "Hero",
+              "version": 2,
+              "props": {
+                "layout": "split",
+                "heading": "Move well. Feel better.",
+                "text": "Treatment for injuries, back and neck pain, sports and recovery after surgery — with a plan that gets you back to normal.",
+                "primaryLabel": "Book a session",
+                "primaryHref": "/book",
+                "secondaryLabel": "What we treat",
+                "secondaryHref": "/treatments",
+                "facts": [
+                  {
+                    "text": "Medical aids accepted"
+                  },
+                  {
+                    "text": "Same-week appointments"
+                  }
+                ],
+                "images": [
+                  {
+                    "src": "/images/templates/health-physio/hero-1600.webp",
+                    "alt": "A physiotherapist treating a patient’s knee"
+                  }
+                ],
+                "autoplay": false
+              }
+            },
+            {
+              "id": "treat",
+              "type": "FeatureGrid",
+              "version": 1,
+              "props": {
+                "heading": "What we treat",
+                "intro": "",
+                "items": [
+                  {
+                    "icon": "heart",
+                    "title": "Back and neck pain",
+                    "text": "Posture, desk work and lifting injuries."
+                  },
+                  {
+                    "icon": "star",
+                    "title": "Sports injuries",
+                    "text": "Ankles, knees, shoulders and hamstrings."
+                  },
+                  {
+                    "icon": "clock",
+                    "title": "After surgery",
+                    "text": "Rehab after knee, hip and shoulder operations."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "how",
+              "type": "Steps",
+              "version": 1,
+              "props": {
+                "heading": "Your first visit",
+                "intro": "",
+                "items": [
+                  {
+                    "title": "Assessment",
+                    "text": "We find what’s causing the problem."
+                  },
+                  {
+                    "title": "Treatment",
+                    "text": "Hands-on treatment and exercises."
+                  },
+                  {
+                    "title": "Your plan",
+                    "text": "What to do at home, and how many sessions you need."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "rehab",
+              "type": "ImageText",
+              "version": 1,
+              "props": {
+                "heading": "Our practice",
+                "text": "Describe your rooms, rehab area and the therapists who work here.",
+                "image": "/images/templates/health-physio/rehab-1600.webp",
+                "imageAlt": "A patient doing rehab exercises",
+                "imageSide": "right",
+                "buttonLabel": "",
+                "buttonHref": ""
+              }
+            },
+            {
+              "id": "medical-aids",
+              "type": "Logos",
+              "version": 1,
+              "props": {
+                "heading": "Medical aids we work with",
+                "items": []
+              }
+            },
+            {
+              "id": "reviews",
+              "type": "Testimonials",
+              "version": 1,
+              "props": {
+                "heading": "What patients say",
+                "items": []
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "treatments",
+        "title": "Treatments",
+        "slug": "treatments",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "services",
+              "type": "ServicesPrices",
+              "version": 1,
+              "props": {
+                "heading": "Treatments",
+                "intro": "",
+                "note": "Rates as per medical aid; cash rates on request.",
+                "items": [
+                  {
+                    "name": "First consultation",
+                    "description": "Assessment and treatment",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Follow-up",
+                    "description": "Treatment",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Sports massage",
+                    "description": "",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Dry needling",
+                    "description": "",
+                    "duration": "30 min",
+                    "price": 0,
+                    "from": false
+                  },
+                  {
+                    "name": "Rehab class",
+                    "description": "Small group",
+                    "duration": "45 min",
+                    "price": 0,
+                    "from": false
+                  }
+                ]
+              }
+            },
+            {
+              "id": "faq",
+              "type": "Faq",
+              "version": 1,
+              "props": {
+                "heading": "Questions",
+                "items": [
+                  {
+                    "question": "Do I need a referral?",
+                    "answer": "No, you can book directly."
+                  },
+                  {
+                    "question": "What should I wear?",
+                    "answer": "Loose clothes you can move in."
+                  }
+                ]
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      },
+      {
+        "key": "book",
+        "title": "Book",
+        "slug": "book",
+        "is_home": false,
+        "seo_title": null,
+        "seo_description": null,
+        "content": {
+          "schema": 1,
+          "blocks": [
+            {
+              "id": "header",
+              "type": "Header",
+              "version": 1,
+              "props": {
+                "buttonLabel": "Book a session",
+                "buttonHref": "/book",
+                "sticky": true
+              }
+            },
+            {
+              "id": "book-online",
+              "type": "BookOnline",
+              "version": 1,
+              "props": {
+                "mode": "appointments",
+                "heading": "Book a session",
+                "intro": "Choose a service and a time that suits you.",
+                "fallbackText": "Call or message us to book.",
+                "fallbackLabel": "Contact us",
+                "fallbackHref": "/contact"
+              }
+            },
+            {
+              "id": "contact",
+              "type": "Contact",
+              "version": 1,
+              "props": {
+                "heading": "Contact the practice",
+                "intro": "Bring your medical aid card and ID.",
+                "address": "",
+                "phone": "",
+                "whatsapp": "",
+                "email": ""
+              }
+            },
+            {
+              "id": "hours",
+              "type": "OpeningHours",
+              "version": 1,
+              "props": {
+                "heading": "Opening hours",
+                "note": "Please confirm public holiday hours with us."
+              }
+            },
+            {
+              "id": "directions",
+              "type": "Directions",
+              "version": 1,
+              "props": {
+                "heading": "Find the practice",
+                "address": "",
+                "landmark": "",
+                "showMap": true
+              }
+            },
+            {
+              "id": "footer",
+              "type": "Footer",
+              "version": 1,
+              "props": {}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
