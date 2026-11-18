@@ -4,6 +4,13 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Premium templates — Sprint 20.2b (video)
+- **Video hero:** a new "Full video" first screen. A short, muted clip loops behind the heading, with a **Pause the video** button. Visitors who've asked for less motion, have Save-Data on or are on a slow connection see the still picture instead, and download none of the video. With no video yet, the hero uses its first photo.
+- **Video section:** a short clip of the business's work or premises. It plays, with sound and controls, only when a visitor taps it; until then only the still loads. Without JavaScript the picture links to the video.
+- **Videos in the media library:** MP4, MOV or WebM, up to 20 MB. WURK keeps the first 30 seconds, makes it at most 1280 wide in a light format every phone plays, removes the phone's hidden details (such as where it was filmed), and takes a still from it. Videos are listed in **Website → Media** with where each is used; deleting one removes the file too.
+- **Fixed:** the emergency switch for the admin IP allow-list (`WURK_ADMIN_IP_ALLOWLIST=false`) was ignored, because a second "security" settings block hid it.
+- **Deploying:** the production image now includes ffmpeg (see docs/deployment/docker.md, v0.21.0).
+
 ### Premium templates — Sprint 20.2a (new sections and motion)
 - **Four new sections:**
   - **Numbers:** years open, customers served, a rating.
