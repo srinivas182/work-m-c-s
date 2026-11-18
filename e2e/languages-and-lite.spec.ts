@@ -49,3 +49,17 @@ test('an expense recorded with no signal waits, then is sent once', async ({
   await page.reload();
   await expect(page.getByText(/Taxi, no signal/)).toHaveCount(1);
 });
+
+test.describe('with the service worker', () => {
+  test.use({ serviceWorkers: 'allow' });
+
+  test('the app installs its service worker, so it opens without a signal', async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(90_000);
+    await signUpBusiness(page, testInfo, 'sw');
+    await expect(page.locator('link[rel="manifest"]')).toHaveCount(1);
+    const scope = await page.evaluate(async () => (await navigator.serviceWorker.ready).scope);
+    expect(new URL(scope).pathname).toBe('/');
+  });
+});
