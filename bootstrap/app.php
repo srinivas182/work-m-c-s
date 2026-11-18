@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Wurk\Identity\Auth\SignInFlow;
 use Wurk\Identity\Http\Middleware\SessionGuardian;
 use Wurk\Identity\Support\Surface;
+use Wurk\Platform\I18n\SetLocale;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             SessionGuardian::class,
+            SetLocale::class, // the person's language (24.1)
             HandleInertiaRequests::class,
         ]);
         // The referral cookie holds only a public code, and is read on routes with and without the web stack (Sprint 13.2).

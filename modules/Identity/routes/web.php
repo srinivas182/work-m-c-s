@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/sign-out', [AccountController::class, 'signOut'])->name('identity.sign-out');
     Route::get('/account/security', [AccountController::class, 'show'])->name('identity.account');
     Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('identity.account.profile');
+    Route::put('/account/language', [AccountController::class, 'updateLanguage'])->name('identity.account.language'); // 24.1
     Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('identity.account.password');
     Route::post('/account/mfa', [AccountController::class, 'beginMfa'])->name('identity.account.mfa.begin');
     Route::post('/account/mfa/confirm', [AccountController::class, 'confirmMfa'])->name('identity.account.mfa.confirm');

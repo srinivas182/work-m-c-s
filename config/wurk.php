@@ -58,7 +58,7 @@ return [
         'reserved_handles' => [
             'admin', 'api', 'app', 'assets', 'auth', 'billing', 'blog', 'cdn', 'dashboard', 'docs',
             '.well-known', 'help', 'login', 'logout', 'mail', 'my', 'agent', 'partners', 'register', 'signup', 'static',
-            'status', 'support', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
+            'status', 'support', 'i18n', 'www', 'wurk', 'sign-in', 'sign-out', 'account', 'businesses',
             'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'templates', 'forms', 'settings', 'webhooks', 'whatsapp', 'signup', 'oauth',
             'pay',
             'payments',

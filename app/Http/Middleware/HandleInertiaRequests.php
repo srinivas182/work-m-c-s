@@ -9,6 +9,7 @@ use Inertia\Middleware;
 use Symfony\Component\HttpFoundation\Response;
 use Wurk\Identity\Models\Identity;
 use Wurk\Identity\Support\Surface;
+use Wurk\Platform\I18n\Locales;
 use Wurk\Platform\Navigation\NavigationBuilder;
 
 final class HandleInertiaRequests extends Middleware
@@ -54,6 +55,8 @@ final class HandleInertiaRequests extends Middleware
                     'email' => $user->email ?? $user->phone ?? '',
                 ] : null,
             ],
+            // The language (24.1): its translations load as a script before the app (resources/views/app.blade.php).
+            'i18n' => fn () => ['locale' => app()->getLocale(), 'languages' => array_map(fn (string $code, array $names) => ['code' => $code, 'name' => $names[1]], array_keys(Locales::SUPPORTED), Locales::SUPPORTED)],
             'flash' => fn () => ['status' => $request->session()->get('status'), 'warning' => $request->session()->get('warning')],
             // A page-wide notice a module attached to this request (e.g. Billing's payment reminder).
             'banner' => fn () => $request->attributes->get('wurk.banner'),

@@ -4,6 +4,15 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Languages — Sprint 24.1a (the foundation)
+- **Account & security → Language:** each person picks the language WURK uses for them, from English, isiZulu, isiXhosa, Afrikaans, Sesotho, Swahili, French, Portuguese, Hausa and Yoruba. Visitors get theirs from `?lang=` (remembered), then their browser.
+- **How translations work:**
+  - Texts are written in English and marked for translation (`t()` in React, `__()` in PHP).
+  - Each language's translations load as a small cached script before the app, so pages draw in the right language from the start.
+  - Anything not yet translated shows in English.
+- **Money is written the same way on the server and in the browser:** R1 380.00, or 1 380,00 R in French and Portuguese.
+- **The translation list is kept up to date:** `node scripts/i18n-extract.mjs` collects every marked text into `lang/_source.json`. `pnpm lint` fails when that list is out of date, and prints each language's coverage.
+
 ## [0.24.0] — 2026-11-18 — Sprint 23: Easy setup & money tools
 
 ### Release — Sprint 23.6

@@ -1,4 +1,5 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { t } from '@/i18n';
 import { KeyRound, Laptop, ShieldCheck, Smartphone } from 'lucide-react';
 import type { FormEvent } from 'react';
 import {
@@ -28,7 +29,13 @@ interface Session {
 }
 
 interface Props {
-  profile: { first_name: string; last_name: string; email: string | null; phone: string | null };
+  profile: {
+    first_name: string;
+    last_name: string;
+    email: string | null;
+    phone: string | null;
+    locale: string;
+  };
   hasPassword: boolean;
   mfaEnabled: boolean;
   mfaRequired: boolean;
@@ -297,6 +304,47 @@ function SessionsCard({ sessions }: Pick<Props, 'sessions'>) {
   );
 }
 
+/** The person's language for WURK's screens and their own messages (24.1). */
+function LanguageCard({ current }: { current: string }) {
+  const languages = (usePage().props.i18n as { languages: { code: string; name: string }[] })
+    .languages;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('Language')}</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-3 text-sm">
+        <label className="grid gap-1">
+          <span>{t('The language WURK uses for you')}</span>
+          <select
+            className="border-border bg-bg min-h-10 rounded-md border px-3"
+            value={current}
+            onChange={(e) =>
+              // A full reload, so the new language's texts load before the page draws.
+              router.put(
+                '/account/language',
+                { locale: e.target.value },
+                { onSuccess: () => window.location.reload() },
+              )
+            }
+          >
+            {languages.map((l) => (
+              <option key={l.code} value={l.code} lang={l.code}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <p className="text-fg-muted">
+          {t(
+            'Languages marked preview are still being checked by people. Tell us if a word is wrong.',
+          )}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Security(props: Props) {
   return (
     <AppShell title="Account & security">
@@ -309,6 +357,7 @@ export default function Security(props: Props) {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="grid content-start gap-6">
             <ProfileCard profile={props.profile} />
+            <LanguageCard current={props.profile.locale} />
             <PasswordCard hasPassword={props.hasPassword} />
           </div>
           <div className="grid content-start gap-6">
