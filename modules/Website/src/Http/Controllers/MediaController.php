@@ -29,10 +29,14 @@ final class MediaController
         $usage = $this->usage();
 
         return Inertia::render('Website::Media', [
-            'photos' => SiteAsset::query()->latest()->get()->map(fn (SiteAsset $a) => [
+            'photos' => SiteAsset::query()->where('kind', 'photo')->latest()->get()->map(fn (SiteAsset $a) => [
                 ...$this->assets->photo($a, (string) $a->description), 'id' => $a->id, 'name' => $a->name, 'description' => $a->description,
                 'ai' => $a->ai_generated, 'kb' => (int) round($a->bytes / 1024), 'width' => $a->width, 'height' => $a->height,
                 'usedIn' => $usage[strtolower($a->id)] ?? [],
+            ])->all(),
+            'videos' => SiteAsset::query()->where('kind', 'video')->latest()->get()->map(fn (SiteAsset $a) => [
+                ...$this->assets->video($a), 'id' => $a->id, 'name' => $a->name,
+                'kb' => (int) round($a->bytes / 1024), 'usedIn' => $usage[strtolower($a->id)] ?? [],
             ])->all(),
             'usedMb' => round($this->assets->usedBytes() / 1048576, 1),
             'limitMb' => (int) ($entitlements->limits($context->id())['storage_mb'] ?? 0),
@@ -53,16 +57,20 @@ final class MediaController
         $photo = SiteAsset::query()->findOrFail($asset);
         $usedIn = $this->usage()[strtolower($photo->id)] ?? [];
         if ($usedIn !== []) {
-            throw ValidationException::withMessages(['photo' => 'This photo is still used on: '.implode(', ', $usedIn).'. Remove it there first.']);
+            $what = $photo->kind === 'video' ? 'video' : 'photo';
+            throw ValidationException::withMessages(['photo' => 'This '.$what.' is still used on: '.implode(', ', $usedIn).'. Remove it there first.']);
         }
         $disk = Storage::disk((string) config('wurk.site_assets_disk'));
         foreach ($photo->variants as $path) {
             $disk->delete($path);
         }
+        if ($photo->video_path !== null) {
+            $disk->delete($photo->video_path);
+        }
         $photo->delete();
-        $audit->record('website.photo_deleted', 'site_asset', $photo->id, ['name' => $photo->name]);
+        $audit->record($photo->kind === 'video' ? 'website.video_deleted' : 'website.photo_deleted', 'site_asset', $photo->id, ['name' => $photo->name]);
 
-        return back()->with('status', 'Photo deleted.');
+        return back()->with('status', $photo->kind === 'video' ? 'Video deleted.' : 'Photo deleted.');
     }
 
     /**

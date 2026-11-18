@@ -22,6 +22,7 @@ use Wurk\Website\Http\Controllers\PublicSeoController;
 use Wurk\Website\Http\Controllers\PublicSiteController;
 use Wurk\Website\Http\Controllers\QuoteFormController;
 use Wurk\Website\Http\Controllers\TemplatePreviewController;
+use Wurk\Website\Http\Controllers\VideosController;
 use Wurk\Website\Http\Controllers\WebsiteChatController;
 
 Route::get('/_blocks', BlockBoardController::class)->name('website.block-board');
@@ -51,6 +52,8 @@ Route::tenant(function (): void {
         Route::delete('/media/{asset}', [MediaController::class, 'destroy'])->name('media.destroy');
         Route::get('/photos', [AssetsController::class, 'index'])->name('photos');
         Route::post('/photos', [AssetsController::class, 'store'])->middleware('throttle:60,1,website-photos')->name('photos.store');
+        Route::get('/videos', [VideosController::class, 'index'])->name('videos');
+        Route::post('/videos', [VideosController::class, 'store'])->middleware('throttle:10,1,website-videos')->name('videos.store');
         Route::get('/preview', PreviewController::class)->name('preview');
         Route::get('/ai', [AiWriterController::class, 'show'])->name('ai');
         Route::get('/ai/quote', [AiWriterController::class, 'quote'])->name('ai.quote');

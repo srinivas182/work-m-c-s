@@ -34,6 +34,12 @@ return [
         'timeout' => (int) env('CLAMAV_TIMEOUT', 30),
     ],
 
+    // ffmpeg and ffprobe re-encode website videos and take their poster frame (Sprint 20.2; installed in the image).
+    'ffmpeg' => [
+        'binary' => env('WURK_FFMPEG', 'ffmpeg'),
+        'probe' => env('WURK_FFPROBE', 'ffprobe'),
+    ],
+
     'domains' => [
         'root' => $root,
         'admin' => env('WURK_ADMIN_DOMAIN', 'admin.'.$root),
@@ -119,11 +125,6 @@ return [
         'ai-assistant' => ['name' => 'WURK AI', 'sprint' => 6],
     ],
 
-    'security' => [
-        // Emergency switch: WURK_ADMIN_IP_ALLOWLIST=false ignores the admin IP allow-list.
-        'admin_ip_allowlist' => (bool) env('WURK_ADMIN_IP_ALLOWLIST', true),
-    ],
-
     // Where website enquiries from wurk.co.za/contact are sent.
     'contact_email' => env('WURK_CONTACT_EMAIL'),
 
@@ -154,6 +155,8 @@ return [
         // The load balancer's addresses (comma-separated), or "*" when the servers are reachable only through it:
         // WURK then sees each visitor's IP (rate limits, audit) and HTTPS (HSTS, secure cookies). Unset: trust nobody.
         'trusted_proxies' => env('TRUSTED_PROXIES', ''),
+        // Emergency switch: WURK_ADMIN_IP_ALLOWLIST=false ignores the admin IP allow-list.
+        'admin_ip_allowlist' => (bool) env('WURK_ADMIN_IP_ALLOWLIST', true),
     ],
 
     // Load tests on staging (Sprint 18.3b): the secret that lets test machines play many visitors. Never in production.

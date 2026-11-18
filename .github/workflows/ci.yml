@@ -208,7 +208,7 @@ jobs:
         run: vendor/bin/pest --parallel --compact
 
   backend-clamav:
-    name: Backend · malware scanner (real ClamAV)
+    name: Backend · real tools (ClamAV, ffmpeg)
     needs: [changes, backend-quick]
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
@@ -245,12 +245,16 @@ jobs:
             sleep 5
           done
           echo "::error::ClamAV didn't start in 5 minutes"; exit 1
-      - name: Scan the antivirus test file and an ordinary file
+      # Website videos are re-encoded with ffmpeg (Sprint 20.2); the production image installs it too.
+      - name: Install ffmpeg
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends ffmpeg
+      - name: Scan the antivirus test file, and re-encode real videos
         env:
           CLAMAV_LIVE: '1'
           CLAMAV_HOST: 127.0.0.1
-        # --fail-on-skipped: if the test ever skips here, the job fails — so a pass means a real scan.
-        run: vendor/bin/pest --group=clamav --fail-on-skipped --compact
+          FFMPEG_LIVE: '1'
+        # --fail-on-skipped: if a test ever skips here, the job fails — so a pass means a real scan and a real encode.
+        run: vendor/bin/pest --group=clamav,video --fail-on-skipped --compact
 
   backend-tests-mysql:
     name: Backend · tests on MySQL 8 (part ${{ matrix.part }} of 8)
