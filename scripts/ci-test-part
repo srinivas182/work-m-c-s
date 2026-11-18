@@ -6,9 +6,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 PART1=(Records Health Regions Data Success Website) # Website back from part 7 (19.5): part 7 reached 12 min with the receptionist and sales tests; part 1 took 2 min # Admin to part 2: part 1 reached 10m17s (15.5c); Data, Success from part 5 (18.0b)
-PART2=(Admin Identity Audit Team Referrals) # Tenancy now in part 5 ("everything else"): part 2 timed out at 9m10s (15.1b); Messaging, Sales, Portal to part 7 (21.2: 12 min on a slow runner)
+PART2=(Admin Identity Audit Team Referrals Shop) # Shop from part 7 (v0.23.0: part 7 reached 12 min with it; part 2 took 4.6 min) # Tenancy now in part 5 ("everything else"): part 2 timed out at 9m10s (15.1b); Messaging, Sales, Portal to part 7 (21.2: 12 min on a slow runner)
 PART3=(Bookings Access) # Plans, Features to part 5 (v0.23.0: part 3 took 10.9 min on a slow runner)
-PART7=(Ai Security Marketing Messaging Sales Portal Support Watchtower Shop) # 19.2: part 3 passed 12 min on a slow runner; the receptionist adds Ai tests. Part 7 took 1.5 min (21.2)
+PART7=(Ai Security Marketing Messaging Sales Portal Support Watchtower) # 19.2: part 3 passed 12 min on a slow runner; the receptionist adds Ai tests. Part 7 took 1.5 min (21.2)
 # Website's slowest files run in part 8 (20.1): Website alone takes ~8.5 min on MySQL, and part 1 with all of it was
 # cancelled at 12 min. Website's other files stay in part 1 (~4.5 min with the rest of part 1).
 WEBSITE_PART8=(QuoteFormTest SiteModelTest PhotoUploadTest ChatBotTest ReceptionistTest VideoUploadTest TemplatePhotosTest WhatsAppChatsTest WhatsAppReceptionistTest VoiceNotesTest) # WhatsApp (21)
