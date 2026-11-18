@@ -107,7 +107,7 @@ final readonly class MoneyBook
         $expense = Expense::query()->create(['spent_on' => $data['spent_on'], 'amount_cents' => (int) round((float) $data['amount'] * 100), 'category' => $category,
             'note' => ($data['note'] ?? '') === '' ? null : mb_substr((string) $data['note'], 0, 200), 'slip_path' => $slip?->path, 'from_slip' => $slip !== null, 'created_by' => $by]);
         if ($slip !== null) {
-            DB::connection($this->context->connectionName())->table('money_slips')->where('id', $slipId)->delete();
+            DB::connection($this->context->connectionName())->table('money_slips')->where('tenant_id', $this->context->id())->where('id', $slipId)->delete();
         }
         $this->audit->record('money.expense_added', 'expense', $expense->id, ['cents' => $expense->amount_cents, 'category' => $category, 'from_slip' => $slip !== null]);
 

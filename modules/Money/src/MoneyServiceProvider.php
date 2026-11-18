@@ -57,7 +57,7 @@ final class MoneyServiceProvider extends ModuleServiceProvider
                 'highlights' => ['You took '.MoneyBook::rand($now['took']).', spent '.MoneyBook::rand($now['spent']).', so you made about '.MoneyBook::rand($now['made']).'.'],
                 'note' => 'Spent is the expenses added in Money → Expenses.'];
         }));
-        $this->callAfterResolving(DashboardTiles::class, fn (DashboardTiles $t) => $t->register('money.profit', 8, function (): ?array {
+        $this->callAfterResolving(DashboardTiles::class, fn (DashboardTiles $t) => $t->register('money.profit', 400, function (): ?array {
             $context = app(TenantContext::class);
             if (! $context->has() || ! Gate::allows('money.manage')) {
                 return null;
