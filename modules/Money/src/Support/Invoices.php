@@ -20,6 +20,7 @@ use Wurk\Money\Mail\InvoiceMail;
 use Wurk\Money\Models\Invoice;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Regions\Contracts\Countries;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -39,7 +40,7 @@ final readonly class Invoices
     public const REMINDER_DAYS = [1, 7, 14];
 
     public function __construct(private TenantContext $context, private BusinessPayments $payments, private InPersonPayments $inPerson, private WhatsAppBusiness $whatsapp,
-        private Messenger $messenger, private CreditWallet $wallet, private AuditLog $audit) {}
+        private Messenger $messenger, private CreditWallet $wallet, private AuditLog $audit, private Countries $countries) {}
 
     /**
      * @param  array{customer_name: string, customer_phone?: string|null, customer_email?: string|null, lines: list<array{description: string, quantity: int|float|string, unit: int|float|string}>,
@@ -59,10 +60,12 @@ final readonly class Invoices
         if ($lines === []) {
             throw ValidationException::withMessages(['lines' => 'Add at least one line with a price.']);
         }
-        $vatBp = ($data['vat'] ?? false) ? 1500 : 0;
+        $now = CarbonImmutable::now($this->context->current()->timezone());
+        $today = $now->toDateString();
+        // The business's country's tax on the invoice's day (25.1), levies included; the invoice keeps it from then on.
+        $vatBp = ($data['vat'] ?? false) ? (int) ($this->countries->taxOn($this->context->current()->countryCode(), $now)['total_bp'] ?? 0) : 0;
         $subtotal = array_sum(array_map(fn (array $l) => $l['quantity'] * $l['unit_cents'], $lines));
         $vat = (int) round($subtotal * $vatBp / 10000);
-        $today = CarbonImmutable::now($this->context->current()->timezone())->toDateString();
 
         return DB::connection($this->context->connectionName())->transaction(function () use ($data, $lines, $vatBp, $subtotal, $vat, $today, $by): Invoice {
             $number = (int) Invoice::query()->lockForUpdate()->max('number') + 1;

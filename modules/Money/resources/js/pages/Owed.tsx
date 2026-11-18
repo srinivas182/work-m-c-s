@@ -42,6 +42,8 @@ interface Props {
   invoices: InvoiceRow[];
   paidMethods: Record<string, string>;
   today: string;
+  /** The business's country's tax today (Sprint 25.1), e.g. VAT 15%. */
+  tax: { name: string; rate: number };
 }
 
 /** Rand as WURK writes it everywhere: R1 380.00 (the server's own format). */
@@ -96,7 +98,7 @@ function PaidButton({
   );
 }
 
-function NewInvoice({ today }: { today: string }) {
+function NewInvoice({ today, tax }: { today: string; tax: Props['tax'] }) {
   const due = new Date(Date.parse(today) + 7 * 86400000).toISOString().slice(0, 10);
   const form = useForm({
     customer_name: '',
@@ -208,12 +210,12 @@ function NewInvoice({ today }: { today: string }) {
               checked={form.data.vat}
               onChange={(e) => form.setData('vat', e.target.checked)}
             />
-            {__('Add VAT (15%) — I’m VAT-registered')}
+            {__('Add :tax (:rate%) — I’m registered for it', { tax: tax.name, rate: tax.rate })}
           </label>
         </div>
       </div>
       {form.data.vat && (
-        <Field label={__('Your VAT number')} error={form.errors.vat_number}>
+        <Field label={__('Your :tax number', { tax: tax.name })} error={form.errors.vat_number}>
           <Input
             value={form.data.vat_number}
             onChange={(e) => form.setData('vat_number', e.target.value)}
@@ -235,7 +237,7 @@ function NewInvoice({ today }: { today: string }) {
   );
 }
 
-export default function Owed({ owed, total_cents, invoices, paidMethods, today }: Props) {
+export default function Owed({ owed, total_cents, invoices, paidMethods, today, tax }: Props) {
   const warning = (usePage().props.flash as { warning?: string | null } | undefined)?.warning;
   const post = (path: string, data: Record<string, string> = {}) =>
     router.post(`${tenantBase()}${path}`, data, { preserveScroll: true });
@@ -308,7 +310,7 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today }
             <CardTitle>{__('New invoice')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <NewInvoice today={today} />
+            <NewInvoice today={today} tax={tax} />
           </CardContent>
         </Card>
         {invoices.length > 0 && (

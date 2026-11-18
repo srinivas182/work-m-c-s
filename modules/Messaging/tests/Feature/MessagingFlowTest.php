@@ -14,6 +14,7 @@ use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Models\MessageDelivery;
 use Wurk\Messaging\Models\ProviderSetting;
 use Wurk\Messaging\Support\ProviderSettings;
+use Wurk\Regions\Models\TaxRate;
 
 uses(InteractsWithIdentity::class, InteractsWithShards::class);
 
@@ -135,6 +136,9 @@ it('lets countries be opened for sign-up and only allows businesses in open coun
     $business = ['name' => 'Kalahari Coffee', 'handle' => 'kalahari-coffee', 'owner_first_name' => 'Neo', 'owner_contact' => 'neo@kalahari.co.bw'];
 
     $this->actingAs($admin)->post($this->admin('/businesses'), $business + ['country' => 'BW'])->assertSessionHasErrors('country');
-    $this->actingAs($admin)->put($this->admin('/countries/BW'), ['vat' => 14, 'enabled' => true])->assertSessionHas('status');
+    $this->actingAs($admin)->put($this->admin('/countries/BW'), ['enabled' => true])->assertSessionHasErrors('enabled'); // its rate isn't confirmed yet (25.1)
+    $rate = TaxRate::query()->where('country_code', 'BW')->firstOrFail();
+    $this->actingAs($admin)->post($this->admin("/countries/BW/rates/{$rate->id}/confirm"));
+    $this->actingAs($admin)->put($this->admin('/countries/BW'), ['enabled' => true])->assertSessionHas('status');
     $this->actingAs($admin)->post($this->admin('/businesses'), $business + ['country' => 'BW'])->assertSessionHasNoErrors();
 });
