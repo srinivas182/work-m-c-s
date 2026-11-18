@@ -4,6 +4,12 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Languages — Sprint 24.2b (messages in the customer's language)
+- **Messages to customers follow the customer's language.** Booking messages, reminders, receipts, invoice messages and invoice reminders use the standard wording translated. A business's own wording is used exactly as they wrote it.
+- **Each customer's language is remembered** from the customer page they used (24.3 turns this on), or set by the business. It's kept on the contact as `contacts.locale`, through `ContactBook::locale()` / `setLocale()`.
+- Template placeholders (`{client}`) are protected in translations, like `:name`.
+- Still to come: WhatsApp templates in each reviewed language, and dates spelt out in the customer's language.
+
 ### Languages — Sprint 24.2a (drafts and reviews)
 - **Admin → Settings → Languages:** each language's progress (drafted and reviewed). **Draft the missing texts with WURK AI** runs in the background, using the language's glossary. Each language can be offered or withdrawn.
 - **Reviewers** (the new permission `languages.review`) correct texts in context, one at a time, and save them as reviewed. A review takes effect at once in PHP and the browser, with no release needed.

@@ -72,8 +72,10 @@ final class TranslationStore
     /** Every :placeholder in the English text, and no others, appears in the translation. */
     public static function samePlaceholders(string $source, string $text): bool
     {
-        preg_match_all('/:([a-z_]+)/i', $source, $a);
-        preg_match_all('/:([a-z_]+)/i', $text, $b);
+        preg_match_all('/:([a-z_]+)|\{([a-z_]+)\}/i', $source, $a); // Laravel's :name and the message templates' {name}
+        preg_match_all('/:([a-z_]+)|\{([a-z_]+)\}/i', $text, $b);
+        $a[1] = $a[0];
+        $b[1] = $b[0];
         $x = array_unique($a[1]);
         $y = array_unique($b[1]);
         sort($x);

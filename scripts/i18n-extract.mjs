@@ -26,6 +26,12 @@ const flash = /->with\(\s*'(?:status|warning)',\s*'((?:\\.|[^'\\])*)'\s*\)/g;
 const texts = new Set();
 for (const f of files) {
   const src = readFileSync(join(root, f), 'utf8');
+  if (f.endsWith('.php') && src.includes("'placeholders' =>")) { // message templates' standard wording (24.2)
+    for (const m of src.matchAll(/'(?:subject|text)'\s*=>\s*'((?:\\.|[^'\\])*)'/g)) {
+      const text = m[1].replace(/\\(['\\])/g, '$1');
+      if (/\p{L}/u.test(text)) texts.add(text);
+    }
+  }
   if (f.endsWith('.php')) {
     for (const m of [...(f.endsWith('ServiceProvider.php') ? src.matchAll(menu) : []), ...src.matchAll(flash)]) {
       const text = m[1].replace(/\\(['\\])/g, '$1');
