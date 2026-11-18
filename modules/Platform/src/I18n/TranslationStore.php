@@ -117,6 +117,16 @@ final class TranslationStore
         return is_file($file) ? array_values(array_map('strval', (array) json_decode((string) file_get_contents($file), true))) : [];
     }
 
+    /** How many texts there are to translate (read once per process). */
+    public static function sourceCount(): int
+    {
+        static $counts = [];
+        $file = lang_path('_source.json');
+        $key = is_file($file) ? filemtime($file).':'.filesize($file) : 'none';
+
+        return $counts[$key] ??= count(self::sourceTexts());
+    }
+
     /** @return array<string, bool> */
     public static function enabledMap(): array
     {

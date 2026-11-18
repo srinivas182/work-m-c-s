@@ -6,6 +6,7 @@ namespace Wurk\Platform\I18n;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -94,17 +95,22 @@ final class Locales
      */
     public static function offered(): array
     {
+        // On every page: two small queries (cached briefly), never the whole progress report.
         try {
-            $progress = Cache::remember('i18n-offered:'.implode(',', array_map(fn ($c) => TranslationStore::stamp($c), array_keys(self::SUPPORTED))), 600, fn () => TranslationStore::progress());
+            [$reviewed, $enabled] = Cache::remember('i18n-offered:'.implode(',', array_map(fn ($c) => TranslationStore::stamp($c), array_keys(self::SUPPORTED))), 600, fn () => [
+                DB::table('translations')->where('status', 'reviewed')->groupBy('locale')->selectRaw('locale, count(*) as n')->pluck('n', 'locale')->map(fn ($n) => (int) $n)->all(),
+                TranslationStore::enabledMap(),
+            ]);
         } catch (\Throwable) {
-            $progress = [];
+            [$reviewed, $enabled] = [[], []];
         }
+        $total = TranslationStore::sourceCount();
         $out = [['code' => 'en', 'name' => 'English', 'preview' => false]];
         foreach (self::SUPPORTED as $code => $names) {
-            if ($code === 'en' || ! ($progress[$code]['enabled'] ?? true)) {
+            if ($code === 'en' || ! ($enabled[$code] ?? true)) {
                 continue;
             }
-            $out[] = ['code' => $code, 'name' => $names[1], 'preview' => $progress[$code]['preview'] ?? true];
+            $out[] = ['code' => $code, 'name' => $names[1], 'preview' => $total === 0 || ($reviewed[$code] ?? 0) < $total * TranslationStore::REVIEWED_SHARE];
         }
 
         return $out;
