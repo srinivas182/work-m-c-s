@@ -4,6 +4,11 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Templates — demo photos installed by default
+- **Every design now comes with real photos.** WURK has chosen a Pexels photo for each of the 215 photo places in the 78 designs, matched to what the place shows (a dentist with a patient, foam on a car in the wash bay, solar panels on a roof…). `website:install-templates` imports them with the designs, so a new installation looks finished, like a Wix or WordPress demo.
+- Photos already in place are skipped. A photo that can't be fetched keeps its stand-in and is reported, without failing the install. HQ can still change any photo in **Admin → Templates → Demo photos**.
+- Turn it off with `--no-photos` or `WURK_TEMPLATE_DEMO_PHOTOS=false`.
+
 ### WhatsApp — Sprint 21.4 (voice notes understood)
 - **Voice notes are transcribed** as they arrive. Chats shows the words with a player, the length and the language. The assistant answers them as if typed.
 - **When WURK AI isn't sure** of the words, Chats marks them, and the assistant says what it understood and asks the customer to confirm or type it. Notes longer than 2 minutes, or ones that can't be heard, get a polite request to type or send a shorter one.

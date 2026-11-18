@@ -26,6 +26,18 @@ Every design should look finished the moment someone previews it. That means sha
 
 **Back to the stand-in** removes the photo from that place for new sites. The file stays, because earlier sites may still use it.
 
+## WURK's chosen photos (installed by default)
+
+`modules/Website/templates/photos/photos.json` lists a chosen **Pexels** photo for every photo place of every design (215 places in 78 designs). Each was picked to match what the place shows, preferring African people and places, with no brands. Each row links the photo's image and its Pexels page (recorded as the credit).
+
+`php artisan website:install-templates`, which runs on every deploy, imports them after installing the designs. So a **new installation shows real photos at once**, like a Wix or WordPress demo site:
+- Photos already in place are skipped, so later deploys fetch only what's missing.
+- A photo that can't be fetched is reported, and its place keeps its stand-in. The install itself still succeeds. Run it again later, or add that photo in Admin.
+- HQ can still change any photo in Admin, and **Back to the stand-in** works as before. The install never replaces a photo HQ chose, because the place is no longer empty.
+- To skip the photos: `--no-photos`, or `WURK_TEMPLATE_DEMO_PHOTOS=false` (used in tests and the offline end-to-end setup).
+
+To change the list, edit `photos.json`. A test checks that it covers every photo place, links only to Pexels, and uses no photo twice.
+
 ## Importing a list (server)
 
 On a server that can reach the photo sites:

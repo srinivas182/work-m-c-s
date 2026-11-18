@@ -35,6 +35,7 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="WATCHTOWER_TIMING_SAMPLE" value="0"/>
+        <env name="WURK_TEMPLATE_DEMO_PHOTOS" value="false"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
