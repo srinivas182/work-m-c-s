@@ -42,6 +42,7 @@ Route::tenant(function (): void {
         Route::post('/pages/{page}/home', [PagesController::class, 'home'])->name('pages.home');
         Route::delete('/pages/{page}', [PagesController::class, 'destroy'])->name('pages.destroy');
         Route::post('/pages/{page}/restore', [PagesController::class, 'restore'])->name('pages.restore');
+        Route::post('/returns-policy', [PagesController::class, 'returnsPolicy'])->name('returns-policy');
         Route::post('/checklist/{step}', [PagesController::class, 'confirmStep'])->name('checklist.confirm');
         Route::post('/design', [PagesController::class, 'switchDesign'])->middleware('throttle:10,1,website-design')->name('design');
         // Set up by talking (23.1): six questions, typed or spoken, then one confirmed set-up.

@@ -32,6 +32,7 @@ interface InvoiceRow {
   reminders_sent: number;
   reminders_on: boolean;
   paid_how: string | null;
+  refunded_cents: number;
   link: string;
   whatsapp: string;
   has_phone: boolean;
@@ -41,9 +42,108 @@ interface Props {
   total_cents: number;
   invoices: InvoiceRow[];
   paidMethods: Record<string, string>;
+  /** How a paid invoice can be paid back (25.5). */
+  refundMethods: Record<string, string>;
   today: string;
   /** The business's country's tax today (Sprint 25.1), e.g. VAT 15%. */
   tax: { name: string; rate: number };
+}
+
+/** Refund all or part of a paid invoice (25.5): online payments go back the same way; others are recorded by hand. */
+function RefundInvoice({
+  invoice,
+  methods,
+}: {
+  invoice: InvoiceRow;
+  methods: Record<string, string>;
+}) {
+  const [open, setOpen] = useState(false);
+  const left = invoice.total_cents - invoice.refunded_cents;
+  const online = invoice.paid_how === 'online';
+  const choices = Object.entries(methods).filter(([k]) =>
+    online ? k === 'provider' || k === 'eft' : k !== 'provider',
+  );
+  const form = useForm({
+    amount: (left / 100).toFixed(2),
+    method: choices[0]?.[0] ?? '',
+    reason: '',
+    note: '',
+  });
+  if (left <= 0) return <span className="text-fg-muted">{__('Refunded in full')}</span>;
+  if (!open)
+    return (
+      <Button
+        size="sm"
+        variant="ghost"
+        aria-label={__('Refund :invoice', { invoice: invoice.label })}
+        onClick={() => setOpen(true)}
+      >
+        {__('Refund')}
+      </Button>
+    );
+  return (
+    <form
+      className="border-border grid w-full gap-3 rounded-md border p-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.post(`${tenantBase()}/money/invoices/${invoice.id}/refund`, {
+          preserveScroll: true,
+          onSuccess: () => setOpen(false),
+        });
+      }}
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field
+          label={__('Amount (:currency)', { currency: currencySymbol() })}
+          error={form.errors.amount}
+        >
+          <Input
+            inputMode="decimal"
+            value={form.data.amount}
+            onChange={(e) => form.setData('amount', e.target.value)}
+          />
+        </Field>
+        <Field label={__('Paid back by')} error={form.errors.method}>
+          {(control) => (
+            <select
+              {...control}
+              className="border-border bg-bg h-9 rounded-md border px-2 text-sm"
+              value={form.data.method}
+              onChange={(e) => form.setData('method', e.target.value)}
+            >
+              {choices.map(([k, label]) => (
+                <option key={k} value={k}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          )}
+        </Field>
+      </div>
+      <Field label={__('Why (kept with the refund)')} error={form.errors.reason}>
+        <Input
+          value={form.data.reason}
+          maxLength={200}
+          onChange={(e) => form.setData('reason', e.target.value)}
+        />
+      </Field>
+      <Field label={__('Note for the customer (optional)')} error={form.errors.note}>
+        <Input
+          value={form.data.note}
+          maxLength={500}
+          onChange={(e) => form.setData('note', e.target.value)}
+        />
+      </Field>
+      <div className="flex gap-2">
+        <Button size="sm" type="submit" loading={form.processing}>
+          {__('Refund')}
+        </Button>
+        <Button size="sm" variant="ghost" type="button" onClick={() => setOpen(false)}>
+          {__('Cancel')}
+        </Button>
+      </div>
+    </form>
+  );
 }
 
 /** Rand as WURK writes it everywhere: R1 380.00 (the server's own format). */
@@ -240,7 +340,15 @@ function NewInvoice({ today, tax }: { today: string; tax: Props['tax'] }) {
   );
 }
 
-export default function Owed({ owed, total_cents, invoices, paidMethods, today, tax }: Props) {
+export default function Owed({
+  owed,
+  total_cents,
+  invoices,
+  paidMethods,
+  refundMethods,
+  today,
+  tax,
+}: Props) {
   const warning = (usePage().props.flash as { warning?: string | null } | undefined)?.warning;
   const post = (path: string, data: Record<string, string> = {}) =>
     router.post(`${tenantBase()}${path}`, data, { preserveScroll: true });
@@ -343,6 +451,11 @@ export default function Owed({ owed, total_cents, invoices, paidMethods, today, 
                               : `${i.overdue ? 'Overdue' : 'Due'} ${i.due_on}${i.reminders_sent > 0 ? ` · ${i.reminders_sent} reminder${i.reminders_sent === 1 ? '' : 's'}` : ''}`}
                       </span>
                     </p>
+                    {i.status === 'paid' && (
+                      <div className="flex flex-wrap gap-2">
+                        <RefundInvoice invoice={i} methods={refundMethods} />
+                      </div>
+                    )}
                     {(i.status === 'draft' || i.status === 'sent') && (
                       <div className="flex flex-wrap gap-2">
                         {i.status === 'draft' ? (

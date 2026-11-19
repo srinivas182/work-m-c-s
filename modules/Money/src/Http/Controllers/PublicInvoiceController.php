@@ -59,7 +59,9 @@ final class PublicInvoiceController
             'business' => $t->displayName(), 'badge' => app()->bound(BusinessBadge::class) ? app(BusinessBadge::class)->for($t->tenantId()) : null, 'label' => $i->label(), 'customer' => $i->customer_name, 'issued' => $i->issued_on->format('j M Y'), 'due' => $i->due_on->format('j M Y'),
             'vatNumber' => $i->vat_number, 'paid' => $i->status === 'paid', 'void' => $i->status === 'void', 'paidOn' => $i->paid_at?->setTimezone($t->timezone())->format('j M Y'),
             'lines' => array_map(fn (array $l) => ['description' => $l['description'], 'quantity' => $l['quantity'], 'amount' => $rand($l['quantity'] * $l['unit_cents'])], $i->lines),
-            'vat' => $i->vat_bp > 0 ? $rand($i->vat_cents) : null, 'total' => $rand($i->total_cents), 'message' => $message,
+            'vat' => $i->vat_bp > 0 ? $rand($i->vat_cents) : null, 'vatRate' => rtrim(rtrim(number_format($i->vat_bp / 100, 2, '.', ''), '0'), '.'), 'total' => $rand($i->total_cents), 'message' => $message,
+            'refunded' => (int) $i->refunded_cents > 0 ? $rand((int) $i->refunded_cents) : null,
+            'refundedVat' => (int) $i->refunded_cents > 0 && $i->vat_bp > 0 ? $rand(Invoices::refundVat($i, (int) $i->refunded_cents)) : null,
             'canPayOnline' => app(BusinessPayments::class)->available() !== [], 'eft' => $eft,
             'payUrl' => URL::signedRoute('money.public.pay', ['handle' => $t->handle(), 'invoice' => $i->id]),
         ])->render(), 200, ['Cache-Control' => 'private, no-store', 'X-Robots-Tag' => 'noindex']);

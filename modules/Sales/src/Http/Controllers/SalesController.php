@@ -16,6 +16,7 @@ use Wurk\Access\Contracts\BranchRestriction;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\CustomerIdentity;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Platform\Money\Money;
 use Wurk\Sales\Models\Sale;
 use Wurk\Sales\Support\SaleProblem;
@@ -126,9 +127,11 @@ final class SalesController
 
     public function refund(Request $request, string $sale): RedirectResponse
     {
-        $amount = (float) $request->validate(['amount' => ['required', 'numeric', 'min:0.01']])['amount'];
+        $data = $request->validate(['amount' => ['required', 'numeric', 'min:0.01'], 'method' => ['nullable', 'string', 'in:'.implode(',', array_keys(Refunds::METHODS))],
+            'reason' => ['nullable', 'string', 'max:200'], 'note' => ['nullable', 'string', 'max:500']]);
 
-        return $this->act(fn () => $this->sales->refund($this->sale($request, $sale), (int) round($amount * 100), $this->who($request)), 'Refund recorded.');
+        return $this->act(fn () => $this->sales->refund($this->sale($request, $sale), (int) round((float) $data['amount'] * 100), $this->who($request),
+            $data['method'] ?? null, trim((string) ($data['reason'] ?? '')) ?: 'Refund', $data['note'] ?? null, (string) $request->user()?->getAuthIdentifier()), 'Refund recorded.');
     }
 
     public function threshold(Request $request): RedirectResponse

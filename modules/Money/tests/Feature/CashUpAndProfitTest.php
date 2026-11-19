@@ -15,10 +15,15 @@ use Wurk\Messaging\Contracts\SendResult;
 use Wurk\Messaging\Events\WurkWhatsAppReceived;
 use Wurk\Money\Models\CashUp;
 use Wurk\Money\Models\Expense;
+use Wurk\Money\Models\Invoice;
+use Wurk\Money\Support\Invoices;
+use Wurk\Money\Support\MoneyBook;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Plans\Actions\PackageCatalog;
 use Wurk\Plans\Contracts\Catalog;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Sales\Support\SaleProblem;
 use Wurk\Sales\Support\Sales;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -149,4 +154,44 @@ it('records a change sent twice with the same key once (saved offline, sent late
     expect(($this->in)(fn () => Expense::query()->count()))->toBe(1);
     $this->actingAs($this->owner)->withHeader('Idempotency-Key', 'k-0987654321-xyz')->post($this->base.'/expenses', ['amount' => 80, 'category' => 'transport', 'spent_on' => $this->today]);
     expect(($this->in)(fn () => Expense::query()->count()))->toBe(2); // a different change
+});
+
+it('counts a refund paid back at the counter as money out on the day it’s paid, with its reason, and tells the customer (25.5)', function () {
+    $sale = ($this->in)(fn () => app(Sales::class)->record(['name' => 'Sipho', 'phone' => '0825550103', 'email' => 'sipho@example.com', 'amount_cents' => 20000, 'method' => 'cash',
+        'note' => null, 'branch_id' => null], $this->owner->id, 'Zodwa', null, true));
+    $this->travel(1)->days();
+    $today = now('Africa/Johannesburg')->toDateString();
+    ($this->in)(fn () => app(Sales::class)->refund($sale, 5000, 'Zodwa', 'cash', 'Wrong size', 'Sorry about that!', $this->owner->id));
+
+    $this->actingAs($this->owner)->get($this->base.'/cash-up?day='.$today)->assertInertia(fn (Assert $p) => $p->where('expected.cash', -5000)); // R50 out today
+    $this->actingAs($this->owner)->get($this->base.'/cash-up?day='.$this->today)->assertInertia(fn (Assert $p) => $p->where('expected.cash', 20000)); // the sale's day keeps it in full
+    $refund = ($this->in)(fn () => app(Refunds::class)->for('sale', $sale->id));
+    expect($refund)->toHaveCount(1)->and($refund[0])->toMatchArray(['amount_cents' => 5000, 'method' => 'cash', 'reason' => 'Wrong size', 'note' => 'Sorry about that!', 'by_name' => 'Zodwa', 'told_by' => 'email']);
+
+    expect(fn () => ($this->in)(fn () => app(Sales::class)->refund($sale, 1000, 'Zodwa', 'eft', 'x')))->toThrow(SaleProblem::class, 'can’t be refunded that way');
+});
+
+it('refunds a paid invoice: online back through the provider, in person by hand; a reason is needed (25.5)', function () {
+    $invoice = ($this->in)(function () {
+        $i = app(Invoices::class)->create(['customer_name' => 'Thandi Mokoena', 'customer_email' => 'thandi@example.com', 'lines' => [['description' => 'Wedding hair', 'quantity' => 1, 'unit' => 1200]],
+            'due_on' => now()->addDays(7)->toDateString()], null);
+        app(Invoices::class)->markPaid($i, 'cash', $this->owner->id, 'Zodwa');
+
+        return $i->refresh();
+    });
+    $url = $this->base.'/invoices/'.$invoice->id.'/refund';
+    $this->actingAs($this->owner)->post($url, ['amount' => '200', 'method' => 'cash'])->assertSessionHasErrors(['reason' => 'Say why — it’s kept with the refund.']);
+    $this->actingAs($this->owner)->post($url, ['amount' => '200', 'method' => 'provider', 'reason' => 'Late'])->assertSessionHasErrors('method');
+    $this->actingAs($this->owner)->post($url, ['amount' => '2000', 'method' => 'cash', 'reason' => 'Late'])->assertSessionHasErrors('amount');
+    $this->actingAs($this->owner)->post($url, ['amount' => '200', 'method' => 'cash', 'reason' => 'Late start'])->assertSessionHas('status', 'INV-0001 refunded — the customer has been told.');
+
+    expect(($this->in)(fn () => Invoice::query()->find($invoice->id)->refunded_cents))->toBe(20000)
+        ->and(($this->in)(fn () => app(MoneyBook::class)->profit(now()->startOfMonth(), now()->endOfMonth())['took']))->toBe(120000 - 20000)
+        ->and(($this->in)(fn () => app(MoneyBook::class)->expected($this->today)['cash']))->toBe(120000 - 20000);
+
+    // The customer's invoice shows the refund, with the VAT inside it reversed in proportion.
+    $link = ($this->in)(fn () => app(Invoices::class)->link(Invoice::query()->findOrFail($invoice->id)));
+    $vat = ($this->in)(fn () => Invoices::refundVat(Invoice::query()->findOrFail($invoice->id), 20000));
+    $this->get($link)->assertOk()->assertSee('Refunded')->assertSee('−R200.00', false);
+    expect($vat)->toBe(intdiv($invoice->vat_cents * 20000 * 2 + $invoice->total_cents, $invoice->total_cents * 2));
 });

@@ -11,12 +11,14 @@ use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\Coupons;
 use Wurk\Payments\Contracts\InPersonPayments;
 use Wurk\Payments\Contracts\PlatformPayments;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Payments\Support\InPersonLedger;
 use Wurk\Payments\Support\NoCoupons;
 use Wurk\Payments\Support\NoStoreCredit;
 use Wurk\Payments\Support\Payments;
+use Wurk\Payments\Support\RefundLedger;
 use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Payments\Support\WurkPayments;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -32,6 +34,7 @@ final class PaymentsServiceProvider extends ModuleServiceProvider
         $this->mergeConfigFrom($this->modulePath('config/payments.php'), 'payments');
         $this->app->bind(BusinessPayments::class, Payments::class);
         $this->app->bind(InPersonPayments::class, InPersonLedger::class);
+        $this->app->bind(Refunds::class, RefundLedger::class); // 25.5
         $this->app->bind(PlatformPayments::class, WurkPayments::class);
     }
 

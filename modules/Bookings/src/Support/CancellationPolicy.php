@@ -10,6 +10,7 @@ use Wurk\Bookings\Models\BookingSettings;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\BusinessPayments;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
 use Wurk\Team\Contracts\BranchLedger;
@@ -96,6 +97,11 @@ final readonly class CancellationPolicy
         $supplier = $booking instanceof ClassAttendee ? $booking->session()->branch_id : $booking->branch_id;
         if ($cash > 0) { // only the card part was cash; the wallet part went back to the wallet
             app(BranchLedger::class)->record($this->payments->receivedBy($booking->payment_reference), $supplier, -$cash, 'refund', $booking->payment_reference, 'Refund: '.$booking->customer_name);
+        }
+        foreach (['provider' => $cash, 'store_credit' => (int) $booking->wallet_cents] as $method => $cents) { // the refunds ledger (25.5): money reports and the customer's record
+            if ($cents > 0) {
+                app(Refunds::class)->record($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $cents, $method, 'Booking cancelled', null, null, 'WURK', $supplier);
+            }
         }
         event(new PurchaseRefunded($booking instanceof ClassAttendee ? 'class' : 'booking', $booking->id, $booking->deposit_cents)); // rewards on it are reversed
         $this->audit->record('bookings.deposit_refunded', $booking instanceof ClassAttendee ? 'class_attendee' : 'booking', $booking->id, ['cents' => $booking->deposit_cents]);
