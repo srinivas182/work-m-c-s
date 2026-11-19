@@ -7,8 +7,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 PART1=(Records Health Regions Data Success Website) # Website back from part 7 (19.5): part 7 reached 12 min with the receptionist and sales tests; part 1 took 2 min # Admin to part 2: part 1 reached 10m17s (15.5c); Data, Success from part 5 (18.0b)
 PART2=(Admin Identity Audit Team Referrals Credits) # Credits from part 5 (24.6: part 5 took 10 min twice); # Shop to part 4 (24.4: part 2 took 8 min normally and was cancelled at 12 on a slow runner; part 4 took 3-4 min). Shop came from part 7 (v0.23.0: part 7 reached 12 min with it; part 2 took 4.6 min) # Tenancy now in part 5 ("everything else"): part 2 timed out at 9m10s (15.1b); Messaging, Sales, Portal to part 7 (21.2: 12 min on a slow runner)
-PART3=(Bookings Access) # Plans, Features to part 5 (v0.23.0: part 3 took 10.9 min on a slow runner)
-PART7=(Ai Security Marketing Messaging Sales Portal Support Watchtower) # 19.2: part 3 passed 12 min on a slow runner; the receptionist adds Ai tests. Part 7 took 1.5 min (21.2)
+PART3=(Bookings) # Access to part 7 (26.3: part 3 was cancelled at 12 min on a slow runner; part 7 took 4.8). # Plans, Features to part 5 (v0.23.0: part 3 took 10.9 min on a slow runner)
+PART7=(Ai Security Marketing Messaging Sales Portal Support Watchtower Access) # 19.2: part 3 passed 12 min on a slow runner; the receptionist adds Ai tests. Part 7 took 1.5 min (21.2)
 # Website's slowest files run in part 8 (20.1): Website alone takes ~8.5 min on MySQL, and part 1 with all of it was
 # cancelled at 12 min. Website's other files stay in part 1 (~4.5 min with the rest of part 1).
 PART8=(Money) # with Website's slowest files (25.4)
@@ -19,7 +19,7 @@ website_files() { # $1 = in | out (of WEBSITE_PART8)
     if in_list "$b" "${WEBSITE_PART8[@]}"; then [[ "$1" == in ]] && echo "$f"; else [[ "$1" == out ]] && echo "$f"; fi
   done
 }
-PART6=(Tenancy Agents Crm) # Money to part 8 (25.4: part 6 reached 12 min on a slow runner; part 8 took 4 min). # Tenancy on its own (18.4b): moves, restores and rollouts migrate several MySQL shards per test (~6 min); part 3 with it passed 12 min. Agents, Crm from part 5 (10.5 min) to part 6 (4.5 min) — 21.2
+PART6=(Tenancy Crm) # Agents to part 5, "everything else" (26.3: part 6 took 11.8 min on a slow runner; part 5 took 5.5). # Money to part 8 (25.4: part 6 reached 12 min on a slow runner; part 8 took 4 min). # Tenancy on its own (18.4b): moves, restores and rollouts migrate several MySQL shards per test (~6 min); part 3 with it passed 12 min. Agents, Crm from part 5 (10.5 min) to part 6 (4.5 min) — 21.2
 PART4=(Payments Billing Shop) # money and the shop (Shop from part 2, 24.4); Shop to part 7 and Credits to part 5 (v0.23.0: part 4 reached 12 min on a slow runner with Sprint 22's payment tests)
 in_list() { local x="$1"; shift; for y in "$@"; do [[ "$x" == "$y" ]] && return 0; done; return 1; }
 case "${1:-}" in

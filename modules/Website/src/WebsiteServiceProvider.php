@@ -27,6 +27,7 @@ use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
+use Wurk\Platform\Contracts\NeedsYouNow;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\PushNotifications;
 use Wurk\Platform\Contracts\RecentlyDeleted;
@@ -64,6 +65,7 @@ use Wurk\Website\Setup\WebsiteSetupStep;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\ChatBot;
 use Wurk\Website\Support\EloquentSiteTemplates;
+use Wurk\Website\Support\LaunchChecklist;
 use Wurk\Website\Support\LaunchSignal;
 use Wurk\Website\Support\NoProductCatalog;
 use Wurk\Website\Support\PageRenderer;
@@ -172,6 +174,24 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
             }
         };
         ReceptionistConversation::created($waiting);
+        // Home's "Needs you now" (26.3): chats waiting longer than 15 minutes, and demo photos still on the site.
+        $this->callAfterResolving(NeedsYouNow::class, fn (NeedsYouNow $n) => $n->register('website', function (): array {
+            if (! Gate::allows('website.edit') || ! app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'website')) {
+                return [];
+            }
+            $items = array_values(ReceptionistConversation::query()->where('status', 'waiting')->where('last_message_at', '<=', now()->subMinutes(15))->orderByDesc('last_message_at')->limit(5)->get()
+                ->map(fn (ReceptionistConversation $c) => ['id' => 'chat:'.$c->id, 'kind' => __('Chat waiting'), 'title' => $c->name ?: __('A customer'),
+                    'detail' => __('Waiting since :time', ['time' => $c->last_message_at->diffForHumans()]), 'at' => $c->last_message_at->toIso8601String(),
+                    'url' => route('tenant.website.chats', ['open' => $c->id]), 'actions' => [['label' => __('Answer'), 'url' => route('tenant.website.chats', ['open' => $c->id]), 'data' => [], 'tone' => 'primary', 'link' => true]]])->all());
+            $photos = collect(app(LaunchChecklist::class)->steps())->firstWhere('key', 'photos');
+            if (is_array($photos) && ! $photos['done'] && Page::query()->exists()) {
+                $items[] = ['id' => 'photos', 'kind' => __('Website'), 'title' => (string) $photos['label'], 'detail' => __('Customers trust real photos of your business.'),
+                    'at' => now()->subYear()->toIso8601String(), // not urgent: after everything else
+                    'url' => (string) $photos['href'], 'actions' => [['label' => __('Replace them'), 'url' => (string) $photos['href'], 'data' => [], 'tone' => 'secondary', 'link' => true]]];
+            }
+
+            return $items;
+        }));
         // Today (26.2): chats waiting for a person, for the people who answer them.
         $this->callAfterResolving(TodayList::class, fn (TodayList $t) => $t->register('chats', 200, function (string $identityId): ?array {
             $user = Auth::getProvider()->retrieveById($identityId);

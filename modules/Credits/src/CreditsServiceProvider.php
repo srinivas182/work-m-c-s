@@ -22,6 +22,7 @@ use Wurk\Credits\Support\RolledUpUsage;
 use Wurk\Credits\Support\Wallet;
 use Wurk\Plans\Events\SubscriptionChanged;
 use Wurk\Platform\Contracts\HealthSignals;
+use Wurk\Platform\Contracts\NeedsYouNow;
 use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Contracts\PushNotifications;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -73,6 +74,22 @@ final class CreditsServiceProvider extends ModuleServiceProvider
         });
         Event::listen(SubscriptionChanged::class, GrantFirstAllowance::class);
         // Notification delivery to owners arrives with the notification engine; for now the alert is recorded.
+        // Home's "Needs you now" (26.3): credits running out.
+        $this->callAfterResolving(NeedsYouNow::class, fn (NeedsYouNow $n) => $n->register('credits', function (): array {
+            if (! Gate::allows('credits.view-own')) {
+                return [];
+            }
+            $wallet = app(CreditWallet::class);
+            $b = $wallet->balance();
+            // Only while they're using credits (as the health signal, 16.5): a business that sends nothing isn't nagged.
+            if ($b['low_balance_milli'] <= 0 || $b['balance_milli'] >= $b['low_balance_milli'] || array_sum(array_column($wallet->usageThisMonth(), 'milli')) <= 0) {
+                return [];
+            }
+
+            return [['id' => 'credits', 'kind' => __('Credits'), 'title' => __('Credits running out'), 'detail' => __(':n credits left — messages and WURK AI stop when they run out.',
+                ['n' => rtrim(rtrim(number_format($b['balance_milli'] / 1000, 1, '.', ''), '0'), '.')]), 'at' => now()->toIso8601String(), 'url' => route('tenant.credits'),
+                'actions' => [['label' => __('Top up'), 'url' => route('tenant.credits'), 'data' => [], 'tone' => 'primary', 'link' => true]]]];
+        }));
         // 26.2: credits running low buzz the phones of the people who see the business's credits.
         Event::listen(LowCreditBalance::class, fn (LowCreditBalance $e) => $this->app->make(TenantContext::class)->has() && $this->app->make(TenantContext::class)->id() === $e->tenantId
             ? $this->app->make(PushNotifications::class)->notify('credits', 'Credits running low', 'You have '.rtrim(rtrim(number_format($e->balanceMilli / 1000, 1, '.', ''), '0'), '.')
