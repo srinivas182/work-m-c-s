@@ -371,7 +371,7 @@ final readonly class Assistant implements AskWurk
             array_push($out, ...($examples[$name] ?? []));
         }
 
-        return array_slice([...$out, 'How do I add a team member?'], 0, 5);
+        return [...array_slice($out, 0, 4), 'How do I add a team member?']; // always one how-to question
     }
 
     /**
