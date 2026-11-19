@@ -19,6 +19,23 @@ final class Backups
 
     public const SCOPES = ['shard', 'business', 'everything'];
 
+    /**
+     * Sprint 17.4: AWS Backup reports the resource it backed up by its ARN; WURK names it by the resource's own name
+     * (the database instance or the bucket), as BACKUP_TARGETS lists them.
+     *   arn:aws:rds:af-south-1:123:db:wurk-production-shard-1 → wurk-production-shard-1
+     *   arn:aws:s3:::wurk-production-files-123                → wurk-production-files-123
+     */
+    public static function targetName(string $target): string
+    {
+        if (! str_starts_with($target, 'arn:')) {
+            return $target;
+        }
+        $resource = (string) (explode(':', $target, 6)[5] ?? $target);
+        $parts = preg_split('#[:/]#', $resource) ?: [$resource];
+
+        return (string) end($parts);
+    }
+
     public static function record(string $target, string $kind, CarbonImmutable $at, ?int $size, ?string $location, ?string $by): void
     {
         DB::table('watchtower_backups')->insert(['id' => strtolower((string) Str::ulid()), 'target' => mb_substr($target, 0, 64), 'kind' => $kind,

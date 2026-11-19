@@ -7,6 +7,7 @@ namespace Wurk\Tenancy\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 use Wurk\Tenancy\Contracts\CustomDomains;
 use Wurk\Tenancy\Resolution\TenantResolver;
 
@@ -31,9 +32,18 @@ final readonly class ServeCustomDomains
     {
         $root = strtolower((string) config('wurk.domains.root'));
         $host = strtolower($request->getHost());
+        if (self::bypass($request, $host)) {
+            return $next($request); // health checks (the load balancer calls by IP) and local addresses never look anything up
+        }
 
         if ($host !== $root && ! str_ends_with($host, '.'.$root)) {
-            $tenant = $this->resolver->byHost($host);
+            try {
+                $tenant = $this->resolver->byHost($host);
+            } catch (Throwable $e) {
+                report($e);
+
+                return $next($request); // the database is down: the platform's own pages still answer (with their own errors)
+            }
             if ($tenant !== null) {
                 $request->attributes->set(CustomDomains::REQUEST_HOST, $host);
                 $request->headers->set('HOST', $tenant->handle().'.'.$root);
@@ -53,6 +63,12 @@ final readonly class ServeCustomDomains
         }
 
         return $next($request);
+    }
+
+    /** Health checks, IP addresses and single-label hosts (localhost) are never a business's domain. */
+    private static function bypass(Request $request, string $host): bool
+    {
+        return str_starts_with($request->path(), 'health/') || filter_var($host, FILTER_VALIDATE_IP) !== false || ! str_contains($host, '.');
     }
 
     private function stays(Request $request): bool

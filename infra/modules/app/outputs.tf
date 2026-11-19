@@ -48,3 +48,7 @@ output "task_role_arns" {
   description = "The roles release tasks and services run with (the deploy role may pass only these)"
   value       = [aws_iam_role.execution.arn, aws_iam_role.task.arn]
 }
+
+output "cluster_arn" {
+  value = aws_ecs_cluster.this.arn
+}

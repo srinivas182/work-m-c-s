@@ -98,3 +98,9 @@ variable "source_repository_arn" {
   type        = string
   default     = null
 }
+
+variable "offsite_vault_arn" {
+  description = "The locked vault in WURK's backups account (envs/backups output); null until it exists"
+  type        = string
+  default     = null
+}

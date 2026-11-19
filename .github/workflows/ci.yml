@@ -90,6 +90,7 @@ jobs:
               - 'infra/**'
               - 'scripts/deploy'
               - 'scripts/smoke-remote'
+              - 'scripts/drill-restore'
             docker:
               - *shared
               - 'docker/**'
@@ -586,7 +587,7 @@ jobs:
       - name: Validate each environment
         run: |
           set -euo pipefail
-          for d in bootstrap envs/staging envs/production; do
+          for d in bootstrap envs/staging envs/production envs/backups; do
             echo "::group::$d"
             tofu -chdir="infra/$d" init -backend=false -input=false -lockfile=readonly
             tofu -chdir="infra/$d" validate
@@ -598,13 +599,13 @@ jobs:
         run: |
           set -euo pipefail
           cd infra && tflint --init
-          for d in bootstrap envs/staging envs/production; do tflint --chdir="$d" --config="$PWD/.tflint.hcl" --format compact; done
+          for d in bootstrap envs/staging envs/production envs/backups; do tflint --chdir="$d" --config="$PWD/.tflint.hcl" --format compact; done
       - name: Checkov
         run: |
           pipx run "checkov==${CHECKOV_VERSION}" -d infra --config-file infra/.checkov.yaml
       - name: Release scripts and workflow (17.2)
         run: |
-          shellcheck scripts/deploy scripts/smoke-remote
+          shellcheck scripts/deploy scripts/smoke-remote scripts/drill-restore
           pipx run "actionlint-py==1.7.12.25" .github/workflows/release.yml
 
   ci:

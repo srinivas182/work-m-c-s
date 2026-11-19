@@ -129,8 +129,7 @@ SNAPSHOTS=()
 for db in $(aws rds describe-db-instances --query "DBInstances[?starts_with(DBInstanceIdentifier, '${NAME}-')].DBInstanceIdentifier" --output text); do
   snap="${db}-pre-${VERSION//./-}-${STAMP}"
   aws rds create-db-snapshot --db-instance-identifier "$db" --db-snapshot-identifier "$snap" --tags Key=Purpose,Value=pre-release >/dev/null
-  target="${db#"${NAME}"-}"; target="${target//_/-}"
-  RECORD+="php artisan system:backup-taken '${target}' --kind=snapshot --location='rds:${snap}' --by='deploy ${VERSION}' && "
+  RECORD+="php artisan system:backup-taken '${db}' --kind=snapshot --location='rds:${snap}' --by='deploy ${VERSION}' && "
   SNAPSHOTS+=("$snap")
 done
 for snap in "${SNAPSHOTS[@]}"; do aws rds wait db-snapshot-available --db-snapshot-identifier "$snap"; done

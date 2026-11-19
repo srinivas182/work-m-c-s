@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# The timed restore drill on the cloud (Sprint 17.4; docs/runbooks/restore.md → "Drill").
+#   scripts/drill-restore <staging|production> <database, e.g. shard-1> [minutes ago to restore to, default 10]
+#
+# 1. Records the moment of the (pretend) disaster.
+# 2. Restores the database to that many minutes before, with point-in-time restore, as a NEW instance next to the
+#    live one (never over it), in the same subnets and security group, and waits until it's available.
+# 3. Prints its endpoint and the exact commands to check it and to record the drill (`system:drill-recorded`) with
+#    its timings against the targets: data lost ≤ 15 minutes, working again within 4 hours.
+# The new instance is left running for the checks; delete it afterwards (the command is printed).
+set -euo pipefail
+
+ENVIRONMENT="${1:?usage: scripts/drill-restore <staging|production> <database> [minutes]}"
+DATABASE="${2:?usage: scripts/drill-restore <staging|production> <database> [minutes]}"
+MINUTES="${3:-10}"
+[[ "$ENVIRONMENT" =~ ^(staging|production)$ ]] || { echo "environment must be staging or production" >&2; exit 2; }
+[[ "$MINUTES" =~ ^[0-9]+$ ]] || { echo "minutes must be a number" >&2; exit 2; }
+export AWS_REGION="${AWS_REGION:-af-south-1}"
+
+SOURCE="wurk-${ENVIRONMENT}-${DATABASE//_/-}"
+FAILED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+RESTORE_TO="$(date -u -d "-${MINUTES} minutes" +%Y-%m-%dT%H:%M:%SZ)"
+TARGET="${SOURCE}-drill-$(date -u +%m%d%H%M)"
+
+echo "Disaster at ${FAILED_AT}; restoring ${SOURCE} to ${RESTORE_TO} as ${TARGET}"
+latest="$(aws rds describe-db-instances --db-instance-identifier "$SOURCE" --query 'DBInstances[0].LatestRestorableTime' --output text)"
+echo "Latest restorable time: ${latest}"
+
+read -r subnet_group security_group class <<<"$(aws rds describe-db-instances --db-instance-identifier "$SOURCE" \
+  --query 'DBInstances[0].[DBSubnetGroup.DBSubnetGroupName, VpcSecurityGroups[0].VpcSecurityGroupId, DBInstanceClass]' --output text)"
+
+aws rds restore-db-instance-to-point-in-time \
+  --source-db-instance-identifier "$SOURCE" --target-db-instance-identifier "$TARGET" \
+  --restore-time "$RESTORE_TO" --db-subnet-group-name "$subnet_group" --vpc-security-group-ids "$security_group" \
+  --db-instance-class "$class" --no-multi-az --no-publicly-accessible --copy-tags-to-snapshot \
+  --tags Key=Purpose,Value=restore-drill >/dev/null
+
+aws rds wait db-instance-available --db-instance-identifier "$TARGET"
+RESTORED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+endpoint="$(aws rds describe-db-instances --db-instance-identifier "$TARGET" --query 'DBInstances[0].Endpoint.Address' --output text)"
+minutes=$(( ($(date -u -d "$RESTORED_AT" +%s) - $(date -u -d "$FAILED_AT" +%s)) / 60 ))
+
+cat <<EOT
+
+Restored in ${minutes} min: ${endpoint}
+
+Check it from a one-off release task (it can reach the database), with the restore connection pointed at it:
+  RESTORE_DB_HOST=${endpoint} RESTORE_DB_DATABASE=wurk RESTORE_DB_USERNAME=wurk RESTORE_DB_PASSWORD=<from wurk/${ENVIRONMENT}/db>
+  - one business, onto a test shard:   php artisan tenants:restore <business> --to=<test shard>
+  - or the whole shard (a real loss):  php artisan shards:repoint ${DATABASE//_/-} --host=${endpoint} --database=wurk --username=wurk --password=…
+
+Record the drill:
+  php artisan system:drill-recorded --scope=shard --target=${SOURCE} --failed='${FAILED_AT}' --restored='${RESTORED_AT}' --backup='${RESTORE_TO}' --note='Cloud PITR drill'
+
+Delete the drill copy afterwards:
+  aws rds delete-db-instance --db-instance-identifier ${TARGET} --skip-final-snapshot
+EOT

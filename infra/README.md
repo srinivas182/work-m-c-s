@@ -13,6 +13,8 @@ production are built the same way and every change is reviewed in a pull request
 | `modules/files` | The private, versioned files bucket (with a `tenants/<id>/` prefix per business), the logs bucket, and CloudFront for public website files. |
 | `modules/app` | The image registry and the ECS cluster with `serve`, `worker`, `scheduler`, `ssr` and `clamav`. Also the load balancer (Cloudflare only), autoscaling, roles and logs. |
 | `modules/edge` | Cloudflare (17.3): DNS for WURK's addresses, the ACM certificates (validated through Cloudflare), and in production the zone's TLS settings and the fallback origin for owners' own domains. |
+| `modules/backup` | Daily AWS Backup of every database and the files bucket, copied to the backups account's locked vault, with each finished backup reported to WURK (17.4). |
+| `envs/backups` | WURK's backups account: the locked off-site vault (17.4). |
 | `modules/deploy` | The release pipeline's role, for GitHub OIDC (17.2). |
 | `modules/stack` | One environment: everything above, with its encryption key. |
 | `envs/staging`, `envs/production` | The two environments and their sizes. |
@@ -64,6 +66,18 @@ Then, once:
 The DNS records, the certificates and Cloudflare's settings are all in `modules/edge`, so nothing is clicked in Cloudflare.
 
 **Staging's addresses** (`<business>.staging.wurk.co.za`) are two levels below the zone. Cloudflare's free edge certificate covers only one level. Staging therefore needs either Cloudflare's Advanced Certificate Manager for `*.staging.wurk.co.za`, or its own domain. The app, admin, origin and sites addresses work either way.
+
+## Backups (17.4)
+
+1. In WURK's backups account, enable cross-account backup in AWS Organizations (AWS Backup → Settings), then apply `envs/backups` with:
+   - `-var account_id=…`;
+   - `-var 'source_account_ids=["<production>","<staging>"]'`;
+   - `-var organization_id=o-…`.
+
+   This creates the locked vault. Its lock can be corrected for **3 days**; after that it is permanent.
+2. Apply production and staging with `-var offsite_vault_arn=<the vault's ARN>`. Every daily backup is then copied there: production's kept 90 days, staging's 14.
+
+How to restore and how to run the drill: `docs/runbooks/restore.md` → "In the cloud".
 
 ## Owners' own domains (17.3)
 

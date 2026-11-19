@@ -28,7 +28,7 @@ A typical small business moves in seconds. The pause lasts at most 30 minutes, e
 Use this when a business has lost data, for example through a mistake, a bad import, or a support request that went wrong. Other businesses on the shard are not affected.
 
 1. **Restore the shard's backup, to the point in time before the problem, as a separate database.** Never restore over the live shard.
-   - Sprint 17 covers how to do this on the managed database (snapshot or point-in-time restore to a new instance).
+   - In the cloud, use point-in-time restore to a **new** instance (see "In the cloud" below), or `scripts/drill-restore`, which does it for you.
    - Locally, load the dump into a new database.
 2. **Point the `restore` connection at it** with `RESTORE_DB_HOST`, `RESTORE_DB_PORT`, `RESTORE_DB_DATABASE`, `RESTORE_DB_USERNAME` and `RESTORE_DB_PASSWORD`. Use a read-only user if you can.
 3. **Choose one of two ways:**
@@ -137,3 +137,65 @@ Both drills are recorded.
 | One business (same run) | 200 customers | 4 s | up to the backup's time | Passed |
 
 Restoring from a logical dump grows with the data: about 6,000 customer rows a second here. A shard with 5,000 businesses would take minutes, well inside 4 hours. The managed database's snapshot restore (Sprint 17) doesn't replay rows, so it depends far less on size. **Data lost is set by the backup**, not by the restore: a nightly dump can lose up to a day. The 15-minute target needs the managed database's point-in-time recovery (continuous log backup), which Sprint 17 sets up and drills on staging.
+
+## In the cloud (Sprint 17.4)
+
+WURK's backups are kept in four places:
+
+| Kept where | How far back | Restores |
+|---|---|---|
+| Each database's point-in-time log (RDS) | 35 days in production, 7 in staging, to the second | A database at any moment, as a new instance |
+| Daily snapshots (AWS Backup, 01:00 SAST) | 35 days | A database or the files bucket on that day |
+| Copies in WURK's **backups account** (locked vault, same region) | 90 days | When the production account itself is lost or compromised |
+| Snapshots taken before every release (`scripts/deploy`) | Until deleted | The databases just before a release |
+
+Files (photos, documents, exports) are also **versioned**: an overwritten or deleted file can be brought back for 90 days.
+
+Every finished backup reports to WURK (`system:backup-taken`, run by EventBridge). If one is late, Admin → System shows it and Watchtower raises a problem.
+
+### Restore a database to a moment
+
+```bash
+aws rds restore-db-instance-to-point-in-time \
+  --source-db-instance-identifier wurk-production-shard-1 \
+  --target-db-instance-identifier wurk-production-shard-1-restored \
+  --restore-time 2027-03-01T09:55:00Z \
+  --db-subnet-group-name wurk-production --vpc-security-group-ids <the mysql security group> --no-publicly-accessible
+aws rds wait db-instance-available --db-instance-identifier wurk-production-shard-1-restored
+```
+
+Then do one of two things:
+- **Bring back one business:** point the `restore` connection at the new instance (`RESTORE_DB_*`) and run `tenants:restore <business> --replace`, as described above.
+- **Replace the whole shard** (it's lost or damaged): `php artisan shards:repoint shard-1 --host=<new endpoint> --database=wurk --username=wurk --password=…`. Keep the old instance until you're sure.
+
+**The central database** works the same way, but keep its address unchanged. An RDS address comes from the instance's name, so:
+1. Rename the damaged instance (`aws rds modify-db-instance --db-instance-identifier wurk-production-central --new-db-instance-identifier wurk-production-central-damaged --apply-immediately`).
+2. Rename the restored one to `wurk-production-central`.
+
+The app reconnects on its own and nothing in `infra/` changes. Run `tofu plan` afterwards to confirm that.
+
+### Restore files
+
+Restore earlier versions of objects under `tenants/<business id>/` in the files bucket. Use `aws s3api list-object-versions` and then `copy-object` with `--copy-source <bucket>/<key>?versionId=<id>`. A whole bucket on a day can come from its AWS Backup recovery point, restored to a new bucket.
+
+### When the production account is lost
+
+The copies in the backups account's vault can't be deleted early by anyone, including an administrator of that account. To rebuild:
+1. Create the new account and apply `infra/envs/production` there.
+2. Copy the recovery points back from the backups account's vault.
+3. Restore each one.
+
+## Drill
+
+Do this once a quarter on staging, and before going live (acceptance 4):
+
+```bash
+scripts/drill-restore staging shard-1 10   # restores shard-1 to 10 minutes ago as a new instance, timed
+```
+
+The script prints three things:
+- the new instance's endpoint;
+- how to check it;
+- the `system:drill-recorded` command with the timings.
+
+The drill counts when **no more than 15 minutes of data are lost** and the database is **working again within 4 hours**. Delete the drill instance afterwards; the script prints that command too.
