@@ -69,7 +69,7 @@ final readonly class BookAppointmentTool implements ReceptionistTool
         }
         $deposit = $this->deposits->amountFor($service, $online);
         // Mobile money on WhatsApp needs no email: the prompt and its confirmation are on the customer's phone (22.2).
-        $mobile = ChatBookings::source($context) === 'whatsapp' && in_array(app(BusinessPayments::class)->available()[0] ?? null, BusinessPayments::MOBILE_MONEY, true);
+        $mobile = in_array(ChatBookings::source($context), ['whatsapp', 'ussd', 'sms'], true) && in_array(app(BusinessPayments::class)->available()[0] ?? null, BusinessPayments::MOBILE_MONEY, true);
         if ($deposit > 0 && $customer['email'] === null && ! $mobile) {
             throw new ReceptionistRefused('This service needs a deposit and the receipt is emailed: ask for their email.');
         }
@@ -91,7 +91,7 @@ final readonly class BookAppointmentTool implements ReceptionistTool
 
             // On WhatsApp with mobile money (22.2): the prompt goes straight to the customer's own number, so they never leave the chat.
             $phone = (string) ($context['customer']['phone'] ?? '');
-            if (ChatBookings::source($context) === 'whatsapp' && $phone !== '' && $this->deposits->promptOnPhone($booking, $phone) === null) {
+            if (in_array(ChatBookings::source($context), ['whatsapp', 'ussd', 'sms'], true) && $phone !== '' && $this->deposits->promptOnPhone($booking, $phone) === null) {
                 return ['booked' => false, 'awaiting_deposit' => true, 'booking_id' => $booking->id, 'when' => $when, 'deposit' => $this->chat->money($deposit), 'prompt_sent' => true,
                     'tell_the_customer' => 'A payment prompt for the deposit is on their phone now: approve it with their mobile money PIN and the booking is confirmed. The link also works if the prompt doesn’t arrive.',
                     'card' => [...$card, 'deposit' => $this->chat->money($deposit), 'action' => ['label' => 'Pay the deposit', 'url' => $pay]]];

@@ -134,6 +134,8 @@ function BookingItem({
           {b.source === 'website' && <Badge tone="info">{__('Booked online')}</Badge>}
           {b.source === 'chat' && <Badge tone="info">{__('Booked by the AI assistant')}</Badge>}
           {b.source === 'whatsapp' && <Badge tone="info">{__('Booked on WhatsApp')}</Badge>}
+          {b.source === 'ussd' && <Badge tone="info">{__('Booked by USSD')}</Badge>}
+          {b.source === 'sms' && <Badge tone="info">{__('Booked by SMS')}</Badge>}
           {b.customer_confirmed && <Badge tone="success">{__('Confirmed by the customer')}</Badge>}
           {STATUS[b.status] && <Badge tone="neutral">{STATUS[b.status]}</Badge>}
         </span>

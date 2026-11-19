@@ -2,7 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "wurk/platform",
     "type": "project",
-    "description": "WURK \u2014 multi-tenant business platform",
+    "description": "WURK — multi-tenant business platform",
     "license": "proprietary",
     "require": {
         "php": "^8.3",
@@ -67,7 +67,8 @@
             "Wurk\\Support\\": "modules/Support/src/",
             "Wurk\\Team\\": "modules/Team/src/",
             "Wurk\\Tenancy\\": "modules/Tenancy/src/",
-            "Wurk\\Website\\": "modules/Website/src/"
+            "Wurk\\Website\\": "modules/Website/src/",
+            "Wurk\\Reach\\": "modules/Reach/src/"
         }
     },
     "autoload-dev": {
@@ -90,7 +91,8 @@
             "Wurk\\Marketing\\Tests\\": "modules/Marketing/tests/",
             "Wurk\\Billing\\Tests\\": "modules/Billing/tests/",
             "Wurk\\Website\\Tests\\": "modules/Website/tests/",
-            "Wurk\\Ai\\Tests\\": "modules/Ai/tests/"
+            "Wurk\\Ai\\Tests\\": "modules/Ai/tests/",
+            "Wurk\\Reach\\Tests\\": "modules/Reach/tests/"
         }
     },
     "scripts": {
