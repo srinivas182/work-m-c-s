@@ -9,16 +9,17 @@ use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Bookings\Models\Booking;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Platform\Contracts\LoyaltyCards;
 use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
  * Today → My bookings (Sprint 26.2): this person's appointments for the rest of today, with Start, Done and
- * No-show, and "Paid in person" (Sprint 22.3) for what's still to pay. Only for someone who takes bookings.
+ * No-show, "Paid in person" (Sprint 22.3) for what's still to pay, and "Use reward" when their loyalty card is full (26.5). Only for someone who takes bookings.
  */
 final readonly class MyBookings
 {
-    public function __construct(private TenantContext $context, private TeamDirectory $team, private InPersonPayments $inPerson) {}
+    public function __construct(private TenantContext $context, private TeamDirectory $team, private InPersonPayments $inPerson, private LoyaltyCards $loyalty) {}
 
     /** @return array<string, mixed>|null */
     public function section(string $identityId): ?array
@@ -45,7 +46,7 @@ final readonly class MyBookings
             'items' => array_values($bookings->map(function (Booking $b) use ($services, $taken, $tz, $base): array {
                 $service = $services[$b->service_id] ?? null;
                 $online = $b->payment_reference !== null && $b->paid_at !== null && $b->refunded_at === null ? $b->deposit_cents - (int) $b->wallet_cents : 0;
-                $due = max(0, (int) ($service->price_cents ?? 0) - $online - (int) ($taken[$b->id] ?? 0));
+                $due = max(0, (int) ($service->price_cents ?? 0) - $online - (int) ($taken[$b->id] ?? 0) - (int) $b->reward_cents);
                 $done = $b->status === 'completed';
                 $actions = [];
                 if (! $done) {
@@ -56,6 +57,9 @@ final readonly class MyBookings
                     if ($b->started_at === null) {
                         $actions[] = ['label' => __('No-show'), 'url' => $base.$b->id.'/status', 'data' => ['status' => 'no_show'], 'tone' => 'danger'];
                     }
+                }
+                if ($due > 0 && (int) $b->reward_cents === 0 && ($offer = $this->loyalty->offer($b->customer_phone, $due, 'booking')) !== null) {
+                    $actions[] = ['label' => __('Use reward: :off off', ['off' => Money::format($offer['discount_cents'])]), 'url' => $base.$b->id.'/reward', 'data' => [], 'tone' => 'primary'];
                 }
                 if ($due > 0) {
                     foreach (InPersonPayments::METHODS as $method => $label) {

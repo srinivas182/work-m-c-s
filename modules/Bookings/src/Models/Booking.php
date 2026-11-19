@@ -23,6 +23,7 @@ use Wurk\Tenancy\Contracts\BranchDirectory;
  * @property Carbon|null $cancelled_at
  * @property string $customer_name
  * @property string|null $customer_phone
+ * @property int $reward_cents
  * @property string|null $customer_email
  * @property string|null $notes
  * @property string $source

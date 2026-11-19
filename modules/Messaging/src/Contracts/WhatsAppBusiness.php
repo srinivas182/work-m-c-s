@@ -23,6 +23,9 @@ interface WhatsAppBusiness
     /** "How was it?" after a visit or order (25.3): customer's first name, business, what it was, the review link. */
     public const REVIEW_REQUEST = 'wurk_review_request';
 
+    /** A loyalty card's progress after a paid visit or order (26.5): name, business, the progress line. */
+    public const LOYALTY_PROGRESS = 'wurk_loyalty_progress';
+
     /** Whether the current business has connected its own number. */
     public function connected(): bool;
 

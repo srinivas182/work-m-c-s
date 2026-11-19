@@ -17,6 +17,7 @@ use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\FinishedVisits;
 use Wurk\Platform\Contracts\HealthSignals;
+use Wurk\Platform\Contracts\LoyaltyCards;
 use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\NeedsYouNow;
 use Wurk\Platform\Contracts\OwnerDigest;
@@ -44,6 +45,7 @@ use Wurk\Platform\Support\HealthRegistry;
 use Wurk\Platform\Support\MetricsRegistry;
 use Wurk\Platform\Support\MoneyOwedRegistry;
 use Wurk\Platform\Support\NeedsYouRegistry;
+use Wurk\Platform\Support\NoLoyaltyCards;
 use Wurk\Platform\Support\NoPushNotifications;
 use Wurk\Platform\Support\NoSupportSessions;
 use Wurk\Platform\Support\OwnerDigestRegistry;
@@ -88,6 +90,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(RecentlyDeleted::class, DeletedRegistry::class);
         $this->app->bind(SupportSessions::class, NoSupportSessions::class); // the Support module answers for real
         $this->app->bind(PushNotifications::class, NoPushNotifications::class); // the Push module sends for real (26.2)
+        $this->app->bind(LoyaltyCards::class, NoLoyaltyCards::class); // the Loyalty module for real (26.5)
 
         $this->app->singleton(
             ModuleRegistry::class,

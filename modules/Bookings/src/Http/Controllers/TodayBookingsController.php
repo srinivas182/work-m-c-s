@@ -15,6 +15,7 @@ use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Today\MyBookings;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Platform\Contracts\LoyaltyCards;
 use Wurk\Platform\Money\Money;
 
 /**
@@ -75,6 +76,22 @@ final class TodayBookingsController
         app(Deposits::class)->paidInPerson($b, $method, $due, $me, (string) $name);
 
         return back()->with('status', Money::format($due).' '.__('recorded:').' '.strtolower(InPersonPayments::METHODS[$method]).'.');
+    }
+
+    /** Uses the customer's full loyalty card (26.5) on what's left to pay — once. */
+    public function reward(Request $request, string $booking, MyBookings $mine, LoyaltyCards $loyalty): RedirectResponse
+    {
+        $b = $this->mine($request, $booking);
+        abort_if(in_array($b->status, ['cancelled', 'expired', 'no_show'], true) || (int) $b->reward_cents > 0, 422);
+        $member = collect($this->team->roster())->firstWhere('id', $b->member_id);
+        $item = collect((array) ($mine->section((string) ($member['identity_id'] ?? $request->user()?->getAuthIdentifier()))['items'] ?? []))->firstWhere('id', $b->id);
+        $offer = $loyalty->offer($b->customer_phone, (int) ($item['due_cents'] ?? 0), 'booking');
+        if ($offer === null || ! $loyalty->redeem($offer['reward_id'], 'booking', $b->id, $offer['discount_cents'])) {
+            return back()->with('warning', __('There’s no reward to use on this booking.'));
+        }
+        $b->update(['reward_cents' => $offer['discount_cents']]);
+
+        return back()->with('status', __('Reward used: :off off.', ['off' => Money::format($offer['discount_cents'])]));
     }
 
     /** A booking with this person — or any booking, for someone who manages bookings. Otherwise it isn't here. */
