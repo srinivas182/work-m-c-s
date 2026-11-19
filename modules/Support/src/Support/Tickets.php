@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Identity\Contracts\PeopleDirectory;
+use Wurk\Messaging\Contracts\WurkWhatsApp;
 use Wurk\Support\Mail\TicketMail;
 use Wurk\Support\Models\SupportAttachment;
 use Wurk\Support\Models\SupportMessage;
@@ -22,6 +23,9 @@ use Wurk\Tenancy\Contracts\TenantDirectory;
  */
 final readonly class Tickets
 {
+    /** Where a ticket opened from the WhatsApp help line says it came from (25.6). */
+    public const HELP_LINE = 'WhatsApp help line';
+
     public function __construct(
         private SupportTargets $targets,
         private Screenshots $screenshots,
@@ -74,6 +78,26 @@ final readonly class Tickets
         $this->audit->record('support.replied', 'support_ticket', $ticket->id, ['number' => $ticket->number, 'solved' => $solve], ['platform' => true]);
         $this->tellBusiness($ticket, $solve ? "Solved: {$ticket->subject} ({$ticket->reference()})" : "WURK replied: {$ticket->subject} ({$ticket->reference()})",
             [$body, '', $solve ? 'We’ve marked this solved. Reply if it isn’t, or tell us how we did.' : 'Reply from your back office.']);
+        if ($ticket->page === self::HELP_LINE) {
+            $this->whatsAppReply($ticket, $body);
+        }
+    }
+
+    /**
+     * A ticket from the WhatsApp help line (25.6): the reply goes back on WhatsApp too — as a message inside the 24-hour
+     * window, else with the approved `wurk_help_reply` template.
+     */
+    private function whatsAppReply(SupportTicket $ticket, string $body): void
+    {
+        $phone = (string) preg_replace('/\D/', '', (string) $this->people->verifiedPhone($ticket->opened_by));
+        $wa = app(WurkWhatsApp::class);
+        if ($phone === '' || ! $wa->available()) {
+            return;
+        }
+        $text = mb_substr(trim($body), 0, 900);
+        if (! $wa->sendText($phone, "WURK support ({$ticket->reference()}):\n\n".$text)) {
+            $wa->sendTemplate($phone, WurkWhatsApp::HELP_REPLY, [$ticket->reference(), mb_substr((string) preg_replace('/\s+/', ' ', $text), 0, 500)]);
+        }
     }
 
     public function setStatus(SupportTicket $ticket, string $status, string $staffId): void

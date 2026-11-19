@@ -6,11 +6,13 @@ namespace Wurk\Support;
 
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
+use Wurk\Messaging\Events\WurkWhatsAppReceived;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\SupportSessions;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Support\Http\Middleware\GuardSupportSession;
 use Wurk\Support\Http\Middleware\ShareSupport;
+use Wurk\Support\Jobs\AnswerHelpLine;
 use Wurk\Support\Support\SupportAccess;
 use Wurk\Support\Support\TicketSignal;
 use Wurk\Tenancy\Events\TenantEntered;
@@ -50,5 +52,11 @@ final class SupportServiceProvider extends ModuleServiceProvider
         $this->app->make(Router::class)->pushMiddlewareToGroup('tenant.back-office', ShareSupport::class);
         $this->app->make(Router::class)->pushMiddlewareToGroup('tenant.back-office', GuardSupportSession::class);
         Event::listen(TenantEntered::class, fn () => $this->app->make(SupportAccess::class)->forget());
+        // The WhatsApp help line (25.6): anything to WURK's number that isn't STOP or a reply to the evening summary.
+        Event::listen(WurkWhatsAppReceived::class, function (WurkWhatsAppReceived $e): void {
+            if (! $e->answered && strtoupper(trim($e->text)) !== 'STOP') {
+                AnswerHelpLine::dispatch($e->from, $e->text, $e->mediaId, $e->mediaMime);
+            }
+        });
     }
 }

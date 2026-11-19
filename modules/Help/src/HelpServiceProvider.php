@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Wurk\Help;
 
 use Wurk\Help\Contracts\HelpSearch;
+use Wurk\Help\Contracts\VideoCaptions;
+use Wurk\Help\Support\Captions;
 use Wurk\Help\Support\HelpCentre;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 
@@ -14,6 +16,7 @@ final class HelpServiceProvider extends ModuleServiceProvider
     {
         parent::register();
         $this->app->bind(HelpSearch::class, HelpCentre::class);
+        $this->app->bind(VideoCaptions::class, Captions::class); // 25.6: video subtitles
     }
 
     public function menu(): array
