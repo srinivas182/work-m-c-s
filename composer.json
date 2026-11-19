@@ -13,6 +13,7 @@
         "laravel/octane": "^2.22",
         "laravel/pennant": "^1.26",
         "laravel/tinker": "^3.0",
+        "league/flysystem-aws-s3-v3": "^3.0",
         "league/flysystem-path-prefixing": "^3.31"
     },
     "require-dev": {

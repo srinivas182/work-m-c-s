@@ -1,0 +1,15 @@
+# Checkov's rules that don't fit WURK, each with the reason (Sprint 17.1). Checks on single resources are skipped next
+# to the resource instead ("#checkov:skip=…" inside the block).
+framework: terraform
+quiet: true
+compact: true
+skip-check:
+  - CKV_AWS_338 # logs kept 30 days, not a year: POPIA's minimisation; the audit log lives in the app's database
+  - CKV2_AWS_62 # no S3 event notifications needed
+  - CKV_AWS_144 # no cross-region replication: data stays in South Africa (decision C; backups to a second account, 17.4)
+  - CKV2_AWS_57 # no automatic rotation: shard credentials are stored in the central database; rotation is a runbook step
+  - CKV2_AWS_65 # ACLs enabled on purpose: Flysystem sends one (ignored), CloudFront logging needs them
+  - CKV_AWS_336 # read-only root filesystem: Octane and Caddy write to storage/ inside the container
+  - CKV2_AWS_50 # staging runs one cache node (no failover); production has a replica with failover
+  - CKV_AWS_305 # CloudFront serves files, there's no root page
+  - CKV2_AWS_32 # the managed security-headers policy is attached by its id
