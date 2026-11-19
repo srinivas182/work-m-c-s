@@ -55,7 +55,8 @@ locals {
   secrets = [
     { name = "APP_KEY", valueFrom = "${aws_secretsmanager_secret.app.arn}:APP_KEY::" },
     { name = "REDIS_PASSWORD", valueFrom = "${aws_secretsmanager_secret.app.arn}:REDIS_PASSWORD::" },
-    { name = "CLOUDFLARE_API_TOKEN", valueFrom = "${aws_secretsmanager_secret.app.arn}:CLOUDFLARE_API_TOKEN::" }, # 17.3, custom hostnames only
+    { name = "WATCHTOWER_ALARM_TOKEN", valueFrom = "${aws_secretsmanager_secret.app.arn}:WATCHTOWER_ALARM_TOKEN::" }, # 17.5
+    { name = "CLOUDFLARE_API_TOKEN", valueFrom = "${aws_secretsmanager_secret.app.arn}:CLOUDFLARE_API_TOKEN::" },     # 17.3, custom hostnames only
     { name = "DB_USERNAME", valueFrom = "${var.db_secret_arn}:central.username::" },
     { name = "DB_PASSWORD", valueFrom = "${var.db_secret_arn}:central.password::" },
   ]
@@ -141,7 +142,7 @@ resource "aws_secretsmanager_secret" "app" {
 # REDIS_PASSWORD is written here; APP_KEY is added by hand once (docs: infra/README.md) and kept when this runs again.
 resource "aws_secretsmanager_secret_version" "app" {
   secret_id     = aws_secretsmanager_secret.app.id
-  secret_string = jsonencode({ APP_KEY = "set-me", REDIS_PASSWORD = var.redis_auth_token, CLOUDFLARE_API_TOKEN = "" })
+  secret_string = jsonencode({ APP_KEY = "set-me", REDIS_PASSWORD = var.redis_auth_token, CLOUDFLARE_API_TOKEN = "", WATCHTOWER_ALARM_TOKEN = var.alarm_token })
   lifecycle {
     ignore_changes = [secret_string]
   }

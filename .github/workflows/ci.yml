@@ -587,7 +587,7 @@ jobs:
       - name: Validate each environment
         run: |
           set -euo pipefail
-          for d in bootstrap envs/staging envs/production envs/backups; do
+          for d in bootstrap envs/staging envs/production envs/backups envs/uptime; do
             echo "::group::$d"
             tofu -chdir="infra/$d" init -backend=false -input=false -lockfile=readonly
             tofu -chdir="infra/$d" validate
@@ -599,7 +599,7 @@ jobs:
         run: |
           set -euo pipefail
           cd infra && tflint --init
-          for d in bootstrap envs/staging envs/production envs/backups; do tflint --chdir="$d" --config="$PWD/.tflint.hcl" --format compact; done
+          for d in bootstrap envs/staging envs/production envs/backups envs/uptime; do tflint --chdir="$d" --config="$PWD/.tflint.hcl" --format compact; done
       - name: Checkov
         run: |
           pipx run "checkov==${CHECKOV_VERSION}" -d infra --config-file infra/.checkov.yaml

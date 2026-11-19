@@ -140,3 +140,9 @@ variable "ecr_pull_role_arns" {
   type        = list(string)
   default     = []
 }
+
+variable "alarm_token" {
+  description = "The secret in the address WURK receives the cloud's alarms on (17.5)"
+  type        = string
+  sensitive   = true
+}

@@ -63,6 +63,10 @@ final class Drivers
                 'service_code' => 'Service code (e.g. *384*1234#)', 'webhook_token' => 'Webhook token (16+ letters and digits, also in the callback URLs)',
                 'sms_number' => 'SMS booking number or short code (its incoming-messages URL: /webhooks/sms/africastalking/{webhook token})',
             ]]],
+            // Error tracking (17.5, decision G): server errors, already masked by Watchtower, also go to Sentry.
+            'errors.sentry' => ['sentry' => ['name' => 'Sentry', 'fields' => ['dsn' => ['label' => 'DSN (Settings → Client Keys)', 'secret' => true]], 'settings' => [
+                'environment' => 'Environment name (production or staging)', 'sample_rate' => 'Share of errors sent, 0–1 (default 1)',
+            ]]],
             // How WURK collects its own subscriptions (Billing). WURK's keys for the payment methods businesses offer
             // (PayFast, Yoco, Ozow, Peach) are set in Admin → Payment methods, where they're checked when saved (19.6).
             'payments.paystack' => ['paystack' => ['name' => 'Paystack', 'fields' => ['public_key' => ['label' => 'Public key', 'secret' => false], 'secret_key' => ['label' => 'Secret key', 'secret' => true]], 'settings' => []]],

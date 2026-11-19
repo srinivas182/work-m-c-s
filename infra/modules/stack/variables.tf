@@ -104,3 +104,9 @@ variable "offsite_vault_arn" {
   type        = string
   default     = null
 }
+
+variable "alert_emails" {
+  description = "Extra addresses for the cloud's alarms (17.5), given when applying"
+  type        = list(string)
+  default     = []
+}

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Throwable;
 use Wurk\Messaging\Contracts\SendResult;
 use Wurk\Messaging\Models\ProviderSetting;
+use Wurk\Platform\Support\SentryDsn;
 
 /**
  * "Test connection" for providers that don't send messages (Sprint 19.6): a read-only request with the saved keys,
@@ -17,7 +18,7 @@ use Wurk\Messaging\Models\ProviderSetting;
 final class ConnectionCheck
 {
     /** Channels with a check here; message channels send a real test instead. */
-    public const CHANNELS = ['ai.anthropic', 'ai.openai', 'ai.google', 'payments.paystack', 'meetings.google', 'meetings.zoom', 'places.google', 'ussd'];
+    public const CHANNELS = ['ai.anthropic', 'ai.openai', 'ai.google', 'payments.paystack', 'meetings.google', 'meetings.zoom', 'places.google', 'ussd', 'errors.sentry'];
 
     public function check(string $channel, ProviderSetting $setting): SendResult
     {
@@ -32,6 +33,11 @@ final class ConnectionCheck
                 // WURK's USSD code (25.2): the account's details answer only to the right username and key.
                 'ussd' => $this->keyResult('Africa’s Talking', Http::timeout(15)->withHeaders(['apiKey' => $c['api_key'] ?? '', 'Accept' => 'application/json'])
                     ->get((($c['username'] ?? '') === 'sandbox' ? 'https://api.sandbox.africastalking.com' : 'https://api.africastalking.com').'/version1/user', ['username' => $c['username'] ?? ''])),
+                // Sentry (17.5): one test event, marked as a test.
+                'errors.sentry' => ($dsn = SentryDsn::parse($c['dsn'] ?? '')) === null ? SendResult::failed('That isn’t a Sentry DSN. Copy it from the project’s Settings → Client Keys.')
+                    : $this->keyResult('Sentry', Http::timeout(15)->withHeaders($dsn->headers())->withBody(SentryDsn::envelope(['event_id' => bin2hex(random_bytes(16)),
+                        'timestamp' => gmdate('Y-m-d\TH:i:s\Z'), 'platform' => 'php', 'level' => 'info', 'message' => ['formatted' => 'WURK connection test — safe to ignore'],
+                        'tags' => ['test' => 'yes']]), 'application/x-sentry-envelope')->post($dsn->endpoint)),
                 'payments.paystack' => $this->keyResult('Paystack', Http::timeout(15)->withToken($c['secret_key'] ?? '')->get('https://api.paystack.co/balance')),
                 // OAuth apps can't be fully tried without someone signing in; a made-up code tells a wrong client
                 // ("invalid_client") from right credentials with a bad code ("invalid_grant").
