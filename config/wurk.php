@@ -192,6 +192,9 @@ return [
         'recipients' => array_values(array_filter(array_map('trim', explode(',', (string) env('WATCHTOWER_EMAIL', ''))))),
         // Secret in the external uptime checker's webhook address: /_wurk/uptime/{token} (18.0b). Unset = no webhook.
         'uptime_token' => env('WATCHTOWER_UPTIME_TOKEN'),
+        // The cloud's alarms through Amazon SNS (17.5): POST /_wurk/alarms/{token}, from this topic only.
+        'alarm_token' => env('WATCHTOWER_ALARM_TOKEN'),
+        'alarm_topic' => env('WATCHTOWER_ALARM_TOPIC'),
         // The AI explains problems (18.0b): on/off, and how many a day at most (WURK's cost, not businesses').
         'ai' => (bool) env('WATCHTOWER_AI', true),
         'ai_daily_cap' => (int) env('WATCHTOWER_AI_DAILY_CAP', 50),

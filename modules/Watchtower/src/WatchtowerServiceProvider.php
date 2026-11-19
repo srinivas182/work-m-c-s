@@ -24,11 +24,13 @@ use Wurk\Watchtower\Console\ReleaseFinishedCommand;
 use Wurk\Watchtower\Console\ReleaseTasksCommand;
 use Wurk\Watchtower\Console\SweepCommand;
 use Wurk\Watchtower\Http\Controllers\ClientErrorController;
+use Wurk\Watchtower\Http\Controllers\CloudAlarmsController;
 use Wurk\Watchtower\Http\Controllers\HeartbeatController;
 use Wurk\Watchtower\Http\Controllers\UptimeWebhookController;
 use Wurk\Watchtower\Http\Middleware\TimeRequests;
 use Wurk\Watchtower\Support\Heartbeats;
 use Wurk\Watchtower\Support\Recorder;
+use Wurk\Watchtower\Support\SentryForwarder;
 use Wurk\Watchtower\Support\Signal;
 use Wurk\Watchtower\Support\Where;
 
@@ -80,8 +82,10 @@ final class WatchtowerServiceProvider extends ModuleServiceProvider
                 try {
                     $request = $this->app->runningInConsole() && ! $this->app->runningUnitTests() ? null : request();
                     $worker = str_starts_with((string) ($_SERVER['argv'][1] ?? ''), 'queue:');
-                    $this->app->make(Recorder::class)->record(Signal::fromThrowable($e, 'exception', $request !== null ? Where::location($request) : null,
-                        $request !== null ? Where::surface($request) : ($worker ? 'queue' : 'console')));
+                    $signal = Signal::fromThrowable($e, 'exception', $request !== null ? Where::location($request) : null,
+                        $request !== null ? Where::surface($request) : ($worker ? 'queue' : 'console'));
+                    $this->app->make(Recorder::class)->record($signal);
+                    $this->app->make(SentryForwarder::class)->forward($signal); // 17.5, when switched on
                 } catch (Throwable) {
                     // never let recording an error cause another
                 }
@@ -112,5 +116,6 @@ final class WatchtowerServiceProvider extends ModuleServiceProvider
         Route::get('health/heartbeat', HeartbeatController::class)->name('health.heartbeat');
         Route::post('_wurk/client-error', ClientErrorController::class)->middleware('throttle:20,1,client-error')->name('watchtower.client-error');
         Route::post('_wurk/uptime/{token}', UptimeWebhookController::class)->middleware('throttle:60,1,uptime-webhook')->where('token', '[A-Za-z0-9_\-]{16,128}')->name('watchtower.uptime');
+        Route::post('_wurk/alarms/{token}', CloudAlarmsController::class)->middleware('throttle:120,1,cloud-alarms')->where('token', '[A-Za-z0-9_\-]{16,128}')->name('watchtower.alarms'); // 17.5
     }
 }

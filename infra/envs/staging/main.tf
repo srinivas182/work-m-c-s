@@ -48,6 +48,12 @@ variable "offsite_vault_arn" {
   default     = null
 }
 
+variable "alert_emails" {
+  description = "Also email the cloud's alarms here (17.5) — pass with TF_VAR_alert_emails, never commit"
+  type        = list(string)
+  default     = []
+}
+
 variable "account_id" {
   description = "WURK's staging AWS account (guards against applying to the wrong one)"
   type        = string
@@ -75,6 +81,7 @@ module "wurk" {
   root_domain           = "staging.wurk.co.za"
   cloudflare_zone_id    = var.cloudflare_zone_id
   offsite_vault_arn     = var.offsite_vault_arn
+  alert_emails          = var.alert_emails
   image_tag             = var.image_tag
   vpc_cidr              = "10.41.0.0/16"
   single_nat_gateway    = true

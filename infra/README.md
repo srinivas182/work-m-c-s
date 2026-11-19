@@ -14,6 +14,8 @@ production are built the same way and every change is reviewed in a pull request
 | `modules/app` | The image registry and the ECS cluster with `serve`, `worker`, `scheduler`, `ssr` and `clamav`. Also the load balancer (Cloudflare only), autoscaling, roles and logs. |
 | `modules/edge` | Cloudflare (17.3): DNS for WURK's addresses, the ACM certificates (validated through Cloudflare), and in production the zone's TLS settings and the fallback origin for owners' own domains. |
 | `modules/backup` | Daily AWS Backup of every database and the files bucket, copied to the backups account's locked vault, with each finished backup reported to WURK (17.4). |
+| `modules/monitoring` | CloudWatch alarms into one SNS topic, delivered to WURK's Watchtower (signature-checked) and optionally by email (17.5). |
+| `envs/uptime` | Better Stack checking WURK from outside, and the optional status page (17.5). |
 | `envs/backups` | WURK's backups account: the locked off-site vault (17.4). |
 | `modules/deploy` | The release pipeline's role, for GitHub OIDC (17.2). |
 | `modules/stack` | One environment: everything above, with its encryption key. |
@@ -78,6 +80,36 @@ The DNS records, the certificates and Cloudflare's settings are all in `modules/
 2. Apply production and staging with `-var offsite_vault_arn=<the vault's ARN>`. Every daily backup is then copied there: production's kept 90 days, staging's 14.
 
 How to restore and how to run the drill: `docs/runbooks/restore.md` → "In the cloud".
+
+## Monitoring and alerts (17.5)
+
+**Alarms in CloudWatch.** Every alarm goes to the SNS topic `wurk-<env>-alarms`.
+
+| Alarm | When |
+|---|---|
+| `crit-5xx` | More than 2% of requests fail (5xx), in 3 of 5 minutes, when there's traffic |
+| `crit-no-healthy-web` | No healthy web container behind the load balancer for 3 minutes |
+| `crit-no-scheduler`, `crit-no-workers` | The scheduler, or every queue worker, has stopped for 5 minutes |
+| `warn-slow-pages` | 95% of requests take more than 2 seconds, for most of 10 minutes |
+| `warn-db-cpu-*`, `crit-db-storage-*`, `warn-db-memory-*` | A database's CPU above 80%, or less than 5 GB of storage or 256 MB of memory free |
+| `warn-cache-memory` | The cache more than 80% full |
+
+**Who is told.**
+- **WURK receives the topic** at `/_wurk/alarms/<token>`. Each alarm becomes a Watchtower problem, emailed to the people in **Admin → Watchtower → settings**. An alarm going back to OK resolves it. WURK checks SNS's signature and the topic on every message.
+- **When WURK itself is down,** give `-var 'alert_emails=["…"]'` (or `TF_VAR_alert_emails`) when applying, so the topic emails them too. Each address must confirm the subscription from AWS's email.
+- **Better Stack** (`envs/uptime`, token in `BETTERUPTIME_API_TOKEN`) checks these from outside every 1–5 minutes:
+  - `/health/ready`;
+  - the scheduler's heartbeat;
+  - the website;
+  - certificates near expiry.
+
+  In Better Stack, add a webhook integration to `https://app.wurk.co.za/_wurk/uptime/<token>` (the token is in Admin → Watchtower), so outages are recorded in Watchtower. The status page `status.wurk.co.za` is optional (`-var status_page=true`, a paid Better Stack feature).
+
+**What Watchtower watches itself** (Sprint 18): a full queue, late backups, failed scheduled tasks, slow pages and server errors.
+
+**Error tracking:** set the Sentry DSN in **Admin → Providers → Error tracking** (decision G). Server errors then go to Sentry as well, already masked.
+
+**Logs:** every container logs JSON lines to CloudWatch (`/wurk/<env>/<role>`), kept 30 days, with personal data masked as everywhere in WURK.
 
 ## Owners' own domains (17.3)
 

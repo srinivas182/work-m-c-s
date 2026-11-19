@@ -139,7 +139,9 @@ module "app" {
     CLOUDFLARE_ZONE_ID        = var.cloudflare_zone_id # 17.3: owners' own domains (the token is in wurk/<env>/app)
     WURK_CUSTOM_DOMAIN_TARGET = module.edge.custom_domain_target
     WURK_CUSTOM_DOMAIN_ORIGIN = "origin.${var.root_domain}"
+    WATCHTOWER_ALARM_TOPIC    = module.monitoring.topic_arn # 17.5: the cloud's alarms (the token is in wurk/<env>/app)
   }
+  alarm_token         = module.monitoring.token
   central_db_host     = module.database.endpoints["central"]
   db_secret_arn       = module.database.secret_arn
   redis_host          = module.cache.primary_endpoint
@@ -183,4 +185,17 @@ module "backup" {
   task_role_arns         = module.app.task_role_arns
   app_subnet_ids         = module.app.app_subnet_ids
   app_security_group_id  = module.app.app_security_group_id
+}
+
+module "monitoring" {
+  source                   = "../monitoring"
+  name                     = local.name
+  app_domain               = "app.${var.root_domain}"
+  kms_key_arn              = aws_kms_key.this.arn
+  alert_emails             = var.alert_emails
+  load_balancer_arn_suffix = module.app.load_balancer_arn_suffix
+  target_group_arn_suffix  = module.app.target_group_arn_suffix
+  cluster_name             = module.app.cluster_name
+  cache_id                 = module.cache.replication_group_id
+  database_ids             = module.database.instance_ids
 }
