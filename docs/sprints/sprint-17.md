@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Approved by WURK (19 Nov 2026: "Approve all"), decisions A–H as recommended |
-| **Release** | v1.0.0 (first production release) |
+| **Release** | v1.0.0 (first production release); code complete as **v1.0.0-rc.1**, which becomes v1.0.0 after the go-live checks on staging |
 | **Depends on** | v0.27.0 (Sprint 26). Builds on: the cloud-agnostic production image (FrankenPHP + Octane; `serve`, `worker`, `scheduler`, `migrate` roles), shards and rollouts (Sprints 1 and 18), Watchtower, `/health/*`, backup records (`system:backup-taken`), k6 load scripts, the restore runbook and the UAT script (Sprint 18) |
 | **Next** | Live operation; feature work resumes from the backlog |
 
@@ -186,3 +186,50 @@ Also: rebalance the MySQL CI parts again (the slowest took 11.5 of 12 minutes on
 | 17.3 Owners' own domains | #283 | Website → Your domain: one CNAME to `sites.<root>`, Cloudflare for SaaS issues the certificate (custom origin `origin.<root>`, Full (strict)), checks every 5 minutes, main-address 301 from `<handle>.<root>` (never POSTs, payment notices or signed links), lapse → back to the WURK address with a push; let go after 7 days unpointed. Admin → Domains. `infra/modules/edge`: DNS, ACM certificates validated through Cloudflare, zone TLS settings, fallback origin, Cloudflare's IP ranges from its API |
 | 17.4 Backups and DR | #284 | AWS Backup daily for every database and the files bucket (35 days), copied to a locked vault in WURK's backups account in the same region (decision C); each finished backup recorded through EventBridge → `system:backup-taken`; `scripts/drill-restore` (timed point-in-time restore to a new instance, prints the checks and the drill record); restore runbook's cloud steps. The drill itself runs on staging (17.6) |
 | 17.5 Monitoring and alerts | #285 | CloudWatch alarms (5xx rate, no healthy web, no scheduler/workers, slow pages, database CPU/storage/memory, cache memory) → SNS → WURK's Watchtower at `/_wurk/alarms/<token>` (SNS signature and topic checked) → emailed to Admin → Watchtower's recipients; optional email for when WURK is down; Better Stack monitors and status page as code (`envs/uptime`); Sentry as a provider (Admin → Providers → Error tracking), errors forwarded masked from the queue. JSON logs, 30 days (17.1) |
+| 17.6 Going live | #286 | Go-live checklist (`docs/deployment/go-live.md`), `scripts/ecs-task`, e2e (`sprint-17.spec.ts`), CHANGELOG and VERSION **1.0.0-rc.1**, docker.md rows. The checks that need AWS (load test, drill, pen test, UAT, cut-over) are in the checklist and wait for WURK's accounts |
+
+## Verification (before closing)
+
+Every spec item and acceptance criterion, checked against the code and its tests. Verified 20 Nov 2026. ⏳ marks what can only be done once WURK's AWS accounts, Cloudflare zone and pen-test firm exist. Those items are in `docs/deployment/go-live.md`, and the sprint closes as **v1.0.0** when they pass.
+
+| Item | Where | Status |
+|---|---|---|
+| 17.1 OpenTofu, one state per environment, encrypted and locked | `infra/bootstrap`, `envs/*` backends | ✅ Validated in CI / ⏳ applied |
+| 17.1 Network across 3 AZs; load balancer from Cloudflare only | `modules/network`, `modules/app` (IP ranges from Cloudflare's API) | ✅ |
+| 17.1 MySQL: central + N shards, Multi-AZ in production, PITR | `modules/database` | ✅ |
+| 17.1 Redis; object storage with versioning, encryption, no public access | `modules/cache` (Valkey), `modules/files` | ✅ Public ACLs are accepted on upload but ignored; public policies are blocked |
+| 17.1 Containers: serve (autoscaled), worker, single scheduler, ClamAV | `modules/app` | ✅ Workers scale on CPU; Watchtower alerts on queue backlog |
+| 17.1 Secrets in the secrets store, provider keys in Admin | Secrets Manager `wurk/<env>/app` and `/db` | ✅ |
+| 17.1 Files on S3 under `tenants/<id>/`; `trust` private | `config/filesystems.php`; CloudFilesTest | ✅ |
+| 17.1 Staging mirrors production at smaller sizes, 2 shards | `envs/staging` | ✅ |
+| 17.2 Tag → build and scan → staging → smoke → approval → production | `.github/workflows/release.yml` | ✅ actionlint / ⏳ first run |
+| 17.2 Snapshot, migrate central then shards (canary first), rolling update, restart workers, notify | `scripts/deploy`, `release:finished`; ReleasesTest | ✅ / ⚠️ the shared Redis cache isn't flushed (it holds rate limits and pending confirmations); each container rebuilds its own caches |
+| 17.2 Automatic rollback within 10 minutes; expand-then-contract migrations | `scripts/deploy` watch + ECS circuit breaker | ✅ / ⏳ proven on staging |
+| 17.2 docker.md steps scripted where they're commands | `config/release.php`, `release:tasks` | ✅ |
+| 17.3 wurk.co.za on Cloudflare: DNS, wildcard, WAF and rules at the edge, origin only from Cloudflare | `modules/edge`; zone settings in production | ✅ / ⚠️ WAF custom rules beyond Cloudflare's managed defaults aren't defined yet |
+| 17.3 Settings → Your domain: one CNAME, registrar help, checks, SSL status, main address with redirect | Website DomainController, `Domain.tsx`; YourDomainTest, e2e | ✅ |
+| 17.3 Apex guidance (www + redirect, or CNAME flattening) | Domain page | ✅ |
+| 17.3 Admin → Domains; domain lapses → WURK address keeps working, owner told | DomainsController, DomainNotices; YourDomainTest, e2e | ✅ |
+| 17.3 Token is an infrastructure secret; hostname count visible | `CLOUDFLARE_API_TOKEN` in Secrets Manager; Admin → Domains counts | ✅ Shown on Admin → Domains (not Admin → Metrics) |
+| 17.4 Snapshots and PITR (35/7 days); files versioned 90 days | `modules/database`, `modules/files` | ✅ |
+| 17.4 Off-site copy, second account, same region (decision C) | `modules/backup`, `envs/backups` (locked vault) | ✅ / ⏳ applied |
+| 17.4 Backups report to `system:backup-taken`; late → Watchtower | EventBridge → release task; ARN naming test | ✅ |
+| 17.4 Runbook cloud steps; timed drill RPO ≤ 15 min, RTO ≤ 4 h | `docs/runbooks/restore.md`, `scripts/drill-restore` | ✅ / ⏳ drill on staging |
+| 17.5 JSON logs, 30 days, masked | `LOG_STDERR_FORMATTER`, CloudWatch log groups | ✅ |
+| 17.5 Alarms: 5xx, latency, CPU, memory, queue, DB, Redis, certificates | `modules/monitoring` | ✅ / ⚠️ queue depth and late backups come from Watchtower; certificate expiry from Better Stack |
+| 17.5 Better Stack: ready, a site, heartbeat; status page | `envs/uptime` | ✅ / ⏳ applied |
+| 17.5 Alerts to the on-call contact from settings, not code | `/_wurk/alarms/<token>` → Watchtower recipients; CloudAlarmsTest | ✅ |
+| 17.5 Sentry with PII scrubbing, DSN in Admin → Providers | SentryForwarder, ConnectionCheck | ✅ Sent through Sentry's envelope API (the SDK couldn't be installed in this environment); Watchtower masks before sending |
+| 17.6 Load test, pen test, DR drill, UAT on staging | `docs/deployment/go-live.md` §3 | ⏳ |
+| 17.6 Go-live checklist (DNS, TRUSTED_PROXIES, HSTS, super admin MFA, provider keys, live tests) | `docs/deployment/go-live.md` §4–5 | ✅ Written / ⏳ done |
+| 17.6 v1.0.0 with the infrastructure upgrade guide | CHANGELOG 1.0.0-rc.1, `infra/README.md`, docker.md | ✅ as rc.1 / ⏳ v1.0.0 |
+| Also: rebalance the MySQL CI parts | `scripts/ci-test-part` (17.1, 17.2) | ✅ |
+| Acceptance 1 (built from `infra/` alone; re-plan shows no changes) | `infra/` | ⏳ needs the accounts |
+| Acceptance 2 (tag → staging → approval → production; failing health check rolls back) | release.yml, `scripts/deploy` | ⏳ |
+| Acceptance 3 (owner's CNAME → HTTPS on their domain; WURK address redirects) | YourDomainTest (Cloudflare simulated), e2e | ✅ simulated / ⏳ live |
+| Acceptance 4 (shard restored to a point in time within RTO/RPO) | `scripts/drill-restore` | ⏳ |
+| Acceptance 5 (full-scale load test meets budgets) | k6 journeys, go-live §3 | ⏳ |
+| Acceptance 6 (pen test: no open critical/high) | go-live §3 | ⏳ |
+| Acceptance 7 (alerts: scheduler, health check, queue, late backup) | CloudAlarmsTest, Watchtower tests | ✅ simulated / ⏳ live |
+| Acceptance 8 (v1.0.0 live with WhatsApp, payments, SMS; UAT passed) | go-live §5 | ⏳ |
+

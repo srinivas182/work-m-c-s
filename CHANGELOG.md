@@ -4,6 +4,50 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [1.0.0-rc.1] — 2026-11-20 — Sprint 17: Cloud & going live (release candidate)
+
+The first release built to run in the cloud. It becomes **v1.0.0** once staging has passed the go-live checks: the load test, the restore drill, the pen test and UAT (`docs/deployment/go-live.md`). None of that can run until WURK's AWS accounts exist.
+
+### Infrastructure as code — Sprint 17.1
+- **`infra/` (OpenTofu): AWS Africa (Cape Town)**, staging and production built the same way:
+  - a private network across three zones;
+  - MySQL 8 for the central database and one per shard (production: Multi-AZ, 35 days' point-in-time restore, TLS);
+  - Valkey;
+  - a private, versioned files bucket, with CloudFront for website photos;
+  - ECS Fargate running the one image as web, workers, scheduler, SSR and ClamAV, behind a load balancer that accepts only Cloudflare.
+- **Files** move to the bucket in the cloud (`FILES_DRIVER=s3`), each disk its own private prefix, with no keys. Locally nothing changes.
+- **CI checks every infrastructure change:** `fmt`, `validate`, TFLint with AWS's rules, and Checkov.
+
+### Releases — Sprint 17.2
+- **A version tag builds the image once,** deploys it to staging and checks it from outside. After approval, the **same image** goes to production. GitHub signs in with OIDC, so no AWS keys are stored anywhere.
+- **Each deploy:**
+  - snapshots the databases;
+  - migrates central then every shard (canary first) and runs `release:tasks` (each version's steps, once per environment);
+  - rolls out;
+  - watches errors and health for 10 minutes and **rolls back by itself** if they fail;
+  - is recorded on **Admin → System → Releases**, and HQ is emailed.
+
+### Owners' own domains — Sprint 17.3
+- **Website → Your domain:**
+  - one CNAME record, and Cloudflare for SaaS issues and renews the certificate;
+  - checked every 5 minutes;
+  - can become the main address: page visits to the WURK address are redirected, but payment notices and signed links never are;
+  - if the domain stops pointing at WURK, the site falls back to its WURK address and the owner is told.
+- **Admin → Domains.** `wurk.co.za`'s DNS, certificates and TLS settings are now code too (`modules/edge`).
+
+### Backups and DR — Sprint 17.4
+- **Daily AWS Backup** of every database and the files bucket, copied to a **locked vault in a separate backups account** in Cape Town. Each finished backup is recorded in WURK.
+- **`scripts/drill-restore`** runs the timed point-in-time drill. The restore runbook has the cloud steps.
+
+### Monitoring and alerts — Sprint 17.5
+- **CloudWatch alarms** go to WURK's Watchtower, are emailed to the recipients set in Admin, and have their SNS signatures checked.
+- **Better Stack** checks WURK from outside, as code.
+- **Sentry** is optional in Admin → Providers → Error tracking. Errors arrive already masked.
+
+### Going live — Sprint 17.6
+- **The go-live checklist** (`docs/deployment/go-live.md`) and `scripts/ecs-task` for one-off commands in an environment.
+- **Browser tests** for Your domain, Admin → Domains and Releases.
+
 ## [0.27.0] — 2026-11-19 — Sprint 26: Run it from your phone
 
 ### Tell WURK what to do, on WhatsApp — Sprint 26.1

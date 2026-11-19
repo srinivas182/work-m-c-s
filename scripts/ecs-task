@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Runs one command in an environment, the way release steps run (Sprint 17.6): a one-off container of the release
+# task definition, in the app's private network, with the app's secrets — then prints its output and exit code.
+#   scripts/ecs-task <staging|production> '<command>'
+# Examples:
+#   scripts/ecs-task staging 'php artisan wurk:seed-load --businesses=10000 --customers=200 --bookings=60 --products=20'
+#   scripts/ecs-task production 'php artisan shards:migrate --dry-run'
+#   scripts/ecs-task staging 'php artisan system:drill-recorded --scope=shard --target=… --failed=… --restored=…'
+# Needs the environment's deploy role (or an engineer's admin role). Everything it does is in CloudTrail.
+set -euo pipefail
+
+ENVIRONMENT="${1:?usage: scripts/ecs-task <staging|production> '<command>'}"
+COMMAND="${2:?usage: scripts/ecs-task <staging|production> '<command>'}"
+[[ "$ENVIRONMENT" =~ ^(staging|production)$ ]] || { echo "environment must be staging or production" >&2; exit 2; }
+export AWS_REGION="${AWS_REGION:-af-south-1}"
+NAME="wurk-${ENVIRONMENT}"
+
+network="$(aws ecs describe-services --cluster "$NAME" --services serve --query 'services[0].networkConfiguration' --output json)"
+task="$(aws ecs run-task --cluster "$NAME" --launch-type FARGATE --task-definition "${NAME}-release" \
+  --network-configuration "$network" --started-by "ecs-task ${USER:-ci}" \
+  --overrides "$(jq -n --arg s "$COMMAND" '{containerOverrides: [{name: "release", command: ["sh", "-c", $s]}]}')" \
+  --query 'tasks[0].taskArn' --output text)"
+echo "task ${task##*/}: ${COMMAND}"
+aws ecs wait tasks-stopped --cluster "$NAME" --tasks "$task"
+
+aws logs get-log-events --log-group-name "/wurk/${NAME}/release" --log-stream-name "release/release/${task##*/}" \
+  --start-from-head --query 'events[].message' --output text 2>/dev/null | tr '\t' '\n' || echo "(no output found in /wurk/${NAME}/release)"
+
+code="$(aws ecs describe-tasks --cluster "$NAME" --tasks "$task" --query 'tasks[0].containers[0].exitCode' --output text)"
+echo "exit code: ${code}"
+[ "$code" = "0" ]
