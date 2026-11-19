@@ -39,6 +39,7 @@ use Wurk\Tenancy\Contracts\BranchDirectory;
  * @property string|null $consent_version
  * @property Carbon|null $consent_at
  * @property string|null $branch_id
+ * @property string|null $created_by
  */
 final class Booking extends Model
 {

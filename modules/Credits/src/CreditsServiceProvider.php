@@ -23,8 +23,10 @@ use Wurk\Credits\Support\Wallet;
 use Wurk\Plans\Events\SubscriptionChanged;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\PlatformMetrics;
+use Wurk\Platform\Contracts\PushNotifications;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
+use Wurk\Tenancy\Contracts\TenantContext;
 
 final class CreditsServiceProvider extends ModuleServiceProvider
 {
@@ -71,6 +73,10 @@ final class CreditsServiceProvider extends ModuleServiceProvider
         });
         Event::listen(SubscriptionChanged::class, GrantFirstAllowance::class);
         // Notification delivery to owners arrives with the notification engine; for now the alert is recorded.
+        // 26.2: credits running low buzz the phones of the people who see the business's credits.
+        Event::listen(LowCreditBalance::class, fn (LowCreditBalance $e) => $this->app->make(TenantContext::class)->has() && $this->app->make(TenantContext::class)->id() === $e->tenantId
+            ? $this->app->make(PushNotifications::class)->notify('credits', 'Credits running low', 'You have '.rtrim(rtrim(number_format($e->balanceMilli / 1000, 1, '.', ''), '0'), '.')
+                .' credits left. Top up so messages and WURK AI keep working.', route('tenant.credits'), 'credits.view-own') : null);
         Event::listen(LowCreditBalance::class, fn (LowCreditBalance $e) => $this->app->make(AuditLog::class)->record(
             'credits.low_balance', 'tenant', $e->tenantId, ['balance' => $e->balanceMilli / 1000, 'threshold' => $e->thresholdMilli / 1000],
         ));
