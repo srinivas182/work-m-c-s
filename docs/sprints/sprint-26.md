@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved by WURK (18 Nov 2026: "yes, agreed to all"), with the additions to Sprints 23 and 25 and decisions A–F as recommended |
+| **Status** | Approved by WURK (18 Nov 2026: "yes, agreed to all"), with the additions to Sprints 23 and 25 and decisions A–F as recommended. Built 19 Nov 2026 as v0.27.0 |
 | **Release** | v0.27.0 |
 | **Depends on** | v0.26.0 (Sprint 25). Builds on: WhatsApp both ways and the owner's evening summary (Sprint 21), payments and cash recording (Sprint 22), languages and lite mode (Sprint 24), Bookings, Shop, Team, Customer accounts (Portal), Campaigns |
 | **Next** | Sprint 17 — Cloud & going live (still last) |
@@ -164,3 +164,45 @@ Sources:
 
 | Part | PR | Notes |
 |---|---|---|
+| 26.1 Tell WURK what to do, on WhatsApp | #272 | Text and voice notes; read back with Yes/No buttons; acts as the person; receptionist rate; daily cap (50) in Admin → WURK AI |
+| 26.2 The WURK app | #273 | New Push module (Web Push with WURK's own VAPID keys); Today; installable app opening on Today; offline queue |
+| 26.3 Needs you now | #274 | One list across WURK with actions; "All done for now." |
+| 26.4 Shifts, clock-in, commission | #275 | New Shifts module; roster from booking hours; Wi-Fi or 200 m check optional; earnings export |
+| 26.5 Loyalty cards | #276 | New Loyalty module; stamps once per visit, cash included; reward used once, best of coupon or reward |
+| 26.6 Release | #277 | e2e/sprint-26.spec.ts; CHANGELOG, VERSION 0.27.0, upgrade steps |
+
+## Verification (before closing)
+
+Every spec item and acceptance criterion, checked against the code and its tests. Verified 19 Nov 2026.
+
+| Item | Where | Status |
+|---|---|---|
+| 26.1 Plain words or a voice note; examples (book, move, mark paid, add stock, a special, figures) | Assistant::instruct, HelpLine; BookCustomer, MoveBookingForOwner, MarkOrderPaid, AddStock, DraftCampaign tools; OwnerInstructionsTest | ✅ |
+| 26.1 Always read back; only after Yes; questions straight away | `act:yes|no` buttons, cached pending action; OwnerInstructionsTest | ✅ |
+| 26.1 Acts as that person with their permissions; audited; switch off or limit per person | Assistant::asPerson, permission `assistant.whatsapp`, audit | ✅ Limited per person through their role |
+| 26.1 AI credits at the receptionist's rate; daily cap in Admin | Assistant::instructed, Admin → WURK AI | ✅ |
+| 26.2 Installs from the browser, icon, full screen, opens on Today | manifest (`/businesses?to=today`), icons, apple meta; e2e | ✅ |
+| 26.2 Push per person: bookings, chats, orders, payments, credits | Push Notifier and hooks; PushNotificationsTest | ✅ |
+| 26.2 Today: my bookings with Start/Done/No-show, Paid in person; orders to pack | MyBookings, Shop section; TodayTest | ✅ |
+| 26.2 Today: chats assigned to me | Website section | ⚠️ Shows chats waiting for a person; WURK has no chat assignment yet |
+| 26.2 Works with lite mode: opens on a weak signal, queues actions | sw.js cache, offline.ts queueable patterns | ✅ |
+| 26.3 Bookings to confirm, deposits not paid, chats over 15 min, orders, who owes me, demo photos, credits | NeedsYouNow sources; NeedsYouNowTest | ✅ Bookings to confirm and deposits not paid are the same bookings (owed money) |
+| 26.3 Action on each item; "All done for now." | Workspace NeedsYouNow; NeedsYouNowTest, e2e | ✅ |
+| 26.4 Roster from booking hours; swaps and leave approved by the owner; own shifts on the phone | Roster, MyShiftsController; ShiftsTest, e2e | ✅ |
+| 26.4 Clock in and out, optional Wi-Fi or 200 m; hours per person | Clock; ShiftsTest | ✅ / ⚠️ the Today clock button doesn't send location (My shifts does) |
+| 26.4 Commission % of services or products; tips; monthly report to export; not payroll | Earnings; ShiftsTest, e2e | ✅ Tips are recorded by the owner on Earnings, not inside the payment flow |
+| 26.5 Owner sets reward, stamps, least spend, what counts; in every package | Loyalty settings; LoyaltyTest, e2e | ✅ |
+| 26.5 Stamps after a paid visit or order, cash included | PurchaseMade listener; LoyaltyTest | ✅ |
+| 26.5 "6 of 8 — 2 more…" on WhatsApp, account page, and "my card" | `wurk_loyalty_progress`, Portal Home, WhatsAppChats; LoyaltyTest | ✅ Sent as its own message after the stamp, not inside the receipt |
+| 26.5 Reward offered at the next booking or checkout, used once, counts like a discount | Today "Use reward", OrderPlacer; LoyaltyTest | ✅ Online booking deposits don't take the reward; it's used at the counter |
+| 26.5 Alongside referrals and coupons; one discount, the customer's best | OrderPlacer (better of coupon or reward); LoyaltyTest | ✅ |
+| 26.6 e2e: owner on WhatsApp books, moves, marks paid | OwnerInstructionsTest (webhook-level) | ⚠️ Covered by feature tests; a browser can't drive WhatsApp |
+| 26.6 e2e: app installs and receives a push | e2e (manifest, service worker), PushNotificationsTest (encrypted send) | ✅ / ⚠️ a real push service isn't reachable from CI |
+| 26.6 e2e: Needs you now; a shift and the commission report; loyalty | e2e/sprint-26.spec.ts; ShiftsTest, LoyaltyTest | ✅ |
+| 26.6 v0.27.0 with upgrade steps (VAPID keys made by WURK, daily cap) | CHANGELOG, docker.md | ✅ |
+| Acceptance 1 (text and voice note, read back, Yes, in the calendar; no permission → polite no) | OwnerInstructionsTest | ✅ |
+| Acceptance 2 (stylist installs, gets a push in seconds, marks done from Today) | PushNotificationsTest, TodayTest, e2e | ✅ Simulated push delivery |
+| Acceptance 3 (Home lists, each done from there, list empties) | NeedsYouNowTest, e2e | ✅ |
+| Acceptance 4 (roster, clock in/out, export matching the takings) | ShiftsTest | ✅ |
+| Acceptance 5 (8th paid haircut incl. cash earns the reward; progress on WhatsApp; used once) | LoyaltyTest | ✅ |
+| Acceptance 6 (no change without confirmation; every owner action audited) | OwnerInstructionsTest | ✅ |
