@@ -11,6 +11,7 @@ use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Platform\Money\Money;
 use Wurk\Sales\Contracts\SalesTotals;
@@ -87,8 +88,9 @@ final readonly class Sales implements SalesTotals
     {
         return Sale::query()->where('status', 'recorded')->where('recorded_at', '>=', $from)->where('recorded_at', '<', $to)
             ->when($branchId !== null, fn ($q) => $q->where('branch_id', $branchId))
-            ->get(['method', 'amount_cents', 'refunded_cents'])->groupBy('method')
-            ->map(fn ($g) => (int) $g->sum(fn (Sale $s) => $s->amount_cents - $s->refunded_cents))->all();
+            ->get(['method', 'amount_cents'])->groupBy('method')
+            // In full on the day of the sale: refunds are money out on the day they're paid back (Refunds, 25.5).
+            ->map(fn ($g) => (int) $g->sum(fn (Sale $s) => $s->amount_cents))->all();
     }
 
     /**
@@ -113,8 +115,16 @@ final readonly class Sales implements SalesTotals
     }
 
     /** A refund in store — only within the return window (decision D), never more than was paid. */
-    public function refund(Sale $sale, int $cents, string $by): void
+    /** The ways a sale paid in each way can be paid back (store credit is always a choice, never forced: 25.5). */
+    public const REFUND_METHODS = ['cash' => ['cash', 'store_credit'], 'card' => ['card_machine', 'eft', 'store_credit'], 'eft' => ['eft', 'cash', 'store_credit'],
+        'account' => ['cash', 'eft', 'store_credit']];
+
+    public function refund(Sale $sale, int $cents, string $by, ?string $method = null, string $reason = 'Refund', ?string $note = null, ?string $byId = null): void
     {
+        $method ??= self::REFUND_METHODS[$sale->method][0] ?? 'cash';
+        if (! in_array($method, self::REFUND_METHODS[$sale->method] ?? ['cash'], true)) {
+            throw new SaleProblem('A sale paid that way can’t be refunded that way.');
+        }
         $window = app(RefundWindow::class);
         if ($sale->status !== 'recorded') {
             throw new SaleProblem('Only recorded sales can be refunded.');
@@ -129,6 +139,10 @@ final readonly class Sales implements SalesTotals
         $sale->update(['refunded_cents' => $sale->refunded_cents + $cents]);
         event(new PurchaseRefunded('sale', $sale->id, $cents));
         $this->audit->record('sales.refunded', 'sale', $sale->id, ['cents' => $cents, 'by' => $by]);
+        // One record of every refund; paid back at the counter, it's money out of today's cash-up (25.5).
+        $customer = $sale->contact_id === null ? [] : ['name' => $this->contacts->names([$sale->contact_id])[$sale->contact_id] ?? '',
+            'email' => $this->contacts->emails([$sale->contact_id])[$sale->contact_id] ?? null, 'what' => __('your in-store purchase')];
+        app(Refunds::class)->record('sale', $sale->id, $cents, $method, $reason, $note, $byId, $by, $sale->branch_id, $customer);
     }
 
     private function decide(Sale $sale, string $status, string $byId, string $byName): void

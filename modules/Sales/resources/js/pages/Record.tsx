@@ -103,7 +103,39 @@ export default function RecordSale({
     stop();
   };
   const [found, setFound] = useState<{ name: string; email: boolean } | null | 'new'>(null);
-  const [refund, setRefund] = useState<{ id: string; amount: string } | null>(null);
+  const [refund, setRefund] = useState<{
+    id: string;
+    amount: string;
+    method: string;
+    reason: string;
+  } | null>(null);
+  // How a sale paid each way can be paid back (Sprint 25.5); store credit only if the customer agrees.
+  const CASH_BACK: [string, string][] = [
+    ['cash', __('Cash')],
+    ['store_credit', __('Store credit')],
+  ];
+  const backFor = (method: string) => BACK[method] ?? CASH_BACK;
+  const BACK: Record<string, [string, string][]> = {
+    cash: [
+      ['cash', __('Cash')],
+      ['store_credit', __('Store credit')],
+    ],
+    card: [
+      ['card_machine', __('Card machine')],
+      ['eft', __('EFT')],
+      ['store_credit', __('Store credit')],
+    ],
+    eft: [
+      ['eft', __('EFT')],
+      ['cash', __('Cash')],
+      ['store_credit', __('Store credit')],
+    ],
+    account: [
+      ['cash', __('Cash')],
+      ['eft', __('EFT')],
+      ['store_credit', __('Store credit')],
+    ],
+  };
   const find = async () => {
     const q = new URLSearchParams(
       form.data.phone ? { phone: form.data.phone } : { email: form.data.email },
@@ -343,7 +375,11 @@ export default function RecordSale({
                           e.preventDefault();
                           router.post(
                             `${base}/${s.id}/refund`,
-                            { amount: refund.amount },
+                            {
+                              amount: refund.amount,
+                              method: refund.method,
+                              reason: refund.reason || null,
+                            },
                             { preserveScroll: true, onSuccess: () => setRefund(null) },
                           );
                         }}
@@ -355,7 +391,30 @@ export default function RecordSale({
                             min="0.01"
                             step="0.01"
                             value={refund.amount}
-                            onChange={(e) => setRefund({ id: s.id, amount: e.target.value })}
+                            onChange={(e) => setRefund({ ...refund, amount: e.target.value })}
+                          />
+                        </Field>
+                        <Field label={__('Paid back by')}>
+                          {(control) => (
+                            <select
+                              {...control}
+                              className="border-border bg-bg h-9 rounded-md border px-2 text-sm"
+                              value={refund.method}
+                              onChange={(e) => setRefund({ ...refund, method: e.target.value })}
+                            >
+                              {backFor(s.method).map(([k, label]) => (
+                                <option key={k} value={k}>
+                                  {label}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </Field>
+                        <Field label={__('Why')}>
+                          <Input
+                            value={refund.reason}
+                            maxLength={200}
+                            onChange={(e) => setRefund({ ...refund, reason: e.target.value })}
                           />
                         </Field>
                         <Button size="sm" type="submit">
@@ -374,6 +433,8 @@ export default function RecordSale({
                           setRefund({
                             id: s.id,
                             amount: String((s.amount_cents - s.refunded_cents) / 100),
+                            method: backFor(s.method)[0]?.[0] ?? 'cash',
+                            reason: '',
                           })
                         }
                       >

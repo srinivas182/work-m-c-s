@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Models\OrderItem;
 use Wurk\Shop\Support\CheckoutProblem;
@@ -123,9 +124,11 @@ final class OrdersController
 
     public function refund(Request $request, string $order): RedirectResponse
     {
-        $data = $request->validate(['amount_cents' => ['nullable', 'integer', 'min:1'], 'restock' => ['boolean'], 'note' => ['nullable', 'string', 'max:300']]);
+        $data = $request->validate(['amount_cents' => ['nullable', 'integer', 'min:1'], 'restock' => ['boolean'], 'note' => ['nullable', 'string', 'max:300'],
+            'method' => ['nullable', 'string', 'in:'.implode(',', array_keys(Refunds::METHODS))], 'reason' => ['nullable', 'string', 'max:200']]);
 
-        return $this->attempt(fn () => $this->orders->refund($this->find($order), $data['amount_cents'] ?? null, (bool) ($data['restock'] ?? false), $this->who($request), $data['note'] ?? null),
+        return $this->attempt(fn () => $this->orders->refund($this->find($order), $data['amount_cents'] ?? null, (bool) ($data['restock'] ?? false), $this->who($request), $data['note'] ?? null,
+            $data['method'] ?? null, trim((string) ($data['reason'] ?? '')) ?: 'Refund', (string) $request->user()?->getAuthIdentifier()),
             'Refund recorded — the customer has been told.');
     }
 

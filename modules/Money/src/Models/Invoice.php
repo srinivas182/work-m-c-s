@@ -19,6 +19,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  * @property string|null $customer_email
  * @property list<array{description: string, quantity: int, unit_cents: int}> $lines
  * @property int $vat_bp
+ * @property int $refunded_cents
  * @property string|null $vat_number
  * @property int $subtotal_cents
  * @property int $vat_cents
@@ -48,7 +49,7 @@ final class Invoice extends Model
     protected function casts(): array
     {
         return ['lines' => 'array', 'issued_on' => 'date', 'due_on' => 'date', 'sent_at' => 'datetime', 'paid_at' => 'datetime', 'last_reminded_at' => 'datetime',
-            'reminders_on' => 'boolean', 'number' => 'integer', 'vat_bp' => 'integer', 'subtotal_cents' => 'integer', 'vat_cents' => 'integer', 'total_cents' => 'integer', 'reminders_sent' => 'integer'];
+            'reminders_on' => 'boolean', 'number' => 'integer', 'vat_bp' => 'integer', 'subtotal_cents' => 'integer', 'vat_cents' => 'integer', 'total_cents' => 'integer', 'reminders_sent' => 'integer', 'refunded_cents' => 'integer'];
     }
 
     public function label(): string

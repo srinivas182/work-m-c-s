@@ -19,6 +19,7 @@ use Wurk\Money\Models\CashUp;
 use Wurk\Money\Models\Expense;
 use Wurk\Money\Models\Invoice;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Platform\Money\Money;
 use Wurk\Sales\Contracts\SalesTotals;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -64,9 +65,11 @@ final readonly class MoneyBook
         [$from, $to] = $this->dayBounds($day);
         $inPerson = $this->inPerson->totals($from, $to); // the ledger's own split; branches share it unless a branch is asked for
         $sales = $this->sales->totals($from, $to, $branchId);
+        $back = app(Refunds::class)->atTheCounter($from, $to); // refunds paid back at the counter today: money out (25.5)
 
-        return ['cash' => (int) ($inPerson['cash'] ?? 0) + (int) ($sales['cash'] ?? 0), 'card_machine' => (int) ($inPerson['card_machine'] ?? 0) + (int) ($sales['card'] ?? 0),
-            'qr' => (int) ($inPerson['qr'] ?? 0)];
+        return ['cash' => (int) ($inPerson['cash'] ?? 0) + (int) ($sales['cash'] ?? 0) - (int) ($back['cash'] ?? 0),
+            'card_machine' => (int) ($inPerson['card_machine'] ?? 0) + (int) ($sales['card'] ?? 0) - (int) ($back['card_machine'] ?? 0),
+            'qr' => (int) ($inPerson['qr'] ?? 0) - (int) ($back['qr'] ?? 0)];
     }
 
     /**
@@ -167,7 +170,8 @@ final readonly class MoneyBook
     public function profit(\DateTimeInterface $from, \DateTimeInterface $to): array
     {
         $took = $this->takings->net($from, $to, null)
-            + (int) Invoice::query()->where('status', 'paid')->where('paid_at', '>=', $from)->where('paid_at', '<', $to)->sum('total_cents');
+            + (int) Invoice::query()->where('status', 'paid')->where('paid_at', '>=', $from)->where('paid_at', '<', $to)->sum('total_cents')
+            - app(Refunds::class)->totalFor('invoice', $from, $to); // invoice refunds, in the month they're made (25.5)
         $tz = $this->context->current()->timezone();
         $byCategory = Expense::query()->where('spent_on', '>=', CarbonImmutable::instance($from)->setTimezone($tz)->toDateString())
             ->where('spent_on', '<', CarbonImmutable::instance($to)->setTimezone($tz)->toDateString())

@@ -20,6 +20,7 @@ use Wurk\Money\Mail\InvoiceMail;
 use Wurk\Money\Models\Invoice;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Platform\Money\Money;
 use Wurk\Regions\Contracts\Countries;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -156,6 +157,40 @@ final readonly class Invoices
             }
         });
         $this->audit->record('money.invoice_paid', 'invoice', $invoice->id, ['how' => $how]);
+    }
+
+    /** How a paid invoice can be paid back: online payments only through the provider; others by hand (25.5). */
+    public const REFUND_BY_HAND = ['cash', 'card_machine', 'qr', 'eft', 'mobile_money'];
+
+    /** Refund all or part of a paid invoice, with a reason; the customer is told and cash-up counts a counter refund. */
+    public function refund(Invoice $invoice, int $cents, string $method, string $reason, ?string $note, ?string $byId, string $byName): void
+    {
+        if ($invoice->status !== 'paid') {
+            throw ValidationException::withMessages(['amount' => __('Only a paid invoice can be refunded.')]);
+        }
+        $left = $invoice->total_cents - (int) $invoice->refunded_cents;
+        if ($cents < 1 || $cents > $left) {
+            throw ValidationException::withMessages(['amount' => __('Refund up to :amount (what’s left of this invoice).', ['amount' => Money::format($left)])]);
+        }
+        $online = $invoice->paid_how === 'online';
+        if ($online && $method !== 'provider' && $method !== 'eft') { // eft: refunded in the provider's dashboard, recorded here
+            throw ValidationException::withMessages(['method' => __('This invoice was paid online: the refund goes back the same way.')]);
+        }
+        if (! $online && ! in_array($method, self::REFUND_BY_HAND, true)) {
+            throw ValidationException::withMessages(['method' => __('Choose how you paid it back.')]);
+        }
+        if ($online && $method === 'provider' && ! $this->payments->refund((string) $invoice->payment_reference, $cents)) {
+            throw ValidationException::withMessages(['method' => __('The payment provider didn’t accept the refund. Refund it in their dashboard, then record it here as an EFT refund.')]);
+        }
+        $invoice->update(['refunded_cents' => (int) $invoice->refunded_cents + $cents]);
+        app(Refunds::class)->record('invoice', $invoice->id, $cents, $method, $reason, $note, $byId, $byName, null,
+            ['name' => $invoice->customer_name, 'phone' => $invoice->customer_phone, 'email' => $invoice->customer_email, 'what' => $invoice->label()]);
+    }
+
+    /** The VAT inside a refund: the same share of the invoice's VAT as the refund is of its total (VAT reverses with it). */
+    public static function refundVat(Invoice $invoice, int $refundedCents): int
+    {
+        return $invoice->total_cents < 1 ? 0 : intdiv($invoice->vat_cents * $refundedCents * 2 + $invoice->total_cents, $invoice->total_cents * 2);
     }
 
     /** The customer is paying online: where to send them (null when the business takes no online payments). */
