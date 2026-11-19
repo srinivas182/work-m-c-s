@@ -7,6 +7,7 @@ namespace Wurk\Website;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -27,7 +28,9 @@ use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\OwnerDigest;
+use Wurk\Platform\Contracts\PushNotifications;
 use Wurk\Platform\Contracts\RecentlyDeleted;
+use Wurk\Platform\Contracts\TodayList;
 use Wurk\Platform\Events\BadgeChanged;
 use Wurk\Platform\Events\ReviewsChanged;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -55,6 +58,7 @@ use Wurk\Website\Listeners\RerenderReviewPages;
 use Wurk\Website\Listeners\RerenderShopPages;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Models\Page;
+use Wurk\Website\Models\ReceptionistConversation;
 use Wurk\Website\Models\SiteAsset;
 use Wurk\Website\Setup\WebsiteSetupStep;
 use Wurk\Website\Support\Branding;
@@ -160,6 +164,30 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(HealthSignals::class, fn (HealthSignals $s) => $s->register('website', fn (string $t) => $this->app->make(LaunchSignal::class)($t))); // business health (16.5)
         // Website analytics (Sprint 15.2): an order or booking made on the public site is credited to where the visitor came from.
         // WhatsApp conversations in Chats (21.2): the webhook dispatches these inside the business's context.
+        // 26.2: a chat handed to a person buzzes the phones of the people who answer chats.
+        $waiting = function (ReceptionistConversation $c): void {
+            if ($c->status === 'waiting') {
+                app(PushNotifications::class)->notify('chat', 'A chat is waiting for you', trim(($c->name ?: 'A customer').' · '.($c->channel === 'whatsapp' ? 'WhatsApp' : 'Website chat')),
+                    route('tenant.website.chats', ['open' => $c->id]), 'website.edit');
+            }
+        };
+        ReceptionistConversation::created($waiting);
+        // Today (26.2): chats waiting for a person, for the people who answer them.
+        $this->callAfterResolving(TodayList::class, fn (TodayList $t) => $t->register('chats', 200, function (string $identityId): ?array {
+            $user = Auth::getProvider()->retrieveById($identityId);
+            if ($user === null || ! Gate::forUser($user)->allows('website.edit')
+                || ! app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'website')) {
+                return null;
+            }
+            $chats = ReceptionistConversation::query()->whereIn('status', ['waiting', 'person'])->orderByDesc('last_message_at')->limit(10)->get();
+            $url = route('tenant.website.chats');
+
+            return ['title' => __('Chats waiting for you'), 'empty' => __('No chats waiting.'), 'link' => ['label' => __('All chats'), 'url' => $url],
+                'items' => array_values($chats->map(fn (ReceptionistConversation $c) => ['id' => $c->id, 'title' => $c->name ?: __('A customer'),
+                    'detail' => ($c->channel === 'whatsapp' ? 'WhatsApp' : __('Website chat')).' · '.$c->last_message_at->diffForHumans(), 'time' => null,
+                    'badge' => $c->status === 'waiting' ? __('Waiting') : null, 'url' => route('tenant.website.chats', ['open' => $c->id]), 'actions' => []])->all())];
+        }));
+        ReceptionistConversation::updated(fn (ReceptionistConversation $c) => $c->wasChanged('status') ? $waiting($c) : null);
         Event::listen(WhatsAppReceived::class, fn (WhatsAppReceived $e) => app(WhatsAppChats::class)->received($e));
         Event::listen(WhatsAppStatusChanged::class, fn (WhatsAppStatusChanged $e) => app(WhatsAppChats::class)->status($e));
         Event::listen(WhatsAppSent::class, fn (WhatsAppSent $e) => app(WhatsAppChats::class)->sent($e)); // 21.5

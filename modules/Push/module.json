@@ -1,0 +1,14 @@
+{
+    "name": "Push",
+    "key": "push",
+    "version": "0.1.0",
+    "description": "The WURK app's push notifications (Sprint 26.2): phones signed up per person, what each person wants per business (bookings, chats, orders, payments, credits), and Web Push sent with WURK's own VAPID keys. No third-party push service account is needed.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit",
+        "identity"
+    ]
+}

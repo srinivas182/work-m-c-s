@@ -18,6 +18,7 @@ use Wurk\Tenancy\Contracts\BranchDirectory;
  * @property string $member_id
  * @property Carbon $starts_at
  * @property Carbon $ends_at
+ * @property Carbon|null $started_at Today → Start (26.2)
  * @property string $status
  * @property Carbon|null $cancelled_at
  * @property string $customer_name
@@ -39,6 +40,7 @@ use Wurk\Tenancy\Contracts\BranchDirectory;
  * @property string|null $consent_version
  * @property Carbon|null $consent_at
  * @property string|null $branch_id
+ * @property string|null $created_by
  */
 final class Booking extends Model
 {
@@ -52,7 +54,7 @@ final class Booking extends Model
 
     protected function casts(): array
     {
-        return ['cancelled_at' => 'datetime', 'consent_at' => 'datetime', 'starts_at' => 'datetime', 'ends_at' => 'datetime', 'deposit_cents' => 'integer', 'online' => 'boolean', 'hold_expires_at' => 'datetime', 'paid_at' => 'datetime', 'refunded_at' => 'datetime', 'customer_confirmed_at' => 'datetime'];
+        return ['cancelled_at' => 'datetime', 'consent_at' => 'datetime', 'starts_at' => 'datetime', 'ends_at' => 'datetime', 'deposit_cents' => 'integer', 'online' => 'boolean', 'hold_expires_at' => 'datetime', 'paid_at' => 'datetime', 'refunded_at' => 'datetime', 'customer_confirmed_at' => 'datetime', 'started_at' => 'datetime'];
     }
 
     /** Statuses that hold their time (claim slots). */

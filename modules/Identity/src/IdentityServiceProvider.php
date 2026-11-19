@@ -72,4 +72,14 @@ final class IdentityServiceProvider extends ModuleServiceProvider
             ['key' => 'team.manage', 'label' => 'Invite and manage team members'],
         ];
     }
+
+    /**
+     * @return list<array{label: string, route: string, icon?: string, section?: string, permission?: string, order?: int}>
+     */
+    public function menu(): array
+    {
+        return [
+            ['label' => 'Today', 'route' => 'tenant.today', 'icon' => 'sun', 'section' => 'Overview', 'order' => 1], // 26.2: where the app opens
+        ];
+    }
 }
