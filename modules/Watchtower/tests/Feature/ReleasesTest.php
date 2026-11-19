@@ -58,3 +58,10 @@ it('records each deploy, tells HQ, and shows it on Admin → System', function (
     $this->actingAs($this->staffWithRole('engineering', 'eng@wurk.co.za'))->get($this->admin('/system'))->assertInertia(fn (Assert $p) => $p
         ->has('releases', 2)->where('releases.0.version', 'v1.0.1')->where('releases.0.status', 'rolled_back')->where('releases.1.environment', 'staging'));
 });
+
+it('names AWS Backup’s resources the way BACKUP_TARGETS lists them (17.4)', function () {
+    $this->artisan('system:backup-taken', ['target' => 'arn:aws:rds:af-south-1:123456789012:db:wurk-production-shard-1', '--kind' => 'snapshot',
+        '--location' => 'arn:aws:backup:af-south-1:123456789012:recovery-point:abc', '--size' => '5242880', '--by' => 'aws-backup'])->assertSuccessful();
+    $this->artisan('system:backup-taken', ['target' => 'arn:aws:s3:::wurk-production-files-123456789012', '--kind' => 'files'])->assertSuccessful();
+    expect(DB::table('watchtower_backups')->orderBy('target')->pluck('target')->all())->toBe(['wurk-production-files-123456789012', 'wurk-production-shard-1']);
+});

@@ -13,6 +13,8 @@ data "aws_region" "this" {}
 
 locals {
   name = "wurk-${var.environment}"
+  # WURK's backups account (17.4): copies of this environment's backups are made there, so it may use this key.
+  backup_account = var.offsite_vault_arn == null ? null : split(":", var.offsite_vault_arn)[4]
 }
 
 # One key per environment encrypts its databases, cache, files, secrets, registry and logs.
@@ -22,7 +24,13 @@ resource "aws_kms_key" "this" {
   deletion_window_in_days = 30
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat(local.backup_account == null ? [] : [{
+      Sid       = "BackupsAccountCopies"
+      Effect    = "Allow"
+      Principal = { AWS = "arn:aws:iam::${local.backup_account}:root" }
+      Action    = ["kms:Decrypt", "kms:DescribeKey", "kms:CreateGrant", "kms:ReEncrypt*", "kms:GenerateDataKey*"]
+      Resource  = "*"
+      }], [
       {
         Sid       = "Account"
         Effect    = "Allow"
@@ -46,7 +54,7 @@ resource "aws_kms_key" "this" {
         Resource  = "*"
         Condition = { StringEquals = { "aws:SourceAccount" = data.aws_caller_identity.this.account_id } }
       },
-    ]
+    ])
   })
 }
 
@@ -140,7 +148,7 @@ module "app" {
   files_bucket_arn    = module.files.bucket_arn
   files_public_url    = module.files.public_url
   logs_bucket         = module.files.logs_bucket
-  backup_targets      = concat([for k in keys(var.databases) : replace(k, "_", "-")], ["files"])
+  backup_targets      = concat(values(module.database.instance_ids), [module.files.bucket]) # as AWS Backup names them (17.4)
   serve               = var.serve
   worker              = var.worker
   deletion_protection = var.deletion_protection
@@ -159,4 +167,20 @@ module "deploy" {
   task_role_arns        = module.app.task_role_arns
   database_arns         = values(module.database.instance_arns)
   source_repository_arn = var.source_repository_arn
+}
+
+module "backup" {
+  source                 = "../backup"
+  name                   = local.name
+  kms_key_arn            = aws_kms_key.this.arn
+  retention_days         = var.backup_retention_days
+  offsite_vault_arn      = var.offsite_vault_arn
+  offsite_retention_days = var.environment == "production" ? 90 : 14
+  database_arns          = values(module.database.instance_arns)
+  files_bucket_arn       = module.files.bucket_arn
+  cluster_arn            = module.app.cluster_arn
+  release_family         = module.app.release_task_definition
+  task_role_arns         = module.app.task_role_arns
+  app_subnet_ids         = module.app.app_subnet_ids
+  app_security_group_id  = module.app.app_security_group_id
 }

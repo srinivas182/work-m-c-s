@@ -42,6 +42,12 @@ variable "cloudflare_zone_id" {
   type        = string
 }
 
+variable "offsite_vault_arn" {
+  description = "envs/backups output offsite_vault_arn (17.4)"
+  type        = string
+  default     = null
+}
+
 variable "account_id" {
   description = "WURK's production AWS account"
   type        = string
@@ -68,6 +74,7 @@ module "wurk" {
   source_repository_arn = var.staging_repository_arn
   root_domain           = "wurk.co.za"
   cloudflare_zone_id    = var.cloudflare_zone_id
+  offsite_vault_arn     = var.offsite_vault_arn
   image_tag             = var.image_tag
   vpc_cidr              = "10.40.0.0/16"
   single_nat_gateway    = false
