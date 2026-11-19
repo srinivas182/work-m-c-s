@@ -20,6 +20,9 @@ interface WhatsAppBusiness
     /** A request to pay, and its reminders (23.5a): customer's first name, business, amount, what for, the pay link. */
     public const PAYMENT_REQUEST = 'wurk_payment_request';
 
+    /** "How was it?" after a visit or order (25.3): customer's first name, business, what it was, the review link. */
+    public const REVIEW_REQUEST = 'wurk_review_request';
+
     /** Whether the current business has connected its own number. */
     public function connected(): bool;
 

@@ -68,7 +68,8 @@
             "Wurk\\Team\\": "modules/Team/src/",
             "Wurk\\Tenancy\\": "modules/Tenancy/src/",
             "Wurk\\Website\\": "modules/Website/src/",
-            "Wurk\\Reach\\": "modules/Reach/src/"
+            "Wurk\\Reach\\": "modules/Reach/src/",
+            "Wurk\\Reviews\\": "modules/Reviews/src/"
         }
     },
     "autoload-dev": {
@@ -92,7 +93,8 @@
             "Wurk\\Billing\\Tests\\": "modules/Billing/tests/",
             "Wurk\\Website\\Tests\\": "modules/Website/tests/",
             "Wurk\\Ai\\Tests\\": "modules/Ai/tests/",
-            "Wurk\\Reach\\Tests\\": "modules/Reach/tests/"
+            "Wurk\\Reach\\Tests\\": "modules/Reach/tests/",
+            "Wurk\\Reviews\\Tests\\": "modules/Reviews/tests/"
         }
     },
     "scripts": {

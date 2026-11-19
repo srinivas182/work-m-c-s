@@ -1,0 +1,15 @@
+{
+    "name": "Reviews",
+    "key": "reviews",
+    "version": "0.1.0",
+    "description": "Honest reviews (Sprint 25.3): after a visit or an order, one message asks \"How was it?\"; everyone who answers is offered the business's Google review link and a private word with the owner — never only the happy ones. Reviews show on the business's site in date order.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "audit",
+        "regions",
+        "messaging",
+        "credits"
+    ]
+}

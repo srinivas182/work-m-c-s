@@ -18,7 +18,7 @@
 </style>
 </head>
 <body>
-<div class="sheet">
+<main class="sheet" aria-label="{{ __('Counter cards') }}">
   @for ($i = 0; $i < 4; $i++)
     <div class="card">
       <h1>{{ $business }}</h1>
@@ -36,6 +36,6 @@
       @endif
     </div>
   @endfor
-</div>
+</main>
 </body>
 </html>
