@@ -11,6 +11,7 @@ PART3=(Bookings Access) # Plans, Features to part 5 (v0.23.0: part 3 took 10.9 m
 PART7=(Ai Security Marketing Messaging Sales Portal Support Watchtower) # 19.2: part 3 passed 12 min on a slow runner; the receptionist adds Ai tests. Part 7 took 1.5 min (21.2)
 # Website's slowest files run in part 8 (20.1): Website alone takes ~8.5 min on MySQL, and part 1 with all of it was
 # cancelled at 12 min. Website's other files stay in part 1 (~4.5 min with the rest of part 1).
+PART8=(Money) # with Website's slowest files (25.4)
 WEBSITE_PART8=(QuoteFormTest SiteModelTest PhotoUploadTest ChatBotTest ReceptionistTest VideoUploadTest TemplatePhotosTest WhatsAppChatsTest WhatsAppReceptionistTest VoiceNotesTest) # WhatsApp (21)
 website_files() { # $1 = in | out (of WEBSITE_PART8)
   find modules/Website/tests -name '*Test.php' | sort | while read -r f; do
@@ -18,14 +19,15 @@ website_files() { # $1 = in | out (of WEBSITE_PART8)
     if in_list "$b" "${WEBSITE_PART8[@]}"; then [[ "$1" == in ]] && echo "$f"; else [[ "$1" == out ]] && echo "$f"; fi
   done
 }
-PART6=(Tenancy Agents Crm Money) # Money from part 5 (24.6: part 5 took 10 min twice; part 6 took 4-7 min). # Tenancy on its own (18.4b): moves, restores and rollouts migrate several MySQL shards per test (~6 min); part 3 with it passed 12 min. Agents, Crm from part 5 (10.5 min) to part 6 (4.5 min) — 21.2
+PART6=(Tenancy Agents Crm) # Money to part 8 (25.4: part 6 reached 12 min on a slow runner; part 8 took 4 min). # Tenancy on its own (18.4b): moves, restores and rollouts migrate several MySQL shards per test (~6 min); part 3 with it passed 12 min. Agents, Crm from part 5 (10.5 min) to part 6 (4.5 min) — 21.2
 PART4=(Payments Billing Shop) # money and the shop (Shop from part 2, 24.4); Shop to part 7 and Credits to part 5 (v0.23.0: part 4 reached 12 min on a slow runner with Sprint 22's payment tests)
 in_list() { local x="$1"; shift; for y in "$@"; do [[ "$x" == "$y" ]] && return 0; done; return 1; }
 case "${1:-}" in
   1) for m in "${PART1[@]}"; do
        if [[ "$m" == Website ]]; then website_files out; elif [[ -d "modules/$m/tests" ]]; then echo "modules/$m/tests"; fi
      done ;;
-  8) website_files in ;;
+  8) website_files in
+     for m in "${PART8[@]}"; do [[ -d "modules/$m/tests" ]] && echo "modules/$m/tests"; done ;;
   2) for m in "${PART2[@]}"; do [[ -d "modules/$m/tests" ]] && echo "modules/$m/tests"; done ;;
   3) for m in "${PART3[@]}"; do [[ -d "modules/$m/tests" ]] && echo "modules/$m/tests"; done ;;
   4) for m in "${PART4[@]}"; do [[ -d "modules/$m/tests" ]] && echo "modules/$m/tests"; done ;;
@@ -33,6 +35,6 @@ case "${1:-}" in
   7) for m in "${PART7[@]}"; do [[ -d "modules/$m/tests" ]] && echo "modules/$m/tests"; done ;;
   5) echo tests
      for d in modules/*/tests; do m="${d#modules/}"; m="${m%/tests}"
-       in_list "$m" "${PART1[@]}" || in_list "$m" "${PART2[@]}" || in_list "$m" "${PART3[@]}" || in_list "$m" "${PART4[@]}" || in_list "$m" "${PART6[@]}" || in_list "$m" "${PART7[@]}" || echo "$d"; done ;;
+       in_list "$m" "${PART1[@]}" || in_list "$m" "${PART2[@]}" || in_list "$m" "${PART3[@]}" || in_list "$m" "${PART4[@]}" || in_list "$m" "${PART6[@]}" || in_list "$m" "${PART7[@]}" || in_list "$m" "${PART8[@]}" || echo "$d"; done ;;
   *) echo "usage: $0 1|2|3|4|5|6|7|8" >&2; exit 2 ;;
 esac
