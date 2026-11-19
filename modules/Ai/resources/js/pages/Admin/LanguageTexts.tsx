@@ -20,6 +20,15 @@ interface Props {
   items: Item[];
   glossary: { id: string; term: string; translation: string; note: string | null }[];
   canManage: boolean;
+  /** The help videos' subtitles in this language (25.6), line for line with the English. */
+  captions?: Caption[];
+}
+interface Caption {
+  article_id: string;
+  title: string;
+  english: string[];
+  text: string[] | null;
+  status: 'missing' | 'draft' | 'approved';
 }
 
 const SHOW = {
@@ -75,6 +84,54 @@ function Row({ item, locale }: { item: Item; locale: string }) {
   );
 }
 
+/** One video's subtitles: each English line with its translation, approved (shown) or kept as a draft. */
+function CaptionRow({ caption, locale, name }: { caption: Caption; locale: string; name: string }) {
+  const [lines, setLines] = useState<string[]>(caption.text ?? caption.english.map(() => ''));
+  const save = (approved: boolean) =>
+    router.put(
+      `/settings/languages/${locale}/captions/${caption.article_id}`,
+      { lines, approved },
+      { preserveScroll: true },
+    );
+  return (
+    <li className="border-border grid gap-3 rounded-md border p-3">
+      <p className="font-medium">
+        {caption.title}{' '}
+        <span className="text-fg-muted text-sm">
+          ·{' '}
+          {caption.status === 'approved'
+            ? 'approved'
+            : caption.status === 'draft'
+              ? 'draft to check'
+              : 'not drafted yet'}
+        </span>
+      </p>
+      <ol className="grid gap-2">
+        {caption.english.map((en, i) => (
+          <li key={i} className="grid gap-1 sm:grid-cols-2 sm:gap-3">
+            <span className="text-fg-muted text-sm">{en}</span>
+            <Input
+              aria-label={`Line ${i + 1} in ${name}`}
+              lang={locale}
+              maxLength={200}
+              value={lines[i] ?? ''}
+              onChange={(e) => setLines(lines.map((l, j) => (j === i ? e.target.value : l)))}
+            />
+          </li>
+        ))}
+      </ol>
+      <div className="flex gap-2">
+        <Button size="sm" onClick={() => save(true)}>
+          Approve
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => save(false)}>
+          Keep as draft
+        </Button>
+      </div>
+    </li>
+  );
+}
+
 export default function LanguageTexts({
   locale,
   name,
@@ -83,6 +140,7 @@ export default function LanguageTexts({
   items,
   glossary,
   canManage,
+  captions = [],
 }: Props) {
   const term = useForm({ term: '', translation: '', note: '' });
   return (
@@ -147,6 +205,41 @@ export default function LanguageTexts({
             )}
           </CardContent>
         </Card>
+        {captions.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Video subtitles</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 text-sm">
+              <p className="text-fg-muted">
+                The help centre’s 30-second videos. The timings stay the English ones; only approved
+                subtitles are shown.
+              </p>
+              {canManage && captions.some((c) => c.status === 'missing') && (
+                <div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() =>
+                      router.post(
+                        `/settings/languages/${locale}/captions`,
+                        {},
+                        { preserveScroll: true },
+                      )
+                    }
+                  >
+                    Draft the missing subtitles with WURK AI
+                  </Button>
+                </div>
+              )}
+              <ul className="grid gap-4">
+                {captions.map((c) => (
+                  <CaptionRow key={c.article_id} caption={c} locale={locale} name={name} />
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader>
             <CardTitle>Glossary</CardTitle>

@@ -88,16 +88,22 @@ final readonly class DeliveryWebhooks
 
                     continue;
                 }
-                // Messages to WURK's own number: owners answering their evening summary (21.6).
+                // Messages to WURK's own number: owners answering their evening summary (21.6), STOP (23.5b), and
+                // questions and voice notes to the help line (25.6).
                 foreach ((array) ($value['messages'] ?? []) as $m) {
                     $text = (string) ($m['text']['body'] ?? $m['button']['text'] ?? $m['interactive']['button_reply']['title'] ?? '');
                     $from = (string) preg_replace('/\D/', '', (string) ($m['from'] ?? ''));
-                    if ($from !== '' && $text !== '') {
-                        event(new WurkWhatsAppReceived($from, $text)); // e.g. STOP to the Monday summary (23.5b)
+                    $voice = ($m['type'] ?? '') === 'audio' ? (string) ($m['audio']['id'] ?? '') : '';
+                    if ($from === '' || ($text === '' && $voice === '')) {
+                        continue;
                     }
-                    if ($from !== '' && $text !== '' && strtoupper(trim($text)) !== 'STOP' && ($answer = app(OwnerSummaries::class)->reply($from, $text)) !== null) {
+                    $answered = false;
+                    if ($text !== '' && strtoupper(trim($text)) !== 'STOP' && ($answer = app(OwnerSummaries::class)->reply($from, $text)) !== null) {
                         app(OwnerSummaries::class)->answer($from, $answer);
+                        $answered = true;
                     }
+                    event(new WurkWhatsAppReceived($from, $text, $voice !== '' ? $voice : null, $voice !== '' ? (string) ($m['audio']['mime_type'] ?? 'audio/ogg') : null,
+                        $answered, (string) ($m['id'] ?? '')));
                 }
                 foreach ((array) ($value['statuses'] ?? []) as $status) {
                     $this->update((string) ($status['id'] ?? ''), match ($status['status'] ?? '') {

@@ -6,8 +6,10 @@ namespace Wurk\Help\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Wurk\Help\Models\HelpCategory;
+use Wurk\Help\Support\Captions;
 use Wurk\Help\Support\HelpCentre;
 
 /** help.wurk.co.za (Sprint 16.1a): server-rendered, public, searchable. */
@@ -33,7 +35,17 @@ final class PublicHelpController
         $this->help->viewed($a);
 
         return $this->page('help::article', ['article' => $a, 'html' => $this->help->render($a->body), 'video' => $this->help->url($a->video_path), 'poster' => $this->help->url($a->poster_path),
+            'tracks' => $a->video_path !== null ? app(Captions::class)->tracks($a) : [], 'lang' => app()->getLocale(),
             'category' => HelpCategory::query()->find($a->category_id), 'thanked' => (bool) $request->session()->get('help.thanked.'.$a->id)]);
+    }
+
+    /** A video's subtitles in one approved language (WebVTT). */
+    public function captions(string $slug, string $locale, Captions $captions): Response
+    {
+        $a = $this->help->published($slug) ?? abort(404);
+        $vtt = $captions->approved($a, $locale) ?? abort(404);
+
+        return new Response($vtt, 200, ['Content-Type' => 'text/vtt; charset=utf-8', 'Cache-Control' => 'public, max-age=600', 'X-Content-Type-Options' => 'nosniff']);
     }
 
     public function search(Request $request): View

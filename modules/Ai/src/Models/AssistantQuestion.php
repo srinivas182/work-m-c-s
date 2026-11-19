@@ -14,6 +14,7 @@ use Wurk\Tenancy\Contracts\BelongsToTenant;
  *
  * @property string $id
  * @property string $user_id
+ * @property string $channel app | whatsapp (the help line, 25.6)
  * @property string $question
  * @property string|null $answer
  * @property list<array{title: string, url: string}>|null $sources

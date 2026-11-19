@@ -13,8 +13,10 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Wurk\Ai\Languages\DraftCaptionsJob;
 use Wurk\Ai\Languages\DraftTranslationsJob;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Help\Contracts\VideoCaptions;
 use Wurk\Platform\I18n\Locales;
 use Wurk\Platform\I18n\TranslationStore;
 
@@ -58,6 +60,7 @@ final class LanguagesController
             'locale' => $locale, 'name' => Locales::SUPPORTED[$locale][0], 'show' => $filter, 'q' => $q, 'items' => $items,
             'glossary' => DB::table('translation_glossary')->where('locale', $locale)->orderBy('term')->get(['id', 'term', 'translation', 'note'])->all(),
             'canManage' => Gate::allows('languages.manage'),
+            'captions' => app(VideoCaptions::class)->forLocale($locale), // 25.6: the help videos' subtitles
         ]);
     }
 
@@ -81,6 +84,27 @@ final class LanguagesController
         DraftTranslationsJob::dispatch($locale);
 
         return back()->with('status', 'WURK AI is drafting the missing texts. They appear here as drafts as they’re done.');
+    }
+
+    /** WURK AI drafts the help videos' subtitles still missing in this language (25.6). */
+    public function draftCaptions(string $locale): RedirectResponse
+    {
+        abort_unless(Gate::allows('languages.manage') && Locales::supported($locale) && $locale !== 'en', 403);
+        DraftCaptionsJob::dispatch($locale);
+
+        return back()->with('status', 'WURK AI is drafting the subtitles. They appear here as drafts to check.');
+    }
+
+    /** A reviewer saves a video's subtitles, line for line — approved (shown with the video) or kept as a draft. */
+    public function saveCaptions(Request $request, string $locale, string $article, VideoCaptions $captions): RedirectResponse
+    {
+        abort_unless(Locales::supported($locale) && $locale !== 'en', 404);
+        $data = $request->validate(['lines' => ['required', 'array', 'max:120'], 'lines.*' => ['required', 'string', 'max:200'], 'approved' => ['boolean']]);
+        if (! $captions->save($article, $locale, array_values(array_map('strval', $data['lines'])), (bool) ($data['approved'] ?? true), (string) $request->user()?->getAuthIdentifier())) {
+            return back()->with('warning', 'Not saved: give every subtitle line its words, one for each English line.');
+        }
+
+        return back()->with('status', ($data['approved'] ?? true) ? 'Approved — shown with the video.' : 'Saved as a draft.');
     }
 
     public function toggle(Request $request, string $locale): RedirectResponse

@@ -10,10 +10,12 @@ use Wurk\Ai\Console\SweepSalesConversationsCommand;
 use Wurk\Ai\Contracts\Ai;
 use Wurk\Ai\Contracts\AiActions;
 use Wurk\Ai\Contracts\AiConversations;
+use Wurk\Ai\Contracts\AskWurk;
 use Wurk\Ai\Contracts\HelpAnswers;
 use Wurk\Ai\Http\Middleware\ShareAssistant;
 use Wurk\Ai\Support\AiClient;
 use Wurk\Ai\Support\AiSettings;
+use Wurk\Ai\Support\Assistant;
 use Wurk\Ai\Support\CostEstimates;
 use Wurk\Ai\Support\CreditedActions;
 use Wurk\Ai\Support\FiguresTool;
@@ -31,6 +33,7 @@ final class AiServiceProvider extends ModuleServiceProvider
         $this->app->singleton(AiConversations::class, AiClient::class); // 19.1: conversations with tools
         $this->app->scoped(AiActions::class, CreditedActions::class);
         $this->app->bind(HelpAnswers::class, HelpAnswerer::class);
+        $this->app->bind(AskWurk::class, Assistant::class); // 25.6: the WhatsApp help line
         $this->app->singleton(CreditCostEstimates::class, CostEstimates::class);
     }
 

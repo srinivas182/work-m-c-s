@@ -148,7 +148,8 @@ final readonly class OwnerSummaries
             return null;
         }
         if (preg_match('/^\s*(?:(n|no|decline)\s*)?(?:(y|yes|ok)\s*)?#?\s*(\d)\s*$/i', $text, $m) !== 1) {
-            return self::HELP;
+            // A short "yes"/"n" was meant for the summary; anything longer is a question for the help line (25.6).
+            return mb_strlen(trim($text)) <= 8 ? self::HELP : null;
         }
         $yes = $m[1] === '';
         $action = $open->first(fn ($a) => (int) $a->number === (int) $m[3]);

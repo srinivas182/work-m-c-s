@@ -36,4 +36,12 @@ interface Accounts
 
     /** The active WURK ID with this email or number, if any — never creates one. */
     public function identityFor(string $identifier): ?string;
+
+    /**
+     * Whoever writes from this mobile number, when it's an active WURK ID's confirmed number (the WhatsApp help line,
+     * Sprint 25.6): their language and the businesses they work in, oldest first.
+     *
+     * @return array{id: string, locale: string|null, tenants: list<string>}|null
+     */
+    public function byVerifiedPhone(string $phone): ?array;
 }

@@ -94,4 +94,16 @@ final readonly class AccountService implements Accounts
 
         return $i !== null && $i->isActive() ? $i->id : null;
     }
+
+    public function byVerifiedPhone(string $phone): ?array
+    {
+        $digits = (string) preg_replace('/\D/', '', $phone);
+        $i = $digits === '' ? null : Identity::query()->where('phone', '+'.$digits)->whereNotNull('phone_verified_at')->first();
+        if ($i === null || ! $i->isActive()) {
+            return null;
+        }
+
+        return ['id' => $i->id, 'locale' => $i->locale, 'tenants' => array_values($i->memberships()->where('kind', 'staff')->where('status', 'active')
+            ->orderBy('created_at')->pluck('tenant_id')->map(fn ($t) => (string) $t)->all())];
+    }
 }

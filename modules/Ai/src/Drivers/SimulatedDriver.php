@@ -32,6 +32,9 @@ final class SimulatedDriver implements AiDriver, ChatDriver, VisionDriver
     /** @var list<array{system: string, items: list<array<string, mixed>>, tools: list<string>}> Tests: what each chat step was given. */
     public static array $seen = [];
 
+    /** @var list<string> Tests: the system prompt of each completion, in order. */
+    public static array $systems = [];
+
     public function name(): string
     {
         return 'simulated';
@@ -46,6 +49,7 @@ final class SimulatedDriver implements AiDriver, ChatDriver, VisionDriver
             self::$failNext--;
             throw new ProviderFailed('Simulated failure');
         }
+        self::$systems = [...array_slice(self::$systems, -19), $system];
         $text = self::$nextAnswer ?? array_shift(self::$answers) ?? $this->fillSlots($prompt) ?? (str_contains($system.$prompt, 'JSON') ? (string) json_encode(['note' => 'simulated']) : 'Simulated answer.');
         self::$nextAnswer = null;
 
