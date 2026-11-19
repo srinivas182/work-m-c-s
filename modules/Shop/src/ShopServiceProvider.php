@@ -19,6 +19,7 @@ use Wurk\Plans\Contracts\Entitlements;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\FinishedVisits;
 use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
@@ -125,6 +126,11 @@ final class ShopServiceProvider extends ModuleServiceProvider
         $this->loadViewsFrom($this->modulePath('resources/views'), 'shop');
         Event::listen(BusinessPaymentReceived::class, [OrderPayments::class, 'handle']);
         // Who owes me (23.5): pay-later orders not yet paid.
+        // Reviews (25.3): orders delivered or collected (done).
+        $this->callAfterResolving(FinishedVisits::class, fn (FinishedVisits $v) => $v->register('shop', fn (\DateTimeInterface $from, \DateTimeInterface $until) => Order::query()
+            ->where('status', 'done')->where('updated_at', '>=', $from)->where('updated_at', '<', $until)->get()
+            ->map(fn (Order $o) => ['key' => 'order:'.$o->id, 'kind' => 'order', 'title' => 'order #'.$o->number, 'customer' => $o->customer_name,
+                'phone' => $o->customer_phone, 'email' => $o->customer_email, 'finished_at' => $o->updated_at?->toIso8601String() ?? now()->toIso8601String()])));
         $this->callAfterResolving(MoneyOwed::class, fn (MoneyOwed $o) => $o->register('shop', fn () => Order::query()->where('status', 'awaiting_payment')->where('payment_method', 'offline')
             ->orderBy('created_at')->limit(200)->get()->map(fn (Order $order) => ['key' => 'order:'.$order->id, 'kind' => 'order', 'title' => 'Order #'.$order->number.' (pay later)',
                 'customer' => $order->customer_name, 'phone' => $order->customer_phone, 'email' => $order->customer_email, 'amount_cents' => $order->dueCents(),

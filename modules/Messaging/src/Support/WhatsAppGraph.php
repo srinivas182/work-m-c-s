@@ -36,6 +36,8 @@ final readonly class WhatsAppGraph
             'example' => ['Thandi', 'Box braids', 'Glow Salon', 'Sat 21 Nov, 14:00'], 'buttons' => ['Confirm', 'Move', 'Cancel']],
         WhatsAppBusiness::PAYMENT_REQUEST => ['body' => 'Hi {{1}}, {{2}} has sent you a request to pay {{3}} for {{4}}. You can view and pay it here: {{5}} Thank you.',
             'example' => ['Thandi', 'Glow Salon', 'R1 200.00', 'INV-0003', 'https://glow-salon.wurk.co.za/invoice/01J'], ],
+        WhatsAppBusiness::REVIEW_REQUEST => ['body' => 'Hi {{1}}, thank you for choosing {{2}}. How was your {{3}}? It takes a few seconds: {{4}} Reply STOP to get no more of these.',
+            'example' => ['Thandi', 'Glow Salon', 'Knotless braids', 'https://glow-salon.wurk.co.za/review/01J'], ],
     ];
 
     public function __construct(private ProviderCredentials $providers) {}

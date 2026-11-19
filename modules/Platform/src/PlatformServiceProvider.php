@@ -15,6 +15,7 @@ use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\FinishedVisits;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
@@ -33,6 +34,7 @@ use Wurk\Platform\Support\AudienceRegistry;
 use Wurk\Platform\Support\BusinessSetupRegistry;
 use Wurk\Platform\Support\DeletedRegistry;
 use Wurk\Platform\Support\ExportRegistry;
+use Wurk\Platform\Support\FinishedVisitsRegistry;
 use Wurk\Platform\Support\HealthRegistry;
 use Wurk\Platform\Support\MetricsRegistry;
 use Wurk\Platform\Support\MoneyOwedRegistry;
@@ -64,6 +66,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(OwnerDigest::class, OwnerDigestRegistry::class); // 21.6
         $this->app->singleton(BusinessSetup::class, BusinessSetupRegistry::class); // 23.1
         $this->app->singleton(MoneyOwed::class, MoneyOwedRegistry::class); // 23.5
+        $this->app->singleton(FinishedVisits::class, FinishedVisitsRegistry::class); // 25.3: who to ask for a review
         $this->app->extend('translation.loader', fn (Loader $loader) => new StoreAwareLoader($loader)); // reviewed translations over the files (24.2)
         $this->app->singleton(SalesTools::class, SalesRegistry::class); // 19.5
         $this->app->singleton(HealthSignals::class, HealthRegistry::class);
