@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft for WURK's approval (19 Nov 2026) |
+| **Status** | Approved by WURK (19 Nov 2026: "Approve all"), decisions A–H as recommended |
 | **Release** | v1.0.0 (first production release) |
 | **Depends on** | v0.27.0 (Sprint 26). Builds on: the cloud-agnostic production image (FrankenPHP + Octane; `serve`, `worker`, `scheduler`, `migrate` roles), shards and rollouts (Sprints 1 and 18), Watchtower, `/health/*`, backup records (`system:backup-taken`), k6 load scripts, the restore runbook and the UAT script (Sprint 18) |
 | **Next** | Live operation; feature work resumes from the backlog |
@@ -167,6 +167,11 @@ Also: rebalance the MySQL CI parts again (the slowest took 11.5 of 12 minutes on
 6. The external pen test has no open critical or high findings.
 7. Alerts reach the on-call contact for a stopped scheduler, a failing health check, a full queue and a late backup.
 8. v1.0.0 runs in production with live WhatsApp, payments and SMS, and the UAT script is passed with WURK.
+
+## Agreed (19 Nov 2026)
+
+- Decisions A–H as recommended: AWS Africa (Cape Town) on ECS Fargate, OpenTofu, Cloudflare for SaaS, backup copies in a separate AWS account in the same region, one RDS instance per shard (2 to start), Sentry, v1.0.0.
+- Nothing is applied to AWS until WURK provides the accounts and approves the budget estimate.
 
 ## Parts
 
