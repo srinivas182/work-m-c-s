@@ -57,6 +57,8 @@ export interface SiteContext {
   products?: ProductSummary[];
   /** The business's reviews (Reviews module, 25.3b); undefined in the editor and previews (samples shown). */
   reviews?: ReviewsSummary | null;
+  /** "Verified by WURK" (Trust module, 25.4): shown in the footer, linked to what was checked. */
+  badge?: { verified: boolean; registered: boolean; checked_on: string | null; url: string } | null;
   /** On a product page (/shop/{slug}): the product shown. */
   product?: ProductPage;
   /** True inside the editor: links don't navigate, empty fields show prompts. */

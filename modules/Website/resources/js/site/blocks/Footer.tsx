@@ -1,3 +1,4 @@
+import { ShieldCheck } from 'lucide-react';
 import type { BlockDefinition } from '../types';
 
 export interface FooterProps extends Record<string, unknown> {
@@ -21,6 +22,18 @@ export const Footer: BlockDefinition<FooterProps> = {
               {site.businessName}
             </p>
             {p.text && <p className="mt-2 max-w-md text-[var(--s-fg-muted)]">{p.text}</p>}
+            {site.badge?.verified && (
+              <a
+                href={site.editing ? undefined : site.badge.url}
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--s-border)] px-3 py-1 text-sm font-semibold"
+                rel="noopener"
+              >
+                <ShieldCheck aria-hidden className="size-4" />
+                {site.badge.registered
+                  ? 'Verified by WURK · Registered business'
+                  : 'Verified by WURK'}
+              </a>
+            )}
           </div>
           {items.length > 0 && (
             <nav aria-label="Footer" className="grid content-start gap-2">
