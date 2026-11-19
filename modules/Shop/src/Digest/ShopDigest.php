@@ -7,6 +7,7 @@ namespace Wurk\Shop\Digest;
 use Carbon\CarbonImmutable;
 use Wurk\Platform\Contracts\OwnerDigestRefused;
 use Wurk\Platform\Contracts\OwnerDigestSource;
+use Wurk\Platform\Money\Money;
 use Wurk\Shop\Models\Order;
 use Wurk\Shop\Support\CheckoutProblem;
 use Wurk\Shop\Support\OrderManager;
@@ -63,6 +64,6 @@ final readonly class ShopDigest implements OwnerDigestSource
 
     private static function money(int $cents): string
     {
-        return 'R'.number_format($cents / 100, 2, '.', ' ');
+        return Money::format((int) $cents);
     }
 }

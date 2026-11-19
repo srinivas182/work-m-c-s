@@ -8,7 +8,7 @@ import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import AppShell from '@/layouts/AppShell';
 import { CalendarDays } from 'lucide-react';
-import { __ } from '@/i18n';
+import { __, currencySymbol, money } from '@/i18n';
 
 interface BookingRow {
   id: string;
@@ -54,7 +54,7 @@ const STATUS: Record<string, string> = {
   pending_payment: 'Awaiting deposit',
 };
 
-const rand = (cents: number) => `R${(cents / 100).toFixed(2)}`;
+const rand = (cents: number) => money(cents); // the business's currency (25.1b)
 const METHODS: [string, string][] = [
   ['cash', 'Cash'],
   ['card_machine', 'Card machine'],
@@ -88,7 +88,10 @@ function RecordPayment({ b, done }: { b: BookingRow; done: () => void }) {
           ))}
         </select>
       </Field>
-      <Field label={__('Amount (R)')} error={form.errors.amount}>
+      <Field
+        label={__('Amount (:currency)', { currency: currencySymbol() })}
+        error={form.errors.amount}
+      >
         <Input
           inputMode="decimal"
           value={form.data.amount}
@@ -131,6 +134,8 @@ function BookingItem({
           {b.source === 'website' && <Badge tone="info">{__('Booked online')}</Badge>}
           {b.source === 'chat' && <Badge tone="info">{__('Booked by the AI assistant')}</Badge>}
           {b.source === 'whatsapp' && <Badge tone="info">{__('Booked on WhatsApp')}</Badge>}
+          {b.source === 'ussd' && <Badge tone="info">{__('Booked by USSD')}</Badge>}
+          {b.source === 'sms' && <Badge tone="info">{__('Booked by SMS')}</Badge>}
           {b.customer_confirmed && <Badge tone="success">{__('Confirmed by the customer')}</Badge>}
           {STATUS[b.status] && <Badge tone="neutral">{STATUS[b.status]}</Badge>}
         </span>

@@ -15,6 +15,7 @@ use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\CancellationPolicy;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\ManageLink;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 uses(InteractsWithShards::class, FakesYoco::class);
@@ -80,4 +81,6 @@ it('refunds the deposit when the customer cancels in time, and keeps it when itâ
 it('always refunds when the business cancels', function () {
     $this->travelTo(CarbonImmutable::parse('2027-05-03 08:30', 'Africa/Johannesburg')); // inside the window
     ($this->in)(fn () => expect(app(CancellationPolicy::class)->businessCancels($this->booking, null))->toBe(['refunded' => true]));
+    $ledger = ($this->in)(fn () => app(Refunds::class)->for('booking', $this->booking->id)); // the refunds ledger (25.5)
+    expect($ledger)->toHaveCount(1)->and($ledger[0])->toMatchArray(['amount_cents' => $this->booking->deposit_cents, 'method' => 'provider', 'reason' => 'Booking cancelled']);
 });

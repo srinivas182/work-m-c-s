@@ -9,7 +9,7 @@ import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { STATUS, rand } from './Orders';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface OrderData {
   id: string;
@@ -67,7 +67,7 @@ const EVENT: Record<string, string> = { placed: 'Placed', refunded: 'Refunded', 
 export default function Order({ order: o }: { order: OrderData }) {
   const base = window.location.pathname.replace(/\/$/, '');
   const cancel = useForm({ reason: '' });
-  const refund = useForm({ amount: '', restock: false, note: '' });
+  const refund = useForm({ amount: '', restock: false, note: '', method: 'eft', reason: '' });
   const [how, setHow] = useState('eft'); // how a pay-later order was paid (Sprint 22.3)
   const err =
     (cancel.errors as Record<string, string | undefined>).order ??
@@ -312,6 +312,8 @@ export default function Order({ order: o }: { order: OrderData }) {
                       amount_cents: d.amount === '' ? null : Math.round(Number(d.amount) * 100),
                       restock: d.restock,
                       note: d.note || null,
+                      method: o.payment === 'card' ? null : d.method, // card: back through the provider (25.5)
+                      reason: d.reason || null,
                     }));
                     refund.post(`${base}/refund`, {
                       preserveScroll: true,
@@ -320,7 +322,7 @@ export default function Order({ order: o }: { order: OrderData }) {
                   }}
                 >
                   <Field
-                    label={__('Amount (R)')}
+                    label={__('Amount (:currency)', { currency: currencySymbol() })}
                     hint={`Leave empty to refund all that’s left (${rand(left)}).${o.payment === 'offline' ? ' For EFT orders, pay the customer back yourself — this records it.' : ''}`}
                   >
                     <Input
@@ -329,6 +331,34 @@ export default function Order({ order: o }: { order: OrderData }) {
                       step={0.01}
                       value={refund.data.amount}
                       onChange={(e) => refund.setData('amount', e.target.value)}
+                    />
+                  </Field>
+                  {o.payment !== 'card' && (
+                    <Field label={__('Paid back by')}>
+                      {(control) => (
+                        <select
+                          {...control}
+                          className="border-border bg-bg h-9 rounded-md border px-2 text-sm"
+                          value={refund.data.method}
+                          onChange={(e) => refund.setData('method', e.target.value)}
+                        >
+                          <option value="eft">{__('EFT')}</option>
+                          <option value="cash">{__('Cash')}</option>
+                          <option value="card_machine">{__('Card machine')}</option>
+                          <option value="qr">{__('SnapScan / Zapper')}</option>
+                          <option value="mobile_money">{__('Mobile money')}</option>
+                          <option value="store_credit">
+                            {__('Store credit (if the customer agrees)')}
+                          </option>
+                        </select>
+                      )}
+                    </Field>
+                  )}
+                  <Field label={__('Why (kept with the refund)')}>
+                    <Input
+                      value={refund.data.reason}
+                      maxLength={200}
+                      onChange={(e) => refund.setData('reason', e.target.value)}
                     />
                   </Field>
                   <Field label={__('Note (optional)')}>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/design-system/compon
 import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { AgentLayout } from '../../components/AgentLayout';
-import { __ } from '@/i18n';
+import { __, zar } from '@/i18n';
 
 interface Onboarding {
   id: string;
@@ -46,7 +46,7 @@ const ORDER: Record<Onboarding['step'], number> = {
   done: 6,
 };
 /** Rand as WURK writes it everywhere: R1 380.00 (the server's own format). */
-const rand = (c: number) => `R${(c / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
+const rand = (c: number) => zar(c); // WURK's prices are in rand
 
 /** Minutes since the start, so the agent can keep to the 15 minutes. */
 function Clock({ since }: { since: string }) {

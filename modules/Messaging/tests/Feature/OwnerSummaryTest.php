@@ -104,8 +104,8 @@ it('only works for the owner, from their own verified number', function () {
     ($this->in)(fn () => expect(app(OwnerSummaries::class)->isOwner($this->staff->id))->toBeFalse()->and(app(OwnerSummaries::class)->isOwner($this->owner->id))->toBeTrue());
 
     ($this->in)(fn () => app(OwnerSummaries::class)->send($this->owner->id));
-    ($this->reply)('1', '27825550102'); // someone else's number: not answered at all
-    expect(($this->toWurk)())->toHaveCount(1);
+    ($this->reply)('1', '27825550102'); // someone else's number: the summary isn't answered — the help line asks for a question (25.6)
+    expect(($this->toWurk)())->toHaveCount(2)->and(($this->toWurk)()->last()['text']['body'])->toBe('Ask your question in a few words, or send a voice note.');
     ($this->in)(fn () => expect(Order::query()->where('number', 7)->value('status'))->toBe('awaiting_payment'));
 
     $this->owner->forceFill(['phone_verified_at' => null])->save();

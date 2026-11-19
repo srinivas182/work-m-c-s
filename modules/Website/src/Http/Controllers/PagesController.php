@@ -13,6 +13,7 @@ use Wurk\Website\Models\Page;
 use Wurk\Website\Models\Site;
 use Wurk\Website\Support\LaunchChecklist;
 use Wurk\Website\Support\Pages;
+use Wurk\Website\Support\ReturnsPolicy;
 use Wurk\Website\Support\Templates;
 use Wurk\Website\Support\TemplateSwitcher;
 
@@ -36,6 +37,7 @@ final class PagesController
             'base' => route('tenant.website.pages', [], false),
             'design' => $this->design(),
             'checklist' => app(LaunchChecklist::class)->steps(),
+            'returns' => app(ReturnsPolicy::class)->status(),
         ]);
     }
 
@@ -45,6 +47,16 @@ final class PagesController
         $this->pages->create($data['title'], $data['slug'] ?? null, (string) $request->user()?->getAuthIdentifier());
 
         return back()->with('status', "Page “{$data['title']}” added.");
+    }
+
+    /** Write (or rewrite) the returns policy as a draft page, from the country pack and the owner's choices. */
+    public function returnsPolicy(Request $request, ReturnsPolicy $policy): RedirectResponse
+    {
+        $data = $request->validate(['offers' => ['array'], 'offers.*' => ['string', 'in:'.implode(',', array_keys(ReturnsPolicy::OFFERS))], 'confirmed' => ['accepted']],
+            ['confirmed.accepted' => __('Tick to confirm you’ve read it — it’s a template, not legal advice.')]);
+        $page = $policy->write(array_values(array_map('strval', $data['offers'] ?? [])), true, (string) $request->user()?->getAuthIdentifier());
+
+        return redirect()->route('tenant.website.editor', ['page' => $page->id])->with('status', 'Your returns policy is ready to check. Publish it when you’re happy.');
     }
 
     public function update(Request $request, string $page): RedirectResponse

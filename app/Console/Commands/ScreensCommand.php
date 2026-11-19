@@ -48,8 +48,9 @@ final class ScreensCommand extends Command
         'tenant.website.photos' => 'JSON for the photo picker', 'tenant.website.setup.photo' => 'image: a photo found online, for its thumbnail (23.2)',
         'tenant.website.share.status' => 'image: a WhatsApp Status picture (23.3)', 'tenant.website.share.poster' => 'PDF: a poster or table card (23.3)',
         'agent.onboard.show' => 'needs a business being set up (covered by the Agents feature tests, 23.4)', 'agent.onboard.paid' => 'redirect back from the payment provider',
-        'money.public.invoice' => 'the customer’s signed invoice link (covered by the Money feature tests, 23.5a)', 'money.public.returned' => 'redirect back from the payment provider', 'tenant.money.expenses.slip-photo' => 'image: a slip photo (23.5b)', 'tenant.website.videos' => 'JSON for the video picker (20.2)', 'tenant.shop.photos' => 'JSON for the photo picker', 'admin.templates.versions' => 'JSON for the editor',
+        'money.public.invoice' => 'the customer’s signed invoice link (covered by the Money feature tests, 23.5a)', 'reviews.public.show' => 'the customer’s signed review link (covered by ReviewsTest, 25.3)', 'admin.verification.document' => 'an ID document or selfie (a file, not a page; covered by VerifiedBusinessTest, 25.4)', 'money.public.returned' => 'redirect back from the payment provider', 'tenant.money.expenses.slip-photo' => 'image: a slip photo (23.5b)', 'tenant.website.videos' => 'JSON for the video picker (20.2)', 'tenant.shop.photos' => 'JSON for the photo picker', 'admin.templates.versions' => 'JSON for the editor',
         'admin.templates.photos' => 'JSON for the photo picker', 'help.panel.app' => 'JSON for the help panel', 'help.panel.admin' => 'JSON for the help panel', 'help.search' => 'JSON',
+        'help.captions' => 'WebVTT subtitles (25.6)', 'help.panel.captions.app' => 'WebVTT subtitles (25.6)', 'help.panel.captions.admin' => 'WebVTT subtitles (25.6)',
         'bookings.public.services' => 'JSON for the booking widget', 'bookings.public.times' => 'JSON for the booking widget', 'bookings.public.tables.times' => 'JSON for the booking widget',
         'bookings.public.classes' => 'JSON for the booking widget', 'tenant.website.chat' => 'JSON for the chat widget',
         'tenant.billing.return' => 'redirect back from the payment provider', 'bookings.public.paid' => 'redirect back from the payment provider',
@@ -145,6 +146,7 @@ final class ScreensCommand extends Command
                 $p === 'slug' && $route->getName() === 'help.category' => $ids['help_category_slug'] ?? throw new \RuntimeException('No help category'),
                 $p === 'number' => $ids['ticket_number'],
                 $p === 'locale' => 'zu', // Admin → Languages → a language (24.2)
+                $p === 'code' && $route->getName() === 'admin.countries.show' => 'GH', // a country with levies and a rate to confirm (25.1)
                 isset($ids[$p]) => $ids[$p],
                 default => throw new \RuntimeException("No value for {{$p}}"),
             };
@@ -220,6 +222,9 @@ final class ScreensCommand extends Command
      */
     private function central(string $tenantId): array
     {
+        // A verification waiting for HQ (25.4), behind Admin → Verification → a business.
+        DB::table('business_verifications')->insertOrIgnore(['tenant_id' => $tenantId, 'identity_status' => 'pending', 'registry_status' => 'pending',
+            'registry_number' => '2019/123456/07', 'identity_submitted_at' => now(), 'registry_submitted_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
         if (! DB::table('support_tickets')->where('tenant_id', $tenantId)->exists()) {
             $owner = (string) DB::table('identities')->where('email', 'owner@'.self::HANDLE.'.test')->value('id');
             app(Tickets::class)->open($tenantId, $owner, 'Can’t connect PayFast', 'It says my merchant key is wrong.', [], []);

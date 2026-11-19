@@ -13,6 +13,8 @@ Route::domain((string) config('wurk.domains.help'))->group(function (): void {
     Route::get('/search', [PublicHelpController::class, 'search'])->middleware('throttle:60,1,help-search')->name('help.search');
     Route::get('/c/{slug}', [PublicHelpController::class, 'category'])->where('slug', '[a-z0-9-]+')->name('help.category');
     Route::get('/a/{slug}', [PublicHelpController::class, 'article'])->where('slug', '[a-z0-9-]+')->name('help.article');
+    Route::get('/a/{slug}/captions/{locale}.vtt', [PublicHelpController::class, 'captions'])->where(['slug' => '[a-z0-9-]+', 'locale' => '[a-z]{2}'])
+        ->middleware('throttle:120,1,help-captions')->name('help.captions');
     Route::post('/a/{slug}/feedback', [PublicHelpController::class, 'feedback'])->where('slug', '[a-z0-9-]+')->middleware('throttle:30,1,help-feedback')->name('help.feedback');
 });
 
@@ -31,4 +33,6 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
 foreach (['app', 'admin'] as $site) {
     Route::domain((string) config('wurk.domains.'.$site))->middleware(['auth', 'throttle:60,1,help-panel'])
         ->get('/_help', HelpPanelController::class)->name('help.panel.'.$site);
+    Route::domain((string) config('wurk.domains.'.$site))->middleware(['auth', 'throttle:120,1,help-captions'])
+        ->get('/_help/captions/{slug}/{locale}.vtt', [PublicHelpController::class, 'captions'])->where(['slug' => '[a-z0-9-]+', 'locale' => '[a-z]{2}'])->name('help.panel.captions.'.$site);
 }

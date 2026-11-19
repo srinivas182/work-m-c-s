@@ -22,7 +22,7 @@
 </head>
 <body>
 <main>
-  <p>{{ $business }}</p>
+  <p>{{ $business }}@if (($badge['verified'] ?? false)) · <a href="{{ $badge['url'] }}" rel="noopener">{{ $badge['registered'] ? __('Verified by WURK · Registered business') : __('Verified by WURK') }}</a>@endif</p>
   <h1>{{ __('Invoice :number', ['number' => $label]) }}</h1>
   <p>{{ __('For :customer · issued :issued · due :due', ['customer' => $customer, 'issued' => $issued, 'due' => $due]) }}@if ($vatNumber) · {{ __('VAT number :number', ['number' => $vatNumber]) }}@endif</p>
   @if ($paid)<p><span class="status paid">{{ __('Paid :date', ['date' => $paidOn]) }}</span></p>@elseif ($void)<p><span class="status">{{ __('Cancelled') }}</span></p>@endif
@@ -33,9 +33,12 @@
       <tr><td>{{ $l['description'] }}</td><td class="n">{{ $l['quantity'] }}</td><td class="n">{{ $l['amount'] }}</td></tr>
     @endforeach
     @if ($vat !== null)
-      <tr><td colspan="2">{{ __('VAT (15%)') }}</td><td class="n">{{ $vat }}</td></tr>
+      <tr><td colspan="2">{{ __('VAT (:rate%)', ['rate' => $vatRate]) }}</td><td class="n">{{ $vat }}</td></tr>
     @endif
       <tr class="total"><td colspan="2">{{ __('Total') }}</td><td class="n">{{ $total }}</td></tr>
+    @if ($refunded !== null)
+      <tr><td colspan="2">{{ __('Refunded') }}@if ($refundedVat !== null) {{ __('(includes :vat VAT)', ['vat' => $refundedVat]) }}@endif</td><td class="n">−{{ $refunded }}</td></tr>
+    @endif
     </tbody>
   </table>
   @if ($message)<p role="status">{{ $message }}</p>@endif

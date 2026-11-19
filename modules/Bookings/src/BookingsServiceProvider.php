@@ -60,6 +60,7 @@ use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\CannotRestore;
 use Wurk\Platform\Contracts\DataExports;
+use Wurk\Platform\Contracts\FinishedVisits;
 use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
@@ -193,6 +194,14 @@ final class BookingsServiceProvider extends ModuleServiceProvider
             });
         });
         // Who owes me (23.5): deposits asked for and not yet paid.
+        // Reviews (25.3): appointments whose time has passed, unless cancelled or a no-show.
+        $this->callAfterResolving(FinishedVisits::class, fn (FinishedVisits $v) => $v->register('bookings', function (\DateTimeInterface $from, \DateTimeInterface $until) {
+            $bookings = Booking::query()->whereIn('status', ['confirmed', 'completed'])->where('ends_at', '>=', $from)->where('ends_at', '<', $until)->get();
+            $names = BookingService::withTrashed()->whereKey($bookings->pluck('service_id')->unique())->pluck('name', 'id');
+
+            return $bookings->map(fn (Booking $b) => ['key' => 'booking:'.$b->id, 'kind' => 'booking', 'title' => (string) ($names[$b->service_id] ?? 'appointment'),
+                'customer' => $b->customer_name, 'phone' => $b->customer_phone, 'email' => $b->customer_email, 'finished_at' => $b->ends_at->toIso8601String()]);
+        }));
         $this->callAfterResolving(MoneyOwed::class, fn (MoneyOwed $o) => $o->register('bookings', fn () => Booking::query()->where('status', 'pending_payment')->where('deposit_cents', '>', 0)
             ->whereNull('paid_at')->orderBy('starts_at')->limit(200)->get()->map(fn (Booking $b) => ['key' => 'deposit:'.$b->id, 'kind' => 'deposit', 'title' => 'Deposit for a booking',
                 'customer' => $b->customer_name, 'phone' => $b->customer_phone, 'email' => $b->customer_email, 'amount_cents' => $b->deposit_cents,

@@ -1,5 +1,7 @@
 import {
   BookOpen,
+  Star,
+  Smartphone,
   Mic,
   Share2,
   HandCoins,
@@ -76,6 +78,9 @@ export const icons: Record<string, LucideIcon> = {
   mic: Mic,
   'share-2': Share2,
   'hand-coins': HandCoins,
+  // Bookings by phone (25.2b)
+  phone: Smartphone,
+  star: Star,
   inbox: Inbox,
   menu: Menu,
   'layout-template': LayoutTemplate,

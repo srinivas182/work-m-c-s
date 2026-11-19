@@ -1,0 +1,14 @@
+{
+    "name": "Trust",
+    "key": "trust",
+    "version": "0.1.0",
+    "description": "Verified business badge (Sprint 25.4): the owner's phone, their identity (checked by WURK HQ) and, for companies, a registry match. \"Verified by WURK\" on the site and invoices, linked to what was checked and when. Documents are encrypted and deleted 90 days after the decision.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "audit",
+        "access",
+        "identity"
+    ]
+}

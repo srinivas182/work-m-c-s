@@ -41,6 +41,14 @@ return [
             'throw' => true,
         ],
 
+        // Verified business (Sprint 25.4): ID documents and selfies, encrypted before they're written; deleted 90 days
+        // after HQ's decision. Never public.
+        'trust' => [
+            'driver' => 'local',
+            'root' => storage_path('app/trust'),
+            'visibility' => 'private',
+            'throw' => true,
+        ],
         'records' => [
             'driver' => 'local',
             'root' => storage_path('app/records'),

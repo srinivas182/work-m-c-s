@@ -5,7 +5,7 @@ import { Button } from '@/design-system/components/button';
 import { Input } from '@/design-system/components/input';
 import { Sheet, SheetContent } from '@/design-system/components/dialog';
 import { Tooltip } from '@/design-system/components/tooltip';
-import { __ } from '@/i18n';
+import { __, locale } from '@/i18n';
 
 interface Article {
   slug: string;
@@ -15,6 +15,8 @@ interface Article {
   video: string | null;
   poster: string | null;
   url: string;
+  /** Subtitles: English and each reviewed language (25.6), served from this site. */
+  tracks?: { locale: string; label: string; url: string }[];
 }
 
 /** "?" on every back-office screen (Sprint 16.1b): this screen's help (articles and 30-second videos), and search. */
@@ -94,7 +96,18 @@ export function HelpPanel() {
                             aria-label={`Video: ${a.title}`}
                             src={a.video}
                             className="w-full rounded-md"
-                          />
+                          >
+                            {(a.tracks ?? []).map((t) => (
+                              <track
+                                key={t.locale}
+                                kind="subtitles"
+                                srcLang={t.locale}
+                                label={t.label}
+                                src={t.url}
+                                default={t.locale === locale()}
+                              />
+                            ))}
+                          </video>
                         )}
                         {/* Rendered on the server from Markdown with raw HTML stripped and unsafe links refused. */}
                         <div

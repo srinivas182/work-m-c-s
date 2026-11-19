@@ -20,6 +20,9 @@ use Wurk\Money\Mail\InvoiceMail;
 use Wurk\Money\Models\Invoice;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Payments\Contracts\Refunds;
+use Wurk\Platform\Money\Money;
+use Wurk\Regions\Contracts\Countries;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -39,7 +42,7 @@ final readonly class Invoices
     public const REMINDER_DAYS = [1, 7, 14];
 
     public function __construct(private TenantContext $context, private BusinessPayments $payments, private InPersonPayments $inPerson, private WhatsAppBusiness $whatsapp,
-        private Messenger $messenger, private CreditWallet $wallet, private AuditLog $audit) {}
+        private Messenger $messenger, private CreditWallet $wallet, private AuditLog $audit, private Countries $countries) {}
 
     /**
      * @param  array{customer_name: string, customer_phone?: string|null, customer_email?: string|null, lines: list<array{description: string, quantity: int|float|string, unit: int|float|string}>,
@@ -59,10 +62,12 @@ final readonly class Invoices
         if ($lines === []) {
             throw ValidationException::withMessages(['lines' => 'Add at least one line with a price.']);
         }
-        $vatBp = ($data['vat'] ?? false) ? 1500 : 0;
+        $now = CarbonImmutable::now($this->context->current()->timezone());
+        $today = $now->toDateString();
+        // The business's country's tax on the invoice's day (25.1), levies included; the invoice keeps it from then on.
+        $vatBp = ($data['vat'] ?? false) ? (int) ($this->countries->taxOn($this->context->current()->countryCode(), $now)['total_bp'] ?? 0) : 0;
         $subtotal = array_sum(array_map(fn (array $l) => $l['quantity'] * $l['unit_cents'], $lines));
         $vat = (int) round($subtotal * $vatBp / 10000);
-        $today = CarbonImmutable::now($this->context->current()->timezone())->toDateString();
 
         return DB::connection($this->context->connectionName())->transaction(function () use ($data, $lines, $vatBp, $subtotal, $vat, $today, $by): Invoice {
             $number = (int) Invoice::query()->lockForUpdate()->max('number') + 1;
@@ -152,6 +157,40 @@ final readonly class Invoices
             }
         });
         $this->audit->record('money.invoice_paid', 'invoice', $invoice->id, ['how' => $how]);
+    }
+
+    /** How a paid invoice can be paid back: online payments only through the provider; others by hand (25.5). */
+    public const REFUND_BY_HAND = ['cash', 'card_machine', 'qr', 'eft', 'mobile_money'];
+
+    /** Refund all or part of a paid invoice, with a reason; the customer is told and cash-up counts a counter refund. */
+    public function refund(Invoice $invoice, int $cents, string $method, string $reason, ?string $note, ?string $byId, string $byName): void
+    {
+        if ($invoice->status !== 'paid') {
+            throw ValidationException::withMessages(['amount' => __('Only a paid invoice can be refunded.')]);
+        }
+        $left = $invoice->total_cents - (int) $invoice->refunded_cents;
+        if ($cents < 1 || $cents > $left) {
+            throw ValidationException::withMessages(['amount' => __('Refund up to :amount (what’s left of this invoice).', ['amount' => Money::format($left)])]);
+        }
+        $online = $invoice->paid_how === 'online';
+        if ($online && $method !== 'provider' && $method !== 'eft') { // eft: refunded in the provider's dashboard, recorded here
+            throw ValidationException::withMessages(['method' => __('This invoice was paid online: the refund goes back the same way.')]);
+        }
+        if (! $online && ! in_array($method, self::REFUND_BY_HAND, true)) {
+            throw ValidationException::withMessages(['method' => __('Choose how you paid it back.')]);
+        }
+        if ($online && $method === 'provider' && ! $this->payments->refund((string) $invoice->payment_reference, $cents)) {
+            throw ValidationException::withMessages(['method' => __('The payment provider didn’t accept the refund. Refund it in their dashboard, then record it here as an EFT refund.')]);
+        }
+        $invoice->update(['refunded_cents' => (int) $invoice->refunded_cents + $cents]);
+        app(Refunds::class)->record('invoice', $invoice->id, $cents, $method, $reason, $note, $byId, $byName, null,
+            ['name' => $invoice->customer_name, 'phone' => $invoice->customer_phone, 'email' => $invoice->customer_email, 'what' => $invoice->label()]);
+    }
+
+    /** The VAT inside a refund: the same share of the invoice's VAT as the refund is of its total (VAT reverses with it). */
+    public static function refundVat(Invoice $invoice, int $refundedCents): int
+    {
+        return $invoice->total_cents < 1 ? 0 : intdiv($invoice->vat_cents * $refundedCents * 2 + $invoice->total_cents, $invoice->total_cents * 2);
     }
 
     /** The customer is paying online: where to send them (null when the business takes no online payments). */
@@ -278,7 +317,7 @@ final readonly class Invoices
 
     public static function rand(int $cents): string
     {
-        return 'R'.number_format($cents / 100, 2, '.', ' ');
+        return Money::format((int) $cents);
     }
 
     private static function first(string $name): string

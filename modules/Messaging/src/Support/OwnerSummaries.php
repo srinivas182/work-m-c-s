@@ -16,6 +16,7 @@ use Wurk\Messaging\Contracts\ProviderCredentials;
 use Wurk\Messaging\Drivers\WhatsApp\MetaCloudWhatsApp;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\OwnerDigestRefused;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -129,7 +130,7 @@ final readonly class OwnerSummaries
             : 'Needs your yes or no: '.implode(' · ', array_map(fn (array $r, int $i) => ($i + 1).') '.$r['label'], $requests, array_keys($requests))).' Reply with the number to say yes, or N and the number to say no (e.g. N1).';
         $name = (string) strtok($this->people->names([$identityId])[$identityId] ?? '', ' ');
         $result = app(Messenger::class)->whatsappTemplate($phone, self::TEMPLATE, [$name !== '' ? $name : 'there', $tenant->displayName(),
-            (string) $figures['tomorrow_bookings'], (string) $figures['new_orders'], 'R'.number_format($figures['received_cents'] / 100, 2, '.', ' '), (string) $figures['chats_waiting'], $asks], 'owner_summary');
+            (string) $figures['tomorrow_bookings'], (string) $figures['new_orders'], Money::format((int) $figures['received_cents']), (string) $figures['chats_waiting'], $asks], 'owner_summary');
         $this->audit->record('messaging.owner_summary_sent', 'whatsapp_owner_summary', $identityId, ['sent' => $result->ok, 'requests' => count($requests)]);
 
         return $result->ok;
@@ -147,7 +148,8 @@ final readonly class OwnerSummaries
             return null;
         }
         if (preg_match('/^\s*(?:(n|no|decline)\s*)?(?:(y|yes|ok)\s*)?#?\s*(\d)\s*$/i', $text, $m) !== 1) {
-            return self::HELP;
+            // A short "yes"/"n" was meant for the summary; anything longer is a question for the help line (25.6).
+            return mb_strlen(trim($text)) <= 8 ? self::HELP : null;
         }
         $yes = $m[1] === '';
         $action = $open->first(fn ($a) => (int) $a->number === (int) $m[3]);

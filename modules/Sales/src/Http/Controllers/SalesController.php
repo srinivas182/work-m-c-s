@@ -16,6 +16,8 @@ use Wurk\Access\Contracts\BranchRestriction;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\CustomerIdentity;
+use Wurk\Payments\Contracts\Refunds;
+use Wurk\Platform\Money\Money;
 use Wurk\Sales\Models\Sale;
 use Wurk\Sales\Support\SaleProblem;
 use Wurk\Sales\Support\Sales;
@@ -96,7 +98,7 @@ final class SalesController
             'method' => $d['method'], 'note' => $d['note'] ?? null, 'branch_id' => $branch, 'contact_id' => $proven],
             (string) $user?->getAuthIdentifier(), $this->who($request), mb_substr((string) $request->userAgent(), 0, 120), Gate::allows('sales.approve'));
 
-        return back()->with('status', $sale->status === 'pending' ? 'Sale saved — it needs a manager’s approval (over R'.number_format($this->sales->threshold() / 100, 2).').' : 'Sale recorded.');
+        return back()->with('status', $sale->status === 'pending' ? 'Sale saved — it needs a manager’s approval (over '.Money::format((int) ($this->sales->threshold())).').' : 'Sale recorded.');
     }
 
     public function settle(Request $request, string $sale): RedirectResponse
@@ -125,9 +127,11 @@ final class SalesController
 
     public function refund(Request $request, string $sale): RedirectResponse
     {
-        $amount = (float) $request->validate(['amount' => ['required', 'numeric', 'min:0.01']])['amount'];
+        $data = $request->validate(['amount' => ['required', 'numeric', 'min:0.01'], 'method' => ['nullable', 'string', 'in:'.implode(',', array_keys(Refunds::METHODS))],
+            'reason' => ['nullable', 'string', 'max:200'], 'note' => ['nullable', 'string', 'max:500']]);
 
-        return $this->act(fn () => $this->sales->refund($this->sale($request, $sale), (int) round($amount * 100), $this->who($request)), 'Refund recorded.');
+        return $this->act(fn () => $this->sales->refund($this->sale($request, $sale), (int) round((float) $data['amount'] * 100), $this->who($request),
+            $data['method'] ?? null, trim((string) ($data['reason'] ?? '')) ?: 'Refund', $data['note'] ?? null, (string) $request->user()?->getAuthIdentifier()), 'Refund recorded.');
     }
 
     public function threshold(Request $request): RedirectResponse
@@ -135,7 +139,7 @@ final class SalesController
         $amount = (float) $request->validate(['amount' => ['required', 'numeric', 'min:0', 'max:1000000']], ['amount.min' => 'Use 0 for no approvals.'])['amount'];
         $this->sales->setThreshold((int) round($amount * 100));
 
-        return back()->with('status', $amount > 0 ? 'Sales over R'.number_format($amount, 2).' now need approval.' : 'Sales no longer need approval.');
+        return back()->with('status', $amount > 0 ? 'Sales over '.Money::format((int) round($amount * 100)).' now need approval.' : 'Sales no longer need approval.');
     }
 
     private function act(callable $fn, string $done): RedirectResponse

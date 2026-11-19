@@ -233,6 +233,12 @@ final readonly class WhatsAppBusinessService implements WhatsAppBusiness
         };
     }
 
+    /** Whether a media address is one of Meta's own servers (never follow a link elsewhere with a token). */
+    public static function isMetaHost(string $url): bool
+    {
+        return self::metaHost($url);
+    }
+
     private static function metaHost(string $url): bool
     {
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));

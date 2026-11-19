@@ -8,6 +8,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
+use Wurk\Platform\Money\Money;
 use Wurk\Referrals\Models\ReferralMember;
 use Wurk\Referrals\Models\ReferralPayout;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -42,8 +43,8 @@ final readonly class Payouts
             $balance = $this->wallets->balance($member->id);
             if ($cents < $rules['min_payout_cents'] || $cents > $balance) {
                 throw new \DomainException($balance < $rules['min_payout_cents']
-                    ? 'Payouts start at R'.number_format($rules['min_payout_cents'] / 100, 2).' — you have R'.number_format($balance / 100, 2).'.'
-                    : 'Choose an amount from R'.number_format($rules['min_payout_cents'] / 100, 2).' to R'.number_format($balance / 100, 2).'.');
+                    ? 'Payouts start at '.Money::format((int) $rules['min_payout_cents']).' — you have '.Money::format((int) $balance).'.'
+                    : 'Choose an amount from '.Money::format((int) $rules['min_payout_cents']).' to '.Money::format((int) $balance).'.');
             }
             $digits = (string) preg_replace('/\D/', '', $bank['account']);
             $p = ReferralPayout::query()->create(['member_id' => $member->id, 'cents' => $cents, 'status' => 'requested', 'account_holder' => $bank['holder'],

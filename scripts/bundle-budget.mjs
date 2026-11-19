@@ -25,7 +25,9 @@ const closure = (key, into = new Set()) => {
   return into;
 };
 const entry = closure('resources/js/app.tsx');
-const pages = Object.keys(manifest).filter((k) => /\/pages\/.*\.tsx$/.test(k) && !/\.test\./.test(k));
+// The block board is a design tool that production never serves (404 there), so no owner ever downloads it.
+const NOT_SERVED = ['Website/resources/js/pages/BlockBoard.tsx'];
+const pages = Object.keys(manifest).filter((k) => /\/pages\/.*\.tsx$/.test(k) && !/\.test\./.test(k) && !NOT_SERVED.some((p) => k.endsWith(p)));
 const uses = new Map();
 const own = new Map(pages.map((p) => [p, [...closure(p)].filter((k) => !entry.has(k))]));
 for (const list of own.values()) for (const k of list) uses.set(k, (uses.get(k) ?? 0) + 1);

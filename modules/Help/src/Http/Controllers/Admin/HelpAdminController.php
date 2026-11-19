@@ -16,6 +16,7 @@ use Inertia\Response;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Help\Models\HelpArticle;
 use Wurk\Help\Models\HelpCategory;
+use Wurk\Help\Support\Captions;
 use Wurk\Help\Support\HelpCentre;
 use Wurk\Help\Support\Screens;
 
@@ -62,7 +63,8 @@ final class HelpAdminController
         $a = HelpArticle::query()->findOrFail($article);
 
         return Inertia::render('Help::Admin/Edit', ['article' => [...$a->only(['id', 'category_id', 'slug', 'title', 'summary', 'body', 'status', 'position']), 'screens' => $a->screens ?? [],
-            'video' => $help->url($a->video_path), 'poster' => $help->url($a->poster_path), 'url' => 'https://'.config('wurk.domains.help').'/a/'.$a->slug],
+            'video' => $help->url($a->video_path), 'poster' => $help->url($a->poster_path), 'url' => 'https://'.config('wurk.domains.help').'/a/'.$a->slug,
+            'captions' => app(Captions::class)->english($a) ?? ''],
             'categories' => HelpCategory::query()->orderBy('position')->get(['id', 'name']), 'screens' => $screens->all()]);
     }
 
@@ -92,7 +94,7 @@ final class HelpAdminController
             'body' => ['required', 'string', 'max:100000'], 'status' => ['required', Rule::in(['draft', 'published'])], 'position' => ['nullable', 'integer', 'min:0', 'max:1000'],
             'screens' => ['nullable', 'array', 'max:20'], 'screens.*' => ['string', 'max:120', 'regex:/^[A-Za-z]+::[A-Za-z\/]+$/'],
             'video' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm', 'max:40960'], 'poster' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'remove_video' => ['boolean'],
+            'remove_video' => ['boolean'], 'captions' => ['nullable', 'string', 'max:20000'],
         ], ['video.max' => 'Keep videos under 40 MB (about 30 seconds).', 'screens.*.regex' => 'Choose screens from the list.']);
         if ($a->slug === null || $a->slug === '') {
             $a->slug = $this->slug(HelpArticle::class, (string) $d['title']);
@@ -112,6 +114,9 @@ final class HelpAdminController
             $a->published_at = now();
         }
         $a->save();
+        if ($request->has('captions')) {
+            app(Captions::class)->setEnglish($a, $a->video_path === null ? null : ($d['captions'] ?? null), (string) Auth::id());
+        }
     }
 
     /** @param class-string<HelpArticle|HelpCategory> $model */

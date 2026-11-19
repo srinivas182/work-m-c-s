@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Wurk\Billing\Models\Invoice;
+use Wurk\Platform\Money\Money;
 
 final class InvoiceMail extends Mailable
 {
@@ -23,7 +24,7 @@ final class InvoiceMail extends Mailable
     {
         return new Content(text: 'billing::mail.invoice', with: [
             'number' => $this->invoice->number,
-            'total' => 'R'.number_format($this->invoice->total_cents / 100, 2, '.', ' '),
+            'total' => Money::zar((int) $this->invoice->total_cents),
         ]);
     }
 

@@ -16,6 +16,11 @@ export interface TestimonialsProps extends Record<string, unknown> {
   /** A link to the business's reviews elsewhere (e.g. its Google listing), never copied in (Sprint 23.2). */
   moreLabel?: string;
   moreHref?: string;
+  /**
+   * The owner confirms these are real words from real customers (25.3). New sections start unconfirmed and show
+   * nothing publicly until confirmed; sections saved before (version 1) were written by their owners and keep showing.
+   */
+  real?: string;
 }
 
 function Stars({ rating }: { rating: number }) {
@@ -39,7 +44,7 @@ function Stars({ rating }: { rating: number }) {
 
 export const Testimonials: BlockDefinition<TestimonialsProps> = {
   type: 'Testimonials',
-  version: 1,
+  version: 2, // 2 (25.3): `real` — the owner confirms the words are real
   label: 'Testimonials',
   description: 'What customers say — one featured, others alongside.',
   fields: {
@@ -68,11 +73,29 @@ export const Testimonials: BlockDefinition<TestimonialsProps> = {
       max: 60,
     },
     moreHref: { kind: 'link', label: 'Reviews link goes to' },
+    real: {
+      kind: 'select',
+      label: 'Are these real words from real customers?',
+      options: [
+        { value: 'yes', label: 'Yes — customers really said these' },
+        { value: 'not-yet', label: 'Not yet (hidden on your website)' },
+      ],
+    },
   },
   isEmpty: (p) => p.items.length === 0 && !p.moreHref,
-  defaults: { heading: 'What our customers say', items: [], moreLabel: '', moreHref: '' },
+  defaults: {
+    heading: 'What our customers say',
+    items: [],
+    moreLabel: '',
+    moreHref: '',
+    real: 'not-yet',
+  },
+  // v1 had no confirmation: those sections were the owner's own words, so they stay shown.
+  upgrade: (props, from) => (from === 1 ? { ...props, real: 'yes' } : props),
   render: (p, site) => {
-    const [featured, ...rest] = p.items;
+    // Only words the owner confirms are real are shown publicly (25.3); the editor shows them with a reminder.
+    const unconfirmed = p.real === 'not-yet' && p.items.length > 0;
+    const [featured, ...rest] = unconfirmed && !site.editing ? [] : p.items;
     const more =
       p.moreHref && p.moreLabel ? (
         <a
@@ -108,6 +131,12 @@ export const Testimonials: BlockDefinition<TestimonialsProps> = {
           <SectionTitle className="font-[family-name:var(--s-font-display)] text-3xl font-bold tracking-[-0.01em] sm:text-4xl">
             {p.heading}
           </SectionTitle>
+          {unconfirmed && (
+            <p className="mt-4 rounded-[var(--s-radius)] border border-dashed border-[var(--s-border)] p-3 text-sm text-[var(--s-fg-muted)]">
+              Hidden on your website until you confirm these are real words from real customers (in
+              this section’s settings).
+            </p>
+          )}
           {/* A lone quote keeps a readable line length instead of spanning the page. */}
           <div
             className={`mt-10 grid gap-6 ${rest.length > 0 ? 'lg:grid-cols-[1.4fr_1fr]' : 'max-w-3xl'}`}

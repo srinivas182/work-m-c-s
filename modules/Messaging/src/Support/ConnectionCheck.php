@@ -17,7 +17,7 @@ use Wurk\Messaging\Models\ProviderSetting;
 final class ConnectionCheck
 {
     /** Channels with a check here; message channels send a real test instead. */
-    public const CHANNELS = ['ai.anthropic', 'ai.openai', 'ai.google', 'payments.paystack', 'meetings.google', 'meetings.zoom', 'places.google'];
+    public const CHANNELS = ['ai.anthropic', 'ai.openai', 'ai.google', 'payments.paystack', 'meetings.google', 'meetings.zoom', 'places.google', 'ussd'];
 
     public function check(string $channel, ProviderSetting $setting): SendResult
     {
@@ -29,6 +29,9 @@ final class ConnectionCheck
                 'ai.google' => $this->keyResult('Google', Http::timeout(15)->withHeaders(['x-goog-api-key' => $c['api_key'] ?? ''])->get('https://generativelanguage.googleapis.com/v1beta/models')),
                 'places.google' => $this->keyResult('Google Places', Http::timeout(15)->withHeaders(['X-Goog-Api-Key' => $c['api_key'] ?? '', 'X-Goog-FieldMask' => 'places.id'])
                     ->post('https://places.googleapis.com/v1/places:searchText', ['textQuery' => 'Johannesburg', 'maxResultCount' => 1])),
+                // WURK's USSD code (25.2): the account's details answer only to the right username and key.
+                'ussd' => $this->keyResult('Africa’s Talking', Http::timeout(15)->withHeaders(['apiKey' => $c['api_key'] ?? '', 'Accept' => 'application/json'])
+                    ->get((($c['username'] ?? '') === 'sandbox' ? 'https://api.sandbox.africastalking.com' : 'https://api.africastalking.com').'/version1/user', ['username' => $c['username'] ?? ''])),
                 'payments.paystack' => $this->keyResult('Paystack', Http::timeout(15)->withToken($c['secret_key'] ?? '')->get('https://api.paystack.co/balance')),
                 // OAuth apps can't be fully tried without someone signing in; a made-up code tells a wrong client
                 // ("invalid_client") from right credentials with a bad code ("invalid_grant").

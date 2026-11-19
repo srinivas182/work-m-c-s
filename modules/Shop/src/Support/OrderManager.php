@@ -11,8 +11,10 @@ use Wurk\Crm\Contracts\PurchaseMade;
 use Wurk\Crm\Contracts\PurchaseRefunded;
 use Wurk\Payments\Contracts\BusinessPayments;
 use Wurk\Payments\Contracts\InPersonPayments;
+use Wurk\Payments\Contracts\Refunds;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
+use Wurk\Platform\Money\Money;
 use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Models\Order;
@@ -118,8 +120,17 @@ final readonly class OrderManager
      * Refund all or part of a paid order. Card orders go through the provider; EFT orders are recorded
      * (the business pays the customer back itself). Stock goes back only if asked.
      */
-    public function refund(Order $order, ?int $cents, bool $restock, string $by, ?string $note = null): void
+    /**
+     * Refund all or part of an order. Card payments go back through the provider; an order paid another way is paid
+     * back as the owner chooses (cash, card machine, QR, EFT, mobile money, or store credit — never forced). Every
+     * refund is recorded with its reason, counted in cash-up when paid at the counter, and the customer is told (25.5).
+     */
+    public function refund(Order $order, ?int $cents, bool $restock, string $by, ?string $note = null, ?string $method = null, string $reason = 'Refund', ?string $byId = null): void
     {
+        $method = $order->payment_method === 'card' ? 'provider' : ($method ?? 'eft');
+        if ($method === 'provider' && $order->payment_method !== 'card') {
+            throw new CheckoutProblem('This order wasn’t paid online. Choose how you paid it back.');
+        }
         $this->refundsStillOpen($order);
         if (in_array($order->status, ['awaiting_payment', 'expired'], true) || ($order->status === 'cancelled' && $order->refunded_cents >= $order->total_cents)) {
             throw new CheckoutProblem('Nothing has been paid to refund.');
@@ -127,7 +138,7 @@ final readonly class OrderManager
         $left = $order->total_cents - $order->refunded_cents;
         $amount = $cents ?? $left;
         if ($amount < 1 || $amount > $left) {
-            throw new CheckoutProblem('Refund up to R'.number_format($left / 100, 2).' (what’s left of this order).');
+            throw new CheckoutProblem('Refund up to '.Money::format((int) $left).' (what’s left of this order).');
         }
         // Decision F: the wallet part back to the wallet, the rest back to the card or account — in proportion to how
         // the order was paid; the last refund returns exactly what's left of each part.
@@ -155,6 +166,13 @@ final readonly class OrderManager
             $this->toWallet($order, $toWallet);
             $this->log($order, 'refunded', $by, $amount, $note ?? ($restock ? 'Stock returned' : null));
         });
+        // Recorded (and counted in cash-up when paid at the counter); the customer is told by the shop's own order message.
+        if ($cash > 0) {
+            app(Refunds::class)->record('order', $order->id, $cash, $method, $reason, $note, $byId, $by, $order->branch_id);
+        }
+        if ($toWallet > 0) {
+            app(Refunds::class)->record('order', $order->id, $toWallet, 'store_credit', $reason, $note, $byId, $by, $order->branch_id);
+        }
         $this->audit->record('shop.order_refunded', 'order', $order->id, ['cents' => $amount, 'by' => $by]);
         event(new PurchaseRefunded('order', $order->id, $amount));
         event(new OrderStatusChanged($this->context->id(), $order->id, 'refunded'));

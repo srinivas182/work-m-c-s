@@ -13,6 +13,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Payments\Contracts\StoreCredit;
+use Wurk\Platform\Money\Money;
 use Wurk\Portal\Support\DataRequest;
 use Wurk\Portal\Support\DataRequests;
 use Wurk\Referrals\Contracts\CustomerRewards;
@@ -47,7 +48,7 @@ final class DataRequestsController
         $d = $request->validate(['amount' => ['required', 'numeric', 'min:0.01'], 'method' => ['required', 'in:eft,cash'], 'reference' => ['nullable', 'string', 'max:80']]);
         $paid = $this->requests->settle($this->request($id), (int) round((float) $d['amount'] * 100), $d['method'] === 'eft' ? 'EFT' : 'Cash', (string) ($d['reference'] ?? ''));
 
-        return back()->with('status', 'Recorded: R'.number_format($paid / 100, 2).' paid to the customer.');
+        return back()->with('status', 'Recorded: '.Money::format((int) $paid).' paid to the customer.');
     }
 
     public function approve(Request $request, string $id): RedirectResponse

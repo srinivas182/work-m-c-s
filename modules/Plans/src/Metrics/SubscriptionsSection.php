@@ -7,6 +7,7 @@ namespace Wurk\Plans\Metrics;
 use Carbon\CarbonImmutable;
 use Wurk\Plans\Models\Package;
 use Wurk\Plans\Support\MrrSnapshots;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Support\ReportPeriod;
 
 /** Admin → Metrics → Subscriptions (Sprint 15.4a): MRR, businesses, churn, LTV, trial conversion — by package and country. */
@@ -21,9 +22,9 @@ final readonly class SubscriptionsSection
         $before = $this->stats($p->previousFrom(), $p->previousTo());
         $names = Package::query()->pluck('name', 'id');
         $byPackage = collect($now['end'])->filter(fn ($r) => $r['mrr_cents'] > 0)->groupBy('package_id')
-            ->map(fn ($g, $pkg) => [(string) ($names[$pkg] ?? 'Unknown'), (string) $g->count(), 'R'.number_format($g->sum('mrr_cents') / 100, 2)])->sortByDesc(fn ($r) => (int) $r[1])->values()->all();
+            ->map(fn ($g, $pkg) => [(string) ($names[$pkg] ?? 'Unknown'), (string) $g->count(), Money::zar((int) ($g->sum('mrr_cents')))])->sortByDesc(fn ($r) => (int) $r[1])->values()->all();
         $byCountry = collect($now['end'])->filter(fn ($r) => $r['mrr_cents'] > 0)->groupBy('country')
-            ->map(fn ($g, $c) => [(string) $c, (string) $g->count(), 'R'.number_format($g->sum('mrr_cents') / 100, 2)])->sortByDesc(fn ($r) => (int) $r[1])->values()->all();
+            ->map(fn ($g, $c) => [(string) $c, (string) $g->count(), Money::zar((int) ($g->sum('mrr_cents')))])->sortByDesc(fn ($r) => (int) $r[1])->values()->all();
         $since = $this->snapshots->since();
         $metric = fn (string $label, string $key, string $format) => ['label' => $label, 'value' => $now[$key], 'previous' => $before[$key], 'format' => $format];
         $highlights = [];

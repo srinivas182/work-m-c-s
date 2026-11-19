@@ -57,6 +57,12 @@ final class Drivers
                     'host' => 'Host (Brevo: smtp-relay.brevo.com)', 'port' => 'Port (587)', 'from_address' => 'From address', 'from_name' => 'From name',
                 ]],
             ],
+            // WURK's USSD code (Reach, 25.2): one code for every business. The gateway posts each step to
+            // /webhooks/ussd/africastalking/{webhook token}; set that address as the code's callback URL.
+            'ussd' => ['africastalking' => ['name' => 'Africa’s Talking', 'fields' => ['username' => ['label' => 'Username', 'secret' => false], 'api_key' => ['label' => 'API key', 'secret' => true]], 'settings' => [
+                'service_code' => 'Service code (e.g. *384*1234#)', 'webhook_token' => 'Webhook token (16+ letters and digits, also in the callback URLs)',
+                'sms_number' => 'SMS booking number or short code (its incoming-messages URL: /webhooks/sms/africastalking/{webhook token})',
+            ]]],
             // How WURK collects its own subscriptions (Billing). WURK's keys for the payment methods businesses offer
             // (PayFast, Yoco, Ozow, Peach) are set in Admin → Payment methods, where they're checked when saved (19.6).
             'payments.paystack' => ['paystack' => ['name' => 'Paystack', 'fields' => ['public_key' => ['label' => 'Public key', 'secret' => false], 'secret_key' => ['label' => 'Secret key', 'secret' => true]], 'settings' => []]],

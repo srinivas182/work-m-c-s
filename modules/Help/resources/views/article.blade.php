@@ -4,7 +4,7 @@
 <article>
 <h1>{{ $article->title }}</h1>
 @if ($video)
-<video controls preload="none" playsinline @if ($poster) poster="{{ $poster }}" @endif aria-label="Video: {{ $article->title }}"><source src="{{ $video }}"></video>
+<video controls preload="none" playsinline @if ($poster) poster="{{ $poster }}" @endif aria-label="Video: {{ $article->title }}"><source src="{{ $video }}">@foreach ($tracks as $t)<track kind="subtitles" srclang="{{ $t['locale'] }}" label="{{ $t['label'] }}" src="{{ $t['url'] }}" @if ($t['locale'] === $lang) default @endif>@endforeach</video>
 @endif
 {!! $html !!}
 </article>

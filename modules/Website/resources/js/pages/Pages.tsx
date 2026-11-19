@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Badge } from '@/design-system/components/badge';
+import { Checkbox } from '@/design-system/components/choice';
 import { Button } from '@/design-system/components/button';
 import {
   Card,
@@ -57,6 +58,7 @@ interface Props {
     href: string;
     confirm: boolean;
   }[];
+  returns?: { template: string; days: number; page_id: string | null };
   design: {
     current: string | null;
     options: { key: string; name: string; description: string | null }[];
@@ -238,6 +240,96 @@ function DesignCard({ base, design }: { base: string; design: NonNullable<Props[
   );
 }
 
+const OFFERS = [
+  { key: 'refund', label: 'A refund' },
+  { key: 'exchange', label: 'An exchange' },
+  { key: 'credit', label: 'Store credit' },
+] as const;
+
+/** The returns policy, written from the country's consumer law and the owner's choices (Sprint 25.5). */
+function ReturnsPolicyCard({
+  base,
+  returns,
+}: {
+  base: string;
+  returns: NonNullable<Props['returns']>;
+}) {
+  const form = useForm<{ offers: string[]; confirmed: boolean }>({
+    offers: ['refund', 'exchange'],
+    confirmed: false,
+  });
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    form.post(`${base.replace(/\/pages$/, '')}/returns-policy`, { preserveScroll: true });
+  };
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{__('Returns policy')}</CardTitle>
+        <CardDescription>
+          {returns.template === 'za-cpa'
+            ? __(
+                'We write it for you, including your customers’ rights under the Consumer Protection Act. You check it and publish it.',
+              )
+            : __('We write it for you from your choices. You check it and publish it.')}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form className="grid gap-4" onSubmit={submit}>
+          <p className="text-fg-muted text-sm">
+            {returns.days > 0
+              ? `${__('Your return window:')} ${returns.days} ${__('days (from Settings → Payments).')}`
+              : __('You don’t take returns for a change of mind (Settings → Payments).')}
+          </p>
+          {returns.days > 0 && (
+            <fieldset className="grid gap-2">
+              <legend className="text-sm font-medium">{__('On a return, you offer')}</legend>
+              {OFFERS.map((o) => (
+                <label key={o.key} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={form.data.offers.includes(o.key)}
+                    onCheckedChange={(on) =>
+                      form.setData(
+                        'offers',
+                        on === true
+                          ? [...form.data.offers, o.key]
+                          : form.data.offers.filter((x) => x !== o.key),
+                      )
+                    }
+                  />
+                  {__(o.label)}
+                </label>
+              ))}
+              {form.errors.offers && (
+                <p role="alert" className="text-danger-11 text-sm">
+                  {form.errors.offers}
+                </p>
+              )}
+            </fieldset>
+          )}
+          <label className="flex items-start gap-2 text-sm">
+            <Checkbox
+              checked={form.data.confirmed}
+              onCheckedChange={(on) => form.setData('confirmed', on === true)}
+            />
+            {__('I’ll read it before publishing. It’s a general template, not legal advice.')}
+          </label>
+          {form.errors.confirmed && (
+            <p role="alert" className="text-danger-11 text-sm">
+              {form.errors.confirmed}
+            </p>
+          )}
+          <div>
+            <Button type="submit" disabled={form.processing}>
+              {returns.page_id ? __('Rewrite my returns policy') : __('Write my returns policy')}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 /** From template to a site the owner is proud of — each step from the site's real state. */
 function LaunchChecklist({
   steps,
@@ -321,7 +413,7 @@ function LaunchChecklist({
   );
 }
 
-export default function Pages({ pages, deleted, base, design, checklist = [] }: Props) {
+export default function Pages({ pages, deleted, base, design, returns, checklist = [] }: Props) {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<PageRow | null>(null);
   const move = (index: number, delta: number) => {
@@ -437,6 +529,7 @@ export default function Pages({ pages, deleted, base, design, checklist = [] }: 
             </ul>
           </CardContent>
         </Card>
+        {returns && <ReturnsPolicyCard base={base} returns={returns} />}
         {design && <DesignCard base={base} design={design} />}
         {deleted.length > 0 && (
           <Card>

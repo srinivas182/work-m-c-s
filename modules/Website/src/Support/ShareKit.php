@@ -15,6 +15,7 @@ use GdImage;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Models\Page;
@@ -317,6 +318,6 @@ final readonly class ShareKit
 
     private static function money(int $cents): string
     {
-        return 'R'.number_format($cents / 100, $cents % 100 === 0 ? 0 : 2, '.', ' ');
+        return Money::short((int) $cents);
     }
 }

@@ -18,6 +18,7 @@ use Wurk\Platform\Contracts\AudienceSegments;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Referrals\Console\ExpireWalletsCommand;
 use Wurk\Referrals\Contracts\CustomerRewards;
@@ -91,7 +92,7 @@ final class ReferralsServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(DashboardTiles::class, function (DashboardTiles $tiles): void {
             $allowed = fn (): bool => app(TenantContext::class)->has() && Gate::allows('referrals.manage')
                 && app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'referrals');
-            $rand = fn (int $c): string => 'R'.number_format($c / 100, 2);
+            $rand = fn (int $c): string => Money::format((int) $c);
             $href = fn (): string => route('tenant.referral-reports', ['tenant' => app(TenantContext::class)->current()->handle()]);
             $tiles->register('referrals.sales', 300, fn () => $allowed() ? ['label' => 'Referral sales (this month)', 'href' => $href(),
                 'value' => $rand(app(ReferralReports::class)->cost(...ReportsController::range('month', app(TenantContext::class)->current()->timezone()))['sales_cents'])] : null);

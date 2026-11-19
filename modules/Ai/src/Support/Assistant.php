@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Wurk\Ai\Support;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Throwable;
 use Wurk\Ai\Contracts\Ai;
 use Wurk\Ai\Contracts\AiUnavailable;
+use Wurk\Ai\Contracts\AskWurk;
 use Wurk\Ai\Models\AssistantAction;
 use Wurk\Ai\Models\AssistantQuestion;
 use Wurk\Audit\Contracts\AuditLog;
@@ -21,6 +23,7 @@ use Wurk\Platform\Contracts\AssistantReadTool;
 use Wurk\Platform\Contracts\AssistantRefused;
 use Wurk\Platform\Contracts\AssistantTool;
 use Wurk\Platform\Contracts\AssistantTools;
+use Wurk\Platform\I18n\Locales;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -32,7 +35,7 @@ use Wurk\Tenancy\Contracts\TenantContext;
  * Privacy: only the question, matching help articles and the tool's totals go to the AI provider; tools leave out
  * customers' personal details.
  */
-final readonly class Assistant
+final readonly class Assistant implements AskWurk
 {
     /** A proposed change must be confirmed within this many minutes (the data may have moved on since). */
     public const CONFIRM_WITHIN_MINUTES = 30;
@@ -73,7 +76,7 @@ final readonly class Assistant
     /**
      * @return array<string, mixed> status: answered | quote (needs an OK to spend credits) | refused | failed
      */
-    public function ask(Authenticatable $user, string $question, string $screen = '', bool $acceptCharge = false): array
+    public function ask(Authenticatable $user, string $question, string $screen = '', bool $acceptCharge = false, string $channel = 'app', ?string $language = null): array
     {
         $s = $this->settings();
         if (! $s['enabled']) {
@@ -103,14 +106,15 @@ final readonly class Assistant
             }
         }
 
-        $q = AssistantQuestion::query()->create(['user_id' => $by, 'question' => mb_substr(trim($question), 0, 500), 'free' => ! $paid, 'status' => 'failed', 'created_at' => now()]);
+        $q = AssistantQuestion::query()->create(['user_id' => $by, 'channel' => $channel, 'question' => mb_substr(trim($question), 0, 500), 'free' => ! $paid, 'status' => 'failed',
+            'created_at' => now()]);
         $chargeKey = 'assistant:'.$q->id;
         if ($paid) {
             $this->wallet->charge('ai.assistant', $chargeKey, 'Ask WURK: a question', $by);
             $q->charged_milli = (int) $price;
         }
         try {
-            $result = $this->answer($user, $q, $screen);
+            $result = $this->answer($user, $q, $screen, $channel === 'app', $language);
         } catch (Throwable $e) {
             if ($paid) {
                 $this->wallet->refund($chargeKey, 'Refund: Ask WURK couldn’t answer');
@@ -126,6 +130,30 @@ final readonly class Assistant
 
         return ['status' => 'answered', 'id' => $q->id, 'question' => $q->question, 'answer' => $result['answer'], 'sources' => $result['sources'],
             'action' => $result['action'], 'free' => ! $paid, 'usage' => $this->usage()];
+    }
+
+    public function helpLine(string $identityId, string $question, string $language, bool $acceptCharge = false): array
+    {
+        $r = $this->ask(new GenericUser(['id' => $identityId]), $question, 'WhatsApp help line', $acceptCharge, 'whatsapp', $language);
+        $out = ['status' => (string) $r['status']];
+        if (isset($r['answer'])) {
+            $out['answer'] = (string) $r['answer'];
+            $out['sources'] = array_values(array_map(fn (array $s) => ['title' => (string) $s['title'], 'url' => (string) $s['url']], (array) ($r['sources'] ?? [])));
+        }
+        if (isset($r['credits'])) {
+            $out['credits'] = (float) $r['credits'];
+        }
+        if (isset($r['message'])) {
+            $out['message'] = (string) $r['message'];
+        }
+
+        return $out;
+    }
+
+    public function helpLineConversation(string $identityId, int $limit = 10): array
+    {
+        return array_values(AssistantQuestion::query()->where('user_id', $identityId)->where('channel', 'whatsapp')->orderByDesc('created_at')->limit($limit)->get()
+            ->reverse()->map(fn (AssistantQuestion $q) => ['question' => $q->question, 'answer' => $q->answer, 'at' => (string) $q->created_at?->toIso8601String()])->all());
     }
 
     /**
@@ -217,11 +245,17 @@ final readonly class Assistant
     /**
      * @return array{answer: string, sources: list<array{title: string, url: string}>, tool: string|null, action: array<string, mixed>|null}
      */
-    private function answer(Authenticatable $user, AssistantQuestion $q, string $screen): array
+    private function answer(Authenticatable $user, AssistantQuestion $q, string $screen, bool $withTools = true, ?string $language = null): array
     {
-        $tools = $this->toolsFor($user);
+        $tools = $withTools ? $this->toolsFor($user) : []; // the help line: the help centre only, never figures or changes
         $articles = $this->help->relevant($q->question, 3);
-        $system = $this->system($tools);
+        if ($articles === [] && $language !== null && $language !== 'en') {
+            // The help centre is written in English: search it with the question in English words (25.6).
+            $words = trim(mb_substr($this->ai->run('assistant', 'Translate the question into a few plain English search words for a help centre. Reply with the words only.',
+                $q->question, 40, $this->context->id()), 0, 120));
+            $articles = $words === '' ? [] : $this->help->relevant($words, 3);
+        }
+        $system = $this->system($tools, $language);
         $prompt = $this->prompt($q, $screen, $articles);
         $reply = $this->parse($this->ai->run('assistant', $system, $prompt, 1200, $this->context->id()));
 
@@ -284,8 +318,9 @@ final readonly class Assistant
     }
 
     /** @param array<string, AssistantTool> $tools */
-    private function system(array $tools): string
+    private function system(array $tools, ?string $language = null): string
     {
+        $lang = Locales::SUPPORTED[(string) $language][0] ?? 'English';
         $tenant = $this->context->current();
         $now = CarbonImmutable::now($tenant->timezone());
         $list = [];
@@ -296,7 +331,7 @@ final readonly class Assistant
 
         return 'You are "Ask WURK", the assistant inside WURK, the back office of the business "'.$tenant->displayName().'". '
             .'Today is '.$now->format('l j F Y').", {$now->format('H:i')} ({$tenant->timezone()}).\n"
-            ."Answer in plain, friendly English, briefly (about 120 words at most).\n"
+            ."Answer in plain, friendly {$lang}, briefly (about 120 words at most)".($lang !== 'English' ? ', whatever language the help articles are in' : '').".\n"
             ."For how-to questions, answer only from the HELP ARTICLES given and list the slugs you used in \"articles\".\n"
             ."For questions about this business's own figures, use a tool that looks up data — never guess or invent numbers.\n"
             .'To change something, choose the tool that makes that change and fill in its parameters. The person sees exactly what will change and confirms it '

@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Platform\Contracts\AssistantActionTool;
 use Wurk\Platform\Contracts\AssistantRefused;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -58,11 +59,11 @@ final readonly class CreateCouponTool implements AssistantActionTool
     public function preview(array $params): array
     {
         $c = $this->check($params);
-        $off = $c['kind'] === 'percent' ? $this->num($c['value']).'% off' : 'R'.number_format($c['value'], 2).' off';
+        $off = $c['kind'] === 'percent' ? $this->num($c['value']).'% off' : Money::format((int) round((float) $c['value'] * 100)).' off';
         $changes = ["Code: {$c['code']}", "Discount: {$off}", 'For: '.['shop' => 'the shop', 'bookings' => 'bookings', 'both' => 'the shop and bookings'][$c['applies_to']]];
         $changes[] = 'Valid: '.($c['starts_on'] ?? 'from now').' to '.($c['ends_on'] ?? 'no end date');
         if ($c['min_spend'] > 0) {
-            $changes[] = 'Minimum spend: R'.number_format($c['min_spend'], 2);
+            $changes[] = 'Minimum spend: '.Money::format((int) round((float) $c['min_spend'] * 100));
         }
         if ($c['max_uses'] !== null) {
             $changes[] = "Up to {$c['max_uses']} uses";

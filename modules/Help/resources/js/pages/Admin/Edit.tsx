@@ -4,7 +4,7 @@ import { Button } from '@/design-system/components/button';
 import { Card, CardContent } from '@/design-system/components/card';
 import { Checkbox } from '@/design-system/components/choice';
 import { Field } from '@/design-system/components/field';
-import { Input } from '@/design-system/components/input';
+import { Input, Textarea } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
 import { __ } from '@/i18n';
@@ -22,6 +22,8 @@ interface Article {
   video: string | null;
   poster: string | null;
   url: string;
+  /** English subtitles as WebVTT (25.6); other languages are drafted from them in Admin → Languages. */
+  captions: string;
 }
 interface Props {
   article: Article | null;
@@ -42,6 +44,7 @@ export default function Edit({ article, categories, screens }: Props) {
     video: File | null;
     poster: File | null;
     remove_video: boolean;
+    captions: string;
   }>({
     category_id: article?.category_id ?? categories[0]?.id ?? '',
     title: article?.title ?? '',
@@ -53,6 +56,7 @@ export default function Edit({ article, categories, screens }: Props) {
     video: null,
     poster: null,
     remove_video: false,
+    captions: article?.captions ?? '',
   });
   const [find, setFind] = useState('');
   const errors = form.errors as Record<string, string | undefined>;
@@ -175,6 +179,23 @@ export default function Edit({ article, categories, screens }: Props) {
                   />
                   {__('Remove the video')}
                 </label>
+              )}
+              {(article?.video || form.data.video) && (
+                <Field
+                  label={__('English subtitles (WebVTT)')}
+                  hint={__(
+                    'Each line’s time, then its words. Other languages are drafted from these in Admin → Languages and shown once reviewed.',
+                  )}
+                  error={errors.captions}
+                >
+                  <Textarea
+                    rows={8}
+                    className="font-mono text-sm"
+                    placeholder={'WEBVTT\n\n00:00.000 --> 00:03.000\nOpen Bookings, then Services.'}
+                    value={form.data.captions}
+                    onChange={(e) => form.setData('captions', e.target.value)}
+                  />
+                </Field>
               )}
               <fieldset className="grid gap-2">
                 <legend className="font-medium">

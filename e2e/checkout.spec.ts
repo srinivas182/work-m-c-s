@@ -19,9 +19,9 @@ test('a shopper adds a dress to the cart and places an order paid by EFT', async
   await expect(items.getByRole('link', { name: 'Linen summer dress (M)' })).toBeVisible();
   await page.getByLabel('Quantity').fill('2');
   await page.getByLabel('Quantity').dispatchEvent('change');
-  await expect(page.getByText('Total R1798.00 (incl. VAT)')).toBeVisible();
+  await expect(page.getByText('Total R1 798.00 (incl. VAT)')).toBeVisible();
   await page.getByLabel(/^Delivery — R60\.00/).check();
-  await expect(page.getByText('Total R1858.00 (incl. VAT, delivery R60.00)')).toBeVisible();
+  await expect(page.getByText('Total R1 858.00 (incl. VAT, delivery R60.00)')).toBeVisible();
   await page.getByRole('radio', { name: /^Collect/ }).check();
   await page.getByLabel('Your name').fill('Sipho Ndlovu');
   await page.getByLabel('Phone').fill('082 555 0101');

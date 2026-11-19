@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Platform\Contracts\ReceptionistRefused;
+use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 
 /**
@@ -75,18 +76,24 @@ final readonly class ChatBookings
     }
 
     /**
-     * Where the booking was made, for the diary: the website chat, or WhatsApp (21.5).
+     * Where the booking was made, for the diary: the website chat, WhatsApp (21.5), or USSD and SMS (25.2) — for the
+     * last three the phone is the customer's own.
      *
      * @param  array<string, mixed>  $context
      */
     public static function source(array $context): string
     {
-        return ($context['channel'] ?? '') === 'whatsapp' ? 'whatsapp' : 'chat';
+        return match ($context['channel'] ?? '') {
+            'whatsapp' => 'whatsapp',
+            'ussd' => 'ussd', // 25.2: booked from a basic phone, the caller's number given by the network
+            'sms' => 'sms',
+            default => 'chat',
+        };
     }
 
     public function money(?int $cents): ?string
     {
-        return $cents === null ? null : 'R'.number_format($cents / 100, 2, '.', ' ');
+        return $cents === null ? null : Money::format((int) $cents);
     }
 
     public function local(CarbonImmutable|\DateTimeInterface $at): CarbonImmutable

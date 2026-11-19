@@ -28,6 +28,8 @@ use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
+use Wurk\Platform\Events\BadgeChanged;
+use Wurk\Platform\Events\ReviewsChanged;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -48,6 +50,8 @@ use Wurk\Website\Contracts\ProductCatalog;
 use Wurk\Website\Contracts\SiteLaunches;
 use Wurk\Website\Contracts\SiteTemplates;
 use Wurk\Website\Digest\ChatsDigest;
+use Wurk\Website\Listeners\RerenderAllPages;
+use Wurk\Website\Listeners\RerenderReviewPages;
 use Wurk\Website\Listeners\RerenderShopPages;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Models\Page;
@@ -179,6 +183,8 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);
         $this->app->bind(MediaLibrary::class, SiteMediaLibrary::class);
         Event::listen(CatalogChanged::class, RerenderShopPages::class);
+        Event::listen(ReviewsChanged::class, RerenderReviewPages::class); // 25.3b
+        Event::listen(BadgeChanged::class, RerenderAllPages::class); // 25.4
         Event::listen(ContactsBackfillRequested::class, function (): void { // past enquiries → contacts (the 12.1 release step)
             $book = app(ContactBook::class);
             Enquiry::query()->orderBy('id')->chunk(500, function ($rows) use ($book): void {

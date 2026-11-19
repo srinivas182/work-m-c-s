@@ -21,6 +21,7 @@ use Wurk\Tenancy\Contracts\CentralModel;
  * @property Carbon|null $email_verified_at
  * @property string|null $phone
  * @property Carbon|null $phone_verified_at
+ * @property string|null $locale the language they chose in WURK (Sprint 24)
  * @property string|null $password
  * @property string $status
  * @property Carbon|null $last_login_at

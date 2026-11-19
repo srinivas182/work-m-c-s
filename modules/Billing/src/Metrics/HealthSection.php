@@ -7,6 +7,7 @@ namespace Wurk\Billing\Metrics;
 use Carbon\CarbonImmutable;
 use Wurk\Identity\Contracts\TeamActivity;
 use Wurk\Plans\Contracts\SubscriptionHistory;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 
@@ -35,11 +36,11 @@ final readonly class HealthSection
             ],
             'chart' => null,
             'rows' => ['columns' => ['Business', 'Package', 'MRR', 'Last sign-in'], 'data' => array_values($risk->take(20)->map(fn ($r, $id) => [
-                $this->tenants->find((string) $id)?->displayName() ?? 'A business', $names[(string) $r['package_id']] ?? '—', 'R'.number_format($r['mrr_cents'] / 100, 2),
+                $this->tenants->find((string) $id)?->displayName() ?? 'A business', $names[(string) $r['package_id']] ?? '—', Money::zar((int) $r['mrr_cents']),
                 ($seen[$id] ?? null) === null ? 'Never' : CarbonImmutable::parse((string) $seen[$id])->setTimezone('Africa/Johannesburg')->toDateString(),
             ])->all())],
             'extra' => null,
-            'highlights' => $risk->isEmpty() ? [] : [$risk->count().' paying '.($risk->count() === 1 ? 'business hasn’t' : 'businesses haven’t').' signed in for '.self::DAYS.'+ days ('.'R'.number_format($mrr / 100, 2).' MRR) — worth a call.'],
+            'highlights' => $risk->isEmpty() ? [] : [$risk->count().' paying '.($risk->count() === 1 ? 'business hasn’t' : 'businesses haven’t').' signed in for '.self::DAYS.'+ days ('.Money::zar((int) $mrr).' MRR) — worth a call.'],
             'note' => 'As at the end of the period; the 20 with the most MRR are listed.',
         ];
     }

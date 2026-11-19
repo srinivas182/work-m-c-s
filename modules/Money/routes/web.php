@@ -17,6 +17,7 @@ Route::tenant(function (): void {
         Route::post('/invoices/{invoice}/paid', [OwedController::class, 'paid'])->name('invoices.paid');
         Route::put('/invoices/{invoice}/reminders', [OwedController::class, 'reminders'])->name('invoices.reminders');
         Route::post('/invoices/{invoice}/void', [OwedController::class, 'void'])->name('invoices.void');
+        Route::post('/invoices/{invoice}/refund', [OwedController::class, 'refund'])->middleware('throttle:30,1,money-refunds')->name('invoices.refund'); // 25.5
         // Expenses and profit (23.5b).
         Route::get('/expenses', [MoneyBookController::class, 'expenses'])->name('expenses');
         Route::post('/expenses', [MoneyBookController::class, 'addExpense'])->middleware('throttle:60,1,money-expenses')->name('expenses.store');

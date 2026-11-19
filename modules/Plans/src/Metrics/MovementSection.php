@@ -7,6 +7,7 @@ namespace Wurk\Plans\Metrics;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Wurk\Plans\Support\MrrSnapshots;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Support\ReportPeriod;
 
 /**
@@ -21,7 +22,7 @@ final readonly class MovementSection
     public function build(ReportPeriod $p): array
     {
         $m = $this->movement($p->from, $p->to);
-        $line = fn (string $label, int $cents) => [$label, ($cents < 0 ? '−' : '').'R'.number_format(abs($cents) / 100, 2)];
+        $line = fn (string $label, int $cents) => [$label, ($cents < 0 ? '−' : '').Money::zar((int) (abs($cents)))];
 
         return [
             'title' => 'MRR movement',

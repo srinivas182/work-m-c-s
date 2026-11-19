@@ -40,4 +40,6 @@ Route::domain((string) config('wurk.domains.admin'))->middleware(['auth', 'staff
     Route::post('/{locale}/draft', [LanguagesController::class, 'draft'])->where('locale', '[a-z]{2}')->middleware('throttle:5,10,languages-draft')->name('.draft');
     Route::put('/{locale}/offered', [LanguagesController::class, 'toggle'])->where('locale', '[a-z]{2}')->name('.toggle');
     Route::post('/{locale}/glossary', [LanguagesController::class, 'glossary'])->where('locale', '[a-z]{2}')->name('.glossary');
+    Route::post('/{locale}/captions', [LanguagesController::class, 'draftCaptions'])->where('locale', '[a-z]{2}')->middleware('throttle:5,10,languages-captions')->name('.captions');
+    Route::put('/{locale}/captions/{article}', [LanguagesController::class, 'saveCaptions'])->where('locale', '[a-z]{2}')->name('.captions.save');
 });

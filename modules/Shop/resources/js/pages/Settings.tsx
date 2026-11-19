@@ -12,7 +12,7 @@ import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface Settings {
   collection_enabled: boolean;
@@ -101,7 +101,10 @@ export default function ShopSettings({
             )}
             {form.data.delivery_enabled && (
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={__('Delivery fee (R)')} error={errors.delivery_fee_cents}>
+                <Field
+                  label={__('Delivery fee (:currency)', { currency: currencySymbol() })}
+                  error={errors.delivery_fee_cents}
+                >
                   <Input
                     type="number"
                     min={0}

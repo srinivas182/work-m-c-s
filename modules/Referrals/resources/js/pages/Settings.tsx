@@ -7,7 +7,7 @@ import { Field } from '@/design-system/components/field';
 import { Input } from '@/design-system/components/input';
 import { PageHeader } from '@/design-system/components/feedback';
 import AppShell from '@/layouts/AppShell';
-import { __ } from '@/i18n';
+import { __, currencySymbol } from '@/i18n';
 
 interface Rules {
   enabled: boolean;
@@ -286,7 +286,10 @@ function WalletRules({ wallet, base }: { wallet: Wallet; base: string }) {
             {__('Customers can ask for their rewards to be paid out')}
           </label>
           {form.data.payouts_allowed && (
-            <Field label={__('Smallest payout (R)')} error={errors.min_payout_cents}>
+            <Field
+              label={__('Smallest payout (:currency)', { currency: currencySymbol() })}
+              error={errors.min_payout_cents}
+            >
               <Input
                 type="number"
                 inputMode="decimal"
