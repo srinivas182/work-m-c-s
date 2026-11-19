@@ -39,7 +39,13 @@ interface Settings {
   target_margin_pct: number;
   caps: { tenant_daily_requests: number; provider_monthly_usd: Record<string, number | null> };
   retirements?: Record<string, string | null>;
-  assistant: { enabled: boolean; free_questions: number; monthly_cap: number };
+  assistant: {
+    enabled: boolean;
+    free_questions: number;
+    monthly_cap: number;
+    /** 26.1: instructions on WhatsApp, per business per day */
+    whatsapp_daily_cap?: number;
+  };
   sales: { enabled: boolean; greeting: string; monthly_cap: number };
   speech: Step;
   speech_fallback: Step[];
@@ -540,6 +546,22 @@ export default function AiAdmin({
                   form.setData('assistant', {
                     ...form.data.assistant,
                     monthly_cap: Number(e.target.value) || 0,
+                  })
+                }
+              />
+            </Field>
+            <Field
+              label={__('Most instructions on WhatsApp a day (per business)')}
+              hint={__('Owners’ instructions on WhatsApp use the AI receptionist’s price.')}
+              error={form.errors['assistant.whatsapp_daily_cap']}
+            >
+              <Input
+                inputMode="numeric"
+                value={String(form.data.assistant.whatsapp_daily_cap ?? 50)}
+                onChange={(e) =>
+                  form.setData('assistant', {
+                    ...form.data.assistant,
+                    whatsapp_daily_cap: Number(e.target.value) || 0,
                   })
                 }
               />

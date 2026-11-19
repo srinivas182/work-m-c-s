@@ -242,7 +242,7 @@ it('is in every back office header unless WURK switches it off — and WURK sets
     $settings = [...AiSettings::DEFAULTS, 'assistant' => ['enabled' => false, 'free_questions' => 20, 'monthly_cap' => 10]];
     $this->actingAs($staff)->put($this->admin('/settings/ai'), $settings)->assertSessionHasErrors(['assistant.monthly_cap' => 'The most questions a month can’t be fewer than the free ones.']);
     $this->actingAs($staff)->put($this->admin('/settings/ai'), [...$settings, 'assistant' => ['enabled' => false, 'free_questions' => 20, 'monthly_cap' => 200]])->assertSessionHasNoErrors();
-    expect(app(AiSettings::class)->all()['assistant'])->toBe(['enabled' => false, 'free_questions' => 20, 'monthly_cap' => 200]);
+    expect(app(AiSettings::class)->all()['assistant'])->toBe(['enabled' => false, 'free_questions' => 20, 'monthly_cap' => 200, 'whatsapp_daily_cap' => 50]);
 
     $this->actingAs($this->owner)->get($this->app('/glow-salon/coupons'))->assertInertia(fn (Assert $page) => $page->where('assistant', null));
     $this->actingAs($this->owner)->postJson($this->base.'/ask', ['question' => 'hello there'])->assertStatus(422)->assertJson(['status' => 'refused']);

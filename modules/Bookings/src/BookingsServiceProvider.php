@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Bookings\Assistant\AddBookingHoursTool;
+use Wurk\Bookings\Assistant\BookCustomerTool;
 use Wurk\Bookings\Assistant\BookingsOnDayTool;
+use Wurk\Bookings\Assistant\MoveBookingForOwnerTool;
 use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
 use Wurk\Bookings\Console\SendRemindersCommand;
@@ -164,6 +166,8 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
             $t->register(BookingsOnDayTool::class);
             $t->register(AddBookingHoursTool::class);
+            $t->register(BookCustomerTool::class);      // 26.1: instructions on WhatsApp too
+            $t->register(MoveBookingForOwnerTool::class);
         });
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
             $r->register('bookings', 200, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))

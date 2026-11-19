@@ -28,6 +28,9 @@ use Wurk\Tenancy\Contracts\TenantDirectory;
  * - "PERSON" hands over to WURK support: a ticket with the conversation attached; support's replies come back on
  *   WhatsApp (and by email).
  * - Someone in more than one business is answered for the first business they joined.
+ * - 26.1: someone allowed to give WURK instructions (owners; others when the owner adds the permission) gets the
+ *   whole Ask WURK, acting as themselves: questions about the business answered, changes read back and made only
+ *   after they tap Yes. Charged at the AI receptionist's rate, up to the daily cap.
  */
 final readonly class HelpLine
 {
@@ -35,6 +38,8 @@ final readonly class HelpLine
     public const PERSON = ['person', 'human', 'agent', 'support', 'talk to a person', 'umuntu', 'mntu', 'persoon', 'motho', 'mtu', 'personne', 'pessoa', 'mutum', 'eniyan'];
 
     public const YES = ['yes', 'y', 'yebo', 'ewe', 'ja', 'ee', 'ndiyo', 'oui', 'sim', 'eh', 'bẹẹni'];
+
+    public const NO = ['no', 'n', 'cha', 'hayi', 'nee', 'aowa', 'hapana', 'non', 'não', "a'a", 'rara'];
 
     /** A voice note longer than this (about three minutes) isn't transcribed. */
     public const VOICE_MAX_BYTES = 3_000_000;
@@ -46,7 +51,7 @@ final readonly class HelpLine
         private Ai $ai, private WurkWhatsApp $whatsapp, private Tickets $tickets, private AuditLog $audit) {}
 
     /** Answers one message to the help line. `$from` is digits only. */
-    public function handle(string $from, string $text, ?string $mediaId, ?string $mediaMime): void
+    public function handle(string $from, string $text, ?string $mediaId, ?string $mediaMime, ?string $buttonId = null): void
     {
         $caller = $this->accounts->byVerifiedPhone($from);
         $tenant = $caller === null ? null : ($this->tenants->activeAmong($caller['tenants'])[0] ?? null);
@@ -62,7 +67,26 @@ final readonly class HelpLine
         $lang = Locales::supported((string) $caller['locale']) ? (string) $caller['locale'] : 'en';
         $say = fn (string $line, array $replace = []) => (string) __($line, $replace, $lang);
 
-        $this->context->run($tenant, function () use ($caller, $from, $text, $mediaId, $mediaMime, $lang, $say): void {
+        $this->context->run($tenant, function () use ($caller, $from, $text, $mediaId, $mediaMime, $buttonId, $lang, $say): void {
+            // "Yes" or "No" to a change WURK read back (26.1): the button, or the word while one is waiting.
+            $waiting = Cache::get('helpline:action:'.$from);
+            $tapped = preg_match('/^act:(yes|no):([0-9A-Za-z]{26})$/', (string) $buttonId, $b) === 1 ? [$b[1], $b[2]] : null;
+            $typed = mb_strtolower(trim($text, " \t\n\r\0\x0B.!?"));
+            if ($tapped === null && is_string($waiting) && (in_array($typed, self::YES, true) || in_array($typed, self::NO, true))) {
+                $tapped = [in_array($typed, self::YES, true) ? 'yes' : 'no', $waiting];
+            }
+            if ($tapped !== null) {
+                Cache::forget('helpline:action:'.$from);
+                if ($tapped[0] === 'yes') {
+                    $done = $this->ask->confirmFromWhatsApp($caller['id'], $tapped[1]);
+                    $this->whatsapp->sendText($from, $done['status'] === 'applied' ? '✅ '.$done['message'] : $done['message']);
+                } else {
+                    $this->ask->cancelFromWhatsApp($caller['id'], $tapped[1]);
+                    $this->whatsapp->sendText($from, $say('OK — nothing was changed.'));
+                }
+
+                return;
+            }
             $question = trim($text);
             if ($question === '' && $mediaId !== null) {
                 $question = $this->listen($mediaId, (string) $mediaMime);
@@ -89,6 +113,11 @@ final readonly class HelpLine
 
                 return;
             }
+            if (! is_string($pending) && $this->ask->canInstruct($caller['id'])) {
+                $this->instruct($caller['id'], $from, $question, $lang, $say);
+
+                return;
+            }
             $accept = false;
             if (is_string($pending) && in_array($word, self::YES, true)) {
                 [$question, $accept] = [$pending, true];
@@ -110,6 +139,37 @@ final readonly class HelpLine
             };
             $this->whatsapp->sendText($from, $reply);
             $this->audit->record('support.help_line', 'help_line', $this->context->id(), ['status' => $result['status'], 'voice' => $mediaId !== null, 'by' => $caller['id']]);
+        });
+    }
+
+    /**
+     * An owner's instruction (26.1): answered straight away when it's a question; a change is read back with Yes and
+     * No buttons, and made only after Yes (within the assistant's confirmation window).
+     *
+     * @param  callable(string, array<string, string>=): string  $say
+     */
+    private function instruct(string $identityId, string $from, string $message, string $lang, callable $say): void
+    {
+        try {
+            $r = $this->ask->instruct($identityId, $message, $lang);
+        } catch (Throwable) {
+            $r = ['status' => 'failed'];
+        }
+        if ($r['status'] === 'proposed' && isset($r['action'])) {
+            $a = $r['action'];
+            Cache::put('helpline:action:'.$from, $a['id'], now()->addMinutes(30));
+            $body = trim((string) ($r['answer'] ?? ''))."\n\n*".$a['summary']."*\n".implode("\n", array_map(fn (string $c) => '• '.$c, $a['changes']))
+                ."\n\n".$say('Tap Yes to do it.');
+            if (! $this->whatsapp->sendButtons($from, trim($body), ['act:yes:'.$a['id'] => $say('Yes, do it'), 'act:no:'.$a['id'] => $say('No, cancel')])) {
+                $this->whatsapp->sendText($from, trim($body)."\n".$say('Reply YES to do it, or NO.'));
+            }
+
+            return;
+        }
+        $this->whatsapp->sendText($from, match ($r['status']) {
+            'answered' => trim((string) ($r['answer'] ?? '')).(($url = $r['sources'][0]['url'] ?? null) !== null ? "\n\n".$say('Read more: :url', ['url' => $url]) : ''),
+            'refused' => trim((string) ($r['message'] ?? '')),
+            default => $say('Sorry, I can’t do that right now. Try again in a minute, or use the app.'),
         });
     }
 

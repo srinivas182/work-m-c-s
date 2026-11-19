@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Auth;
 use Throwable;
 use Wurk\Ai\Contracts\Ai;
 use Wurk\Ai\Contracts\AiUnavailable;
@@ -52,12 +53,16 @@ final readonly class Assistant implements AskWurk
         private Gate $gate,
     ) {}
 
-    /** @return array{enabled: bool, free: int, cap: int} */
+    /** The permission to give WURK instructions on WhatsApp (26.1). Owners have it; other roles when the owner adds it. */
+    public const WHATSAPP_PERMISSION = 'assistant.whatsapp';
+
+    /** @return array{enabled: bool, free: int, cap: int, whatsapp_daily: int} */
     public function settings(): array
     {
         $s = (array) ($this->settings->all()['assistant'] ?? []);
 
-        return ['enabled' => (bool) ($s['enabled'] ?? true), 'free' => max(0, (int) ($s['free_questions'] ?? 50)), 'cap' => max(0, (int) ($s['monthly_cap'] ?? 500))];
+        return ['enabled' => (bool) ($s['enabled'] ?? true), 'free' => max(0, (int) ($s['free_questions'] ?? 50)), 'cap' => max(0, (int) ($s['monthly_cap'] ?? 500)),
+            'whatsapp_daily' => max(0, (int) ($s['whatsapp_daily_cap'] ?? 50))];
     }
 
     /** @return array{used: int, free: int, free_left: int, cap: int, credits_each: float|null, balance: float} */
@@ -81,6 +86,9 @@ final readonly class Assistant implements AskWurk
         $s = $this->settings();
         if (! $s['enabled']) {
             return ['status' => 'refused', 'message' => 'Ask WURK is switched off right now. The help centre is still here.'];
+        }
+        if ($channel === 'owner') {
+            return $this->instructed($user, $question, $language);
         }
         $usage = $this->usage();
         if ($usage['used'] >= $s['cap']) {
@@ -114,7 +122,7 @@ final readonly class Assistant implements AskWurk
             $q->charged_milli = (int) $price;
         }
         try {
-            $result = $this->answer($user, $q, $screen, $channel === 'app', $language);
+            $result = $this->answer($user, $q, $screen, $channel !== 'whatsapp', $language);
         } catch (Throwable $e) {
             if ($paid) {
                 $this->wallet->refund($chargeKey, 'Refund: Ask WURK couldn’t answer');
@@ -130,6 +138,128 @@ final readonly class Assistant implements AskWurk
 
         return ['status' => 'answered', 'id' => $q->id, 'question' => $q->question, 'answer' => $result['answer'], 'sources' => $result['sources'],
             'action' => $result['action'], 'free' => ! $paid, 'usage' => $this->usage()];
+    }
+
+    /**
+     * An instruction or question on WhatsApp from someone allowed to give WURK instructions (26.1). It acts as that
+     * person, with their permissions; a change is only proposed — read back, and made after they tap Yes. Charged at
+     * the AI receptionist's rate, at most the daily cap per business.
+     *
+     * @return array<string, mixed>
+     */
+    private function instructed(Authenticatable $user, string $question, ?string $language): array
+    {
+        $cap = $this->settings()['whatsapp_daily'];
+        $today = AssistantQuestion::query()->where('channel', 'owner')->where('status', 'answered')->where('created_at', '>=', CarbonImmutable::now($this->context->current()->timezone())->startOfDay())->count();
+        if ($today >= $cap) {
+            return ['status' => 'refused', 'message' => "WURK has done {$cap} things for your business on WhatsApp today — the most for one day. It starts again tomorrow, and the app still works."];
+        }
+        try {
+            $price = $this->wallet->rateFor('ai.receptionist');
+        } catch (\InvalidArgumentException) {
+            $price = null;
+        }
+        $by = (string) $user->getAuthIdentifier();
+        $s = $this->settings();
+        $freeLeft = $this->usedThisMonth() < $s['free'];
+        $canPay = $price !== null && (int) $this->wallet->balance()['balance_milli'] >= $price;
+        if (! $canPay && ! $freeLeft) {
+            return ['status' => 'refused', 'message' => 'Instructions on WhatsApp use AI credits, and your business has run out. Top up in the app (Credits) to keep going.'];
+        }
+        $q = AssistantQuestion::query()->create(['user_id' => $by, 'channel' => 'owner', 'question' => mb_substr(trim($question), 0, 500), 'free' => true, 'status' => 'failed', 'created_at' => now()]);
+        try {
+            // Without credits, only the help centre (a free question); with credits, the business's tools too.
+            $result = $this->answer($user, $q, 'WhatsApp — the person is not looking at a screen; keep the answer short', $canPay, $language);
+        } catch (AiUnavailable $e) {
+            return ['status' => 'failed', 'message' => $e->getMessage()];
+        }
+        // Using the business's data or proposing a change is an instruction, at the receptionist's rate; a plain help
+        // answer is one of the month's free Ask WURK questions while they last (25.6).
+        $paid = $result['tool'] !== null || ! $freeLeft;
+        if ($paid && $price !== null) {
+            $this->wallet->charge('ai.receptionist', 'assistant:'.$q->id, 'Ask WURK on WhatsApp: an instruction', $by);
+        }
+        $q->fill(['answer' => $result['answer'], 'sources' => $result['sources'], 'tool' => $result['tool'], 'status' => 'answered', 'free' => ! $paid,
+            'channel' => $paid ? 'owner' : 'whatsapp', 'charged_milli' => $paid ? (int) $price : 0])->save();
+        $this->audit->record('assistant.whatsapp_instruction', 'assistant_question', $q->id, ['by' => $by, 'tool' => $result['tool'], 'proposed' => $result['action'] !== null]);
+
+        return ['status' => $result['action'] !== null ? 'proposed' : 'answered', 'answer' => $result['answer'], 'sources' => $result['sources'], 'action' => $result['action']];
+    }
+
+    public function canInstruct(string $identityId): bool
+    {
+        return $this->settings()['enabled'] && $this->gate->forUser($this->person($identityId))->allows(self::WHATSAPP_PERMISSION);
+    }
+
+    public function instruct(string $identityId, string $message, string $language): array
+    {
+        return $this->asPerson($identityId, function (Authenticatable $user) use ($message, $language): array {
+            $r = $this->ask($user, $message, '', false, 'owner', $language);
+            $out = ['status' => (string) $r['status']];
+            foreach (['answer', 'message'] as $k) {
+                if (isset($r[$k])) {
+                    $out[$k] = (string) $r[$k];
+                }
+            }
+            if (isset($r['sources'])) {
+                $out['sources'] = array_values(array_map(fn (array $s) => ['title' => (string) $s['title'], 'url' => (string) $s['url']], (array) $r['sources']));
+            }
+            if (($r['action'] ?? null) !== null) {
+                $out['action'] = ['id' => (string) $r['action']['id'], 'summary' => (string) $r['action']['summary'], 'changes' => array_values(array_map('strval', (array) $r['action']['changes']))];
+            }
+
+            return $out;
+        });
+    }
+
+    public function confirmFromWhatsApp(string $identityId, string $actionId): array
+    {
+        return $this->asPerson($identityId, function (Authenticatable $user) use ($actionId): array {
+            try {
+                $r = $this->confirm($user, $actionId);
+                $link = $r['action']['link'] ?? null;
+
+                return ['status' => 'applied', 'message' => (string) $r['message'].($link ? "\n".$link : '')];
+            } catch (AssistantRefused $e) {
+                return ['status' => 'refused', 'message' => $e->getMessage()];
+            }
+        });
+    }
+
+    public function cancelFromWhatsApp(string $identityId, string $actionId): void
+    {
+        $this->cancel($this->person($identityId), $actionId);
+    }
+
+    /** The person themselves (the tools check their permissions and record who did it). */
+    private function person(string $identityId): Authenticatable
+    {
+        return Auth::getProvider()->retrieveById($identityId) ?? new GenericUser(['id' => $identityId]);
+    }
+
+    /**
+     * Runs as that person, as if they were signed in (for tools that note who made a change).
+     *
+     * @template T
+     *
+     * @param  callable(Authenticatable): T  $fn
+     * @return T
+     */
+    private function asPerson(string $identityId, callable $fn): mixed
+    {
+        $guard = Auth::guard();
+        $before = $guard->hasUser() ? $guard->user() : null;
+        $user = $this->person($identityId);
+        $guard->setUser($user);
+        try {
+            return $fn($user);
+        } finally {
+            if ($before !== null) {
+                $guard->setUser($before);
+            } elseif (method_exists($guard, 'forgetUser')) {
+                $guard->forgetUser();
+            }
+        }
     }
 
     public function helpLine(string $identityId, string $question, string $language, bool $acceptCharge = false): array
@@ -152,7 +282,7 @@ final readonly class Assistant implements AskWurk
 
     public function helpLineConversation(string $identityId, int $limit = 10): array
     {
-        return array_values(AssistantQuestion::query()->where('user_id', $identityId)->where('channel', 'whatsapp')->orderByDesc('created_at')->limit($limit)->get()
+        return array_values(AssistantQuestion::query()->where('user_id', $identityId)->whereIn('channel', ['whatsapp', 'owner'])->orderByDesc('created_at')->limit($limit)->get()
             ->reverse()->map(fn (AssistantQuestion $q) => ['question' => $q->question, 'answer' => $q->answer, 'at' => (string) $q->created_at?->toIso8601String()])->all());
     }
 
@@ -233,6 +363,8 @@ final readonly class Assistant implements AskWurk
             'add_booking_hours' => ['Add Saturday 9:00–13:00 to my booking hours'],
             'create_coupon' => ['Create a 10% coupon for December'],
             'draft_campaign' => ['Draft a win-back email for customers we haven’t seen in a while'],
+            'book_customer' => ['Book Thandi for braids on Saturday at 10'],
+            'mark_order_paid' => ['Mark order 1042 paid cash'],
         ];
         $out = [];
         foreach (array_keys($this->toolsFor($user)) as $name) {
@@ -394,7 +526,7 @@ final readonly class Assistant implements AskWurk
 
     private function usedThisMonth(): int
     {
-        return AssistantQuestion::query()->where('status', 'answered')->where('created_at', '>=', now()->startOfMonth())->count();
+        return AssistantQuestion::query()->where('status', 'answered')->where('channel', '!=', 'owner')->where('created_at', '>=', now()->startOfMonth())->count(); // instructions on WhatsApp are paid apart (26.1)
     }
 
     /** The rate card's price for one question here, or null if WURK hasn't set one for this country. */

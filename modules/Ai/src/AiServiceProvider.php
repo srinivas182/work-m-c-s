@@ -56,6 +56,7 @@ final class AiServiceProvider extends ModuleServiceProvider
             ['key' => 'ai.manage', 'label' => 'Manage WURK AI (providers’ models, prices, margin, caps)', 'scope' => 'platform'],
             ['key' => 'languages.manage', 'label' => 'Languages: draft with WURK AI, offer or withdraw a language, glossary', 'scope' => 'platform'],
             ['key' => 'languages.review', 'label' => 'Languages: review and correct translations', 'scope' => 'platform'],
+            ['key' => 'assistant.whatsapp', 'label' => 'Give WURK instructions on WhatsApp (as themselves, confirmed with Yes)'], // 26.1
         ];
     }
 

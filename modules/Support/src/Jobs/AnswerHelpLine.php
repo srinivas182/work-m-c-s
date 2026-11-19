@@ -21,10 +21,11 @@ final class AnswerHelpLine implements ShouldQueue
 
     public int $timeout = 120;
 
-    public function __construct(public readonly string $from, public readonly string $text, public readonly ?string $mediaId, public readonly ?string $mediaMime) {}
+    public function __construct(public readonly string $from, public readonly string $text, public readonly ?string $mediaId, public readonly ?string $mediaMime,
+        public readonly ?string $buttonId = null) {}
 
     public function handle(HelpLine $helpLine): void
     {
-        $helpLine->handle($this->from, $this->text, $this->mediaId, $this->mediaMime);
+        $helpLine->handle($this->from, $this->text, $this->mediaId, $this->mediaMime, $this->buttonId);
     }
 }

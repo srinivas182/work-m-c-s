@@ -55,7 +55,7 @@ final class SupportServiceProvider extends ModuleServiceProvider
         // The WhatsApp help line (25.6): anything to WURK's number that isn't STOP or a reply to the evening summary.
         Event::listen(WurkWhatsAppReceived::class, function (WurkWhatsAppReceived $e): void {
             if (! $e->answered && strtoupper(trim($e->text)) !== 'STOP') {
-                AnswerHelpLine::dispatch($e->from, $e->text, $e->mediaId, $e->mediaMime);
+                AnswerHelpLine::dispatch($e->from, $e->text, $e->mediaId, $e->mediaMime, $e->buttonId);
             }
         });
     }
