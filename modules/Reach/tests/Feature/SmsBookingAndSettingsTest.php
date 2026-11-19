@@ -132,3 +132,9 @@ it('shows the business its number, how customers book, and lets the owner switch
     ($this->in)(fn () => app(Team::class)->add($staff->id, 'Lindiwe', 'staff'));
     $this->actingAs($staff)->get($page)->assertNotFound(); // inside a business a refusal is a 404
 });
+
+it('shows a new number’s switches as on before it’s read back (an unset switch has no state to announce)', function () {
+    $other = $this->createTenant('other-salon', name: 'Other Salon');
+    $fresh = app(ReachNumbers::class)->for($other->id);
+    expect($fresh->ussd_on)->toBeTrue()->and($fresh->sms_on)->toBeTrue();
+});

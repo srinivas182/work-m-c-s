@@ -26,6 +26,9 @@ final class ReachNumber extends Model implements CentralModel
 
     protected $fillable = ['tenant_id', 'number', 'ussd_on', 'sms_on', 'sms_keyword'];
 
+    /** The table's defaults, on a new number too (its switches show "on" before it's read back). */
+    protected $attributes = ['ussd_on' => true, 'sms_on' => true];
+
     protected function casts(): array
     {
         return ['ussd_on' => 'boolean', 'sms_on' => 'boolean'];

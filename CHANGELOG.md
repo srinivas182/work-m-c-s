@@ -4,6 +4,74 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.26.0] — 2026-11-19 — Sprint 25: Reach & trust
+
+### Country packs — Sprint 25.1
+- **Each country WURK serves has a pack:**
+  - currency and how money is written;
+  - tax name and rate, with dated rates and levies, each confirmed by HQ;
+  - phone format, week start, languages, payment providers, SMS and USSD providers;
+  - the returns-policy template.
+- **First packs:** South Africa (confirmed and open), Namibia, Botswana, Eswatini, Kenya, Nigeria, Ghana (VAT plus the NHIL and GETFund levies) and Côte d'Ivoire.
+  - Rates outside South Africa come from PwC Tax Summaries and are marked *to confirm*.
+  - A country opens for sign-up only with a confirmed rate in force.
+- **Admin → Countries:** edit a pack, and add, confirm or remove rates. A confirmed rate can't be removed, and a new rate applies from its date, so older invoices keep theirs.
+- **Money in the business's currency everywhere,** the same on the server and in the browser: R1 380.00, KSh1,380.00, 5 000 CFA.
+  - Amounts stay in hundredths for every currency.
+  - Paystack and Flutterwave charge in the business's currency.
+  - Invoices charge the business's country's tax.
+
+### Book from any phone — Sprint 25.2
+- **USSD** (new Reach module): one shared WURK code through Africa's Talking, and a four-digit number per business. Callers book, see, cancel or move their own bookings, and check what they owe.
+  - Same rules as the website.
+  - Screens fit 182 characters, with at most seven choices.
+  - A dropped session can be picked up within 2 minutes.
+  - Each session is charged once in credits; the business can switch USSD off.
+  - Bookings show "Booked by USSD".
+- **SMS booking:** a customer texts BOOK and the business's number (or its own word) to WURK's SMS number. The same menu answers by SMS.
+- **Settings → Bookings by phone:** the business's number, how to dial and text it, switches, the SMS word, this month's use, and printable counter cards.
+
+### Honest reviews — Sprint 25.3
+- **After a visit or a delivered order,** one "How was it?" goes out on WhatsApp (template `wurk_review_request`) or by SMS, 2–26 hours later.
+  - At most once per customer per 90 days, and never after STOP.
+- **No gating:** everyone who answers sees the same thank-you, the same Google review link and the same private word with the owner.
+- **Customers → Reviews:** low unanswered reviews first, replies, and hiding only for a stated reason. Hidden reviews are logged and still counted in the average.
+- **The Reviews section on the business's site:** the average from every review, then the shown ones newest first, with replies. Kept up to date automatically.
+- **Testimonials** show only words the owner confirms are real customers'. Existing sections are carried over as confirmed.
+
+### Verified business — Sprint 25.4
+- **"Verified by WURK":** the owner's phone was confirmed by code, and HQ checked their ID against a selfie in the last two years. Sole traders qualify.
+- **"Registered business"** is added when HQ matches the company number with the registry.
+- **Admin → Verification:** a queue, the documents (every view logged), approve or refuse with a reason.
+- **Documents** are encrypted at rest on the private `trust` disk and deleted 90 days after the decision.
+- **Where the badge shows:** the site footer and invoices. It links to a page that says what was checked, lapses after two years, and never shows for a suspended business.
+
+### Clear refunds — Sprint 25.5
+- **One refunds ledger:** every refund on a booking, shop order, sale or invoice is kept with how it was paid back, the reason, who did it and a note for the customer. The customer is told by SMS, or by email if there's no SMS.
+- **How the money goes back:**
+  - Online payments go back through the provider.
+  - Cash, card machine and QR refunds show in cash-up as money out on the day they're paid.
+  - Store credit is offered, never forced.
+- **Invoices:** refund all or part. The customer's invoice shows the refund, with the VAT inside it reversed in proportion, and profit counts it.
+- **Website → Pages → Returns policy:** written from the business's return window and what it offers.
+  - In South Africa it states the Consumer Protection Act and ECT Act rights.
+  - It stays a draft until published, and the owner confirms it isn't legal advice.
+
+### Help in the owner's language — Sprint 25.6
+- **The WhatsApp help line:** owners message WURK's number from their confirmed mobile. Ask WURK answers from the help centre in their language, with the article's link; voice notes are transcribed.
+  - It never reads figures or makes changes.
+  - It counts toward Ask WURK's free questions, then quotes the credit and waits for YES.
+  - PERSON hands over to support with the conversation. Replies come back on WhatsApp (template `wurk_help_reply` once 24 hours have passed) and by email.
+- **Video subtitles:** English WebVTT is written with each help video. WURK AI drafts each language on the same timings in Admin → Languages, and a reviewer approves them before they're shown. Changed English words send them back for review.
+
+### Release — Sprint 25.7
+- End-to-end tests (desktop and mobile):
+  - a basic phone books by USSD;
+  - a customer answers a review request and the owner sees it;
+  - an owner refunds part of an invoice with a reason;
+  - HQ approves an owner's ID and the badge appears.
+- The data budget no longer counts the block board, which production never serves. First load is about 219 KB, against the 225 KB ceiling.
+
 ## [0.25.0] — 2026-11-19 — Sprint 24: Languages & light on data
 
 ### Fixed
