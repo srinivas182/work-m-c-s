@@ -12,6 +12,7 @@ use Wurk\Payments\Contracts\CouponCustomer;
 use Wurk\Payments\Contracts\Coupons;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
+use Wurk\Platform\Contracts\LoyaltyCards;
 use Wurk\Shipping\Contracts\Couriers;
 use Wurk\Shipping\Contracts\ShippingProblem;
 use Wurk\Shop\Models\Order;
@@ -103,6 +104,13 @@ final readonly class OrderPlacer
                 throw new CheckoutProblem((string) $quote['message']);
             }
             $discount = $quote['discount_cents'] ?? 0;
+            // A full loyalty card (26.5) is used instead when it's worth more: never added to a coupon.
+            $reward = app(LoyaltyCards::class)->offer($customer['phone'] ?? null, $subtotal, 'shop');
+            if ($reward !== null && $reward['discount_cents'] > $discount) {
+                [$quote, $discount, $coupon] = [null, $reward['discount_cents'], null];
+            } else {
+                $reward = null;
+            }
             $order = Order::query()->create([
                 'number' => $settings->next_order_number, 'branch_id' => $branch, 'status' => 'awaiting_payment', 'payment_method' => $method, 'fulfilment' => $fulfilment,
                 'customer_name' => $customer['name'], 'customer_phone' => $customer['phone'], 'customer_email' => $customer['email'] ?? null,
@@ -120,6 +128,9 @@ final readonly class OrderPlacer
             ]);
             if ($quote !== null) {
                 app(Coupons::class)->redeem((string) $quote['coupon_id'], 'order', $order->id, $discount, $customerKey);
+            }
+            if ($reward !== null && ! app(LoyaltyCards::class)->redeem($reward['reward_id'], 'order', $order->id, $discount)) {
+                throw new CheckoutProblem('Your loyalty reward has just been used. Please check out again.');
             }
             foreach ($items as $item) {
                 OrderItem::query()->create(['order_id' => $order->id, ...$item]);
@@ -155,6 +166,7 @@ final readonly class OrderPlacer
         });
         DB::table('shop_holds')->where('order_id', $order->id)->delete();
         app(Coupons::class)->release('order', $order->id); // the order didn't stand: the coupon use is given back
+        app(LoyaltyCards::class)->release('order', $order->id); // and so is a loyalty reward
         if ($order->paid_at === null) {
             app(OrderManager::class)->toWallet($order, (int) $order->wallet_cents); // never paid: the wallet part goes straight back (0 if none)
         }

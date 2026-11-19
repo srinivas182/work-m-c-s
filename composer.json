@@ -72,7 +72,8 @@
             "Wurk\\Reviews\\": "modules/Reviews/src/",
             "Wurk\\Trust\\": "modules/Trust/src/",
             "Wurk\\Push\\": "modules/Push/src/",
-            "Wurk\\Shifts\\": "modules/Shifts/src/"
+            "Wurk\\Shifts\\": "modules/Shifts/src/",
+            "Wurk\\Loyalty\\": "modules/Loyalty/src/"
         }
     },
     "autoload-dev": {
@@ -100,7 +101,8 @@
             "Wurk\\Reviews\\Tests\\": "modules/Reviews/tests/",
             "Wurk\\Trust\\Tests\\": "modules/Trust/tests/",
             "Wurk\\Push\\Tests\\": "modules/Push/tests/",
-            "Wurk\\Shifts\\Tests\\": "modules/Shifts/tests/"
+            "Wurk\\Shifts\\Tests\\": "modules/Shifts/tests/",
+            "Wurk\\Loyalty\\Tests\\": "modules/Loyalty/tests/"
         }
     },
     "scripts": {

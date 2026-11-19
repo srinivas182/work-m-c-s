@@ -20,6 +20,7 @@ Route::tenant(function (): void {
         Route::post('/{booking}/start', [TodayBookingsController::class, 'start'])->name('start');
         Route::post('/{booking}/status', [TodayBookingsController::class, 'status'])->name('status');
         Route::post('/{booking}/paid', [TodayBookingsController::class, 'paid'])->name('paid');
+        Route::post('/{booking}/reward', [TodayBookingsController::class, 'reward'])->name('reward');
     });
     // The calendar: everyone who can see bookings; changes need bookings.manage.
     Route::middleware(['entitled:bookings', 'permission:bookings.view'])->prefix('bookings')->name('tenant.bookings.')->group(function (): void {
