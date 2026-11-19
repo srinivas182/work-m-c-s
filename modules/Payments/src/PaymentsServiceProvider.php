@@ -14,6 +14,7 @@ use Wurk\Payments\Contracts\PlatformPayments;
 use Wurk\Payments\Contracts\Refunds;
 use Wurk\Payments\Contracts\RefundWindow;
 use Wurk\Payments\Contracts\StoreCredit;
+use Wurk\Payments\Models\PaymentAttempt;
 use Wurk\Payments\Support\InPersonLedger;
 use Wurk\Payments\Support\NoCoupons;
 use Wurk\Payments\Support\NoStoreCredit;
@@ -21,7 +22,9 @@ use Wurk\Payments\Support\Payments;
 use Wurk\Payments\Support\RefundLedger;
 use Wurk\Payments\Support\ReturnWindow;
 use Wurk\Payments\Support\WurkPayments;
+use Wurk\Platform\Contracts\PushNotifications;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Money\Money;
 
 final class PaymentsServiceProvider extends ModuleServiceProvider
 {
@@ -56,6 +59,13 @@ final class PaymentsServiceProvider extends ModuleServiceProvider
     protected function bootModule(): void
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'payments');
+        // 26.2: money arriving online buzzes the phones of the people who handle the money.
+        PaymentAttempt::saved(function (PaymentAttempt $a): void {
+            if ($a->status === 'paid' && $a->wasChanged('status')) {
+                app(PushNotifications::class)->notify('payment', 'Payment received: '.Money::format($a->amount_cents),
+                    'Paid online ('.ucfirst($a->provider).') · '.$a->reference, route('tenant.money.owed'), 'money.manage', branchId: $a->branch_id);
+            }
+        });
         // Never one counter per IP across every business: provider notifications all come from the provider's
         // own IPs, so they're limited per business and provider; the hand-off page per business and visitor.
         RateLimiter::for('payments-handoff', fn (Request $r) => Limit::perMinute(60)->by('handoff|'.(string) ($r->route('handle') ?? 'wurk').'|'.$r->ip()));

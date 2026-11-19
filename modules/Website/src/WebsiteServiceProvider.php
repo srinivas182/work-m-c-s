@@ -27,6 +27,7 @@ use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\OwnerDigest;
+use Wurk\Platform\Contracts\PushNotifications;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Events\BadgeChanged;
 use Wurk\Platform\Events\ReviewsChanged;
@@ -55,6 +56,7 @@ use Wurk\Website\Listeners\RerenderReviewPages;
 use Wurk\Website\Listeners\RerenderShopPages;
 use Wurk\Website\Models\Enquiry;
 use Wurk\Website\Models\Page;
+use Wurk\Website\Models\ReceptionistConversation;
 use Wurk\Website\Models\SiteAsset;
 use Wurk\Website\Setup\WebsiteSetupStep;
 use Wurk\Website\Support\Branding;
@@ -160,6 +162,15 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(HealthSignals::class, fn (HealthSignals $s) => $s->register('website', fn (string $t) => $this->app->make(LaunchSignal::class)($t))); // business health (16.5)
         // Website analytics (Sprint 15.2): an order or booking made on the public site is credited to where the visitor came from.
         // WhatsApp conversations in Chats (21.2): the webhook dispatches these inside the business's context.
+        // 26.2: a chat handed to a person buzzes the phones of the people who answer chats.
+        $waiting = function (ReceptionistConversation $c): void {
+            if ($c->status === 'waiting') {
+                app(PushNotifications::class)->notify('chat', 'A chat is waiting for you', trim(($c->name ?: 'A customer').' · '.($c->channel === 'whatsapp' ? 'WhatsApp' : 'Website chat')),
+                    route('tenant.website.chats', ['open' => $c->id]), 'website.edit');
+            }
+        };
+        ReceptionistConversation::created($waiting);
+        ReceptionistConversation::updated(fn (ReceptionistConversation $c) => $c->wasChanged('status') ? $waiting($c) : null);
         Event::listen(WhatsAppReceived::class, fn (WhatsAppReceived $e) => app(WhatsAppChats::class)->received($e));
         Event::listen(WhatsAppStatusChanged::class, fn (WhatsAppStatusChanged $e) => app(WhatsAppChats::class)->status($e));
         Event::listen(WhatsAppSent::class, fn (WhatsAppSent $e) => app(WhatsAppChats::class)->sent($e)); // 21.5
