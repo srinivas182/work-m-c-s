@@ -17,4 +17,23 @@ final class ReachServiceProvider extends ModuleServiceProvider
     {
         $this->app->singleton(ReachNumbers::class);
     }
+
+    public function boot(): void
+    {
+        parent::boot();
+        $this->loadViewsFrom($this->modulePath('resources/views'), 'reach');
+    }
+
+    public function permissions(): array
+    {
+        return [['key' => 'reach.manage', 'label' => 'Bookings by phone: USSD and SMS settings']];
+    }
+
+    /**
+     * @return list<array{label: string, route: string, icon?: string, section?: string, permission?: string, order?: int}>
+     */
+    public function menu(): array
+    {
+        return [['label' => 'Bookings by phone', 'route' => 'tenant.reach.settings', 'icon' => 'phone', 'section' => 'Settings', 'permission' => 'reach.manage', 'order' => 835]];
+    }
 }

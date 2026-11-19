@@ -9,9 +9,11 @@ use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Credits\Contracts\CreditWallet;
 use Wurk\Credits\Contracts\InsufficientCredits;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\ReceptionistRefused;
 use Wurk\Platform\Contracts\ReceptionistTool;
 use Wurk\Platform\Contracts\ReceptionistTools;
+use Wurk\Platform\Money\Money;
 use Wurk\Reach\Models\ReachNumber;
 use Wurk\Reach\Models\UssdSession;
 use Wurk\Tenancy\Contracts\CurrentTenant;
@@ -35,9 +37,13 @@ final class UssdMenu
     public function __construct(private TenantContext $context, private TenantDirectory $tenants, private ReceptionistTools $tools,
         private Entitlements $entitlements, private AuditLog $audit) {}
 
+    /** How this session reached WURK: 'ussd' (charged per session) or 'sms' (each reply SMS is charged as a message). */
+    private string $channel = 'ussd';
+
     /** The caller's latest answer moves the session on; the session is saved with its new state. */
-    public function handle(UssdSession $session, string $input, bool $first): Screen
+    public function handle(UssdSession $session, string $input, bool $first, string $channel = 'ussd'): Screen
     {
+        $this->channel = $channel;
         $state = $session->state;
         $input = trim($input);
         if ($first) {
@@ -52,7 +58,7 @@ final class UssdMenu
             }
             $session->state = $state;
 
-            return Screen::ask("WURK bookings\nEnter the business's number:");
+            return Screen::ask($this->ask());
         }
 
         return $this->step($session, $state, $input);
@@ -65,7 +71,10 @@ final class UssdMenu
         if ($dialled !== '' && ctype_digit($dialled)) {
             return ['step' => 'home', 'number' => $dialled, 'conversation' => 'ussd:'.$session->id];
         }
-        $dropped = UssdSession::query()->where('phone', $session->phone)->where('id', '!=', $session->id)->where('ended', false)->whereNotNull('tenant_id')
+        if ($this->channel !== 'ussd') {
+            return $fresh; // SMS keeps one conversation for 30 minutes instead
+        }
+        $dropped = UssdSession::query()->where('provider', '!=', 'sms')->where('phone', $session->phone)->where('id', '!=', $session->id)->where('ended', false)->whereNotNull('tenant_id')
             ->where('updated_at', '>=', now()->subSeconds(self::RESUME_SECONDS))->orderByDesc('updated_at')->first();
         if ($dropped !== null && ! in_array($dropped->state['step'] ?? 'home', ['business', 'home'], true)) {
             $tenant = $this->tenants->find((string) $dropped->tenant_id);
@@ -93,7 +102,7 @@ final class UssdMenu
             $state = ['step' => 'business', 'conversation' => 'ussd:'.$session->id];
             $session->state = $state;
 
-            return Screen::ask("WURK bookings\nEnter the business's number:");
+            return Screen::ask($this->ask());
         }
         if ($state['step'] === 'business') {
             return $this->enter($session, [...$state, 'number' => $in]);
@@ -112,13 +121,14 @@ final class UssdMenu
 
             return Screen::ask("No business has that number.\nEnter the business's number:");
         }
-        if (! $number->ussd_on || ! $this->entitlements->entitled($tenant->tenantId(), 'bookings')) {
-            return $this->finish($session, $tenant->displayName().' doesn’t take bookings by USSD. Please call them.');
+        $on = $this->channel === 'sms' ? $number->sms_on : $number->ussd_on;
+        if (! $on || ! $this->entitlements->entitled($tenant->tenantId(), 'bookings')) {
+            return $this->finish($session, $tenant->displayName().' doesn’t take bookings by '.($this->channel === 'sms' ? 'SMS' : 'USSD').'. Please call them.');
         }
         $session->forceFill(['tenant_id' => $tenant->tenantId()]);
 
         return $this->within($session, function (CurrentTenant $t) use ($session, $state) {
-            if (! $session->charged) {
+            if (! $session->charged && $this->channel === 'ussd') {
                 try {
                     app(CreditWallet::class)->charge('ussd', 'ussd:'.$session->id, 'USSD booking session');
                     $session->charged = true;
@@ -153,9 +163,12 @@ final class UssdMenu
                 return match ($in) {
                     '1' => $this->show($session, $t, ['step' => 'services', 'conversation' => $state['conversation']]),
                     '2' => $this->show($session, $t, ['step' => 'mine', 'conversation' => $state['conversation']]),
+                    '3' => $this->show($session, $t, ['step' => 'owed', 'conversation' => $state['conversation']]),
                     '0' => $this->finish($session, 'Thank you. Goodbye.'),
-                    default => $this->show($session, $t, $state, 'Choose 1, 2 or 0.'),
+                    default => $this->show($session, $t, $state, 'Choose 1, 2, 3 or 0.'),
                 };
+            case 'owed':
+                return $in === '0' ? $this->show($session, $t, ['step' => 'home', 'conversation' => $state['conversation']]) : $this->finish($session, 'Thank you. Goodbye.');
             case 'services':
                 if (! isset($options[$pick])) {
                     return $this->show($session, $t, $state, 'Choose a number from the list.');
@@ -239,7 +252,8 @@ final class UssdMenu
             'booking' => [new Screen($prefix.$state['booking']['label'], ['Cancel it', 'Move it'], back: true), $state],
             'confirm_cancel' => [new Screen($prefix.'Cancel '.$state['booking']['label'].'?', ['Yes, cancel', 'No']), $state],
             'confirm_move' => [new Screen($prefix.'Move to '.$state['day']['label'].' '.$state['time'].'?', ['Yes', 'No']), $state],
-            default => [new Screen($prefix.$t->displayName()."\n1 Book\n2 My bookings\n0 Exit"), [...$state, 'step' => 'home']],
+            'owed' => [new Screen($prefix.$this->owed($session), back: true), $state],
+            default => [new Screen($prefix.$t->displayName()."\n1 Book\n2 My bookings\n3 What I owe\n0 Exit"), [...$state, 'step' => 'home']],
         };
         $session->state = $state;
 
@@ -327,6 +341,21 @@ final class UssdMenu
         }, $found));
     }
 
+    /** What the caller owes this business (unpaid deposits, pay-later orders, sales on account, invoices), by their number. */
+    private function owed(UssdSession $session): string
+    {
+        $digits = fn (?string $p) => ltrim(preg_replace('/\D/', '', (string) $p) ?? '', '0');
+        $mine = $digits($session->phone);
+        $items = array_values(array_filter(app(MoneyOwed::class)->all(), fn (array $o) => $o['phone'] !== null && $mine !== ''
+            && (str_ends_with($mine, $digits($o['phone'])) || str_ends_with($digits($o['phone']), $mine)) && strlen($digits($o['phone'])) >= 9));
+        if ($items === []) {
+            return 'You owe nothing here.';
+        }
+        $lines = array_map(fn (array $o) => Money::format((int) $o['amount_cents']).' '.$o['title'], array_slice($items, 0, 4));
+
+        return "You owe:\n".implode("\n", $lines)."\nPay at the business, or with the link in your message.";
+    }
+
     /** @param array<string, mixed> $state */
     private function book(UssdSession $session, CurrentTenant $t, array $state): Screen
     {
@@ -362,7 +391,7 @@ final class UssdMenu
         }
         $session = $this->session;
         try {
-            return $tool->run($arguments, ['conversation' => (string) $state['conversation'], 'channel' => 'ussd',
+            return $tool->run($arguments, ['conversation' => (string) $state['conversation'], 'channel' => $this->channel,
                 'customer' => ['phone' => $session?->phone, 'verified' => true]]);
         } catch (ReceptionistRefused $e) {
             return ['refused' => $e->getMessage()];
@@ -378,7 +407,7 @@ final class UssdMenu
     private function back(array $state): array
     {
         $to = match ($state['step']) {
-            'services', 'mine' => 'home',
+            'services', 'mine', 'owed' => 'home',
             'days' => ($state['mode'] ?? 'book') === 'move' ? 'booking' : 'services',
             'times' => 'days',
             'name' => 'times',
@@ -387,6 +416,11 @@ final class UssdMenu
         };
 
         return [...$state, 'step' => $to, 'page' => 0];
+    }
+
+    private function ask(): string
+    {
+        return "WURK bookings\nEnter the business's number:";
     }
 
     private function finish(UssdSession $session, string $text): Screen

@@ -70,7 +70,7 @@ it('books a free time from a basic phone, with a confirmation, and charges the b
     $screens = ($this->dial)('ATUid_1', [$this->number, '1', '1', '1', '1', 'Thandi Mokoena', '1']);
 
     expect($screens[0])->toBe("CON WURK bookings\nEnter the business's number:")
-        ->and($screens[1])->toBe("CON Glow Salon\n1 Book\n2 My bookings\n0 Exit")
+        ->and($screens[1])->toBe("CON Glow Salon\n1 Book\n2 My bookings\n3 What I owe\n0 Exit")
         ->and($screens[2])->toBe("CON Choose a service:\n1 Knotless braids R450.00\n0 Back")
         ->and($screens[3])->toBe("CON Knotless braids\nChoose a day:\n1 Mon 3 May\n2 Mon 10 May\n0 Back")
         ->and($screens[4])->toBe("CON Mon 3 May\nChoose a time:\n1 09:00\n2 09:15\n3 09:30\n4 09:45\n5 10:00\n0 Back")
@@ -93,7 +93,7 @@ it('takes the business number dialled in the code, and lets the caller see, canc
 
     // *384*1234*<number>#: straight to the business
     $first = $this->post($this->url, ['sessionId' => 'ATUid_4', 'phoneNumber' => '+27825550101', 'serviceCode' => '*384*1234#', 'text' => $this->number])->getContent();
-    expect($first)->toBe("CON Glow Salon\n1 Book\n2 My bookings\n0 Exit");
+    expect($first)->toBe("CON Glow Salon\n1 Book\n2 My bookings\n3 What I owe\n0 Exit");
     $mine = $this->post($this->url, ['sessionId' => 'ATUid_4', 'phoneNumber' => '+27825550101', 'text' => $this->number.'*2'])->getContent();
     expect($mine)->toBe("CON Your bookings:\n1 Knotless braids, Mon 3 May 09:00\n0 Back"); // only Thandi's
     $move = fn (string $text) => $this->post($this->url, ['sessionId' => 'ATUid_4', 'phoneNumber' => '+27825550101', 'text' => $this->number.'*2*'.$text])->getContent();

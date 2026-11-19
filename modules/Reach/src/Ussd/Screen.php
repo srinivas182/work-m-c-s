@@ -39,16 +39,25 @@ final readonly class Screen
             $tail[] = '0 Back';
         }
         $lines = array_map(fn (string $c, int $i) => ($i + 1).' '.$c, $this->choices, array_keys($this->choices));
-        $out = trim($this->text."\n".implode("\n", $lines)."\n".implode('  ', $tail));
+        $out = $this->join($this->text, $lines, $tail);
         if (mb_strlen($out) <= self::MAX) {
             return $out;
         }
         // Too long: shorten the choices evenly, then the text, so every choice stays visible.
-        $room = self::MAX - mb_strlen(trim($this->text."\n".implode('  ', $tail))) - count($lines);
+        $room = self::MAX - mb_strlen($this->join($this->text, [], $tail)) - count($lines);
         $each = max(6, intdiv(max(0, $room), max(1, count($lines))));
         $lines = array_map(fn (string $l) => mb_strlen($l) > $each ? rtrim(mb_substr($l, 0, $each - 1)).'…' : $l, $lines);
-        $out = trim($this->text."\n".implode("\n", $lines)."\n".implode('  ', $tail));
+        $out = $this->join($this->text, $lines, $tail);
 
         return mb_strlen($out) <= self::MAX ? $out : rtrim(mb_substr($out, 0, self::MAX - 1)).'…';
+    }
+
+    /**
+     * @param  list<string>  $lines
+     * @param  list<string>  $tail
+     */
+    private function join(string $text, array $lines, array $tail): string
+    {
+        return implode("\n", array_filter([trim($text), ...$lines, implode('  ', $tail)], fn (string $p) => $p !== ''));
     }
 }
