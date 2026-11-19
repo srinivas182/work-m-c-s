@@ -24,6 +24,7 @@ use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\FinishedVisits;
 use Wurk\Platform\Contracts\MoneyOwed;
+use Wurk\Platform\Contracts\NeedsYouNow;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
@@ -138,6 +139,19 @@ final class ShopServiceProvider extends ModuleServiceProvider
             ->where('status', 'done')->where('updated_at', '>=', $from)->where('updated_at', '<', $until)->get()
             ->map(fn (Order $o) => ['key' => 'order:'.$o->id, 'kind' => 'order', 'title' => 'order #'.$o->number, 'customer' => $o->customer_name,
                 'phone' => $o->customer_phone, 'email' => $o->customer_email, 'finished_at' => $o->updated_at?->toIso8601String() ?? now()->toIso8601String()])));
+        // Home's "Needs you now" (26.3): orders to pack, and orders ready but not collected yet.
+        $this->callAfterResolving(NeedsYouNow::class, fn (NeedsYouNow $n) => $n->register('orders', function (): array {
+            if (! Gate::allows('shop.orders') || ! app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'shop')) {
+                return [];
+            }
+            $handle = app(TenantContext::class)->current()->handle();
+
+            return array_values(Order::query()->whereIn('status', ['paid', 'ready'])->orderByDesc('paid_at')->limit(8)->get()->map(fn (Order $o) => ['id' => 'order:'.$o->id,
+                'kind' => $o->status === 'paid' ? __('Order to pack') : __('Waiting to be collected'), 'title' => '#'.$o->number.' · '.$o->customer_name,
+                'detail' => Money::format($o->total_cents), 'at' => ($o->paid_at ?? $o->created_at)->toIso8601String(), 'url' => "/{$handle}/shop/orders/{$o->id}",
+                'actions' => [$o->status === 'paid' ? ['label' => __('Packed'), 'url' => "/{$handle}/shop/orders/{$o->id}/advance", 'data' => ['to' => 'packed'], 'tone' => 'primary']
+                    : ['label' => __('Collected'), 'url' => "/{$handle}/shop/orders/{$o->id}/advance", 'data' => ['to' => 'done'], 'tone' => 'primary']]])->all());
+        }));
         // Today (26.2): paid orders still to pack, for the people who handle orders (only their branches').
         $this->callAfterResolving(TodayList::class, fn (TodayList $t) => $t->register('orders', 300, function (string $identityId): ?array {
             $user = Auth::getProvider()->retrieveById($identityId);

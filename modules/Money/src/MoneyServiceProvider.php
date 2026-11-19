@@ -20,7 +20,9 @@ use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\DashboardTiles;
 use Wurk\Platform\Contracts\MoneyOwed;
+use Wurk\Platform\Contracts\NeedsYouNow;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
 
@@ -31,6 +33,18 @@ final class MoneyServiceProvider extends ModuleServiceProvider
         parent::boot();
         $this->loadViewsFrom($this->modulePath('resources/views'), 'money');
         // Who owes me (23.5a): invoices sent and not yet paid.
+        // Home's "Needs you now" (26.3): what customers owe, with "Paid: cash" right there when it can be settled in person.
+        $this->callAfterResolving(NeedsYouNow::class, fn (NeedsYouNow $n) => $n->register('owed', function (): array {
+            if (! Gate::allows('money.manage')) {
+                return [];
+            }
+            $base = '/'.app(TenantContext::class)->current()->handle();
+
+            return array_map(fn (array $o) => ['id' => $o['key'], 'kind' => __('Owed to you'), 'title' => $o['customer'].' · '.Money::format((int) $o['amount_cents']),
+                'detail' => $o['title'].($o['due'] !== null && $o['due'] < now()->toDateString() ? ' · '.__('overdue') : ''), 'at' => $o['since'].'T00:00:00Z', 'url' => $base.$o['link'],
+                'actions' => isset($o['settle']) ? [['label' => __('Paid: cash'), 'url' => $base.$o['settle'], 'data' => ['how' => 'cash', 'to' => 'paid'], 'tone' => 'secondary']] : []],
+                array_slice(app(MoneyOwed::class)->all(), 0, 8));
+        }));
         $this->callAfterResolving(MoneyOwed::class, fn (MoneyOwed $o) => $o->register('money', fn () => Invoice::query()->where('status', 'sent')->orderBy('due_on')->get()
             ->map(fn (Invoice $i) => ['key' => 'invoice:'.$i->id, 'kind' => 'invoice', 'title' => 'Invoice '.$i->label(), 'customer' => $i->customer_name,
                 'phone' => $i->customer_phone, 'email' => $i->customer_email, 'amount_cents' => $i->total_cents, 'since' => $i->issued_on->toDateString(),

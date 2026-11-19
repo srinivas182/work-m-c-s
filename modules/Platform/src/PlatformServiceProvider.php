@@ -18,6 +18,7 @@ use Wurk\Platform\Contracts\DataExports;
 use Wurk\Platform\Contracts\FinishedVisits;
 use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\MoneyOwed;
+use Wurk\Platform\Contracts\NeedsYouNow;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\PlatformMetrics;
 use Wurk\Platform\Contracts\PushNotifications;
@@ -40,6 +41,7 @@ use Wurk\Platform\Support\FinishedVisitsRegistry;
 use Wurk\Platform\Support\HealthRegistry;
 use Wurk\Platform\Support\MetricsRegistry;
 use Wurk\Platform\Support\MoneyOwedRegistry;
+use Wurk\Platform\Support\NeedsYouRegistry;
 use Wurk\Platform\Support\NoPushNotifications;
 use Wurk\Platform\Support\NoSupportSessions;
 use Wurk\Platform\Support\OwnerDigestRegistry;
@@ -63,6 +65,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         Connection::resolverFor('sqlite', fn ($pdo, string $database, string $prefix, array $config) => new AppTimezoneSQLiteConnection($pdo, $database, $prefix, $config));
         $this->app->singleton(DashboardTiles::class, TileRegistry::class);
         $this->app->singleton(TodayList::class, TodayRegistry::class); // 26.2: the team's Today
+        $this->app->singleton(NeedsYouNow::class, NeedsYouRegistry::class); // 26.3: Home's "Needs you now"
         $this->app->singleton(BusinessReports::class, ReportRegistry::class);
         $this->app->singleton(PlatformMetrics::class, MetricsRegistry::class);
         $this->app->singleton(AudienceSegments::class, AudienceRegistry::class);
