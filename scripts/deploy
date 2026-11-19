@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+# Deploys a version of WURK to an environment on AWS (Sprint 17.2). Run by .github/workflows/release.yml, or by an
+# engineer with the environment's deploy role:  scripts/deploy <staging|production> <version, e.g. v1.0.0>
+#
+# 1. Checks the image for the version is in the environment's registry.
+# 2. Snapshots every database (kept until deleted by hand), so the release can always be undone.
+# 3. Registers new task definitions with the new image (everything else stays as OpenTofu set it).
+# 4. Release task: records the snapshots, migrates the central database then every shard (canary first),
+#    then runs the release steps (`release:tasks`). Stops here on failure — the running version is untouched.
+# 5. Rolls out serve, worker, scheduler and ssr (rolling; the circuit breaker rolls back containers that don't
+#    become healthy). The scheduler is replaced, never doubled.
+# 6. Watches for WATCH_MINUTES (10): the load balancer's 5xx rate and /health/ready from outside. If either fails,
+#    puts the previous task definitions back. Migrations only ever add (expand, then contract later), so the
+#    previous version runs on the new schema and no data is lost.
+# 7. Records the outcome (`release:finished`) — HQ is emailed — and exits non-zero unless the release is live.
+set -euo pipefail
+
+ENVIRONMENT="${1:?usage: scripts/deploy <staging|production> <version>}"
+VERSION="${2:?usage: scripts/deploy <staging|production> <version>}"
+[[ "$ENVIRONMENT" =~ ^(staging|production)$ ]] || { echo "environment must be staging or production" >&2; exit 2; }
+[[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || { echo "version must look like v1.2.3" >&2; exit 2; }
+
+export AWS_REGION="${AWS_REGION:-af-south-1}"
+NAME="wurk-${ENVIRONMENT}"
+CLUSTER="$NAME"
+SERVICES=(serve worker ssr scheduler)
+WATCH_MINUTES="${WATCH_MINUTES:-10}"
+MAX_5XX_PERCENT="${MAX_5XX_PERCENT:-2}"
+HEALTH_URL="${HEALTH_URL:-https://app.$([ "$ENVIRONMENT" = production ] && echo wurk.co.za || echo staging.wurk.co.za)/health/ready}"
+STAMP="$(date -u +%Y%m%d%H%M)"
+
+log() { printf '\n==> %s\n' "$*"; }
+fail() { printf '::error::%s\n' "$*" >&2; }
+
+REPO="$(aws ecr describe-repositories --repository-names "${NAME}/wurk" --query 'repositories[0].repositoryUri' --output text)"
+IMAGE="${REPO}:${VERSION}"
+
+# --- helpers -----------------------------------------------------------------------------------------------------------
+
+# A new revision of a task definition family with the new image and WURK_RELEASE; prints its ARN.
+new_revision() {
+  local family="$1" current
+  current="$(aws ecs describe-task-definition --task-definition "$family" --query taskDefinition --output json)"
+  jq --arg image "$IMAGE" --arg version "$VERSION" '
+      .containerDefinitions |= map(
+        .image = $image
+        | .environment = ([.environment[]? | select(.name != "WURK_RELEASE")] + [{name: "WURK_RELEASE", value: $version}])
+      )
+      | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)
+    ' <<<"$current" > "/tmp/${family}.json"
+  aws ecs register-task-definition --cli-input-json "file:///tmp/${family}.json" --query taskDefinition.taskDefinitionArn --output text
+}
+
+# Runs a one-off task with the release task definition and a shell command; fails unless it exits 0.
+run_release_task() {
+  local definition="$1" script="$2" network task code
+  network="$(aws ecs describe-services --cluster "$CLUSTER" --services serve \
+    --query 'services[0].networkConfiguration' --output json)"
+  task="$(aws ecs run-task --cluster "$CLUSTER" --launch-type FARGATE --task-definition "$definition" \
+    --network-configuration "$network" --started-by "deploy-${VERSION}" \
+    --overrides "$(jq -n --arg s "$script" '{containerOverrides: [{name: "release", command: ["sh", "-c", $s]}]}')" \
+    --query 'tasks[0].taskArn' --output text)"
+  echo "task: $task"
+  aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$task"
+  code="$(aws ecs describe-tasks --cluster "$CLUSTER" --tasks "$task" --query 'tasks[0].containers[0].exitCode' --output text)"
+  echo "exit code: $code (logs: CloudWatch /wurk/${NAME}/release)"
+  [ "$code" = "0" ]
+}
+
+report() { # status — with $NOTE; best effort: never hides the real outcome
+  local note="${NOTE//\'/\'\\\'\'}"
+  run_release_task "$RELEASE_DEF" "php artisan release:finished '${VERSION}' --environment='${ENVIRONMENT}' --status='$1' --note='${note}'" \
+    >/dev/null 2>&1 || true
+}
+
+# Waits until every service's newest deployment has finished rolling out; fails if one rolled back.
+wait_for_rollout() {
+  local deadline=$(( $(date +%s) + 1200 )) states
+  while true; do
+    # shellcheck disable=SC2016 # a JMESPath literal, not a shell expansion
+    states="$(aws ecs describe-services --cluster "$CLUSTER" --services "${SERVICES[@]}" \
+      --query 'services[].deployments[?status==`PRIMARY`].rolloutState[]' --output text)"
+    echo "rollout: $states"
+    if grep -qw FAILED <<<"$states"; then return 1; fi
+    if [ -n "$states" ] && ! tr -s '[:blank:]' '\n' <<<"$states" | grep -qvx COMPLETED; then return 0; fi
+    [ "$(date +%s)" -lt "$deadline" ] || return 1
+    sleep 20
+  done
+}
+
+# 5xx share of requests at the load balancer over the last minute, in percent (0 when idle).
+error_rate() {
+  local lb now from data
+  lb="$(aws elbv2 describe-load-balancers --names "$NAME" --query 'LoadBalancers[0].LoadBalancerArn' --output text | sed 's#.*:loadbalancer/##')"
+  now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"; from="$(date -u -d '-2 minutes' +%Y-%m-%dT%H:%M:%SZ)"
+  data="$(aws cloudwatch get-metric-data --start-time "$from" --end-time "$now" --metric-data-queries "$(jq -n --arg lb "$lb" '[
+      {Id: "e", MetricStat: {Metric: {Namespace: "AWS/ApplicationELB", MetricName: "HTTPCode_Target_5XX_Count", Dimensions: [{Name: "LoadBalancer", Value: $lb}]}, Period: 60, Stat: "Sum"}},
+      {Id: "r", MetricStat: {Metric: {Namespace: "AWS/ApplicationELB", MetricName: "RequestCount", Dimensions: [{Name: "LoadBalancer", Value: $lb}]}, Period: 60, Stat: "Sum"}}
+    ]')" --output json)"
+  jq -r '([.MetricDataResults[] | select(.Id=="e") | .Values[0] // 0][0]) as $e
+         | ([.MetricDataResults[] | select(.Id=="r") | .Values[0] // 0][0]) as $r
+         | if $r < 20 then 0 else ($e * 100 / $r | floor) end' <<<"$data"
+}
+
+rollback() {
+  log "Rolling back to the previous version"
+  for i in "${!SERVICES[@]}"; do
+    aws ecs update-service --cluster "$CLUSTER" --service "${SERVICES[$i]}" --task-definition "${PREVIOUS[$i]}" >/dev/null
+  done
+  aws ecs wait services-stable --cluster "$CLUSTER" --services "${SERVICES[@]}" || true
+}
+
+# --- 1. the image -------------------------------------------------------------------------------------------------------
+log "Deploying ${VERSION} to ${ENVIRONMENT} (${IMAGE})"
+aws ecr describe-images --repository-name "${NAME}/wurk" --image-ids imageTag="$VERSION" >/dev/null \
+  || { fail "No image ${VERSION} in ${REPO}"; exit 1; }
+
+PREVIOUS=()
+for s in "${SERVICES[@]}"; do
+  PREVIOUS+=("$(aws ecs describe-services --cluster "$CLUSTER" --services "$s" --query 'services[0].taskDefinition' --output text)")
+done
+RELEASE_DEF="$(new_revision "${NAME}-release")"
+NOTE=""
+
+# --- 2. snapshots -------------------------------------------------------------------------------------------------------
+log "Snapshotting the databases"
+RECORD=""
+SNAPSHOTS=()
+for db in $(aws rds describe-db-instances --query "DBInstances[?starts_with(DBInstanceIdentifier, '${NAME}-')].DBInstanceIdentifier" --output text); do
+  snap="${db}-pre-${VERSION//./-}-${STAMP}"
+  aws rds create-db-snapshot --db-instance-identifier "$db" --db-snapshot-identifier "$snap" --tags Key=Purpose,Value=pre-release >/dev/null
+  RECORD+="php artisan system:backup-taken '${db}' --kind=snapshot --location='rds:${snap}' --by='deploy ${VERSION}' && "
+  SNAPSHOTS+=("$snap")
+done
+for snap in "${SNAPSHOTS[@]}"; do aws rds wait db-snapshot-available --db-snapshot-identifier "$snap"; done
+
+# --- 3–4. migrate and release steps -------------------------------------------------------------------------------------
+log "Migrating (central, then every shard) and running the release steps"
+if ! run_release_task "$RELEASE_DEF" "${RECORD}php artisan migrate --force --no-interaction && php artisan shards:migrate --no-interaction && php artisan release:tasks --no-interaction"; then
+  NOTE="Migrations or release steps failed; the running version wasn't changed. Snapshots: ${SNAPSHOTS[*]}"
+  fail "$NOTE"; report failed; exit 1
+fi
+
+# --- 5. roll out --------------------------------------------------------------------------------------------------------
+log "Rolling out ${SERVICES[*]}"
+for s in "${SERVICES[@]}"; do
+  def="$(new_revision "${NAME}-${s}")"
+  aws ecs update-service --cluster "$CLUSTER" --service "$s" --task-definition "$def" >/dev/null
+done
+if ! wait_for_rollout; then
+  NOTE="New containers didn't become healthy; ECS put the previous version back."
+  fail "$NOTE"; rollback; report rolled_back; exit 1
+fi
+
+# --- 6. watch -----------------------------------------------------------------------------------------------------------
+log "Watching for ${WATCH_MINUTES} minutes (5xx under ${MAX_5XX_PERCENT}%, ${HEALTH_URL} healthy)"
+for minute in $(seq 1 "$WATCH_MINUTES"); do
+  sleep 60
+  rate="$(error_rate)"
+  health="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$HEALTH_URL" || echo 000)"
+  echo "minute ${minute}: 5xx ${rate}%, health ${health}"
+  if [ "$rate" -gt "$MAX_5XX_PERCENT" ] || [ "$health" != "200" ]; then
+    NOTE="After ${minute} min: 5xx at ${rate}% and /health/ready answered ${health}."
+    fail "$NOTE"; rollback; report rolled_back; exit 1
+  fi
+done
+
+# --- 7. done ------------------------------------------------------------------------------------------------------------
+NOTE="Snapshots before the release: ${SNAPSHOTS[*]}"
+report live
+log "${VERSION} is live on ${ENVIRONMENT}"

@@ -12,7 +12,7 @@ use Wurk\Watchtower\Support\Backups;
 /** Sprint 18.4c: a backup job reports a finished backup (shown on Admin → System; a missing one raises a problem). */
 final class BackupTakenCommand extends Command
 {
-    protected $signature = 'system:backup-taken {target : What was backed up — central, a shard name, files…}
+    protected $signature = 'system:backup-taken {target : What was backed up — central, a shard name, files… or the resource ARN (AWS Backup, 17.4)}
         {--kind=full : full, incremental, snapshot or files}
         {--at= : When it was taken (default now; any date PHP understands, WURK’s time zone unless it says otherwise)}
         {--size= : Size in bytes}
@@ -37,7 +37,7 @@ final class BackupTakenCommand extends Command
             return self::FAILURE;
         }
         $size = $this->option('size');
-        Backups::record((string) $this->argument('target'), $kind, $at, is_numeric($size) ? (int) $size : null,
+        Backups::record(Backups::targetName((string) $this->argument('target')), $kind, $at, is_numeric($size) ? (int) $size : null,
             $this->option('location') ? (string) $this->option('location') : null, $this->option('by') ? (string) $this->option('by') : null);
         $this->components->info('Recorded the '.$kind.' backup of '.$this->argument('target').' taken '.$at->setTimezone(Backups::tz())->format('Y-m-d H:i').'.');
 

@@ -6,6 +6,7 @@ namespace Wurk\Website\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Wurk\Tenancy\Contracts\CustomDomains;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Website\Models\Page;
@@ -21,7 +22,8 @@ final class PublicSeoController
     {
         $type = (string) $request->route('type');
         $tenant = $tenants->findByHandle($handle);
-        $base = $request->getSchemeAndHttpHost();
+        $custom = $request->attributes->get(CustomDomains::REQUEST_HOST); // 17.3: the business's own domain
+        $base = is_string($custom) ? 'https://'.$custom : $request->getSchemeAndHttpHost();
         $live = $tenant !== null && $tenant->isActive()
             && $context->run($tenant, fn () => Page::query()->where('is_home', true)->whereNotNull('published_version_id')->exists());
 

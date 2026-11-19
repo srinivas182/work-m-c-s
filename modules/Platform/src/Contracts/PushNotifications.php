@@ -17,6 +17,7 @@ interface PushNotifications
         'order' => 'New orders',
         'payment' => 'Payments received',
         'credits' => 'Credits running low',
+        'website' => 'Your website and domain', // 17.3
     ];
 
     /**

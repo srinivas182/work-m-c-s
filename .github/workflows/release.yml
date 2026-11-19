@@ -1,0 +1,126 @@
+# Sprint 17.2: releases. A version tag (v1.2.3) builds the image once, deploys it to staging, checks staging from
+# outside, then waits for approval before deploying the same image to production. Re-running for an older tag
+# (workflow_dispatch) is how a release is rolled back on purpose.
+#
+# Set up once by WURK (docs: infra/README.md, "Releases"):
+# - GitHub environments "staging" and "production"; production with required reviewers (the approval).
+# - In each environment, the variable AWS_DEPLOY_ROLE_ARN (OpenTofu output `deploy_role_arn`); in production also
+#   STAGING_REPOSITORY_URI (staging's `repository_url`). No AWS keys anywhere.
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (an existing tag, e.g. v1.0.0)'
+        required: true
+      environment:
+        description: 'Where to'
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+  id-token: write # GitHub's OIDC token, exchanged for the deploy role
+
+concurrency:
+  group: release # one release at a time; never cancel one half-way
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: af-south-1
+  VERSION: ${{ inputs.version || github.ref_name }}
+
+jobs:
+  build:
+    name: Build the image
+    if: github.event_name == 'push' || inputs.environment == 'staging'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: staging
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.VERSION }}
+      - name: Check the version matches VERSION
+        run: |
+          [ "v$(tr -d '[:space:]' < VERSION)" = "$VERSION" ] || { echo "::error::Tag $VERSION but VERSION says $(cat VERSION)"; exit 1; }
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Log in to the registry
+        id: registry
+        run: |
+          repo="$(aws ecr describe-repositories --repository-names wurk-staging/wurk --query 'repositories[0].repositoryUri' --output text)"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "${repo%%/*}"
+          echo "repo=$repo" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - name: Build and push (once — production gets this exact image)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/production/Dockerfile
+          build-args: WURK_COMMIT=${{ github.sha }}
+          tags: ${{ steps.registry.outputs.repo }}:${{ env.VERSION }}
+          push: true
+          provenance: false
+          cache-from: type=gha,scope=wurk-prod
+      - name: Scan findings (the registry scans every pushed image)
+        run: |
+          aws ecr wait image-scan-complete --repository-name wurk-staging/wurk --image-id imageTag="$VERSION" || true
+          aws ecr describe-image-scan-findings --repository-name wurk-staging/wurk --image-id imageTag="$VERSION" \
+            --query 'imageScanFindings.findingSeverityCounts' --output json | tee findings.json
+          critical="$(jq -r '.CRITICAL // 0' findings.json)"
+          [ "$critical" = "0" ] || { echo "::error::$critical critical vulnerabilities in the image"; exit 1; }
+
+  staging:
+    name: Deploy to staging
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment:
+      name: staging
+      url: https://app.staging.wurk.co.za
+    steps:
+      - uses: actions/checkout@v7
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-duration-seconds: 7200
+      - run: scripts/deploy staging "$VERSION"
+      - run: scripts/smoke-remote staging.wurk.co.za "$VERSION"
+
+  production:
+    name: Deploy to production
+    needs: staging
+    if: always() && (needs.staging.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'production'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment:
+      name: production # required reviewers: the approval
+      url: https://app.wurk.co.za
+    steps:
+      - uses: actions/checkout@v7
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-duration-seconds: 7200
+      # The same image (same digest) as staging tested: production's deploy role may pull from staging's registry
+      # (repository policy, infra/) and copies it across. STAGING_REPOSITORY_URI is a production environment variable.
+      - name: Copy the staging image to production's registry
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          src="${{ vars.STAGING_REPOSITORY_URI }}:${VERSION}"
+          dst="$(aws ecr describe-repositories --repository-names wurk-production/wurk --query 'repositories[0].repositoryUri' --output text):${VERSION}"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "${src%%/*}"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "${dst%%/*}"
+          docker buildx imagetools create --tag "$dst" "$src"
+      - run: scripts/deploy production "$VERSION"
+      - run: scripts/smoke-remote wurk.co.za "$VERSION"

@@ -60,6 +60,10 @@ const TITLES: Record<string, [string, string]> = {
   ],
   whatsapp: ['WhatsApp', 'Sign-in codes and business messages through approved templates.'],
   email: ['Email', 'Sign-in codes, invitations and receipts.'],
+  'errors.sentry': [
+    'Error tracking',
+    'Server errors also go to Sentry, already masked by Watchtower (no personal data or keys). Optional.',
+  ],
 };
 
 function ChannelCard({ channel }: { channel: Channel }) {

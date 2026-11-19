@@ -33,6 +33,24 @@ final readonly class TenantResolver
         return $this->remember("tenancy:host:{$host}", fn () => TenantDomain::query()->where('host', $host)->value('tenant_id'));
     }
 
+    /**
+     * The business's active custom domain set as its main address (Sprint 17.3), or null — its wurk.co.za address
+     * then redirects there.
+     */
+    public function primaryCustomHost(string $tenantId): ?string
+    {
+        $host = $this->cache->remember("tenancy:primary:{$tenantId}", (int) config('wurk.tenancy.resolution_cache_ttl', 600),
+            fn () => TenantDomain::query()->where('tenant_id', $tenantId)->where('type', TenantDomain::TYPE_CUSTOM)
+                ->where('status', TenantDomain::ACTIVE)->where('is_primary', true)->value('host') ?? '');
+
+        return is_string($host) && $host !== '' ? $host : null;
+    }
+
+    public function forgetPrimary(string $tenantId): void
+    {
+        $this->cache->forget("tenancy:primary:{$tenantId}");
+    }
+
     public function forgetHandle(string $handle): void
     {
         $this->cache->forget('tenancy:handle:'.strtolower($handle));
