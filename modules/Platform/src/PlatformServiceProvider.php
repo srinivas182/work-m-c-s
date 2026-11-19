@@ -26,6 +26,8 @@ use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Contracts\SalesTools;
 use Wurk\Platform\Contracts\SupportSessions;
+use Wurk\Platform\Contracts\TeamHours;
+use Wurk\Platform\Contracts\TeamTakings;
 use Wurk\Platform\Contracts\TodayList;
 use Wurk\Platform\Database\AppTimezoneSQLiteConnection;
 use Wurk\Platform\Database\DatesPast2038Connection;
@@ -48,6 +50,8 @@ use Wurk\Platform\Support\OwnerDigestRegistry;
 use Wurk\Platform\Support\ReceptionistRegistry;
 use Wurk\Platform\Support\ReportRegistry;
 use Wurk\Platform\Support\SalesRegistry;
+use Wurk\Platform\Support\TeamHoursRegistry;
+use Wurk\Platform\Support\TeamTakingsRegistry;
 use Wurk\Platform\Support\TileRegistry;
 use Wurk\Platform\Support\TodayRegistry;
 
@@ -66,6 +70,8 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         $this->app->singleton(DashboardTiles::class, TileRegistry::class);
         $this->app->singleton(TodayList::class, TodayRegistry::class); // 26.2: the team's Today
         $this->app->singleton(NeedsYouNow::class, NeedsYouRegistry::class); // 26.3: Home's "Needs you now"
+        $this->app->singleton(TeamHours::class, TeamHoursRegistry::class); // 26.4: the roster
+        $this->app->singleton(TeamTakings::class, TeamTakingsRegistry::class); // 26.4: commission
         $this->app->singleton(BusinessReports::class, ReportRegistry::class);
         $this->app->singleton(PlatformMetrics::class, MetricsRegistry::class);
         $this->app->singleton(AudienceSegments::class, AudienceRegistry::class);

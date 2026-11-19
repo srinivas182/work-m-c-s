@@ -1,0 +1,13 @@
+{
+    "name": "Shifts",
+    "key": "shifts",
+    "version": "0.1.0",
+    "description": "Team shifts, clock-in and earnings (Sprint 26.4): a weekly roster built from booking hours, leave and swaps approved by the owner, clocking in and out (optionally only on the business's Wi-Fi or near it), and each person's hours, commission and tips for the month, exported for the bookkeeper. Not payroll.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "access",
+        "audit"
+    ]
+}

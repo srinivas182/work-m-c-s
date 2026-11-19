@@ -39,7 +39,7 @@ final class ScreensCommand extends Command
         'portal.handoff' => 'redirect', 'portal.id-qr' => 'image', 'portal.qr' => 'image', 'portal.my-data' => 'JSON download', 'portal.wallet-pass' => 'wallet file',
         'agent.demo.qr' => 'image', 'agent.qr' => 'image', 'admin.agents.qr' => 'image', 'tenant.referrals.qr' => 'image',
         'admin.agents.payouts.csv' => 'CSV', 'admin.metrics.export' => 'CSV', 'admin.reconciliation.export' => 'CSV', 'admin.health.export' => 'CSV',
-        'tenant.contacts.export' => 'CSV', 'tenant.credits.statement' => 'CSV', 'tenant.reports.export' => 'CSV/PDF', 'tenant.data.download' => 'ZIP',
+        'tenant.contacts.export' => 'CSV', 'tenant.shifts.export' => 'CSV: team earnings (26.4)', 'tenant.credits.statement' => 'CSV', 'tenant.reports.export' => 'CSV/PDF', 'tenant.data.download' => 'ZIP',
         'admin.businesses.invoice' => 'PDF', 'tenant.billing.invoice' => 'PDF', 'tenant.billing.credit-note' => 'PDF',
         'records.public.file' => 'file', 'tenant.records.file' => 'file', 'admin.support.file' => 'file', 'tenant.support.file' => 'file', 'tenant.website.enquiries.file' => 'file',
         'admin.businesses.check-handle' => 'JSON', 'signup.check-handle' => 'JSON', 'tenant.contacts.search' => 'JSON', 'tenant.campaigns.estimate' => 'JSON',
