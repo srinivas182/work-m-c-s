@@ -78,4 +78,31 @@ final class MetaCloudWhatsApp
             ? SendResult::sent((string) ($response->json('messages.0.id') ?? ''))
             : SendResult::failed('WhatsApp: '.($response->json('error.message') ?? 'HTTP '.$response->status()));
     }
+
+    /**
+     * Up to three reply buttons from WURK's own number, inside the 24-hour window (26.1: "Yes" to an owner's
+     * instruction). The tapped button comes back with its id.
+     *
+     * @param  array<string, string>  $buttons  id => title (at most 20 characters)
+     * @param  array<string, string>  $credentials
+     * @param  array<string, string>  $settings
+     */
+    public function sendButtons(string $to, string $body, array $buttons, array $credentials, array $settings): SendResult
+    {
+        $rows = array_map(fn (string $id, string $title) => ['type' => 'reply', 'reply' => ['id' => mb_substr($id, 0, 256), 'title' => mb_substr($title, 0, 20)]],
+            array_keys(array_slice($buttons, 0, 3, true)), array_slice($buttons, 0, 3, true));
+        try {
+            $response = Http::timeout(10)->acceptJson()->withToken($credentials['access_token'] ?? '')
+                ->post(sprintf(self::ENDPOINT, $settings['api_version'] ?? self::DEFAULT_VERSION, $settings['phone_number_id'] ?? ''), [
+                    'messaging_product' => 'whatsapp', 'to' => ltrim($to, '+'), 'type' => 'interactive',
+                    'interactive' => ['type' => 'button', 'body' => ['text' => mb_substr($body, 0, 1024)], 'action' => ['buttons' => $rows]],
+                ]);
+        } catch (ConnectionException $e) {
+            return SendResult::failed('WhatsApp unreachable: '.$e->getMessage());
+        }
+
+        return $response->successful()
+            ? SendResult::sent((string) ($response->json('messages.0.id') ?? ''))
+            : SendResult::failed('WhatsApp: '.($response->json('error.message') ?? 'HTTP '.$response->status()));
+    }
 }

@@ -58,7 +58,7 @@ final readonly class AiSettings
         'speech_prices' => ['openai:gpt-4o-transcribe' => 0.006, 'openai:gpt-4o-mini-transcribe' => 0.003, 'openai:whisper-1' => 0.006, 'google:gemini-3.8-flash' => 0.002, 'simulated:simulated' => 0.0],
         // "Ask WURK" (16.2, decision A): free questions a month per business, then the rate card's "ai.assistant" price each;
         // actions are free; no business asks more than the monthly cap.
-        'assistant' => ['enabled' => true, 'free_questions' => 50, 'monthly_cap' => 500],
+        'assistant' => ['enabled' => true, 'free_questions' => 50, 'monthly_cap' => 500, 'whatsapp_daily_cap' => 50], // 26.1: instructions on WhatsApp, per business per day
         // WURK's sales assistant on wurk.co.za (19.5): off until HQ switches it on; WURK pays, within this monthly cap.
         'sales' => ['enabled' => false, 'greeting' => 'Hi! I’m WURK’s AI assistant. Ask me about packages, prices and what WURK can do for your business.', 'monthly_cap' => 2000],
     ];

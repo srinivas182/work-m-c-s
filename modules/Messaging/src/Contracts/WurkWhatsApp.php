@@ -20,6 +20,14 @@ interface WurkWhatsApp
     /** @param  list<string>  $parameters */
     public function sendTemplate(string $to, string $template, array $parameters, string $language = 'en'): bool;
 
+    /**
+     * A message with up to three reply buttons, inside the 24-hour window (26.1). The tap arrives as a
+     * `WurkWhatsAppReceived` with `buttonId`.
+     *
+     * @param  array<string, string>  $buttons  id => title
+     */
+    public function sendButtons(string $to, string $body, array $buttons): bool;
+
     /** @return array{contents: string, mime: string}|null a file sent to WURK's number */
     public function media(string $mediaId): ?array;
 }

@@ -14,5 +14,5 @@ namespace Wurk\Messaging\Events;
 final readonly class WurkWhatsAppReceived
 {
     public function __construct(public string $from, public string $text, public ?string $mediaId = null, public ?string $mediaMime = null,
-        public bool $answered = false, public string $messageId = '') {}
+        public bool $answered = false, public string $messageId = '', public ?string $buttonId = null) {}
 }

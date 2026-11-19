@@ -16,6 +16,7 @@ use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Payments\Contracts\BusinessPaymentReceived;
 use Wurk\Plans\Contracts\Entitlements;
+use Wurk\Platform\Contracts\AssistantTools;
 use Wurk\Platform\Contracts\BusinessReports;
 use Wurk\Platform\Contracts\BusinessSetup;
 use Wurk\Platform\Contracts\DataExports;
@@ -27,6 +28,8 @@ use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Shipping\Contracts\ShipmentUpdated;
+use Wurk\Shop\Assistant\AddStockTool;
+use Wurk\Shop\Assistant\MarkOrderPaidTool;
 use Wurk\Shop\Console\DemoShopCommand;
 use Wurk\Shop\Console\ExpireOrdersCommand;
 use Wurk\Shop\Digest\ShopDigest;
@@ -131,6 +134,11 @@ final class ShopServiceProvider extends ModuleServiceProvider
             ->where('status', 'done')->where('updated_at', '>=', $from)->where('updated_at', '<', $until)->get()
             ->map(fn (Order $o) => ['key' => 'order:'.$o->id, 'kind' => 'order', 'title' => 'order #'.$o->number, 'customer' => $o->customer_name,
                 'phone' => $o->customer_phone, 'email' => $o->customer_email, 'finished_at' => $o->updated_at?->toIso8601String() ?? now()->toIso8601String()])));
+        // Ask WURK (26.1, in the app and on WhatsApp): mark a pay-later order paid, add stock that arrived.
+        $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
+            $t->register(MarkOrderPaidTool::class);
+            $t->register(AddStockTool::class);
+        });
         $this->callAfterResolving(MoneyOwed::class, fn (MoneyOwed $o) => $o->register('shop', fn () => Order::query()->where('status', 'awaiting_payment')->where('payment_method', 'offline')
             ->orderBy('created_at')->limit(200)->get()->map(fn (Order $order) => ['key' => 'order:'.$order->id, 'kind' => 'order', 'title' => 'Order #'.$order->number.' (pay later)',
                 'customer' => $order->customer_name, 'phone' => $order->customer_phone, 'email' => $order->customer_email, 'amount_cents' => $order->dueCents(),
