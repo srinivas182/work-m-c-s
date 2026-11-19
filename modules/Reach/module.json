@@ -1,0 +1,15 @@
+{
+    "name": "Reach",
+    "key": "reach",
+    "version": "0.1.0",
+    "description": "Customers without smartphones or data: booking by USSD on any phone (one WURK code, a short number per business), and by SMS (Sprint 25.2).",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "regions",
+        "audit",
+        "messaging",
+        "credits"
+    ]
+}
