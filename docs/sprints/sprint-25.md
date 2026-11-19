@@ -1,6 +1,6 @@
 # Sprint 25 — Reach & trust
 
-**Status:** approved 19 Nov 2026 (decisions A–H as recommended).
+**Status:** approved 19 Nov 2026 (decisions A–H as recommended). Built 19 Nov 2026 as v0.26.0.
 
 ## Why
 
@@ -168,3 +168,59 @@ WURK's businesses already reach customers on WhatsApp and the web. Two groups ar
 | 25.5 | Refunds across bookings, shop, sales and invoices; cash-up; VAT reversal; the returns-policy template per country |
 | 25.6 | WhatsApp help line through Ask WURK; video subtitles |
 | 25.7 | End-to-end tests; v0.26.0 |
+
+## Progress
+
+| Part | PR | Notes |
+|---|---|---|
+| 25.1a | #261 | Country packs (currency and format, tax with dated, HQ-confirmed rates and levies, phone, week start, languages, providers, returns template); ZA confirmed, seven more to confirm; Admin → Countries; invoices charge the country's tax |
+| 25.1b | #262 | Money written in the business's currency on server and browser (`Money::format/short/zar`, `currency` prop, `<html data-currency>`); Paystack and Flutterwave in the business's currency |
+| 25.2a | #263 | Reach module: a four-digit number per business, USSD sessions (resume within 2 minutes), the booking menu over the receptionist's booking tools; Africa's Talking webhook; credits per session |
+| 25.2b | #264 | SMS booking by BOOK or the business's word; "what I owe"; Settings → Bookings by phone (number, switches, SMS word, use, counter cards) |
+| 25.3a | #265 | Reviews module: `FinishedVisits` (Bookings, Shop), `reviews:ask` hourly, WhatsApp `wurk_review_request` or SMS, 90 days and STOP; the customer's signed page; no gating; Customers → Reviews (replies, hide with a reason, still counted) |
+| 25.3b | #266 | The Reviews block on the business's site, re-rendered when reviews change; Testimonials v2 shows only words confirmed real |
+| 25.4 | #267 | Trust module: phone + HQ-checked ID make "Verified by WURK", a registry match adds "Registered business"; encrypted documents, every view logged, deleted after 90 days; badge in the site footer and on invoices, linked to `/verified/{handle}` |
+| 25.5 | #268 | Refunds ledger across bookings, shop, sales and invoices; provider or by hand; cash-up; store credit only by choice; invoice refunds with VAT reversed; the returns-policy page from the country pack |
+| 25.6 | #269 | WhatsApp help line through Ask WURK (help centre only, owner's language, voice notes, free questions then credits, PERSON → support with replies back on WhatsApp); video subtitles drafted by WURK AI and approved by reviewers |
+| 25.7 | | End-to-end tests (USSD booking, a review, an invoice refund, the badge); v0.26.0 notes and upgrade steps |
+
+## Verification (before closing)
+
+Every spec item and acceptance criterion, checked against the code and its tests. Verified 19 Nov 2026.
+
+| Item | Where | Status |
+|---|---|---|
+| 25.1 Pack contents (currency, tax, phone, time zone, week start, providers, SMS/USSD provider, languages, returns template) | Regions migration, EloquentCountries::pack; CountryPacksTest | ✅ / ⚠️ privacy and terms stay one template for every country |
+| 25.1 First eight packs; HQ confirms each rate before a pack is offered | Seeded packs, Admin → Countries | ✅ ZA open; the others wait for HQ's confirmation |
+| 25.1 Packs edited in Admin with history; new rates from a date, old invoices keep theirs | CountriesController, `country_tax_rates`; audit log | ✅ |
+| 25.1 Country at signup; owner changes what differs (not VAT-registered → no VAT) | Signup country; VAT per invoice | ✅ / ⚠️ VAT is switched off per invoice, not as a business setting |
+| 25.1 Hard-coded rand and 15% replaced by lookups | Money, BusinessCurrency, invoices' tax; BusinessCurrencyTest | ✅ |
+| 25.2 Shared USSD code, number per business; book, cancel, move, what's owed; 182 characters, 7 choices; resume within 2 minutes | Reach (UssdMenu, Screen); UssdBookingTest, e2e | ✅ |
+| 25.2 SMS booking by BOOK or the business's word, same rules | SmsBookingController; SmsBookingAndSettingsTest | ✅ |
+| 25.2 Deposits: payment link; "pay at the business" without data | Mobile-money prompt or the website | ⚠️ "Pay at the business" for deposit services isn't offered by phone |
+| 25.2 Settings → Reach (number, word, poster and counter card); "came by USSD/SMS" | ReachSettingsController, card view; diary source | ✅ |
+| 25.2 Credits per session and SMS, per-country price; switch off | Credits channels `ussd` and SMS; settings switches | ✅ |
+| 25.3 One request after a visit or delivered order; 90 days; STOP; switch off | Reviews::askDue; ReviewsTest | ✅ |
+| 25.3 No gating: same Google link and private reply for everyone | Public pages; ReviewsTest | ✅ |
+| 25.3 Low scores first; reply; hide only with a reason, logged, still counted; date order; count and average | Reviews screen and block; ReviewsTest, blocks.test | ✅ |
+| 25.3 Testimonials only with words confirmed real | Testimonials v2 | ✅ |
+| 25.3 Google link from the Google listing or pasted in | Reviews settings | ⚠️ Pasted in (Google addresses only); not yet filled from the listing |
+| 25.4 Three checks shown separately; badge once phone and identity pass; "Registered business" for the registry | Trust Verifications; VerifiedBusinessTest, e2e | ✅ |
+| 25.4 Badge on the site, booking pages and invoices, linked to what was checked | Footer block, public invoice, `/verified/{handle}` | ✅ Site and invoices / ⚠️ the stand-alone booking manage pages don't show it yet |
+| 25.4 HQ queue, documents, approve or refuse with a reason; encrypted; deleted after 90 days | Admin → Verification; `trust:purge-documents` | ✅ |
+| 25.4 Withdrawn when suspended or expired; redone every 2 years | Verifications::for | ✅ |
+| 25.4 A provider can do the checks later | — | ⏳ Later, by design (decision E) |
+| 25.5 One Refund action on bookings, orders, sales and invoices, with a reason and a note | Refunds ledger; CashUpAndProfitTest, Shop and Sales tests, e2e | ✅ Bookings: deposits refunded on cancellation are recorded |
+| 25.5 Provider when it can, by hand otherwise; cash in cash-up; store credit never forced | Invoices::refund, Sales, OrderManager, MoneyBook | ✅ |
+| 25.5 Returns policy from the country pack, with the CPA rights; "not legal advice"; owner confirms | ReturnsPolicy; ReturnsPolicyTest | ✅ |
+| 25.5 Receipts and reports show refunds; VAT reverses | Public invoice, profit; customer told by SMS/email | ✅ Invoices / ⚠️ sales and orders carry no separate VAT to reverse |
+| 25.6 WhatsApp help line through Ask WURK, owner's language, voice notes, handover, no changes | HelpLine, AskWurk; HelpLineTest | ✅ |
+| 25.6 Counts toward Ask WURK's free questions, then credits | Assistant (channel `whatsapp`); HelpLineTest | ✅ |
+| 25.6 Video subtitles drafted by WURK AI, checked by reviewers | Captions, CaptionDrafts; VideoSubtitlesTest | ✅ |
+| Acceptance 1 (USSD booking, SMS confirmation, marked USSD) | UssdBookingTest, e2e | ✅ Simulated; live once Africa's Talking is set up |
+| Acceptance 2 (SMS BOOK) | SmsBookingAndSettingsTest | ✅ |
+| Acceptance 3 (one request; Google link and private reply whatever the score; shown on the site in date order) | ReviewsTest, ReviewsOnTheSiteTest, e2e | ✅ |
+| Acceptance 4 (HQ approves; badge on site, booking page and invoice) | VerifiedBusinessTest, e2e | ✅ / ⚠️ booking manage pages |
+| Acceptance 5 (refund half a card payment and a whole cash sale; receipt; cash-up; VAT) | Refunds; CashUpAndProfitTest, e2e | ✅ / ⚠️ VAT reverses on invoices only |
+| Acceptance 6 (Kenya: KES, 16%, +254, returns template) | KE pack | ⚠️ The pack is ready; Kenya opens once HQ confirms the rate; the returns page uses the general template |
+| Acceptance 7 (isiZulu question, isiZulu answer with the article link) | HelpLineTest | ✅ |

@@ -79,6 +79,14 @@ php artisan shop:demo --no-interaction > /dev/null           # the retail demos 
 # WURK's sales assistant on wurk.co.za (Sprint 19.5b), switched on as HQ would in Admin → WURK AI.
 php artisan tinker --execute="\$s = app(Wurk\\Ai\\Support\\AiSettings::class); \$all = \$s->all(); \$s->save([...\$all, 'sales' => [...\$all['sales'], 'enabled' => true]], null);" > /dev/null
 
+# Sprint 25 (25.7): the USSD provider's test settings, credits and a review request for the demo salon (its signed
+# link for the test server), and WURK staff who approve a verified business — one per Playwright project.
+APP_URL="http://127.0.0.1:${E2E_PORT:-8123}" php artisan tinker scripts/e2e-sprint25.php > /dev/null
+for project in desktop mobile; do
+  php artisan identities:create "trust-${project}@wurk.co.za" --first=Naledi --last=Trust \
+    --password="sunny days in durban" --staff --mfa-secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP > /dev/null
+done
+
 # The accessibility crawl (Sprint 18.5a): a business with a record behind every screen, the list of every screen,
 # and staff accounts for its Admin chunks (authenticator codes are single-use, so each chunk signs in as its own person).
 for project in desktop mobile; do
