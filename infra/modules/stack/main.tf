@@ -124,4 +124,19 @@ module "app" {
   serve               = var.serve
   worker              = var.worker
   deletion_protection = var.deletion_protection
+  ecr_pull_role_arns  = var.ecr_pull_role_arns
+}
+
+module "deploy" {
+  source                = "../deploy"
+  name                  = local.name
+  environment           = var.environment
+  github_repository     = var.github_repository
+  create_oidc_provider  = var.create_github_oidc_provider
+  cluster_name          = module.app.cluster_name
+  repository_arn        = module.app.repository_arn
+  kms_key_arn           = aws_kms_key.this.arn
+  task_role_arns        = module.app.task_role_arns
+  database_arns         = values(module.database.instance_arns)
+  source_repository_arn = var.source_repository_arn
 }

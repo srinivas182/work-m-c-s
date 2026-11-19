@@ -182,3 +182,4 @@ Also: rebalance the MySQL CI parts again (the slowest took 11.5 of 12 minutes on
 | Part | PR | Notes |
 |---|---|---|
 | 17.1 Infrastructure as code | #281 | OpenTofu in `infra/`: network, MySQL per shard, Valkey, files bucket + CloudFront, ECS Fargate roles and autoscaling. Disks switch to S3 prefixes with `FILES_DRIVER=s3`; RDS CA in the image; a CI job validates, lints (TFLint + AWS rules) and scans (Checkov). Not applied: waits for WURK's accounts and budget |
+| 17.2 Releases | #282 | Tag → build once → staging → smoke → approval → the same image to production. `scripts/deploy` (snapshots, migrate central and shards, `release:tasks`, rolling update, 10-minute watch, automatic rollback), `release:finished` (Admin → System and HQ email), GitHub OIDC deploy roles (no AWS keys). Caches: each new container rebuilds its own; the shared Redis cache is kept, since it holds rate limits and pending actions |

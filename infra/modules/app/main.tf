@@ -47,6 +47,8 @@ locals {
       CLAMAV_PORT          = "3310"
       TRUSTED_PROXIES      = var.vpc_cidr
       BACKUP_TARGETS       = join(",", var.backup_targets)
+      INERTIA_SSR_URL      = "http://ssr.${var.name}.internal:13714"
+      WURK_RELEASE         = var.image_tag # replaced by each release (17.2)
     }, var.extra_environment) : { name = k, value = tostring(v) }
   ])
 
@@ -78,6 +80,21 @@ resource "aws_ecr_repository" "wurk" {
     encryption_type = "KMS"
     kms_key         = var.kms_key_arn
   }
+}
+
+# Production's deploy role copies the image staging tested (same digest) — staging's registry lets it pull.
+resource "aws_ecr_repository_policy" "pull" {
+  count      = length(var.ecr_pull_role_arns) > 0 ? 1 : 0
+  repository = aws_ecr_repository.wurk.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "ProductionPulls"
+      Effect    = "Allow"
+      Principal = { AWS = var.ecr_pull_role_arns }
+      Action    = ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer", "ecr:BatchCheckLayerAvailability"]
+    }]
+  })
 }
 
 resource "aws_ecr_lifecycle_policy" "wurk" {
@@ -438,7 +455,7 @@ resource "aws_ecs_service" "role" {
   }
 
   lifecycle {
-    ignore_changes = [desired_count] # autoscaling owns it
+    ignore_changes = [desired_count, task_definition] # autoscaling owns the count; releases (scripts/deploy) the version
   }
 
   depends_on = [aws_lb_listener.https]

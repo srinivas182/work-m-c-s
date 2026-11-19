@@ -59,6 +59,13 @@ interface Props {
   drills: Drill[];
   targets: { rpo_minutes: number; rto_minutes: number };
   moves: Move[];
+  releases: {
+    version: string;
+    environment: string;
+    status: 'live' | 'rolled_back' | 'failed';
+    note: string | null;
+    finished_at: string;
+  }[];
 }
 
 const size = (b: number | null) => {
@@ -88,6 +95,7 @@ export default function System({
   drills,
   targets,
   moves,
+  releases,
 }: Props) {
   const behind = shards.filter((s) => s.schema_version < s.expected_version);
   const late = backups.filter((b) => b.late);
@@ -234,6 +242,63 @@ export default function System({
                       <td className={td}>{b.kind ?? '—'}</td>
                       <td className={`${td} text-right tabular-nums`}>{size(b.size_bytes)}</td>
                       <td className={`${td} break-all`}>{b.location ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{__('Releases')}</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            {releases.length === 0 ? (
+              <p className="text-fg-muted text-sm">
+                {__('None recorded yet. Each deploy is recorded here (Sprint 17.2).')}
+              </p>
+            ) : (
+              <table className="w-full text-sm">
+                <caption className="sr-only">{__('Latest releases')}</caption>
+                <thead>
+                  <tr className="text-fg-muted text-left">
+                    <th className={th}>{__('When')}</th>
+                    <th className={th}>{__('Version')}</th>
+                    <th className={th}>{__('Where')}</th>
+                    <th className={th}>{__('Result')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {releases.map((r) => (
+                    <tr
+                      key={r.finished_at + r.environment}
+                      className="border-border border-t align-top"
+                    >
+                      <td className={td}>{at(r.finished_at)}</td>
+                      <td className={td}>
+                        {r.version}
+                        {r.note && <p className="text-fg-muted">{r.note}</p>}
+                      </td>
+                      <td className={td}>{r.environment}</td>
+                      <td className={td}>
+                        <Badge
+                          tone={
+                            r.status === 'live'
+                              ? 'success'
+                              : r.status === 'rolled_back'
+                                ? 'warning'
+                                : 'danger'
+                          }
+                        >
+                          {r.status === 'live'
+                            ? __('Live')
+                            : r.status === 'rolled_back'
+                              ? __('Rolled back')
+                              : __('Failed')}
+                        </Badge>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

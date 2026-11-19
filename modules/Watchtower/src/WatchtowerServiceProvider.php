@@ -20,6 +20,8 @@ use Wurk\Watchtower\Console\BackupTakenCommand;
 use Wurk\Watchtower\Console\CheckCommand;
 use Wurk\Watchtower\Console\DigestCommand;
 use Wurk\Watchtower\Console\DrillRecordedCommand;
+use Wurk\Watchtower\Console\ReleaseFinishedCommand;
+use Wurk\Watchtower\Console\ReleaseTasksCommand;
 use Wurk\Watchtower\Console\SweepCommand;
 use Wurk\Watchtower\Http\Controllers\ClientErrorController;
 use Wurk\Watchtower\Http\Controllers\HeartbeatController;
@@ -62,7 +64,8 @@ final class WatchtowerServiceProvider extends ModuleServiceProvider
     {
         $this->loadViewsFrom($this->modulePath('resources/views'), 'watchtower');
         if ($this->app->runningInConsole()) {
-            $this->commands([CheckCommand::class, DigestCommand::class, SweepCommand::class, BackupTakenCommand::class, DrillRecordedCommand::class]);
+            $this->commands([CheckCommand::class, DigestCommand::class, SweepCommand::class, BackupTakenCommand::class, DrillRecordedCommand::class,
+                ReleaseTasksCommand::class, ReleaseFinishedCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $s): void {
             $s->command('watchtower:check')->everyMinute()->onOneServer()->withoutOverlapping(5);

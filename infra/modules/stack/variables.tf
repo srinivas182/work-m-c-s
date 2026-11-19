@@ -94,3 +94,26 @@ variable "cloudflare_ipv4" {
     "104.24.0.0/14", "172.64.0.0/13", "131.0.72.0/22",
   ]
 }
+
+variable "github_repository" {
+  description = "The repository whose release workflow may deploy here"
+  type        = string
+  default     = "srinivas182/work-m-c-s"
+}
+
+variable "create_github_oidc_provider" {
+  type    = bool
+  default = true
+}
+
+variable "ecr_pull_role_arns" {
+  description = "Staging: production's deploy role, so it can copy the tested image"
+  type        = list(string)
+  default     = []
+}
+
+variable "source_repository_arn" {
+  description = "Production: staging's registry"
+  type        = string
+  default     = null
+}

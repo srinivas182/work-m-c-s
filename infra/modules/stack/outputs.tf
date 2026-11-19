@@ -46,3 +46,12 @@ output "files_cloudfront_domain" {
 output "outbound_ips" {
   value = module.network.nat_public_ips
 }
+
+output "deploy_role_arn" {
+  description = "GitHub environment variable AWS_DEPLOY_ROLE_ARN for this environment"
+  value       = module.deploy.role_arn
+}
+
+output "repository_arn" {
+  value = module.app.repository_arn
+}
