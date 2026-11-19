@@ -12,6 +12,8 @@ production are built the same way and every change is reviewed in a pull request
 | `modules/cache` | Valkey for cache, sessions and queues. Encrypted, with an auth token and failover in production. |
 | `modules/files` | The private, versioned files bucket (with a `tenants/<id>/` prefix per business), the logs bucket, and CloudFront for public website files. |
 | `modules/app` | The image registry and the ECS cluster with `serve`, `worker`, `scheduler`, `ssr` and `clamav`. Also the load balancer (Cloudflare only), autoscaling, roles and logs. |
+| `modules/edge` | Cloudflare (17.3): DNS for WURK's addresses, the ACM certificates (validated through Cloudflare), and in production the zone's TLS settings and the fallback origin for owners' own domains. |
+| `modules/deploy` | The release pipeline's role, for GitHub OIDC (17.2). |
 | `modules/stack` | One environment: everything above, with its encryption key. |
 | `envs/staging`, `envs/production` | The two environments and their sizes. |
 
@@ -33,7 +35,8 @@ Before the first apply, these sizes are priced in the AWS Pricing Calculator and
 You need:
 - AWS accounts for production, staging and backups, in one AWS Organization, with `af-south-1` enabled;
 - an IAM Identity Center role for the engineers (never root keys);
-- the ACM certificate for `wurk.co.za` and `*.wurk.co.za` (or the `staging.` ones), validated through Cloudflare DNS.
+- `wurk.co.za` on Cloudflare, with Cloudflare for SaaS enabled on the zone. Note the zone ID.
+- A Cloudflare API token **for OpenTofu**, limited to the `wurk.co.za` zone, with these permissions: Zone Settings Edit, DNS Edit, SSL and Certificates Edit, Custom Hostnames Edit. Export it as `CLOUDFLARE_API_TOKEN` when you run OpenTofu, and never write it in a file.
 
 ```bash
 cd infra/bootstrap
@@ -41,7 +44,7 @@ tofu init && tofu apply -var account_id=<account id>          # state bucket + l
 
 cd ../envs/staging
 tofu init -backend-config=bucket=wurk-tofu-state-<account id>
-tofu plan -var account_id=<id> -var image_tag=<version> -var certificate_arn=<arn> -out staging.tfplan
+tofu plan -var account_id=<id> -var image_tag=<version> -var cloudflare_zone_id=<zone> -out staging.tfplan
 tofu apply staging.tfplan
 ```
 
@@ -56,7 +59,22 @@ Then, once:
 2. **Push the first image** to the registry in `repository_url` (17.2 automates this).
 3. **Migrate the central database and register the shards.** The credentials are in `wurk/<env>/db`, and the release task does this in 17.2:
    `migrate`, then `php artisan shards:register shard-1 --host=<shard_1 endpoint> --database=wurk --username=wurk --password=… --if-missing`, the same for `shard-2`, then `shards:migrate`.
-4. **Point Cloudflare at the load balancer** (`load_balancer_dns`), proxied, with SSL mode *Full (strict)*. Point `files.wurk.co.za` at `files_cloudfront_domain` with a DNS-only CNAME. See 17.3.
+4. **Give WURK its own Cloudflare token for owners' domains.** It needs only the SSL and Certificates and Custom Hostnames permissions, on the `wurk.co.za` zone. Put it in the secret `wurk/<env>/app` as `CLOUDFLARE_API_TOKEN`, then redeploy. Until it's there, Website → Your domain says connecting domains isn't switched on yet.
+
+The DNS records, the certificates and Cloudflare's settings are all in `modules/edge`, so nothing is clicked in Cloudflare.
+
+**Staging's addresses** (`<business>.staging.wurk.co.za`) are two levels below the zone. Cloudflare's free edge certificate covers only one level. Staging therefore needs either Cloudflare's Advanced Certificate Manager for `*.staging.wurk.co.za`, or its own domain. The app, admin, origin and sites addresses work either way.
+
+## Owners' own domains (17.3)
+
+1. The owner types `www.theirbusiness.co.za` in **Website → Your domain**. Their package must include a custom domain.
+2. WURK adds it to Cloudflare for SaaS as a custom hostname. The hostname's origin is `origin.<root>`, so Cloudflare connects with that name and the load balancer's certificate is valid under Full (strict). The Host header stays the owner's domain, which is how WURK knows the business.
+3. The owner adds one CNAME record, pointing at `sites.<root>`, where their domain is managed.
+4. Cloudflare issues the domain's certificate (HTTP validation) and renews it from then on.
+5. `domains:check` runs every 5 minutes and marks the domain working; the owner gets a push notification. The owner can then make it the **main address**, and page visits to `<handle>.<root>` get a 301 to it. Payment notices, signed links and anything that isn't a GET stay on the WURK address.
+6. Once a day, `domains:check --all` finds domains that stopped pointing at WURK. The site goes back to its WURK address and the owner is told.
+
+A domain that never points at WURK is let go after 7 days. Each custom hostname costs $0.10 a month after the first 100. **Admin → Domains** shows every business's domains and their state.
 
 ## Rules
 

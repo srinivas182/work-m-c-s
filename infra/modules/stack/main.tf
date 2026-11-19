@@ -2,8 +2,9 @@
 
 terraform {
   required_providers {
-    aws    = { source = "hashicorp/aws", version = "~> 5.80" }
-    random = { source = "hashicorp/random", version = "~> 3.6" }
+    aws        = { source = "hashicorp/aws", version = "~> 5.80", configuration_aliases = [aws.us_east_1] }
+    random     = { source = "hashicorp/random", version = "~> 3.6" }
+    cloudflare = { source = "cloudflare/cloudflare", version = "~> 4.52" }
   }
 }
 
@@ -63,13 +64,27 @@ module "network" {
   kms_key_arn        = aws_kms_key.this.arn
 }
 
+module "edge" {
+  source                  = "../edge"
+  environment             = var.environment
+  zone_id                 = var.cloudflare_zone_id
+  root_domain             = var.root_domain
+  load_balancer_dns       = module.app.load_balancer_dns
+  files_cloudfront_domain = module.files.cloudfront_domain
+  manage_zone             = var.environment == "production"
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+}
+
 module "files" {
   source                 = "../files"
   name                   = local.name
   environment            = var.environment
   kms_key_arn            = aws_kms_key.this.arn
-  public_domain          = var.files_domain
-  public_certificate_arn = var.files_certificate_arn
+  public_domain          = "files.${var.root_domain}"
+  public_certificate_arn = module.edge.files_certificate_arn
 }
 
 module "database" {
@@ -99,19 +114,24 @@ module "cache" {
 }
 
 module "app" {
-  source              = "../app"
-  name                = local.name
-  environment         = var.environment
-  vpc_id              = module.network.vpc_id
-  vpc_cidr            = var.vpc_cidr
-  public_subnet_ids   = module.network.public_subnet_ids
-  app_subnet_ids      = module.network.app_subnet_ids
-  kms_key_arn         = aws_kms_key.this.arn
-  image_tag           = var.image_tag
-  root_domain         = var.root_domain
-  app_domain          = "app.${var.root_domain}"
-  certificate_arn     = var.certificate_arn
-  cloudflare_ipv4     = var.cloudflare_ipv4
+  source            = "../app"
+  name              = local.name
+  environment       = var.environment
+  vpc_id            = module.network.vpc_id
+  vpc_cidr          = var.vpc_cidr
+  public_subnet_ids = module.network.public_subnet_ids
+  app_subnet_ids    = module.network.app_subnet_ids
+  kms_key_arn       = aws_kms_key.this.arn
+  image_tag         = var.image_tag
+  root_domain       = var.root_domain
+  app_domain        = "app.${var.root_domain}"
+  certificate_arn   = module.edge.certificate_arn
+  cloudflare_ipv4   = module.edge.cloudflare_ipv4
+  extra_environment = {
+    CLOUDFLARE_ZONE_ID        = var.cloudflare_zone_id # 17.3: owners' own domains (the token is in wurk/<env>/app)
+    WURK_CUSTOM_DOMAIN_TARGET = module.edge.custom_domain_target
+    WURK_CUSTOM_DOMAIN_ORIGIN = "origin.${var.root_domain}"
+  }
   central_db_host     = module.database.endpoints["central"]
   db_secret_arn       = module.database.secret_arn
   redis_host          = module.cache.primary_endpoint

@@ -37,6 +37,7 @@ use Wurk\Platform\Events\ReviewsChanged;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
+use Wurk\Tenancy\Events\CustomDomainChanged;
 use Wurk\Website\Analytics\AssistantSection;
 use Wurk\Website\Analytics\SiteVisits;
 use Wurk\Website\Analytics\WebsiteSection;
@@ -64,6 +65,7 @@ use Wurk\Website\Models\SiteAsset;
 use Wurk\Website\Setup\WebsiteSetupStep;
 use Wurk\Website\Support\Branding;
 use Wurk\Website\Support\ChatBot;
+use Wurk\Website\Support\DomainNotices;
 use Wurk\Website\Support\EloquentSiteTemplates;
 use Wurk\Website\Support\LaunchChecklist;
 use Wurk\Website\Support\LaunchSignal;
@@ -121,6 +123,7 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
             ['label' => 'Set up by talking', 'route' => 'tenant.website.setup', 'icon' => 'mic', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 99],
             ['label' => 'Share', 'route' => 'tenant.website.share', 'icon' => 'share-2', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 101],
             ['label' => 'Pages', 'route' => 'tenant.website.pages', 'icon' => 'globe', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 100],
+            ['label' => 'Your domain', 'route' => 'tenant.website.domain', 'icon' => 'link', 'section' => 'Website', 'permission' => 'website.publish', 'entitlement' => 'website', 'order' => 103],
             ['label' => 'Branding', 'route' => 'tenant.website.branding', 'icon' => 'palette', 'section' => 'Website', 'permission' => 'website.edit', 'entitlement' => 'website', 'order' => 102],
             ['label' => 'Time to launch', 'route' => 'admin.launch-times', 'icon' => 'clock', 'section' => 'Platform', 'permission' => 'tenants.view', 'order' => 61],
             ['label' => 'Templates', 'route' => 'admin.templates', 'icon' => 'layout-template', 'section' => 'Platform', 'permission' => 'templates.manage', 'order' => 60],
@@ -208,6 +211,8 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
                     'badge' => $c->status === 'waiting' ? __('Waiting') : null, 'url' => route('tenant.website.chats', ['open' => $c->id]), 'actions' => []])->all())];
         }));
         ReceptionistConversation::updated(fn (ReceptionistConversation $c) => $c->wasChanged('status') ? $waiting($c) : null);
+        // 17.3: the owner hears when their domain starts working, stops pointing at WURK, or is let go unused.
+        Event::listen(CustomDomainChanged::class, fn (CustomDomainChanged $e) => app(DomainNotices::class)->changed($e));
         Event::listen(WhatsAppReceived::class, fn (WhatsAppReceived $e) => app(WhatsAppChats::class)->received($e));
         Event::listen(WhatsAppStatusChanged::class, fn (WhatsAppStatusChanged $e) => app(WhatsAppChats::class)->status($e));
         Event::listen(WhatsAppSent::class, fn (WhatsAppSent $e) => app(WhatsAppChats::class)->sent($e)); // 21.5

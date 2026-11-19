@@ -6,6 +6,7 @@ namespace Wurk\Tenancy;
 
 use Closure;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Log\Context\Repository as LogContext;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobProcessed;
@@ -19,6 +20,7 @@ use Laravel\Octane\Events\RequestReceived;
 use Laravel\Octane\Events\RequestTerminated;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Tenancy\Actions\TenantProvisioning;
+use Wurk\Tenancy\Console\CheckCustomDomainsCommand;
 use Wurk\Tenancy\Console\ClearMovedCommand;
 use Wurk\Tenancy\Console\CreateTenantCommand;
 use Wurk\Tenancy\Console\MigrateShardsCommand;
@@ -29,12 +31,17 @@ use Wurk\Tenancy\Console\RestoreTenantCommand;
 use Wurk\Tenancy\Console\RunForTenantsCommand;
 use Wurk\Tenancy\Context\TenantContextManager;
 use Wurk\Tenancy\Contracts\BranchDirectory;
+use Wurk\Tenancy\Contracts\CustomDomains;
+use Wurk\Tenancy\Contracts\CustomHostnames;
 use Wurk\Tenancy\Contracts\ShardStatus;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Tenancy\Contracts\TenantProvisioner;
+use Wurk\Tenancy\Domains\CloudflareHostnames;
+use Wurk\Tenancy\Domains\CustomDomainManager;
 use Wurk\Tenancy\Http\Middleware\InitializeTenancyByDomain;
 use Wurk\Tenancy\Http\Middleware\InitializeTenancyByPath;
+use Wurk\Tenancy\Http\Middleware\ServeCustomDomains;
 use Wurk\Tenancy\Listeners\ForgetTenantContext;
 use Wurk\Tenancy\Models\Branch;
 use Wurk\Tenancy\Models\Tenant;
@@ -57,6 +64,8 @@ final class TenancyServiceProvider extends ModuleServiceProvider
         $this->app->singleton(TenantContext::class, TenantContextManager::class);
         $this->app->singleton(TenantDirectory::class, EloquentTenantDirectory::class);
         $this->app->bind(ShardStatus::class, ShardStatusReport::class);
+        $this->app->bind(CustomHostnames::class, CloudflareHostnames::class); // Sprint 17.3
+        $this->app->bind(CustomDomains::class, CustomDomainManager::class);
     }
 
     /**
@@ -80,6 +89,7 @@ final class TenancyServiceProvider extends ModuleServiceProvider
     {
         return [
             ['label' => 'Businesses', 'route' => 'admin.businesses.index', 'icon' => 'building', 'section' => 'Platform', 'permission' => 'tenants.view', 'order' => 20],
+            ['label' => 'Domains', 'route' => 'admin.domains', 'icon' => 'globe', 'section' => 'Platform', 'permission' => 'tenants.view', 'order' => 21],
         ];
     }
 
@@ -89,6 +99,8 @@ final class TenancyServiceProvider extends ModuleServiceProvider
         Gate::policy(Branch::class, BranchPolicy::class);
 
         $this->registerRouteMacros();
+        // 17.3: owners' own domains are served as their WURK address — before the router picks a route.
+        $this->app->make(Kernel::class)->prependMiddleware(ServeCustomDomains::class);
         $this->resetContextBetweenUnitsOfWork();
         $this->restoreContextInQueuedJobs();
 
@@ -102,9 +114,14 @@ final class TenancyServiceProvider extends ModuleServiceProvider
                 MoveTenantCommand::class,
                 RestoreTenantCommand::class,
                 ClearMovedCommand::class,
+                CheckCustomDomainsCommand::class,
             ]);
         }
-        $this->callAfterResolving(Schedule::class, fn (Schedule $s) => $s->command('tenants:clear-moved')->dailyAt('04:13')->onOneServer()); // 18.4a
+        $this->callAfterResolving(Schedule::class, function (Schedule $s): void {
+            $s->command('tenants:clear-moved')->dailyAt('04:13')->onOneServer(); // 18.4a
+            $s->command('domains:check')->everyFiveMinutes()->onOneServer()->withoutOverlapping(); // 17.3: pending domains
+            $s->command('domains:check --all')->dailyAt('03:25')->onOneServer()->withoutOverlapping(); // and lapsed ones
+        });
     }
 
     /**

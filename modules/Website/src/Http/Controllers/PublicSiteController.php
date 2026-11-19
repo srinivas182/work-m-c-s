@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Vite;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Tenancy\Contracts\CurrentTenant;
+use Wurk\Tenancy\Contracts\CustomDomains;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Tenancy\Contracts\TenantDirectory;
 use Wurk\Tenancy\Contracts\TenantProvisioner;
@@ -92,6 +93,14 @@ final class PublicSiteController
         });
     }
 
+    /** The address the visitor used: the business's own domain (17.3, always HTTPS) or its WURK address. */
+    private static function origin(): string
+    {
+        $custom = request()->attributes->get(CustomDomains::REQUEST_HOST);
+
+        return is_string($custom) ? 'https://'.$custom : request()->getSchemeAndHttpHost();
+    }
+
     /** The page shell around stored content (pages and product pages share it): caching, assets, headers. */
     private function respond(CurrentTenant $tenant, string $path, ?int $renderedAt, string $canonical, bool $home): Response
     {
@@ -123,8 +132,8 @@ final class PublicSiteController
             'chat' => $chatHere, // decided here — never by whether an asset address exists
             'chatScript' => $chatHere ? $assets->chat() : null,
             'body' => $body,
-            'canonical' => request()->getSchemeAndHttpHost().$canonical,
-            'image' => ($img = $stored['image'] ?? null) ? request()->getSchemeAndHttpHost().$img : null,
+            'canonical' => self::origin().$canonical,
+            'image' => ($img = $stored['image'] ?? null) ? self::origin().$img : null,
             'siteName' => $tenant->displayName(),
             // WhatsApp chat button from the published contact details: digits, a leading 0 becomes 27
             // (as the Contact section does), or the business's connected number. A plain link — no third-party script.
@@ -132,7 +141,7 @@ final class PublicSiteController
             'whatsapp' => ($wa = preg_replace('/\D/', '', $facts['contact']['whatsapp']) ?? '') === '' ? app(WhatsAppBusiness::class)->number() : (str_starts_with($wa, '0') ? '27'.substr($wa, 1) : $wa),
             'whatsappText' => app(WhatsAppBusiness::class)->connected() ? app(WhatsAppBusiness::class)->chatText() : null,
             'favicon' => $site?->branding['favicon'] ?? null,
-            'jsonLd' => $home ? json_encode(app(SiteSeo::class)->localBusiness($facts, request()->getSchemeAndHttpHost()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
+            'jsonLd' => $home ? json_encode(app(SiteSeo::class)->localBusiness($facts, self::origin()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) : null,
         ])->render();
 
         return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8', ...$caching, ...($tenant->isDemo() ? ['X-Robots-Tag' => 'noindex, nofollow'] : []), ...$this->securityHeaders()]);

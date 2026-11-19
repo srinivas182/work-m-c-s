@@ -116,7 +116,7 @@ it('tells the booked stylist and the people who manage bookings — not the cash
 it('lets each person turn notifications on for a phone, send a test, and turn them off; a phone the push service forgot is removed', function () {
     $page = $this->app('/glow-salon/settings/notifications');
     $this->actingAs($this->stylist)->get($page)->assertInertia(fn (Assert $p) => $p->component('Push::Settings')->where('phones', 0)->where('off', [])
-        ->where('publicKey', app(WebPush::class)->publicKey())->has('kinds', 5));
+        ->where('publicKey', app(WebPush::class)->publicKey())->has('kinds', 6));
     $key = WebPush::newKey();
     $sub = ['endpoint' => 'https://updates.push.services.mozilla.com/wpush/v2/abc', 'keys' => ['p256dh' => WebPush::b64e(WebPush::point($key)), 'auth' => WebPush::b64e(random_bytes(16))]];
     $this->actingAs($this->stylist)->postJson($page.'/phones', [...$sub, 'keys' => ['p256dh' => 'short', 'auth' => 'x']])->assertUnprocessable();
