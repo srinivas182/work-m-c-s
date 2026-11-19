@@ -7,6 +7,7 @@ namespace Wurk\Website\Support;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Wurk\Platform\Contracts\BusinessBadge;
 use Wurk\Platform\Contracts\PublicReviews;
 use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -70,6 +71,8 @@ final readonly class PageRenderer
                 'products' => app(ProductCatalog::class)->published(),
                 // The business's reviews (25.3b), when the Reviews module is installed.
                 'reviews' => app()->bound(PublicReviews::class) ? app(PublicReviews::class)->summary() : null,
+                // "Verified by WURK" in the footer (25.4), when the Trust module is installed.
+                'badge' => app()->bound(BusinessBadge::class) ? app(BusinessBadge::class)->for($this->context->id()) : null,
                 'formAction' => '/forms/quote', // posts to the business's own address (allowed by its content policy)
                 ...$site,
             ],

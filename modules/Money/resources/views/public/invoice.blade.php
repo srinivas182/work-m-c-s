@@ -22,7 +22,7 @@
 </head>
 <body>
 <main>
-  <p>{{ $business }}</p>
+  <p>{{ $business }}@if (($badge['verified'] ?? false)) · <a href="{{ $badge['url'] }}" rel="noopener">{{ $badge['registered'] ? __('Verified by WURK · Registered business') : __('Verified by WURK') }}</a>@endif</p>
   <h1>{{ __('Invoice :number', ['number' => $label]) }}</h1>
   <p>{{ __('For :customer · issued :issued · due :due', ['customer' => $customer, 'issued' => $issued, 'due' => $due]) }}@if ($vatNumber) · {{ __('VAT number :number', ['number' => $vatNumber]) }}@endif</p>
   @if ($paid)<p><span class="status paid">{{ __('Paid :date', ['date' => $paidOn]) }}</span></p>@elseif ($void)<p><span class="status">{{ __('Cancelled') }}</span></p>@endif

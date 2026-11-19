@@ -474,3 +474,36 @@ describe('reviews (25.3)', () => {
     expect(page({}, [t()])).toContain('Lovely');
   });
 });
+
+describe('verified badge (25.4)', () => {
+  const footer = { id: 'f', type: 'Footer', version: BLOCKS.Footer!.version, props: { text: '' } };
+  const live = (
+    badge: {
+      verified: boolean;
+      registered: boolean;
+      checked_on: string | null;
+      url: string;
+    } | null,
+  ) =>
+    renderToString(
+      <SiteRenderer
+        document={{ schema: 1, blocks: [footer] }}
+        branding={branding}
+        site={{ ...site, editing: false, badge }}
+      />,
+    );
+
+  it('shows “Verified by WURK” in the footer, linked to what was checked, only when verified', () => {
+    const url = 'https://wurk.test/verified/glow-salon';
+    expect(live({ verified: true, registered: false, checked_on: '2027-05-03', url })).toContain(
+      `href="${url}"`,
+    );
+    expect(live({ verified: true, registered: true, checked_on: '2027-05-03', url })).toContain(
+      'Verified by WURK · Registered business',
+    );
+    expect(live({ verified: false, registered: false, checked_on: null, url })).not.toContain(
+      'Verified by WURK',
+    );
+    expect(live(null)).not.toContain('Verified by WURK');
+  });
+});
