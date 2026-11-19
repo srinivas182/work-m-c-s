@@ -91,6 +91,7 @@ jobs:
               - 'scripts/deploy'
               - 'scripts/smoke-remote'
               - 'scripts/drill-restore'
+              - 'scripts/ecs-task'
             docker:
               - *shared
               - 'docker/**'
@@ -605,7 +606,7 @@ jobs:
           pipx run "checkov==${CHECKOV_VERSION}" -d infra --config-file infra/.checkov.yaml
       - name: Release scripts and workflow (17.2)
         run: |
-          shellcheck scripts/deploy scripts/smoke-remote scripts/drill-restore
+          shellcheck scripts/deploy scripts/smoke-remote scripts/drill-restore scripts/ecs-task
           pipx run "actionlint-py==1.7.12.25" .github/workflows/release.yml
 
   ci:

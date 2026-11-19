@@ -87,6 +87,14 @@ for project in desktop mobile; do
     --password="sunny days in durban" --staff --mfa-secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP > /dev/null
 done
 
+# Sprint 17 (17.6): WURK staff who check Admin → Domains and Admin → System's releases, one per Playwright project,
+# and a release recorded as the pipeline would.
+for project in desktop mobile; do
+  php artisan identities:create "golive-${project}@wurk.co.za" --first=Kagiso --last=Ops \
+    --password="sunny days in durban" --staff --mfa-secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP > /dev/null
+done
+php artisan release:finished v1.0.0-rc.1 --environment=staging --note="e2e: recorded as the release pipeline does" > /dev/null
+
 # The accessibility crawl (Sprint 18.5a): a business with a record behind every screen, the list of every screen,
 # and staff accounts for its Admin chunks (authenticator codes are single-use, so each chunk signs in as its own person).
 for project in desktop mobile; do
