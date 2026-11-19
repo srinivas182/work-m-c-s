@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Checks a freshly deployed environment from outside (Sprint 17.2): the app is ready, the marketing site answers,
+# HTTPS is enforced with HSTS, and nothing leaks the server software.
+#   scripts/smoke-remote <root domain, e.g. staging.wurk.co.za> <version (for the log)>
+set -euo pipefail
+ROOT="${1:?usage: scripts/smoke-remote <root domain> <version>}"
+VERSION="${2:?usage: scripts/smoke-remote <root domain> <version>}"
+APP="https://app.${ROOT}"
+failures=0
+
+check() { # url, expected status
+  local code
+  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$1" || echo 000)"
+  if [ "$code" = "$2" ]; then echo "ok   $1 -> $code"; else echo "FAIL $1 -> $code (expected $2)"; failures=$((failures + 1)); fi
+}
+
+for i in $(seq 1 30); do # new containers may still be warming up
+  [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${APP}/health/ready" || true)" = "200" ] && break
+  echo "waiting for ${APP}/health/ready ($i)"; sleep 10
+done
+
+check "${APP}/health/live" 200
+check "${APP}/health/ready" 200
+check "https://${ROOT}/" 200
+check "https://${ROOT}/sign-in" 200
+
+headers="$(curl -sI --max-time 15 "https://${ROOT}/")"
+has_header() { # pattern, label
+  if grep -qi "$1" <<<"$headers"; then echo "ok   $2"; else echo "FAIL no $2"; failures=$((failures + 1)); fi
+}
+has_header '^strict-transport-security: max-age=' 'HSTS'
+has_header '^x-content-type-options: nosniff' 'X-Content-Type-Options'
+if grep -qi '^x-powered-by' <<<"$headers"; then echo "FAIL X-Powered-By leaked"; failures=$((failures + 1)); fi
+
+redirect="$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 15 "http://${ROOT}/" || true)"
+if [[ "$redirect" =~ ^30[178]\ https:// ]]; then echo "ok   http -> https"; else echo "FAIL http not redirected to https ($redirect)"; failures=$((failures + 1)); fi
+
+
+[ "$failures" -eq 0 ] || { echo "${failures} check(s) failed"; exit 1; }
+echo "All checks passed for ${VERSION}."

@@ -12,6 +12,7 @@ use Throwable;
 use Wurk\Tenancy\Contracts\ShardStatus;
 use Wurk\Watchtower\Support\Backups;
 use Wurk\Watchtower\Support\Release;
+use Wurk\Watchtower\Support\Releases;
 use Wurk\Watchtower\Support\SystemChecks;
 
 /**
@@ -34,6 +35,7 @@ final class SystemController extends Controller
             'drills' => Backups::drills(),
             'targets' => ['rpo_minutes' => (int) config('wurk.watchtower.rpo_minutes', 15), 'rto_minutes' => (int) config('wurk.watchtower.rto_minutes', 240)],
             'moves' => $shards->recentMoves(),
+            'releases' => app(Releases::class)->recent(), // 17.2: each deploy's outcome
         ]);
     }
 

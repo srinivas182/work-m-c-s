@@ -134,3 +134,9 @@ variable "extra_environment" {
   type        = map(string)
   default     = {}
 }
+
+variable "ecr_pull_role_arns" {
+  description = "Roles in other accounts allowed to pull images (staging: production's deploy role)"
+  type        = list(string)
+  default     = []
+}

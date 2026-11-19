@@ -88,6 +88,8 @@ jobs:
             infra:
               - *shared
               - 'infra/**'
+              - 'scripts/deploy'
+              - 'scripts/smoke-remote'
             docker:
               - *shared
               - 'docker/**'
@@ -600,6 +602,10 @@ jobs:
       - name: Checkov
         run: |
           pipx run "checkov==${CHECKOV_VERSION}" -d infra --config-file infra/.checkov.yaml
+      - name: Release scripts and workflow (17.2)
+        run: |
+          shellcheck scripts/deploy scripts/smoke-remote
+          pipx run "actionlint-py==1.7.12.25" .github/workflows/release.yml
 
   ci:
     name: CI

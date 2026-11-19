@@ -76,3 +76,37 @@ Then, once:
   - `tofu validate` for each environment;
   - TFLint with AWS's rules;
   - Checkov, with the skipped rules and their reasons in `.checkov.yaml`.
+
+## Releases (17.2)
+
+**A version tag deploys.** Push `v1.2.3` (matching `VERSION`) and `.github/workflows/release.yml` does the rest.
+
+1. **Build the image once.** WURK's commit is baked into the image. The image is pushed to staging's registry, scanned, and stopped if any critical finding turns up.
+2. **Deploy to staging** with `scripts/deploy staging v1.2.3`, then check it from outside with `scripts/smoke-remote`.
+3. **Production waits for approval** (required reviewers on the GitHub environment). It then copies the **same image** (same digest) and runs `scripts/deploy production v1.2.3`.
+
+**What `scripts/deploy` does**, in order:
+
+1. Snapshots every database. The snapshots are kept until someone deletes them.
+2. Runs one release task. It records the snapshots (`system:backup-taken`), migrates the central database and every shard (canary first), then runs `release:tasks`: each version's one-off steps once, plus `permissions:sync` on every deploy (`config/release.php`).
+3. Rolls out `serve`, `worker`, `ssr` and `scheduler`. The scheduler is replaced, never doubled.
+4. Watches for 10 minutes: the 5xx rate stays at 2% or below, and `/health/ready` answers from outside.
+5. Records the outcome with `release:finished`. It shows on **Admin → System → Releases**, and HQ is emailed.
+
+**When something fails:**
+
+| What fails | What happens | Data |
+|---|---|---|
+| Migrations or release steps | The deploy stops, and the running version is untouched | The snapshots are there if a migration did damage |
+| New containers don't become healthy | ECS's circuit breaker puts the previous version back | Unchanged |
+| 5xx or health checks during the watch | `scripts/deploy` puts the previous task definitions back | Migrations only ever add (expand, then contract in a later release), so the previous version runs on the new schema |
+
+**To roll back on purpose,** run the Release workflow by hand (*Run workflow*) with the older tag and the environment.
+
+**Set up once in GitHub** (Settings → Environments):
+- `staging`: variable `AWS_DEPLOY_ROLE_ARN`, from staging's `deploy_role_arn`.
+- `production`: required reviewers, plus these variables:
+  - `AWS_DEPLOY_ROLE_ARN`, from production's `deploy_role_arn`;
+  - `STAGING_REPOSITORY_URI`, from staging's `repository_url`.
+
+Then apply staging with `-var production_deploy_role_arn=…`, and production with `-var staging_repository_arn=…`. Production can then copy the tested image.

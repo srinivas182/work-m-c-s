@@ -36,9 +36,16 @@ variable "certificate_arn" {
   type = string
 }
 
+variable "production_deploy_role_arn" {
+  description = "Production's deploy role (output deploy_role_arn there), allowed to pull tested images from here"
+  type        = string
+  default     = null
+}
+
 module "wurk" {
   source                = "../../modules/stack"
   environment           = "staging"
+  ecr_pull_role_arns    = var.production_deploy_role_arn == null ? [] : [var.production_deploy_role_arn]
   root_domain           = "staging.wurk.co.za"
   certificate_arn       = var.certificate_arn
   image_tag             = var.image_tag

@@ -42,9 +42,16 @@ variable "files_certificate_arn" {
   default     = null
 }
 
+variable "staging_repository_arn" {
+  description = "Staging's registry (output repository_arn there): production deploys the image staging tested"
+  type        = string
+  default     = null
+}
+
 module "wurk" {
   source                = "../../modules/stack"
   environment           = "production"
+  source_repository_arn = var.staging_repository_arn
   root_domain           = "wurk.co.za"
   certificate_arn       = var.certificate_arn
   files_domain          = var.files_certificate_arn == null ? null : "files.wurk.co.za"
