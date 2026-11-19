@@ -38,7 +38,8 @@ beforeEach(function () {
     $this->owner = $this->person(['phone' => '+27831000000', 'email' => 'owner@glow.co.za']);
     $this->owner->forceFill(['phone_verified_at' => now(), 'locale' => 'zu'])->save();
     $this->member($this->owner, $this->glow);
-    app(TenantContext::class)->run($this->glow, fn () => app(Team::class)->add($this->owner->id, 'Thandi', 'owner'));
+    // Staff: the help line (25.6). Owners also give instructions (26.1, OwnerInstructionsTest).
+    app(TenantContext::class)->run($this->glow, fn () => app(Team::class)->add($this->owner->id, 'Thandi', 'staff'));
     $cat = HelpCategory::query()->create(['name' => 'Bookings', 'slug' => 'bookings', 'position' => 1]);
     HelpArticle::query()->create(['category_id' => $cat->id, 'title' => 'Add a service', 'slug' => 'add-a-service', 'summary' => 'Add what customers can book.',
         'body' => 'Go to **Bookings → Services → Add service**.', 'status' => 'published', 'screens' => []]);
@@ -70,6 +71,16 @@ beforeEach(function () {
         public function sendTemplate(string $to, string $template, array $parameters, string $language = 'en'): bool
         {
             $this->templates[] = [$to, $template, $parameters];
+
+            return true;
+        }
+
+        /** @var list<array{string, string, array<string, string>}> */
+        public array $buttons = [];
+
+        public function sendButtons(string $to, string $body, array $buttons): bool
+        {
+            $this->buttons[] = [$to, $body, $buttons];
 
             return true;
         }

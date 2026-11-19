@@ -25,6 +25,7 @@ use Wurk\Crm\Contracts\CustomerIdentity;
 use Wurk\Identity\Contracts\Accounts;
 use Wurk\Identity\Contracts\Verification;
 use Wurk\Payments\Contracts\StoreCredit;
+use Wurk\Platform\Contracts\LoyaltyCards;
 use Wurk\Portal\Support\CustomerSession;
 use Wurk\Portal\Support\DefaultPasswords;
 use Wurk\Portal\Support\Handoff;
@@ -70,6 +71,7 @@ final class PortalController
                 'deletion' => $request_ === null ? null : ['status' => (string) $request_->status, 'reason' => $request_->reason,
                     'asked' => CarbonImmutable::parse((string) $request_->created_at)->setTimezone($tz)->format('j M Y')],
                 'name' => app(ContactBook::class)->names([$me['contact_id']])[$me['contact_id']] ?? '',
+                'loyalty' => app(LoyaltyCards::class)->forContact($me['contact_id']), // 26.5: "6 of 8 — 2 more to your free cut"
                 'rewards' => $rewards === null ? null : [...$rewards, 'referred' => array_map(fn (array $r) => ['name' => $r['name'],
                     'since' => CarbonImmutable::instance($r['since'])->setTimezone($tz)->format('j M Y')], $rewards['referred'])],
                 // Their own purchases and visits — never internal entries (forms, chats).

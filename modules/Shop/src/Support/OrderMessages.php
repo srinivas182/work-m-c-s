@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Wurk\Access\Contracts\TeamDirectory;
 use Wurk\Messaging\Contracts\MessageTemplates;
+use Wurk\Platform\Contracts\PushNotifications;
 use Wurk\Platform\Money\Money;
 use Wurk\Shop\Mail\NewOrderMail;
 use Wurk\Shop\Mail\OrderUpdateMail;
@@ -35,6 +36,8 @@ final readonly class OrderMessages
         foreach ($this->team->emailsWithPermission('shop.orders', $order->branch_id) as $email) {
             Mail::to($email)->send(new NewOrderMail($order->number, $order->customer_name, $lines, $rand($order->total_cents), $how, $link));
         }
+        app(PushNotifications::class)->notify('order', "New order #{$order->number}", "{$order->customer_name} · ".$rand($order->total_cents).' · '.implode(', ', array_slice($lines, 0, 3)),
+            $link, 'shop.orders', branchId: $order->branch_id); // the phone buzzes too (26.2)
     }
 
     /** The order moved on: the customer is told (if they gave an email). */

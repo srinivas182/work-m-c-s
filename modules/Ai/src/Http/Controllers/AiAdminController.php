@@ -75,6 +75,7 @@ final class AiAdminController
             'assistant.enabled' => ['required', 'boolean'],
             'assistant.free_questions' => ['required', 'integer', 'between:0,10000'],
             'assistant.monthly_cap' => ['required', 'integer', 'between:0,100000', 'gte:assistant.free_questions'],
+            'assistant.whatsapp_daily_cap' => ['sometimes', 'integer', 'between:0,1000'], // 26.1
             'sales.enabled' => ['required', 'boolean'],
             'sales.greeting' => ['required', 'string', 'max:200'],
             'sales.monthly_cap' => ['required', 'integer', 'between:0,1000000'],

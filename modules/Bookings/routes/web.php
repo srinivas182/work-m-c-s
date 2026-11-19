@@ -11,9 +11,17 @@ use Wurk\Bookings\Http\Controllers\PublicClassController;
 use Wurk\Bookings\Http\Controllers\PublicManageController;
 use Wurk\Bookings\Http\Controllers\PublicTableController;
 use Wurk\Bookings\Http\Controllers\TablesController;
+use Wurk\Bookings\Http\Controllers\TodayBookingsController;
 use Wurk\Bookings\Http\Controllers\VideoConnectionController;
 
 Route::tenant(function (): void {
+    // Today in the WURK app (26.2): a team member's own bookings — Start, Done, No-show, Paid in person.
+    Route::middleware(['entitled:bookings', 'throttle:60,1,bookings-today'])->prefix('bookings/today')->name('tenant.bookings.today.')->group(function (): void {
+        Route::post('/{booking}/start', [TodayBookingsController::class, 'start'])->name('start');
+        Route::post('/{booking}/status', [TodayBookingsController::class, 'status'])->name('status');
+        Route::post('/{booking}/paid', [TodayBookingsController::class, 'paid'])->name('paid');
+        Route::post('/{booking}/reward', [TodayBookingsController::class, 'reward'])->name('reward');
+    });
     // The calendar: everyone who can see bookings; changes need bookings.manage.
     Route::middleware(['entitled:bookings', 'permission:bookings.view'])->prefix('bookings')->name('tenant.bookings.')->group(function (): void {
         Route::get('/', [CalendarController::class, 'show'])->name('calendar');

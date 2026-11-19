@@ -1,0 +1,14 @@
+{
+    "name": "Loyalty",
+    "key": "loyalty",
+    "version": "0.1.0",
+    "description": "Loyalty cards on WhatsApp (Sprint 26.5): the owner sets the reward, the stamps needed, the minimum spend and what counts; stamps are added after each paid visit, order or sale (cash too); customers see their progress on WhatsApp and their account; the reward is offered at the next booking or checkout and used once — never on top of another discount.",
+    "core": false,
+    "depends_on": [
+        "platform",
+        "tenancy",
+        "audit",
+        "crm",
+        "messaging"
+    ]
+}

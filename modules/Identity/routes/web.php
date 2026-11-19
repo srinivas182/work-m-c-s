@@ -10,6 +10,7 @@ use Wurk\Identity\Http\Controllers\InvitationController;
 use Wurk\Identity\Http\Controllers\MfaController;
 use Wurk\Identity\Http\Controllers\PasswordResetController;
 use Wurk\Identity\Http\Controllers\SignInController;
+use Wurk\Identity\Http\Controllers\TodayController;
 use Wurk\Identity\Http\Controllers\WorkspaceController;
 use Wurk\Identity\Http\Middleware\EnsureTenantMember;
 
@@ -57,4 +58,5 @@ Route::middleware('auth')->group(function (): void {
 
 Route::tenant(function (): void {
     Route::get('/', WorkspaceController::class)->middleware(EnsureTenantMember::class)->name('tenant.home');
+    Route::get('/today', TodayController::class)->middleware(EnsureTenantMember::class)->name('tenant.today'); // 26.2
 });

@@ -4,6 +4,35 @@ All notable changes to WURK are documented here. Format: [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.27.0] — 2026-11-19 — Sprint 26: Run it from your phone
+
+### Tell WURK what to do, on WhatsApp — Sprint 26.1
+- **The owner, or a team member with the permission, messages WURK's number** in plain words or a voice note: "book Thandi for braids Saturday 10am", "move my 3 o'clock to 4", "mark order 1042 paid cash", "add 20 Kasi T-shirts".
+- **WURK reads back what it will do and does it only after a Yes button** (decision B). Questions are answered straight away.
+- It acts as that person, with their permissions; every action is audited.
+- Charged at the AI receptionist's rate, with a daily cap per business (50 by default; **Admin → WURK AI**).
+
+### The WURK app — Sprint 26.2
+- **Installs from the browser** on Android and iPhone, with an icon, a full screen, and opens on **Today** (decision F: no store app).
+- **Push notifications** (new Push module), each switched on or off per person in **Settings → Notifications on my phone**: bookings, chats waiting, orders, payments, credits running low. Sent with Web Push; the keys are made by WURK.
+- **Today:** my bookings for the rest of the day with Start, Done, No-show and Paid in person; chats waiting; orders to pack; my shift. Actions queue offline (lite mode).
+
+### "Needs you now" on Home — Sprint 26.3
+- One list across WURK, newest first: money owed (with "Paid: cash"), chats waiting over 15 minutes, demo photos to replace, orders to pack or collect, credits running out. Each with its action; "All done for now." when it's empty.
+
+### Shifts, clock-in and commission — Sprint 26.4
+- **Settings → Shifts** (new Shifts module): the week's roster filled from booking hours, leave and swaps approved by the owner.
+- **My shifts:** clock in and out — from anywhere by default, or only on the business's Wi-Fi or within 200 m (decision C). The location is checked, never stored.
+- **Settings → Team earnings:** hours, services done, products sold, commission at each person's rates and tips, matching the takings, exported as a spreadsheet. Not payroll (decision E).
+
+### Loyalty cards on WhatsApp — Sprint 26.5
+- **Customers → Loyalty card** (new Loyalty module, in every package — decision D): the reward, the stamps needed, the least spend, and what counts.
+- A stamp after each paid visit, order or sale, cash included, once per visit. The customer is told on WhatsApp (template `wurk_loyalty_progress`), sees the card on their account page, and gets it by replying "my card".
+- The reward is used once: **Use reward** on Today, or at checkout instead of a smaller coupon — never on top of one — and given back if the order falls away.
+
+### Release — Sprint 26.6
+- Browser tests for Sprint 26 (`e2e/sprint-26.spec.ts`).
+
 ## [0.26.0] — 2026-11-19 — Sprint 25: Reach & trust
 
 ### Country packs — Sprint 25.1

@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Wurk\Audit\Contracts\AuditLog;
 use Wurk\Bookings\Assistant\AddBookingHoursTool;
+use Wurk\Bookings\Assistant\BookCustomerTool;
 use Wurk\Bookings\Assistant\BookingsOnDayTool;
+use Wurk\Bookings\Assistant\MoveBookingForOwnerTool;
 use Wurk\Bookings\Console\DemoBookingsCommand;
 use Wurk\Bookings\Console\ExpireHoldsCommand;
 use Wurk\Bookings\Console\SendRemindersCommand;
@@ -27,8 +29,10 @@ use Wurk\Bookings\Events\ClassLeft;
 use Wurk\Bookings\Events\ReservationCancelled;
 use Wurk\Bookings\Events\ReservationConfirmed;
 use Wurk\Bookings\Listeners\ConfirmPaymentOnWhatsApp;
+use Wurk\Bookings\Listeners\PushBookingNews;
 use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Models\Booking;
+use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Receptionist\BookAppointmentTool;
@@ -48,6 +52,7 @@ use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\MessageWording;
+use Wurk\Bookings\Today\MyBookings;
 use Wurk\Bookings\WhatsApp\ReminderButtons;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
@@ -65,6 +70,9 @@ use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
+use Wurk\Platform\Contracts\TeamHours;
+use Wurk\Platform\Contracts\TeamTakings;
+use Wurk\Platform\Contracts\TodayList;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -161,9 +169,23 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         });
         // 21.5: the Confirm / Move / Cancel buttons on reminders from the business's WhatsApp number.
         $this->callAfterResolving(WhatsAppActions::class, fn (WhatsAppActions $a) => $a->register(ReminderButtons::class));
+        // 26.4: booking hours start the roster; services done count towards each person's commission.
+        $this->callAfterResolving(TeamHours::class, fn (TeamHours $h) => $h->register('bookings', fn () => BookingHours::query()
+            ->withoutGlobalScope('branch')->get()->map(fn ($r) => ['member_id' => (string) $r->member_id, 'weekday' => (int) $r->weekday, 'starts' => substr((string) $r->starts, 0, 5),
+                'ends' => substr((string) $r->ends, 0, 5), 'branch_id' => $r->branch_id])->all()));
+        $this->callAfterResolving(TeamTakings::class, fn (TeamTakings $t) => $t->register('bookings', function (\DateTimeInterface $from, \DateTimeInterface $until): array {
+            $prices = BookingService::withTrashed()->pluck('price_cents', 'id');
+
+            return Booking::query()->where('status', 'completed')->where('starts_at', '>=', $from)->where('starts_at', '<', $until)->get(['member_id', 'service_id'])
+                ->map(fn (Booking $b) => ['member_id' => (string) $b->member_id, 'identity_id' => null, 'kind' => 'services', 'cents' => (int) ($prices[$b->service_id] ?? 0)])->all();
+        }));
+        $this->callAfterResolving(TodayList::class, fn (TodayList $t) => $t->register('bookings', 100,
+            fn (string $identityId) => app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'bookings') ? app(MyBookings::class)->section($identityId) : null)); // 26.2
         $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
             $t->register(BookingsOnDayTool::class);
             $t->register(AddBookingHoursTool::class);
+            $t->register(BookCustomerTool::class);      // 26.1: instructions on WhatsApp too
+            $t->register(MoveBookingForOwnerTool::class);
         });
         $this->callAfterResolving(BusinessReports::class, function (BusinessReports $r): void {
             $r->register('bookings', 200, fn (ReportPeriod $p) => ($p->forOwners || Gate::allows('reports.view'))
@@ -209,6 +231,7 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         Event::listen(BusinessPaymentReceived::class, fn (BusinessPaymentReceived $e) => str_starts_with($e->reference, 'dep_') ? $this->app->make(Deposits::class)->confirm($e->reference) : null);
         Event::listen([BookingConfirmed::class, BookingMoved::class, BookingCancelled::class, ReservationConfirmed::class, ReservationCancelled::class, ClassJoined::class, ClassLeft::class], SendBookingMessages::class);
         Event::listen([BookingConfirmed::class, ClassJoined::class], ConfirmPaymentOnWhatsApp::class); // 21.5
+        Event::listen([BookingConfirmed::class, BookingMoved::class], PushBookingNews::class); // 26.2: the app's notifications
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('bookings:expire-holds')->everyMinute()->onOneServer()->withoutOverlapping();
             $schedule->command('bookings:send-reminders')->everyFiveMinutes()->onOneServer()->withoutOverlapping();

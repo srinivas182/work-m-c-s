@@ -34,6 +34,13 @@ final readonly class WurkNumber implements WurkWhatsApp
         return $p !== null && $this->driver->sendTemplate($to, $template, $parameters, $language, (array) $p['credentials'], (array) $p['settings'])->ok;
     }
 
+    public function sendButtons(string $to, string $body, array $buttons): bool
+    {
+        $p = $this->provider();
+
+        return $p !== null && $this->driver->sendButtons($to, $body, $buttons, (array) $p['credentials'], (array) $p['settings'])->ok;
+    }
+
     public function media(string $mediaId): ?array
     {
         $p = $this->provider();

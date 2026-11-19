@@ -38,6 +38,7 @@ interface Props {
   business: string;
   name: string;
   rewards: Rewards | null;
+  loyalty: { stamps: number; needed: number; ready: number; reward: string; line: string } | null;
   history: { type: string; summary: string; at: string }[];
 }
 
@@ -48,7 +49,15 @@ const KIND: Record<string, string> = {
   sale: 'In-store',
 };
 
-export default function Home({ business, name, rewards, history, deletion, payouts }: Props) {
+export default function Home({
+  business,
+  name,
+  rewards,
+  loyalty,
+  history,
+  deletion,
+  payouts,
+}: Props) {
   const [copied, setCopied] = useState(false);
   const [idVersion, setIdVersion] = useState(0);
   useEffect(() => {
@@ -79,6 +88,25 @@ export default function Home({ business, name, rewards, history, deletion, payou
           />
         </CardContent>
       </Card>
+      {loyalty && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{__('Your loyalty card')}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3 text-sm">
+            <ol className="flex flex-wrap gap-1.5" aria-label={loyalty.line}>
+              {Array.from({ length: loyalty.needed }, (_, i) => (
+                <li
+                  key={i}
+                  aria-hidden
+                  className={`size-7 rounded-full border ${i < loyalty.stamps || loyalty.ready > 0 ? 'bg-brand-9 border-brand-9' : 'border-border'}`}
+                />
+              ))}
+            </ol>
+            <p>{loyalty.line}</p>
+          </CardContent>
+        </Card>
+      )}
       {rewards && (
         <>
           <Card>

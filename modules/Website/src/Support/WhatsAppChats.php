@@ -19,6 +19,7 @@ use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Messaging\Events\WhatsAppReceived;
 use Wurk\Messaging\Events\WhatsAppSent;
 use Wurk\Messaging\Events\WhatsAppStatusChanged;
+use Wurk\Platform\Contracts\LoyaltyCards;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Jobs\AnswerOnWhatsApp;
 use Wurk\Website\Jobs\FetchWhatsAppMedia;
@@ -42,6 +43,9 @@ final readonly class WhatsAppChats
     public const SEND_TYPES = ['image/jpeg' => 'image', 'image/png' => 'image', 'application/pdf' => 'document'];
 
     /** "STOP" and its everyday equivalents opt the customer out of marketing messages. */
+    /** "my card" (26.5): the customer's loyalty card, answered without the assistant. */
+    private const MY_CARD = ['my card', 'card', 'loyalty', 'my loyalty card', 'stamps', 'my stamps', 'ikhadi lami', 'my kaart'];
+
     private const STOP = ['stop', 'unsubscribe', 'yima', 'misa', 'stop asseblief', 'hamba', 'acha', 'arrête'];
 
     public function __construct(private TenantContext $context, private ContactBook $contacts, private Audiences $audiences, private AuditLog $audit, private WhatsAppActions $actions) {}
@@ -86,6 +90,9 @@ final readonly class WhatsAppChats
             $this->append($conversation, 'person', 'You won’t get marketing messages from us any more. You can still message us any time.', null);
             app(WhatsAppBusiness::class)->sendText($phone, 'You won’t get marketing messages from us any more. You can still message us any time.');
             $this->audit->record('website.whatsapp_opt_out', 'receptionist_conversation', $conversation->id, []);
+        } elseif (in_array(mb_strtolower(trim($e->text, " \t\n.!?")), self::MY_CARD, true) && ($card = app(LoyaltyCards::class)->forPhone($phone)) !== null) {
+            $this->append($conversation, 'assistant', $card['line'], null, 'sent', ['notice' => true]); // 26.5: answered straight away, no AI
+            app(WhatsAppBusiness::class)->sendText($phone, $card['line']);
         } elseif ($conversation->status === 'ai' && ($e->type !== 'audio' || $e->mediaId === null)) { // voice notes are answered once transcribed (21.4)
             AnswerOnWhatsApp::dispatch($this->context->id(), $conversation->id, $message->id)->delay(now()->addSeconds(AnswerOnWhatsApp::SETTLE));
         }

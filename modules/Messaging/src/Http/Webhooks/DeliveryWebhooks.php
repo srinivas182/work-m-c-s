@@ -89,7 +89,7 @@ final readonly class DeliveryWebhooks
                     continue;
                 }
                 // Messages to WURK's own number: owners answering their evening summary (21.6), STOP (23.5b), and
-                // questions and voice notes to the help line (25.6).
+                // questions and voice notes to the help line (25.6), and owners' instructions (26.1).
                 foreach ((array) ($value['messages'] ?? []) as $m) {
                     $text = (string) ($m['text']['body'] ?? $m['button']['text'] ?? $m['interactive']['button_reply']['title'] ?? '');
                     $from = (string) preg_replace('/\D/', '', (string) ($m['from'] ?? ''));
@@ -98,12 +98,15 @@ final readonly class DeliveryWebhooks
                         continue;
                     }
                     $answered = false;
-                    if ($text !== '' && strtoupper(trim($text)) !== 'STOP' && ($answer = app(OwnerSummaries::class)->reply($from, $text)) !== null) {
+                    $button = isset($m['interactive']['button_reply']['id']) ? (string) $m['interactive']['button_reply']['id'] : null;
+                    // A tap on "Yes" to an owner's instruction (26.1, ids "act:…") is never a summary reply.
+                    if ($text !== '' && ! str_starts_with((string) $button, 'act:') && strtoupper(trim($text)) !== 'STOP'
+                        && ($answer = app(OwnerSummaries::class)->reply($from, $text)) !== null) {
                         app(OwnerSummaries::class)->answer($from, $answer);
                         $answered = true;
                     }
                     event(new WurkWhatsAppReceived($from, $text, $voice !== '' ? $voice : null, $voice !== '' ? (string) ($m['audio']['mime_type'] ?? 'audio/ogg') : null,
-                        $answered, (string) ($m['id'] ?? '')));
+                        $answered, (string) ($m['id'] ?? ''), $button));
                 }
                 foreach ((array) ($value['statuses'] ?? []) as $status) {
                     $this->update((string) ($status['id'] ?? ''), match ($status['status'] ?? '') {

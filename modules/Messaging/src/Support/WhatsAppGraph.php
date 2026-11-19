@@ -38,6 +38,7 @@ final readonly class WhatsAppGraph
             'example' => ['Thandi', 'Glow Salon', 'R1 200.00', 'INV-0003', 'https://glow-salon.wurk.co.za/invoice/01J'], ],
         WhatsAppBusiness::REVIEW_REQUEST => ['body' => 'Hi {{1}}, thank you for choosing {{2}}. How was your {{3}}? It takes a few seconds: {{4}} Reply STOP to get no more of these.',
             'example' => ['Thandi', 'Glow Salon', 'Knotless braids', 'https://glow-salon.wurk.co.za/review/01J'], ],
+        WhatsAppBusiness::LOYALTY_PROGRESS => ['body' => 'Thank you, {{1}}! Your {{2}} loyalty card: {{3}}', 'example' => ['Thandi', 'Glow Salon', '6 of 8 — 2 more to your free cut.']],
     ];
 
     public function __construct(private ProviderCredentials $providers) {}
