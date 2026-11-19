@@ -18,6 +18,12 @@ use Wurk\Tenancy\Resolution\TenantResolver;
  * @property string $type
  * @property bool $is_primary
  * @property Carbon|null $verified_at
+ * @property string $status
+ * @property string|null $provider_id
+ * @property string|null $ssl_status
+ * @property string|null $problem
+ * @property Carbon|null $checked_at
+ * @property Carbon|null $created_at
  */
 final class TenantDomain extends Model implements CentralModel
 {
@@ -27,11 +33,18 @@ final class TenantDomain extends Model implements CentralModel
 
     public const TYPE_CUSTOM = 'custom';
 
-    protected $fillable = ['tenant_id', 'host', 'type', 'is_primary', 'verified_at'];
+    /** Sprint 17.3: a custom domain's state. */
+    public const PENDING = 'pending';
+
+    public const ACTIVE = 'active';
+
+    public const LAPSED = 'lapsed';
+
+    protected $fillable = ['tenant_id', 'host', 'type', 'is_primary', 'verified_at', 'status', 'provider_id', 'ssl_status', 'problem', 'checked_at'];
 
     protected function casts(): array
     {
-        return ['is_primary' => 'boolean', 'verified_at' => 'datetime'];
+        return ['is_primary' => 'boolean', 'verified_at' => 'datetime', 'checked_at' => 'datetime'];
     }
 
     protected static function booted(): void
@@ -39,6 +52,7 @@ final class TenantDomain extends Model implements CentralModel
         $flush = function (TenantDomain $domain): void {
             $resolver = app(TenantResolver::class);
             $resolver->forgetHost($domain->host);
+            $resolver->forgetPrimary($domain->tenant_id);
             $original = $domain->getOriginal('host');
             if (is_string($original) && $original !== $domain->host) {
                 $resolver->forgetHost($original);

@@ -53,6 +53,18 @@ return [
         'help' => env('WURK_HELP_DOMAIN', 'help.'.$root), // the public help centre (Sprint 16.1)
     ],
 
+    // Owners' own domains (Sprint 17.3) through Cloudflare for SaaS. The token and zone are infrastructure secrets
+    // (Secrets Manager in the cloud); without them, Settings → Your domain says the service isn't set up yet.
+    'custom_domains' => [
+        'cloudflare_token' => env('CLOUDFLARE_API_TOKEN'),
+        'cloudflare_zone' => env('CLOUDFLARE_ZONE_ID'),
+        // Owners point their domain here (a CNAME); Cloudflare sends their visitors to WURK's origin.
+        'target' => env('WURK_CUSTOM_DOMAIN_TARGET', 'sites.'.$root),
+        'origin' => env('WURK_CUSTOM_DOMAIN_ORIGIN', 'origin.'.$root),
+        'per_business' => 2, // e.g. www.glowsalon.co.za and glowsalon.com
+        'pending_days' => 7, // a domain never pointed at WURK is let go after this
+    ],
+
     'tenancy' => [
         // Business handles that can never be claimed (they collide with platform hosts or routes).
         'reserved_handles' => [
@@ -62,6 +74,7 @@ return [
             'forgot-password', 'mfa', 'health', 'build', 'storage', 'invitations', '_blocks', 'templates', 'forms', 'settings', 'webhooks', 'whatsapp', 'signup', 'oauth',
             'pay',
             'payments',
+            'origin', 'sites', 'files', 'staging', // the cloud's own addresses (Sprint 17)
         ],
 
         // Default capacity of a shared shard (tenants per database).

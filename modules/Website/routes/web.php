@@ -11,6 +11,7 @@ use Wurk\Website\Http\Controllers\AiWriterController;
 use Wurk\Website\Http\Controllers\AssetsController;
 use Wurk\Website\Http\Controllers\BlockBoardController;
 use Wurk\Website\Http\Controllers\BrandingController;
+use Wurk\Website\Http\Controllers\DomainController;
 use Wurk\Website\Http\Controllers\DraftController;
 use Wurk\Website\Http\Controllers\EditorController;
 use Wurk\Website\Http\Controllers\EnquiriesController;
@@ -34,6 +35,14 @@ Route::domain((string) config('wurk.domains.app'))->middleware('throttle:120,1,t
     ->get('/templates/{template}/preview', TemplatePreviewController::class)->name('website.template-preview');
 
 Route::tenant(function (): void {
+    // Your domain (17.3): connecting the business's own domain is a publishing decision.
+    Route::middleware(['entitled:website', 'permission:website.publish'])->prefix('website/domain')->name('tenant.website.domain')->group(function (): void {
+        Route::get('/', [DomainController::class, 'show']);
+        Route::post('/', [DomainController::class, 'store'])->middleware('throttle:10,1,website-domain')->name('.store');
+        Route::post('/{domain}/check', [DomainController::class, 'check'])->middleware('throttle:20,1,website-domain-check')->name('.check');
+        Route::post('/{domain}/primary', [DomainController::class, 'primary'])->name('.primary');
+        Route::delete('/{domain}', [DomainController::class, 'destroy'])->name('.destroy');
+    });
     Route::middleware(['entitled:website', 'permission:website.edit'])->prefix('website')->name('tenant.website.')->group(function (): void {
         Route::get('/pages', [PagesController::class, 'index'])->name('pages');
         Route::post('/pages', [PagesController::class, 'store'])->name('pages.store');

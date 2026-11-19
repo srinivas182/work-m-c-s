@@ -1,4 +1,5 @@
 import {
+  Link2,
   Bell,
   Sun,
   BookOpen,
@@ -79,6 +80,8 @@ export const icons: Record<string, LucideIcon> = {
   sparkles: Sparkles,
   mic: Mic,
   'share-2': Share2,
+  // Your domain (17.3)
+  link: Link2,
   'hand-coins': HandCoins,
   // Bookings by phone (25.2b)
   phone: Smartphone,
