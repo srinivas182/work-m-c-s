@@ -70,6 +70,10 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
+# Amazon RDS's certificate authorities (Sprint 17.1): the cloud databases require TLS and WURK verifies them
+# (MYSQL_ATTR_SSL_CA). Harmless elsewhere.
+ADD --chmod=644 https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /etc/ssl/certs/rds-global-bundle.pem
+
 ARG APP_USER=wurk
 ARG APP_UID=10001
 # The commit this image was built from (Watchtower shows it on every problem — Sprint 18.0). The release comes from VERSION.

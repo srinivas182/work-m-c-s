@@ -36,6 +36,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
       docker: ${{ steps.filter.outputs.docker }}
+      infra: ${{ steps.filter.outputs.infra }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -84,6 +85,9 @@ jobs:
               - 'e2e/**'
               - 'playwright.config.ts'
               - 'load/**'
+            infra:
+              - *shared
+              - 'infra/**'
             docker:
               - *shared
               - 'docker/**'
@@ -526,6 +530,7 @@ jobs:
           check / 200
           check /_design 404
           uid=$(docker exec wurk id -u); echo "uid=$uid"; [ "$uid" != "0" ]
+          docker exec wurk test -s /etc/ssl/certs/rds-global-bundle.pem # TLS to the cloud databases (17.1)
           if curl -sI http://localhost:8000/ | grep -qi '^x-powered-by'; then echo "X-Powered-By header leaked"; exit 1; fi
           for i in $(seq 1 20); do
             status=$(docker inspect --format '{{.State.Health.Status}}' wurk); echo "health=$status"
@@ -549,10 +554,57 @@ jobs:
           docker logs wurk || true
           docker logs wurk-ssr || true
 
+  # Sprint 17.1: the cloud is code. Formatting, validation of every environment, TFLint (with AWS's rules) and Checkov
+  # on each change to infra/. Nothing is planned or applied here: that needs WURK's AWS accounts (17.2).
+  infra:
+    name: Infrastructure · OpenTofu
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TOFU_VERSION: 1.8.8
+      TOFU_SHA256: 9e889633bc177b1d266552658020fe8ceb839445fcac82aaa7622952fd9c81bb
+      TFLINT_VERSION: 0.54.0
+      TFLINT_SHA256: 16d062ebb3d2d199463fb93e17644c27feb57cb6175babecbce3e8d34f4956c6
+      CHECKOV_VERSION: 3.4.6
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install OpenTofu and TFLint (checksums pinned)
+        run: |
+          set -euo pipefail
+          curl -fsSL -o tofu.zip "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
+          echo "${TOFU_SHA256}  tofu.zip" | sha256sum -c -
+          curl -fsSL -o tflint.zip "https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip"
+          echo "${TFLINT_SHA256}  tflint.zip" | sha256sum -c -
+          sudo unzip -qo tofu.zip tofu -d /usr/local/bin && sudo unzip -qo tflint.zip -d /usr/local/bin
+          tofu version && tflint --version
+      - name: Format
+        run: tofu -chdir=infra fmt -check -recursive -diff
+      - name: Validate each environment
+        run: |
+          set -euo pipefail
+          for d in bootstrap envs/staging envs/production; do
+            echo "::group::$d"
+            tofu -chdir="infra/$d" init -backend=false -input=false -lockfile=readonly
+            tofu -chdir="infra/$d" validate
+            echo "::endgroup::"
+          done
+      - name: TFLint
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd infra && tflint --init
+          for d in bootstrap envs/staging envs/production; do tflint --chdir="$d" --config="$PWD/.tflint.hcl" --format compact; done
+      - name: Checkov
+        run: |
+          pipx run "checkov==${CHECKOV_VERSION}" -d infra --config-file infra/.checkov.yaml
+
   ci:
     name: CI
     if: always()
-    needs: [changes, security, backend-quick, frontend-quick, backend-tests, backend-clamav, backend-tests-mysql, frontend-tests, e2e, docker-dev, docker-prod]
+    needs: [changes, security, backend-quick, frontend-quick, backend-tests, backend-clamav, backend-tests-mysql, frontend-tests, e2e, docker-dev, docker-prod, infra]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
