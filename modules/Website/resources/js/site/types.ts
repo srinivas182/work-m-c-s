@@ -26,6 +26,19 @@ export interface Branding {
   favicon: string | null;
 }
 
+/** The business's reviews as its site shows them: all counted in the average, the shown ones newest first. */
+export interface ReviewsSummary {
+  count: number;
+  average: number | null;
+  reviews: {
+    name: string;
+    rating: number;
+    comment: string | null;
+    reply: string | null;
+    date: string;
+  }[];
+}
+
 /** What every block may know about the site it is rendered on. */
 export interface MenuItem {
   label: string;
@@ -42,6 +55,8 @@ export interface SiteContext {
   logo?: string | null;
   /** Published products for shop sections (Shop module); undefined in template previews (samples shown). */
   products?: ProductSummary[];
+  /** The business's reviews (Reviews module, 25.3b); undefined in the editor and previews (samples shown). */
+  reviews?: ReviewsSummary | null;
   /** On a product page (/shop/{slug}): the product shown. */
   product?: ProductPage;
   /** True inside the editor: links don't navigate, empty fields show prompts. */

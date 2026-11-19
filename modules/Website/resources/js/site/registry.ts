@@ -10,6 +10,7 @@ import { ImageText } from './blocks/ImageText';
 import { OpeningHours } from './blocks/OpeningHours';
 import { ServicesPrices } from './blocks/ServicesPrices';
 import { Team } from './blocks/Team';
+import { Reviews } from './blocks/Reviews';
 import { Testimonials } from './blocks/Testimonials';
 import { Text } from './blocks/Text';
 import { BeforeAfter } from './blocks/BeforeAfter';
@@ -46,6 +47,7 @@ export const BLOCKS: Record<string, AnyBlock> = Object.fromEntries(
     ImageText,
     Gallery,
     Testimonials,
+    Reviews,
     Team,
     OpeningHours,
     Contact,

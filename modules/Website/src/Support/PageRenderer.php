@@ -7,6 +7,7 @@ namespace Wurk\Website\Support;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Wurk\Platform\Contracts\PublicReviews;
 use Wurk\Platform\Money\Money;
 use Wurk\Tenancy\Contracts\TenantContext;
 use Wurk\Website\Contracts\ProductCatalog;
@@ -67,6 +68,8 @@ final readonly class PageRenderer
                 'logo' => $record->branding['logo'] ?? null,
                 'menus' => $this->menus->resolve($record),
                 'products' => app(ProductCatalog::class)->published(),
+                // The business's reviews (25.3b), when the Reviews module is installed.
+                'reviews' => app()->bound(PublicReviews::class) ? app(PublicReviews::class)->summary() : null,
                 'formAction' => '/forms/quote', // posts to the business's own address (allowed by its content policy)
                 ...$site,
             ],
