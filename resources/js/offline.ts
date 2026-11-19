@@ -23,6 +23,8 @@ const QUEUEABLE = [
   /^\/[^/]+\/money\/expenses$/,
   /^\/[^/]+\/money\/cash-up$/,
   /^\/[^/]+\/website\/chats\/ai\/[^/]+\/reply$/,
+  /^\/[^/]+\/bookings\/today\/[^/]+\/(start|status|paid)$/, // Today's buttons (26.2)
+  /^\/[^/]+\/shop\/orders\/[^/]+\/advance$/,
 ];
 const LABELS: [RegExp, string][] = [
   [/\/sales$/, 'Sale'],
@@ -31,6 +33,9 @@ const LABELS: [RegExp, string][] = [
   [/\/money\/expenses$/, 'Expense'],
   [/\/money\/cash-up$/, 'Cash-up'],
   [/\/reply$/, 'Chat reply'],
+  [/\/start$/, 'Booking started'],
+  [/\/today\/[^/]+\/status$/, 'Booking done or no-show'],
+  [/\/advance$/, 'Order packed'],
 ];
 
 const listeners = new Set<() => void>();

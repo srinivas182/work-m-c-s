@@ -3,7 +3,7 @@
   "name": "WURK",
   "short_name": "WURK",
   "description": "Run your business from your phone: bookings, chats, orders and money.",
-  "start_url": "/businesses",
+  "start_url": "/businesses?to=today",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

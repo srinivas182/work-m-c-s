@@ -1,5 +1,6 @@
 import {
   Bell,
+  Sun,
   BookOpen,
   Star,
   Smartphone,
@@ -100,6 +101,7 @@ export const icons: Record<string, LucideIcon> = {
   settings: Settings,
   'shield-check': ShieldCheck,
   bell: Bell,
+  sun: Sun,
   'shopping-bag': ShoppingBag,
   wallet: Wallet,
 };

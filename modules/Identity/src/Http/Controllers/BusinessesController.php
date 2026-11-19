@@ -25,16 +25,17 @@ final class BusinessesController
         $ids = array_values(array_map('strval', Membership::query()->where('identity_id', $identity->id)
             ->where('kind', Membership::KIND_STAFF)->where('status', 'active')->pluck('tenant_id')->all()));
         $businesses = $directory->activeAmong($ids);
+        $to = $request->query('to') === 'today' ? 'tenant.today' : 'tenant.home'; // the installed app opens on Today (26.2)
 
         if (count($businesses) === 1 && ! $request->boolean('choose')) {
-            return redirect()->route('tenant.home', ['tenant' => $businesses[0]->handle()]);
+            return redirect()->route($to, ['tenant' => $businesses[0]->handle()]);
         }
 
         return Inertia::render('Identity::Businesses', [
             'businesses' => array_map(fn (CurrentTenant $t) => [
                 'name' => $t->displayName(),
                 'handle' => $t->handle(),
-                'url' => route('tenant.home', ['tenant' => $t->handle()]),
+                'url' => route($to, ['tenant' => $t->handle()]),
             ], $businesses),
         ]);
     }

@@ -7,10 +7,12 @@ namespace Wurk\Shop;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Wurk\Access\Contracts\BranchRestriction;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
 use Wurk\Messaging\Contracts\MessageTemplates;
@@ -25,7 +27,9 @@ use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
+use Wurk\Platform\Contracts\TodayList;
 use Wurk\Platform\Modules\ModuleServiceProvider;
+use Wurk\Platform\Money\Money;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Shipping\Contracts\ShipmentUpdated;
 use Wurk\Shop\Assistant\AddStockTool;
@@ -134,6 +138,22 @@ final class ShopServiceProvider extends ModuleServiceProvider
             ->where('status', 'done')->where('updated_at', '>=', $from)->where('updated_at', '<', $until)->get()
             ->map(fn (Order $o) => ['key' => 'order:'.$o->id, 'kind' => 'order', 'title' => 'order #'.$o->number, 'customer' => $o->customer_name,
                 'phone' => $o->customer_phone, 'email' => $o->customer_email, 'finished_at' => $o->updated_at?->toIso8601String() ?? now()->toIso8601String()])));
+        // Today (26.2): paid orders still to pack, for the people who handle orders (only their branches').
+        $this->callAfterResolving(TodayList::class, fn (TodayList $t) => $t->register('orders', 300, function (string $identityId): ?array {
+            $user = Auth::getProvider()->retrieveById($identityId);
+            if ($user === null || ! app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'shop') || ! Gate::forUser($user)->allows('shop.orders')) {
+                return null;
+            }
+            $branches = app(BranchRestriction::class)->branchRestriction($identityId);
+            $orders = Order::query()->where('status', 'paid')->when($branches !== null, fn ($q) => $q->whereIn('branch_id', $branches))->orderBy('paid_at')->limit(15)->get();
+            $handle = app(TenantContext::class)->current()->handle();
+
+            return ['title' => __('Orders to pack'), 'empty' => __('Nothing to pack.'), 'link' => ['label' => __('All orders'), 'url' => route('tenant.shop.orders')],
+                'items' => array_values($orders->map(fn (Order $o) => ['id' => $o->id, 'title' => '#'.$o->number.' · '.$o->customer_name,
+                    'detail' => ($o->fulfilment === 'delivery' ? __('Delivery') : __('Collection')).' · '.Money::format($o->total_cents), 'time' => null, 'badge' => null,
+                    'url' => route('tenant.shop.orders.show', ['order' => $o->id]),
+                    'actions' => [['label' => __('Packed'), 'url' => "/{$handle}/shop/orders/{$o->id}/advance", 'data' => ['to' => 'packed'], 'tone' => 'primary']]])->all())];
+        }));
         // Ask WURK (26.1, in the app and on WhatsApp): mark a pay-later order paid, add stock that arrived.
         $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
             $t->register(MarkOrderPaidTool::class);

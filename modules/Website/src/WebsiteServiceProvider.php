@@ -7,6 +7,7 @@ namespace Wurk\Website;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +30,7 @@ use Wurk\Platform\Contracts\HealthSignals;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\PushNotifications;
 use Wurk\Platform\Contracts\RecentlyDeleted;
+use Wurk\Platform\Contracts\TodayList;
 use Wurk\Platform\Events\BadgeChanged;
 use Wurk\Platform\Events\ReviewsChanged;
 use Wurk\Platform\Modules\ModuleServiceProvider;
@@ -170,6 +172,21 @@ final class WebsiteServiceProvider extends ModuleServiceProvider
             }
         };
         ReceptionistConversation::created($waiting);
+        // Today (26.2): chats waiting for a person, for the people who answer them.
+        $this->callAfterResolving(TodayList::class, fn (TodayList $t) => $t->register('chats', 200, function (string $identityId): ?array {
+            $user = Auth::getProvider()->retrieveById($identityId);
+            if ($user === null || ! Gate::forUser($user)->allows('website.edit')
+                || ! app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'website')) {
+                return null;
+            }
+            $chats = ReceptionistConversation::query()->whereIn('status', ['waiting', 'person'])->orderByDesc('last_message_at')->limit(10)->get();
+            $url = route('tenant.website.chats');
+
+            return ['title' => __('Chats waiting for you'), 'empty' => __('No chats waiting.'), 'link' => ['label' => __('All chats'), 'url' => $url],
+                'items' => array_values($chats->map(fn (ReceptionistConversation $c) => ['id' => $c->id, 'title' => $c->name ?: __('A customer'),
+                    'detail' => ($c->channel === 'whatsapp' ? 'WhatsApp' : __('Website chat')).' · '.$c->last_message_at->diffForHumans(), 'time' => null,
+                    'badge' => $c->status === 'waiting' ? __('Waiting') : null, 'url' => route('tenant.website.chats', ['open' => $c->id]), 'actions' => []])->all())];
+        }));
         ReceptionistConversation::updated(fn (ReceptionistConversation $c) => $c->wasChanged('status') ? $waiting($c) : null);
         Event::listen(WhatsAppReceived::class, fn (WhatsAppReceived $e) => app(WhatsAppChats::class)->received($e));
         Event::listen(WhatsAppStatusChanged::class, fn (WhatsAppStatusChanged $e) => app(WhatsAppChats::class)->status($e));

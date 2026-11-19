@@ -25,6 +25,7 @@ use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
 use Wurk\Platform\Contracts\SalesTools;
 use Wurk\Platform\Contracts\SupportSessions;
+use Wurk\Platform\Contracts\TodayList;
 use Wurk\Platform\Database\AppTimezoneSQLiteConnection;
 use Wurk\Platform\Database\DatesPast2038Connection;
 use Wurk\Platform\I18n\StoreAwareLoader;
@@ -46,6 +47,7 @@ use Wurk\Platform\Support\ReceptionistRegistry;
 use Wurk\Platform\Support\ReportRegistry;
 use Wurk\Platform\Support\SalesRegistry;
 use Wurk\Platform\Support\TileRegistry;
+use Wurk\Platform\Support\TodayRegistry;
 
 /**
  * Registered in bootstrap/providers.php. Boots the Platform module itself and then
@@ -60,6 +62,7 @@ final class PlatformServiceProvider extends ModuleServiceProvider
         // Dates bound to queries are moved to the app's zone first, as stored (fix, 18 Nov 2026).
         Connection::resolverFor('sqlite', fn ($pdo, string $database, string $prefix, array $config) => new AppTimezoneSQLiteConnection($pdo, $database, $prefix, $config));
         $this->app->singleton(DashboardTiles::class, TileRegistry::class);
+        $this->app->singleton(TodayList::class, TodayRegistry::class); // 26.2: the team's Today
         $this->app->singleton(BusinessReports::class, ReportRegistry::class);
         $this->app->singleton(PlatformMetrics::class, MetricsRegistry::class);
         $this->app->singleton(AudienceSegments::class, AudienceRegistry::class);

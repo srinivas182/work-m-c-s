@@ -51,6 +51,7 @@ use Wurk\Bookings\Support\Booker;
 use Wurk\Bookings\Support\Deposits;
 use Wurk\Bookings\Support\HealthPractice;
 use Wurk\Bookings\Support\MessageWording;
+use Wurk\Bookings\Today\MyBookings;
 use Wurk\Bookings\WhatsApp\ReminderButtons;
 use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Crm\Contracts\ContactsBackfillRequested;
@@ -68,6 +69,7 @@ use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
+use Wurk\Platform\Contracts\TodayList;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
 use Wurk\Tenancy\Contracts\TenantContext;
@@ -164,6 +166,8 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         });
         // 21.5: the Confirm / Move / Cancel buttons on reminders from the business's WhatsApp number.
         $this->callAfterResolving(WhatsAppActions::class, fn (WhatsAppActions $a) => $a->register(ReminderButtons::class));
+        $this->callAfterResolving(TodayList::class, fn (TodayList $t) => $t->register('bookings', 100,
+            fn (string $identityId) => app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'bookings') ? app(MyBookings::class)->section($identityId) : null)); // 26.2
         $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
             $t->register(BookingsOnDayTool::class);
             $t->register(AddBookingHoursTool::class);
