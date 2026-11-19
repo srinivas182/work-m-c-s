@@ -71,7 +71,8 @@
             "Wurk\\Reach\\": "modules/Reach/src/",
             "Wurk\\Reviews\\": "modules/Reviews/src/",
             "Wurk\\Trust\\": "modules/Trust/src/",
-            "Wurk\\Push\\": "modules/Push/src/"
+            "Wurk\\Push\\": "modules/Push/src/",
+            "Wurk\\Shifts\\": "modules/Shifts/src/"
         }
     },
     "autoload-dev": {
@@ -98,7 +99,8 @@
             "Wurk\\Reach\\Tests\\": "modules/Reach/tests/",
             "Wurk\\Reviews\\Tests\\": "modules/Reviews/tests/",
             "Wurk\\Trust\\Tests\\": "modules/Trust/tests/",
-            "Wurk\\Push\\Tests\\": "modules/Push/tests/"
+            "Wurk\\Push\\Tests\\": "modules/Push/tests/",
+            "Wurk\\Shifts\\Tests\\": "modules/Shifts/tests/"
         }
     },
     "scripts": {

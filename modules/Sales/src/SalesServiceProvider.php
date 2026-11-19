@@ -8,6 +8,7 @@ use Wurk\Crm\Contracts\ContactBook;
 use Wurk\Messaging\Contracts\MessageTemplates;
 use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
+use Wurk\Platform\Contracts\TeamTakings;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Sales\Contracts\SalesTotals;
 use Wurk\Sales\Digest\SalesDigest;
@@ -23,6 +24,10 @@ final class SalesServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(MessageTemplates::class, fn (MessageTemplates $t) => $t->define('sale.receipt', Sales::RECEIPT)); // Settings → Messages
         $this->callAfterResolving(OwnerDigest::class, fn (OwnerDigest $d) => $d->register(SalesDigest::class)); // the owner's evening WhatsApp summary (21.6)
         // Who owes me (23.5): sales on account, not yet paid.
+        // 26.4: what each person sold at the till counts towards their commission on products.
+        $this->callAfterResolving(TeamTakings::class, fn (TeamTakings $t) => $t->register('sales', fn (\DateTimeInterface $from, \DateTimeInterface $until) => Sale::query()
+            ->where('status', 'recorded')->where('recorded_at', '>=', $from)->where('recorded_at', '<', $until)->get(['recorded_by', 'amount_cents', 'refunded_cents'])
+            ->map(fn ($s) => ['member_id' => null, 'identity_id' => (string) $s->recorded_by, 'kind' => 'products', 'cents' => (int) $s->amount_cents - (int) $s->refunded_cents])->all()));
         $this->callAfterResolving(MoneyOwed::class, fn (MoneyOwed $o) => $o->register('sales', function (): array {
             $sales = Sale::query()->where('method', 'account')->where('status', 'recorded')->whereNull('settled_at')->orderBy('recorded_at')->limit(200)->get();
             $people = app(ContactBook::class)->names(array_values(array_filter($sales->map(fn (Sale $s) => $s->contact_id)->all(), 'is_string')));

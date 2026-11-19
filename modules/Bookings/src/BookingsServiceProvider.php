@@ -32,6 +32,7 @@ use Wurk\Bookings\Listeners\ConfirmPaymentOnWhatsApp;
 use Wurk\Bookings\Listeners\PushBookingNews;
 use Wurk\Bookings\Listeners\SendBookingMessages;
 use Wurk\Bookings\Models\Booking;
+use Wurk\Bookings\Models\BookingHours;
 use Wurk\Bookings\Models\BookingService;
 use Wurk\Bookings\Models\ClassAttendee;
 use Wurk\Bookings\Receptionist\BookAppointmentTool;
@@ -69,6 +70,8 @@ use Wurk\Platform\Contracts\MoneyOwed;
 use Wurk\Platform\Contracts\OwnerDigest;
 use Wurk\Platform\Contracts\RecentlyDeleted;
 use Wurk\Platform\Contracts\ReceptionistTools;
+use Wurk\Platform\Contracts\TeamHours;
+use Wurk\Platform\Contracts\TeamTakings;
 use Wurk\Platform\Contracts\TodayList;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Platform\Support\ReportPeriod;
@@ -166,6 +169,16 @@ final class BookingsServiceProvider extends ModuleServiceProvider
         });
         // 21.5: the Confirm / Move / Cancel buttons on reminders from the business's WhatsApp number.
         $this->callAfterResolving(WhatsAppActions::class, fn (WhatsAppActions $a) => $a->register(ReminderButtons::class));
+        // 26.4: booking hours start the roster; services done count towards each person's commission.
+        $this->callAfterResolving(TeamHours::class, fn (TeamHours $h) => $h->register('bookings', fn () => BookingHours::query()
+            ->withoutGlobalScope('branch')->get()->map(fn ($r) => ['member_id' => (string) $r->member_id, 'weekday' => (int) $r->weekday, 'starts' => substr((string) $r->starts, 0, 5),
+                'ends' => substr((string) $r->ends, 0, 5), 'branch_id' => $r->branch_id])->all()));
+        $this->callAfterResolving(TeamTakings::class, fn (TeamTakings $t) => $t->register('bookings', function (\DateTimeInterface $from, \DateTimeInterface $until): array {
+            $prices = BookingService::withTrashed()->pluck('price_cents', 'id');
+
+            return Booking::query()->where('status', 'completed')->where('starts_at', '>=', $from)->where('starts_at', '<', $until)->get(['member_id', 'service_id'])
+                ->map(fn (Booking $b) => ['member_id' => (string) $b->member_id, 'identity_id' => null, 'kind' => 'services', 'cents' => (int) ($prices[$b->service_id] ?? 0)])->all();
+        }));
         $this->callAfterResolving(TodayList::class, fn (TodayList $t) => $t->register('bookings', 100,
             fn (string $identityId) => app(Entitlements::class)->entitled(app(TenantContext::class)->id(), 'bookings') ? app(MyBookings::class)->section($identityId) : null)); // 26.2
         $this->callAfterResolving(AssistantTools::class, function (AssistantTools $t): void {
