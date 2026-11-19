@@ -167,8 +167,8 @@ it('reads a domain the way owners type it', function (string $typed, ?string $ho
 ]);
 
 it('never looks up a domain for health checks or the load balancer’s IP address', function () {
-    \Illuminate\Support\Facades\DB::enableQueryLog();
+    DB::enableQueryLog();
     $this->get('http://10.40.16.5/health/live')->assertOk();
     $this->get('http://localhost/health/live')->assertOk();
-    expect(collect(\Illuminate\Support\Facades\DB::getQueryLog())->pluck('query')->filter(fn ($q) => str_contains($q, 'tenant_domains'))->all())->toBe([]);
+    expect(collect(DB::getQueryLog())->pluck('query')->filter(fn ($q) => str_contains($q, 'tenant_domains'))->all())->toBe([]);
 });
