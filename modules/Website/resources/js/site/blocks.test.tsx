@@ -4,7 +4,7 @@ import { internationalDigits } from './blocks/Contact';
 import { gallerySpan } from './blocks/Gallery';
 import { BLOCKS } from './registry';
 import { SiteRenderer, upgradeBlock } from './SiteRenderer';
-import type { Branding, ContentDocument } from './types';
+import type { Branding, ContentDocument, ReviewsSummary } from './types';
 
 const branding: Branding = {
   primary: '#9D174D',
@@ -32,8 +32,8 @@ const render = (blocks: ContentDocument['blocks'], editing = false) =>
   );
 
 describe('block library', () => {
-  it('has 33 blocks whose types and versions the server accepts', () => {
-    expect(Object.keys(BLOCKS)).toHaveLength(33); // + Book online (8.2), Products (10.1), Form (12.3), Numbers, How it works, Logos, Map and directions, Video (20.2), Property listings (20.4d)
+  it('has 34 blocks whose types and versions the server accepts', () => {
+    expect(Object.keys(BLOCKS)).toHaveLength(34); // + Reviews (25.3b), Book online (8.2), Products (10.1), Form (12.3), Numbers, How it works, Logos, Map and directions, Video (20.2), Property listings (20.4d)
     for (const [type, def] of Object.entries(BLOCKS)) {
       expect(type).toMatch(/^[A-Z][A-Za-z0-9]{1,40}$/);
       expect(def.type).toBe(type);
@@ -197,6 +197,7 @@ describe('colour contrast guards', () => {
   // disabled controls (WCAG-exempt) and editor-only states.
   const ALLOWED = [
     'Testimonials.tsx:opacity-25',
+    'Reviews.tsx:opacity-25', // empty stars: decorative, the rating is in the label
     'QuoteForm.tsx:disabled:opacity-60',
     'Packages.tsx:opacity-60',
   ];
@@ -392,5 +393,84 @@ describe('sections added in Sprint 20.2', () => {
     expect(render([block('Listings', { heading: 'To let', listings: [] })])).not.toContain(
       'To let',
     ); // empty: hidden live
+  });
+});
+
+describe('reviews (25.3)', () => {
+  const reviews = {
+    count: 3,
+    average: 3.7,
+    reviews: [
+      {
+        name: 'Sipho D.',
+        rating: 2,
+        comment: 'Waited 40 minutes.',
+        reply: 'Sorry — we’ve added a stylist.',
+        date: '2027-05-03',
+      },
+      {
+        name: 'Thandi M.',
+        rating: 5,
+        comment: 'Beautiful braids!',
+        reply: null,
+        date: '2027-05-01',
+      },
+    ],
+  };
+  const page = (
+    s: Partial<typeof site> & { reviews?: ReviewsSummary | null },
+    blocks: ContentDocument['blocks'],
+  ) =>
+    renderToString(
+      <SiteRenderer
+        document={{ schema: 1, blocks }}
+        branding={branding}
+        site={{ ...site, editing: false, ...s }}
+      />,
+    );
+  const reviewsBlock = {
+    id: 'r',
+    type: 'Reviews',
+    version: BLOCKS.Reviews!.version,
+    props: { heading: 'Reviews', intro: '', limit: 'up-to-6' },
+  };
+
+  it('shows the average from every review and the shown ones in date order, with the owner’s replies', () => {
+    const html = page({ reviews }, [reviewsBlock]);
+    expect(html).toContain('3.7<!-- --> out of 5');
+    expect(html).toContain('from <!-- -->3<!-- --> <!-- -->reviews');
+    expect(html.indexOf('Sipho D.')).toBeLessThan(html.indexOf('Thandi M.')); // as given: newest first, not by stars
+    expect(html).toContain(
+      'Reply from <!-- -->Glow Salon<!-- -->: </span>Sorry — we’ve added a stylist.',
+    );
+  });
+
+  it('is hidden live with no reviews, and shows samples only in previews', () => {
+    expect(
+      page({ reviews: { count: 0, average: null, reviews: [] } }, [reviewsBlock]),
+    ).not.toContain('Reviews');
+    expect(page({ reviews: null }, [reviewsBlock])).not.toContain('Reviews');
+    expect(page({}, [reviewsBlock])).toContain('Every review is shown — not only the best.');
+  });
+
+  it('shows testimonials only once the owner confirms they’re real (older sections keep showing)', () => {
+    const t = (real?: string) => ({
+      id: 't',
+      type: 'Testimonials',
+      version: real ? BLOCKS.Testimonials!.version : 1, // no value: saved by version 1
+      props: {
+        heading: 'Kind words',
+        items: [{ quote: 'Lovely', name: 'Ayanda', detail: '', rating: 5 }],
+        moreLabel: '',
+        moreHref: '',
+        ...(real ? { real } : {}),
+      },
+    });
+    expect(page({}, [t('not-yet')])).not.toContain('Lovely');
+    expect(page({ editing: true }, [t('not-yet')])).toContain(
+      'Hidden on your website until you confirm',
+    );
+    expect(page({}, [t('yes')])).toContain('Lovely');
+    expect(page({}, [t()])).toContain('Lovely');
   });
 });

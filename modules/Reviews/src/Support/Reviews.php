@@ -14,6 +14,8 @@ use Wurk\Credits\Contracts\InsufficientCredits;
 use Wurk\Messaging\Contracts\Messenger;
 use Wurk\Messaging\Contracts\WhatsAppBusiness;
 use Wurk\Platform\Contracts\FinishedVisits;
+use Wurk\Platform\Contracts\PublicReviews;
+use Wurk\Platform\Events\ReviewsChanged;
 use Wurk\Regions\Contracts\Countries;
 use Wurk\Reviews\Models\Review;
 use Wurk\Reviews\Models\ReviewRequest;
@@ -30,7 +32,7 @@ use Wurk\Tenancy\Contracts\TenantContext;
  *   Google, and the US FTC treats it as review suppression.
  * - Reviews show in date order. The owner may hide one only for a stated reason; it still counts in the average.
  */
-final class Reviews
+final class Reviews implements PublicReviews
 {
     /** Ask once a visit has been over this long… */
     public const AFTER_HOURS = 2;
@@ -105,7 +107,7 @@ final class Reviews
         }
         $clean = fn (?string $t, int $max) => ($t = trim(strip_tags((string) $t))) === '' ? null : mb_substr($t, 0, $max);
 
-        return DB::connection($this->context->connectionName())->transaction(function () use ($request, $rating, $comment, $privateNote, $clean): Review {
+        $review = DB::connection($this->context->connectionName())->transaction(function () use ($request, $rating, $comment, $privateNote, $clean): Review {
             $review = Review::query()->create(['request_id' => $request->id, 'name' => self::shortName($request->customer_name), 'title' => $request->title,
                 'rating' => $rating, 'comment' => $clean($comment, 1000), 'private_note' => $clean($privateNote, 1000)]);
             $request->update(['answered_at' => now()]);
@@ -113,6 +115,9 @@ final class Reviews
 
             return $review;
         });
+        event(new ReviewsChanged($this->context->id())); // the site's Reviews block is re-rendered
+
+        return $review;
     }
 
     public function reply(Review $review, ?string $text, string $by): void
@@ -120,6 +125,7 @@ final class Reviews
         $text = trim(strip_tags((string) $text));
         $review->update(['reply' => $text === '' ? null : mb_substr($text, 0, 1000), 'replied_at' => $text === '' ? null : now()]);
         $this->audit->record('reviews.replied', 'review', $review->id, ['by' => $by]);
+        event(new ReviewsChanged($this->context->id()));
     }
 
     public function hide(Review $review, string $reason, string $by): void
@@ -129,12 +135,14 @@ final class Reviews
         }
         $review->update(['hidden_reason' => $reason, 'hidden_by' => $by, 'hidden_at' => now()]);
         $this->audit->record('reviews.hidden', 'review', $review->id, ['reason' => $reason, 'by' => $by]);
+        event(new ReviewsChanged($this->context->id()));
     }
 
     public function unhide(Review $review, string $by): void
     {
         $review->update(['hidden_reason' => null, 'hidden_by' => null, 'hidden_at' => null]);
         $this->audit->record('reviews.shown', 'review', $review->id, ['by' => $by]);
+        event(new ReviewsChanged($this->context->id()));
     }
 
     /**

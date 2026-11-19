@@ -7,6 +7,7 @@ namespace Wurk\Reviews;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Wurk\Messaging\Events\WhatsAppReceived;
+use Wurk\Platform\Contracts\PublicReviews;
 use Wurk\Platform\Modules\ModuleServiceProvider;
 use Wurk\Reviews\Console\AskForReviewsCommand;
 use Wurk\Reviews\Support\Reviews;
@@ -17,6 +18,11 @@ use Wurk\Reviews\Support\Reviews;
  */
 final class ReviewsServiceProvider extends ModuleServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->bind(PublicReviews::class, Reviews::class); // the website's Reviews block (25.3b)
+    }
+
     public function boot(): void
     {
         parent::boot();
